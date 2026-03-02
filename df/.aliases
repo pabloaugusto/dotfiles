@@ -1,0 +1,214 @@
+alias c='clear'
+alias g=git
+
+# git for dotfiles
+alias df='git --git-dir="$HOME/dotfiles/.git" --work-tree="$HOME/dotfiles"'
+
+# ssh tools aliases for Linux WSL running on Windows 11
+alias ssh=ssh.exe
+alias ssh-add=ssh-add.exe
+
+# ls tools
+alias ll='ls -alF --group-directories-first'
+alias la='ls -A'
+alias l='ls -CF'
+
+# dev
+alias pn=pnpm
+
+# fast dirs swap
+alias ..='cd ..'
+alias ...='cd ../..'
+alias ....='cd ../../..'
+alias .....='cd ../../../..'
+alias h='cd $HOME'
+alias p='cd $PROJECTS'
+alias d='cd $DOTFILES'
+alias cr='cd $CLIENTS/cr'
+alias crn='cd $CLIENTS/cr/projects/cr_net'
+alias crw='cd $CLIENTS/cr/projects/cr_net/cr.web'
+
+
+
+#alias reload=". ~/.profile"
+
+# Is the internet on fire?
+alias iof='dig +short txt istheinternetonfire.com | fmt'
+
+# Update and upgrade
+alias update='sudo apt update && sudo apt upgrade --yes'
+
+# Connect and disconnect Sonos speaker
+# alias btcon='bluetoothctl <<< "connect 5C:AA:FD:D4:EB:84"'
+# alias btuncon='bluetoothctl <<< disconnect'
+
+# push updates at dotfiles to github
+function dpush {
+	cd ~/dotfiles           # go to dotfiles path
+	g acp "Dotfiles Update" #git add all & commit with message "updated" & push
+	cd - >/dev/null         #back to previous patjh
+}
+
+# pull updates at dotfiles from github
+function dpull {
+	cd ~/dotfiles # go to dotfiles path
+	g pull
+	cd - >/dev/null #back to previous patjh
+}
+
+#symlink() {
+#    ln -sf "$1" "$2";
+#}
+
+#symlink_dir() {
+#    ! [ -d "$2" ] && { mkdir -p "$2"; }
+#    ln -sf "$1" "$2";
+#}
+
+# This is specific to WSL 2. If the WSL 2 VM goes rogue and decides not to free
+# up memory, this command will free your memory after about 20-30 seconds.
+#   Details: https://github.com/microsoft/WSL/issues/4166#issuecomment-628493643
+alias drop_cache="sudo sh -c \"echo 3 >'/proc/sys/vm/drop_caches' && swapoff -a && swapon -a && printf '\n%s\n' 'Ram-cache and Swap Cleared'\""
+
+alias 755d="find . -type d -exec chmod 755 {} \;"
+
+alias 644f="find . -type f -exec chmod 644 {} \;"
+alias ymp3="youtube-dl --extract-audio --audio-format mp3"
+
+
+
+
+
+
+
+# --------------------------------------------------------------
+# GitOPS Aliases
+# --------------------------------------------------------------
+
+# home ops dir aliases
+function o	{ cd $HOME_OPS; }
+function ho { cd $HOME_OPS; }
+function kk { cd $HOME_OPS; }
+
+# terraform
+function t  { terraform $@; }
+
+# ansible
+function a  { ansible $@; }
+
+# flux
+function f  { flux $@; }
+function fs { f get all -A --status-selector ready=false $@; }
+
+# kubernetes
+function k { kubectl $@; }
+	#----- get
+	function kg	{ k get $@; }
+		#--- get pod
+		function kgp	{ k get pods $@; }
+		function kgpa { k get pods -A $@; }
+		function kgpn { k get pods -n $@; }
+		#--- get service
+		function kgs	{ k get services $@; }
+		function kgsa { k get services -A $@; }
+		function kgsn { k get services -n $@; }
+		#--- get ingress
+		function kgi	{ k get ingress $@; }
+		function kgia { k get ingress -A $@; }
+		function kgin { k get ingress -n $@; }
+		#--- get helmrelease
+		function kgh	{ k get helmreleases $@; }
+		function kgha { k get helmreleases -A $@; }
+		function kghn { k get helmreleases -n $@; }
+		#--- get kustomizations
+		function kgk	{ k get kustomizations $@; }
+		function kgka { k get kustomizations -A $@; }
+		function kgkn { k get kustomizations -n $@; }
+		#--- get deployments
+		function kgd	{ k get deployments $@; }
+		function kgda { k get deployments -A $@; }
+		function kgdn { k get deployments -n $@; }
+		#--- get namespaces
+		function kgns	 { k get namespaces $@; }
+		function kgnsa { k get namespaces -A $@; }
+		function kgnsn { k get namespaces -n $@; }
+		#--- get secret
+		function kgsec   { k get secrets $@; }
+		function kgseca { k get secrets -A $@; }
+		function kgsecn { k get secrets -n $@; }
+		#--- get cronjob
+		function kgcj	 { k get cronjobs $@; }
+		function kgcja { k get cronjobs -A $@; }
+		function kgcjn { k get cronjobs -n $@; }
+		#--- get configmaps
+		function kgcm	 { k get configmaps $@; }
+		function kgcma { k get configmaps -A $@; }
+		function kgcmn { k get configmaps -n $@; }
+		#--- get jobs
+		function kgj	{ k get jobs $@; }
+		function kgja { k get jobs -A $@; }
+		function kgjn { k get jobs -n $@; }
+		#--- get nodes
+		function kgn	{ kubectl get nodes $@; }
+		function kgnw	{ kubectl get nodes -o wide  $@; }
+
+	#----- describe
+		function kd	{ k describe $@; }
+	#----- describe pod
+		function kdp	{ k describe pods $@; }
+		function kdpa { k describe pods -A $@; }
+		function kdpn { k describe pods -n $@; }
+	#----- describe service
+		function kds	{ k describe services $@; }
+		function kdsa { k describe services -A $@; }
+		function kdsn { k describe services -n $@; }
+	#----- describe ingress
+		function kdi	{ k describe ingress $@; }
+		function kdia { k describe ingress -A $@; }
+		function kdin { k describe ingress -n $@; }
+	#----- describe helmrelease
+		function kdh	{ k describe helmrelease $@; }
+		function kdha { k describe helmrelease -A $@; }
+		function kdhn { k describe helmrelease -n $@; }
+	#----- describe kustomizations
+		function kdk	{ k describe kustomizations $@; }
+		function kdka { k describe kustomizations -A $@; }
+		function kdkn { k describe kustomizations -n $@; }
+	#----- describe deployments
+		function kdd	{ k describe deployment $@; }
+		function kdda { k describe deployment -A $@; }
+		function kddn { k describe deployment -n $@; }
+	#----- describe namespaces
+		function kdns	 { k describe namespaces $@; }
+		function kdnsa { k describe namespaces -A $@; }
+		function kdnsn { k describe namespaces -n $@; }
+	#----- describe secret
+		function kdsec   { k describe secret $@; }
+		function kdseca { k describe secret -A $@; }
+		function kdsecn { k describe secret -n $@; }
+	#----- describe cronjob
+		function kdcj	 { k describe cronjobs $@; }
+		function kdcja { k describe cronjob -A $@; }
+		function kdcjn { k describe cronjob -n $@; }
+	#----- describe configmaps
+		function kdcm	 { k describe configmaps $@; }
+		function kdcma { k describe configmap -A $@; }
+		function kdcmn { k describe configmap -n $@; }
+	#----- describe jobs
+		function kdj	{ k describe configmaps $@; }
+		function kdja { kgns -A $@; }
+		function kdjn { kgns -n $@; }
+
+	#----- logs
+		function kl	{ k logs $@; }
+		function kln	{ k logs -n $@; }
+
+	#----- general
+		function kexec	{ kubectl exec -it $@; }
+		function kbash	{ kubectl exec -it $@ -- /bin/bash; }
+		function kapir	{ kubectl api-resources $@; }
+		function kapiv	{ kubectl api-versions $@; }
+		function kconf	{ kubectl config; }
+		function kconfv	{ kubectl config view; }
+		function kusers	{ kubectl config view -o jsonpath='{.users[*].name}'; }
+		function kcontext	{ kubectl config get-contexts;  }

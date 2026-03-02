@@ -1,0 +1,41 @@
+################################################################################
+# Linux (host Linux) OU WSL com repo em /home (filesystem Linux)
+# - Aqui o caminho do op-ssh-sign depende de onde o 1Password está instalado.
+# - Deixo pronto para você ajustar quando confirmar o binário no Linux.
+################################################################################
+
+[core]
+    # Use code --wait se você tiver VS Code disponível neste Linux/WSL.
+    # Alternativas: vim | nano
+    editor = code --wait
+
+    filemode = true
+    ignorecase = false
+
+
+################################################################################
+# Assinatura via SSH (1Password) - Linux/WSL (/home)
+################################################################################
+
+# [user]
+#     # signingkey = KEY ESPECIFICA DO AMBIENTE
+#     # (por padrão vem do ~/.gitconfig-base)
+#     # signingkey = ssh-ed25519 AAAA...
+
+[gpg "ssh"]
+    # program = BINARIO ESPECIFICO DO AMBIENTE
+    #
+    # Se for WSL (1Password no Windows), use:
+    # program = "/mnt/c/Program\ Files/1Password/app/8/op-ssh-sign-wsl"
+    #
+    # Se for Linux host com 1Password instalado no Linux, ajuste para o binário real:
+    # program = "/usr/bin/op-ssh-sign" (exemplo)
+    # program = "/opt/1Password/op-ssh-sign" (exemplo)
+    #
+    # (deixe comentado até confirmar o caminho real, para não quebrar commits)
+	program = "/opt/1Password/op-ssh-sign"
+
+[commit]
+    # gpgsign = VALOR ESPECIFICO DO AMBIENTE
+    # Recomendação: só ative (true) quando o program estiver configurado.
+    gpgsign = true

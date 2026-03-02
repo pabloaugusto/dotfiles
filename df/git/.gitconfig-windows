@@ -1,0 +1,42 @@
+################################################################################
+# Windows host (Git rodando no Windows)
+# - VS Code como editor/merge/diff (seu snippet original)
+# - Assinatura 1Password (program Windows)
+################################################################################
+
+# VS Code como padrão (editor + merge tool + diff tool)
+[core]
+    editor = code --wait #code as default editor at git
+
+[merge]
+    tool = code
+    # Include summaries of merged commits in newly created merge commit messages
+    log = true
+
+[mergetool "code"]
+    cmd = code --wait $MERGED
+
+[diff]
+    tool = code
+
+[difftool "code"]
+    cmd = code --wait --diff
+
+
+################################################################################
+# Assinatura via SSH (1Password) - Windows
+################################################################################
+
+# [user]
+#     # signingkey = KEY ESPECIFICA DO AMBIENTE
+#     # (por padrão vem do ~/.gitconfig-base)
+#     # signingkey = ssh-ed25519 AAAA...
+
+[gpg "ssh"]
+    # program = BINARIO ESPECIFICO DO AMBIENTE
+    program = "C:/Program Files/1Password/app/8/op-ssh-sign.exe"
+
+[commit]
+    # gpgsign = VALOR ESPECIFICO DO AMBIENTE
+    # Opções: true | false
+    gpgsign = true

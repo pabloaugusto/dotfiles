@@ -1,0 +1,99 @@
+################################################################################
+# ~/.ssh/config (BASE - compatível com Windows + Linux/WSL)
+#
+# Contém:
+# - Defaults globais (seguros e estáveis)
+# - Hosts globais (GitHub + servidores)
+# - Include de um arquivo por ambiente selecionado via symlink:
+#       Include ~/.ssh/config.local
+#
+# Regra:
+# - Não usar aqui sintaxe Unix-only (ex.: Match exec/test -S) para não quebrar no Windows.
+################################################################################
+
+###########################
+# Defaults globais
+###########################
+Host github.com github-com
+    # Força protocolo moderno
+    # Opções: 2
+    Protocol 2
+
+    # Keepalive (evita quedas por inatividade)
+    # Alternativas comuns: 30 | 60 | 120
+    ServerAliveInterval 60
+
+    # Quantas tentativas antes de desconectar
+    # Alternativas: 3 | 5 | 10 | 30
+    ServerAliveCountMax 30
+
+    # Segurança: não encaminhar agent por padrão
+    # Opções: yes | no
+    ForwardAgent no
+
+    ForwardX11 no
+    ForwardX11Trusted no
+
+    # Com agentes como 1Password, normalmente não faz sentido adicionar chaves automaticamente
+    # Opções: yes | no | ask
+    AddKeysToAgent no
+
+    # Checagem de host key:
+    # - yes        (mais seguro: exige known_hosts prévio)
+    # - accept-new (bom equilíbrio: aceita na primeira vez e depois valida)
+    # - no         (inseguro: NÃO recomendado)
+    StrictHostKeyChecking accept-new
+
+
+###########################
+# GitHub (global)
+###########################
+Host github.com github-com
+    HostName github.com
+    User git
+
+    # Evita “too many authentication failures” quando existem muitas chaves/agents
+    # Opções: yes | no
+    IdentitiesOnly yes
+
+    # Forca o uso de chaves gerenciadas pelo agent (1Password),
+    # evitando fallback automatico para id_rsa/id_ed25519 locais.
+    IdentityFile none
+
+    # Não fixar IdentityFile se você quer 1Password/agent como principal.
+    # Se quiser fallback por arquivo (somente se existir em todos os ambientes):
+    # IdentityFile ~/.ssh/id_ed25519
+
+
+###########################
+# Hosts específicos (globais)
+###########################
+Host 54.234.244.188
+    HostName 54.234.244.188
+    User ubuntu
+    IdentitiesOnly yes
+    StrictHostKeyChecking accept-new
+
+    # ATENÇÃO: .ppk (PuTTY) normalmente não funciona no OpenSSH.
+    # Converta para OpenSSH e use:
+    # IdentityFile ~/.ssh/id_rsa_sendy_openssh
+
+
+Host 10.30.4.9
+    HostName 10.30.4.9
+    User azureuser
+    IdentitiesOnly yes
+    StrictHostKeyChecking accept-new
+
+    # Preferir caminho ~/<...> para compatibilidade.
+    # No Windows OpenSSH, "~/.ssh/..." também funciona (expande para o perfil do usuário).
+    IdentityFile ~/.ssh/infra-eastus2-cr_mevo.pem
+
+
+################################################################################
+# Include por ambiente (selecionado via symlink no boostrap dos dotfiles)
+################################################################################
+# Config gerada pelo 1Password com regras/chaves publicas permitidas.
+Include ~/.ssh/1Password/config
+
+Include ~/.ssh/config.local

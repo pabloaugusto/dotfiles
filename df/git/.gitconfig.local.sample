@@ -1,0 +1,23 @@
+# Local Git identity/signing overrides (NOT versioned)
+#
+# Copy to:
+#   ~/.config/git/.gitconfig.local
+#
+# Do not store tokens/passwords in plaintext Git config.
+# Prefer credential helpers and 1Password/gh auth integration.
+
+[user]
+    name = Your Name
+    email = you@example.com
+    username = your-github-user
+    signingkey = ssh-ed25519 AAAA_REPLACE_WITH_YOUR_PUBLIC_SSH_SIGNING_KEY
+
+[commit]
+    gpgsign = true
+
+[gpg]
+    format = ssh
+
+# Uncomment and adjust if needed per environment:
+# [gpg "ssh"]
+#     program = "C:/Program Files/1Password/app/8/op-ssh-sign.exe"

@@ -1,0 +1,5 @@
+# Authorized public keys template
+# Add only PUBLIC keys here. Never add private keys.
+#
+# Example:
+# ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAI... you@example.com

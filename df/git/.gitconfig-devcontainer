@@ -1,0 +1,49 @@
+###############################################################
+# .gitconfig segmentado para Devcontainer (geral)
+#
+# Aplica-se a qualquer Devcontainer, independentemente
+# do host (Windows, Linux ou WSL).
+#
+# Baseado no path padrão do VS Code:
+#   /workspaces/<repo>/
+#
+# Se você usa um path diferente (ex: /workspace),
+# adicione outro bloco includeIf correspondente.
+#
+# OBS: Devcontainer (Linux container)
+# - Por padrão, containers não têm 1Password/op-ssh-sign.
+# - Então assinatura fica desativada por padrão para não quebrar commits.
+###############################################################
+
+[core]
+    # Normalmente não há `code` CLI no container.
+    # Opções: vim | nano
+    editor = nano
+
+    filemode = true
+    ignorecase = false
+
+[safe]
+    # Diretórios típicos do VS Code devcontainer
+    directory = /workspaces
+    directory = /workspace
+
+
+################################################################################
+# Assinatura via SSH no Devcontainer
+################################################################################
+
+# [user]
+#     # signingkey = KEY ESPECIFICA DO AMBIENTE
+#     # (por padrão vem do ~/.gitconfig-base)
+#     # signingkey = ssh-ed25519 AAAA...
+
+# [gpg "ssh"]
+#     # program = BINARIO ESPECIFICO DO AMBIENTE
+#     # (só configure se você instalar o op-ssh-sign dentro do container)
+#     # program = "/caminho/do/op-ssh-sign"
+
+[commit]
+    # gpgsign = VALOR ESPECIFICO DO AMBIENTE
+    # Recomendação: manter false até você ter o binário no container.
+    gpgsign = false

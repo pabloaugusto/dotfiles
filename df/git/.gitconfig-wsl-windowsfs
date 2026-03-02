@@ -1,0 +1,31 @@
+################################################################################
+# WSL usando repositórios no filesystem do Windows (/mnt/c, /mnt/d, etc.)
+# - Assinatura 1Password (program WSL)
+################################################################################
+
+[core]
+    # Se você usa VS Code + Remote WSL, isso funciona.
+    # Alternativas: vim | nano
+    editor = code --wait
+
+    # Em /mnt/* normalmente é melhor:
+    filemode = false
+    ignorecase = true
+
+
+################################################################################
+# Assinatura via SSH (1Password) - WSL (Windows host)
+################################################################################
+
+# [user]
+#     # signingkey = KEY ESPECIFICA DO AMBIENTE
+#     # (por padrão vem do ~/.gitconfig-base)
+#     # signingkey = ssh-ed25519 AAAA...
+
+[gpg "ssh"]
+    # program = BINARIO ESPECIFICO DO AMBIENTE
+    program = "/mnt/c/Program Files/1Password/app/8/op-ssh-sign-wsl"
+
+[commit]
+    # gpgsign = VALOR ESPECIFICO DO AMBIENTE
+    gpgsign = true

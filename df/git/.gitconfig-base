@@ -1,0 +1,154 @@
+################################################################################
+# Configurações base do Git (agnósticas de ambiente)
+# - Assinatura via SSH: chave é a mesma em todos os ambientes
+# - O binário assinador (gpg.ssh.program) varia por ambiente (Windows/WSL/Linux/Container)
+################################################################################
+
+[user]
+    # Configure sua identidade real em ~/.config/git/.gitconfig.local (não versionado).
+    # Exemplo:
+    # [user]
+    #   name = Seu Nome
+    #   email = you@example.com
+    #   username = your-github-user
+    #   signingkey = ssh-ed25519 AAAA...
+	name = CHANGE_ME
+	email = you@example.com
+	username = your-github-user
+
+[gpg]
+    # Assinatura usando SSH (não OpenPGP)
+    # Opções: ssh | openpgp
+    format = ssh
+
+
+################################################################################
+# Padrões e comportamento geral
+################################################################################
+
+[init]
+    # Opções comuns: main | master | trunk | develop
+    defaultBranch = main
+
+[pull]
+    # - merges: rebase preservando/recriando commits de merge (mantém estrutura de merges)
+    # Outras opções:
+    # - true: rebase linear (histórico mais “reto”, sem merges criados pelo pull)
+    # - false: merge tradicional
+    rebase = merges
+
+[push]
+    # Opções: simple (recomendado) | current | upstream | matching
+    default = simple
+
+    # Opções: true | false
+    autoSetupRemote = true
+
+[core]
+    # Força o Git a usar SSH como “caminho principal” quando aplicável.
+    # Opções: ssh | "ssh -v" | "ssh -o IdentitiesOnly=yes"
+    sshCommand = ssh
+
+    # Performance (pode ajudar em repos grandes; em alguns mounts pode variar).
+    # Opções: true | false
+    fsmonitor = true
+
+    # Opções: true | false
+    untrackedCache = true
+
+    # Controle de whitespace.
+    whitespace = space-before-tab,-indent-with-non-tab,trailing-space
+
+    # Opções: true | false
+    trustctime = false
+
+    # Controle de fim de linha.
+    # Opções: false | true | input
+    autocrlf = false
+
+[color]
+    # Opções: auto | always | never
+    ui = auto
+    status = auto
+    branch = auto
+    interactive = auto
+    diff = auto
+
+[help]
+    # Opções: prompt | 0 | N (delay em décimos de segundo)
+    autocorrect = prompt
+
+[rebase]
+    # Opções: true | false
+    autoStash = true
+
+[diff]
+    # Opções: default | plain | zebra | dimmed_zebra
+    colorMoved = default
+
+[commit]
+    # Mostra diff no editor durante o commit
+    # Opções: true | false
+    verbose = true
+
+[log]
+    # Opções: iso | iso-strict | relative | local | short | raw | unix
+    date = iso
+
+[filter "lfs"]
+    clean = git-lfs clean -- %f
+    smudge = git-lfs smudge -- %f
+    process = git-lfs filter-process
+    required = true
+
+[pretty]
+    nice = "%C(blue bold)%h %C(yellow)%cd %C(white)| %C(green)%s%C(red)%d %C(yellow)[%an]%Creset"
+
+[url "git@github.com:"]
+    insteadOf = "gh:"
+    pushInsteadOf = "github:"
+    pushInsteadOf = "git://github.com/"
+
+[url "git://github.com/"]
+    insteadOf = "github:"
+
+[url "git@gist.github.com:"]
+    insteadOf = "gst:"
+    pushInsteadOf = "gist:"
+    pushInsteadOf = "git://gist.github.com/"
+
+[url "git://gist.github.com/"]
+    insteadOf = "gist:"
+
+[alias]
+    a       = add
+    aa      = add .
+    b       = branch
+    cl      = clone --recursive
+    c       = commit
+    cm      = commit -m
+    cu      = commit -m "updated"
+    cf      = commit -a -m "fixed"
+    cwip    = "!f() { git commit -am \"wip: $(date +%Y-%m-%d_%H-%M-%S)\"; }; f"
+    d       = diff
+    co      = checkout
+    sw      = switch
+    rs      = restore
+    g       = grep
+    p       = push
+    fpush   = push --force-with-lease
+    rv      = remote -v
+    r       = rebase
+    ri      = rebase --interactive
+    s       = status
+    ss      = status -s
+    sb      = show-branch
+    hist    = log --pretty=format:"%h %ad | %s%d [%an]" --graph --date=short
+    l       = log --pretty=nice --max-count=15 --date=short --reverse --date=format:"%d/%m/%Y %H:%M:%S"
+    lg      = log --graph --pretty=format:"%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr)%Creset" --abbrev-commit --date=relative
+    msg     = commit --allow-empty -m
+    root    = "!f() { cd $(git rev-parse --show-toplevel); }; f"
+    sync    = "! git pull --rebase && git push"
+    sync-tags = "! git fetch --tags && git push --tags"
+    sync-all  = "! git pull --rebase && git push --progress && git push --tags"
+    clone-https = "! [ $# -ne 1 ] && echo 'Args: USERNAME/REPO_NAME' || git clone https://github.com/$1.git"

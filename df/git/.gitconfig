@@ -1,0 +1,249 @@
+# [user]
+# 	name = Seu Nome
+# 	email = you@example.com
+# 	username = your-github-user
+
+
+#[github]
+#	user = your-github-user
+#	token = <redacted>
+
+
+[init]
+	defaultBranch = main
+
+
+[alias]
+	a		= add
+	aa		= add .
+	acp		= "!f() { git add -A && git commit -m \"$1\" && git push; }; f"
+	acpu		= "!f() { git add -A && git commit -m 'updated' && git push; }; f"
+	acpf		= "!f() { git add -A && git commit -m 'fixed' && git push; }; f"
+	b		= branch
+	cl		= clone --recursive
+	c		= commit
+	ci		= "!git commit -am\"[empty] Initial commit\" --allow-empty" # initial empty commit
+	cm		= commit -m
+	cu		= commit -m "updated"
+	cf		= commit -a -m 'fixed'
+	cwip		= commit -a -m 'wip'
+	d		= diff
+	co		= checkout
+	hist		= log --pretty=format:'%h %ad | %s%d [%an]' --graph --date=short
+	g		= grep
+	l		= log --pretty=nice --max-count=15  --date=short --reverse --date=format:'%d/%m/%Y %H:%M:%S'
+	lg		= log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr)%Creset' --abbrev-commit --date=relative
+	msg		= commit --allow-empty -m
+	p		= push
+	fpush	= push --force-with-lease # A safer git push --force
+	rv		= remote -v
+	r		= rebase
+	ri		= rebase --interactive
+	s		= status
+	ss		= status -s
+	sb		= show-branch
+	root		= "!f() { cd $(git rev-parse --show-toplevel); }; f"
+	sync		= "! git pull --rebase && git push" # Sync local and remote commits.
+	sync-tags	= "! git fetch --tags && git push --tags" # Sync local and remote tags.
+	sync-all	= "! git pull --rebase && git push --progress && git push --tags" # Sync local and remote commits and tags.
+	clone-https	= "! [ $# -ne 1 ] && echo 'Args: USERNAME/REPO_NAME' || git clone https://github.com/$1.git" # git clone-https MichaelCurrin/dotfiles
+	# When you git pull and want to see what you've just pulled in, do git new [branch] [git log options]
+	# inspired by https://git.wiki.kernel.org/index.php/Aliases
+	new = "!f() { case \"$1\" in -*|\"\") b=;; *) b=$1; shift;; esac; git log $b@{1}..$b@{0} \"$@\"; }; f"
+	# Find branches containing commit
+	fb = "!f() { git branch -a --contains $1; }; f"
+
+	# Find tags containing commit
+	ft = "!f() { git describe --always --contains $1; }; f"
+
+	# Find commits by source code
+	fc = "!f() { git log --pretty=format:'%C(yellow)%h	%Cblue%ad  %Creset%s%Cgreen  [%cn] %Cred%d' --decorate --date=short -S$1; }; f"
+
+	# Find commits by commit message
+	fm = "!f() { git log --pretty=format:'%C(yellow)%h	%Cblue%ad  %Creset%s%Cgreen  [%cn] %Cred%d' --decorate --date=short --grep=$1; }; f"
+
+	# Remove branches that have already been merged with master
+	# a.k.a. ‘delete merged’
+	dm = "!git branch --merged | grep -v '\\*' | xargs -n 1 git branch -d; git remote -v update -p"
+
+	# List contributors with number of commits
+	team = shortlog --summary --numbered
+
+	# Get the GitHub URL for a GitHub repository. Usage: `git gh-url [REMOTE]`
+	gh-url = "!f() { \
+		if ! remote=${1:-$(git config --get \
+			branch.$(git symbolic-ref --short HEAD).remote)}; \
+		then \
+			echo no remote specified and could not get remote for HEAD; \
+			exit; \
+		fi; \
+		if ! remote_url=$(git config --get remote.$remote.url); \
+		then \
+			echo "could not get URL for remote \\`$remote\\`"; \
+			exit; \
+		fi; \
+		case $remote_url in \
+			git@github.com:*.git) \
+				repo=$(echo $remote_url \
+					| sed 's/git@github.com:\\(.*\\).git/\\1/');; \
+			https://github.com/*) \
+				repo=$(echo $remote_url \
+					| sed 's+https://github.com/\\(.*\\).git+\\1+');; \
+			*) \
+				echo "\\`$remote\\` does not appear to have " \
+					"a GitHub remote url: $remote_url"; \
+				exit 1;; \
+		esac; \
+		echo https://github.com/$repo; \
+	}; \
+	f"
+
+[pull]
+	rebase = false
+
+[push]
+	autoSetupRemote = true
+	default = matching # https://git-scm.com/docs/git-config#git-config-pushdefault
+
+[filter "lfs"]
+	clean = git-lfs clean -- %f
+	smudge = git-lfs smudge -- %f
+	process = git-lfs filter-process
+	required = true
+
+[pretty]
+	nice = "%C(blue bold)%h %C(yellow)%cd %C(white)| %C(green)%s%C(red)%d %C(yellow)[%an]%Creset"
+
+[web]
+	browser = google-chrome
+
+[core]
+	#excludesfile = ~/.gitignore #global .gitignore file
+	#ignorecase = true
+
+	# Treat spaces before tabs and all kinds of trailing whitespace as an error
+	# [default] trailing-space: looks for spaces at the end of a line
+	# [default] space-before-tab: looks for spaces before tabs at the beginning of a line
+	whitespace = space-before-tab,-indent-with-non-tab,trailing-space
+
+	# Speed up commands involving untracked files such as `git status`.
+	# https://git-scm.com/docs/git-update-index#_untracked_cache
+	untrackedCache = true
+	# Make `git rebase` safer on OS X
+	# More info: <http://www.git-tower.com/blog/make-git-rebase-safe-on-osx/>
+	trustctime = false
+
+	autocrlf = false
+
+[color]
+	# Use colors in Git commands that are capable of colored output when
+	# outputting to the terminal. (This is the default setting in Git ≥ 1.8.4.)
+	ui = always
+	status = auto
+    branch = auto
+    interactive = auto
+	diff = auto
+
+[help]
+	# Automatically correct and execute mistyped commands
+	autocorrect = 1
+	#log = true
+
+
+[url "git@github.com:"]
+
+	insteadOf = "gh:"
+	pushInsteadOf = "github:"
+	pushInsteadOf = "git://github.com/"
+
+[url "git://github.com/"]
+
+	insteadOf = "github:"
+
+[url "git@gist.github.com:"]
+
+	insteadOf = "gst:"
+	pushInsteadOf = "gist:"
+	pushInsteadOf = "git://gist.github.com/"
+
+[url "git://gist.github.com/"]
+
+	insteadOf = "gist:"
+
+
+
+
+
+[safe] # desliga a proteção de “dubious ownership” para qualquer repo
+	directory = *
+##############################################################################################
+# Carrega configurações do Git por "ambiente" (na prática: pelo caminho do repositório)
+# OBS: includeIf usa o caminho do diretório .git (gitdir). Não detecta SO/WSL/container diretamente.
+##############################################################################################
+
+# Base (carregado em qualquer contexto)
+# -----------------------------------------------------------
+[include]
+    path = ~/.config/git/.gitconfig-base
+[include]
+    path = ~/.config/git/.gitconfig.local
+
+
+# Windows host (Git rodando no Windows)
+# Use gitdir/i para tratar paths como case-insensitive
+# -----------------------------------------------------------
+[includeIf "gitdir/i:C:/"]
+    path = ~/.config/git/.gitconfig-windows
+[includeIf "gitdir/i:D:/"]
+    path = ~/.config/git/.gitconfig-windows
+
+
+# WSL (Git rodando no WSL acessando repos no filesystem do Windows)
+# Exemplos: /mnt/c/... e /mnt/d/...
+# -----------------------------------------------------------
+[includeIf "gitdir:/mnt/c/"]
+    path = ~/.config/git/.gitconfig-wsl-windowsfs
+[includeIf "gitdir:/mnt/d/"]
+    path = ~/.config/git/.gitconfig-wsl-windowsfs
+
+
+# Linux (host Linux) OU WSL (repos no filesystem Linux)
+# OBS: se o repo está em /home/, o Git não diferencia Linux host vs WSL.
+# -----------------------------------------------------------
+[includeIf "gitdir:/home/"]
+    path = ~/.config/git/.gitconfig-linux
+
+
+# macOS (se aplicável)
+# -----------------------------------------------------------
+[includeIf "gitdir:/Users/"]
+    path = ~/.config/git/.gitconfig-mac
+
+
+# Devcontainer (qualquer host)
+# Aplica para:
+#   /workspaces/<repo>/  (padrão VS Code)
+#   /workspace/<repo>/   (algumas imagens/ambientes)
+# -----------------------------------------------------------
+[includeIf "gitdir:/workspaces/"]
+    path = ~/.config/git/.gitconfig-devcontainer
+[includeIf "gitdir:/workspace/"]
+    path = ~/.config/git/.gitconfig-devcontainer
+
+
+# Devcontainer por host (opcional)
+# Só funciona se o workspace dentro do container tiver paths diferentes por host, ex.:
+#   /workspaces-win/<repo>/, /workspaces-wsl/<repo>/, /workspaces-linux/<repo>/
+# -----------------------------------------------------------
+[includeIf "gitdir:/workspaces-win/"]
+    path = ~/.config/git/.gitconfig-devcontainer-host-windows
+[includeIf "gitdir:/workspaces-wsl/"]
+    path = ~/.config/git/.gitconfig-devcontainer-host-wsl
+[includeIf "gitdir:/workspaces-linux/"]
+    path = ~/.config/git/.gitconfig-devcontainer-host-linux
+[credential "https://github.com"]
+	helper = 
+	helper = !'C:\\Program Files\\GitHub CLI\\gh.exe' auth git-credential
+[credential "https://gist.github.com"]
+	helper = 
+	helper = !'C:\\Program Files\\GitHub CLI\\gh.exe' auth git-credential

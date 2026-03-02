@@ -1,0 +1,387 @@
+#######################################################################################
+# bootstrap-config.ps1
+#
+# Centralized bootstrap configuration manager.
+# - Uses a simple YAML file (local, non-versioned) as single source of truth.
+# - Can run guided setup in terminal.
+# - Syncs derived files used by existing bootstrap flow:
+#   - df/secrets/secrets-ref.yaml
+#   - bootstrap/secrets/.env.local.tpl
+#   - df/git/.gitconfig.local
+#######################################################################################
+
+function Get-BootstrapConfigDefaults {
+	$defaults = [ordered]@{}
+	$defaults['version'] = '1'
+	$defaults['profile.name'] = 'CHANGE_ME'
+
+	$defaults['git.name'] = 'CHANGE_ME'
+	$defaults['git.email'] = 'you@example.com'
+	$defaults['git.username'] = 'your-github-user'
+	$defaults['git.signing_key'] = 'ssh-ed25519 AAAA_REPLACE_WITH_YOUR_PUBLIC_SSH_SIGNING_KEY'
+
+	$defaults['paths.windows.onedrive_projects_path'] = ''
+	$defaults['paths.wsl.onedrive_root'] = '/mnt/d/OneDrive'
+	$defaults['paths.wsl.onedrive_clients_dir'] = ''
+	$defaults['paths.wsl.onedrive_projects_dir'] = ''
+
+	$defaults['bootstrap.add_user.enabled'] = 'false'
+	$defaults['bootstrap.add_user.username'] = ''
+	$defaults['bootstrap.add_user.password_hash'] = ''
+
+	$defaults['secrets.onepassword_service_account_ref'] = 'op://secrets/dotfiles/1password/service-account'
+	$defaults['secrets.github_project_pat_ref'] = 'op://secrets/dotfiles/github/token'
+	$defaults['secrets.github_full_access_ref'] = 'op://secrets/github/api/token'
+	$defaults['secrets.age_key_ref'] = 'op://secrets/dotfiles/age/age.key'
+	return $defaults
+}
+
+function Convert-SimpleYamlScalar {
+	param ([string]$RawValue)
+
+	$v = $RawValue.Trim()
+	if ($v -match "^'(.*)'$") { return $matches[1] }
+	if ($v -match '^"(.*)"$') { return $matches[1] }
+	if ($v -ieq 'true') { return 'true' }
+	if ($v -ieq 'false') { return 'false' }
+	if ($v -ieq 'null') { return '' }
+	return $v
+}
+
+function Read-SimpleYamlAsPathMap {
+	param ([string]$Path)
+
+	$map = [ordered]@{}
+	if (!(Test-Path -Path $Path -PathType Leaf)) {
+		return $map
+	}
+
+	$stack = New-Object System.Collections.Generic.List[string]
+	foreach ($rawLine in (Get-Content -Path $Path -ErrorAction SilentlyContinue)) {
+		$line = ($rawLine -replace "`t", '  ')
+		if ([string]::IsNullOrWhiteSpace($line) -or $line -match '^\s*#') {
+			continue
+		}
+		if ($line -notmatch '^(\s*)([A-Za-z0-9_-]+):\s*(.*)$') {
+			continue
+		}
+
+		$indentLen = $matches[1].Length
+		if (($indentLen % 2) -ne 0) {
+			continue
+		}
+		$level = [int]($indentLen / 2)
+		$key = $matches[2]
+		$valuePart = $matches[3].Trim()
+
+		while ($stack.Count -gt $level) {
+			$stack.RemoveAt($stack.Count - 1)
+		}
+		if ($stack.Count -eq $level) {
+			$stack.Add($key)
+		}
+		else {
+			continue
+		}
+
+		if ($valuePart -ne '') {
+			$pathKey = ($stack -join '.')
+			$map[$pathKey] = (Convert-SimpleYamlScalar -RawValue $valuePart)
+		}
+	}
+
+	return $map
+}
+
+function Merge-BootstrapConfigWithDefaults {
+	param ([hashtable]$ConfigMap)
+
+	$merged = [ordered]@{}
+	$defaults = Get-BootstrapConfigDefaults
+	foreach ($k in $defaults.Keys) {
+		if ($ConfigMap.Contains($k)) {
+			$merged[$k] = [string]$ConfigMap[$k]
+		}
+		else {
+			$merged[$k] = [string]$defaults[$k]
+		}
+	}
+	return $merged
+}
+
+function Escape-YamlDoubleQuotedValue {
+	param ([string]$Value)
+	return ($Value -replace '\\', '\\' -replace '"', '\"')
+}
+
+function Write-BootstrapConfigYaml {
+	param (
+		[string]$Path,
+		[hashtable]$Config
+	)
+
+	$yaml = @(
+		'# bootstrap/user-config.yaml'
+		'# local bootstrap customization file (single source of truth)'
+		'# This file is intentionally local and should not be committed.'
+		'version: 1'
+		'profile:'
+		("  name: ""{0}""" -f (Escape-YamlDoubleQuotedValue $Config['profile.name']))
+		'git:'
+		("  name: ""{0}""" -f (Escape-YamlDoubleQuotedValue $Config['git.name']))
+		("  email: ""{0}""" -f (Escape-YamlDoubleQuotedValue $Config['git.email']))
+		("  username: ""{0}""" -f (Escape-YamlDoubleQuotedValue $Config['git.username']))
+		("  signing_key: ""{0}""" -f (Escape-YamlDoubleQuotedValue $Config['git.signing_key']))
+		'paths:'
+		'  windows:'
+		("    onedrive_projects_path: ""{0}""" -f (Escape-YamlDoubleQuotedValue $Config['paths.windows.onedrive_projects_path']))
+		'  wsl:'
+		("    onedrive_root: ""{0}""" -f (Escape-YamlDoubleQuotedValue $Config['paths.wsl.onedrive_root']))
+		("    onedrive_clients_dir: ""{0}""" -f (Escape-YamlDoubleQuotedValue $Config['paths.wsl.onedrive_clients_dir']))
+		("    onedrive_projects_dir: ""{0}""" -f (Escape-YamlDoubleQuotedValue $Config['paths.wsl.onedrive_projects_dir']))
+		'bootstrap:'
+		'  add_user:'
+		("    enabled: {0}" -f (($Config['bootstrap.add_user.enabled']).ToLowerInvariant()))
+		("    username: ""{0}""" -f (Escape-YamlDoubleQuotedValue $Config['bootstrap.add_user.username']))
+		("    password_hash: ""{0}""" -f (Escape-YamlDoubleQuotedValue $Config['bootstrap.add_user.password_hash']))
+		'secrets:'
+		("  onepassword_service_account_ref: ""{0}""" -f (Escape-YamlDoubleQuotedValue $Config['secrets.onepassword_service_account_ref']))
+		("  github_project_pat_ref: ""{0}""" -f (Escape-YamlDoubleQuotedValue $Config['secrets.github_project_pat_ref']))
+		("  github_full_access_ref: ""{0}""" -f (Escape-YamlDoubleQuotedValue $Config['secrets.github_full_access_ref']))
+		("  age_key_ref: ""{0}""" -f (Escape-YamlDoubleQuotedValue $Config['secrets.age_key_ref']))
+	)
+
+	$targetDir = Split-Path -Path $Path -Parent
+	if ($targetDir -and !(Test-Path -Path $targetDir)) {
+		New-Item -Path $targetDir -ItemType Directory -Force | Out-Null
+	}
+	Set-Content -Path $Path -Value $yaml
+}
+
+function Test-BootstrapConfigFilled {
+	param ([hashtable]$Config)
+
+	$requiredKeys = @(
+		'git.name',
+		'git.email',
+		'git.username',
+		'git.signing_key',
+		'secrets.onepassword_service_account_ref',
+		'secrets.github_project_pat_ref',
+		'secrets.github_full_access_ref',
+		'secrets.age_key_ref'
+	)
+
+	foreach ($k in $requiredKeys) {
+		$v = [string]$Config[$k]
+		if ([string]::IsNullOrWhiteSpace($v)) {
+			return $false
+		}
+		if ($v -match 'CHANGE_ME|REPLACE_WITH|you@example\.com|your-github-user|AAAA_REPLACE') {
+			return $false
+		}
+	}
+
+	if (($Config['bootstrap.add_user.enabled']).ToLowerInvariant() -eq 'true') {
+		if ([string]::IsNullOrWhiteSpace([string]$Config['bootstrap.add_user.username']) -or
+			[string]::IsNullOrWhiteSpace([string]$Config['bootstrap.add_user.password_hash'])) {
+			return $false
+		}
+	}
+
+	return $true
+}
+
+function Read-ConfigPrompt {
+	param (
+		[string]$Label,
+		[string]$CurrentValue,
+		[switch]$AllowEmpty
+	)
+
+	$display = if ([string]::IsNullOrWhiteSpace($CurrentValue)) { '(vazio)' } else { $CurrentValue }
+	$typed = Read-Host -Prompt "$Label [$display]"
+	if ([string]::IsNullOrWhiteSpace($typed)) {
+		if ($AllowEmpty) { return '' }
+		return $CurrentValue
+	}
+	return $typed.Trim()
+}
+
+function Read-BooleanPrompt {
+	param (
+		[string]$Label,
+		[string]$CurrentValue
+	)
+
+	$defaultLabel = if (($CurrentValue).ToLowerInvariant() -eq 'true') { 'Y' } else { 'N' }
+	while ($true) {
+		$typed = Read-Host -Prompt "$Label (Y/N) [$defaultLabel]"
+		if ([string]::IsNullOrWhiteSpace($typed)) {
+			return if ($defaultLabel -eq 'Y') { 'true' } else { 'false' }
+		}
+		switch -Regex ($typed.Trim()) {
+			'^(y|yes|s|sim)$' { return 'true' }
+			'^(n|no|nao|não)$' { return 'false' }
+			default { Write-Host "Resposta inválida. Use Y ou N." }
+		}
+	}
+}
+
+function Invoke-BootstrapConfigWizard {
+	param ([hashtable]$Config)
+
+	Write-Host "`nConfiguração guiada do bootstrap (YAML central)."
+	Write-Host "Pressione ENTER para manter o valor atual."
+
+	$Config['profile.name'] = Read-ConfigPrompt -Label 'Nome do perfil' -CurrentValue $Config['profile.name']
+	$Config['git.name'] = Read-ConfigPrompt -Label 'Git name' -CurrentValue $Config['git.name']
+	$Config['git.email'] = Read-ConfigPrompt -Label 'Git email' -CurrentValue $Config['git.email']
+	$Config['git.username'] = Read-ConfigPrompt -Label 'Git username' -CurrentValue $Config['git.username']
+	$Config['git.signing_key'] = Read-ConfigPrompt -Label 'Git SSH signing key (public)' -CurrentValue $Config['git.signing_key']
+
+	$Config['paths.windows.onedrive_projects_path'] = Read-ConfigPrompt -Label 'Windows OneDrive projects path (opcional)' -CurrentValue $Config['paths.windows.onedrive_projects_path'] -AllowEmpty
+	$Config['paths.wsl.onedrive_root'] = Read-ConfigPrompt -Label 'WSL OneDrive root' -CurrentValue $Config['paths.wsl.onedrive_root']
+	$Config['paths.wsl.onedrive_clients_dir'] = Read-ConfigPrompt -Label 'WSL OneDrive clients dir (opcional)' -CurrentValue $Config['paths.wsl.onedrive_clients_dir'] -AllowEmpty
+	$Config['paths.wsl.onedrive_projects_dir'] = Read-ConfigPrompt -Label 'WSL OneDrive projects dir (opcional)' -CurrentValue $Config['paths.wsl.onedrive_projects_dir'] -AllowEmpty
+
+	$Config['bootstrap.add_user.enabled'] = Read-BooleanPrompt -Label 'Provisionar usuário extra no bootstrap WSL?' -CurrentValue $Config['bootstrap.add_user.enabled']
+	if (($Config['bootstrap.add_user.enabled']).ToLowerInvariant() -eq 'true') {
+		$Config['bootstrap.add_user.username'] = Read-ConfigPrompt -Label 'Usuário extra (Linux/WSL)' -CurrentValue $Config['bootstrap.add_user.username']
+		$Config['bootstrap.add_user.password_hash'] = Read-ConfigPrompt -Label 'Password hash (openssl passwd -1)' -CurrentValue $Config['bootstrap.add_user.password_hash']
+	}
+	else {
+		$Config['bootstrap.add_user.username'] = ''
+		$Config['bootstrap.add_user.password_hash'] = ''
+	}
+
+	$Config['secrets.onepassword_service_account_ref'] = Read-ConfigPrompt -Label 'Ref 1Password service account' -CurrentValue $Config['secrets.onepassword_service_account_ref']
+	$Config['secrets.github_project_pat_ref'] = Read-ConfigPrompt -Label 'Ref GitHub token dedicado (project-pat)' -CurrentValue $Config['secrets.github_project_pat_ref']
+	$Config['secrets.github_full_access_ref'] = Read-ConfigPrompt -Label 'Ref GitHub full-access (fallback)' -CurrentValue $Config['secrets.github_full_access_ref']
+	$Config['secrets.age_key_ref'] = Read-ConfigPrompt -Label 'Ref SOPS age key' -CurrentValue $Config['secrets.age_key_ref']
+
+	return $Config
+}
+
+function Sync-BootstrapDerivedFiles {
+	param (
+		[hashtable]$Config,
+		[string]$DotFilesDirectory
+	)
+
+	$secretsRefPath = Join-Path $DotFilesDirectory 'df\secrets\secrets-ref.yaml'
+	$envTplPath = Join-Path $DotFilesDirectory 'bootstrap\secrets\.env.local.tpl'
+	$gitLocalPath = Join-Path $DotFilesDirectory 'df\git\.gitconfig.local'
+
+	$secretsRef = @(
+		'---'
+		'# Secrets do repositório dotfiles (gerado a partir de bootstrap/user-config.yaml)'
+		'1password:'
+		("  service-account: ""{0}""" -f $Config['secrets.onepassword_service_account_ref'])
+		'github:'
+		("  full-access-token: ""{0}""" -f $Config['secrets.github_full_access_ref'])
+		("  project-pat: ""{0}""" -f $Config['secrets.github_project_pat_ref'])
+		'age:'
+		("  key: ""{0}""" -f $Config['secrets.age_key_ref'])
+	)
+	Set-Content -Path $secretsRefPath -Value $secretsRef
+
+	$envTpl = @(
+		'# Runtime secrets template injected by 1Password (`op inject`).'
+		'# Output file target: ~/.env.local'
+		'# Generated from bootstrap/user-config.yaml'
+		("export OP_SERVICE_ACCOUNT_TOKEN=""{0}""" -f $Config['secrets.onepassword_service_account_ref'])
+		("export GITHUB_TOKEN=""{0}""" -f $Config['secrets.github_project_pat_ref'])
+		("export SOPS_AGE_KEY=""{0}""" -f $Config['secrets.age_key_ref'])
+	)
+	Set-Content -Path $envTplPath -Value $envTpl
+
+	$gitLocal = @(
+		'# Generated from bootstrap/user-config.yaml'
+		'[user]'
+		("    name = {0}" -f $Config['git.name'])
+		("    email = {0}" -f $Config['git.email'])
+		("    username = {0}" -f $Config['git.username'])
+		("    signingkey = {0}" -f $Config['git.signing_key'])
+	)
+	Set-Content -Path $gitLocalPath -Value $gitLocal
+
+	# Export for current bootstrap process (consumed by windows/wsl bootstrap scripts).
+	if ([string]::IsNullOrWhiteSpace($Config['paths.windows.onedrive_projects_path'])) {
+		Remove-Item Env:DOTFILES_ONEDRIVE_PROJECTS_PATH -ErrorAction SilentlyContinue
+	}
+	else {
+		$Env:DOTFILES_ONEDRIVE_PROJECTS_PATH = $Config['paths.windows.onedrive_projects_path']
+	}
+
+	$Env:DOTFILES_ONEDRIVE_ROOT = $Config['paths.wsl.onedrive_root']
+	if ([string]::IsNullOrWhiteSpace($Config['paths.wsl.onedrive_clients_dir'])) {
+		Remove-Item Env:DOTFILES_ONEDRIVE_CLIENTS_DIR -ErrorAction SilentlyContinue
+	}
+	else {
+		$Env:DOTFILES_ONEDRIVE_CLIENTS_DIR = $Config['paths.wsl.onedrive_clients_dir']
+	}
+	if ([string]::IsNullOrWhiteSpace($Config['paths.wsl.onedrive_projects_dir'])) {
+		Remove-Item Env:DOTFILES_ONEDRIVE_PROJECTS_DIR -ErrorAction SilentlyContinue
+	}
+	else {
+		$Env:DOTFILES_ONEDRIVE_PROJECTS_DIR = $Config['paths.wsl.onedrive_projects_dir']
+	}
+
+	if (($Config['bootstrap.add_user.enabled']).ToLowerInvariant() -eq 'true') {
+		$Env:DOTFILES_ADD_USER = $Config['bootstrap.add_user.username']
+		$Env:DOTFILES_ADD_USER_PASS_HASH = $Config['bootstrap.add_user.password_hash']
+	}
+	else {
+		Remove-Item Env:DOTFILES_ADD_USER -ErrorAction SilentlyContinue
+		Remove-Item Env:DOTFILES_ADD_USER_PASS_HASH -ErrorAction SilentlyContinue
+	}
+}
+
+function Ensure-BootstrapConfigReady {
+	param ([string]$DotFilesDirectory)
+
+	$templatePath = Join-Path $DotFilesDirectory 'bootstrap\user-config.yaml.tpl'
+	$configPath = Join-Path $DotFilesDirectory 'bootstrap\user-config.yaml'
+
+	if (!(Test-Path -Path $templatePath -PathType Leaf)) {
+		throw "Config template not found: $templatePath"
+	}
+
+	if (!(Test-Path -Path $configPath -PathType Leaf)) {
+		Copy-Item -Path $templatePath -Destination $configPath -Force
+		Write-Warning "Arquivo de config local criado em: $configPath"
+	}
+
+	$config = Merge-BootstrapConfigWithDefaults (Read-SimpleYamlAsPathMap -Path $configPath)
+	$isFilled = Test-BootstrapConfigFilled -Config $config
+
+	if ($isFilled) {
+		$choice = Read-Host -Prompt "Config YAML ja preenchido. Escolha: 1=usar como esta, 2=sobrescrever em modo guiado"
+		if ($choice -eq '2') {
+			$config = Invoke-BootstrapConfigWizard -Config $config
+			Write-BootstrapConfigYaml -Path $configPath -Config $config
+		}
+	}
+	else {
+		$choice = Read-Host -Prompt "Config YAML incompleto. Escolha: 1=preencher agora em modo guiado, 2=preencher manualmente e abortar"
+		if ($choice -eq '1') {
+			$config = Invoke-BootstrapConfigWizard -Config $config
+			Write-BootstrapConfigYaml -Path $configPath -Config $config
+		}
+		else {
+			Write-Warning "Preencha manualmente: $configPath e execute o bootstrap novamente."
+			return $false
+		}
+	}
+
+	$config = Merge-BootstrapConfigWithDefaults (Read-SimpleYamlAsPathMap -Path $configPath)
+	if (!(Test-BootstrapConfigFilled -Config $config)) {
+		Write-Warning "Config YAML ainda incompleto. Ajuste manualmente: $configPath"
+		return $false
+	}
+
+	Sync-BootstrapDerivedFiles -Config $config -DotFilesDirectory $DotFilesDirectory
+	Write-Output "Config central aplicada com sucesso a partir de: $configPath"
+	return $true
+}

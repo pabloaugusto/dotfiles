@@ -1,0 +1,56 @@
+################################################################################
+# ~/.ssh/config.unix
+#
+# Para Linux/WSL (OpenSSH em ambiente Unix).
+#
+# Objetivo:
+# - Priorizar 1Password SSH Agent SOMENTE quando estiver disponível
+# - Se não estiver disponível, manter fallback natural (sem quebrar)
+#
+# Contexto real do seu ambiente:
+# - SSH_AUTH_SOCK estava apontando para /tmp/1password-agent.sock
+# - mas o socket não existia. Isso pode quebrar autenticação/assinatura via agent.
+#
+# Aqui evitamos esse problema com Match exec + test -S.
+################################################################################
+
+###############################################################################
+# 1Password SSH Agent (condicional)
+#
+# test -S verifica se existe um socket válido.
+# Se existir, usa explicitamente o agent do 1Password.
+# Se não existir, não aplica nada e o SSH segue com:
+# - agent padrão (se houver)
+# - IdentityFile definido nos hosts
+# - chaves padrão (~/.ssh/id_*), se existirem
+###############################################################################
+Match exec "test -S /tmp/1password-agent.sock"
+    Host *
+        # Define qual agent usar.
+        # Em WSL/Linux, esse socket é o padrão do 1Password quando exposto no ambiente.
+        IdentityAgent /tmp/1password-agent.sock
+
+        # Evita fallback para arquivos id_* locais quando o agent do 1Password
+        # estiver disponivel.
+        IdentityFile none
+
+        # Opção (mais restritiva):
+        # IdentitiesOnly yes
+
+
+###############################################################################
+# Alternativas úteis (Unix/WSL):
+#
+# 1) Se você quiser forçar 1Password SEM condicional (não recomendado no seu caso):
+# Host *
+#     IdentityAgent /tmp/1password-agent.sock
+#
+# 2) Se quiser fallback explícito para uma chave local:
+# Host github.com
+#     IdentityFile ~/.ssh/id_ed25519
+#     IdentitiesOnly yes
+#
+# 3) Se precisar encaminhar agent só em um bastion:
+# Host bastion.exemplo.com
+#     ForwardAgent yes
+###############################################################################

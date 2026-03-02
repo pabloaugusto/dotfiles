@@ -1,0 +1,37 @@
+# when .gitignore not ignoring files may be cache
+# problem. Run this command to fix it
+# $ git rm -r --cached .
+
+*.history
+desktop.ini
+
+# local runtime secrets
+.env
+.env.*
+!.env.example
+!.env.local.tpl
+!/bootstrap/secrets/.env.local.tpl
+bootstrap/user-config.yaml
+df/git/.gitconfig.local
+
+# sensitive key/certificate material
+*.pem
+*.p12
+*.pfx
+*.key
+!*.pub
+!*.sops.yaml
+
+df/ssh/sockets
+df/ssh/known_hosts
+df/ssh/known_hosts.old
+df/ssh/config.local
+#.ssh/authorized_keys
+df/secrets/dotfiles.age.local.key
+df/powershell/Modules
+df/powershell/Scripts
+df/NuGet/
+df/vscode/globalStorage
+df/vscode/History
+df/vscode/workspaceStorage
+df/vscode/sync

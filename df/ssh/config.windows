@@ -1,0 +1,19 @@
+################################################################################
+# ~/.ssh/config.windows
+#
+# Para Windows (OpenSSH nativo do Windows).
+#
+# Em geral, com 1Password configurado como SSH Agent no Windows, não é necessário
+# setar IdentityAgent aqui: o SSH usa o agent já integrado ao sistema/ambiente.
+#
+# Importante:
+# - Não usar Match exec/test -S (isso é Unix-only).
+################################################################################
+
+###############################################################################
+# Força uso do pipe do agent SSH no Windows.
+# Com 1Password SSH Agent habilitado no app, esse pipe passa a entregar as
+# chaves gerenciadas no 1Password para o OpenSSH.
+###############################################################################
+Host *
+    IdentityAgent \\.\pipe\openssh-ssh-agent

@@ -1,0 +1,17 @@
+{
+  "cSpell.diagnosticLevel": "Hint",
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.formatOnSave": true,
+  "[yaml]": {
+    "editor.tabSize": 2,
+    "editor.indentSize": 2,
+    "editor.insertSpaces": true, // forces the tab to be **space**
+    "editor.detectIndentation": false,
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "files.associations": {
+    "*.yaml": "yaml",
+    "*.gitconfig*": "ini"
+  },
+  "terminal.integrated.cursorStyle": "line"
+}

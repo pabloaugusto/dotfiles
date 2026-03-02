@@ -1,0 +1,18 @@
+{
+  $schema: "https://docs.renovatebot.com/renovate-schema.json",
+
+  timezone: "America/Sao_Paulo",
+	prHourlyLimit: 999,
+
+  extends: [
+    "config:base",
+  ],
+
+  // renovate dashboard:
+  dependencyDashboard: true,
+
+// conventional commit: <prefix> <type>(<scope>): <topic>
+  'semanticCommits': 'enabled',
+  'commitMessage':"📦️ {{{commitMessagePrefix}}} {{{commitMessageAction}}} {{{commitMessageTopic}}} {{{commitMessageExtra}}} {{{commitMessageSuffix}}}",
+
+}
