@@ -1628,12 +1628,25 @@ function checkEnv {
 			Add-CheckResult -Item 'Git signing key' -Status 'fail' -Detail 'user.signingkey is missing or invalid.' -Solution 'Set user.signingkey to the SSH public key managed by 1Password.'
 		}
 
-		$resolvedProgramPath = $gpgProgram.Trim('"')
-		if (-not [string]::IsNullOrWhiteSpace($resolvedProgramPath) -and (Test-Path -Path $resolvedProgramPath)) {
-			Add-CheckResult -Item '1Password signer program' -Status 'success' -Detail "gpg.ssh.program exists at $resolvedProgramPath." -Solution ''
+		$resolvedProgramPath = ''
+		$configuredProgram = $gpgProgram.Trim('"')
+		if (-not [string]::IsNullOrWhiteSpace($configuredProgram)) {
+			if (Test-Path -Path $configuredProgram) {
+				$resolvedProgramPath = (Resolve-Path -Path $configuredProgram -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Path -First 1)
+			}
+			if ([string]::IsNullOrWhiteSpace($resolvedProgramPath)) {
+				$programCmd = Get-Command -Name $configuredProgram -ErrorAction SilentlyContinue
+				if ($programCmd) {
+					$resolvedProgramPath = $programCmd.Source
+				}
+			}
 		}
-		elseif (-not [string]::IsNullOrWhiteSpace($resolvedProgramPath)) {
-			Add-CheckResult -Item '1Password signer program' -Status 'fail' -Detail "gpg.ssh.program points to a missing path: $resolvedProgramPath." -Solution 'Fix gpg.ssh.program to a valid op-ssh-sign binary.'
+
+		if (-not [string]::IsNullOrWhiteSpace($resolvedProgramPath)) {
+			Add-CheckResult -Item '1Password signer program' -Status 'success' -Detail "gpg.ssh.program resolved to $resolvedProgramPath." -Solution ''
+		}
+		elseif (-not [string]::IsNullOrWhiteSpace($configuredProgram)) {
+			Add-CheckResult -Item '1Password signer program' -Status 'fail' -Detail "gpg.ssh.program is configured but not resolvable: $configuredProgram." -Solution 'Fix gpg.ssh.program to a valid op-ssh-sign binary (absolute path or command in PATH).'
 		}
 		else {
 			Add-CheckResult -Item '1Password signer program' -Status 'fail' -Detail 'gpg.ssh.program is not set.' -Solution 'Set gpg.ssh.program to 1Password op-ssh-sign binary.'

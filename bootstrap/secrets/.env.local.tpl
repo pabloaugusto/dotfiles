@@ -1,5 +1,5 @@
 # Runtime secrets template resolved by 1Password (`op inject`).
-# Bootstrap encrypts this content to ~/.env.local.sops (no plaintext persisted).
+# Bootstrap persists this material encrypted at ~/.env.local.sops.
 # Generated from bootstrap/user-config.yaml
 export OP_SERVICE_ACCOUNT_TOKEN="op://secrets/dotfiles/1password/service-account"
 export GH_TOKEN="op://secrets/dotfiles/github/token"

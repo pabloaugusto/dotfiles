@@ -17,15 +17,35 @@
 # 5) Final checkEnv
 ################################################################################
 
-BASE_DIR=$(dirname "$(readlink -m "$0")")
+SCRIPT_PATH="${BASH_SOURCE[0]}"
+BASE_DIR="$(cd "$(dirname "$SCRIPT_PATH")" && pwd -P)"
+
+is_sourced() {
+	[[ "${BASH_SOURCE[0]}" != "$0" ]]
+}
+
+bootstrap_exit() {
+	local code="${1:-0}"
+	if is_sourced; then
+		return "$code"
+	fi
+	exit "$code"
+}
+
 ONEDRIVE_ROOT="${DOTFILES_ONEDRIVE_ROOT:-/mnt/d/OneDrive}"
 ONEDRIVE_CLIENTS_DIR="${DOTFILES_ONEDRIVE_CLIENTS_DIR:-$ONEDRIVE_ROOT/clients}"
 ONEDRIVE_PROJECTS_DIR="${DOTFILES_ONEDRIVE_PROJECTS_DIR:-$ONEDRIVE_CLIENTS_DIR/$USER/projects}"
 
 # shellcheck source=../df/bash/.inc/_functions.sh
-source "$BASE_DIR/../df/bash/.inc/_functions.sh"
+if ! source "$BASE_DIR/../df/bash/.inc/_functions.sh"; then
+	echo "Falha ao carregar helper: $BASE_DIR/../df/bash/.inc/_functions.sh"
+	bootstrap_exit 1
+fi
 # shellcheck source=../df/bash/.inc/check-env.sh
-source "$BASE_DIR/../df/bash/.inc/check-env.sh"
+if ! source "$BASE_DIR/../df/bash/.inc/check-env.sh"; then
+	echo "Falha ao carregar helper: $BASE_DIR/../df/bash/.inc/check-env.sh"
+	bootstrap_exit 1
+fi
 
 # ----------------------------------------------------------------------------------------
 function setup_prompt {
@@ -36,7 +56,7 @@ function setup_prompt {
 	read -r -p "MARCO " answer
 	if [ "$answer" != "polo" ]; then
 		echo "At least you have chicken 🐔"
-		exit 1
+		return 1
 	fi
 }
 
@@ -58,7 +78,7 @@ function install_software {
 		eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
 	else
 		echo "Updating Homebrew"
-		sudo brew update >/dev/null
+		brew update >/dev/null
 		eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
 	fi
 
@@ -467,13 +487,13 @@ function clean_setup_vars {
 # --------------------------------------------------------------------
 
 # 00 - prompt
-setup_prompt
+setup_prompt || bootstrap_exit 1
 
 # 0 setup fonts
-setup_fonts
+setup_fonts || bootstrap_exit 1
 
 # 1 - Install Software
-install_software
+install_software || bootstrap_exit 1
 
 # 2 - optional extra user provisioning
 if [ -n "${DOTFILES_ADD_USER:-}" ] && [ -n "${DOTFILES_ADD_USER_PASS_HASH:-}" ]; then
@@ -483,7 +503,7 @@ else
 fi
 
 # 3 - Symlink Setup to current user
-setProfileSymlinks "$USER"
+setProfileSymlinks "$USER" || bootstrap_exit 1
 
 # 4 - config ssh
 # SSH Key Setup # ON CLIENT: ssh-copy-id -i ~/.ssh/id_rsa <user>@SERVER
@@ -493,11 +513,11 @@ setProfileSymlinks "$USER"
 
 # 5 - setup secret local env vars (1password
 # This phase guarantees runtime auth/signing dependencies before final checkEnv.
-ensureOpToken || exit 1
-setLocalEnvFile || exit 1
-importLocalEnvFromSops || exit 1
-persistSopsAgeEnv || exit 1
-ensureGitHubAuth || exit 1
+ensureOpToken || bootstrap_exit 1
+setLocalEnvFile || bootstrap_exit 1
+importLocalEnvFromSops || bootstrap_exit 1
+persistSopsAgeEnv || bootstrap_exit 1
+ensureGitHubAuth || bootstrap_exit 1
 
 
 # 6 - unset setup vars
@@ -513,5 +533,5 @@ chmod 600 ~/.ssh/config ~/.ssh/config.local ~/.ssh/config.unix ~/.ssh/config.win
 echo "Running final environment health check (checkEnv)..."
 checkEnv || {
 	echo "checkEnv encontrou falhas de conformidade. Revise os itens acima."
-	exit 1
+	bootstrap_exit 1
 }

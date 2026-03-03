@@ -62,14 +62,9 @@ Host github.com github-com
     HostName github.com
     User git
 
-    # Agent-first policy:
-    # - no  => allows agent-provided keys (including 1Password managed keys)
-    # - yes => requires explicit IdentityFile entries
+    # Agent-first policy with no local key fallback.
     IdentitiesOnly no
-
-    # Agent-first:
-    # prefer keys exposed by 1Password/OpenSSH agent.
-    # Keep default IdentityFile behavior here to avoid suppressing agent keys.
+    IdentityFile none
 
 
 ###########################

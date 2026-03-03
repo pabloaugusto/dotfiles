@@ -23,8 +23,8 @@
 #     # signingkey = ssh-ed25519 AAAA...
 
 [gpg "ssh"]
-    # program = BINARIO ESPECIFICO DO AMBIENTE
-    program = "/mnt/c/Program Files/1Password/app/8/op-ssh-sign-wsl"
+    # Program from PATH for WSL with 1Password on Windows.
+    program = op-ssh-sign-wsl.exe
 
 [commit]
     # gpgsign = VALOR ESPECIFICO DO AMBIENTE

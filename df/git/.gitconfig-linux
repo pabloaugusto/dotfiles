@@ -23,17 +23,9 @@
 #     # signingkey = ssh-ed25519 AAAA...
 
 [gpg "ssh"]
-    # program = BINARIO ESPECIFICO DO AMBIENTE
-    #
-    # Se for WSL (1Password no Windows), use:
-    # program = "/mnt/c/Program\ Files/1Password/app/8/op-ssh-sign-wsl"
-    #
-    # Se for Linux host com 1Password instalado no Linux, ajuste para o binário real:
-    # program = "/usr/bin/op-ssh-sign" (exemplo)
-    # program = "/opt/1Password/op-ssh-sign" (exemplo)
-    #
-    # (deixe comentado até confirmar o caminho real, para não quebrar commits)
-	program = "/opt/1Password/op-ssh-sign"
+    # Program from PATH for WSL with 1Password on Windows.
+    # (WindowsApps usually exposes op-ssh-sign-wsl.exe automatically in WSL PATH.)
+	program = op-ssh-sign-wsl.exe
 
 [commit]
     # gpgsign = VALOR ESPECIFICO DO AMBIENTE

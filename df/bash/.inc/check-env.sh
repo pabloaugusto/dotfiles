@@ -193,10 +193,19 @@ checkEnv() {
       _add_result "fail" "Git signing key" "user.signingkey ausente ou invalida." "Defina 'git config --global user.signingkey \"ssh-ed25519 ...\"'."
     fi
 
-    if [ -n "$gpg_program" ] && [ -x "$gpg_program" ]; then
-      _add_result "success" "1Password signer program" "gpg.ssh.program aponta para binario executavel." ""
+    local gpg_program_resolved=""
+    if [ -n "$gpg_program" ]; then
+      if [ -x "$gpg_program" ]; then
+        gpg_program_resolved="$gpg_program"
+      else
+        gpg_program_resolved="$(command -v "$gpg_program" 2>/dev/null || true)"
+      fi
+    fi
+
+    if [ -n "$gpg_program_resolved" ]; then
+      _add_result "success" "1Password signer program" "gpg.ssh.program resolvido para: $gpg_program_resolved" ""
     elif [ -n "$gpg_program" ]; then
-      _add_result "fail" "1Password signer program" "gpg.ssh.program definido, mas arquivo nao executavel: $gpg_program" "Ajuste gpg.ssh.program para op-ssh-sign/op-ssh-sign-wsl valido."
+      _add_result "fail" "1Password signer program" "gpg.ssh.program configurado, mas nao resolvivel: $gpg_program" "Ajuste gpg.ssh.program para op-ssh-sign/op-ssh-sign-wsl valido."
     else
       _add_result "fail" "1Password signer program" "gpg.ssh.program nao definido." "Defina gpg.ssh.program para o binario do 1Password."
     fi
