@@ -3,11 +3,11 @@
 _dotfiles_load_runtime_env() {
   # For non-interactive login shells, recover persisted age env from this file.
   if [ -z "${SOPS_AGE_KEY:-}" ] && [ -f "$HOME/.profile" ]; then
-    _dotfiles_sops_key="$(sed -n 's/^export SOPS_AGE_KEY=\"\(.*\)\"$/\1/p' "$HOME/.profile" | tail -n1)"
+    _dotfiles_sops_key="$(awk -F'\"' '/^export SOPS_AGE_KEY=/{print $2}' "$HOME/.profile" | tail -n1 | tr -d '\r')"
     [ -n "$_dotfiles_sops_key" ] && export SOPS_AGE_KEY="$_dotfiles_sops_key"
   fi
   if [ -z "${SOPS_AGE_KEY_FILE:-}" ] && [ -f "$HOME/.profile" ]; then
-    _dotfiles_sops_key_file="$(sed -n 's/^export SOPS_AGE_KEY_FILE=\"\(.*\)\"$/\1/p' "$HOME/.profile" | tail -n1)"
+    _dotfiles_sops_key_file="$(awk -F'\"' '/^export SOPS_AGE_KEY_FILE=/{print $2}' "$HOME/.profile" | tail -n1 | tr -d '\r')"
     [ -n "$_dotfiles_sops_key_file" ] && export SOPS_AGE_KEY_FILE="$_dotfiles_sops_key_file"
   fi
 
@@ -51,6 +51,9 @@ EOF
 }
 
 _dotfiles_ensure_op_ssh_sign
+
+# Ensure Homebrew commands are available in non-interactive login shells too.
+[ -f "/home/linuxbrew/.linuxbrew/bin/brew" ] && eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
 
 # Prefer 1Password SSH agent socket when available in WSL/Linux.
 [ -S /tmp/1password-agent.sock ] && export SSH_AUTH_SOCK=/tmp/1password-agent.sock
