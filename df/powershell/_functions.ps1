@@ -1897,6 +1897,26 @@ function Sync-DotfilesWindowsToWsl {
 		throw ("Sync mismatch: Windows HEAD={0} WSL HEAD={1}" -f $windowsHead, $wslHead)
 	}
 
+	# Best-effort sync of local (ignored) config files required for parity
+	# between Windows and WSL worktrees.
+	$wslRepoWindowsPath = (& wsl -d $WslDistro bash -lc "wslpath -w $WslRepoPath" 2>$null | Out-String).Trim()
+	if (-not [string]::IsNullOrWhiteSpace($wslRepoWindowsPath)) {
+		$localParityFiles = @(
+			@{ RelativePath = 'bootstrap\user-config.yaml' },
+			@{ RelativePath = 'df\git\.gitconfig.local' }
+		)
+		foreach ($entry in $localParityFiles) {
+			$sourcePath = Join-Path $windowsRepoPath $entry.RelativePath
+			if (!(Test-Path -Path $sourcePath -PathType Leaf)) { continue }
+			$targetPath = Join-Path $wslRepoWindowsPath $entry.RelativePath
+			$targetDir = Split-Path -Path $targetPath -Parent
+			if ($targetDir -and !(Test-Path -Path $targetDir -PathType Container)) {
+				New-Item -Path $targetDir -ItemType Directory -Force | Out-Null
+			}
+			Copy-Item -Path $sourcePath -Destination $targetPath -Force
+		}
+	}
+
 	$result = [PSCustomObject]@{
 		WindowsRepo = $windowsRepoPath
 		WslDistro   = $WslDistro

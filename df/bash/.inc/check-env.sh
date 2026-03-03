@@ -255,6 +255,23 @@ checkEnv() {
     ssh_t_rc=$?
     if printf '%s' "$ssh_t_out" | grep -qi "successfully authenticated"; then
       _add_result "success" "SSH auth to GitHub" "Handshake SSH com GitHub OK." ""
+    elif command -v ssh.exe >/dev/null 2>&1; then
+      local ssh_win_out ssh_win_rc
+      if command -v timeout >/dev/null 2>&1; then
+        ssh_win_out="$(timeout 12 ssh.exe -T git@github.com -o BatchMode=yes -o NumberOfPasswordPrompts=0 -o ConnectTimeout=5 -o StrictHostKeyChecking=accept-new 2>&1)"
+      else
+        ssh_win_out="$(ssh.exe -T git@github.com -o BatchMode=yes -o NumberOfPasswordPrompts=0 -o ConnectTimeout=5 -o StrictHostKeyChecking=accept-new 2>&1)"
+      fi
+      ssh_win_rc=$?
+      if printf '%s' "$ssh_win_out" | grep -qi "successfully authenticated"; then
+        _add_result "success" "SSH auth to GitHub" "Handshake SSH com GitHub OK via fallback ssh.exe." ""
+      elif [ $ssh_t_rc -eq 124 ] || [ $ssh_win_rc -eq 124 ]; then
+        _add_result "inconclusive" "SSH auth to GitHub" "Teste SSH excedeu tempo limite." "Verifique conectividade e rode novamente."
+      elif [ $ssh_t_rc -eq 255 ] || [ $ssh_win_rc -eq 255 ]; then
+        _add_result "fail" "SSH auth to GitHub" "Falha de autenticacao SSH (ssh/ssh.exe): $ssh_t_out | $ssh_win_out" "Verifique chave autorizada no GitHub e agent do 1Password."
+      else
+        _add_result "inconclusive" "SSH auth to GitHub" "Retorno nao deterministico (ssh/ssh.exe): $ssh_t_out | $ssh_win_out" "Rode manualmente 'ssh -T git@github.com' para confirmar."
+      fi
     elif [ $ssh_t_rc -eq 124 ]; then
       _add_result "inconclusive" "SSH auth to GitHub" "Teste SSH excedeu tempo limite." "Verifique conectividade e rode novamente."
     elif [ $ssh_t_rc -eq 255 ]; then
