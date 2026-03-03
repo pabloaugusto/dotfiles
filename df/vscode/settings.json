@@ -621,4 +621,5 @@
 		"@cspell/dict-git/cspell-ext.json",
 	],
 	"cSpell.languageSettings": [],
+	"sops-edit.onlyUseButtons": true,
 }
