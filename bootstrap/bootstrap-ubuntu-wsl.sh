@@ -446,7 +446,6 @@ ensureGitHubAuth() {
 
 	# Reuse existing authenticated session when available.
 	if gh auth status --hostname github.com >/dev/null 2>&1; then
-		gh auth setup-git --hostname github.com >/dev/null 2>&1 || true
 		gh config set git_protocol ssh --host github.com >/dev/null 2>&1 || true
 		return 0
 	fi
@@ -462,7 +461,6 @@ ensureGitHubAuth() {
 		return 1
 	fi
 
-	gh auth setup-git --hostname github.com >/dev/null 2>&1 || true
 	gh config set git_protocol ssh --host github.com >/dev/null 2>&1 || true
 	return 0
 }

@@ -139,7 +139,6 @@ checkEnv() {
       fi
       if [ -n "$github_token" ]; then
         printf '%s\n' "$github_token" | gh auth login --hostname github.com --git-protocol ssh --with-token >/dev/null 2>&1 || true
-        gh auth setup-git --hostname github.com >/dev/null 2>&1 || true
         gh config set git_protocol ssh --host github.com >/dev/null 2>&1 || true
       fi
       _run_with_timeout 8 gh auth status --hostname github.com >"$_tmp_out" 2>&1 || true

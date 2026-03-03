@@ -1338,7 +1338,6 @@ function Ensure-GitHubCliAuthFrom1Password {
 
 	$authStatusOutput = & gh auth status --hostname github.com 2>&1
 	if ($LASTEXITCODE -eq 0) {
-		& gh auth setup-git --hostname github.com *> $null
 		& gh config set git_protocol ssh --host github.com *> $null
 		return $true
 	}
@@ -1375,7 +1374,6 @@ function Ensure-GitHubCliAuthFrom1Password {
 		return $false
 	}
 
-	& gh auth setup-git --hostname github.com *> $null
 	& gh config set git_protocol ssh --host github.com *> $null
 	return $true
 }
