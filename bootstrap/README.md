@@ -87,7 +87,7 @@ bash ~/dotfiles/bootstrap/bootstrap-ubuntu-wsl.sh
    - garante `OP_SERVICE_ACCOUNT_TOKEN`.
    - gera env temporário com `op inject` e persiste cifrado em `~/.env.local.sops`.
    - carrega variáveis por decrypt on-demand.
-   - persiste `SOPS_AGE_KEY` em `~/.profile`/`~/.bashrc` (env-only).
+   - persiste `SOPS_AGE_KEY` em `~/.config/dotfiles/runtime.env` (arquivo local nao versionado).
 5. Auth GitHub:
    - autentica `gh` por token e força protocolo `ssh` (preferencial: `op://secrets/dotfiles/github/token`).
 6. Health-check final:

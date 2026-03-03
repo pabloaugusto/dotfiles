@@ -1,7 +1,10 @@
 # personal profile
 
+DOTFILES_RUNTIME_ENV_FILE="${DOTFILES_RUNTIME_ENV_FILE:-$HOME/.config/dotfiles/runtime.env}"
+[ -f "$DOTFILES_RUNTIME_ENV_FILE" ] && . "$DOTFILES_RUNTIME_ENV_FILE"
+
 _dotfiles_load_runtime_env() {
-  # For non-interactive login shells, recover persisted age env from this file.
+  # Fallback for legacy setups that persisted SOPS key in ~/.profile.
   if [ -z "${SOPS_AGE_KEY:-}" ] && [ -f "$HOME/.profile" ]; then
     _dotfiles_sops_key="$(awk -F'\"' '/^export SOPS_AGE_KEY=/{print $2}' "$HOME/.profile" | tail -n1 | tr -d '\r')"
     [ -n "$_dotfiles_sops_key" ] && export SOPS_AGE_KEY="$_dotfiles_sops_key"

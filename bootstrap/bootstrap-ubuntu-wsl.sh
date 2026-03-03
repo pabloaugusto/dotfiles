@@ -366,43 +366,40 @@ importLocalEnvFromSops() {
 }
 
 # --------------------------------------------------------------------
-# Persist only SOPS_AGE_KEY (not key file path) into shell startup files
+# Persist SOPS age runtime env in local non-versioned file
 # --------------------------------------------------------------------
-upsertShellExport() {
-	local file="$1"
-	local var_name="$2"
-	local var_value="$3"
+persistSopsAgeEnv() {
+	local runtime_dir="$HOME/.config/dotfiles"
+	local runtime_file="$runtime_dir/runtime.env"
 	local escaped
 
-	touch "$file"
-	escaped="${var_value//\\/\\\\}"
-	escaped="${escaped//\"/\\\"}"
-
-	if grep -q "^export ${var_name}=" "$file"; then
-		sed -i "s|^export ${var_name}=.*$|export ${var_name}=\"${escaped}\"|g" "$file"
-	else
-		printf '\nexport %s="%s"\n' "$var_name" "$escaped" >> "$file"
-	fi
-}
-
-persistSopsAgeEnv() {
 	if [[ -z "${SOPS_AGE_KEY:-}" ]]; then
 		echo "SOPS_AGE_KEY nao definida; nao foi possivel persistir chave age para novos shells."
 		return 1
 	fi
 
-	# Remove legacy plaintext token exports from startup files.
+	mkdir -p "$runtime_dir"
+	chmod 700 "$runtime_dir" 2>/dev/null || true
+
+	escaped="${SOPS_AGE_KEY//\\/\\\\}"
+	escaped="${escaped//\"/\\\"}"
+
+	cat > "$runtime_file" <<EOF
+export SOPS_AGE_KEY="$escaped"
+export SOPS_AGE_KEY_FILE=""
+EOF
+	chmod 600 "$runtime_file" 2>/dev/null || true
+	export DOTFILES_RUNTIME_ENV_FILE="$runtime_file"
+
+	# Remove legacy plaintext exports from startup files.
 	for _f in "$HOME/.profile" "$HOME/.bashrc"; do
 		[ -f "$_f" ] || touch "$_f"
 		sed -i '/^export OP_SERVICE_ACCOUNT_TOKEN=/d' "$_f"
 		sed -i '/^export GH_TOKEN=/d' "$_f"
 		sed -i '/^export GITHUB_TOKEN=/d' "$_f"
+		sed -i '/^export SOPS_AGE_KEY=/d' "$_f"
+		sed -i '/^export SOPS_AGE_KEY_FILE=/d' "$_f"
 	done
-
-	upsertShellExport "$HOME/.profile" "SOPS_AGE_KEY" "$SOPS_AGE_KEY"
-	upsertShellExport "$HOME/.profile" "SOPS_AGE_KEY_FILE" ""
-	upsertShellExport "$HOME/.bashrc" "SOPS_AGE_KEY" "$SOPS_AGE_KEY"
-	upsertShellExport "$HOME/.bashrc" "SOPS_AGE_KEY_FILE" ""
 }
 
 # --------------------------------------------------------------------

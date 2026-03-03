@@ -203,6 +203,7 @@ O fluxo atual é env-only por padrão:
 
 - `SOPS_AGE_KEY` carregada no ambiente do usuário.
 - `SOPS_AGE_KEY_FILE` mantida vazia, sem materializar `keys.txt` automaticamente.
+- No WSL, a persistência local fica em `~/.config/dotfiles/runtime.env` (não versionado).
 
 ## Documentação complementar
 

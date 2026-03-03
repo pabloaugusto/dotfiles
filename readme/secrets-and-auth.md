@@ -36,6 +36,7 @@ Processo:
 3. Criptografa para `~/.env.local.sops` com `sops+age`.
 4. Remove qualquer `~/.env.local` legado em texto puro.
 5. Carrega variáveis no processo via decrypt on-demand.
+6. No WSL, persiste `SOPS_AGE_KEY` em `~/.config/dotfiles/runtime.env` (local, não versionado).
 
 Variáveis esperadas no template:
 
