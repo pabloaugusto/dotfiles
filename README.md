@@ -43,6 +43,7 @@ Repositório de dotfiles com bootstrap para Windows (host) e Ubuntu WSL, com foc
 6. Opcional (provisionar usuário extra):
    - `DOTFILES_ADD_USER`
    - `DOTFILES_ADD_USER_PASS_HASH` (saída de `openssl passwd -1`)
+   - Use quando quiser separar usuario pessoal de automacao/deploy no WSL.
 
 ## Secrets esperados no 1Password
 

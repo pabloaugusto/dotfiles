@@ -167,10 +167,13 @@ function Write-BootstrapConfigYaml {
 		("    onedrive_projects_dir: ""{0}""" -f (Escape-YamlDoubleQuotedValue $Config['paths.wsl.onedrive_projects_dir']))
 		'bootstrap:'
 		'  add_user:'
-		'    # Criar usuario adicional no WSL?'
+		'    # Criar usuario Linux extra no WSL (alem do principal)?'
+		'    # Utilidade: separar contexto pessoal x automacao/deploy e aplicar permissao minima.'
+		'    # Em desktop pessoal, normalmente deixe false.'
 		'    # EX: false'
 		("    enabled: {0}" -f (($Config['bootstrap.add_user.enabled']).ToLowerInvariant()))
 		'    # Nome do usuario adicional (somente se enabled=true).'
+		'    # Exemplo comum: "deploy" ou "automation".'
 		'    # EX: "deploy"'
 		("    username: ""{0}""" -f (Escape-YamlDoubleQuotedValue $Config['bootstrap.add_user.username']))
 		'    # Hash de senha (openssl passwd -1 "senha"), somente se enabled=true.'
@@ -284,7 +287,7 @@ function Invoke-BootstrapConfigWizard {
 	$Config['paths.wsl.onedrive_clients_dir'] = Read-ConfigPrompt -Label 'WSL clients dir (subpasta, ex: clients, ou vazio)' -CurrentValue $Config['paths.wsl.onedrive_clients_dir'] -AllowEmpty
 	$Config['paths.wsl.onedrive_projects_dir'] = Read-ConfigPrompt -Label 'WSL projects dir (subpasta, ex: projects, ou vazio)' -CurrentValue $Config['paths.wsl.onedrive_projects_dir'] -AllowEmpty
 
-	$Config['bootstrap.add_user.enabled'] = Read-BooleanPrompt -Label 'Criar usuário extra no WSL? (deploy etc.)' -CurrentValue $Config['bootstrap.add_user.enabled']
+	$Config['bootstrap.add_user.enabled'] = Read-BooleanPrompt -Label 'Criar usuario extra no WSL? (isolamento para deploy/automacao)' -CurrentValue $Config['bootstrap.add_user.enabled']
 	if (($Config['bootstrap.add_user.enabled']).ToLowerInvariant() -eq 'true') {
 		$Config['bootstrap.add_user.username'] = Read-ConfigPrompt -Label 'Usuário extra (ex: deploy)' -CurrentValue $Config['bootstrap.add_user.username']
 		$Config['bootstrap.add_user.password_hash'] = Read-ConfigPrompt -Label 'Password hash (openssl passwd -1 \"senha\")' -CurrentValue $Config['bootstrap.add_user.password_hash']

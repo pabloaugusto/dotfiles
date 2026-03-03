@@ -54,15 +54,21 @@ paths:
     onedrive_projects_dir: ""
 bootstrap:
   add_user:
-    # Criar usuário Linux extra (WSL) além do seu? true/false.
-    # Use false na maioria dos casos.
+    # Criar usuario Linux extra (WSL) alem do usuario principal? true/false.
+    # Utilidade:
+    # - separar contexto pessoal x automacao/deploy
+    # - reduzir risco de rodar scripts de CI/CD com seu usuario principal
+    # - facilitar permissao minima por usuario
+    # Na maioria dos desktops pessoais, use false.
     enabled: false
 
-    # Nome do usuário extra (só se enabled=true).
+    # Nome do usuario extra (so se enabled=true).
+    # Exemplo comum: "deploy" ou "automation".
     # EX: "deploy"
     username: ""
 
-    # Hash de senha desse usuário (openssl passwd -1 'senha').
+    # Hash de senha desse usuario (openssl passwd -1 'senha').
+    # So e usado quando enabled=true.
     # EX: "$1$abcd1234$abcdefghijklmnopqrstuv"
     password_hash: ""
 secrets:

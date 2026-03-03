@@ -117,6 +117,16 @@ bash ~/dotfiles/bootstrap/bootstrap-ubuntu-wsl.sh
    - `DOTFILES_ADD_USER`
    - `DOTFILES_ADD_USER_PASS_HASH` (saída de `openssl passwd -1`)
 
+Quando usar usuario extra no WSL:
+
+- Separar sessao pessoal de rotinas de deploy/automacao.
+- Reduzir impacto de comandos com privilegio no usuario principal.
+- Aplicar permissao minima por usuario.
+
+Quando nao usar:
+
+- Setup pessoal simples (um unico usuario no WSL).
+
 ## Diferença prática entre bootstrap e refresh
 
 - Bootstrap (new install):
