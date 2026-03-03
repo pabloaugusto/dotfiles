@@ -11,6 +11,8 @@
     # Em /mnt/* normalmente é melhor:
     filemode = false
     ignorecase = true
+    # Disable fsmonitor in WSL to avoid noisy "Empty last update token".
+    fsmonitor = false
 
 
 ################################################################################

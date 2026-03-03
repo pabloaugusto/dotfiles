@@ -11,6 +11,8 @@
 
     filemode = true
     ignorecase = false
+    # Disable fsmonitor in Linux/WSL to avoid noisy "Empty last update token".
+    fsmonitor = false
 
 
 ################################################################################
