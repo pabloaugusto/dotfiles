@@ -1810,7 +1810,33 @@ function Sync-DotfilesWindowsToWsl {
 	if (-not $SkipPush) {
 		& git -C $windowsRepoPath push origin $currentBranch *> $null
 		if ($LASTEXITCODE -ne 0) {
-			throw ("Failed to push Windows branch '{0}' to origin." -f $currentBranch)
+			# Fallback for https remotes when default auth is not enough:
+			# use GitHub token resolved from 1Password refs.
+			$originUrl = (& git -C $windowsRepoPath remote get-url origin 2>$null | Out-String).Trim()
+			$repoPath = $null
+			if ($originUrl -match 'github\.com[:/](?<repo>[^/]+/[^/]+?)(?:\.git)?$') {
+				$repoPath = $Matches.repo
+			}
+
+			$token = $null
+			if ((Test-CommandExists op)) {
+				foreach ($ref in @('op://secrets/dotfiles/github/token', 'op://secrets/github/api/token')) {
+					$candidate = (& op read $ref 2>$null | Out-String).Trim()
+					if (-not [string]::IsNullOrWhiteSpace($candidate)) {
+						$token = $candidate
+						break
+					}
+				}
+			}
+
+			if (-not [string]::IsNullOrWhiteSpace($token) -and -not [string]::IsNullOrWhiteSpace($repoPath)) {
+				$pushUrl = "https://{0}@github.com/{1}.git" -f $token, $repoPath
+				& git -C $windowsRepoPath push $pushUrl $currentBranch *> $null
+			}
+
+			if ($LASTEXITCODE -ne 0) {
+				throw ("Failed to push Windows branch '{0}' to origin." -f $currentBranch)
+			}
 		}
 	}
 
