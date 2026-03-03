@@ -13,6 +13,11 @@ Set-Alias pn pnpm
 Set-Alias o ho
 Set-Alias kk ho
 
+# Normalize signer command name across environments.
+if (Get-Command op-ssh-sign-wsl.exe -ErrorAction SilentlyContinue) {
+	Set-Alias op-ssh-sign op-ssh-sign-wsl.exe -Scope Global
+}
+
 # easier navigation
 function .. { Set-Location .. }
 function ... { Set-Location ../.. }

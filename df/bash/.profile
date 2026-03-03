@@ -23,6 +23,25 @@ _dotfiles_load_runtime_env() {
 _dotfiles_load_runtime_env
 export DOTFILES_RUNTIME_ENV_LOADED=1
 
+# Keep a stable signer command name in WSL/Linux.
+_dotfiles_ensure_op_ssh_sign() {
+  if command -v op-ssh-sign >/dev/null 2>&1; then
+    return
+  fi
+  if ! command -v op-ssh-sign-wsl.exe >/dev/null 2>&1; then
+    return
+  fi
+
+  mkdir -p "$HOME/.local/bin"
+  cat > "$HOME/.local/bin/op-ssh-sign" <<'EOF'
+#!/usr/bin/env bash
+exec op-ssh-sign-wsl.exe "$@"
+EOF
+  chmod 700 "$HOME/.local/bin/op-ssh-sign"
+}
+
+_dotfiles_ensure_op_ssh_sign
+
 # Prefer 1Password SSH agent socket when available in WSL/Linux.
 [ -S /tmp/1password-agent.sock ] && export SSH_AUTH_SOCK=/tmp/1password-agent.sock
 

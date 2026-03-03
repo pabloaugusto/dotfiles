@@ -33,9 +33,8 @@
 #     # signingkey = ssh-ed25519 AAAA...
 
 [gpg "ssh"]
-    # Program from PATH (Microsoft Store/winget installs expose this command).
-    # This avoids hardcoding versioned install directories.
-    program = op-ssh-sign.exe
+    # Program from PATH to keep a single cross-platform reference.
+    program = op-ssh-sign
 
 [commit]
     # gpgsign = VALOR ESPECIFICO DO AMBIENTE

@@ -23,9 +23,8 @@
 #     # signingkey = ssh-ed25519 AAAA...
 
 [gpg "ssh"]
-    # Program from PATH for WSL with 1Password on Windows.
-    # (WindowsApps usually exposes op-ssh-sign-wsl.exe automatically in WSL PATH.)
-	program = op-ssh-sign-wsl.exe
+    # Program from PATH (wrapper maps to op-ssh-sign-wsl.exe in WSL bootstrap).
+	program = op-ssh-sign
 
 [commit]
     # gpgsign = VALOR ESPECIFICO DO AMBIENTE

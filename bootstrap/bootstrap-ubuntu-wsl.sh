@@ -471,6 +471,29 @@ ensureGitHubAuth() {
 }
 
 # --------------------------------------------------------------------
+# Ensure a stable cross-platform command name for Git signer program
+# (op-ssh-sign -> op-ssh-sign-wsl.exe in WSL)
+# --------------------------------------------------------------------
+ensureOpSshSignAlias() {
+	if command -v op-ssh-sign >/dev/null 2>&1; then
+		return 0
+	fi
+	if ! command -v op-ssh-sign-wsl.exe >/dev/null 2>&1; then
+		echo "op-ssh-sign-wsl.exe nao encontrado para criar alias op-ssh-sign."
+		return 1
+	fi
+
+	mkdir -p "$HOME/.local/bin"
+	cat > "$HOME/.local/bin/op-ssh-sign" <<'EOF'
+#!/usr/bin/env bash
+exec op-ssh-sign-wsl.exe "$@"
+EOF
+	chmod 700 "$HOME/.local/bin/op-ssh-sign"
+	export PATH="$HOME/.local/bin:$PATH"
+	return 0
+}
+
+# --------------------------------------------------------------------
 # Cleanup export vars
 # --------------------------------------------------------------------
 function clean_setup_vars {
@@ -517,6 +540,7 @@ ensureOpToken || bootstrap_exit 1
 setLocalEnvFile || bootstrap_exit 1
 importLocalEnvFromSops || bootstrap_exit 1
 persistSopsAgeEnv || bootstrap_exit 1
+ensureOpSshSignAlias || bootstrap_exit 1
 ensureGitHubAuth || bootstrap_exit 1
 
 
