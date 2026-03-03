@@ -84,10 +84,33 @@ checkEnv() {
 
   # 1Password session + reference readability checks.
   if command -v op >/dev/null 2>&1; then
+    local op_ok=0
     if _run_with_timeout 8 op whoami >/dev/null 2>&1; then
+      op_ok=1
+    elif [ -f "$HOME/.env.local.sops" ] && command -v sops >/dev/null 2>&1; then
+      local _tmp_env token_line token_value
+      _tmp_env="$(mktemp)"
+      if sops -d "$HOME/.env.local.sops" >"$_tmp_env" 2>/dev/null; then
+        token_line="$(grep -E '^(export[[:space:]]+)?OP_SERVICE_ACCOUNT_TOKEN=' "$_tmp_env" | tail -n1 || true)"
+        token_value="${token_line#*=}"
+        token_value="${token_value%\"}"
+        token_value="${token_value#\"}"
+        token_value="${token_value%\'}"
+        token_value="${token_value#\'}"
+        if [ -n "$token_value" ]; then
+          export OP_SERVICE_ACCOUNT_TOKEN="$token_value"
+          if _run_with_timeout 8 op whoami >/dev/null 2>&1; then
+            op_ok=1
+          fi
+        fi
+      fi
+      rm -f "$_tmp_env"
+    fi
+
+    if [ "$op_ok" -eq 1 ]; then
       _add_result "success" "1Password CLI session" "op whoami executou com sucesso." ""
     else
-      _add_result "fail" "1Password CLI session" "op whoami falhou." "Garanta OP_SERVICE_ACCOUNT_TOKEN valido e execute 'op whoami'."
+      _add_result "fail" "1Password CLI session" "op whoami falhou (inclusive apos 1 retry)." "Garanta OP_SERVICE_ACCOUNT_TOKEN valido e execute 'op whoami'."
     fi
 
     local refs_file="$HOME/dotfiles/df/secrets/secrets-ref.yaml"
@@ -106,7 +129,23 @@ checkEnv() {
   # GitHub CLI login + protocol checks.
   if command -v gh >/dev/null 2>&1; then
     _tmp_out="$(mktemp)"
-    if _run_with_timeout 8 gh auth status --hostname github.com >"$_tmp_out" 2>&1; then
+    if ! _run_with_timeout 8 gh auth status --hostname github.com >"$_tmp_out" 2>&1; then
+      local github_token="${GH_TOKEN:-${GITHUB_TOKEN:-}}"
+      if [ -z "$github_token" ] && command -v op >/dev/null 2>&1; then
+        for ref in "op://secrets/dotfiles/github/token" "op://secrets/github/api/token"; do
+          github_token="$(op read "$ref" 2>/dev/null || true)"
+          [ -n "$github_token" ] && break
+        done
+      fi
+      if [ -n "$github_token" ]; then
+        printf '%s\n' "$github_token" | gh auth login --hostname github.com --git-protocol ssh --with-token >/dev/null 2>&1 || true
+        gh auth setup-git --hostname github.com >/dev/null 2>&1 || true
+        gh config set git_protocol ssh --host github.com >/dev/null 2>&1 || true
+      fi
+      _run_with_timeout 8 gh auth status --hostname github.com >"$_tmp_out" 2>&1 || true
+    fi
+
+    if grep -q "Logged in to github.com" "$_tmp_out" || _run_with_timeout 8 gh auth status --hostname github.com >/dev/null 2>&1; then
       _add_result "success" "GitHub CLI auth" "gh autenticado no host github.com." ""
     else
       _add_result "fail" "GitHub CLI auth" "gh nao autenticado no host github.com." "Rode 'gh auth login --hostname github.com --git-protocol ssh --with-token' com token do 1Password (preferencial: op://secrets/dotfiles/github/token)."
@@ -165,13 +204,13 @@ checkEnv() {
     [ -n "$git_probe_tmp" ] && rm -rf "$git_probe_tmp"
   fi
 
-  # Optional SOPS/age readiness (non-blocking for SSH auth path).
+  # SOPS/age readiness.
   if [ -n "${SOPS_AGE_KEY_FILE:-}" ] && [ -f "${SOPS_AGE_KEY_FILE}" ]; then
     _add_result "success" "SOPS age key file" "SOPS_AGE_KEY_FILE definido e arquivo existe." ""
   elif [ -n "${SOPS_AGE_KEY:-}" ]; then
-    _add_result "inconclusive" "SOPS age key file" "SOPS_AGE_KEY existe no ambiente, mas SOPS_AGE_KEY_FILE nao aponta para arquivo." "Materialize a chave em ~/.config/sops/age/keys.txt com permissao 600."
+    _add_result "success" "SOPS age key file" "SOPS_AGE_KEY existe no ambiente (modo env-only)." ""
   else
-    _add_result "inconclusive" "SOPS age key file" "Nenhuma chave age detectada no ambiente." "Injete SOPS_AGE_KEY via 1Password ou configure SOPS_AGE_KEY_FILE."
+    _add_result "fail" "SOPS age key file" "Nenhuma chave age detectada no ambiente." "Defina SOPS_AGE_KEY (recomendado) ou configure SOPS_AGE_KEY_FILE."
   fi
 
   # SSH identity policy + github handshake checks.

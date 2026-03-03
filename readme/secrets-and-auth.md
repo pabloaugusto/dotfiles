@@ -25,17 +25,23 @@ Refs principais:
 - `op://secrets/github/api/token` (fallback)
 - `op://secrets/dotfiles/age/age.key`
 
-## Runtime secrets (`.env.local`)
+## Runtime secrets (`.env.local.sops`)
 
 Template: [bootstrap/secrets/.env.local.tpl](../bootstrap/secrets/.env.local.tpl)
 
 Processo:
 
 1. Bootstrap roda `op inject`.
-2. Gera `~/.env.local`.
-3. Carrega variáveis no processo do shell/profile.
-4. Usa `GITHUB_TOKEN` para autenticar `gh`.
-5. O template já aponta `GITHUB_TOKEN` para o token dedicado de dotfiles.
+2. Gera um buffer temporário em memória/arquivo temporário.
+3. Criptografa para `~/.env.local.sops` com `sops+age`.
+4. Remove qualquer `~/.env.local` legado em texto puro.
+5. Carrega variáveis no processo via decrypt on-demand.
+
+Variáveis esperadas no template:
+
+- `OP_SERVICE_ACCOUNT_TOKEN`
+- `GH_TOKEN` (e `GITHUB_TOKEN` por compatibilidade)
+- `SOPS_AGE_KEY`
 
 ## GitHub CLI (`gh`)
 
@@ -93,16 +99,16 @@ Identidade Git:
 
 `sops+age` complementa o fluxo de runtime:
 
-- Runtime auth/token: `op` e `.env.local` (não versionado).
+- Runtime auth/token: `op` e `.env.local.sops` (não versionado e cifrado).
 - Arquivos versionados com segredo: cifrados via `sops` com chave `age`.
 
-Quando `SOPS_AGE_KEY` vem do 1Password, os scripts podem materializar `SOPS_AGE_KEY_FILE` automaticamente.
+`SOPS_AGE_KEY` em variável de ambiente é suficiente no fluxo atual (env-only).
 
 ## Recomendações de segurança
 
 1. Manter o token dedicado (`op://secrets/dotfiles/github/token`) como padrão para bootstrap.
 2. Manter o token amplo (`op://secrets/github/api/token`) apenas como fallback de contingência.
 3. Rotacionar imediatamente qualquer token já exposto.
-4. Não commitar `~/.env.local`.
+4. Não commitar `~/.env.local` nem `~/.env.local.sops`.
 5. Manter `1Password SSH Agent` habilitado somente quando necessário.
 6. Rodar `checkEnv` após mudanças em auth/ssh/git.

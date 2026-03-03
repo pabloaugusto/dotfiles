@@ -6,7 +6,7 @@
 # Responsibilities:
 # - Install required CLI/tooling (including op/gh/sops/age stack).
 # - Link dotfiles for current user.
-# - Generate runtime secrets (.env.local) from 1Password references.
+# - Generate runtime secrets (.env.local.sops) from 1Password references.
 # - Ensure GitHub CLI auth over SSH and run final checkEnv validation.
 #
 # Execution phases:
@@ -252,17 +252,137 @@ function add_user {
 }
 
 # --------------------------------------------------------------------
-# Generate .env.local from secrets/.env.local.tpl (1password)
+# Generate encrypted runtime env (.env.local.sops) from 1Password template
 # --------------------------------------------------------------------
 function setLocalEnvFile {
-	if ! op inject -i ~/dotfiles/bootstrap/secrets/.env.local.tpl -o ~/.env.local -f >/dev/null 2>&1; then
-		echo "Falha ao gerar ~/.env.local com 1Password (op inject)."
+	local template="$HOME/dotfiles/bootstrap/secrets/.env.local.tpl"
+	local output="$HOME/.env.local.sops"
+	local tmp_plain
+	local tmp_age
+	local age_recipient
+
+	tmp_plain="$(mktemp)" || return 1
+	tmp_age="$(mktemp)" || {
+		rm -f "$tmp_plain"
+		return 1
+	}
+
+	if ! op inject -i "$template" -o "$tmp_plain" -f >/dev/null 2>&1; then
+		echo "Falha ao gerar env temporario com 1Password (op inject)."
+		rm -f "$tmp_plain" "$tmp_age"
 		return 1
 	fi
 
-	# include local env vars
+	# Load injected values in-memory for current bootstrap process.
+	set -a
 	# shellcheck disable=SC1090
-	source ~/.env.local
+	source "$tmp_plain"
+	set +a
+
+	if [[ -z "${SOPS_AGE_KEY:-}" ]]; then
+		echo "SOPS_AGE_KEY nao foi resolvida via 1Password; nao e possivel criptografar .env.local.sops."
+		rm -f "$tmp_plain" "$tmp_age"
+		return 1
+	fi
+	if ! command -v sops >/dev/null 2>&1 || ! command -v age-keygen >/dev/null 2>&1; then
+		echo "Dependencias ausentes para criptografia (.sops): sops e/ou age-keygen."
+		rm -f "$tmp_plain" "$tmp_age"
+		return 1
+	fi
+
+	printf '%s\n' "$SOPS_AGE_KEY" > "$tmp_age"
+	chmod 600 "$tmp_age" 2>/dev/null || true
+	age_recipient="$(age-keygen -y "$tmp_age" 2>/dev/null | tr -d '\r\n')"
+	if [[ -z "$age_recipient" ]]; then
+		echo "Falha ao derivar recipient age a partir de SOPS_AGE_KEY."
+		rm -f "$tmp_plain" "$tmp_age"
+		return 1
+	fi
+
+	if ! sops --encrypt --age "$age_recipient" "$tmp_plain" > "$output"; then
+		echo "Falha ao criptografar $output."
+		rm -f "$tmp_plain" "$tmp_age"
+		return 1
+	fi
+	chmod 600 "$output" 2>/dev/null || true
+
+	# Legacy plaintext file is removed, if present.
+	rm -f "$HOME/.env.local"
+	rm -f "$tmp_plain" "$tmp_age"
+}
+
+# --------------------------------------------------------------------
+# Decrypt ~/.env.local.sops and load vars in current shell process
+# --------------------------------------------------------------------
+importLocalEnvFromSops() {
+	local encrypted="$HOME/.env.local.sops"
+	local tmp_plain
+
+	if [[ ! -f "$encrypted" ]]; then
+		echo "Arquivo de env cifrado nao encontrado: $encrypted"
+		return 1
+	fi
+	if ! command -v sops >/dev/null 2>&1; then
+		echo "sops nao encontrado; nao foi possivel carregar $encrypted"
+		return 1
+	fi
+
+	tmp_plain="$(mktemp)" || return 1
+	if ! sops -d "$encrypted" > "$tmp_plain"; then
+		echo "Falha ao decriptar $encrypted"
+		rm -f "$tmp_plain"
+		return 1
+	fi
+
+	set -a
+	# shellcheck disable=SC1090
+	source "$tmp_plain"
+	set +a
+	rm -f "$tmp_plain"
+
+	if [[ -z "${GH_TOKEN:-}" && -n "${GITHUB_TOKEN:-}" ]]; then
+		export GH_TOKEN="$GITHUB_TOKEN"
+	fi
+}
+
+# --------------------------------------------------------------------
+# Persist only SOPS_AGE_KEY (not key file path) into shell startup files
+# --------------------------------------------------------------------
+upsertShellExport() {
+	local file="$1"
+	local var_name="$2"
+	local var_value="$3"
+	local escaped
+
+	touch "$file"
+	escaped="${var_value//\\/\\\\}"
+	escaped="${escaped//\"/\\\"}"
+
+	if grep -q "^export ${var_name}=" "$file"; then
+		sed -i "s|^export ${var_name}=.*$|export ${var_name}=\"${escaped}\"|g" "$file"
+	else
+		printf '\nexport %s="%s"\n' "$var_name" "$escaped" >> "$file"
+	fi
+}
+
+persistSopsAgeEnv() {
+	if [[ -z "${SOPS_AGE_KEY:-}" ]]; then
+		echo "SOPS_AGE_KEY nao definida; nao foi possivel persistir chave age para novos shells."
+		return 1
+	fi
+
+	# Remove legacy plaintext token exports from startup files.
+	for _f in "$HOME/.profile" "$HOME/.bashrc"; do
+		[ -f "$_f" ] || touch "$_f"
+		sed -i '/^export OP_SERVICE_ACCOUNT_TOKEN=/d' "$_f"
+		sed -i '/^export GH_TOKEN=/d' "$_f"
+		sed -i '/^export GITHUB_TOKEN=/d' "$_f"
+	done
+
+	upsertShellExport "$HOME/.profile" "SOPS_AGE_KEY" "$SOPS_AGE_KEY"
+	upsertShellExport "$HOME/.profile" "SOPS_AGE_KEY_FILE" ""
+	upsertShellExport "$HOME/.bashrc" "SOPS_AGE_KEY" "$SOPS_AGE_KEY"
+	upsertShellExport "$HOME/.bashrc" "SOPS_AGE_KEY_FILE" ""
 }
 
 # --------------------------------------------------------------------
@@ -331,30 +451,6 @@ ensureGitHubAuth() {
 }
 
 # --------------------------------------------------------------------
-# Materialize SOPS AGE key file from injected env (optional hardening)
-# --------------------------------------------------------------------
-ensureSopsAgeKeyFile() {
-	local target="${SOPS_AGE_KEY_FILE:-$HOME/.config/sops/age/keys.txt}"
-
-	if [[ -n "${SOPS_AGE_KEY_FILE:-}" && -f "${SOPS_AGE_KEY_FILE}" ]]; then
-		return 0
-	fi
-
-	# No key content in env means this hardening step can be skipped.
-	if [[ -z "${SOPS_AGE_KEY:-}" ]]; then
-		echo "SOPS_AGE_KEY nao definida; pulando materializacao de chave AGE."
-		return 0
-	fi
-
-	mkdir -p "$(dirname "$target")" || return 1
-	umask 077
-	printf '%s\n' "$SOPS_AGE_KEY" > "$target" || return 1
-	chmod 600 "$target" 2>/dev/null || true
-	export SOPS_AGE_KEY_FILE="$target"
-	return 0
-}
-
-# --------------------------------------------------------------------
 # Cleanup export vars
 # --------------------------------------------------------------------
 function clean_setup_vars {
@@ -399,7 +495,8 @@ setProfileSymlinks "$USER"
 # This phase guarantees runtime auth/signing dependencies before final checkEnv.
 ensureOpToken || exit 1
 setLocalEnvFile || exit 1
-ensureSopsAgeKeyFile || exit 1
+importLocalEnvFromSops || exit 1
+persistSopsAgeEnv || exit 1
 ensureGitHubAuth || exit 1
 
 

@@ -10,7 +10,7 @@ Este diretório contém os fluxos de bootstrap para configurar dotfiles e ambien
 - [bootstrap/bootstrap-ubuntu-wsl.sh](bootstrap-ubuntu-wsl.sh): bootstrap Ubuntu WSL.
 - [bootstrap/user-config.yaml.tpl](user-config.yaml.tpl): template da config central local.
 - [bootstrap/software-list.ps1](software-list.ps1): catálogo de software.
-- [bootstrap/secrets/.env.local.tpl](secrets/.env.local.tpl): template de segredos runtime.
+- [bootstrap/secrets/.env.local.tpl](secrets/.env.local.tpl): template de segredos runtime (origem para `.env.local.sops`).
 
 ## Configuração central
 
@@ -65,8 +65,9 @@ bash ~/dotfiles/bootstrap/bootstrap-ubuntu-wsl.sh
    - módulos PowerShell, pacotes winget/choco/pip.
 4. Auth/signing (full e refresh):
    - garante `1Password`, `op`, `gh`.
-   - gera `~/.env.local` via `op inject`.
-   - materializa `SOPS_AGE_KEY_FILE` quando aplicável.
+   - gera env temporário via `op inject` e persiste cifrado em `~/.env.local.sops`.
+   - remove `~/.env.local` plaintext legado.
+   - persiste `SOPS_AGE_KEY` para shells futuros (modo env-only).
    - autentica `gh` com token vindo do 1Password (preferencial: `op://secrets/dotfiles/github/token`).
 5. Health-check final:
    - executa `checkEnv` e falha em caso de não conformidade.
@@ -78,8 +79,9 @@ bash ~/dotfiles/bootstrap/bootstrap-ubuntu-wsl.sh
 3. Symlinks de dotfiles.
 4. Segredos runtime:
    - garante `OP_SERVICE_ACCOUNT_TOKEN`.
-   - gera `~/.env.local` com `op inject`.
-   - materializa `SOPS_AGE_KEY_FILE` quando aplicável.
+   - gera env temporário com `op inject` e persiste cifrado em `~/.env.local.sops`.
+   - carrega variáveis por decrypt on-demand.
+   - persiste `SOPS_AGE_KEY` em `~/.profile`/`~/.bashrc` (env-only).
 5. Auth GitHub:
    - autentica `gh` por token e força protocolo `ssh` (preferencial: `op://secrets/dotfiles/github/token`).
 6. Health-check final:

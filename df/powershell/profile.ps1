@@ -49,4 +49,4 @@ if ($RunEnvCheck) { . ${PSScriptRoot}\env-check.ps1 }
 # Set keyboard prefs
 # if ($IsWindows) { &Set-MyPrefsWinKeyboard }
 
-if ($IsWindows) { if ( Test-CommandExists winfetch ) { &winfetch } }
+#if ($IsWindows) { if ( Test-CommandExists winfetch ) { &winfetch } }

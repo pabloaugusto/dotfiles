@@ -70,6 +70,11 @@ function dpush {
 	Pop-Location
 }
 
+# Windows -> WSL sync gate before cross-platform tests
+function dfsync {
+	Sync-DotfilesWindowsToWsl @args
+}
+
 # --------------------------------------------------------------
 # easy navigation
 # --------------------------------------------------------------

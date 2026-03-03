@@ -241,15 +241,37 @@ else {
 #################################################################################
 # bootstrap: runtime secrets + gh auth + final environment health check
 #################################################################################
-	# .env.local is generated from 1Password references and loaded into process.
-	# This is the source for GH/GitHub token and optional SOPS_AGE_KEY materialization.
+	# Runtime secrets are generated from 1Password refs and stored encrypted in
+	# ~/.env.local.sops. No plaintext .env.local is kept on disk.
 	$templatePath = Join-Path $DotFilesDirectory 'bootstrap\secrets\.env.local.tpl'
-	$envLocalPath = Join-Path $Env:USERPROFILE '.env.local'
+	$envLocalPath = Join-Path $Env:USERPROFILE '.env.local.sops'
 	if (!(Set-LocalEnvFrom1Password -TemplatePath $templatePath -OutputPath $envLocalPath)) {
-		throw "Failed to initialize .env.local from 1Password."
+		throw "Failed to initialize encrypted env (.env.local.sops) from 1Password."
 	}
-	if (!(Ensure-SopsAgeKeyFile)) {
-		throw "Failed to materialize SOPS age key file from environment."
+
+	$loadedEnv = Import-DotEnvFromSops -EncryptedPath $envLocalPath
+	if ($loadedEnv.Count -eq 0) {
+		throw "Failed to decrypt/import runtime env from .env.local.sops."
+	}
+
+	# Legacy plaintext env file is removed when present.
+	$legacyPlainEnvPath = Join-Path $Env:USERPROFILE '.env.local'
+	if (Test-Path -Path $legacyPlainEnvPath -PathType Leaf) {
+		Remove-Item -Path $legacyPlainEnvPath -Force -ErrorAction SilentlyContinue
+	}
+
+	# Persist only age material for next terminals.
+	if (-not [string]::IsNullOrWhiteSpace($Env:SOPS_AGE_KEY)) {
+		[Environment]::SetEnvironmentVariable('SOPS_AGE_KEY', $Env:SOPS_AGE_KEY, 'User')
+	}
+	[Environment]::SetEnvironmentVariable('SOPS_AGE_KEY_FILE', '', 'User')
+	# Clear plaintext token persistence from previous bootstrap versions.
+	[Environment]::SetEnvironmentVariable('OP_SERVICE_ACCOUNT_TOKEN', '', 'User')
+	[Environment]::SetEnvironmentVariable('GITHUB_TOKEN', '', 'User')
+	[Environment]::SetEnvironmentVariable('GH_TOKEN', '', 'User')
+
+	if ([string]::IsNullOrWhiteSpace($Env:GH_TOKEN) -and -not [string]::IsNullOrWhiteSpace($Env:GITHUB_TOKEN)) {
+		$Env:GH_TOKEN = $Env:GITHUB_TOKEN
 	}
 
 	if (!(Ensure-GitHubCliAuthFrom1Password)) {

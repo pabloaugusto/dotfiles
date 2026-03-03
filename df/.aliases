@@ -56,6 +56,13 @@ function dpull {
 	cd - >/dev/null #back to previous patjh
 }
 
+# sync local WSL dotfiles with remote using safe fast-forward policy
+function dfsync {
+	cd ~/dotfiles || return 1
+	git fetch --prune origin && git pull --ff-only
+	cd - >/dev/null || true
+}
+
 #symlink() {
 #    ln -sf "$1" "$2";
 #}

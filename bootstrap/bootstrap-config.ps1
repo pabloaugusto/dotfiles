@@ -122,32 +122,70 @@ function Write-BootstrapConfigYaml {
 
 	$yaml = @(
 		'# bootstrap/user-config.yaml'
-		'# local bootstrap customization file (single source of truth)'
-		'# This file is intentionally local and should not be committed.'
+		'# Guia rapido (didatico) - preencha aqui tudo que o wizard pergunta.'
+		'# Este arquivo fica apenas na sua maquina (ignorado pelo Git).'
+		'# Dica: mantenha os comentarios para lembrar o significado de cada campo.'
+		'#'
+		'# Legenda de exemplos:'
+		'# - EX: exemplo realista'
+		'# - Opcional vazio: use ""'
+		'# - Boolean: true | false'
 		'version: 1'
 		'profile:'
+		'  # Nome "humano" para identificar o setup/local (aparece em logs).'
+		'  # EX: "work-wsl", "desktop-windows", "notebook-venda"'
 		("  name: ""{0}""" -f (Escape-YamlDoubleQuotedValue $Config['profile.name']))
 		'git:'
+		'  # Nome que vai nos commits.'
+		'  # EX: "Pablo Augusto"'
 		("  name: ""{0}""" -f (Escape-YamlDoubleQuotedValue $Config['git.name']))
+		'  # Email usado nos commits (ideal: verificado no GitHub).'
+		'  # EX: "pablo@pabloaugusto.com"'
 		("  email: ""{0}""" -f (Escape-YamlDoubleQuotedValue $Config['git.email']))
+		'  # Login do GitHub.'
+		'  # EX: "pabloaugusto"'
 		("  username: ""{0}""" -f (Escape-YamlDoubleQuotedValue $Config['git.username']))
+		'  # Chave publica SSH para assinatura de commit (linha ssh-ed25519 completa).'
+		'  # EX: "ssh-ed25519 AAAA... user@host"'
 		("  signing_key: ""{0}""" -f (Escape-YamlDoubleQuotedValue $Config['git.signing_key']))
 		'paths:'
 		'  windows:'
+		'    # Caminho absoluto de projetos no OneDrive (Windows).'
+		'    # EX: "D:\\OneDrive\\projects"'
+		'    # Deixe "" para usar autodeteccao.'
 		("    onedrive_projects_path: ""{0}""" -f (Escape-YamlDoubleQuotedValue $Config['paths.windows.onedrive_projects_path']))
 		'  wsl:'
+		'    # Raiz do OneDrive no WSL.'
+		'    # EX: "/mnt/d/OneDrive"'
 		("    onedrive_root: ""{0}""" -f (Escape-YamlDoubleQuotedValue $Config['paths.wsl.onedrive_root']))
+		'    # Subpasta de clientes dentro da raiz (opcional).'
+		'    # EX: "clients"'
 		("    onedrive_clients_dir: ""{0}""" -f (Escape-YamlDoubleQuotedValue $Config['paths.wsl.onedrive_clients_dir']))
+		'    # Subpasta de projetos dentro da raiz (opcional).'
+		'    # EX: "projects"'
 		("    onedrive_projects_dir: ""{0}""" -f (Escape-YamlDoubleQuotedValue $Config['paths.wsl.onedrive_projects_dir']))
 		'bootstrap:'
 		'  add_user:'
+		'    # Criar usuario adicional no WSL?'
+		'    # EX: false'
 		("    enabled: {0}" -f (($Config['bootstrap.add_user.enabled']).ToLowerInvariant()))
+		'    # Nome do usuario adicional (somente se enabled=true).'
+		'    # EX: "deploy"'
 		("    username: ""{0}""" -f (Escape-YamlDoubleQuotedValue $Config['bootstrap.add_user.username']))
+		'    # Hash de senha (openssl passwd -1 "senha"), somente se enabled=true.'
 		("    password_hash: ""{0}""" -f (Escape-YamlDoubleQuotedValue $Config['bootstrap.add_user.password_hash']))
 		'secrets:'
+		'  # Ref do token de service account do 1Password (entrada unica do bootstrap).'
+		'  # EX: "op://secrets/dotfiles/1password/service-account"'
 		("  onepassword_service_account_ref: ""{0}""" -f (Escape-YamlDoubleQuotedValue $Config['secrets.onepassword_service_account_ref']))
+		'  # Ref do token GitHub dedicado ao projeto (preferido).'
+		'  # EX: "op://secrets/dotfiles/github/token"'
 		("  github_project_pat_ref: ""{0}""" -f (Escape-YamlDoubleQuotedValue $Config['secrets.github_project_pat_ref']))
+		'  # Ref de token GitHub amplo (fallback de contingencia).'
+		'  # EX: "op://secrets/github/api/token"'
 		("  github_full_access_ref: ""{0}""" -f (Escape-YamlDoubleQuotedValue $Config['secrets.github_full_access_ref']))
+		'  # Ref da chave age usada para criptografar/decriptar arquivos .sops.'
+		'  # EX: "op://secrets/dotfiles/age/age.key"'
 		("  age_key_ref: ""{0}""" -f (Escape-YamlDoubleQuotedValue $Config['secrets.age_key_ref']))
 	)
 
@@ -234,31 +272,31 @@ function Invoke-BootstrapConfigWizard {
 	Write-Host "`nConfiguração guiada do bootstrap (YAML central)."
 	Write-Host "Pressione ENTER para manter o valor atual."
 
-	$Config['profile.name'] = Read-ConfigPrompt -Label 'Nome do perfil' -CurrentValue $Config['profile.name']
-	$Config['git.name'] = Read-ConfigPrompt -Label 'Git name' -CurrentValue $Config['git.name']
-	$Config['git.email'] = Read-ConfigPrompt -Label 'Git email' -CurrentValue $Config['git.email']
-	$Config['git.username'] = Read-ConfigPrompt -Label 'Git username' -CurrentValue $Config['git.username']
-	$Config['git.signing_key'] = Read-ConfigPrompt -Label 'Git SSH signing key (public)' -CurrentValue $Config['git.signing_key']
+	$Config['profile.name'] = Read-ConfigPrompt -Label 'Nome do perfil local (apelido). EX: work-wsl | desktop-windows' -CurrentValue $Config['profile.name']
+	$Config['git.name'] = Read-ConfigPrompt -Label 'Git name (nome exibido nos commits). EX: Pablo Augusto' -CurrentValue $Config['git.name']
+	$Config['git.email'] = Read-ConfigPrompt -Label 'Git email (ideal: verificado no GitHub). EX: pablo@pabloaugusto.com' -CurrentValue $Config['git.email']
+	$Config['git.username'] = Read-ConfigPrompt -Label 'Git username (login GitHub). EX: pabloaugusto' -CurrentValue $Config['git.username']
+	$Config['git.signing_key'] = Read-ConfigPrompt -Label 'Chave publica SSH para assinatura. EX: ssh-ed25519 AAA... user@host' -CurrentValue $Config['git.signing_key']
 
-	$Config['paths.windows.onedrive_projects_path'] = Read-ConfigPrompt -Label 'Windows OneDrive projects path (opcional)' -CurrentValue $Config['paths.windows.onedrive_projects_path'] -AllowEmpty
-	$Config['paths.wsl.onedrive_root'] = Read-ConfigPrompt -Label 'WSL OneDrive root' -CurrentValue $Config['paths.wsl.onedrive_root']
-	$Config['paths.wsl.onedrive_clients_dir'] = Read-ConfigPrompt -Label 'WSL OneDrive clients dir (opcional)' -CurrentValue $Config['paths.wsl.onedrive_clients_dir'] -AllowEmpty
-	$Config['paths.wsl.onedrive_projects_dir'] = Read-ConfigPrompt -Label 'WSL OneDrive projects dir (opcional)' -CurrentValue $Config['paths.wsl.onedrive_projects_dir'] -AllowEmpty
+	$Config['paths.windows.onedrive_projects_path'] = Read-ConfigPrompt -Label 'Windows OneDrive projects path (abs, ex: D:\\OneDrive\\projects ou vazio p/ auto)' -CurrentValue $Config['paths.windows.onedrive_projects_path'] -AllowEmpty
+	$Config['paths.wsl.onedrive_root'] = Read-ConfigPrompt -Label 'WSL OneDrive root (ex: /mnt/d/OneDrive)' -CurrentValue $Config['paths.wsl.onedrive_root']
+	$Config['paths.wsl.onedrive_clients_dir'] = Read-ConfigPrompt -Label 'WSL clients dir (subpasta, ex: clients, ou vazio)' -CurrentValue $Config['paths.wsl.onedrive_clients_dir'] -AllowEmpty
+	$Config['paths.wsl.onedrive_projects_dir'] = Read-ConfigPrompt -Label 'WSL projects dir (subpasta, ex: projects, ou vazio)' -CurrentValue $Config['paths.wsl.onedrive_projects_dir'] -AllowEmpty
 
-	$Config['bootstrap.add_user.enabled'] = Read-BooleanPrompt -Label 'Provisionar usuário extra no bootstrap WSL?' -CurrentValue $Config['bootstrap.add_user.enabled']
+	$Config['bootstrap.add_user.enabled'] = Read-BooleanPrompt -Label 'Criar usuário extra no WSL? (deploy etc.)' -CurrentValue $Config['bootstrap.add_user.enabled']
 	if (($Config['bootstrap.add_user.enabled']).ToLowerInvariant() -eq 'true') {
-		$Config['bootstrap.add_user.username'] = Read-ConfigPrompt -Label 'Usuário extra (Linux/WSL)' -CurrentValue $Config['bootstrap.add_user.username']
-		$Config['bootstrap.add_user.password_hash'] = Read-ConfigPrompt -Label 'Password hash (openssl passwd -1)' -CurrentValue $Config['bootstrap.add_user.password_hash']
+		$Config['bootstrap.add_user.username'] = Read-ConfigPrompt -Label 'Usuário extra (ex: deploy)' -CurrentValue $Config['bootstrap.add_user.username']
+		$Config['bootstrap.add_user.password_hash'] = Read-ConfigPrompt -Label 'Password hash (openssl passwd -1 \"senha\")' -CurrentValue $Config['bootstrap.add_user.password_hash']
 	}
 	else {
 		$Config['bootstrap.add_user.username'] = ''
 		$Config['bootstrap.add_user.password_hash'] = ''
 	}
 
-	$Config['secrets.onepassword_service_account_ref'] = Read-ConfigPrompt -Label 'Ref 1Password service account' -CurrentValue $Config['secrets.onepassword_service_account_ref']
-	$Config['secrets.github_project_pat_ref'] = Read-ConfigPrompt -Label 'Ref GitHub token dedicado (project-pat)' -CurrentValue $Config['secrets.github_project_pat_ref']
-	$Config['secrets.github_full_access_ref'] = Read-ConfigPrompt -Label 'Ref GitHub full-access (fallback)' -CurrentValue $Config['secrets.github_full_access_ref']
-	$Config['secrets.age_key_ref'] = Read-ConfigPrompt -Label 'Ref SOPS age key' -CurrentValue $Config['secrets.age_key_ref']
+	$Config['secrets.onepassword_service_account_ref'] = Read-ConfigPrompt -Label 'Ref 1Password service account (op://.../service-account)' -CurrentValue $Config['secrets.onepassword_service_account_ref']
+	$Config['secrets.github_project_pat_ref'] = Read-ConfigPrompt -Label 'Ref GitHub token dedicado (project-pat, op://secrets/dotfiles/github/token)' -CurrentValue $Config['secrets.github_project_pat_ref']
+	$Config['secrets.github_full_access_ref'] = Read-ConfigPrompt -Label 'Ref GitHub full-access (fallback, pode ficar vazio)' -CurrentValue $Config['secrets.github_full_access_ref']
+	$Config['secrets.age_key_ref'] = Read-ConfigPrompt -Label 'Ref SOPS age key (op://.../age.key)' -CurrentValue $Config['secrets.age_key_ref']
 
 	return $Config
 }
@@ -287,10 +325,11 @@ function Sync-BootstrapDerivedFiles {
 	Set-Content -Path $secretsRefPath -Value $secretsRef
 
 	$envTpl = @(
-		'# Runtime secrets template injected by 1Password (`op inject`).'
-		'# Output file target: ~/.env.local'
+		'# Runtime secrets template resolved by 1Password (`op inject`).'
+		'# Bootstrap persists this material encrypted at ~/.env.local.sops.'
 		'# Generated from bootstrap/user-config.yaml'
 		("export OP_SERVICE_ACCOUNT_TOKEN=""{0}""" -f $Config['secrets.onepassword_service_account_ref'])
+		("export GH_TOKEN=""{0}""" -f $Config['secrets.github_project_pat_ref'])
 		("export GITHUB_TOKEN=""{0}""" -f $Config['secrets.github_project_pat_ref'])
 		("export SOPS_AGE_KEY=""{0}""" -f $Config['secrets.age_key_ref'])
 	)

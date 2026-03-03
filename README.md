@@ -161,6 +161,25 @@ Cada item retorna:
 
 No final, o relatório lista sugestões de correção para os itens não conformes.
 
+## Rotina multi-ambiente (obrigatória antes de testes no WSL)
+
+Sempre que houver mudança no Windows e você for testar no WSL:
+
+1. Commit e push no Windows.
+2. No PowerShell do Windows, rode:
+```powershell
+dfsync
+```
+3. Só então execute comandos/testes no WSL.
+
+`dfsync` valida o seguinte:
+
+- Repositório do Windows está limpo.
+- Push da branch atual para `origin`.
+- Repositório do WSL está limpo.
+- Pull no WSL com `--ff-only`.
+- HEAD final igual entre Windows e WSL.
+
 ## Fluxo de segurança adotado
 
 ### Runtime auth (op/gh/ssh signing)

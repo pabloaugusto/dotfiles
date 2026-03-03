@@ -155,8 +155,22 @@ export  CLIENTS="$HOME/clients"
 export   MYDOCS="$HOME/onedrive/documents"
 export ONEDRIVE="$HOME/onedrive"
 
-# include local env vars if file exists
-[ -f ~/.env.local ] && source ~/.env.local
+# include local env vars from encrypted file when available (preferred)
+if [ -f ~/.env.local.sops ] && [ -n "$(command -v sops)" ]; then
+	_dotfiles_env_tmp="$(mktemp)"
+	if sops -d ~/.env.local.sops > "$_dotfiles_env_tmp" 2>/dev/null; then
+		set -a
+		# shellcheck disable=SC1090
+		source "$_dotfiles_env_tmp"
+		set +a
+	fi
+	rm -f "$_dotfiles_env_tmp"
+elif [ -f ~/.env.local ]; then
+	# legacy fallback for previous bootstrap versions
+	# shellcheck disable=SC1090
+	source ~/.env.local
+fi
+[ -z "${GH_TOKEN:-}" ] && [ -n "${GITHUB_TOKEN:-}" ] && export GH_TOKEN="$GITHUB_TOKEN"
 
 # Prefer 1Password SSH agent socket when available in WSL/Linux.
 [ -S /tmp/1password-agent.sock ] && export SSH_AUTH_SOCK=/tmp/1password-agent.sock

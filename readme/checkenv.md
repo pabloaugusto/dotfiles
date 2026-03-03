@@ -22,7 +22,7 @@ checkEnv
 ## Itens validados
 
 1. Binários essenciais (`op`, `gh`, `git`, `ssh`).
-2. Binários de criptografia (`sops`, `age`) como validação complementar.
+2. Binários de criptografia (`sops`, `age`) para fluxo `.sops`.
 3. Sessão ativa do 1Password (`op whoami`).
 4. Leitura dos refs definidos em `df/secrets/secrets-ref.yaml`.
 5. `gh` autenticado no `github.com` e protocolo configurado para SSH.
@@ -42,12 +42,14 @@ checkEnv
 
 - `SUCCESS`: requisito atendido.
 - `FAIL`: requisito obrigatório não atendido.
-- `INCONCLUSIVE`: informação incompleta, opcional ou dependente de contexto externo.
+- `INCONCLUSIVE`: informação incompleta ou dependente de contexto externo.
+- `SOPS_AGE_KEY` ausente é tratado como `FAIL`.
 
 ## Comportamento no bootstrap
 
 - Windows: `bootstrap/bootstrap-windows.ps1` roda `checkEnv` no final.
 - WSL: `bootstrap/bootstrap-ubuntu-wsl.sh` roda `checkEnv` no final.
+- O check tenta 1 retry automático de autenticação (`op` e `gh`) antes de marcar falha.
 - Falhas (`FAIL`) interrompem bootstrap com erro explícito.
 
 ## Troubleshooting orientado por checkEnv

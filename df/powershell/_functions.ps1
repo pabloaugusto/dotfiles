@@ -1130,9 +1130,17 @@ function Ensure-OpServiceAccountToken {
 		return $true
 	}
 
-	$envLocalPath = Join-Path $Env:USERPROFILE '.env.local'
-	if (Test-Path -Path $envLocalPath -PathType Leaf) {
-		$loaded = Import-DotEnvFile -Path $envLocalPath
+	$envSopsPath = Join-Path $Env:USERPROFILE '.env.local.sops'
+	if (Test-Path -Path $envSopsPath -PathType Leaf) {
+		$loaded = Import-DotEnvFromSops -EncryptedPath $envSopsPath
+		if ($loaded.ContainsKey('OP_SERVICE_ACCOUNT_TOKEN') -and -not [string]::IsNullOrWhiteSpace($Env:OP_SERVICE_ACCOUNT_TOKEN)) {
+			return $true
+		}
+	}
+
+	$legacyPlainPath = Join-Path $Env:USERPROFILE '.env.local'
+	if (Test-Path -Path $legacyPlainPath -PathType Leaf) {
+		$loaded = Import-DotEnvFile -Path $legacyPlainPath
 		if ($loaded.ContainsKey('OP_SERVICE_ACCOUNT_TOKEN') -and -not [string]::IsNullOrWhiteSpace($Env:OP_SERVICE_ACCOUNT_TOKEN)) {
 			return $true
 		}
@@ -1162,13 +1170,14 @@ function Ensure-OpServiceAccountToken {
 
 
 ######################################################################################
-# Generate ~/.env.local from 1Password template and load values into process env
+# Generate encrypted ~/.env.local.sops from 1Password template
 ######################################################################################
 function Set-LocalEnvFrom1Password {
 	[CmdletBinding()]
 	param (
 		[string]$TemplatePath = (Join-Path $Env:USERPROFILE 'dotfiles\bootstrap\secrets\.env.local.tpl'),
-		[string]$OutputPath = (Join-Path $Env:USERPROFILE '.env.local')
+		[string]$OutputPath = (Join-Path $Env:USERPROFILE '.env.local.sops'),
+		[switch]$AllowPlaintextFallback
 	)
 
 	if (!(Test-CommandExists op)) {
@@ -1186,18 +1195,95 @@ function Set-LocalEnvFrom1Password {
 		return $false
 	}
 
-	& op inject -i $TemplatePath -o $OutputPath -f *> $null
-	if ($LASTEXITCODE -ne 0) {
-		Write-Warning "Failed to generate $OutputPath from 1Password template."
-		return $false
-	}
+	$tmpPlain = [System.IO.Path]::GetTempFileName()
+	$tmpKey = $null
+	try {
+		& op inject -i $TemplatePath -o $tmpPlain -f *> $null
+		if ($LASTEXITCODE -ne 0 -or !(Test-Path -Path $tmpPlain)) {
+			Write-Warning "Failed to generate temporary .env from 1Password template."
+			return $false
+		}
 
-	$loaded = Import-DotEnvFile -Path $OutputPath
-	if ($loaded.ContainsKey('GITHUB_TOKEN') -and [string]::IsNullOrWhiteSpace($Env:GH_TOKEN)) {
-		$Env:GH_TOKEN = $loaded['GITHUB_TOKEN']
+		$loaded = Import-DotEnvFile -Path $tmpPlain
+		if ($loaded.ContainsKey('GITHUB_TOKEN') -and [string]::IsNullOrWhiteSpace($Env:GH_TOKEN)) {
+			$Env:GH_TOKEN = $loaded['GITHUB_TOKEN']
+		}
+
+		$ageKey = $Env:SOPS_AGE_KEY
+		$canEncrypt = $ageKey -and (Test-CommandExists sops) -and (Test-CommandExists age-keygen)
+		if ($canEncrypt) {
+			# Derive public recipient from private age key using a temp identity file.
+			$tmpKey = [System.IO.Path]::GetTempFileName()
+			Set-Content -Path $tmpKey -Value $ageKey -NoNewline
+			$recipient = (& age-keygen -y $tmpKey 2>$null | Out-String).Trim()
+			if ([string]::IsNullOrWhiteSpace($recipient)) {
+				$canEncrypt = $false
+			}
+			else {
+				& sops --encrypt --age $recipient --output $OutputPath $tmpPlain *> $null
+				if ($LASTEXITCODE -ne 0) { $canEncrypt = $false }
+			}
+		}
+
+		if (-not $canEncrypt) {
+			if ($AllowPlaintextFallback) {
+				Copy-Item -Path $tmpPlain -Destination $OutputPath -Force
+			}
+			else {
+				Write-Warning "SOPS_AGE_KEY/sops/age-keygen ausentes; criptografia .sops indisponível e fallback plaintext não permitido."
+				return $false
+			}
+		}
+	}
+	finally {
+		if (Test-Path -Path $tmpPlain) { Remove-Item -Path $tmpPlain -Force -ErrorAction SilentlyContinue }
+		if ($tmpKey -and (Test-Path -Path $tmpKey)) { Remove-Item -Path $tmpKey -Force -ErrorAction SilentlyContinue }
 	}
 
 	return $true
+}
+
+function Import-DotEnvFromSops {
+	[CmdletBinding()]
+	param (
+		[string]$EncryptedPath = (Join-Path $Env:USERPROFILE '.env.local.sops')
+	)
+
+	if (!(Test-Path -Path $EncryptedPath -PathType Leaf)) {
+		Write-Warning "Encrypted env file not found: $EncryptedPath"
+		return @{}
+	}
+
+	if (!(Test-CommandExists sops)) {
+		Write-Warning "sops not found; cannot decrypt $EncryptedPath"
+		return @{}
+	}
+
+	if ([string]::IsNullOrWhiteSpace($Env:SOPS_AGE_KEY)) {
+		$userAgeKey = [Environment]::GetEnvironmentVariable('SOPS_AGE_KEY', 'User')
+		if (-not [string]::IsNullOrWhiteSpace($userAgeKey)) {
+			$Env:SOPS_AGE_KEY = $userAgeKey
+		}
+	}
+	if ([string]::IsNullOrWhiteSpace($Env:SOPS_AGE_KEY_FILE)) {
+		$userAgeKeyFile = [Environment]::GetEnvironmentVariable('SOPS_AGE_KEY_FILE', 'User')
+		if (-not [string]::IsNullOrWhiteSpace($userAgeKeyFile)) {
+			$Env:SOPS_AGE_KEY_FILE = $userAgeKeyFile
+		}
+	}
+
+	$tmpPlain = [System.IO.Path]::GetTempFileName()
+	try {
+		& sops -d --output $tmpPlain $EncryptedPath *> $null
+		if ($LASTEXITCODE -ne 0) {
+			Write-Warning "Failed to decrypt $EncryptedPath"
+			return @{}
+		}
+		return Import-DotEnvFile -Path $tmpPlain
+	}
+	finally {
+		if (Test-Path -Path $tmpPlain) { Remove-Item -Path $tmpPlain -Force -ErrorAction SilentlyContinue }
+	}
 }
 
 
@@ -1207,14 +1293,22 @@ function Set-LocalEnvFrom1Password {
 function Ensure-SopsAgeKeyFile {
 	[CmdletBinding()]
 	param (
-		[string]$DefaultPath = (Join-Path $Env:USERPROFILE '.config\sops\age\keys.txt')
+		[string]$DefaultPath = (Join-Path $Env:USERPROFILE '.config\sops\age\keys.txt'),
+		[switch]$ForceMaterialize
 	)
 
+	# If a key file is already present, we are done.
 	if (-not [string]::IsNullOrWhiteSpace($Env:SOPS_AGE_KEY_FILE) -and (Test-Path -Path $Env:SOPS_AGE_KEY_FILE -PathType Leaf)) {
 		return $true
 	}
 
+	# If no key material is present, nothing to do.
 	if ([string]::IsNullOrWhiteSpace($Env:SOPS_AGE_KEY)) {
+		return $true
+	}
+
+	# Default behavior now is non-materializing (keep only in env).
+	if (-not $ForceMaterialize -and [string]::IsNullOrWhiteSpace($Env:SOPS_AGE_KEY_FILE)) {
 		return $true
 	}
 
@@ -1406,24 +1500,48 @@ function checkEnv {
 		Add-CheckResult -Item 'Command: age' -Status 'inconclusive' -Detail 'age not found in PATH.' -Solution 'Install age to support sops encryption/decryption flow.'
 	}
 
+	if ([string]::IsNullOrWhiteSpace($Env:SOPS_AGE_KEY)) {
+		$userAgeKey = [Environment]::GetEnvironmentVariable('SOPS_AGE_KEY', 'User')
+		if (-not [string]::IsNullOrWhiteSpace($userAgeKey)) {
+			$Env:SOPS_AGE_KEY = $userAgeKey
+		}
+	}
+
 	if (-not [string]::IsNullOrWhiteSpace($Env:SOPS_AGE_KEY_FILE) -and (Test-Path -Path $Env:SOPS_AGE_KEY_FILE -PathType Leaf)) {
 		Add-CheckResult -Item 'SOPS age key file' -Status 'success' -Detail "SOPS_AGE_KEY_FILE points to an existing file: $Env:SOPS_AGE_KEY_FILE." -Solution ''
 	}
 	elseif (-not [string]::IsNullOrWhiteSpace($Env:SOPS_AGE_KEY)) {
-		Add-CheckResult -Item 'SOPS age key file' -Status 'inconclusive' -Detail 'SOPS_AGE_KEY is loaded but SOPS_AGE_KEY_FILE is not materialized.' -Solution 'Run Ensure-SopsAgeKeyFile to materialize ~/.config/sops/age/keys.txt.'
+		Add-CheckResult -Item 'SOPS age key file' -Status 'success' -Detail 'SOPS_AGE_KEY is loaded in environment (env-only mode).' -Solution ''
 	}
 	else {
-		Add-CheckResult -Item 'SOPS age key file' -Status 'inconclusive' -Detail 'No SOPS age key detected in environment.' -Solution 'Inject SOPS_AGE_KEY via 1Password or configure SOPS_AGE_KEY_FILE.'
+		Add-CheckResult -Item 'SOPS age key file' -Status 'fail' -Detail 'No SOPS age key detected in environment.' -Solution 'Set SOPS_AGE_KEY (recommended) or configure SOPS_AGE_KEY_FILE.'
 	}
 
 	# 3) 1Password CLI session and referenced-secret readability
 	if (Test-CommandExists op) {
+		$opHealthy = $false
 		& op whoami *> $null
 		if ($LASTEXITCODE -eq 0) {
+			$opHealthy = $true
+		}
+		else {
+			$envSopsPath = Join-Path $Env:USERPROFILE '.env.local.sops'
+			if (Test-Path -Path $envSopsPath -PathType Leaf) {
+				$loadedEnv = Import-DotEnvFromSops -EncryptedPath $envSopsPath
+				if ($loadedEnv.ContainsKey('OP_SERVICE_ACCOUNT_TOKEN')) {
+					& op whoami *> $null
+					if ($LASTEXITCODE -eq 0) {
+						$opHealthy = $true
+					}
+				}
+			}
+		}
+
+		if ($opHealthy) {
 			Add-CheckResult -Item '1Password CLI session' -Status 'success' -Detail 'op whoami succeeded.' -Solution ''
 		}
 		else {
-			Add-CheckResult -Item '1Password CLI session' -Status 'fail' -Detail 'op whoami failed.' -Solution 'Ensure OP_SERVICE_ACCOUNT_TOKEN is valid and run op whoami.'
+			Add-CheckResult -Item '1Password CLI session' -Status 'fail' -Detail 'op whoami failed (including one automatic retry).' -Solution 'Ensure OP_SERVICE_ACCOUNT_TOKEN is valid in current shell and run op whoami.'
 		}
 	}
 
@@ -1451,6 +1569,11 @@ function checkEnv {
 	# 4) GitHub CLI auth and protocol policy (must be SSH for this setup)
 	if (Test-CommandExists gh) {
 		$statusOutput = & gh auth status --hostname github.com 2>&1
+		if ($LASTEXITCODE -ne 0) {
+			$null = Ensure-GitHubCliAuthFrom1Password
+			$statusOutput = & gh auth status --hostname github.com 2>&1
+		}
+
 		if ($LASTEXITCODE -eq 0) {
 			Add-CheckResult -Item 'GitHub CLI auth' -Status 'success' -Detail 'gh authenticated for github.com.' -Solution ''
 		}
@@ -1621,4 +1744,108 @@ function checkEnv {
 	}
 
 	return ($failCount -eq 0)
+}
+
+
+######################################################################################
+# Resolve dotfiles repo path from env/default location
+######################################################################################
+function Get-DotfilesRepoPath {
+	[CmdletBinding()]
+	param ()
+
+	if (-not [string]::IsNullOrWhiteSpace($Env:DOTFILES)) {
+		return $Env:DOTFILES
+	}
+
+	return (Join-Path $Env:USERPROFILE 'dotfiles')
+}
+
+
+######################################################################################
+# Sync policy for cross-platform tests:
+# 1) Windows repo must be clean
+# 2) Push Windows branch to origin
+# 3) WSL repo must be clean
+# 4) Pull --ff-only in WSL
+# 5) Validate both HEADs are identical
+######################################################################################
+function Sync-DotfilesWindowsToWsl {
+	[CmdletBinding()]
+	param (
+		[string]$WslDistro = 'Ubuntu',
+		[string]$WslRepoPath = '~/dotfiles',
+		[switch]$SkipPush
+	)
+
+	$windowsRepoPath = Get-DotfilesRepoPath
+	if (!(Test-Path -Path $windowsRepoPath -PathType Container)) {
+		throw "Windows dotfiles path not found: $windowsRepoPath"
+	}
+
+	$winDirty = (& git -C $windowsRepoPath status --porcelain=v1 2>$null | Out-String).Trim()
+	if (-not [string]::IsNullOrWhiteSpace($winDirty)) {
+		throw "Windows repo has uncommitted changes. Commit and push before WSL tests."
+	}
+
+	& git -C $windowsRepoPath fetch --prune origin *> $null
+	if ($LASTEXITCODE -ne 0) {
+		throw "Failed to fetch origin in Windows repo."
+	}
+
+	$currentBranch = (& git -C $windowsRepoPath rev-parse --abbrev-ref HEAD 2>$null | Out-String).Trim()
+	if ([string]::IsNullOrWhiteSpace($currentBranch) -or $currentBranch -eq 'HEAD') {
+		throw "Unable to detect current branch in Windows repo."
+	}
+
+	$upstreamRef = (& git -C $windowsRepoPath rev-parse --abbrev-ref --symbolic-full-name '@{u}' 2>$null | Out-String).Trim()
+	if ([string]::IsNullOrWhiteSpace($upstreamRef)) {
+		& git -C $windowsRepoPath branch --set-upstream-to ("origin/{0}" -f $currentBranch) $currentBranch *> $null
+		$upstreamRef = (& git -C $windowsRepoPath rev-parse --abbrev-ref --symbolic-full-name '@{u}' 2>$null | Out-String).Trim()
+		if ([string]::IsNullOrWhiteSpace($upstreamRef)) {
+			throw ("No upstream configured for branch '{0}'." -f $currentBranch)
+		}
+	}
+
+	if (-not $SkipPush) {
+		& git -C $windowsRepoPath push origin $currentBranch *> $null
+		if ($LASTEXITCODE -ne 0) {
+			throw ("Failed to push Windows branch '{0}' to origin." -f $currentBranch)
+		}
+	}
+
+	$wslCheckCmd = "cd $WslRepoPath && git status --porcelain=v1"
+	$wslDirty = (& wsl -d $WslDistro bash -lc $wslCheckCmd 2>$null | Out-String).Trim()
+	if ($LASTEXITCODE -ne 0) {
+		throw ("WSL repo not accessible at {0} in distro '{1}'." -f $WslRepoPath, $WslDistro)
+	}
+	if (-not [string]::IsNullOrWhiteSpace($wslDirty)) {
+		throw "WSL repo has uncommitted changes. Commit/stash in WSL before sync."
+	}
+
+	$wslSyncCmd = "cd $WslRepoPath && git fetch --prune origin && git pull --ff-only"
+	& wsl -d $WslDistro bash -lc $wslSyncCmd *> $null
+	if ($LASTEXITCODE -ne 0) {
+		throw ("Failed to sync WSL repo ({0}) with pull --ff-only." -f $WslRepoPath)
+	}
+
+	$windowsHead = (& git -C $windowsRepoPath rev-parse HEAD 2>$null | Out-String).Trim()
+	$wslHead = (& wsl -d $WslDistro bash -lc "cd $WslRepoPath && git rev-parse HEAD" 2>$null | Out-String).Trim()
+	if ([string]::IsNullOrWhiteSpace($windowsHead) -or [string]::IsNullOrWhiteSpace($wslHead)) {
+		throw "Unable to resolve HEAD in Windows and/or WSL repositories."
+	}
+	if ($windowsHead -ne $wslHead) {
+		throw ("Sync mismatch: Windows HEAD={0} WSL HEAD={1}" -f $windowsHead, $wslHead)
+	}
+
+	$result = [PSCustomObject]@{
+		WindowsRepo = $windowsRepoPath
+		WslDistro   = $WslDistro
+		WslRepo     = $WslRepoPath
+		Branch      = $currentBranch
+		Head        = $windowsHead
+	}
+
+	Write-Host ("Sync OK: branch={0} head={1}" -f $result.Branch, $result.Head)
+	return $result
 }

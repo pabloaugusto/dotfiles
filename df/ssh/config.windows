@@ -16,4 +16,5 @@
 # chaves gerenciadas no 1Password para o OpenSSH.
 ###############################################################################
 Host *
-    IdentityAgent \\.\pipe\openssh-ssh-agent
+    IdentityAgent //./pipe/openssh-ssh-agent
+    IdentitiesOnly no

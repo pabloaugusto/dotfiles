@@ -30,12 +30,8 @@ Match exec "test -S /tmp/1password-agent.sock"
         # Em WSL/Linux, esse socket é o padrão do 1Password quando exposto no ambiente.
         IdentityAgent /tmp/1password-agent.sock
 
-        # Evita fallback para arquivos id_* locais quando o agent do 1Password
-        # estiver disponivel.
-        IdentityFile none
-
-        # Opção (mais restritiva):
-        # IdentitiesOnly yes
+        # Allows keys exposed by the agent without explicit IdentityFile list.
+        IdentitiesOnly no
 
 
 ###############################################################################
