@@ -96,7 +96,7 @@ alias la='ls -A'
 alias l='ls -CF'
 
 # Normaliza comando de assinatura para referencia unica no Git config.
-if command -v op-ssh-sign-wsl.exe >/dev/null 2>&1; then
+if ! command -v op-ssh-sign >/dev/null 2>&1 && command -v op-ssh-sign-wsl.exe >/dev/null 2>&1; then
 	alias op-ssh-sign='op-ssh-sign-wsl.exe'
 fi
 

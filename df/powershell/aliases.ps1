@@ -14,7 +14,7 @@ Set-Alias o ho
 Set-Alias kk ho
 
 # Normalize signer command name across environments.
-if (Get-Command op-ssh-sign-wsl.exe -ErrorAction SilentlyContinue) {
+if (-not (Get-Command op-ssh-sign -ErrorAction SilentlyContinue) -and (Get-Command op-ssh-sign-wsl.exe -ErrorAction SilentlyContinue)) {
 	Set-Alias op-ssh-sign op-ssh-sign-wsl.exe -Scope Global
 }
 

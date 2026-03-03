@@ -1637,7 +1637,28 @@ function checkEnv {
 			if ([string]::IsNullOrWhiteSpace($resolvedProgramPath)) {
 				$programCmd = Get-Command -Name $configuredProgram -ErrorAction SilentlyContinue
 				if ($programCmd) {
-					$resolvedProgramPath = $programCmd.Source
+					$candidate = $programCmd.Source
+					if ([string]::IsNullOrWhiteSpace($candidate)) { $candidate = $programCmd.Path }
+					if ([string]::IsNullOrWhiteSpace($candidate) -and $programCmd.CommandType -eq 'Alias' -and -not [string]::IsNullOrWhiteSpace($programCmd.Definition)) {
+						$aliasedCmd = Get-Command -Name $programCmd.Definition -ErrorAction SilentlyContinue
+						if ($aliasedCmd) {
+							$candidate = $aliasedCmd.Source
+							if ([string]::IsNullOrWhiteSpace($candidate)) { $candidate = $aliasedCmd.Path }
+							if ([string]::IsNullOrWhiteSpace($candidate)) { $candidate = $aliasedCmd.Definition }
+						}
+						else {
+							$candidate = $programCmd.Definition
+						}
+					}
+					if (-not [string]::IsNullOrWhiteSpace($candidate)) {
+						$resolvedProgramPath = $candidate
+					}
+				}
+			}
+			if ([string]::IsNullOrWhiteSpace($resolvedProgramPath)) {
+				$whereOut = (& where.exe $configuredProgram 2>$null | Select-Object -First 1)
+				if (-not [string]::IsNullOrWhiteSpace($whereOut)) {
+					$resolvedProgramPath = $whereOut.Trim()
 				}
 			}
 		}
