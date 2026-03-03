@@ -1818,23 +1818,22 @@ function Sync-DotfilesWindowsToWsl {
 				$repoPath = $Matches.repo
 			}
 
-			$token = $null
-			if ((Test-CommandExists op)) {
+			$pushRecovered = $false
+			if (-not [string]::IsNullOrWhiteSpace($repoPath) -and (Test-CommandExists op)) {
 				foreach ($ref in @('op://secrets/dotfiles/github/token', 'op://secrets/github/api/token')) {
-					$candidate = (& op read $ref 2>$null | Out-String).Trim()
-					if (-not [string]::IsNullOrWhiteSpace($candidate)) {
-						$token = $candidate
+					$token = (& op read $ref 2>$null | Out-String).Trim()
+					if ([string]::IsNullOrWhiteSpace($token)) { continue }
+
+					$pushUrl = "https://{0}@github.com/{1}.git" -f $token, $repoPath
+					& git -C $windowsRepoPath push $pushUrl $currentBranch *> $null
+					if ($LASTEXITCODE -eq 0) {
+						$pushRecovered = $true
 						break
 					}
 				}
 			}
 
-			if (-not [string]::IsNullOrWhiteSpace($token) -and -not [string]::IsNullOrWhiteSpace($repoPath)) {
-				$pushUrl = "https://{0}@github.com/{1}.git" -f $token, $repoPath
-				& git -C $windowsRepoPath push $pushUrl $currentBranch *> $null
-			}
-
-			if ($LASTEXITCODE -ne 0) {
+			if (-not $pushRecovered) {
 				throw ("Failed to push Windows branch '{0}' to origin." -f $currentBranch)
 			}
 		}
