@@ -1783,7 +1783,7 @@ function Sync-DotfilesWindowsToWsl {
 		throw "Windows dotfiles path not found: $windowsRepoPath"
 	}
 
-	$winDirty = (& git -C $windowsRepoPath status --porcelain=v1 2>$null | Out-String).Trim()
+	$winDirty = (& git -C $windowsRepoPath status --porcelain=v1 --untracked-files=no 2>$null | Out-String).Trim()
 	if (-not [string]::IsNullOrWhiteSpace($winDirty)) {
 		throw "Windows repo has uncommitted changes. Commit and push before WSL tests."
 	}
@@ -1814,7 +1814,7 @@ function Sync-DotfilesWindowsToWsl {
 		}
 	}
 
-	$wslCheckCmd = "cd $WslRepoPath && git status --porcelain=v1"
+	$wslCheckCmd = "cd $WslRepoPath && git status --porcelain=v1 --untracked-files=no"
 	$wslDirty = (& wsl -d $WslDistro bash -lc $wslCheckCmd 2>$null | Out-String).Trim()
 	if ($LASTEXITCODE -ne 0) {
 		throw ("WSL repo not accessible at {0} in distro '{1}'." -f $WslRepoPath, $WslDistro)
