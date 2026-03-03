@@ -146,6 +146,7 @@ function Write-BootstrapConfigYaml {
 		'  # EX: "pabloaugusto"'
 		("  username: ""{0}""" -f (Escape-YamlDoubleQuotedValue $Config['git.username']))
 		'  # Chave publica SSH para assinatura de commit (linha ssh-ed25519 completa).'
+		'  # Isso e chave PUBLICA (nao segredo); a privada deve ficar no 1Password.'
 		'  # EX: "ssh-ed25519 AAAA... user@host"'
 		("  signing_key: ""{0}""" -f (Escape-YamlDoubleQuotedValue $Config['git.signing_key']))
 		'paths:'
@@ -336,11 +337,30 @@ function Sync-BootstrapDerivedFiles {
 	Set-Content -Path $envTplPath -Value $envTpl
 
 	$gitLocal = @(
+		'# -----------------------------------------------------------------------------'
+		'# ~/.config/git/.gitconfig.local (local, nao versionado)'
 		'# Generated from bootstrap/user-config.yaml'
+		'#'
+		'# Objetivo: identidade Git local e chave publica de assinatura.'
+		'#'
+		'# IMPORTANTE:'
+		'# - Nao coloque tokens, senhas ou chaves privadas aqui.'
+		'# - "signingkey" abaixo e uma chave PUBLICA SSH (nao segredo).'
+		'# - A chave privada continua protegida no 1Password SSH Agent.'
+		'# -----------------------------------------------------------------------------'
+		''
 		'[user]'
+		'    # Nome exibido como autor nos commits.'
 		("    name = {0}" -f $Config['git.name'])
+		''
+		'    # Email do autor dos commits.'
 		("    email = {0}" -f $Config['git.email'])
+		''
+		'    # Username usado por alguns aliases/fluxos GitHub.'
 		("    username = {0}" -f $Config['git.username'])
+		''
+		'    # Chave PUBLICA SSH usada para identificar assinaturas de commit.'
+		'    # Formato esperado: ssh-ed25519 AAAA...'
 		("    signingkey = {0}" -f $Config['git.signing_key'])
 	)
 	Set-Content -Path $gitLocalPath -Value $gitLocal

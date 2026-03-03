@@ -1,23 +1,38 @@
-# Local Git identity/signing overrides (NOT versioned)
+# -----------------------------------------------------------------------------
+# ~/.config/git/.gitconfig.local (local, not versioned)
 #
-# Copy to:
-#   ~/.config/git/.gitconfig.local
+# Purpose:
+# - Define your local Git identity (author name/email/username).
+# - Define the public SSH key used to identify commit signatures.
 #
-# Do not store tokens/passwords in plaintext Git config.
-# Prefer credential helpers and 1Password/gh auth integration.
+# Security notes:
+# - Do NOT store tokens, passwords, or private keys here.
+# - "signingkey" is PUBLIC key material (safe to keep in plain config).
+# - Keep private SSH keys only in 1Password SSH Agent.
+# -----------------------------------------------------------------------------
 
 [user]
+    # Author name shown in commits.
     name = Your Name
+
+    # Author email shown in commits.
     email = you@example.com
+
+    # GitHub username used by some aliases/workflows.
     username = your-github-user
+
+    # Public SSH key used to identify signatures (not a secret).
+    # Keep private keys only inside 1Password SSH Agent.
     signingkey = ssh-ed25519 AAAA_REPLACE_WITH_YOUR_PUBLIC_SSH_SIGNING_KEY
 
 [commit]
+    # Sign commits by default.
     gpgsign = true
 
 [gpg]
+    # Use SSH signatures instead of OpenPGP.
     format = ssh
 
-# Uncomment and adjust if needed per environment:
+# Optional override when needed per environment:
 # [gpg "ssh"]
-#     program = "C:/Program Files/1Password/app/8/op-ssh-sign.exe"
+#     program = op-ssh-sign

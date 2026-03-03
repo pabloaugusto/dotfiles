@@ -29,7 +29,7 @@ checkEnv
 6. Configuração Git para assinatura SSH:
    - `gpg.format=ssh`
    - `commit.gpgsign=true`
-   - `user.signingkey` em formato SSH
+   - `user.signingkey` em formato SSH (chave pública)
    - `gpg.ssh.program` válido
 7. Configuração SSH:
    - `identityagent` coerente com 1Password

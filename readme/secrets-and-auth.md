@@ -89,6 +89,14 @@ Requisitos esperados:
 - `user.signingkey=ssh-...`
 - `gpg.ssh.program` apontando para `op-ssh-sign` (binário válido do 1Password)
 
+### `user.signingkey` é segredo?
+
+Não. Esse campo contém a chave pública SSH (material público).
+
+- Pode ficar em `~/.config/git/.gitconfig.local` em texto plano.
+- Não precisa ser cifrado com `sops+age`.
+- O segredo é somente a chave privada, mantida no 1Password SSH Agent.
+
 Identidade Git:
 
 - O repositório usa placeholders em `df/git/.gitconfig-base`.

@@ -73,6 +73,12 @@ Esse YAML centraliza personalizações (Git, paths e refs de segredo) e sincroni
 - `bootstrap/secrets/.env.local.tpl`
 - `df/git/.gitconfig.local`
 
+Nota sobre `git.signing_key`:
+
+- É a chave **pública** de assinatura SSH (não é segredo).
+- Não precisa ser protegida com `sops+age`.
+- O segredo é a chave privada, que deve permanecer no 1Password SSH Agent.
+
 ## Quick Start
 
 ### Novo ambiente Windows
@@ -109,7 +115,7 @@ Executa fluxo completo:
 - Symlinks de dotfiles.
 - Instalação de softwares e módulos.
 - Ajustes de preferências do Windows.
-- Setup runtime auth/signing (`.env.local`, `gh` auth, materialização de chave age).
+- Setup runtime auth/signing (`.env.local.sops`, `gh` auth, `SOPS_AGE_KEY` em env).
 - `checkEnv` final obrigatório.
 
 ### Refresh (Windows opção `2`)
@@ -190,9 +196,12 @@ Usa 1Password (`op`) para resolver segredos em tempo de execução.
 
 Usa `sops+age` para conteúdos que precisam estar no repositório de forma cifrada.
 
-### Materialização de chave age
+### Chave age no runtime
 
-Quando `SOPS_AGE_KEY` está no ambiente, o bootstrap pode materializar `SOPS_AGE_KEY_FILE` para uso do `sops`.
+O fluxo atual é env-only por padrão:
+
+- `SOPS_AGE_KEY` carregada no ambiente do usuário.
+- `SOPS_AGE_KEY_FILE` mantida vazia, sem materializar `keys.txt` automaticamente.
 
 ## Documentação complementar
 
@@ -206,4 +215,5 @@ Quando `SOPS_AGE_KEY` está no ambiente, o bootstrap pode materializar `SOPS_AGE
 1. `gh` não logado: valide o ref `op://secrets/dotfiles/github/token` no `op` e rode `checkEnv` (fallback aceito: `op://secrets/github/api/token`).
 2. SSH falhando no GitHub: confirme chave pública no GitHub e SSH Agent do 1Password ativo.
 3. Assinatura de commit falhando: revise `gpg.ssh.program` e `user.signingkey`.
+   - `user.signingkey` é pública; o ponto crítico é disponibilidade do `op-ssh-sign` e do agent.
 4. `checkEnv` inconclusivo em rede: reexecute após garantir conectividade.

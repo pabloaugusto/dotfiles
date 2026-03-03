@@ -30,6 +30,12 @@ Com isso, os arquivos derivados são sincronizados automaticamente:
 - `bootstrap/secrets/.env.local.tpl`
 - `df/git/.gitconfig.local` (não versionado)
 
+Nota sobre `signingkey` em `df/git/.gitconfig.local`:
+
+- É chave pública SSH de assinatura.
+- Não é segredo e não precisa de `sops+age`.
+- A chave privada deve ficar somente no 1Password SSH Agent.
+
 ## Modos de execução
 
 ### Windows

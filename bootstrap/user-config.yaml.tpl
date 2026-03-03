@@ -27,6 +27,7 @@ git:
   username: "your-github-user"
 
   # Chave pública de assinatura SSH (linha completa, começa com ssh-...).
+  # Isso é chave PUBLICA (não segredo); não precisa sops/1Password.
   # Gere com: ssh-keygen -t ed25519 -C "assinatura-git"
   # Pegue a parte pública e cole aqui.
   # EX: "ssh-ed25519 AAAA_REPLACE_WITH_YOUR_PUBLIC_SSH_SIGNING_KEY"
