@@ -1,150 +1,143 @@
 # Bootstrap Guide
 
-Este diretório contém os fluxos de bootstrap para configurar dotfiles e ambiente base.
+Guia operacional dos scripts de bootstrap para Windows e Ubuntu WSL.
 
-## Arquivos principais
+## Entrypoints
 
-- [bootstrap/_start.ps1](_start.ps1): entrypoint Windows.
-- [bootstrap/bootstrap-config.ps1](bootstrap-config.ps1): validação/wizard da config central YAML.
-- [bootstrap/bootstrap-windows.ps1](bootstrap-windows.ps1): execução do bootstrap/refresh no Windows.
-- [bootstrap/bootstrap-ubuntu-wsl.sh](bootstrap-ubuntu-wsl.sh): bootstrap Ubuntu WSL.
-- [bootstrap/user-config.yaml.tpl](user-config.yaml.tpl): template da config central local.
-- [bootstrap/software-list.ps1](software-list.ps1): catálogo de software.
-- [bootstrap/secrets/.env.local.tpl](secrets/.env.local.tpl): template de segredos runtime (origem para `.env.local.sops`).
+- `bootstrap/_start.ps1`: menu/entrypoint para execução no Windows host.
+- `bootstrap/bootstrap-windows.ps1`: fluxo Windows (full ou refresh).
+- `bootstrap/bootstrap-ubuntu-wsl.sh`: fluxo Ubuntu WSL.
+- `bootstrap/bootstrap-config.ps1`: wizard + validação de config central.
 
-## Configuração central
+## Fluxograma do Bootstrap
 
-Antes do bootstrap Windows, `_start.ps1` gerencia `bootstrap/user-config.yaml`:
+Fluxograma visual e decision-complete (macro + subfluxos Windows/WSL/OneDrive + gates):
 
-1. Se não existir, cria a partir de `bootstrap/user-config.yaml.tpl`.
-2. Se estiver preenchido, pergunta:
-   - usar 100% do que já está no YAML
-   - sobrescrever em modo guiado
-3. Se estiver incompleto, pergunta:
-   - preencher guiado no terminal
-   - preencher manualmente e abortar (rodar bootstrap depois)
+- `../docs/bootstrap-flow.md`
 
-Com isso, os arquivos derivados são sincronizados automaticamente:
+Observação:
+
+- esse README mantém a visão operacional textual;
+- o diagrama central de referência está no documento dedicado acima.
+
+## Config central (YAML)
+
+Arquivos:
+
+- `bootstrap/user-config.yaml.tpl` (template versionado)
+- `bootstrap/user-config.yaml` (local, ignorado)
+
+O YAML define:
+
+- identidade Git (nome/email/username/signing key pública)
+- estratégia OneDrive no Windows (`enabled`, root, auto-migrate)
+- caminhos OneDrive no WSL
+- caminhos customizáveis de links no perfil Windows (`bin`, `etc`, `clients`, `projects`)
+- links opcionais de pastas padrão do perfil Windows para OneDrive (`Documents`, `Desktop`, etc.)
+- caminhos opcionais de atalhos em drive raiz (ex.: `D:\bin`)
+- refs de segredos no 1Password
+- opção de usuário extra no WSL
+
+## Artefatos derivados
+
+Após validar/preencher o YAML, o bootstrap sincroniza:
 
 - `df/secrets/secrets-ref.yaml`
 - `bootstrap/secrets/.env.local.tpl`
-- `df/git/.gitconfig.local` (não versionado)
+- `df/git/.gitconfig.local` (local, não versionado)
 
-Nota sobre `signingkey` em `df/git/.gitconfig.local`:
+## Fluxo Windows (new install)
 
-- É chave pública SSH de assinatura.
-- Não é segredo e não precisa de `sops+age`.
-- A chave privada deve ficar somente no 1Password SSH Agent.
+1. valida pré-requisitos básicos (winget, paths, config YAML)
+2. resolve política OneDrive (`enabled=true/false`)
+3. se OneDrive ativo:
+   - se OneDrive não estiver instalado, instala via `winget` e inicia setup guiado
+   - detecta root atual configurada
+   - pergunta se deve manter ou mover root base
+   - quando necessário, tenta migração automática (best-effort): copia dados, junction e atualização de root no registro
+   - cria links de perfil e links opcionais de drive
+4. se OneDrive desativado:
+   - cria diretórios locais no perfil (sem depender de OneDrive)
+5. instala software/módulos/fontes
+6. resolve runtime secrets via `op inject`
+7. cifra runtime env em `~/.env.local.sops`
+8. autentica `gh` com token do 1Password e força protocolo SSH
+9. roda `checkEnv` (gate obrigatório)
+10. roda validação dedicada de OneDrive/links no pós-bootstrap (gate obrigatório)
+11. aplica preferências Windows (modo full)
 
-## Modos de execução
+## Fluxo Windows (refresh)
 
-### Windows
+Semelhante ao full, porém:
 
-Executar:
-```powershell
-sudo $env:USERPROFILE\dotfiles\bootstrap\_start.ps1
-```
+- não reinstala catálogo completo de software/fontes
+- não reaplica preferências pesadas do sistema
+- mantém auth/signing + `checkEnv`
 
-Menu:
+## Fluxo Ubuntu WSL
 
-1. `Windows - new install`:
-   - setup completo (software, fontes, preferências, auth/signing, check final).
-2. `Windows - refresh dotfiles`:
-   - re-aplica links/config, mantém setup auth/signing e check final.
-3. Linux/Mac:
-   - opções ainda não implementadas no `_start.ps1` (mantidas para evolução).
+1. instala base (`apt`) e stack via Homebrew
+2. cria symlinks de shell/git/ssh/config
+3. garante token `OP_SERVICE_ACCOUNT_TOKEN`
+4. gera env runtime com `op inject`, cifra em `~/.env.local.sops`
+5. persiste `SOPS_AGE_KEY` em `~/.config/dotfiles/runtime.env`
+6. garante auth `gh` (SSH)
+7. roda `checkEnv` no final
 
-### Ubuntu WSL
+## Modelo de autenticação
 
-Executar:
-```bash
-bash ~/dotfiles/bootstrap/bootstrap-ubuntu-wsl.sh
-```
+- `op`: sessão validada e reutilizada quando possível.
+- `gh`: login por token resolvido do 1Password (preferencial token dedicado).
+- SSH: prioridade para 1Password SSH Agent.
+- Assinatura Git: `gpg.format=ssh` + `gpg.ssh.program=op-ssh-sign`.
 
-## Fases do bootstrap Windows
+## Estratégia de override OneDrive (Windows)
 
-1. Validação de pré-requisitos:
-   - elevação administrativa, diretórios base, carregamento de funções.
-2. Symlinks:
-   - home files, PowerShell profile, SSH, Git, VS Code e Windows Terminal.
-3. Instalações (somente modo full):
-   - módulos PowerShell, pacotes winget/choco/pip.
-4. Auth/signing (full e refresh):
-   - garante `1Password`, `op`, `gh`.
-   - gera env temporário via `op inject` e persiste cifrado em `~/.env.local.sops`.
-   - remove `~/.env.local` plaintext legado.
-   - persiste `SOPS_AGE_KEY` para shells futuros (modo env-only).
-   - autentica `gh` com token vindo do 1Password (preferencial: `op://secrets/dotfiles/github/token`).
-5. Health-check final:
-   - executa `checkEnv` e falha em caso de não conformidade.
+Precedência de root desejada:
 
-## Fases do bootstrap Ubuntu WSL
+1. `paths.windows.onedrive_root` (YAML)
+2. `OneDrive` do ambiente
+3. `%USERPROFILE%\OneDrive`
 
-1. Prompt de confirmação.
-2. Instalação de ferramentas base (`apt` + Homebrew).
-3. Symlinks de dotfiles.
-4. Segredos runtime:
-   - garante `OP_SERVICE_ACCOUNT_TOKEN`.
-   - gera env temporário com `op inject` e persiste cifrado em `~/.env.local.sops`.
-   - carrega variáveis por decrypt on-demand.
-   - persiste `SOPS_AGE_KEY` em `~/.config/dotfiles/runtime.env` (arquivo local nao versionado).
-5. Auth GitHub:
-   - autentica `gh` por token e força protocolo `ssh` (preferencial: `op://secrets/dotfiles/github/token`).
-6. Health-check final:
-   - executa `checkEnv`.
+Comportamento:
 
-## Pré-requisitos operacionais antes de rodar
+- `paths.windows.onedrive_enabled=true`: bootstrap executa etapa de pré-requisito OneDrive antes de qualquer link.
+  - se OneDrive não existir: instala, pergunta root desejada e aguarda conclusão de login/setup.
+  - se existir: mostra root atual e pergunta se deve mover.
+- `paths.windows.onedrive_enabled=false`: bootstrap ignora OneDrive e usa diretórios locais.
+- `paths.windows.onedrive_auto_migrate=true`: quando você optar por mudar root, o bootstrap tenta automação sem fechamento manual:
+  - encerra cliente OneDrive
+  - copia dados para root nova
+  - cria junction na root antiga apontando para a nova
+  - tenta atualizar root no registro do OneDrive (best-effort)
+  - inicia cliente novamente
+- `paths.windows.profile_links_migrate_content`:
+  - `true`: migra conteúdo das pastas padrão antes de criar links para OneDrive
+  - `false`: não migra conteúdo, apenas cria links (mantendo backup local da origem)
 
-### Windows
+Limite importante:
 
-1. OneDrive configurado e variável `OneDrive` existente.
-2. `D:\` disponível (fluxo atual depende desse layout).
-3. Repositório em `C:\Users\<user>\dotfiles`.
-4. 1Password Desktop com SSH Agent habilitado.
-5. Opcional: `DOTFILES_ONEDRIVE_PROJECTS_PATH` para sobrescrever o destino `projects`.
+- Alterar a root "oficial" do OneDrive sem interação depende do cliente Microsoft e não é 100% garantido para todos os cenários/versões.
+- O modo de junction reduz intervenção manual e mantém compatibilidade na maior parte dos casos.
 
-### WSL
+## Opção de usuário extra no WSL
 
-1. Repositório em `~/dotfiles`.
-2. Conectividade de rede.
-3. Permissão para instalar pacotes via `sudo`.
-4. Segredos no 1Password conforme `df/secrets/secrets-ref.yaml`.
-5. Opcional:
-   - `DOTFILES_ONEDRIVE_ROOT`
-   - `DOTFILES_ONEDRIVE_CLIENTS_DIR`
-   - `DOTFILES_ONEDRIVE_PROJECTS_DIR`
-6. Opcional (provisionar usuário extra):
-   - `DOTFILES_ADD_USER`
-   - `DOTFILES_ADD_USER_PASS_HASH` (saída de `openssl passwd -1`)
+Campo: `bootstrap.add_user` no YAML.
 
-Quando usar usuario extra no WSL:
+Utilidade:
 
-- Separar sessao pessoal de rotinas de deploy/automacao.
-- Reduzir impacto de comandos com privilegio no usuario principal.
-- Aplicar permissao minima por usuario.
+- separar usuário pessoal e automação/deploy
+- reduzir superfície de execução privilegiada no usuário principal
+- facilitar política de privilégio mínimo por contexto
 
-Quando nao usar:
+Quando evitar:
 
-- Setup pessoal simples (um unico usuario no WSL).
+- uso pessoal simples com um único usuário no WSL
 
-## Diferença prática entre bootstrap e refresh
+## Troubleshooting rápido
 
-- Bootstrap (new install):
-  - aplica tudo.
-  - tempo maior.
-  - ideal para máquina nova.
-
-- Refresh:
-  - re-sincroniza dotfiles e fluxo auth/check sem reinstalar todo software.
-  - tempo menor.
-  - ideal para atualização cotidiana.
-
-## Comandos úteis de operação
-
-- Rodar check de conformidade manual:
-  - PowerShell: `checkEnv`
-  - Bash: `checkEnv`
-- Recarregar profile PowerShell:
-  - `. $PROFILE.CurrentUserAllHosts`
-- Recarregar shell Bash:
-  - `exec bash -l`
+- `checkEnv` com FAIL em `gpg.ssh.program`: validar `op-ssh-sign` no PATH.
+- `gh` sem SSH protocol: `gh config set git_protocol ssh --host github.com`.
+- SSH denied (publickey): confirmar chave no GitHub e agent 1Password ativo.
+- `.env.local.sops` ausente: rerodar bootstrap/auth step.
+- OneDrive path FAIL no pós-bootstrap: validar root atual, permissões e rerodar bootstrap com `paths.windows.onedrive_enabled=true`.

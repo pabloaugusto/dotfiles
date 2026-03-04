@@ -1,5 +1,12 @@
-# Work in progress!
-# Derived from http://stackoverflow.com/questions/25709398/set-location-of-special-folders-with-powershell
+################################################################################
+# bootstrap/scripts/know-folders-change-path.ps1
+#
+# Experimental/legacy script to relocate Windows known folders.
+# Kept for reference. Not executed by current bootstrap flow.
+#
+# Source inspiration:
+# http://stackoverflow.com/questions/25709398/set-location-of-special-folders-with-powershell
+################################################################################
 
 <#
 .SYNOPSIS

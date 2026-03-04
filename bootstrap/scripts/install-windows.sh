@@ -1,3 +1,17 @@
+#!/usr/bin/env bash
+
+###############################################################################
+# bootstrap/scripts/install-windows.sh
+#
+# Legacy script for Git Bash on Windows to create symlinks and copy terminal
+# assets. It is retained for historical support and quick manual recovery.
+#
+# Canonical path today:
+# - Use bootstrap/_start.ps1 on Windows host.
+#
+# This script does not implement the current one-credential auth/secrets model.
+###############################################################################
+
 dir=~/dotfiles
 files=" .aliases
         .bash_profile
@@ -20,12 +34,11 @@ done
 
 # Windows Terminal settings
 terminalDir=~/AppData/Local/Packages/Microsoft.WindowsTerminal_8wekyb3d8bbwe
-
 if [ -d "$terminalDir" ]; then
     cp ./windows-terminal-settings.json "$terminalDir/LocalState/settings.json"
     cp ./git-bash.ico "$terminalDir/RoamingState"
     cp ./ubuntu.ico "$terminalDir/RoamingState"
 fi
 
-#echo "Installing npm dependencies..."
-#cd ~/ && npm i
+# echo "Installing npm dependencies..."
+# cd ~/ && npm i

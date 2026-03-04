@@ -1,221 +1,138 @@
 # Dotfiles
 
-Repositório de dotfiles com bootstrap para Windows (host) e Ubuntu WSL, com foco em:
+Repositório de dotfiles com bootstrap **multiambiente** (Windows host + Ubuntu WSL),
+focado em segurança operacional e repetibilidade.
 
-- Autenticação Git via SSH usando 1Password SSH Agent.
-- `gh` autenticado automaticamente com token vindo do 1Password.
-- Commits Git assinados com SSH (`gpg.format=ssh`) via binário do 1Password.
-- Health-check padronizado (`checkEnv`) para validar conformidade do ambiente.
+## Objetivos
 
-![Test Status](https://github.com/pabloaugusto/dotfiles/actions/workflows/check-scripts.yml/badge.svg)
+- Git via SSH com 1Password SSH Agent como primeira opção.
+- Commits assinados com SSH (`gpg.format=ssh`) usando 1Password signer.
+- `op` e `gh` autenticados automaticamente durante bootstrap.
+- Secrets de runtime sem plaintext versionado (modelo `.env.local.sops`).
+- Health-check (`checkEnv`) como gate de conformidade.
+- OneDrive Windows com override resiliente de paths e validação pós-bootstrap.
 
-## Escopo
+## Arquitetura rápida
 
-- `bootstrap/_start.ps1`: entrypoint do bootstrap no Windows.
-- `bootstrap/bootstrap-windows.ps1`: execução de bootstrap/refresh no Windows.
-- `bootstrap/bootstrap-ubuntu-wsl.sh`: bootstrap no Ubuntu WSL.
-- `df/powershell/_functions.ps1`: funções utilitárias PowerShell, inclusive `checkEnv`.
-- `df/bash/.inc/check-env.sh`: `checkEnv` no Bash.
-- `df/ssh/*`: configuração SSH base e por ambiente.
-- `bootstrap/secrets/.env.local.tpl`: template de segredos runtime injetados via `op inject`.
+- Bootstrap Windows: `bootstrap/_start.ps1` -> `bootstrap/bootstrap-windows.ps1`
+- Bootstrap WSL: `bootstrap/bootstrap-ubuntu-wsl.sh`
+- Config central: `bootstrap/user-config.yaml` (local) e `bootstrap/user-config.yaml.tpl` (template versionado)
+- Secrets refs: `df/secrets/secrets-ref.yaml`
+- Runtime env template: `bootstrap/secrets/.env.local.tpl`
+- Runtime env cifrado local: `~/.env.local.sops`
 
-## Pré-requisitos
+## Modelo de segredos e autenticação
 
-### Windows (host)
+### Entrada única (one-credential)
 
-1. Windows 10/11 com PowerShell 7.
-2. `winget` disponível (o `_start.ps1` tenta instalar se ausente).
-3. Diretório `D:\` e OneDrive configurado (fluxo atual depende disso).
-4. Repositório clonado em `C:\Users\<user>\dotfiles`.
-5. 1Password Desktop instalado e com SSH Agent habilitado no app.
-6. Opcional (OneDrive custom): `DOTFILES_ONEDRIVE_PROJECTS_PATH`.
+O bootstrap usa o token de service account do 1Password para acessar refs
+necessários (`op://...`) sem exigir secrets prévios em disco.
 
-### Ubuntu WSL
+### Persistência pós-bootstrap
 
-1. Distribuição Ubuntu funcional.
-2. Acesso a internet para `apt`/Homebrew.
-3. Repositório clonado em `~/dotfiles`.
-4. 1Password CLI (`op`) com token de Service Account disponível.
-5. Opcional (OneDrive custom):
-   - `DOTFILES_ONEDRIVE_ROOT`
-   - `DOTFILES_ONEDRIVE_CLIENTS_DIR`
-   - `DOTFILES_ONEDRIVE_PROJECTS_DIR`
-6. Opcional (provisionar usuário extra):
-   - `DOTFILES_ADD_USER`
-   - `DOTFILES_ADD_USER_PASS_HASH` (saída de `openssl passwd -1`)
-   - Use quando quiser separar usuario pessoal de automacao/deploy no WSL.
+- `SOPS_AGE_KEY` persiste no ambiente de usuário (modo env-only).
+- `SOPS_AGE_KEY_FILE` permanece vazio por padrão.
+- Secrets runtime ficam cifrados em `~/.env.local.sops`.
+- `~/.env.local` plaintext legado é removido quando encontrado.
 
-## Secrets esperados no 1Password
+### Refs esperados no 1Password
 
-Referência central em [df/secrets/secrets-ref.yaml](df/secrets/secrets-ref.yaml):
+Veja `df/secrets/secrets-ref.yaml`:
 
 - `op://secrets/dotfiles/1password/service-account`
-- `op://secrets/dotfiles/github/token` (preferencial para bootstrap/dotfiles)
-- `op://secrets/github/api/token`
+- `op://secrets/dotfiles/github/token` (preferencial, least privilege)
+- `op://secrets/github/api/token` (fallback)
 - `op://secrets/dotfiles/age/age.key`
 
-Template runtime em [bootstrap/secrets/.env.local.tpl](bootstrap/secrets/.env.local.tpl):
+## Configuração central do bootstrap
 
-- `OP_SERVICE_ACCOUNT_TOKEN`
-- `GITHUB_TOKEN` (apontando para o token dedicado do projeto)
-- `SOPS_AGE_KEY`
+Arquivos:
 
-## Config Central (YAML)
+- Template versionado: `bootstrap/user-config.yaml.tpl`
+- Arquivo local: `bootstrap/user-config.yaml` (ignorado por Git)
 
-- Template versionado: [bootstrap/user-config.yaml.tpl](bootstrap/user-config.yaml.tpl)
-- Arquivo local (não versionado): `bootstrap/user-config.yaml`
-- O `_start.ps1` valida esse arquivo antes de continuar:
-  - se estiver preenchido: pergunta se usa como está ou sobrescreve em modo guiado.
-  - se estiver incompleto: pergunta se preenche via wizard agora ou aborta para preenchimento manual.
+Comportamento:
 
-Esse YAML centraliza personalizações (Git, paths e refs de segredo) e sincroniza automaticamente:
+1. Se não existir `user-config.yaml`, ele é criado a partir do template.
+2. Se estiver completo, `_start.ps1` pergunta se usa como está ou sobrescreve guiado.
+3. Se estiver incompleto, pergunta se abre wizard ou aborta para edição manual.
+
+Arquivos derivados sincronizados automaticamente:
 
 - `df/secrets/secrets-ref.yaml`
 - `bootstrap/secrets/.env.local.tpl`
-- `df/git/.gitconfig.local`
+- `df/git/.gitconfig.local` (local, não versionado)
 
-Nota sobre `git.signing_key`:
+### OneDrive (Windows) no YAML
 
-- É a chave **pública** de assinatura SSH (não é segredo).
-- Não precisa ser protegida com `sops+age`.
-- O segredo é a chave privada, que deve permanecer no 1Password SSH Agent.
+Campos principais em `paths.windows`:
 
-## Quick Start
+- `onedrive_enabled`: habilita/desabilita dependência de OneDrive no bootstrap.
+- `onedrive_root`: root desejada do OneDrive (ou auto-detect quando vazio).
+- `onedrive_auto_migrate`: tentativa best-effort de migração automática de root via junction.
+- `onedrive_clients_dir`, `onedrive_projects_dir`, `onedrive_projects_path`: destinos de links dentro do OneDrive.
+- `links_profile_*`: origens dos symlinks no perfil (`bin`, `etc`, `clients`, `projects`).
+- `links_drive_enabled` + `links_drive_*`: atalhos opcionais no drive raiz (ex.: `D:\*`), sem obrigatoriedade de `D:`.
+- `profile_links_migrate_content` + `profile_links_*`: redirecionamento opcional de pastas padrão do perfil (`Documents`, `Desktop`, `Downloads`, `Pictures`, etc.) para OneDrive, com opção de migração automática de conteúdo.
 
-### Novo ambiente Windows
+## Execução
 
-1. Clone o repositório:
-```powershell
-git clone https://github.com/pabloaugusto/dotfiles.git $env:USERPROFILE\dotfiles
-```
-2. Rode o bootstrap:
+### Windows (host)
+
 ```powershell
 sudo $env:USERPROFILE\dotfiles\bootstrap\_start.ps1
 ```
-3. No menu:
-   - `1` para instalação completa.
-   - `2` para refresh de dotfiles.
 
-### Novo ambiente Ubuntu WSL
+Opções principais:
 
-1. Clone:
-```bash
-git clone https://github.com/pabloaugusto/dotfiles.git ~/dotfiles
-```
-2. Execute:
+- `1` = new install (full)
+- `2` = refresh dotfiles (rápido, sem reinstalar tudo)
+
+### Ubuntu WSL
+
 ```bash
 bash ~/dotfiles/bootstrap/bootstrap-ubuntu-wsl.sh
 ```
 
-## Bootstrap vs Refresh
-
-### Bootstrap (Windows opção `1`)
-
-Executa fluxo completo:
-
-- Symlinks de dotfiles.
-- Instalação de softwares e módulos.
-- Ajustes de preferências do Windows.
-- Setup runtime auth/signing (`.env.local.sops`, `gh` auth, `SOPS_AGE_KEY` em env).
-- `checkEnv` final obrigatório.
-
-### Refresh (Windows opção `2`)
-
-Executa fluxo enxuto:
-
-- Reaplica symlinks/configuração.
-- Pula instalação de software/fontes.
-- Pula ajustes de preferências do sistema.
-- Mantém validação auth/signing e `checkEnv` final.
-
 ## checkEnv
 
-`checkEnv` existe em ambos shells:
+`checkEnv` existe em PowerShell e Bash e valida:
 
-- PowerShell: função em [df/powershell/_functions.ps1](df/powershell/_functions.ps1).
-- Bash: função em [df/bash/.inc/check-env.sh](df/bash/.inc/check-env.sh).
+- binários (`op`, `gh`, `git`, `ssh`, `sops`, `age`)
+- sessão 1Password e leitura de refs
+- auth do `gh` + protocolo SSH
+- política Git de assinatura (`gpg.format`, `commit.gpgsign`, `user.signingkey`, `gpg.ssh.program`)
+- política SSH (`identityagent`, `identityfile none`, socket no Unix/WSL)
+- handshake `ssh -T git@github.com`
+- commit assinado de teste
+- no Windows, validação adicional de root OneDrive e links de perfil (quando `onedrive_enabled=true`)
 
-### Como usar
+Documentação detalhada: `docs/checkenv.md`.
 
-PowerShell:
-```powershell
-checkEnv
-```
+## Rotina operacional Windows + WSL
 
-Bash:
-```bash
-checkEnv
-```
+Antes de testar no WSL após mudanças no Windows:
 
-### O que valida
+1. commit/push no Windows
+2. rodar `dfsync` no Windows (sincroniza e valida WSL)
+3. só então executar testes no WSL
 
-- Comandos essenciais (`op`, `gh`, `git`, `ssh`) e opcionais (`sops`, `age`).
-- Sessão do 1Password (`op whoami`).
-- Leitura dos refs em `df/secrets/secrets-ref.yaml`.
-- Status de autenticação do `gh` e protocolo SSH.
-- Política Git de assinatura SSH (`gpg.format`, `commit.gpgsign`, `user.signingkey`, `gpg.ssh.program`).
-- Política SSH (`identityagent`, `identityfile none`, socket 1Password no Unix/WSL).
-- Handshake SSH com GitHub (`ssh -T git@github.com`).
-- Commit assinado de teste em repositório temporário.
+## Segurança
 
-### Resultado
+- Não versionar secrets plaintext.
+- Não versionar chaves privadas.
+- `user.signingkey` em Git config é **chave pública** (não segredo).
+- Rotacionar qualquer token exposto historicamente.
 
-Cada item retorna:
-
-- `SUCCESS`
-- `FAIL`
-- `INCONCLUSIVE`
-
-No final, o relatório lista sugestões de correção para os itens não conformes.
-
-## Rotina multi-ambiente (obrigatória antes de testes no WSL)
-
-Sempre que houver mudança no Windows e você for testar no WSL:
-
-1. Commit e push no Windows.
-2. No PowerShell do Windows, rode:
-```powershell
-dfsync
-```
-3. Só então execute comandos/testes no WSL.
-
-`dfsync` valida o seguinte:
-
-- Repositório do Windows está limpo.
-- Push da branch atual para `origin`.
-- Repositório do WSL está limpo.
-- Pull no WSL com `--ff-only`.
-- HEAD final igual entre Windows e WSL.
-
-## Fluxo de segurança adotado
-
-### Runtime auth (op/gh/ssh signing)
-
-Usa 1Password (`op`) para resolver segredos em tempo de execução.
-
-### Segredos versionados em arquivo
-
-Usa `sops+age` para conteúdos que precisam estar no repositório de forma cifrada.
-
-### Chave age no runtime
-
-O fluxo atual é env-only por padrão:
-
-- `SOPS_AGE_KEY` carregada no ambiente do usuário.
-- `SOPS_AGE_KEY_FILE` mantida vazia, sem materializar `keys.txt` automaticamente.
-- No WSL, a persistência local fica em `~/.config/dotfiles/runtime.env` (não versionado).
+Guia completo: `SECURITY.md` e `docs/secrets-and-auth.md`.
 
 ## Documentação complementar
 
-- Guia do bootstrap: [bootstrap/README.md](bootstrap/README.md)
-- Guia do health-check: [readme/checkenv.md](readme/checkenv.md)
-- Guia de secrets e segurança: [readme/secrets-and-auth.md](readme/secrets-and-auth.md)
-- Guia de segurança para repo público: [SECURITY.md](SECURITY.md)
-
-## Troubleshooting rápido
-
-1. `gh` não logado: valide o ref `op://secrets/dotfiles/github/token` no `op` e rode `checkEnv` (fallback aceito: `op://secrets/github/api/token`).
-2. SSH falhando no GitHub: confirme chave pública no GitHub e SSH Agent do 1Password ativo.
-3. Assinatura de commit falhando: revise `gpg.ssh.program` e `user.signingkey`.
-   - `user.signingkey` é pública; o ponto crítico é disponibilidade do `op-ssh-sign` e do agent.
-4. `checkEnv` inconclusivo em rede: reexecute após garantir conectividade.
+- `bootstrap/README.md`
+- `docs/bootstrap-flow.md`
+- `docs/checkenv.md`
+- `docs/onedrive.md`
+- `docs/user-home-estructure.md`
+- `docs/secrets-and-auth.md`
+- `docs/config-reference.md`
+- `docs/repo-audit.md`

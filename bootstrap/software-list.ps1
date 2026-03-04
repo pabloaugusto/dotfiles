@@ -1,3 +1,20 @@
+################################################################################
+# bootstrap/software-list.ps1
+#
+# Canonical catalog of software used by Windows bootstrap.
+# Each entry is a hashtable with:
+# - installer: installer backend expected by _functions.ps1
+# - id: package identifier in that backend
+# - name: human-friendly package label shown in logs
+# - bootstrap: when "true", package is eligible for bootstrap runs
+# - url: optional project/source reference
+#
+# Important operational notes:
+# - This list is intentionally broad (full workstation profile).
+# - bootstrap/bootstrap-windows.ps1 can still skip groups depending on mode.
+# - Keep package ids stable; installer helpers cache and compare by id/name.
+################################################################################
+
 $softwareList = @(
 
 	####################################################

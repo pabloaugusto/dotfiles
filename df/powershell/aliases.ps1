@@ -1,3 +1,15 @@
+################################################################################
+# df/powershell/aliases.ps1
+#
+# Canonical alias/functions map for PowerShell runtime in this repository.
+# Keep this file as the single source for shell shortcuts on Windows.
+#
+# Conventions:
+# - Set-Alias for simple command remaps
+# - function for parameter-aware shortcuts
+# - Keep names aligned with Bash aliases when practical (cross-platform muscle memory)
+################################################################################
+
 # git and other dev aliases use https://github.com/MichaelJolley/devtoolbox
 
 # remove Shortcuts

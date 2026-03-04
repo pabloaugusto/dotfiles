@@ -1,5 +1,15 @@
 #!/bin/bash
 
+###############################################################################
+# bootstrap/bootstrap-ubuntu.original.sh
+#
+# Legacy Ubuntu bootstrap preserved for historical reference.
+# Current canonical Linux/WSL flow lives in:
+#   bootstrap/bootstrap-ubuntu-wsl.sh
+#
+# Keep this file only for comparison/recovery scenarios.
+###############################################################################
+
 BASE_DIR=$(dirname "$(readlink -m "$0")")
 ONEDRIVE_ROOT="${DOTFILES_ONEDRIVE_ROOT:-/mnt/d/OneDrive}"
 ONEDRIVE_CLIENTS_DIR="${DOTFILES_ONEDRIVE_CLIENTS_DIR:-$ONEDRIVE_ROOT/clients}"
