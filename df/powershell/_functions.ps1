@@ -1401,8 +1401,8 @@ function Invoke-CheckEnvSignedCommitTest {
 			}
 		}
 
-		$userName = (& git config --global --get user.name 2>$null | Out-String).Trim()
-		$userEmail = (& git config --global --get user.email 2>$null | Out-String).Trim()
+		$userName = (& git config --global --includes --get user.name 2>$null | Out-String).Trim()
+		$userEmail = (& git config --global --includes --get user.email 2>$null | Out-String).Trim()
 		if ([string]::IsNullOrWhiteSpace($userName)) { & git config user.name "checkEnv" *> $null }
 		if ([string]::IsNullOrWhiteSpace($userEmail)) { & git config user.email "checkenv@local" *> $null }
 
@@ -1515,6 +1515,56 @@ function checkEnv {
 		Add-CheckResult -Item 'SOPS age key file' -Status 'fail' -Detail 'No SOPS age key detected in environment.' -Solution 'Set SOPS_AGE_KEY (recommended) or configure SOPS_AGE_KEY_FILE.'
 	}
 
+	# 2.1) Windows OneDrive/profile path compliance (when enabled in bootstrap config)
+	if ($IsWindows) {
+		$oneDriveEnabled = $true
+		if (-not [string]::IsNullOrWhiteSpace($Env:DOTFILES_ONEDRIVE_ENABLED)) {
+			switch -Regex ($Env:DOTFILES_ONEDRIVE_ENABLED.Trim().ToLowerInvariant()) {
+				'^(0|false|no|n|nao|não)$' { $oneDriveEnabled = $false }
+				default { $oneDriveEnabled = $true }
+			}
+		}
+
+		if ($oneDriveEnabled) {
+			$rootCandidates = @(
+				$Env:DOTFILES_ONEDRIVE_ROOT_WINDOWS,
+				$Env:OneDrive,
+				(Join-Path $Env:USERPROFILE 'OneDrive')
+			) | Where-Object { -not [string]::IsNullOrWhiteSpace($_) } | Select-Object -Unique
+			$resolvedRoot = $rootCandidates | Where-Object { Test-Path -Path $_ -PathType Container } | Select-Object -First 1
+			if ($resolvedRoot) {
+				Add-CheckResult -Item 'OneDrive root path' -Status 'success' -Detail "Resolved root: $resolvedRoot." -Solution ''
+			}
+			else {
+				Add-CheckResult -Item 'OneDrive root path' -Status 'fail' -Detail 'Unable to resolve an existing OneDrive root path.' -Solution 'Configure OneDrive or set paths.windows.onedrive_root in bootstrap/user-config.yaml.'
+			}
+
+			$linkChecks = @(
+				$(if ($Env:DOTFILES_LINK_PROFILE_BIN) { $Env:DOTFILES_LINK_PROFILE_BIN } else { Join-Path $Env:USERPROFILE 'bin' }),
+				$(if ($Env:DOTFILES_LINK_PROFILE_ETC) { $Env:DOTFILES_LINK_PROFILE_ETC } else { Join-Path $Env:USERPROFILE 'etc' }),
+				$(if ($Env:DOTFILES_LINK_PROFILE_CLIENTS) { $Env:DOTFILES_LINK_PROFILE_CLIENTS } else { Join-Path $Env:USERPROFILE 'clients' }),
+				$(if ($Env:DOTFILES_LINK_PROFILE_PROJECTS) { $Env:DOTFILES_LINK_PROFILE_PROJECTS } else { Join-Path $Env:USERPROFILE 'projects' })
+			)
+			foreach ($linkPath in $linkChecks) {
+				$item = Get-Item -Path $linkPath -Force -ErrorAction SilentlyContinue
+				if ($null -eq $item) {
+					Add-CheckResult -Item 'OneDrive profile links' -Status 'fail' -Detail "Path missing: $linkPath." -Solution 'Rerun bootstrap to recreate OneDrive/profile links.'
+					continue
+				}
+
+				if ($item.LinkType -eq 'SymbolicLink' -or $item.LinkType -eq 'Junction') {
+					Add-CheckResult -Item 'OneDrive profile links' -Status 'success' -Detail "$linkPath is a link ($($item.LinkType))." -Solution ''
+				}
+				else {
+					Add-CheckResult -Item 'OneDrive profile links' -Status 'inconclusive' -Detail "$linkPath exists but is not a symlink/junction." -Solution 'If OneDrive mode is enabled, rerun bootstrap to enforce link policy.'
+				}
+			}
+		}
+		else {
+			Add-CheckResult -Item 'OneDrive root path' -Status 'inconclusive' -Detail 'OneDrive checks skipped (paths.windows.onedrive_enabled=false).' -Solution ''
+		}
+	}
+
 	# 3) 1Password CLI session and referenced-secret readability
 	if (Test-CommandExists op) {
 		$opHealthy = $false
@@ -1591,19 +1641,17 @@ function checkEnv {
 	# 5) Git signing policy checks in repository context
 	#    (supports includeIf rules that depend on current gitdir path).
 	if (Test-CommandExists git) {
-		$gitProbePath = Join-Path $Env:USERPROFILE 'dotfiles'
-		$tempGitProbePath = $null
-		if (!(Test-Path -Path (Join-Path $gitProbePath '.git'))) {
-			$tempGitProbePath = Join-Path $Env:USERPROFILE ("checkenv-probe-" + [guid]::NewGuid().ToString("N"))
-			New-Item -Path $tempGitProbePath -ItemType Directory -Force | Out-Null
-			& git -C $tempGitProbePath init -q *> $null
-			$gitProbePath = $tempGitProbePath
-		}
+		# Use a clean temporary repo to avoid false negatives caused by local repo overrides
+		# (for example, accidental user.signingkey in .git/config).
+		$tempGitProbePath = Join-Path $Env:USERPROFILE ("checkenv-probe-" + [guid]::NewGuid().ToString("N"))
+		New-Item -Path $tempGitProbePath -ItemType Directory -Force | Out-Null
+		& git -C $tempGitProbePath init -q *> $null
+		$gitProbePath = $tempGitProbePath
 
-		$gpgFormat = (& git -C $gitProbePath config --get gpg.format 2>$null | Out-String).Trim()
-		$gpgProgram = (& git -C $gitProbePath config --get gpg.ssh.program 2>$null | Out-String).Trim()
-		$signingKey = (& git -C $gitProbePath config --get user.signingkey 2>$null | Out-String).Trim()
-		$commitSign = (& git -C $gitProbePath config --get commit.gpgsign 2>$null | Out-String).Trim()
+		$gpgFormat = (& git -C $gitProbePath config --includes --get gpg.format 2>$null | Out-String).Trim()
+		$gpgProgram = (& git -C $gitProbePath config --includes --get gpg.ssh.program 2>$null | Out-String).Trim()
+		$signingKey = (& git -C $gitProbePath config --includes --get user.signingkey 2>$null | Out-String).Trim()
+		$commitSign = (& git -C $gitProbePath config --includes --get commit.gpgsign 2>$null | Out-String).Trim()
 
 		if ($gpgFormat -eq 'ssh') {
 			Add-CheckResult -Item 'Git signing format' -Status 'success' -Detail 'gpg.format=ssh.' -Solution ''

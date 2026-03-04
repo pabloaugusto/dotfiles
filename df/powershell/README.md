@@ -1,39 +1,51 @@
----
-title: PowerShell Profile Paths
-subtitle: Shows the various PowerShell profile paths by platform and version.
-author: Uzma Younas
-date: September 13, 2023
-source: https://adamtheautomator.com/powershell-profile-a-getting-started-guide/
-snippet: https://jonlabelle.com/snippets/view/markdown/powershell-profile-paths
-gist: https://gist.github.com/jonlabelle/f2a4fdd989dbfe59e444e0beaf07bcc9
-notoc: false
----
+# PowerShell Dotfiles
 
-## Windows PowerShell 5.1 (e.g. PowerShell Desktop)
+Este diretório concentra o runtime PowerShell do repositório (perfil, plugins,
+aliases, checks e helpers de bootstrap).
 
-| Profile                     | Path                                                                     |
-| --------------------------- | ------------------------------------------------------------------------ |
-| Current User - Current Host | `$Home\[My]Documents\WindowsPowerShell\Microsoft.PowerShell_profile.ps1` |
-| Current User - All Hosts    | `$Home\[My]Documents\WindowsPowerShell\Profile.ps1`                      |
-| All Users - Current Host    | `$PSHOME\Microsoft.PowerShell_profile.ps1`                               |
-| All Users - All Hosts       | `$PSHOME\Profile.ps1`                                                    |
+## Arquivos principais
 
-## PowerShell 7.x (e.g. PowerShell Core)
+- `profile.ps1`: ponto de entrada carregado no terminal.
+- `_functions.ps1`: biblioteca utilitária (instalação, symlink, auth/secrets, `checkEnv`).
+- `env-vars.ps1`: variáveis de ambiente persistidas em `HKCU:\Environment`.
+- `env-check.ps1`: verificação rápida de ergonomia no startup.
+- `plugins.ps1`: carregamento de módulos/prompt.
+- `aliases.ps1`: aliases e funções de uso diário.
+- `wsl.ps1`: integração opcional com comandos WSL via `WslInterop`.
 
-### Windows
+## Ordem de carga
 
-| Profile                     | Path                                                              |
-| --------------------------- | ----------------------------------------------------------------- |
-| Current User - Current Host | `$Home\[My]Documents\Powershell\Microsoft.Powershell_profile.ps1` |
-| Current User - All Hosts    | `$Home\[My]Documents\Powershell\Profile.ps1`                      |
-| All Users - Current Host    | `$PSHOME\Microsoft.Powershell_profile.ps1`                        |
-| All Users - All Hosts       | `$PSHOME\Profile.ps1`                                             |
+`profile.ps1` carrega os módulos nesta sequência:
 
-### Linux/macOS
+1. `_functions.ps1`
+2. runtime secrets (`~/.env.local.sops` via `Import-DotEnvFromSops`)
+3. `env-vars.ps1`
+4. `env-check.ps1`
+5. `plugins.ps1`
+6. `aliases.ps1`
+7. `hotkeys.ps1`
+8. autocomplete do kubectl
+9. `wsl.ps1`
 
-| Profile                     | Path                                                                 |
-| --------------------------- | -------------------------------------------------------------------- |
-| Current User - Current Host | `~/.config/powershell/Microsoft.Powershell_profile.ps1`              |
-| Current User - All Hosts    | `~/.config/powershell/profile.ps1`                                   |
-| All Users - Current Host    | `/usr/local/microsoft/powershell/7/Microsoft.Powershell_profile.ps1` |
-| All Users - All Hosts       | `/usr/local/microsoft/powershell/7/profile.ps1`                      |
+## Segurança e autenticação
+
+- Segredos de runtime são carregados de `~/.env.local.sops` (não de `.env.local` plaintext).
+- `GH_TOKEN` é normalizado a partir de `GITHUB_TOKEN` quando necessário.
+- `checkEnv` valida:
+  - sessão `op`,
+  - auth do `gh`,
+  - SSH agent/handshake GitHub,
+  - assinatura de commit SSH via 1Password.
+
+## Requisitos recomendados
+
+- PowerShell 7+
+- 1Password Desktop + 1Password CLI (`op`)
+- GitHub CLI (`gh`)
+- `sops` + `age`
+- Módulos: `PSReadLine`, `Terminal-Icons`, `posh-git`, `posh-docker`, `WslInterop` (opcional)
+
+## Arquivos de terceiros
+
+`df/powershell/.inc/3rd/*` contém scripts vendorizados/externos e não deve ser
+editado no fluxo normal de manutenção.

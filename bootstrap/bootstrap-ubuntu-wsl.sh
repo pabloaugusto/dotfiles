@@ -32,9 +32,82 @@ bootstrap_exit() {
 	exit "$code"
 }
 
+_yaml_get() {
+	local file="$1"
+	local target="$2"
+	awk -v target="$target" '
+		function trim(v) {
+			sub(/^[[:space:]]+/, "", v)
+			sub(/[[:space:]]+$/, "", v)
+			return v
+		}
+		/^[[:space:]]*#/ || /^[[:space:]]*$/ { next }
+		{
+			line = $0
+			gsub(/\t/, "  ", line)
+			if (match(line, /^([ ]*)([A-Za-z0-9_-]+):[ ]*(.*)$/, m) == 0) next
+			indent = length(m[1])
+			level = int(indent / 2)
+			key = m[2]
+			value = trim(m[3])
+			path[level] = key
+			for (i = level + 1; i < 20; i++) path[i] = ""
+			if (value != "") {
+				full = path[0]
+				for (i = 1; i <= level; i++) full = full "." path[i]
+				if (full == target) {
+					gsub(/^"/, "", value); gsub(/"$/, "", value)
+					gsub(/^'\''/, "", value); gsub(/'\''$/, "", value)
+					print value
+					exit
+				}
+			}
+		}
+	' "$file"
+}
+
+resolve_unix_path_with_root() {
+	local root="$1"
+	local value="$2"
+
+	if [[ -z "$value" ]]; then
+		echo ""
+		return
+	fi
+	if [[ "$value" == /* ]]; then
+		echo "$value"
+		return
+	fi
+
+	local normalized_root="${root%/}"
+	local normalized_value="${value#/}"
+	normalized_value="${normalized_value//\\//}"
+	echo "${normalized_root}/${normalized_value}"
+}
+
+load_onedrive_overrides_from_user_config() {
+	local cfg="$HOME/dotfiles/bootstrap/user-config.yaml"
+	[ -f "$cfg" ] || return 0
+
+	# Use local YAML values only when env overrides are absent.
+	if [[ -z "${DOTFILES_ONEDRIVE_ROOT:-}" ]]; then
+		DOTFILES_ONEDRIVE_ROOT="$(_yaml_get "$cfg" "paths.wsl.onedrive_root")"
+	fi
+	if [[ -z "${DOTFILES_ONEDRIVE_CLIENTS_DIR:-}" ]]; then
+		DOTFILES_ONEDRIVE_CLIENTS_DIR="$(_yaml_get "$cfg" "paths.wsl.onedrive_clients_dir")"
+	fi
+	if [[ -z "${DOTFILES_ONEDRIVE_PROJECTS_DIR:-}" ]]; then
+		DOTFILES_ONEDRIVE_PROJECTS_DIR="$(_yaml_get "$cfg" "paths.wsl.onedrive_projects_dir")"
+	fi
+}
+
+load_onedrive_overrides_from_user_config
 ONEDRIVE_ROOT="${DOTFILES_ONEDRIVE_ROOT:-/mnt/d/OneDrive}"
-ONEDRIVE_CLIENTS_DIR="${DOTFILES_ONEDRIVE_CLIENTS_DIR:-$ONEDRIVE_ROOT/clients}"
-ONEDRIVE_PROJECTS_DIR="${DOTFILES_ONEDRIVE_PROJECTS_DIR:-$ONEDRIVE_CLIENTS_DIR/$USER/projects}"
+ONEDRIVE_CLIENTS_DIR="$(resolve_unix_path_with_root "$ONEDRIVE_ROOT" "${DOTFILES_ONEDRIVE_CLIENTS_DIR:-clients}")"
+ONEDRIVE_PROJECTS_DIR="$(resolve_unix_path_with_root "$ONEDRIVE_ROOT" "${DOTFILES_ONEDRIVE_PROJECTS_DIR:-}")"
+if [[ -z "$ONEDRIVE_PROJECTS_DIR" ]]; then
+	ONEDRIVE_PROJECTS_DIR="${ONEDRIVE_CLIENTS_DIR%/}/$USER/projects"
+fi
 
 # shellcheck source=../df/bash/.inc/_functions.sh
 if ! source "$BASE_DIR/../df/bash/.inc/_functions.sh"; then
@@ -212,9 +285,12 @@ function setProfileSymlinks {
 	# If is Windows WSL and onedrive installed
 	# set useful profile aliases to common dirs
 	if [ -d "$ONEDRIVE_ROOT" ]; then
+		mkdir -p "$ONEDRIVE_CLIENTS_DIR" "$ONEDRIVE_PROJECTS_DIR" >/dev/null 2>&1 || true
 		ln -sf "$ONEDRIVE_ROOT" ~/onedrive
 		ln -sf "$ONEDRIVE_PROJECTS_DIR" ~/projects
 		ln -sf "$ONEDRIVE_CLIENTS_DIR" ~/clients
+	else
+		echo "Aviso: OneDrive root nao encontrado em '$ONEDRIVE_ROOT'. Links ~/onedrive ~/clients ~/projects foram pulados."
 	fi
 
 }

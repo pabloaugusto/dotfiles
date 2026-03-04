@@ -7,7 +7,7 @@
 # Entry-point bootstrap for Windows host
 #
 # Responsibilities:
-# 1) Validate prerequisites available in current host (winget/onedrive/disk layout).
+# 1) Validate prerequisites available in current host (winget/onedrive/config state).
 # 2) Ask target operation mode (new install vs refresh).
 # 3) Dispatch to bootstrap/bootstrap-windows.ps1 and post actions.
 #
@@ -81,19 +81,43 @@ winget settings --enable InstallerHashOverride >$null
 
 
 #--------------------------------------------------------------------------------------
-# Check onedrive installed
-# TODO: check if each folder exists under onedrive dir (if is already cloud synced)
+# Resolve OneDrive root path for current execution.
+# Priority:
+# 1) DOTFILES_ONEDRIVE_ROOT_WINDOWS (explicit override)
+# 2) OneDrive environment variable
+# 3) %USERPROFILE%\OneDrive (common default)
 #--------------------------------------------------------------------------------------
-if (!$Env:Onedrive) {
-	Write-Host "OneDrive not found. Type 'winget install --id=Microsoft.OneDrive  -e' to install first"
-	return
+function Resolve-OneDriveRootPath {
+	$candidates = New-Object System.Collections.Generic.List[string]
+	if (-not [string]::IsNullOrWhiteSpace($Env:DOTFILES_ONEDRIVE_ROOT_WINDOWS)) {
+		$candidates.Add($Env:DOTFILES_ONEDRIVE_ROOT_WINDOWS)
+	}
+	if (-not [string]::IsNullOrWhiteSpace($Env:OneDrive)) {
+		$candidates.Add($Env:OneDrive)
+	}
+	if (-not [string]::IsNullOrWhiteSpace($Env:USERPROFILE)) {
+		$candidates.Add((Join-Path $Env:USERPROFILE 'OneDrive'))
+	}
+
+	foreach ($candidate in ($candidates | Select-Object -Unique)) {
+		if (Test-Path -Path $candidate -PathType Container) {
+			return $candidate
+		}
+	}
+	return $null
 }
 
-
-#--------------------------------------------------------------------------------------
-if (!(Test-Path -Path "d:\")) {
-	Write-Host "Drive d:\ not found. Aborting"
-	return
+function ConvertTo-BoolFlag {
+	param (
+		[string]$Value,
+		[bool]$Default = $false
+	)
+	if ([string]::IsNullOrWhiteSpace($Value)) { return $Default }
+	switch -Regex ($Value.Trim().ToLowerInvariant()) {
+		'^(1|true|yes|y|sim|s)$' { return $true }
+		'^(0|false|no|n|nao|não)$' { return $false }
+		default { return $Default }
+	}
 }
 
 ##########################################################
@@ -115,6 +139,22 @@ if (!(Test-Path -Path $bootstrapConfigScript -PathType Leaf)) {
 
 if (!(Ensure-BootstrapConfigReady -DotFilesDirectory $DotFilesDirectory)) {
 	return
+}
+
+# OneDrive requirement is config-driven:
+# - enabled=true  -> bootstrap-windows.ps1 executes guided/root migration flow.
+# - enabled=false -> skip OneDrive pre-checks in entrypoint.
+$oneDriveEnabled = ConvertTo-BoolFlag -Value $Env:DOTFILES_ONEDRIVE_ENABLED -Default $true
+if ($oneDriveEnabled) {
+	$resolvedOneDriveRoot = Resolve-OneDriveRootPath
+	if ($resolvedOneDriveRoot) {
+		$Env:DOTFILES_ONEDRIVE_ROOT_WINDOWS = $resolvedOneDriveRoot
+	}
+	else {
+		Write-Warning "OneDrive root not resolved at entrypoint."
+		Write-Warning "Bootstrap Windows will run a guided OneDrive setup/migration step before creating links."
+		Write-Warning "Checked sources: DOTFILES_ONEDRIVE_ROOT_WINDOWS, OneDrive env, and %USERPROFILE%\\OneDrive."
+	}
 }
 
 ##########################################################

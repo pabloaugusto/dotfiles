@@ -2,6 +2,19 @@
 #requires -PSEdition Core
 #requires -Version 7
 
+################################################################################
+# bootstrap/symlinks.ps1
+#
+# Legacy symlink bootstrap script kept for reference and manual recovery.
+#
+# Current primary flow:
+# - bootstrap/_start.ps1 -> bootstrap/bootstrap-windows.ps1
+#
+# This file still works as an isolated "link-only" routine, but it uses older
+# paths/assumptions and should not be treated as canonical source of truth for
+# the modern one-credential bootstrap model.
+################################################################################
+
 # Helper functions
 . ${PSScriptRoot}\..\.config\powershell\.inc\_functions.ps1
 

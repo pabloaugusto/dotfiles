@@ -1,124 +1,118 @@
-#!/bin/bash
+#!/usr/bin/env bash
+
+###############################################################################
+# df/bash/.inc/_functions.sh
+#
+# Shared Bash helpers used by bootstrap/bootstrap-ubuntu-wsl.sh and interactive
+# shell routines.
+#
+# Design principles:
+# - Minimal dependencies
+# - Quiet output by default
+# - Explicit status markers (DONE/ERROR/WARN)
+###############################################################################
 
 ######################################################
-# Print colored status
+# Print colored status label used by installer routines.
+#
+# Usage:
+#   print_status DONE
+#   print_status ERROR
+#   print_status WARN
 ######################################################
-function print_status {
+print_status() {
+	local k_base="\033[0m\n"
+	local k_green_inv="\033[32;7m"
+	local k_red_inv="\033[31;7m"
+	local k_yellow_inv="\033[33;7m"
+	local status="$1"
 
-	K_BASE="\033[0m\n"
-	K_GREEN_INV="\033[32;7m"
-	K_RED_INV="\033[31;7m"
-	K_YELLOW_INV="\033[33;7m"
-
-	STATUS=$1
-
-	case $STATUS in
-	# ---------------------------------
-	# info note DONE
-	# ---------------------------------
-	DONE)
-		# shellcheck disable=SC2059
-		printf " $K_GREEN_INV DONE $K_BASE "
-
-		;;
-	# ---------------------------------
-	# info note ERROR
-	# ---------------------------------
-	ERROR)
-		# shellcheck disable=SC2059
-		printf " $K_RED_INV ERROR $K_BASE "
-		;;
-	# ---------------------------------
-	# info note WARN
-	# ---------------------------------
-	WARN)
-		# shellcheck disable=SC2059
-		printf " $K_YELLOW_INV WARN $K_BASE "
-		;;
+	case "$status" in
+		DONE)
+			# shellcheck disable=SC2059
+			printf " %s DONE %s " "$k_green_inv" "$k_base"
+			;;
+		ERROR)
+			# shellcheck disable=SC2059
+			printf " %s ERROR %s " "$k_red_inv" "$k_base"
+			;;
+		WARN)
+			# shellcheck disable=SC2059
+			printf " %s WARN %s " "$k_yellow_inv" "$k_base"
+			;;
 	esac
-
-}
-######################################################################################
-# Remove a Item (file or folder) if exists (forced, recursive, without confirm)
-######################################################################################
-function installPKG {
-
-	PKG_MANAGER="$1"
-	PKG="$2"
-
-	[[ -z $1 ]] && echo "Not specified: Package manager" && exit 1
-	[[ -z $2 ]] && echo "Not specified: Package to install" && exit 1
-
-	# switch package managers
-	case $PKG_MANAGER in
-
-	# --------------------------------------------------------------------------------
-	# Install packages with: brew
-	# --------------------------------------------------------------------------------
-	brew)
-		if [[ -z $(command -v "$PKG") ]]; then # can use also: "which brew" instead "command -v brew"
-			printf "Instaling %s with %s" "$PKG" "$PKG_MANAGER "
-			export NONINTERACTIVE=1 # install non-interactive way
-			export HOMEBREW_NO_AUTO_UPDATE=1
-			export HOMEBREW_NO_ENV_HINTS=1
-			export HOMEBREW_NO_ANALYTICS=1
-			export HOMEBREW_NO_INSTALL_CLEANUP=1
-			export HOMEBREW_NO_INSTALL_UPGRADE=1
-			export HOMEBREW_NO_UPDATE_REPORT_NEW=1
-			export HOMEBREW_VERBOSE=0
-			export HOMEBREW_VERBOSE_USING_DOTS=1
-			brew install "$PKG" --quiet >/dev/null 2>&1
-			print_status "DONE"
-
-		else
-			printf "Upgrading %s with %s" "$PKG" "$PKG_MANAGER "
-			export NONINTERACTIVE=1 # install non-interactive way
-			export HOMEBREW_NO_AUTO_UPDATE=1
-			export HOMEBREW_NO_ENV_HINTS=1
-			export HOMEBREW_NO_ANALYTICS=1
-			export HOMEBREW_NO_INSTALL_CLEANUP=1
-			export HOMEBREW_NO_INSTALL_UPGRADE=1
-			export HOMEBREW_NO_UPDATE_REPORT_NEW=1
-			export HOMEBREW_VERBOSE=0
-			export HOMEBREW_VERBOSE_USING_DOTS=0
-			brew upgrade "$PKG" --quiet >/dev/null 2>&1
-			print_status DONE
-		fi
-		;;
-
-	# --------------------------------------------------------------------------------
-	# Install packages with: apt
-	# --------------------------------------------------------------------------------
-	apt)
-		if [[ -z $(command -v "$PKG") ]]; then # can use also: "which brew" instead "command -v brew"
-			printf "Instaling %s with %s" "$PKG" "$PKG_MANAGER "
-			export NONINTERACTIVE=1 # install non-interactive way
-			apt install "$PKG" -y -qqq >/dev/null 2>&1
-			print_status "DONE"
-
-		else
-			printf "Upgrading %s with %s" "$PKG" "$PKG_MANAGER "
-			export NONINTERACTIVE=1 # install non-interactive way
-			apt upgrade "$PKG" -y -qqq >/dev/null 2>&1
-			print_status DONE
-		fi
-		;;
-
-
-	# --------------------------------------------------------------------------------
-	# Dont have the pakage manager or misstyped
-	# --------------------------------------------------------------------------------
-	*)
-		echo "don't found package-manager: '$1'"
-		;;
-	esac
-
 }
 
+################################################################################
+# installPKG
+#
+# Instala ou atualiza um pacote em gerenciadores suportados.
+# Inputs:
+#   $1 -> package manager (brew|apt)
+#   $2 -> package name
+################################################################################
+installPKG() {
+	local pkg_manager="$1"
+	local pkg="$2"
+
+	[[ -z "$pkg_manager" ]] && echo "Not specified: Package manager" && exit 1
+	[[ -z "$pkg" ]] && echo "Not specified: Package to install" && exit 1
+
+	case "$pkg_manager" in
+		brew)
+			if [[ -z "$(command -v "$pkg")" ]]; then
+				printf "Instaling %s with %s" "$pkg" "$pkg_manager "
+				export NONINTERACTIVE=1
+				export HOMEBREW_NO_AUTO_UPDATE=1
+				export HOMEBREW_NO_ENV_HINTS=1
+				export HOMEBREW_NO_ANALYTICS=1
+				export HOMEBREW_NO_INSTALL_CLEANUP=1
+				export HOMEBREW_NO_INSTALL_UPGRADE=1
+				export HOMEBREW_NO_UPDATE_REPORT_NEW=1
+				export HOMEBREW_VERBOSE=0
+				export HOMEBREW_VERBOSE_USING_DOTS=1
+				brew install "$pkg" --quiet >/dev/null 2>&1
+				print_status "DONE"
+			else
+				printf "Upgrading %s with %s" "$pkg" "$pkg_manager "
+				export NONINTERACTIVE=1
+				export HOMEBREW_NO_AUTO_UPDATE=1
+				export HOMEBREW_NO_ENV_HINTS=1
+				export HOMEBREW_NO_ANALYTICS=1
+				export HOMEBREW_NO_INSTALL_CLEANUP=1
+				export HOMEBREW_NO_INSTALL_UPGRADE=1
+				export HOMEBREW_NO_UPDATE_REPORT_NEW=1
+				export HOMEBREW_VERBOSE=0
+				export HOMEBREW_VERBOSE_USING_DOTS=0
+				brew upgrade "$pkg" --quiet >/dev/null 2>&1
+				print_status "DONE"
+			fi
+			;;
+		apt)
+			if [[ -z "$(command -v "$pkg")" ]]; then
+				printf "Instaling %s with %s" "$pkg" "$pkg_manager "
+				export NONINTERACTIVE=1
+				apt install "$pkg" -y -qqq >/dev/null 2>&1
+				print_status "DONE"
+			else
+				printf "Upgrading %s with %s" "$pkg" "$pkg_manager "
+				export NONINTERACTIVE=1
+				apt upgrade "$pkg" -y -qqq >/dev/null 2>&1
+				print_status "DONE"
+			fi
+			;;
+		*)
+			echo "don't found package-manager: '$pkg_manager'"
+			;;
+	esac
+}
 
 ######################################################
-# Create / update local env file (with 1password cli)
+# localEnvFile
+#
+# Legacy helper: materializa ~/.env.local plaintext via op inject.
+# The preferred flow today is encrypted runtime env (~/.env.local.sops).
 ######################################################
-function localEnvFile {
+localEnvFile() {
 	op inject -i ~/dotfiles/df/secrets/.env.local.tpl -o ~/.env.local
 }

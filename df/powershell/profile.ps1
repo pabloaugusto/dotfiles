@@ -1,6 +1,12 @@
-# https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_profiles?view=powershell-7.4
-# https://github.com/rodolphocastro/dotfiles/
-# https://jonlabelle.com/snippets/tag/powershell
+################################################################################
+# df/powershell/profile.ps1
+#
+# Main PowerShell profile entrypoint for this dotfiles repository.
+# Responsibilities:
+# - Load helper functions and runtime secrets.
+# - Load environment, checks, plugins, aliases, completions, and WSL bridge.
+# - Keep startup deterministic across fresh bootstrap and daily terminal usage.
+################################################################################
 
 #set default directory
 #Set-Location d:\projects

@@ -1,5 +1,10 @@
 
 <!--
+Arquivo de fixture para testar highlighting de TODO em editores.
+Mantém marcadores variados propositalmente.
+-->
+
+<!--
 # TODO: Teste de Tarefa
 
 # DOING: (MKTP423) SACASDSA

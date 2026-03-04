@@ -1,5 +1,12 @@
+################################################################################
+# df/powershell/env-vars.ps1
+#
+# Persists baseline environment variables to HKCU for new terminal sessions.
+# This file intentionally writes user-scoped values (not machine-wide).
+################################################################################
+
 # TODO: check if path exists before set each env var
-#set custom envs
+# set custom envs
 
 # this method is way faster
 # https://stackoverflow.com/questions/4825967/environment-setenvironmentvariable-takes-a-long-time-to-set-a-variable-at-user-o#comment135137797_4826777

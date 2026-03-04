@@ -1,3 +1,14 @@
+###############################################################################
+# df/.aliases
+#
+# Canonical alias/functions file for Bash/WSL runtime.
+# Loaded by df/bash/.bashrc as the primary user alias source.
+#
+# Notes:
+# - Keep shell-portable Bash syntax.
+# - Group aliases by domain to reduce onboarding/maintenance cost.
+###############################################################################
+
 alias c='clear'
 alias g=git
 

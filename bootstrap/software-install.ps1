@@ -1,3 +1,16 @@
+################################################################################
+# bootstrap/software-install.ps1
+#
+# Legacy helper to install software catalog entries grouped by installer type.
+# The active Windows bootstrap path already performs equivalent logic directly
+# in bootstrap/bootstrap-windows.ps1, but this file remains useful for manual
+# execution and troubleshooting isolated package-install issues.
+#
+# Input dependency:
+# - bootstrap/software-list.ps1 (provides $softwareList array)
+# - df/powershell/_functions.ps1 (installer helper functions)
+################################################################################
+
 ##########################################################
 # Includes
 ##########################################################
@@ -5,32 +18,31 @@ $DotFilesDirectory = "$Env:USERPROFILE\dotfiles"
 . "${DotFilesDirectory}\df\powershell\_functions.ps1"
 . ${PSScriptRoot}\software-list.ps1
 
-
 ##########################################################
-# Split Software List by package installer
+# Split software list by package manager
 ##########################################################
 $wingetPackages = $softwareList | Where-Object { $_.installer -like "winget" }
-#$scoopPackages = $softwareList | Where-Object { $_.installer -like "scoop" }
+# $scoopPackages = $softwareList | Where-Object { $_.installer -like "scoop" }
 $chocoPackages = $softwareList | Where-Object { $_.installer -like "choco" }
 $powershellModules = $softwareList | Where-Object { $_.installer -like "powershell-module" }
 $pipPackages = $softwareList | Where-Object { $_.installer -like "pip" }
 
 ##########################################################
-# Install Powershell Modules
+# Execute installation batches
 ##########################################################
+# Order choice:
+# 1) PowerShell modules first (some aliases/profile hooks depend on them).
+# 2) winget/choco/pip packages next.
 
-# $wingetPackages | ForEach-Object { Write-Output $_.id "`n" }
-# $scoopPackages | ForEach-Object { Write-Output $_.id "`n" }
-
-# todo: change $_.id to $_ and change id at output to name
 $powershellModules | ForEach-Object { Install-PowershellModule ($_.id) }
+
 $wingetInstalledCache = Get-WinGetInstalledCache
 $wingetPackages | ForEach-Object {
 	Install-WinGetApp -Package ($_.id) -PackageName ($_.name) -InstalledIds $wingetInstalledCache.Ids -InstalledNames $wingetInstalledCache.Names -InstalledNameKeys $wingetInstalledCache.NameKeys
 }
+
 $chocoPackages | ForEach-Object { Install-ChocoApp ($_.id) }
 $pipPackages | ForEach-Object { Install-PipPackage ($_.id) }
 
-# todo: convert int a function and put in software-list.ps1
+# Optional CLI script managed historically by this helper.
 Install-Script winfetch -AcceptLicense -Confirm
-#https://github.com/Pscx/Pscx
