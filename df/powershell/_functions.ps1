@@ -1869,14 +1869,558 @@ function Get-DotfilesRepoPath {
 	return (Join-Path $Env:USERPROFILE 'dotfiles')
 }
 
+######################################################################################
+# Resolve sync context label from a repository-relative file path
+######################################################################################
+function Get-DotfilesSyncContext {
+	[CmdletBinding()]
+	param (
+		[Parameter(Mandatory = $true)]
+		[string]$Path
+	)
+
+	$normalized = $Path.Replace('\', '/')
+
+	switch -Regex ($normalized) {
+		'^\.github/workflows/' { return 'ci' }
+		'^\.github/' { return 'automation' }
+		'^bootstrap/' { return 'bootstrap' }
+		'^df/powershell/' { return 'powershell' }
+		'^df/bash/' { return 'bash' }
+		'^df/zsh/' { return 'zsh' }
+		'^df/git/' { return 'git' }
+		'^df/ssh/' { return 'ssh' }
+		'^docs/' { return 'docs' }
+		'^(README|CONTEXT|SECURITY)\.md$' { return 'docs' }
+		'^Taskfile\.yml$' { return 'automation' }
+		'^(Dockerfile|docker/)' { return 'docker' }
+		default {
+			if ($normalized -match '^([^/]+)/') {
+				return $Matches[1]
+			}
+			return 'misc'
+		}
+	}
+}
+
+######################################################################################
+# Read current repository sync state (dirty/ahead/behind/upstream)
+######################################################################################
+function Get-DotfilesRepoSyncState {
+	[CmdletBinding()]
+	param (
+		[Parameter(Mandatory = $true)]
+		[string]$RepoPath
+	)
+
+	$branch = (& git -C $RepoPath rev-parse --abbrev-ref HEAD 2>$null | Out-String).Trim()
+	if ([string]::IsNullOrWhiteSpace($branch)) {
+		throw "Failed to resolve current branch in repository: $RepoPath"
+	}
+
+	$upstream = (& git -C $RepoPath rev-parse --abbrev-ref --symbolic-full-name '@{u}' 2>$null | Out-String).Trim()
+	$dirtyText = (& git -C $RepoPath status --porcelain=v1 2>$null | Out-String).Trim()
+	$dirty = -not [string]::IsNullOrWhiteSpace($dirtyText)
+
+	[int]$ahead = 0
+	[int]$behind = 0
+	if (-not [string]::IsNullOrWhiteSpace($upstream)) {
+		$aheadText = (& git -C $RepoPath rev-list --count "$upstream..HEAD" 2>$null | Out-String).Trim()
+		$behindText = (& git -C $RepoPath rev-list --count "HEAD..$upstream" 2>$null | Out-String).Trim()
+		[void][int]::TryParse($aheadText, [ref]$ahead)
+		[void][int]::TryParse($behindText, [ref]$behind)
+	}
+
+	return [PSCustomObject]@{
+		RepoPath = $RepoPath
+		Branch   = $branch
+		Upstream = $upstream
+		HasUpstream = -not [string]::IsNullOrWhiteSpace($upstream)
+		Dirty    = $dirty
+		Ahead    = $ahead
+		Behind   = $behind
+	}
+}
+
+######################################################################################
+# Prompt helper with safe non-interactive default (No)
+######################################################################################
+function Read-DotfilesYesNo {
+	[CmdletBinding()]
+	param (
+		[Parameter(Mandatory = $true)]
+		[string]$Prompt,
+		[switch]$DefaultYes
+	)
+
+	if ($Env:CI -eq 'true' -or [Console]::IsInputRedirected) {
+		Write-Host "$Prompt [y/N]: sessao nao interativa detectada -> padrao N"
+		return $false
+	}
+
+	$suffix = if ($DefaultYes) { '[Y/n]' } else { '[y/N]' }
+	$answer = (Read-Host "$Prompt $suffix").Trim().ToLowerInvariant()
+	if ([string]::IsNullOrWhiteSpace($answer)) {
+		return [bool]$DefaultYes
+	}
+
+	return @('y', 'yes', 's', 'sim').Contains($answer)
+}
+
+######################################################################################
+# Commit local changes grouped by context labels
+######################################################################################
+function Invoke-DotfilesCommitByContext {
+	[CmdletBinding()]
+	param (
+		[Parameter(Mandatory = $true)]
+		[string]$RepoPath
+	)
+
+	[void](Ensure-DotfilesGitSignerProgram -RepoPath $RepoPath)
+
+	$statusLines = (& git -C $RepoPath status --porcelain=v1 2>$null)
+	if ($LASTEXITCODE -ne 0) {
+		throw "Failed to read git status for grouped commit flow."
+	}
+
+	$groups = @{}
+	foreach ($line in $statusLines) {
+		if ([string]::IsNullOrWhiteSpace($line)) { continue }
+		if ($line.Length -lt 4) { continue }
+
+		$path = $line.Substring(3).Trim()
+		if ([string]::IsNullOrWhiteSpace($path)) { continue }
+
+		if ($path -match ' -> ') {
+			$path = ($path -split ' -> ')[-1].Trim()
+		}
+
+		$context = Get-DotfilesSyncContext -Path $path
+		if (-not $groups.ContainsKey($context)) {
+			$groups[$context] = New-Object System.Collections.Generic.List[string]
+		}
+		if (-not $groups[$context].Contains($path)) {
+			$groups[$context].Add($path)
+		}
+	}
+
+	if ($groups.Count -eq 0) {
+		Write-Host "Nenhuma alteracao local detectada para commits agrupados."
+		return @()
+	}
+
+	$preferredOrder = @('automation', 'ci', 'bootstrap', 'powershell', 'bash', 'zsh', 'git', 'ssh', 'docs', 'docker', 'misc')
+	$orderedContexts = New-Object System.Collections.Generic.List[string]
+
+	foreach ($ctx in $preferredOrder) {
+		if ($groups.ContainsKey($ctx)) {
+			$orderedContexts.Add($ctx)
+		}
+	}
+	foreach ($ctx in ($groups.Keys | Sort-Object)) {
+		if (-not $orderedContexts.Contains($ctx)) {
+			$orderedContexts.Add($ctx)
+		}
+	}
+
+	$createdCommits = @()
+	foreach ($ctx in $orderedContexts) {
+		$files = @($groups[$ctx] | Sort-Object -Unique)
+		if ($files.Count -eq 0) { continue }
+
+		& git -C $RepoPath add -- @files
+		if ($LASTEXITCODE -ne 0) {
+			throw ("Failed to stage files for context '{0}'." -f $ctx)
+		}
+
+		& git -C $RepoPath diff --cached --quiet
+		if ($LASTEXITCODE -eq 0) {
+			continue
+		}
+
+		$message = "chore(sync): $ctx updates"
+		& git -C $RepoPath commit -m $message
+		if ($LASTEXITCODE -ne 0) {
+			throw ("Failed to commit context '{0}'." -f $ctx)
+		}
+
+		$createdCommits += [PSCustomObject]@{
+			Context = $ctx
+			Message = $message
+			Files   = $files
+		}
+	}
+
+	return $createdCommits
+}
+
+######################################################################################
+# Push current branch (with upstream bootstrap when needed)
+######################################################################################
+function Push-DotfilesCurrentBranch {
+	[CmdletBinding()]
+	param (
+		[Parameter(Mandatory = $true)]
+		[string]$RepoPath,
+		[Parameter(Mandatory = $true)]
+		[string]$Branch,
+		[string]$Upstream
+	)
+
+	if ([string]::IsNullOrWhiteSpace($Upstream)) {
+		& git -C $RepoPath push --set-upstream origin $Branch
+	}
+	else {
+		& git -C $RepoPath push
+	}
+
+	if ($LASTEXITCODE -ne 0) {
+		throw ("Failed to push branch '{0}'." -f $Branch)
+	}
+}
+
+######################################################################################
+# Ensure gpg.ssh.program is valid for the current runtime (Windows/Unix).
+# Auto-heals stale local overrides that point to the other platform signer.
+######################################################################################
+function Ensure-DotfilesGitSignerProgram {
+	[CmdletBinding()]
+	param (
+		[Parameter(Mandatory = $true)]
+		[string]$RepoPath
+	)
+
+	$effectiveProgram = (& git -C $RepoPath config --get gpg.ssh.program 2>$null | Out-String).Trim()
+	$localProgram = (& git -C $RepoPath config --local --get gpg.ssh.program 2>$null | Out-String).Trim()
+	$isWindowsRuntime = ($Env:OS -eq 'Windows_NT')
+
+	# Resolve helper for a program token/path
+	$resolveProgramPath = {
+		param ([string]$ProgramValue)
+		if ([string]::IsNullOrWhiteSpace($ProgramValue)) { return '' }
+		$token = $ProgramValue.Trim()
+		if ($token.Contains(' ')) {
+			$token = ($token -split '\s+')[0]
+		}
+		if (Test-Path -Path $token -PathType Leaf) {
+			return (Resolve-Path -Path $token -ErrorAction SilentlyContinue | Select-Object -First 1 -ExpandProperty Path)
+		}
+		$cmdInfo = Get-Command -Name $token -ErrorAction SilentlyContinue
+		if ($null -ne $cmdInfo) {
+			return $cmdInfo.Source
+		}
+		return ''
+	}
+
+	$isCrossPlatformMismatch = $false
+	if ($isWindowsRuntime -and $effectiveProgram -match '^/|^~|^/home/|^/mnt/') {
+		$isCrossPlatformMismatch = $true
+	}
+	if ((-not $isWindowsRuntime) -and $effectiveProgram -match '^[A-Za-z]:\\') {
+		$isCrossPlatformMismatch = $true
+	}
+
+	$resolvedEffective = & $resolveProgramPath $effectiveProgram
+	if ($isCrossPlatformMismatch -or [string]::IsNullOrWhiteSpace($resolvedEffective)) {
+		if (-not [string]::IsNullOrWhiteSpace($localProgram)) {
+			# Local override is the main drift vector between Windows and WSL.
+			& git -C $RepoPath config --local --unset-all gpg.ssh.program *> $null
+			$localProgram = ''
+		}
+
+		if ($isWindowsRuntime) {
+			$preferredWindowsProgram = ''
+			if (Test-CommandExists op-ssh-sign) {
+				$preferredWindowsProgram = 'op-ssh-sign'
+			}
+			elseif (Test-CommandExists op-ssh-sign.exe) {
+				$preferredWindowsProgram = 'op-ssh-sign.exe'
+			}
+			elseif (Test-CommandExists op-ssh-sign-wsl.exe) {
+				$preferredWindowsProgram = 'op-ssh-sign-wsl.exe'
+			}
+
+			$effectiveProgramAfterLocalFix = (& git -C $RepoPath config --get gpg.ssh.program 2>$null | Out-String).Trim()
+			$resolvedAfterLocalFix = & $resolveProgramPath $effectiveProgramAfterLocalFix
+			if ([string]::IsNullOrWhiteSpace($resolvedAfterLocalFix) -and -not [string]::IsNullOrWhiteSpace($preferredWindowsProgram)) {
+				& git -C $RepoPath config --global gpg.ssh.program $preferredWindowsProgram *> $null
+			}
+		}
+		else {
+			$preferredUnixProgram = ''
+			if (Test-Path -Path "$HOME/.local/bin/op-ssh-sign" -PathType Leaf) {
+				$preferredUnixProgram = "$HOME/.local/bin/op-ssh-sign"
+			}
+			elseif (Test-CommandExists op-ssh-sign) {
+				$preferredUnixProgram = 'op-ssh-sign'
+			}
+
+			$effectiveProgramAfterLocalFix = (& git -C $RepoPath config --get gpg.ssh.program 2>$null | Out-String).Trim()
+			$resolvedAfterLocalFix = & $resolveProgramPath $effectiveProgramAfterLocalFix
+			if ([string]::IsNullOrWhiteSpace($resolvedAfterLocalFix) -and -not [string]::IsNullOrWhiteSpace($preferredUnixProgram)) {
+				& git -C $RepoPath config --global gpg.ssh.program $preferredUnixProgram *> $null
+			}
+		}
+
+		$effectiveProgram = (& git -C $RepoPath config --get gpg.ssh.program 2>$null | Out-String).Trim()
+		$resolvedEffective = & $resolveProgramPath $effectiveProgram
+	}
+
+	if ([string]::IsNullOrWhiteSpace($effectiveProgram) -or [string]::IsNullOrWhiteSpace($resolvedEffective)) {
+		throw ("Git signer program is not resolvable for this runtime. gpg.ssh.program='{0}'." -f $effectiveProgram)
+	}
+
+	return [PSCustomObject]@{
+		Program  = $effectiveProgram
+		Resolved = $resolvedEffective
+	}
+}
+
+######################################################################################
+# Deterministic repository update flow used by tasks:
+# - switch to main
+# - fetch --prune
+# - pull --rebase when upstream exists
+# - optional safe mode with stash push/pop
+######################################################################################
+function Invoke-DotfilesRepoUpdate {
+	[CmdletBinding()]
+	param (
+		[string]$RepoPath,
+		[switch]$Safe,
+		[switch]$SwitchMain
+	)
+
+	if ([string]::IsNullOrWhiteSpace($RepoPath)) {
+		$RepoPath = Get-DotfilesRepoPath
+	}
+	if (!(Test-Path -Path (Join-Path $RepoPath '.git') -PathType Container)) {
+		throw "Dotfiles repository not found at: $RepoPath"
+	}
+
+	$stashed = $false
+	if ($Safe) {
+		$dirtyBefore = (& git -C $RepoPath status --porcelain=v1 2>$null | Out-String).Trim()
+		if (-not [string]::IsNullOrWhiteSpace($dirtyBefore)) {
+			& git -C $RepoPath stash push -u -m 'wip-before-sync' *> $null
+			if ($LASTEXITCODE -ne 0) {
+				throw "Failed to stash local changes before update-safe flow."
+			}
+			$stashed = $true
+		}
+	}
+
+	try {
+		if ($SwitchMain) {
+			& git -C $RepoPath switch main *> $null
+			if ($LASTEXITCODE -ne 0) {
+				throw "Failed to switch to main branch."
+			}
+		}
+
+		& git -C $RepoPath fetch --prune origin *> $null
+		if ($LASTEXITCODE -ne 0) {
+			throw "Failed to fetch origin."
+		}
+
+		$state = Get-DotfilesRepoSyncState -RepoPath $RepoPath
+		if (-not $state.HasUpstream) {
+			& git -C $RepoPath branch --set-upstream-to ("origin/{0}" -f $state.Branch) $state.Branch *> $null
+			$state = Get-DotfilesRepoSyncState -RepoPath $RepoPath
+		}
+
+		if ($state.HasUpstream) {
+			& git -C $RepoPath pull --rebase
+			if ($LASTEXITCODE -ne 0) {
+				throw "Failed to pull --rebase."
+			}
+		}
+		else {
+			Write-Host ("Aviso: branch '{0}' sem upstream. Pull foi ignorado." -f $state.Branch)
+		}
+	}
+	finally {
+		if ($Safe -and $stashed) {
+			& git -C $RepoPath stash pop *> $null
+			if ($LASTEXITCODE -ne 0) {
+				Write-Host 'Aviso: stash pop retornou erro. Verifique conflitos locais.'
+			}
+		}
+	}
+
+	& git -C $RepoPath status --short
+	return (Get-DotfilesRepoSyncState -RepoPath $RepoPath)
+}
+
+######################################################################################
+# Deterministic repository publish flow used by tasks:
+# - update (pull --rebase)
+# - add/commit with explicit message
+# - push current branch
+######################################################################################
+function Invoke-DotfilesRepoPublish {
+	[CmdletBinding()]
+	param (
+		[Parameter(Mandatory = $true)]
+		[string]$Message,
+		[string]$RepoPath
+	)
+
+	if ([string]::IsNullOrWhiteSpace($Message)) {
+		throw 'Message is required for publish flow.'
+	}
+	if ([string]::IsNullOrWhiteSpace($RepoPath)) {
+		$RepoPath = Get-DotfilesRepoPath
+	}
+	if (!(Test-Path -Path (Join-Path $RepoPath '.git') -PathType Container)) {
+		throw "Dotfiles repository not found at: $RepoPath"
+	}
+
+	[void](Invoke-DotfilesRepoUpdate -RepoPath $RepoPath -SwitchMain)
+	[void](Ensure-DotfilesGitSignerProgram -RepoPath $RepoPath)
+
+	& git -C $RepoPath add -A
+	if ($LASTEXITCODE -ne 0) {
+		throw 'Failed to stage changes.'
+	}
+
+	& git -C $RepoPath diff --cached --quiet
+	if ($LASTEXITCODE -eq 0) {
+		Write-Host 'Nenhuma alteracao staged para commit.'
+		& git -C $RepoPath status --short
+		return (Get-DotfilesRepoSyncState -RepoPath $RepoPath)
+	}
+
+	& git -C $RepoPath commit -m $Message
+	if ($LASTEXITCODE -ne 0) {
+		throw 'Failed to commit changes.'
+	}
+
+	$state = Get-DotfilesRepoSyncState -RepoPath $RepoPath
+	Push-DotfilesCurrentBranch -RepoPath $RepoPath -Branch $state.Branch -Upstream $state.Upstream
+
+	& git -C $RepoPath status --short
+	return (Get-DotfilesRepoSyncState -RepoPath $RepoPath)
+}
+
+######################################################################################
+# Smart sync for daily operations in the current environment:
+# - inspect local pending state
+# - optionally commit grouped by context
+# - pull --rebase when behind
+# - optionally push when ahead
+######################################################################################
+function Invoke-DotfilesSmartSync {
+	[CmdletBinding()]
+	param (
+		[string]$RepoPath
+	)
+
+	if ([string]::IsNullOrWhiteSpace($RepoPath)) {
+		$RepoPath = Get-DotfilesRepoPath
+	}
+	if (!(Test-Path -Path (Join-Path $RepoPath '.git') -PathType Container)) {
+		throw "Dotfiles repository not found at: $RepoPath"
+	}
+
+	& git -C $RepoPath fetch --prune origin
+	if ($LASTEXITCODE -ne 0) {
+		throw "Failed to fetch origin."
+	}
+
+	$state = Get-DotfilesRepoSyncState -RepoPath $RepoPath
+	Write-Host ("Sync state: branch={0} dirty={1} ahead={2} behind={3}" -f $state.Branch, $state.Dirty, $state.Ahead, $state.Behind)
+
+	if ($state.Dirty) {
+		$commitNow = Read-DotfilesYesNo -Prompt 'Foram detectadas alteracoes locais nao commitadas. Commitar por contexto e publicar agora?'
+		if (-not $commitNow) {
+			Write-Host 'Nenhum commit/push automatico foi executado.'
+			Write-Host 'Sugestoes:'
+			Write-Host '1) Para atualizar do remoto preservando alteracoes locais: task sync:update-safe'
+			Write-Host '2) Para organizar commits manualmente: git add -p && git commit -m "..."'
+			Write-Host '3) Para isolar trabalho em andamento: git switch -c wip/<tema>'
+			return [PSCustomObject]@{
+				Action = 'skipped'
+				Reason = 'user_declined_commit'
+				State  = $state
+			}
+		}
+
+		[void](Ensure-DotfilesGitSignerProgram -RepoPath $RepoPath)
+		$commits = Invoke-DotfilesCommitByContext -RepoPath $RepoPath
+		Write-Host ("Grouped commits created: {0}" -f $commits.Count)
+		foreach ($commit in $commits) {
+			Write-Host ("- {0}" -f $commit.Message)
+		}
+
+		& git -C $RepoPath fetch --prune origin
+		if ($LASTEXITCODE -ne 0) {
+			throw "Failed to fetch origin after local commits."
+		}
+		$state = Get-DotfilesRepoSyncState -RepoPath $RepoPath
+	}
+
+	if ($state.Behind -gt 0) {
+		Write-Host ("Remoto com {0} commit(s) a frente. Executando fluxo repo:update..." -f $state.Behind)
+		$state = Invoke-DotfilesRepoUpdate -RepoPath $RepoPath
+	}
+
+	if (-not $state.HasUpstream) {
+		$setUpstreamNow = Read-DotfilesYesNo -Prompt ("Branch '{0}' nao possui upstream remoto. Publicar e configurar upstream agora?" -f $state.Branch)
+		if (-not $setUpstreamNow) {
+			Write-Host 'Nenhum push automatico foi executado.'
+			Write-Host 'Sugestoes:'
+			Write-Host ("1) Quando quiser publicar: git push --set-upstream origin {0}" -f $state.Branch)
+			Write-Host '2) Continue localmente e rode task sync depois.'
+			return [PSCustomObject]@{
+				Action = 'skipped'
+				Reason = 'user_declined_upstream_push'
+				State  = $state
+			}
+		}
+
+		Push-DotfilesCurrentBranch -RepoPath $RepoPath -Branch $state.Branch -Upstream $state.Upstream
+		$state = Get-DotfilesRepoSyncState -RepoPath $RepoPath
+	}
+	elseif ($state.Ahead -gt 0) {
+		$pushNow = Read-DotfilesYesNo -Prompt ("Foram detectados {0} commit(s) locais nao enviados. Fazer push agora?" -f $state.Ahead)
+		if (-not $pushNow) {
+			Write-Host 'Nenhum push automatico foi executado.'
+			Write-Host 'Sugestoes:'
+			Write-Host '1) Continue localmente e rode task sync depois.'
+			Write-Host '2) Valide antes de publicar: task ci:validate e task pr:validate.'
+			Write-Host '3) Envie manualmente quando estiver pronto: git push'
+			return [PSCustomObject]@{
+				Action = 'skipped'
+				Reason = 'user_declined_push'
+				State  = $state
+			}
+		}
+
+		Push-DotfilesCurrentBranch -RepoPath $RepoPath -Branch $state.Branch -Upstream $state.Upstream
+		$state = Get-DotfilesRepoSyncState -RepoPath $RepoPath
+	}
+
+	if (-not $state.Dirty -and $state.Ahead -eq 0 -and $state.Behind -eq 0) {
+		Write-Host ("Sync OK: branch={0} limpa e alinhada com o remoto." -f $state.Branch)
+	}
+	else {
+		Write-Host ("Sync state after run: branch={0} dirty={1} ahead={2} behind={3}" -f $state.Branch, $state.Dirty, $state.Ahead, $state.Behind)
+	}
+
+	return $state
+}
+
 
 ######################################################################################
 # Sync policy for cross-platform tests:
 # 1) Windows repo must be clean
 # 2) Push Windows branch to origin
 # 3) WSL repo must be clean
-# 4) Pull --ff-only in WSL
+# 4) Pull --rebase in WSL
 # 5) Validate both HEADs are identical
+# 6) Never copy files directly between environments (Git-only sync)
 ######################################################################################
 function Sync-DotfilesWindowsToWsl {
 	[CmdletBinding()]
@@ -1956,10 +2500,10 @@ function Sync-DotfilesWindowsToWsl {
 		throw "WSL repo has uncommitted changes. Commit/stash in WSL before sync."
 	}
 
-	$wslSyncCmd = "cd $WslRepoPath && git fetch --prune origin && git pull --ff-only"
+	$wslSyncCmd = "cd $WslRepoPath && git fetch --prune origin && git pull --rebase"
 	& wsl -d $WslDistro bash -lc $wslSyncCmd *> $null
 	if ($LASTEXITCODE -ne 0) {
-		throw ("Failed to sync WSL repo ({0}) with pull --ff-only." -f $WslRepoPath)
+		throw ("Failed to sync WSL repo ({0}) with pull --rebase." -f $WslRepoPath)
 	}
 
 	$windowsHead = (& git -C $windowsRepoPath rev-parse HEAD 2>$null | Out-String).Trim()
@@ -1969,26 +2513,6 @@ function Sync-DotfilesWindowsToWsl {
 	}
 	if ($windowsHead -ne $wslHead) {
 		throw ("Sync mismatch: Windows HEAD={0} WSL HEAD={1}" -f $windowsHead, $wslHead)
-	}
-
-	# Best-effort sync of local (ignored) config files required for parity
-	# between Windows and WSL worktrees.
-	$wslRepoWindowsPath = (& wsl -d $WslDistro bash -lc "wslpath -w $WslRepoPath" 2>$null | Out-String).Trim()
-	if (-not [string]::IsNullOrWhiteSpace($wslRepoWindowsPath)) {
-		$localParityFiles = @(
-			@{ RelativePath = 'bootstrap\user-config.yaml' },
-			@{ RelativePath = 'df\git\.gitconfig.local' }
-		)
-		foreach ($entry in $localParityFiles) {
-			$sourcePath = Join-Path $windowsRepoPath $entry.RelativePath
-			if (!(Test-Path -Path $sourcePath -PathType Leaf)) { continue }
-			$targetPath = Join-Path $wslRepoWindowsPath $entry.RelativePath
-			$targetDir = Split-Path -Path $targetPath -Parent
-			if ($targetDir -and !(Test-Path -Path $targetDir -PathType Container)) {
-				New-Item -Path $targetDir -ItemType Directory -Force | Out-Null
-			}
-			Copy-Item -Path $sourcePath -Destination $targetPath -Force
-		}
 	}
 
 	$result = [PSCustomObject]@{
