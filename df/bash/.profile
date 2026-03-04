@@ -31,6 +31,11 @@ _dotfiles_load_runtime_env() {
   fi
 
   [ -z "${GH_TOKEN:-}" ] && [ -n "${GITHUB_TOKEN:-}" ] && export GH_TOKEN="$GITHUB_TOKEN"
+  [ -n "${OP_SERVICE_ACCOUNT_TOKEN:-}" ] && export OP_SERVICE_ACCOUNT_TOKEN="$(printf '%s' "$OP_SERVICE_ACCOUNT_TOKEN" | tr -d '\r')"
+  [ -n "${GH_TOKEN:-}" ] && export GH_TOKEN="$(printf '%s' "$GH_TOKEN" | tr -d '\r')"
+  [ -n "${GITHUB_TOKEN:-}" ] && export GITHUB_TOKEN="$(printf '%s' "$GITHUB_TOKEN" | tr -d '\r')"
+  [ -n "${SOPS_AGE_KEY:-}" ] && export SOPS_AGE_KEY="$(printf '%s' "$SOPS_AGE_KEY" | tr -d '\r')"
+  [ -n "${SOPS_AGE_KEY_FILE:-}" ] && export SOPS_AGE_KEY_FILE="$(printf '%s' "$SOPS_AGE_KEY_FILE" | tr -d '\r')"
 }
 
 _dotfiles_load_runtime_env

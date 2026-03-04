@@ -97,6 +97,7 @@ checkEnv() {
         token_value="${token_value#\"}"
         token_value="${token_value%\'}"
         token_value="${token_value#\'}"
+        token_value="$(printf '%s' "$token_value" | tr -d '\r')"
         if [ -n "$token_value" ]; then
           export OP_SERVICE_ACCOUNT_TOKEN="$token_value"
           if _run_with_timeout 8 op whoami >/dev/null 2>&1; then

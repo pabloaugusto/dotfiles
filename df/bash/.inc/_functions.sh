@@ -21,24 +21,21 @@
 #   print_status WARN
 ######################################################
 print_status() {
-	local k_base="\033[0m\n"
-	local k_green_inv="\033[32;7m"
-	local k_red_inv="\033[31;7m"
-	local k_yellow_inv="\033[33;7m"
+	local k_base=$'\033[0m'
+	local k_green_inv=$'\033[32;7m'
+	local k_red_inv=$'\033[31;7m'
+	local k_yellow_inv=$'\033[33;7m'
 	local status="$1"
 
 	case "$status" in
 		DONE)
-			# shellcheck disable=SC2059
-			printf " %s DONE %s " "$k_green_inv" "$k_base"
+			printf ' %s DONE %s\n' "$k_green_inv" "$k_base"
 			;;
 		ERROR)
-			# shellcheck disable=SC2059
-			printf " %s ERROR %s " "$k_red_inv" "$k_base"
+			printf ' %s ERROR %s\n' "$k_red_inv" "$k_base"
 			;;
 		WARN)
-			# shellcheck disable=SC2059
-			printf " %s WARN %s " "$k_yellow_inv" "$k_base"
+			printf ' %s WARN %s\n' "$k_yellow_inv" "$k_base"
 			;;
 	esac
 }
