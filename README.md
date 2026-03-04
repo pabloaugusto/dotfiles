@@ -109,13 +109,39 @@ bash ~/dotfiles/bootstrap/bootstrap-ubuntu-wsl.sh
 
 Documentação detalhada: `docs/checkenv.md`.
 
-## Rotina operacional Windows + WSL
+## Tasks (interface oficial de automação)
 
-Antes de testar no WSL após mudanças no Windows:
+Todas as operações diárias e validações de PR/CI devem ser executadas via `task`
+(`Taskfile.yml`) para manter paridade entre ambientes e evitar drift.
 
-1. commit/push no Windows
-2. rodar `dfsync` no Windows (sincroniza e valida WSL)
-3. só então executar testes no WSL
+Padrão de execução:
+
+- comandos sem sufixo fazem **auto-detecção de ambiente** (Windows/WSL Linux)
+- comandos com sufixo `:windows` e `:linux` permanecem disponíveis para execução manual/forçada
+
+Fluxo de sync (repositórios independentes por ambiente):
+
+1. fluxo canônico diário: rode `task sync` no ambiente em que estiver trabalhando
+2. ao trocar de ambiente (Windows/WSL/outra máquina): rode `task sync` no destino
+3. quando precisar comportamento estritamente previsível (sem prompt): use aliases determinísticos (`sync:update`, `sync:update-safe`, `sync:publish`)
+
+Tasks principais:
+
+- `task sync` (auto), `task sync:windows`, `task sync:linux` (fluxo inteligente guiado)
+- `task sync:update` / `task sync:update-safe` / `task sync:publish MSG="..."` (determinísticos, sem heurística interativa)
+- `task sync:update:windows` / `task sync:update:linux`
+- `task sync:wsl-gate` (auto) e `task sync:wsl-gate:windows` para gate local Windows->WSL via Git-only
+- `task env:check` (auto) e variantes `task env:check:windows` / `task env:check:linux`
+- `task bootstrap` (auto) e variantes `task bootstrap:windows:new` / `task bootstrap:windows:refresh` / `task bootstrap:linux`
+- `task ci:validate` (auto) e variantes `task ci:validate:windows` / `task ci:validate:linux`
+- `task pr:status` / `task pr:checks PR=<numero>`
+
+Política de paridade:
+
+- toda automação de CI/CD e validação de PR deve ter task equivalente em `Taskfile.yml`
+- toda mudança em workflow de CI/CD deve ser refletida nas tasks correspondentes
+- sincronização entre ambientes (Windows/WSL ou máquinas diferentes) deve ocorrer via Git, sem cópia direta de arquivos entre ambientes
+- `repo:update`/`repo:update-safe`/`repo:publish` (e aliases `sync:update`/`sync:update-safe`/`sync:publish`) reutilizam o mesmo core do `sync` para reduzir drift de comportamento
 
 ## Segurança
 

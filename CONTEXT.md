@@ -81,6 +81,12 @@ Derivados automáticos:
 
 Prática operacional esperada antes de testes cross-platform:
 
-1. commit/push no Windows
-2. `dfsync` no Windows (sincroniza e valida WSL)
+1. fluxo canônico: `task sync` no ambiente atual
+2. `task sync:wsl-gate` no Windows (sincroniza e valida clone WSL via Git-only)
 3. testes no WSL
+
+Aliases determinísticos (sem prompt), quando necessário:
+
+- `task sync:update`
+- `task sync:update-safe`
+- `task sync:publish MSG="..."`
