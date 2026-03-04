@@ -491,6 +491,105 @@ function Invoke-ProfileFoldersToOneDriveLinking {
 	}
 }
 
+function Remove-StaleProfileFolderPrelinkBackups {
+	param (
+		[string]$UserProfilePath
+	)
+
+	if ([string]::IsNullOrWhiteSpace($UserProfilePath) -or -not (Test-Path -Path $UserProfilePath -PathType Container)) {
+		return
+	}
+
+	$items = Get-ChildItem -Path $UserProfilePath -Force -ErrorAction SilentlyContinue |
+		Where-Object { $_.Name -like '*.dotfiles-prelink-*' } |
+		Sort-Object LastWriteTime
+
+	$removed = 0
+	$migrated = 0
+	$kept = 0
+
+	foreach ($item in $items) {
+		$removedCurrent = $false
+
+		# Link/junction backups do not carry unique data; safe to delete.
+		if (-not [string]::IsNullOrWhiteSpace([string]$item.LinkType)) {
+			Remove-Item -Path $item.FullName -Recurse -Force -ErrorAction SilentlyContinue
+			$removedCurrent = -not (Test-Path -Path $item.FullName)
+		}
+		elseif ($item.PSIsContainer) {
+			$hasContent = (Get-ChildItem -Path $item.FullName -Force -ErrorAction SilentlyContinue | Select-Object -First 1) -ne $null
+			if (-not $hasContent) {
+				Remove-Item -Path $item.FullName -Recurse -Force -ErrorAction SilentlyContinue
+				$removedCurrent = -not (Test-Path -Path $item.FullName)
+			}
+			else {
+				$backupName = [string]$item.Name
+				$prefix = '.dotfiles-prelink-'
+				$prefixIdx = $backupName.LastIndexOf($prefix, [System.StringComparison]::OrdinalIgnoreCase)
+				$baseFolderName = if ($prefixIdx -gt 0) { $backupName.Substring(0, $prefixIdx) } else { '' }
+				if ([string]::IsNullOrWhiteSpace($baseFolderName)) {
+					Write-Warning ("Unable to infer original folder for backup '{0}'. Keeping as-is." -f $item.FullName)
+				}
+				else {
+					$sourcePath = Join-Path $UserProfilePath $baseFolderName
+					if (-not (Test-Path -Path $sourcePath)) {
+						Write-Warning ("Active profile folder '{0}' not found for backup '{1}'. Keeping as-is." -f $sourcePath, $item.FullName)
+					}
+					else {
+						$sourceItem = Get-Item -Path $sourcePath -Force -ErrorAction SilentlyContinue
+						$isSourceLink = ($null -ne $sourceItem -and ($sourceItem.LinkType -eq 'SymbolicLink' -or $sourceItem.LinkType -eq 'Junction'))
+						if (-not $isSourceLink -or $null -eq $sourceItem.Target) {
+							Write-Warning ("Active profile folder '{0}' is not a link/junction. Keeping backup '{1}'." -f $sourcePath, $item.FullName)
+						}
+						else {
+							$targetPath = Normalize-WindowsPath -PathValue ([string]($sourceItem.Target | Select-Object -First 1))
+							if ([string]::IsNullOrWhiteSpace($targetPath)) {
+								Write-Warning ("Unable to resolve link target for '{0}'. Keeping backup '{1}'." -f $sourcePath, $item.FullName)
+							}
+							else {
+								New-Item -ItemType Directory -Path $targetPath -Force | Out-Null
+								Write-Output ("Migrating backup content: {0} -> {1}" -f $item.FullName, $targetPath)
+								$roboLog = Join-Path $Env:TEMP ("dotfiles-prelink-restore-{0}-{1}.log" -f $baseFolderName.ToLowerInvariant(), (Get-Date -Format 'yyyyMMdd-HHmmss'))
+								$null = & robocopy $item.FullName $targetPath /E /COPY:DAT /DCOPY:DAT /R:1 /W:1 /XJ /NFL /NDL /NJH /NJS /NP /LOG:$roboLog
+								if ($LASTEXITCODE -le 7) {
+									Remove-Item -Path $item.FullName -Recurse -Force -ErrorAction SilentlyContinue
+									$removedCurrent = -not (Test-Path -Path $item.FullName)
+									if ($removedCurrent) {
+										$migrated++
+									}
+									else {
+										Write-Warning ("Content migrated but failed to remove backup folder: {0}" -f $item.FullName)
+									}
+								}
+								else {
+									Write-Warning ("Failed to migrate backup '{0}' (robocopy exit={1}). Log: {2}" -f $item.FullName, $LASTEXITCODE, $roboLog)
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+
+		if ($removedCurrent) {
+			$removed++
+			if ($item.PSIsContainer -and [string]::IsNullOrWhiteSpace([string]$item.LinkType)) {
+				Write-Output ("Removed prelink backup after migration: {0}" -f $item.FullName)
+			}
+			else {
+				Write-Output ("Removed stale prelink backup: {0}" -f $item.FullName)
+			}
+		}
+		else {
+			$kept++
+		}
+	}
+
+	if (($removed + $kept) -gt 0) {
+		Write-Output ("Prelink backup reconciliation summary: removed={0}, migrated={1}, kept={2}" -f $removed, $migrated, $kept)
+	}
+}
+
 function Resolve-WindowsOneDriveLayout {
 	param (
 		[string]$UserProfilePath,
@@ -837,6 +936,7 @@ try {
 	}
 
 	Invoke-ProfileFoldersToOneDriveLinking -OneDriveEnabled:$oneDriveEnabled -OneDriveLayout $oneDriveLayout -UserProfilePath $Env:USERPROFILE
+	Remove-StaleProfileFolderPrelinkBackups -UserProfilePath $Env:USERPROFILE
 
 	# documents and image path change
 	# Set-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders" -name "Personal" -value "D:\OneDrive\documents"
