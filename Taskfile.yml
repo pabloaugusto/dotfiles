@@ -1,0 +1,318 @@
+version: '3'
+
+tasks:
+  default:
+    desc: Lista tasks disponiveis
+    cmds:
+      - task --list
+
+  sync:
+    desc: Auto - sync inteligente (analisa pendencias, pergunta commit/push e sincroniza via Git)
+    cmds:
+      - task: sync:{{if or (eq .OS "Windows_NT") (eq .OS "windows")}}windows{{else}}linux{{end}}
+
+  sync:windows:
+    desc: Windows - sync inteligente do repo local (commit por contexto + pull/push guiado)
+    platforms: [windows]
+    cmds:
+      - "pwsh -NoProfile -Command \". '{{.USERPROFILE}}/dotfiles/df/powershell/_functions.ps1'; Invoke-DotfilesSmartSync\""
+
+  sync:linux:
+    desc: Linux/WSL - sync inteligente do repo local (commit por contexto + pull/push guiado)
+    platforms: [linux]
+    cmds:
+      - bash -lc "bash ~/dotfiles/df/bash/.inc/sync-smart.sh"
+
+  repo:status:
+    desc: Auto - status do repo dotfiles no ambiente atual
+    cmds:
+      - task: repo:status:{{if or (eq .OS "Windows_NT") (eq .OS "windows")}}windows{{else}}linux{{end}}
+
+  repo:status:windows:
+    desc: Windows - status de C:\\Users\\<user>\\dotfiles
+    platforms: [windows]
+    cmds:
+      - git -C "{{.USERPROFILE}}/dotfiles" rev-parse --abbrev-ref HEAD
+      - git -C "{{.USERPROFILE}}/dotfiles" rev-parse --short HEAD
+      - git -C "{{.USERPROFILE}}/dotfiles" status --short
+
+  repo:status:linux:
+    desc: Linux/WSL - status de ~/dotfiles
+    platforms: [linux]
+    cmds:
+      - git -C "{{.HOME}}/dotfiles" rev-parse --abbrev-ref HEAD
+      - git -C "{{.HOME}}/dotfiles" rev-parse --short HEAD
+      - git -C "{{.HOME}}/dotfiles" status --short
+
+  repo:update:
+    desc: Auto - atualizar repo dotfiles (main + fetch --prune + pull --rebase)
+    cmds:
+      - task: repo:update:{{if or (eq .OS "Windows_NT") (eq .OS "windows")}}windows{{else}}linux{{end}}
+
+  repo:update:windows:
+    desc: Windows - atualizar C:\\Users\\<user>\\dotfiles
+    platforms: [windows]
+    cmds:
+      - "pwsh -NoProfile -Command \". '{{.USERPROFILE}}/dotfiles/df/powershell/_functions.ps1'; Invoke-DotfilesRepoUpdate -SwitchMain\""
+
+  repo:update:linux:
+    desc: Linux/WSL - atualizar ~/dotfiles
+    platforms: [linux]
+    cmds:
+      - bash -lc "bash ~/dotfiles/df/bash/.inc/sync-smart.sh update"
+
+  repo:update-safe:
+    desc: Auto - atualizar com auto-stash para worktree suja
+    cmds:
+      - task: repo:update-safe:{{if or (eq .OS "Windows_NT") (eq .OS "windows")}}windows{{else}}linux{{end}}
+
+  repo:update-safe:windows:
+    desc: Windows - atualizar com auto-stash
+    platforms: [windows]
+    cmds:
+      - "pwsh -NoProfile -Command \". '{{.USERPROFILE}}/dotfiles/df/powershell/_functions.ps1'; Invoke-DotfilesRepoUpdate -Safe -SwitchMain\""
+
+  repo:update-safe:linux:
+    desc: Linux/WSL - atualizar com auto-stash
+    platforms: [linux]
+    cmds:
+      - bash -lc "bash ~/dotfiles/df/bash/.inc/sync-smart.sh update-safe"
+
+  repo:publish:
+    desc: Auto - publicar alteracoes (pull --rebase + commit + push)
+    requires:
+      vars: [MSG]
+    cmds:
+      - task: repo:publish:{{if or (eq .OS "Windows_NT") (eq .OS "windows")}}windows{{else}}linux{{end}}
+        vars:
+          MSG: "{{.MSG}}"
+
+  repo:publish:windows:
+    desc: Windows - publicar alteracoes
+    platforms: [windows]
+    requires:
+      vars: [MSG]
+    cmds:
+      - "pwsh -NoProfile -Command \". '{{.USERPROFILE}}/dotfiles/df/powershell/_functions.ps1'; Invoke-DotfilesRepoPublish -Message '{{.MSG}}'\""
+
+  repo:publish:linux:
+    desc: Linux/WSL - publicar alteracoes
+    platforms: [linux]
+    requires:
+      vars: [MSG]
+    cmds:
+      - bash -lc "bash ~/dotfiles/df/bash/.inc/sync-smart.sh publish \"{{.MSG}}\""
+
+  sync:update:
+    desc: Auto - alias para repo:update
+    cmds:
+      - task: repo:update
+
+  sync:update:windows:
+    desc: Windows - alias para repo:update:windows
+    platforms: [windows]
+    cmds:
+      - task: repo:update:windows
+
+  sync:update:linux:
+    desc: Linux/WSL - alias para repo:update:linux
+    platforms: [linux]
+    cmds:
+      - task: repo:update:linux
+
+  sync:update-safe:
+    desc: Auto - alias para repo:update-safe
+    cmds:
+      - task: repo:update-safe
+
+  sync:update-safe:windows:
+    desc: Windows - alias para repo:update-safe:windows
+    platforms: [windows]
+    cmds:
+      - task: repo:update-safe:windows
+
+  sync:update-safe:linux:
+    desc: Linux/WSL - alias para repo:update-safe:linux
+    platforms: [linux]
+    cmds:
+      - task: repo:update-safe:linux
+
+  sync:publish:
+    desc: Auto - alias para repo:publish
+    requires:
+      vars: [MSG]
+    cmds:
+      - task: repo:publish
+        vars:
+          MSG: "{{.MSG}}"
+
+  sync:publish:windows:
+    desc: Windows - alias para repo:publish:windows
+    platforms: [windows]
+    requires:
+      vars: [MSG]
+    cmds:
+      - task: repo:publish:windows
+        vars:
+          MSG: "{{.MSG}}"
+
+  sync:publish:linux:
+    desc: Linux/WSL - alias para repo:publish:linux
+    platforms: [linux]
+    requires:
+      vars: [MSG]
+    cmds:
+      - task: repo:publish:linux
+        vars:
+          MSG: "{{.MSG}}"
+
+  sync:wsl-gate:
+    desc: Auto - gate Git-only para sincronizar Windows repo -> WSL repo local
+    cmds:
+      - task: sync:wsl-gate:{{if or (eq .OS "Windows_NT") (eq .OS "windows")}}windows{{else}}linux{{end}}
+
+  sync:wsl-gate:windows:
+    desc: Windows - gate Git-only para sincronizar repo local do WSL
+    platforms: [windows]
+    cmds:
+      - "pwsh -NoProfile -Command \". '{{.USERPROFILE}}/dotfiles/df/powershell/_functions.ps1'; Sync-DotfilesWindowsToWsl\""
+
+  sync:wsl-gate:linux:
+    desc: Linux/WSL - nao aplicavel (execute sync:wsl-gate no Windows)
+    platforms: [linux]
+    cmds:
+      - bash -lc "echo 'sync:wsl-gate deve ser executado no Windows para sincronizar o clone WSL local via Git.' && exit 1"
+
+  env:check:
+    desc: Auto - roda checkEnv no ambiente atual
+    cmds:
+      - task: env:check:{{if or (eq .OS "Windows_NT") (eq .OS "windows")}}windows{{else}}linux{{end}}
+
+  env:check:windows:
+    desc: Windows - roda checkEnv no PowerShell
+    platforms: [windows]
+    cmds:
+      - "pwsh -NoProfile -Command \". '{{.USERPROFILE}}/dotfiles/df/powershell/_functions.ps1'; checkEnv\""
+
+  env:check:linux:
+    desc: Linux/WSL - roda checkEnv no Bash
+    platforms: [linux]
+    cmds:
+      - bash -lc "source ~/dotfiles/df/bash/.inc/check-env.sh && checkEnv"
+
+  bootstrap:
+    desc: Auto - bootstrap no ambiente atual
+    cmds:
+      - task: bootstrap:{{if or (eq .OS "Windows_NT") (eq .OS "windows")}}windows{{else}}linux{{end}}
+
+  bootstrap:windows:
+    desc: Windows - bootstrap completo (default)
+    platforms: [windows]
+    cmds:
+      - task: bootstrap:windows:new
+
+  bootstrap:windows:new:
+    desc: Windows - bootstrap completo
+    platforms: [windows]
+    cmds:
+      - "pwsh -NoProfile -Command \"& '{{.USERPROFILE}}/dotfiles/bootstrap/_start.ps1'\""
+
+  bootstrap:windows:refresh:
+    desc: Windows - refresh rapido
+    platforms: [windows]
+    cmds:
+      - "pwsh -NoProfile -Command \"& '{{.USERPROFILE}}/dotfiles/bootstrap/_start.ps1' -Refresh\""
+
+  bootstrap:linux:
+    desc: Linux/WSL - bootstrap Ubuntu
+    platforms: [linux]
+    cmds:
+      - bash -lc "bash ~/dotfiles/bootstrap/bootstrap-ubuntu-wsl.sh"
+
+  ci:docker-build:
+    desc: Auto - build Docker local (paridade check-scripts.yml.ignore)
+    cmds:
+      - task: ci:docker-build:{{if or (eq .OS "Windows_NT") (eq .OS "windows")}}windows{{else}}linux{{end}}
+
+  ci:docker-build:windows:
+    desc: Windows - docker build local
+    platforms: [windows]
+    dir: '{{.USERPROFILE}}/dotfiles'
+    cmds:
+      - docker build . --file Dockerfile
+
+  ci:docker-build:linux:
+    desc: Linux/WSL - docker build local
+    platforms: [linux]
+    dir: '{{.HOME}}/dotfiles'
+    cmds:
+      - docker build . --file Dockerfile
+
+  ci:lint:
+    desc: Auto - lint local no ambiente atual
+    cmds:
+      - task: ci:lint:{{if or (eq .OS "Windows_NT") (eq .OS "windows")}}windows{{else}}linux{{end}}
+
+  ci:lint:windows:
+    desc: Windows - validacao sintatica dos scripts .ps1
+    platforms: [windows]
+    dir: '{{.USERPROFILE}}/dotfiles'
+    cmds:
+      - "pwsh -NoProfile -Command '$ErrorActionPreference=\"Stop\"; $failed=$false; git ls-files \"bootstrap/*.ps1\" \"bootstrap/**/*.ps1\" \"df/*.ps1\" \"df/**/*.ps1\" | ForEach-Object { $errs=$null; [System.Management.Automation.Language.Parser]::ParseFile($_,[ref]$null,[ref]$errs) | Out-Null; if($errs -and $errs.Count -gt 0){ $failed=$true; $errs | ForEach-Object { Write-Host ($_.Extent.File + \":\" + $_.Extent.StartLineNumber + \": \" + $_.Message) } } }; if($failed){ exit 1 }'"
+
+  ci:lint:linux:
+    desc: Linux/WSL - validacao sintatica dos scripts .sh
+    platforms: [linux]
+    dir: '{{.HOME}}/dotfiles'
+    cmds:
+      - "bash -lc 'set -euo pipefail; while IFS= read -r f; do bash -n \"$f\"; done < <(git ls-files \"*.sh\")'"
+
+  ci:validate:
+    desc: Auto - validacao de PR local (paridade CI) no ambiente atual
+    cmds:
+      - task: ci:validate:{{if or (eq .OS "Windows_NT") (eq .OS "windows")}}windows{{else}}linux{{end}}
+
+  ci:validate:windows:
+    desc: Windows - validacao de PR local (paridade CI)
+    platforms: [windows]
+    deps:
+      - repo:status:windows
+      - ci:lint:windows
+      - ci:docker-build:windows
+
+  ci:validate:linux:
+    desc: Linux/WSL - validacao de PR local (paridade CI)
+    platforms: [linux]
+    deps:
+      - repo:status:linux
+      - ci:lint:linux
+      - ci:docker-build:linux
+
+  pr:status:
+    desc: Exibe status de PRs no GitHub CLI
+    cmds:
+      - gh pr status
+
+  pr:checks:
+    desc: Exibe checks de um PR especifico
+    requires:
+      vars: [PR]
+    cmds:
+      - gh pr checks "{{.PR}}"
+
+  pr:validate:
+    desc: Auto - pipeline local antes de abrir/atualizar PR
+    cmds:
+      - task: pr:validate:{{if or (eq .OS "Windows_NT") (eq .OS "windows")}}windows{{else}}linux{{end}}
+
+  pr:validate:windows:
+    desc: Windows - pipeline local antes de abrir/atualizar PR
+    platforms: [windows]
+    deps:
+      - ci:validate:windows
+
+  pr:validate:linux:
+    desc: Linux/WSL - pipeline local antes de abrir/atualizar PR
+    platforms: [linux]
+    deps:
+      - ci:validate:linux
