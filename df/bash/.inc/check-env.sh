@@ -120,7 +120,7 @@ checkEnv() {
         if _run_with_timeout 8 op read "$ref" >/dev/null 2>&1; then
           _add_result "success" "1Password secret ref" "$ref acessivel." ""
         else
-          _add_result "inconclusive" "1Password secret ref" "$ref nao acessivel no contexto atual." "Ajuste permissoes do service account no vault/item."
+          _add_result "fail" "1Password secret ref" "$ref nao acessivel no contexto atual." "Ajuste permissoes do service account no vault/item."
         fi
       done < <(grep -Eo 'op://[A-Za-z0-9._/-]+' "$refs_file" | sort -u)
     fi
@@ -128,8 +128,15 @@ checkEnv() {
 
   # GitHub CLI login + protocol checks.
   if command -v gh >/dev/null 2>&1; then
+    local gh_bin=""
+    gh_bin="$(type -P gh 2>/dev/null || true)"
+    if [ -z "$gh_bin" ]; then
+      gh_bin="$(command -v gh 2>/dev/null || true)"
+    fi
+    [ -n "$gh_bin" ] || gh_bin="gh"
+
     _tmp_out="$(mktemp)"
-    if ! _run_with_timeout 8 gh auth status --hostname github.com >"$_tmp_out" 2>&1; then
+    if ! _run_with_timeout 8 "$gh_bin" auth status --hostname github.com >"$_tmp_out" 2>&1; then
       local github_token="${GH_TOKEN:-${GITHUB_TOKEN:-}}"
       if [ -z "$github_token" ] && command -v op >/dev/null 2>&1; then
         for ref in "op://secrets/dotfiles/github/token" "op://secrets/github/api/token"; do
@@ -138,22 +145,31 @@ checkEnv() {
         done
       fi
       if [ -n "$github_token" ]; then
-        printf '%s\n' "$github_token" | gh auth login --hostname github.com --git-protocol ssh --with-token >/dev/null 2>&1 || true
-        gh config set git_protocol ssh --host github.com >/dev/null 2>&1 || true
+        printf '%s\n' "$github_token" | "$gh_bin" auth login --hostname github.com --git-protocol ssh --with-token >/dev/null 2>&1 || true
+        "$gh_bin" config set git_protocol ssh --host github.com >/dev/null 2>&1 || true
       fi
-      _run_with_timeout 8 gh auth status --hostname github.com >"$_tmp_out" 2>&1 || true
+      _run_with_timeout 8 "$gh_bin" auth status --hostname github.com >"$_tmp_out" 2>&1 || true
     fi
 
-    if grep -q "Logged in to github.com" "$_tmp_out" || _run_with_timeout 8 gh auth status --hostname github.com >/dev/null 2>&1; then
+    if grep -q "Logged in to github.com" "$_tmp_out" || _run_with_timeout 8 "$gh_bin" auth status --hostname github.com >/dev/null 2>&1; then
       _add_result "success" "GitHub CLI auth" "gh autenticado no host github.com." ""
     else
       _add_result "fail" "GitHub CLI auth" "gh nao autenticado no host github.com." "Rode 'gh auth login --hostname github.com --git-protocol ssh --with-token' com token do 1Password (preferencial: op://secrets/dotfiles/github/token)."
     fi
 
-    if gh config get git_protocol --host github.com 2>/dev/null | grep -q '^ssh$'; then
+    "$gh_bin" config set git_protocol ssh --host github.com >/dev/null 2>&1 || true
+    "$gh_bin" config set git_protocol ssh >/dev/null 2>&1 || true
+
+    local gh_protocol=""
+    gh_protocol="$("$gh_bin" config get git_protocol --host github.com 2>/dev/null | tr -d '\r' | tail -n1)"
+    if [ -z "$gh_protocol" ]; then
+      gh_protocol="$("$gh_bin" config get git_protocol 2>/dev/null | tr -d '\r' | tail -n1)"
+    fi
+
+    if [ "$gh_protocol" = "ssh" ]; then
       _add_result "success" "GitHub CLI git protocol" "git_protocol=ssh." ""
     else
-      _add_result "fail" "GitHub CLI git protocol" "git_protocol nao esta em ssh." "Execute 'gh config set git_protocol ssh --host github.com'."
+      _add_result "fail" "GitHub CLI git protocol" "git_protocol='${gh_protocol:-<empty>}'." "Execute 'gh config set git_protocol ssh --host github.com'."
     fi
     rm -f "$_tmp_out"
   fi
@@ -193,16 +209,25 @@ checkEnv() {
     fi
 
     local gpg_program_resolved=""
+    local gpg_program_type=""
     if [ -n "$gpg_program" ]; then
-      if [ -x "$gpg_program" ]; then
-        gpg_program_resolved="$gpg_program"
+      local gpg_program_cmd="$gpg_program"
+      gpg_program_cmd="${gpg_program_cmd%%[[:space:]]*}"
+      if [ -x "$gpg_program_cmd" ]; then
+        gpg_program_resolved="$gpg_program_cmd"
       else
-        gpg_program_resolved="$(command -v "$gpg_program" 2>/dev/null || true)"
+        gpg_program_resolved="$(type -P "$gpg_program_cmd" 2>/dev/null || true)"
+        if [ -z "$gpg_program_resolved" ] && [ "$gpg_program_cmd" = "op-ssh-sign" ] && [ -x "$HOME/.local/bin/op-ssh-sign" ]; then
+          gpg_program_resolved="$HOME/.local/bin/op-ssh-sign"
+        fi
       fi
+      gpg_program_type="$(type -t "$gpg_program_cmd" 2>/dev/null || true)"
     fi
 
     if [ -n "$gpg_program_resolved" ]; then
       _add_result "success" "1Password signer program" "gpg.ssh.program resolvido para: $gpg_program_resolved" ""
+    elif [ -n "$gpg_program" ] && [ "$gpg_program_type" = "alias" ]; then
+      _add_result "fail" "1Password signer program" "gpg.ssh.program aponta para alias ($gpg_program), e o Git exige executavel real." "Use um caminho/binario real para op-ssh-sign (ex.: ~/.local/bin/op-ssh-sign)."
     elif [ -n "$gpg_program" ]; then
       _add_result "fail" "1Password signer program" "gpg.ssh.program configurado, mas nao resolvivel: $gpg_program" "Ajuste gpg.ssh.program para op-ssh-sign/op-ssh-sign-wsl valido."
     else
@@ -224,7 +249,7 @@ checkEnv() {
   # SSH identity policy + github handshake checks.
   if command -v ssh >/dev/null 2>&1; then
     local ssh_graph identity_agent ssh_t_out ssh_t_rc
-    ssh_graph="$(ssh -G github.com 2>/dev/null)"
+    ssh_graph="$(ssh -G github.com 2>/dev/null | tr -d '\r')"
     identity_agent="$(printf '%s\n' "$ssh_graph" | awk '/^identityagent /{print $2; exit}')"
     if printf '%s' "$identity_agent" | grep -Eq '1password|openssh-ssh-agent|/tmp/1password-agent\.sock'; then
       _add_result "success" "SSH identity agent" "identityagent=$identity_agent" ""
@@ -237,13 +262,15 @@ checkEnv() {
     if printf '%s\n' "$ssh_graph" | grep -q '^identityfile none$'; then
       _add_result "success" "SSH identity source policy" "identityfile none ativo para evitar fallback local." ""
     else
-      _add_result "inconclusive" "SSH identity source policy" "identityfile none nao encontrado para github.com." "Use IdentityFile none para garantir chaves somente via 1Password agent."
+      _add_result "fail" "SSH identity source policy" "identityfile none nao encontrado para github.com." "Use IdentityFile none para garantir chaves somente via 1Password agent."
     fi
 
     if [ -S /tmp/1password-agent.sock ]; then
       _add_result "success" "1Password agent socket" "/tmp/1password-agent.sock presente." ""
+    elif printf '%s' "$identity_agent" | grep -q 'openssh-ssh-agent'; then
+      _add_result "success" "1Password agent socket" "Agent resolvido via named pipe do Windows ($identity_agent)." ""
     else
-      _add_result "inconclusive" "1Password agent socket" "/tmp/1password-agent.sock ausente." "Ative a integracao SSH do 1Password com WSL e reinicie o terminal."
+      _add_result "fail" "1Password agent socket" "/tmp/1password-agent.sock ausente e sem fallback de agent via Windows." "Ative a integracao SSH do 1Password com WSL e reinicie o terminal."
     fi
 
     if command -v timeout >/dev/null 2>&1; then
@@ -265,24 +292,24 @@ checkEnv() {
       if printf '%s' "$ssh_win_out" | grep -qi "successfully authenticated"; then
         _add_result "success" "SSH auth to GitHub" "Handshake SSH com GitHub OK via fallback ssh.exe." ""
       elif [ $ssh_t_rc -eq 124 ] || [ $ssh_win_rc -eq 124 ]; then
-        _add_result "inconclusive" "SSH auth to GitHub" "Teste SSH excedeu tempo limite." "Verifique conectividade e rode novamente."
+        _add_result "fail" "SSH auth to GitHub" "Teste SSH excedeu tempo limite." "Verifique conectividade e rode novamente."
       elif [ $ssh_t_rc -eq 255 ] || [ $ssh_win_rc -eq 255 ]; then
         _add_result "fail" "SSH auth to GitHub" "Falha de autenticacao SSH (ssh/ssh.exe): $ssh_t_out | $ssh_win_out" "Verifique chave autorizada no GitHub e agent do 1Password."
       else
-        _add_result "inconclusive" "SSH auth to GitHub" "Retorno nao deterministico (ssh/ssh.exe): $ssh_t_out | $ssh_win_out" "Rode manualmente 'ssh -T git@github.com' para confirmar."
+        _add_result "fail" "SSH auth to GitHub" "Retorno nao deterministico (ssh/ssh.exe): $ssh_t_out | $ssh_win_out" "Rode manualmente 'ssh -T git@github.com' para confirmar."
       fi
     elif [ $ssh_t_rc -eq 124 ]; then
-      _add_result "inconclusive" "SSH auth to GitHub" "Teste SSH excedeu tempo limite." "Verifique conectividade e rode novamente."
+      _add_result "fail" "SSH auth to GitHub" "Teste SSH excedeu tempo limite." "Verifique conectividade e rode novamente."
     elif [ $ssh_t_rc -eq 255 ]; then
       _add_result "fail" "SSH auth to GitHub" "Falha de autenticacao SSH: $ssh_t_out" "Verifique chave autorizada no GitHub e agent do 1Password."
     else
-      _add_result "inconclusive" "SSH auth to GitHub" "Retorno nao deterministico: $ssh_t_out" "Rode manualmente 'ssh -T git@github.com' para confirmar."
+      _add_result "fail" "SSH auth to GitHub" "Retorno nao deterministico: $ssh_t_out" "Rode manualmente 'ssh -T git@github.com' para confirmar."
     fi
   fi
 
   # End-to-end signed commit simulation in disposable temporary repo.
   if command -v git >/dev/null 2>&1; then
-    _tmp_dir="$(mktemp -d)"
+    _tmp_dir="$(mktemp -d "$HOME/checkenv-sign.XXXXXX" 2>/dev/null || mktemp -d 2>/dev/null || true)"
     if [ -n "$_tmp_dir" ]; then
       (
         cd "$_tmp_dir" || exit 1
@@ -291,32 +318,53 @@ checkEnv() {
         uemail="$(git config --global --get user.email 2>/dev/null)"
         [ -n "$uname" ] || git config user.name "checkEnv"
         [ -n "$uemail" ] || git config user.email "checkenv@local"
+        [ -n "$signing_key" ] && git config user.signingkey "$signing_key"
+        [ -n "$gpg_format" ] && git config gpg.format "$gpg_format"
+        if [ -n "$gpg_program_resolved" ]; then
+          git config gpg.ssh.program "$gpg_program_resolved"
+        elif [ -n "$gpg_program" ]; then
+          git config gpg.ssh.program "$gpg_program"
+        fi
+        [ "$commit_sign" = "true" ] && git config commit.gpgsign true
         printf 'checkenv %s\n' "$(date +%s)" > .checkenv
         git add .checkenv >/dev/null 2>&1 || exit 3
         if command -v timeout >/dev/null 2>&1; then
-          timeout 20 git commit -S -m "checkEnv signed commit" >/tmp/checkenv_commit.$$ 2>&1 || exit 4
+          if ! timeout 45 git commit -S -m "checkEnv signed commit" >/tmp/checkenv_commit.$$ 2>&1; then
+            rc=$?
+            [ "$rc" -eq 124 ] && exit 124
+            exit 4
+          fi
         else
           git commit -S -m "checkEnv signed commit" >/tmp/checkenv_commit.$$ 2>&1 || exit 4
         fi
         git log --show-signature -1 >/tmp/checkenv_sig.$$ 2>&1 || exit 5
+        git cat-file -p HEAD >/tmp/checkenv_cat.$$ 2>&1 || exit 6
         exit 0
       )
-      case $? in
+      local commit_probe_rc=$?
+      case $commit_probe_rc in
         0)
           if grep -Eq 'Good "git" signature|Good SSH signature' /tmp/checkenv_sig.$$ 2>/dev/null; then
             _add_result "success" "Signed commit test" "git commit -S e assinatura validada." ""
+          elif grep -q '^gpgsig ' /tmp/checkenv_cat.$$ 2>/dev/null; then
+            _add_result "success" "Signed commit test" "git commit -S gerou commit assinado (bloco gpgsig presente)." ""
           else
-            _add_result "inconclusive" "Signed commit test" "Commit assinado, mas sem confirmacao textual de assinatura boa." "Revise 'git log --show-signature -1' em um repo de teste."
+            _add_result "fail" "Signed commit test" "Commit criado, mas sem evidencia de assinatura (gpgsig ausente)." "Revise gpg.ssh.program, user.signingkey e agent do 1Password."
           fi
           ;;
+        124)
+          _add_result "fail" "Signed commit test" "git commit -S excedeu tempo limite (possivel prompt de aprovacao do 1Password)." "Aprove o prompt de assinatura no 1Password e rode checkEnv novamente."
+          ;;
         *)
-          _add_result "fail" "Signed commit test" "git commit -S falhou em repositorio temporario." "Corrija gpg.ssh.program, user.signingkey e agent do 1Password."
+          local commit_err=""
+          commit_err="$(head -n1 /tmp/checkenv_commit.$$ 2>/dev/null | tr -d '\r')"
+          _add_result "fail" "Signed commit test" "git commit -S falhou em repositorio temporario (${commit_err:-sem detalhe})." "Corrija gpg.ssh.program, user.signingkey e agent do 1Password."
           ;;
       esac
-      rm -f /tmp/checkenv_commit.$$ /tmp/checkenv_sig.$$
+      rm -f /tmp/checkenv_commit.$$ /tmp/checkenv_sig.$$ /tmp/checkenv_cat.$$
       rm -rf "$_tmp_dir"
     else
-      _add_result "inconclusive" "Signed commit test" "Nao foi possivel criar diretorio temporario." "Verifique permissao de escrita em /tmp."
+      _add_result "fail" "Signed commit test" "Nao foi possivel criar diretorio temporario." "Verifique permissao de escrita em $HOME ou /tmp."
     fi
   fi
 
