@@ -1336,9 +1336,14 @@ function Ensure-GitHubCliAuthFrom1Password {
 		return $false
 	}
 
+	function Set-GhSshProtocol {
+		& gh config set git_protocol ssh --host github.com *> $null
+		& gh config set git_protocol ssh *> $null
+	}
+
 	$authStatusOutput = & gh auth status --hostname github.com 2>&1
 	if ($LASTEXITCODE -eq 0) {
-		& gh config set git_protocol ssh --host github.com *> $null
+		Set-GhSshProtocol
 		return $true
 	}
 
@@ -1370,11 +1375,16 @@ function Ensure-GitHubCliAuthFrom1Password {
 
 	$token | & gh auth login --hostname github.com --git-protocol ssh --with-token *> $null
 	if ($LASTEXITCODE -ne 0) {
+		$authStatusOutput = & gh auth status --hostname github.com 2>&1
+		if ($LASTEXITCODE -eq 0) {
+			Set-GhSshProtocol
+			return $true
+		}
 		Write-Warning "gh auth login failed."
 		return $false
 	}
 
-	& gh config set git_protocol ssh --host github.com *> $null
+	Set-GhSshProtocol
 	return $true
 }
 
@@ -1427,10 +1437,19 @@ function Invoke-CheckEnvSignedCommitTest {
 			}
 		}
 
+		$catOutput = (& git cat-file -p HEAD 2>&1 | Out-String)
+		if ($catOutput -match '(?m)^gpgsig ') {
+			return [PSCustomObject]@{
+				Status   = 'success'
+				Detail   = 'git commit -S created a signed commit (gpgsig block present).'
+				Solution = ''
+			}
+		}
+
 		return [PSCustomObject]@{
-			Status   = 'inconclusive'
-			Detail   = 'Signed commit created, but no explicit "Good signature" marker was found.'
-			Solution = 'Run git log --show-signature -1 in a test repo and validate signer output.'
+			Status   = 'fail'
+			Detail   = 'Commit created but signature block (gpgsig) was not found.'
+			Solution = 'Fix gpg.ssh.program, user.signingkey and 1Password SSH agent availability.'
 		}
 	}
 	finally {
@@ -1608,7 +1627,7 @@ function checkEnv {
 					Add-CheckResult -Item "1Password secret ref" -Status 'success' -Detail "$ref is readable." -Solution ''
 				}
 				else {
-					Add-CheckResult -Item "1Password secret ref" -Status 'inconclusive' -Detail "$ref is not readable in current context." -Solution "Validate vault/item permissions for the service account token."
+					Add-CheckResult -Item "1Password secret ref" -Status 'fail' -Detail "$ref is not readable in current context." -Solution "Validate vault/item permissions for the service account token."
 				}
 			}
 		}
@@ -1629,7 +1648,13 @@ function checkEnv {
 			Add-CheckResult -Item 'GitHub CLI auth' -Status 'fail' -Detail (($statusOutput | Out-String).Trim()) -Solution 'Authenticate with gh using a token from 1Password (prefer op://secrets/dotfiles/github/token).'
 		}
 
+		& gh config set git_protocol ssh --host github.com *> $null
+		& gh config set git_protocol ssh *> $null
+
 		$gitProtocol = (& gh config get git_protocol --host github.com 2>$null | Out-String).Trim()
+		if ([string]::IsNullOrWhiteSpace($gitProtocol)) {
+			$gitProtocol = (& gh config get git_protocol 2>$null | Out-String).Trim()
+		}
 		if ($gitProtocol -eq 'ssh') {
 			Add-CheckResult -Item 'GitHub CLI git protocol' -Status 'success' -Detail 'git_protocol=ssh.' -Solution ''
 		}
@@ -1726,7 +1751,7 @@ function checkEnv {
 
 	# 6) SSH identity agent policy + GitHub SSH handshake
 	if (Test-CommandExists ssh) {
-		$sshGraph = & ssh -G github.com 2>$null
+		$sshGraph = (& ssh -G github.com 2>$null | ForEach-Object { $_ -replace "`r", '' })
 		$identityAgentLine = $sshGraph | Where-Object { $_ -match '^identityagent\s+' } | Select-Object -First 1
 		$identityAgent = if ($identityAgentLine) { ($identityAgentLine -replace '^identityagent\s+', '').Trim() } else { '' }
 
@@ -1745,14 +1770,17 @@ function checkEnv {
 			Add-CheckResult -Item 'SSH identity source policy' -Status 'success' -Detail 'identityfile none is active for github.com.' -Solution ''
 		}
 		else {
-			Add-CheckResult -Item 'SSH identity source policy' -Status 'inconclusive' -Detail 'identityfile none not found in effective SSH config.' -Solution 'Set IdentityFile none to enforce agent-only key usage.'
+			Add-CheckResult -Item 'SSH identity source policy' -Status 'fail' -Detail 'identityfile none not found in effective SSH config.' -Solution 'Set IdentityFile none to enforce agent-only key usage.'
 		}
 
 		if ((Test-Path -Path '/tmp/1password-agent.sock' -PathType Leaf) -or (Test-Path -Path '/tmp/1password-agent.sock' -PathType Container)) {
 			Add-CheckResult -Item '1Password WSL agent socket' -Status 'success' -Detail '/tmp/1password-agent.sock is present.' -Solution ''
 		}
+		elseif ($identityAgent -match 'openssh-ssh-agent') {
+			Add-CheckResult -Item '1Password WSL agent socket' -Status 'success' -Detail "Using Windows named-pipe SSH agent: $identityAgent." -Solution ''
+		}
 		elseif (-not $IsWindows) {
-			Add-CheckResult -Item '1Password WSL agent socket' -Status 'inconclusive' -Detail '/tmp/1password-agent.sock not found.' -Solution 'Enable 1Password SSH agent integration for Linux/WSL and restart shell.'
+			Add-CheckResult -Item '1Password WSL agent socket' -Status 'fail' -Detail '/tmp/1password-agent.sock not found and no Windows named-pipe fallback detected.' -Solution 'Enable 1Password SSH agent integration for Linux/WSL and restart shell.'
 		}
 
 		$sshTestOutput = & ssh -T git@github.com -o BatchMode=yes -o NumberOfPasswordPrompts=0 -o ConnectTimeout=10 -o ConnectionAttempts=1 -o StrictHostKeyChecking=accept-new 2>&1
@@ -1761,13 +1789,13 @@ function checkEnv {
 			Add-CheckResult -Item 'SSH auth to GitHub' -Status 'success' -Detail 'SSH handshake with GitHub succeeded.' -Solution ''
 		}
 		elseif ($sshTestText -match 'timed out') {
-			Add-CheckResult -Item 'SSH auth to GitHub' -Status 'inconclusive' -Detail $sshTestText -Solution 'Check network connectivity and run checkEnv again.'
+			Add-CheckResult -Item 'SSH auth to GitHub' -Status 'fail' -Detail $sshTestText -Solution 'Check network connectivity and run checkEnv again.'
 		}
 		elseif ($LASTEXITCODE -eq 255) {
 			Add-CheckResult -Item 'SSH auth to GitHub' -Status 'fail' -Detail $sshTestText -Solution 'Ensure GitHub account has the 1Password-managed SSH public key and the agent is active.'
 		}
 		else {
-			Add-CheckResult -Item 'SSH auth to GitHub' -Status 'inconclusive' -Detail $sshTestText -Solution 'Run ssh -T git@github.com manually and inspect host/key output.'
+			Add-CheckResult -Item 'SSH auth to GitHub' -Status 'fail' -Detail $sshTestText -Solution 'Run ssh -T git@github.com manually and inspect host/key output.'
 		}
 	}
 
