@@ -504,10 +504,21 @@ ensureOpToken() {
 # Ensure GitHub CLI is logged in using a token resolved from 1Password
 # --------------------------------------------------------------------
 ensureGitHubAuth() {
-	if ! command -v gh >/dev/null 2>&1; then
+	local gh_bin=""
+	gh_bin="$(type -P gh 2>/dev/null || true)"
+	if [[ -z "$gh_bin" ]] && command -v gh >/dev/null 2>&1; then
+		gh_bin="$(command -v gh)"
+	fi
+	if [[ -z "$gh_bin" ]]; then
 		echo "gh CLI nao encontrado."
 		return 1
 	fi
+
+	# Keep both host-specific and default gh protocol on SSH to avoid context drift.
+	_set_gh_protocol_ssh() {
+		"$gh_bin" config set git_protocol ssh --host github.com >/dev/null 2>&1 || true
+		"$gh_bin" config set git_protocol ssh >/dev/null 2>&1 || true
+	}
 
 	local github_token="${GH_TOKEN:-${GITHUB_TOKEN:-}}"
 	if [[ -z "$github_token" ]]; then
@@ -521,8 +532,8 @@ ensureGitHubAuth() {
 	fi
 
 	# Reuse existing authenticated session when available.
-	if gh auth status --hostname github.com >/dev/null 2>&1; then
-		gh config set git_protocol ssh --host github.com >/dev/null 2>&1 || true
+	if "$gh_bin" auth status --hostname github.com >/dev/null 2>&1; then
+		_set_gh_protocol_ssh
 		return 0
 	fi
 
@@ -532,12 +543,17 @@ ensureGitHubAuth() {
 	fi
 	export GH_TOKEN="$github_token"
 
-	if ! printf '%s\n' "$github_token" | gh auth login --hostname github.com --git-protocol ssh --with-token >/dev/null 2>&1; then
+	if ! printf '%s\n' "$github_token" | "$gh_bin" auth login --hostname github.com --git-protocol ssh --with-token >/dev/null 2>&1; then
+		# In some environments (plugins/wrappers), login may fail even with an active session.
+		if "$gh_bin" auth status --hostname github.com >/dev/null 2>&1; then
+			_set_gh_protocol_ssh
+			return 0
+		fi
 		echo "Falha ao autenticar gh via token do 1Password."
 		return 1
 	fi
 
-	gh config set git_protocol ssh --host github.com >/dev/null 2>&1 || true
+	_set_gh_protocol_ssh
 	return 0
 }
 
@@ -546,7 +562,13 @@ ensureGitHubAuth() {
 # (op-ssh-sign -> op-ssh-sign-wsl.exe in WSL)
 # --------------------------------------------------------------------
 ensureOpSshSignAlias() {
-	if command -v op-ssh-sign >/dev/null 2>&1; then
+	local op_sign_real=""
+	op_sign_real="$(type -P op-ssh-sign 2>/dev/null || true)"
+	if [[ -n "$op_sign_real" && -x "$op_sign_real" ]]; then
+		case ":$PATH:" in
+			*":$HOME/.local/bin:"*) ;;
+			*) export PATH="$HOME/.local/bin:$PATH" ;;
+		esac
 		return 0
 	fi
 	if ! command -v op-ssh-sign-wsl.exe >/dev/null 2>&1; then
@@ -560,7 +582,10 @@ ensureOpSshSignAlias() {
 exec op-ssh-sign-wsl.exe "$@"
 EOF
 	chmod 700 "$HOME/.local/bin/op-ssh-sign"
-	export PATH="$HOME/.local/bin:$PATH"
+	case ":$PATH:" in
+		*":$HOME/.local/bin:"*) ;;
+		*) export PATH="$HOME/.local/bin:$PATH" ;;
+	esac
 	return 0
 }
 
