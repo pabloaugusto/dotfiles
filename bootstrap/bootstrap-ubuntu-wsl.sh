@@ -374,6 +374,9 @@ function setLocalEnvFile {
 	# shellcheck disable=SC1090
 	source "$tmp_plain"
 	set +a
+	if [[ -n "${OP_SERVICE_ACCOUNT_TOKEN:-}" ]]; then
+		export OP_SERVICE_ACCOUNT_TOKEN="$(printf '%s' "$OP_SERVICE_ACCOUNT_TOKEN" | tr -d '\r')"
+	fi
 
 	if [[ -z "${SOPS_AGE_KEY:-}" ]]; then
 		echo "SOPS_AGE_KEY nao foi resolvida via 1Password; nao e possivel criptografar .env.local.sops."
@@ -434,6 +437,9 @@ importLocalEnvFromSops() {
 	# shellcheck disable=SC1090
 	source "$tmp_plain"
 	set +a
+	if [[ -n "${OP_SERVICE_ACCOUNT_TOKEN:-}" ]]; then
+		export OP_SERVICE_ACCOUNT_TOKEN="$(printf '%s' "$OP_SERVICE_ACCOUNT_TOKEN" | tr -d '\r')"
+	fi
 	rm -f "$tmp_plain"
 
 	if [[ -z "${GH_TOKEN:-}" && -n "${GITHUB_TOKEN:-}" ]]; then
