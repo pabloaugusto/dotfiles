@@ -2068,6 +2068,17 @@ function Push-DotfilesCurrentBranch {
 		[string]$Upstream
 	)
 
+	# Auto-heal GitHub origin remotes from HTTPS to SSH to avoid HTTPS token drift.
+	$originUrl = (& git -C $RepoPath remote get-url origin 2>$null | Out-String).Trim()
+	if ($originUrl -match '^https://github\.com/(?<repo>[^/]+/[^/]+?)(?:\.git)?$') {
+		$repoSlug = $Matches.repo
+		$sshUrl = "git@github.com:{0}.git" -f $repoSlug
+		& git -C $RepoPath remote set-url origin $sshUrl *> $null
+		if ($LASTEXITCODE -eq 0) {
+			Write-Host ("Origin remoto ajustado para SSH: {0}" -f $sshUrl)
+		}
+	}
+
 	if ([string]::IsNullOrWhiteSpace($Upstream)) {
 		& git -C $RepoPath push --set-upstream origin $Branch
 	}
@@ -2331,39 +2342,42 @@ function Invoke-DotfilesSmartSync {
 
 	$state = Get-DotfilesRepoSyncState -RepoPath $RepoPath
 	Write-Host ("Sync state: branch={0} dirty={1} ahead={2} behind={3}" -f $state.Branch, $state.Dirty, $state.Ahead, $state.Behind)
+	$commitDeclinedWithDirty = $false
 
 	if ($state.Dirty) {
 		$commitNow = Read-DotfilesYesNo -Prompt 'Foram detectadas alteracoes locais nao commitadas. Commitar por contexto e publicar agora?'
 		if (-not $commitNow) {
-			Write-Host 'Nenhum commit/push automatico foi executado.'
+			$commitDeclinedWithDirty = $true
+			Write-Host 'Commit automatico ignorado por escolha do usuario.'
 			Write-Host 'Sugestoes:'
-			Write-Host '1) Para atualizar do remoto preservando alteracoes locais: task sync:update-safe'
-			Write-Host '2) Para organizar commits manualmente: git add -p && git commit -m "..."'
-			Write-Host '3) Para isolar trabalho em andamento: git switch -c wip/<tema>'
-			return [PSCustomObject]@{
-				Action = 'skipped'
-				Reason = 'user_declined_commit'
-				State  = $state
+			Write-Host '1) Para organizar commits manualmente: git add -p && git commit -m "..."'
+			Write-Host '2) Para isolar trabalho em andamento: git switch -c wip/<tema>'
+		}
+		else {
+			[void](Ensure-DotfilesGitSignerProgram -RepoPath $RepoPath)
+			$commits = Invoke-DotfilesCommitByContext -RepoPath $RepoPath
+			Write-Host ("Grouped commits created: {0}" -f $commits.Count)
+			foreach ($commit in $commits) {
+				Write-Host ("- {0}" -f $commit.Message)
 			}
-		}
 
-		[void](Ensure-DotfilesGitSignerProgram -RepoPath $RepoPath)
-		$commits = Invoke-DotfilesCommitByContext -RepoPath $RepoPath
-		Write-Host ("Grouped commits created: {0}" -f $commits.Count)
-		foreach ($commit in $commits) {
-			Write-Host ("- {0}" -f $commit.Message)
+			& git -C $RepoPath fetch --prune origin
+			if ($LASTEXITCODE -ne 0) {
+				throw "Failed to fetch origin after local commits."
+			}
+			$state = Get-DotfilesRepoSyncState -RepoPath $RepoPath
 		}
-
-		& git -C $RepoPath fetch --prune origin
-		if ($LASTEXITCODE -ne 0) {
-			throw "Failed to fetch origin after local commits."
-		}
-		$state = Get-DotfilesRepoSyncState -RepoPath $RepoPath
 	}
 
 	if ($state.Behind -gt 0) {
-		Write-Host ("Remoto com {0} commit(s) a frente. Executando fluxo repo:update..." -f $state.Behind)
-		$state = Invoke-DotfilesRepoUpdate -RepoPath $RepoPath
+		if ($commitDeclinedWithDirty) {
+			Write-Host ("Remoto com {0} commit(s) a frente, mas pull foi ignorado porque ha alteracoes locais nao commitadas." -f $state.Behind)
+			Write-Host 'Sugestao: finalize commits locais ou rode task sync:update-safe.'
+		}
+		else {
+			Write-Host ("Remoto com {0} commit(s) a frente. Executando fluxo repo:update..." -f $state.Behind)
+			$state = Invoke-DotfilesRepoUpdate -RepoPath $RepoPath
+		}
 	}
 
 	if (-not $state.HasUpstream) {
