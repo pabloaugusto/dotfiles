@@ -157,6 +157,16 @@ _sync_commit_by_context() {
 
 _sync_push_current_branch() {
   local repo="$1"
+  local origin_url=""
+  local repo_slug=""
+
+  # Auto-heal GitHub origin remotes from HTTPS to SSH to avoid HTTPS token drift.
+  origin_url="$(git -C "$repo" remote get-url origin 2>/dev/null || true)"
+  if [[ "$origin_url" =~ ^https://github\.com/([^/]+/[^/]+?)(\.git)?$ ]]; then
+    repo_slug="${BASH_REMATCH[1]}"
+    git -C "$repo" remote set-url origin "git@github.com:${repo_slug}.git" >/dev/null 2>&1 || true
+  fi
+
   if [[ -z "$SYNC_UPSTREAM" ]]; then
     git -C "$repo" push --set-upstream origin "$SYNC_BRANCH"
   else
@@ -337,6 +347,7 @@ dotfiles_publish() {
 
 dotfiles_sync() {
   local repo="${1:-$(_sync_repo_path)}"
+  local commit_declined_with_dirty=0
 
   _sync_ensure_repo "$repo"
 
@@ -351,14 +362,22 @@ dotfiles_sync() {
       git -C "$repo" fetch --prune origin
       _sync_refresh_state "$repo"
     else
-      _sync_print_decline_commit_suggestions
-      return 0
+      commit_declined_with_dirty=1
+      echo "Commit automatico ignorado por escolha do usuario."
+      echo "Sugestoes:"
+      echo "1) Para organizar commits manualmente: git add -p && git commit -m \"...\""
+      echo "2) Para isolar trabalho em andamento: git switch -c wip/<tema>"
     fi
   fi
 
   if [[ "$SYNC_BEHIND" -gt 0 ]]; then
-    echo "Remoto com ${SYNC_BEHIND} commit(s) a frente. Executando fluxo repo:update..."
-    _dotfiles_update_core "$repo" "0" "0"
+    if [[ "$commit_declined_with_dirty" -eq 1 ]]; then
+      echo "Remoto com ${SYNC_BEHIND} commit(s) a frente, mas pull foi ignorado porque ha alteracoes locais nao commitadas."
+      echo "Sugestao: finalize commits locais ou rode task sync:update-safe."
+    else
+      echo "Remoto com ${SYNC_BEHIND} commit(s) a frente. Executando fluxo repo:update..."
+      _dotfiles_update_core "$repo" "0" "0"
+    fi
   fi
 
   if [[ -z "$SYNC_UPSTREAM" ]]; then
