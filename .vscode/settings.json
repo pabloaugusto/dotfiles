@@ -2,6 +2,46 @@
   "cSpell.diagnosticLevel": "Hint",
   "editor.defaultFormatter": "esbenp.prettier-vscode",
   "editor.formatOnSave": true,
+  // =========================
+  // VISUAL: repo/arquivo mais explicitos
+  // =========================
+  "window.title": "${folderName} - ${activeEditorShort}",
+  "window.commandCenter": true,
+  // =========================
+  // GIT (nativo)
+  // =========================
+  "git.autofetch": true,
+  "git.autofetchPeriod": 180,
+  "git.confirmSync": true,
+  "git.enableSmartCommit": false,
+  "git.fetchOnPull": true,
+  "git.pruneOnFetch": true,
+  "git.showPushSuccessNotification": true,
+  "git.untrackedChanges": "mixed",
+  // =========================
+  // SCM / Status Bar
+  // =========================
+  "scm.alwaysShowRepositories": true,
+  // =========================
+  // GITLENS
+  // =========================
+  "gitlens.statusBar.enabled": true,
+  "gitlens.statusBar.alignment": "left",
+  "gitlens.statusBar.reduceFlicker": true,
+  "gitlens.statusBar.format": "${repo} | ${branch}${aheadBehind} | ${remote} | ${author}",
+  "gitlens.currentLine.enabled": true,
+  "gitlens.codeLens.enabled": true,
+  "gitlens.hovers.enabled": true,
+  // =========================
+  // GITHUB PRs
+  // =========================
+  "githubPullRequests.showStatusBar": true,
+  "githubPullRequests.pullBranch": "never",
+  // =========================
+  // QUALIDADE DE VIDA
+  // =========================
+  "workbench.statusBar.visible": true,
+  "workbench.activityBar.location": "default",
   "[yaml]": {
     "editor.tabSize": 2,
     "editor.indentSize": 2,
@@ -13,5 +53,12 @@
     "*.yaml": "yaml",
     "*.gitconfig*": "ini"
   },
-  "terminal.integrated.cursorStyle": "line"
+  "terminal.integrated.cursorStyle": "line",
+  "gitlens.worktrees.promptForLocation": false,
+  "editor.suggest.showStatusBar": true,
+  "debug.showInStatusBar": "onFirstSessionStart",
+  "telemetry.editStats.showStatusBar": true,
+  "todo-tree.general.showIconsInsteadOfTagsInStatusBar": true,
+  "gitlens.statusBar.command": "gitlens.showCommitsInView",
+  "gitlens.launchpad.indicator.enabled": true
 }

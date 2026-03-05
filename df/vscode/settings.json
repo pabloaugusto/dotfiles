@@ -3,6 +3,10 @@
 	"workbench.colorTheme": "GitHub Dark",
 	"workbench.preferredDarkColorTheme": "GitHub Dark",
 	"workbench.preferredHighContrastColorTheme": "GitHub Dark",
+	"window.title": "${folderName} - ${activeEditorShort}",
+	"window.commandCenter": true,
+	"workbench.statusBar.visible": true,
+	"workbench.activityBar.location": "left",
 	//Appearance Settings Extensions-----------------------------------------------
 	"indentRainbow.colorOnWhiteSpaceOnly": true,
 	"indentRainbow.indicatorStyle": "light",
@@ -37,9 +41,17 @@
 	"security.workspace.trust.enabled": false,
 	//Git Settings -----------------------------------------------------------
 	"git.openRepositoryInParentFolders": "always",
+	"scm.alwaysShowRepositories": true,
 	//Telemetry Settings -----------------------------------------------------------
 	"telemetry.telemetryLevel": "off",
 	"gitlens.telemetry.enabled": false,
+	"gitlens.statusBar.enabled": true,
+	"gitlens.statusBar.alignment": "left",
+	"gitlens.statusBar.reduceFlicker": true,
+	"gitlens.statusBar.format": "${repo} | ${branch}${aheadBehind} | ${remote} | ${author}",
+	"gitlens.currentLine.enabled": true,
+	"gitlens.codeLens.enabled": true,
+	"gitlens.hovers.enabled": true,
 	"mdb.sendTelemetry": false,
 	"intelephense.telemetry.enabled": null,
 	"sonarlint.disableTelemetry": true,
@@ -371,7 +383,12 @@
 	"editor.defaultFormatter": "esbenp.prettier-vscode",
 	"explorer.confirmDelete": false,
 	"git.autofetch": true,
-	"git.enableSmartCommit": true,
+	"git.autofetchPeriod": 180,
+	"git.enableSmartCommit": false,
+	"git.fetchOnPull": true,
+	"git.pruneOnFetch": true,
+	"git.showPushSuccessNotification": true,
+	"git.untrackedChanges": "mixed",
 	"[shellscript]": {
 		"editor.defaultFormatter": "foxundermoon.shell-format",
 	},
@@ -398,7 +415,7 @@
 	},
 	"diffEditor.ignoreTrimWhitespace": true,
 	"diffEditor.renderSideBySide": false,
-	"git.confirmSync": false,
+	"git.confirmSync": true,
 	"prettier.singleQuote": true,
 	"[xml]": {
 		"editor.defaultFormatter": "redhat.vscode-xml",
@@ -584,6 +601,7 @@
 	"github.copilot.chat.copilotMemory.enabled": true,
 	"chat.agent.maxRequests": 40,
 	"python.analysis.typeCheckingMode": "standard",
+	"githubPullRequests.showStatusBar": true,
 	"githubPullRequests.pullBranch": "never",
 	"chat.tools.urls.autoApprove": {
 		"https://developers.google.com": true
