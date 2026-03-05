@@ -161,7 +161,10 @@ export   MYDOCS="$HOME/onedrive/documents"
 export ONEDRIVE="$HOME/onedrive"
 
 # include local env vars from encrypted file when available (preferred)
-if [ "${DOTFILES_RUNTIME_ENV_LOADED:-0}" != "1" ]; then
+if [ "${DOTFILES_RUNTIME_ENV_LOADED:-0}" != "1" ] || [ -z "${OP_SERVICE_ACCOUNT_TOKEN:-}" ]; then
+	DOTFILES_RUNTIME_ENV_FILE="${DOTFILES_RUNTIME_ENV_FILE:-$HOME/.config/dotfiles/runtime.env}"
+	[ -f "$DOTFILES_RUNTIME_ENV_FILE" ] && source "$DOTFILES_RUNTIME_ENV_FILE"
+
 	if [ -f ~/.env.local.sops ] && [ -n "$(command -v sops)" ]; then
 		_dotfiles_env_tmp="$(mktemp)"
 		if sops -d ~/.env.local.sops > "$_dotfiles_env_tmp" 2>/dev/null; then
@@ -189,7 +192,9 @@ fi
 
 # 1password bash plugins integration if file exists
 # only supported by unix systems at this date 03/2026
-[ -f $HOME/.config/op/plugins.sh ] && source $HOME/.config/op/plugins.sh
+# Disabled for WSL dotfiles since Shell Plugins require 1Password app integration (Biometric Unlock)
+# and do not work well with OP_SERVICE_ACCOUNT_TOKEN or headless setups.
+# [ -f $HOME/.config/op/plugins.sh ] && source $HOME/.config/op/plugins.sh
 
 
 
@@ -203,7 +208,7 @@ fi
 # ---------------- fastfetch
 	# fastfetch (terminal stats with great ui at terminal startup)
 	# set PATH so it includes fastfetch if command exists
-	[ -n "$(command -v fastfetch)" ] && fastfetch
+#	[ -n "$(command -v fastfetch)" ] && fastfetch
 
 # ---------------- kubectl
 	# Include Kubectl bash completion
