@@ -1,5 +1,7 @@
 # personal profile
 
+# Ensure Homebrew commands are available in non-interactive login shells too.
+[ -f "/home/linuxbrew/.linuxbrew/bin/brew" ] && eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
 DOTFILES_RUNTIME_ENV_FILE="${DOTFILES_RUNTIME_ENV_FILE:-$HOME/.config/dotfiles/runtime.env}"
 [ -f "$DOTFILES_RUNTIME_ENV_FILE" ] && . "$DOTFILES_RUNTIME_ENV_FILE"
 
@@ -60,8 +62,6 @@ EOF
 
 _dotfiles_ensure_op_ssh_sign
 
-# Ensure Homebrew commands are available in non-interactive login shells too.
-[ -f "/home/linuxbrew/.linuxbrew/bin/brew" ] && eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
 
 # Prefer 1Password SSH agent socket when available in WSL/Linux.
 [ -S /tmp/1password-agent.sock ] && export SSH_AUTH_SOCK=/tmp/1password-agent.sock
