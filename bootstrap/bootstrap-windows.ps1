@@ -1002,6 +1002,8 @@ catch {
 	# ----------------------------------------------------
 	$mydocs =  [Environment]::GetFolderPath("MyDocuments")
 	Add-Symlink "${mydocs}\Powershell\profile.ps1" "$DotFilesDirectory\df\powershell\profile.ps1" > $null
+	Add-Symlink "${mydocs}\Powershell\Microsoft.PowerShell_profile.ps1" "$DotFilesDirectory\df\powershell\Microsoft.PowerShell_profile.ps1" > $null
+	Add-Symlink "${mydocs}\WindowsPowerShell\Microsoft.PowerShell_profile.ps1" "$DotFilesDirectory\df\powershell\Microsoft.PowerShell_profile.ps1" > $null
 	Add-Symlink "${mydocs}\powershell\env-vars.ps1" "$DotFilesDirectory\df\powershell\env-vars.ps1" > $null
 	Add-Symlink "${mydocs}\powershell\env-check.ps1" "$DotFilesDirectory\df\powershell\env-check.ps1" > $null
 	Add-Symlink "${mydocs}\powershell\plugins.ps1" "$DotFilesDirectory\df\powershell\plugins.ps1" > $null

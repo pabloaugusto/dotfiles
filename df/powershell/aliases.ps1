@@ -10,12 +10,12 @@
 # - Keep names aligned with Bash aliases when practical (cross-platform muscle memory)
 ################################################################################
 
-Set-alias ag antigravity
+Set-Alias ag antigravity -Scope Global
 
 # git and other dev aliases use https://github.com/MichaelJolley/devtoolbox
 
 # remove Shortcuts
-If (Test-Path Alias:h) { Remove-Alias h }
+if (Test-Path Alias:h) { Remove-Item Alias:h -Force }
 
 # shell shortcuts
 Set-Alias c clear
