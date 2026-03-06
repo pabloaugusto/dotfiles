@@ -9,6 +9,8 @@
 # - Group aliases by domain to reduce onboarding/maintenance cost.
 ###############################################################################
 
+alias ag=antigravity
+
 alias c='clear'
 alias g=git
 

@@ -10,6 +10,8 @@
 # - Keep names aligned with Bash aliases when practical (cross-platform muscle memory)
 ################################################################################
 
+Set-alias ag antigravity
+
 # git and other dev aliases use https://github.com/MichaelJolley/devtoolbox
 
 # remove Shortcuts
