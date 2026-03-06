@@ -49,9 +49,12 @@
 	"gitlens.statusBar.alignment": "left",
 	"gitlens.statusBar.reduceFlicker": true,
 	"gitlens.statusBar.format": "${repo} | ${branch}${aheadBehind} | ${remote} | ${author}",
+	"gitlens.statusBar.command": "gitlens.showCommitsInView",
 	"gitlens.currentLine.enabled": true,
 	"gitlens.codeLens.enabled": true,
 	"gitlens.hovers.enabled": true,
+	"gitlens.views.branches.showRemoteBranches": true,
+	"gitlens.worktrees.promptForLocation": false,
 	"mdb.sendTelemetry": false,
 	"intelephense.telemetry.enabled": null,
 	"sonarlint.disableTelemetry": true,
@@ -380,7 +383,7 @@
 			".taskfiles/**/*.yaml"
 		]
 	},
-	"editor.defaultFormatter": "esbenp.prettier-vscode",
+	"editor.defaultFormatter": "charliermarsh.ruff",
 	"explorer.confirmDelete": false,
 	"git.autofetch": true,
 	"git.autofetchPeriod": 180,
