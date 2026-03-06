@@ -74,6 +74,19 @@ Semelhante ao full, porém:
 - não reaplica preferências pesadas do sistema
 - mantém auth/signing + `checkEnv`
 
+## Fluxo relink (Windows/WSL)
+
+Para reparar rapidamente links quebrados sem rodar o bootstrap completo:
+
+- Windows: `task bootstrap:windows:relink` ou `task bootstrap:relink`
+- WSL: `task bootstrap:linux:relink` ou `task bootstrap:relink`
+
+Comportamento:
+
+- recria os symlinks/junctions canônicos definidos pelo bootstrap atual
+- no Windows, reutiliza a mesma resolução de layout OneDrive/perfil e valida os links ao final
+- no WSL, recria apenas links de dotfiles/perfil e encerra sem reinstalar software ou refazer auth
+
 ## Fluxo Ubuntu WSL
 
 1. instala base (`apt`) e stack via Homebrew

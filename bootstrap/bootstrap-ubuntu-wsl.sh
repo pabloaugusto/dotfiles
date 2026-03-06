@@ -15,10 +15,14 @@
 # 3) Symlinks
 # 4) Secrets/auth
 # 5) Final checkEnv
+# Modes:
+# - full (default)
+# - relink: recreate canonical symlinks only
 ################################################################################
 
 SCRIPT_PATH="${BASH_SOURCE[0]}"
 BASE_DIR="$(cd "$(dirname "$SCRIPT_PATH")" && pwd -P)"
+BOOTSTRAP_MODE="${1:-full}"
 
 is_sourced() {
 	[[ "${BASH_SOURCE[0]}" != "$0" ]]
@@ -31,6 +35,15 @@ bootstrap_exit() {
 	fi
 	exit "$code"
 }
+
+case "$BOOTSTRAP_MODE" in
+	full|relink) ;;
+	--relink-only) BOOTSTRAP_MODE="relink" ;;
+	*)
+		echo "Uso: bash bootstrap/bootstrap-ubuntu-wsl.sh [full|relink|--relink-only]"
+		bootstrap_exit 2
+		;;
+esac
 
 _yaml_get() {
 	local file="$1"
@@ -612,12 +625,25 @@ function clean_setup_vars {
 	unset USR_HOME
 }
 
+ensureUnixSshConfigLocalLink() {
+	ln -sf ~/.ssh/config.unix ~/.ssh/config.local
+	chmod 600 ~/.ssh/config ~/.ssh/config.local ~/.ssh/config.unix ~/.ssh/config.windows 2>/dev/null || true
+}
+
 # --------------------------------------------------------------------
 # BOOTSTRAP steps
 # --------------------------------------------------------------------
 
 # 00 - prompt
 setup_prompt || bootstrap_exit 1
+
+if [ "$BOOTSTRAP_MODE" = "relink" ]; then
+	setProfileSymlinks "$USER" || bootstrap_exit 1
+	ensureUnixSshConfigLocalLink
+	clean_setup_vars
+	echo "Relink mode concluido."
+	bootstrap_exit 0
+fi
 
 # 0 setup fonts
 setup_fonts || bootstrap_exit 1
@@ -658,8 +684,7 @@ clean_setup_vars
 # ----------------------------------------------------
 # simlink para a config de ssh baseada no ambiente
 # ----------------------------------------------------
-ln -sf ~/.ssh/config.unix ~/.ssh/config.local
-chmod 600 ~/.ssh/config ~/.ssh/config.local ~/.ssh/config.unix ~/.ssh/config.windows 2>/dev/null || true
+ensureUnixSshConfigLocalLink
 
 echo "Running final environment health check (checkEnv)..."
 checkEnv || {

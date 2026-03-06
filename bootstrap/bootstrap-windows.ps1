@@ -1,6 +1,7 @@
 # inspired in https://github.com/rodolphocastro/dotfiles/
 param (
-	[switch]$RefreshDotfiles
+	[switch]$RefreshDotfiles,
+	[switch]$RelinkOnly
 )
 
 #################################################################################
@@ -9,18 +10,24 @@ param (
 # Modes:
 # - default (new install): full setup (links + apps + fonts + prefs + auth/checks)
 # - -RefreshDotfiles: update links/config/runtime auth without full software phase
+# - -RelinkOnly: recreate canonical symlinks/junctions without auth/secrets/software
 #
 # Design choice:
-# Auth/signing checks run in both modes to guarantee git/ssh/gh conformity.
+# Auth/signing checks run in full/refresh modes; relink-only stays focused on
+# link repair and link validation.
 #
 # Execution phases:
 # 1) OneDrive prerequisite (install/setup/migrate root when enabled)
 # 2) Safety checks + dotfiles links
 # 3) Optional software/fonts/preferences (full mode)
-# 4) Mandatory auth/signing bootstrap (both modes)
+# 4) Mandatory auth/signing bootstrap (full/refresh)
 # 5) Optional profile-folder links to OneDrive (with migration/backup policy)
-# 6) Final checkEnv gate
+# 6) Final gates (checkEnv or link-only validation)
 #################################################################################
+
+if ($RefreshDotfiles -and $RelinkOnly) {
+	throw "Use either -RefreshDotfiles or -RelinkOnly, not both."
+}
 
 if (! ($MyInvocation.InvocationName -eq ".")) {
 	Write-Output "cant run directly. Run _start.ps1 instead"
@@ -859,8 +866,7 @@ function Test-OneDriveLayoutHealth {
 #################################################################################
 	$DotFilesDirectory = "$Env:USERPROFILE\dotfiles"
 	if (!(Test-Path "$DotFilesDirectory")) {
-		Write-Host -ForegroundColor red "Folder $Env:USERPROFILE\dotfiles. Did you forgot clone dotfiles?"
-		return
+		throw "Folder $Env:USERPROFILE\dotfiles. Did you forgot clone dotfiles?"
 	} else {
 		. "${DotFilesDirectory}\df\powershell\_functions.ps1"
 	}
@@ -869,20 +875,24 @@ function Test-OneDriveLayoutHealth {
 # verify: runnning bootstrap on elevated powershell (as admin)?
 #################################################################################
 	if (! (Test-PowershellElevated)){
-		Write-Host -ForegroundColor red "This script must run on elevated powershell (as admin)"
-		return
+		throw "This script must run on elevated powershell (as admin)"
 	}
 
 #################################################################################
 # verify: really want run bootstrap?
 #################################################################################
-	Write-Warning "This script will override some of your home files"
-	Write-Warning "If you are okay with that complete the sentence below..."
+	if (-not ($RefreshDotfiles -or $RelinkOnly)) {
+		Write-Warning "This script will override some of your home files"
+		Write-Warning "If you are okay with that complete the sentence below..."
 
-	$Answer = Read-Host -Prompt "MARCO"
-	if ($Answer -ne "POLO") {
-		Write-Host "At least you have chicken 🐔"
-		return
+		$Answer = Read-Host -Prompt "MARCO"
+		if ($Answer -ne "POLO") {
+			Write-Host "At least you have chicken 🐔"
+			return
+		}
+	}
+	else {
+		Write-Output "Non-full mode: skipping interactive confirmation."
 	}
 
 #################################################################################
@@ -1029,7 +1039,7 @@ catch {
 #################################################################################
 # bootstrap: font install
 #################################################################################
-	if (-not $RefreshDotfiles) {
+	if (-not ($RefreshDotfiles -or $RelinkOnly)) {
 		Install-FontWindows("$DotFilesDirectory\df\assets\fonts\comic-code-nerdfonts")
 	}
 	#sudo oh-my-posh font install Hack
@@ -1040,7 +1050,7 @@ catch {
 #################################################################################
 # bootstrap: software install
 #################################################################################
-	if (-not $RefreshDotfiles) {
+	if (-not ($RefreshDotfiles -or $RelinkOnly)) {
 		# TODO: ask to install complete software list
 		# Install powers Shell Modules
 		. ${PSScriptRoot}\software-list.ps1
@@ -1061,69 +1071,79 @@ catch {
 			Install-Script winfetch -AcceptLicense -Force
 	}
 	else {
-		Write-Output "Refresh mode: skipping software/font installation."
+		Write-Output "Non-full mode: skipping software/font installation."
 	}
 
 #################################################################################
 # bootstrap: ensure auth/signing prerequisites for 1Password + GitHub CLI
 #################################################################################
-	# Even in refresh mode, auth/signing tooling must be present because
-	# checkEnv validates runtime compliance immediately at the end.
-	$authPrereqPackages = @(
-		@{ id = 'AgileBits.1Password'; name = '1Password' },
-		@{ id = 'AgileBits.1Password.CLI'; name = '1Password CLI' },
-		@{ id = 'GitHub.cli'; name = 'GitHub CLI' }
-	)
+	# Refresh mode still preserves auth/signing compliance because checkEnv runs
+	# at the end. Relink-only intentionally skips this phase.
+	if (-not $RelinkOnly) {
+		$authPrereqPackages = @(
+			@{ id = 'AgileBits.1Password'; name = '1Password' },
+			@{ id = 'AgileBits.1Password.CLI'; name = '1Password CLI' },
+			@{ id = 'GitHub.cli'; name = 'GitHub CLI' }
+		)
 
-	$authPrereqCache = Get-WinGetInstalledCache
-	foreach ($pkg in $authPrereqPackages) {
-		Install-WinGetApp -Package $pkg.id -PackageName $pkg.name -InstalledIds $authPrereqCache.Ids -InstalledNames $authPrereqCache.Names -InstalledNameKeys $authPrereqCache.NameKeys
+		$authPrereqCache = Get-WinGetInstalledCache
+		foreach ($pkg in $authPrereqPackages) {
+			Install-WinGetApp -Package $pkg.id -PackageName $pkg.name -InstalledIds $authPrereqCache.Ids -InstalledNames $authPrereqCache.Names -InstalledNameKeys $authPrereqCache.NameKeys
+		}
+		$Env:Path = ("{0};{1}" -f [Environment]::GetEnvironmentVariable('Path', 'Machine'), [Environment]::GetEnvironmentVariable('Path', 'User'))
 	}
-	$Env:Path = ("{0};{1}" -f [Environment]::GetEnvironmentVariable('Path', 'Machine'), [Environment]::GetEnvironmentVariable('Path', 'User'))
+	else {
+		Write-Output "Relink mode: skipping auth/signing prerequisite installation."
+	}
 
 #################################################################################
 # bootstrap: runtime secrets + gh auth + final environment health check
 #################################################################################
 	# Runtime secrets are generated from 1Password refs and stored encrypted in
 	# ~/.env.local.sops. No plaintext .env.local is kept on disk.
-	$templatePath = Join-Path $DotFilesDirectory 'bootstrap\secrets\.env.local.tpl'
-	$envLocalPath = Join-Path $Env:USERPROFILE '.env.local.sops'
-	if (!(Set-LocalEnvFrom1Password -TemplatePath $templatePath -OutputPath $envLocalPath)) {
-		throw "Failed to initialize encrypted env (.env.local.sops) from 1Password."
-	}
+	if (-not $RelinkOnly) {
+		$templatePath = Join-Path $DotFilesDirectory 'bootstrap\secrets\.env.local.tpl'
+		$envLocalPath = Join-Path $Env:USERPROFILE '.env.local.sops'
+		if (!(Set-LocalEnvFrom1Password -TemplatePath $templatePath -OutputPath $envLocalPath)) {
+			throw "Failed to initialize encrypted env (.env.local.sops) from 1Password."
+		}
 
-	$loadedEnv = Import-DotEnvFromSops -EncryptedPath $envLocalPath
-	if ($loadedEnv.Count -eq 0) {
-		throw "Failed to decrypt/import runtime env from .env.local.sops."
-	}
+		$loadedEnv = Import-DotEnvFromSops -EncryptedPath $envLocalPath
+		if ($loadedEnv.Count -eq 0) {
+			throw "Failed to decrypt/import runtime env from .env.local.sops."
+		}
 
-	# Legacy plaintext env file is removed when present.
-	$legacyPlainEnvPath = Join-Path $Env:USERPROFILE '.env.local'
-	if (Test-Path -Path $legacyPlainEnvPath -PathType Leaf) {
-		Remove-Item -Path $legacyPlainEnvPath -Force -ErrorAction SilentlyContinue
-	}
+		# Legacy plaintext env file is removed when present.
+		$legacyPlainEnvPath = Join-Path $Env:USERPROFILE '.env.local'
+		if (Test-Path -Path $legacyPlainEnvPath -PathType Leaf) {
+			Remove-Item -Path $legacyPlainEnvPath -Force -ErrorAction SilentlyContinue
+		}
 
-	# Persist only age material for next terminals.
-	if (-not [string]::IsNullOrWhiteSpace($Env:SOPS_AGE_KEY)) {
-		[Environment]::SetEnvironmentVariable('SOPS_AGE_KEY', $Env:SOPS_AGE_KEY, 'User')
-	}
-	[Environment]::SetEnvironmentVariable('SOPS_AGE_KEY_FILE', '', 'User')
-	# Clear plaintext token persistence from previous bootstrap versions.
-	[Environment]::SetEnvironmentVariable('OP_SERVICE_ACCOUNT_TOKEN', '', 'User')
-	[Environment]::SetEnvironmentVariable('GITHUB_TOKEN', '', 'User')
-	[Environment]::SetEnvironmentVariable('GH_TOKEN', '', 'User')
+		# Persist only age material for next terminals.
+		if (-not [string]::IsNullOrWhiteSpace($Env:SOPS_AGE_KEY)) {
+			[Environment]::SetEnvironmentVariable('SOPS_AGE_KEY', $Env:SOPS_AGE_KEY, 'User')
+		}
+		[Environment]::SetEnvironmentVariable('SOPS_AGE_KEY_FILE', '', 'User')
+		# Clear plaintext token persistence from previous bootstrap versions.
+		[Environment]::SetEnvironmentVariable('OP_SERVICE_ACCOUNT_TOKEN', '', 'User')
+		[Environment]::SetEnvironmentVariable('GITHUB_TOKEN', '', 'User')
+		[Environment]::SetEnvironmentVariable('GH_TOKEN', '', 'User')
 
-	if ([string]::IsNullOrWhiteSpace($Env:GH_TOKEN) -and -not [string]::IsNullOrWhiteSpace($Env:GITHUB_TOKEN)) {
-		$Env:GH_TOKEN = $Env:GITHUB_TOKEN
-	}
+		if ([string]::IsNullOrWhiteSpace($Env:GH_TOKEN) -and -not [string]::IsNullOrWhiteSpace($Env:GITHUB_TOKEN)) {
+			$Env:GH_TOKEN = $Env:GITHUB_TOKEN
+		}
 
-	if (!(Ensure-GitHubCliAuthFrom1Password)) {
-		throw "Failed to authenticate gh using token from 1Password."
-	}
+		if (!(Ensure-GitHubCliAuthFrom1Password)) {
+			throw "Failed to authenticate gh using token from 1Password."
+		}
 
-	Write-Output "Running final environment health check (checkEnv)..."
-	if (!(checkEnv)) {
-		throw "checkEnv found failures. Review the output and fix before continuing."
+		Write-Output "Running final environment health check (checkEnv)..."
+		if (!(checkEnv)) {
+			throw "checkEnv found failures. Review the output and fix before continuing."
+		}
+	}
+	else {
+		Write-Output "Relink mode: skipping runtime secrets, gh auth and checkEnv."
 	}
 
 	Write-Output "Running OneDrive/profile link health check..."
@@ -1134,7 +1154,7 @@ catch {
 #################################################################################
 # bootstrap: set personal windows configs
 #################################################################################
-	if (-not $RefreshDotfiles) {
+	if (-not ($RefreshDotfiles -or $RelinkOnly)) {
 		# set my preferences
 		Set-MyPrefsWinDateTime
 		Set-MyPrefsWinKeyboard
@@ -1142,7 +1162,7 @@ catch {
 		Set-MyPrefsWinExplorer
 	}
 	else {
-		Write-Output "Refresh mode: skipping system preference changes."
+		Write-Output "Non-full mode: skipping system preference changes."
 	}
 
 #################################################################################

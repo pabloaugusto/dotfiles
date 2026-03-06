@@ -223,11 +223,28 @@ tasks:
     cmds:
       - "pwsh -NoProfile -Command \"& '{{.USERPROFILE}}/dotfiles/bootstrap/_start.ps1' -Refresh\""
 
+  bootstrap:relink:
+    desc: Auto - recria os symlinks canonicos do bootstrap no ambiente atual
+    cmds:
+      - task: bootstrap:{{if or (eq .OS "Windows_NT") (eq .OS "windows")}}windows{{else}}linux{{end}}:relink
+
+  bootstrap:windows:relink:
+    desc: Windows - recria symlinks/junctions do bootstrap
+    platforms: [windows]
+    cmds:
+      - "pwsh -NoProfile -Command \". '{{.USERPROFILE}}/dotfiles/bootstrap/bootstrap-config.ps1'; if (!(Ensure-BootstrapConfigReady -DotFilesDirectory '{{.USERPROFILE}}/dotfiles')) { exit 1 }; . '{{.USERPROFILE}}/dotfiles/bootstrap/bootstrap-windows.ps1' -RelinkOnly\""
+
   bootstrap:linux:
     desc: Linux/WSL - bootstrap Ubuntu
     platforms: [linux]
     cmds:
       - bash -lc "bash ~/dotfiles/bootstrap/bootstrap-ubuntu-wsl.sh"
+
+  bootstrap:linux:relink:
+    desc: Linux/WSL - recria symlinks do bootstrap
+    platforms: [linux]
+    cmds:
+      - bash -lc "bash ~/dotfiles/bootstrap/bootstrap-ubuntu-wsl.sh relink"
 
   ci:docker-build:
     desc: Auto - build Docker local (paridade check-scripts.yml.ignore)

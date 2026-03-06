@@ -133,6 +133,7 @@ Tasks principais:
 - `task sync:wsl-gate` (auto) e `task sync:wsl-gate:windows` para gate local Windows->WSL via Git-only
 - `task env:check` (auto) e variantes `task env:check:windows` / `task env:check:linux`
 - `task bootstrap` (auto) e variantes `task bootstrap:windows:new` / `task bootstrap:windows:refresh` / `task bootstrap:linux`
+- `task bootstrap:relink` (auto) e variantes `task bootstrap:windows:relink` / `task bootstrap:linux:relink` para recriar symlinks canônicos do bootstrap
 - `task ci:validate` (auto) e variantes `task ci:validate:windows` / `task ci:validate:linux`
 - `task pr:status` / `task pr:checks PR=<numero>`
 

@@ -3,6 +3,11 @@
 #requires -Version 7
 #requires -Modules PowerShellGet
 
+param (
+	[switch]$Refresh,
+	[switch]$Relink
+)
+
 #######################################################################################
 # Entry-point bootstrap for Windows host
 #
@@ -14,7 +19,12 @@
 # Important:
 # - Option 1 (new install) applies software + preferences + auth checks.
 # - Option 2 (refresh) keeps software/system changes minimal, focusing on links/config.
+# - -Relink recreates only the canonical bootstrap symlinks/junctions.
 #######################################################################################
+if ($Refresh -and $Relink) {
+	throw "Use either -Refresh or -Relink, not both."
+}
+
 Set-ExecutionPolicy -ExecutionPolicy Bypass -Force #-Scope CurrentUser #  Set-ExecutionPolicy -ExecutionPolicy RemoteSigned
 Set-PSRepository -Name PSGallery -InstallationPolicy Trusted
 
@@ -210,7 +220,58 @@ if (!(Get-Command -Name wsl -ErrorAction SilentlyContinue)) {
 # Bootstrap Function
 ##########################################################
 # inicial questions to install
+function Invoke-WindowsBootstrapFull {
+	Write-Host -NoNewline "`nConfiguring Windows: "
+
+	$DotFilesDirectory = "$Env:USERPROFILE\dotfiles"
+	. "${DotFilesDirectory}\df\powershell\_functions.ps1"
+
+	. "${DotFilesDirectory}\bootstrap\bootstrap-windows.ps1"
+
+	Set-ComputerName('RYZEN')			#from _functions.ps1
+	Set-MyPrefsWinRegionalization 		#from _functions.ps1
+	Set-MyPrefsWinExplorer				#from _functions.ps1
+	# Set-MyPrefsWinFileAssociations	#from _functions.ps1
+
+	Write-Host "[DONE] `b" -ForegroundColor green
+	Write-Output "`n`nConfigure Dotfiles: DONE!"
+	Start-CountDown -Message "Restarting Windows Explorer in" -Seconds 5
+	Get-Process explorer | Stop-Process #restart explorer
+}
+
+function Invoke-WindowsBootstrapRefresh {
+	Write-Host -NoNewline "`nRefreshing Dotfiles: "
+
+	$DotFilesDirectory = "$Env:USERPROFILE\dotfiles"
+	. "${DotFilesDirectory}\df\powershell\_functions.ps1"
+
+	. "${DotFilesDirectory}\bootstrap\bootstrap-windows.ps1" -RefreshDotfiles
+
+	Write-Host "[DONE] `b" -ForegroundColor green
+	Write-Output "`n`nRefresh Dotfiles: DONE!"
+}
+
+function Invoke-WindowsBootstrapRelink {
+	Write-Host -NoNewline "`nRecreating bootstrap symlinks: "
+
+	$DotFilesDirectory = "$Env:USERPROFILE\dotfiles"
+	. "${DotFilesDirectory}\df\powershell\_functions.ps1"
+
+	. "${DotFilesDirectory}\bootstrap\bootstrap-windows.ps1" -RelinkOnly
+
+	Write-Host "[DONE] `b" -ForegroundColor green
+	Write-Output "`n`nRecreate Bootstrap Symlinks: DONE!"
+}
+
 function bootstrap {
+	if ($Relink) {
+		Invoke-WindowsBootstrapRelink
+		return
+	}
+	if ($Refresh) {
+		Invoke-WindowsBootstrapRefresh
+		return
+	}
 
 
 	$prompt = @("`n"
@@ -220,6 +281,7 @@ function bootstrap {
 		"0 - ABORT (Cancel Bootstrap) `n"
 		"1 - Windows - new install `n"
 		"2 - Windows - refresh dotfiles `n"
+		"5 - Windows - recreate bootstrap symlinks `n"
 		"3 - Linux `n"
 		"4 - Mac `n`n"
 	) -join ''
@@ -232,56 +294,13 @@ function bootstrap {
 			Write-Host "`nABORTING! At least you have 🐔 `n"
 		}
 		"1" {
-			##########################################################
-			# Config Windows and load my settings and preferences
-			# TODO: [MESH-2] Put variables from MyPrefs at a file under .bootstrap
-			# TODO: Support other OSs
-			# - [ ] [Support other OSs] Support Linux
-			# - [ ] [Support other OSs] Support Mac OS
-			##########################################################
-			Write-Host -NoNewline "`nConfiguring Windows: "
-
-			# helper functions
-			#$DotFilesDirectory = Split-Path -Path "${PSScriptRoot}" -Parent
-			#Import-Module ${DotFilesDirectory}\df\powershell\_functions.ps1
-			$DotFilesDirectory = "$Env:USERPROFILE\dotfiles"
-			. "${DotFilesDirectory}\df\powershell\_functions.ps1"
-
-			# run windows bootstrap (full mode)
-			. "${DotFilesDirectory}\bootstrap\bootstrap-windows.ps1"
-
-			# Do dotfiles Bootstrap
-			# TODO": Inform steps at write-output
-			Set-ComputerName('RYZEN')			#from _functions.ps1
-			Set-MyPrefsWinRegionalization 		#from _functions.ps1
-			Set-MyPrefsWinExplorer				#from _functions.ps1
-			# Set-MyPrefsWinFileAssociations	#from _functions.ps1
-
-			# Boostrap DONE
-			Write-Host "[DONE] `b" -ForegroundColor green
-
-			# Process done. Restart Windows Exporer
-			Write-Output "`n`nConfigure Dotfiles: DONE!"
-			Start-CountDown -Message "Restarting Windows Explorer in" -Seconds 5
-			Get-Process explorer | Stop-Process #restart explorer
-
+			Invoke-WindowsBootstrapFull
 		}
 		"2" {
-			##########################################################
-			# Refresh Dotfiles (links and configs) without full setup
-			##########################################################
-			Write-Host -NoNewline "`nRefreshing Dotfiles: "
-
-			# helper functions
-			$DotFilesDirectory = "$Env:USERPROFILE\dotfiles"
-			. "${DotFilesDirectory}\df\powershell\_functions.ps1"
-
-			# run windows bootstrap in refresh mode
-			. "${DotFilesDirectory}\bootstrap\bootstrap-windows.ps1" -RefreshDotfiles
-
-			# Refresh DONE
-			Write-Host "[DONE] `b" -ForegroundColor green
-			Write-Output "`n`nRefresh Dotfiles: DONE!"
+			Invoke-WindowsBootstrapRefresh
+		}
+		"5" {
+			Invoke-WindowsBootstrapRelink
 		}
 
 		default {
