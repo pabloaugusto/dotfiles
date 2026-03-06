@@ -675,10 +675,10 @@ function Sync-BootstrapDerivedFiles {
 		'# Runtime secrets template resolved by 1Password (`op inject`).'
 		'# Bootstrap persists this material encrypted at ~/.env.local.sops.'
 		'# Generated from bootstrap/user-config.yaml'
-		("export OP_SERVICE_ACCOUNT_TOKEN=""{0}""" -f $Config['secrets.onepassword_service_account_ref'])
-		("export GH_TOKEN=""{0}""" -f $Config['secrets.github_project_pat_ref'])
-		("export GITHUB_TOKEN=""{0}""" -f $Config['secrets.github_project_pat_ref'])
-		("export SOPS_AGE_KEY=""{0}""" -f $Config['secrets.age_key_ref'])
+		("export OP_SERVICE_ACCOUNT_TOKEN=""{{{{{0}}}}}""" -f $Config['secrets.onepassword_service_account_ref'])
+		("export GH_TOKEN=""{{{{{0}}}}}""" -f $Config['secrets.github_project_pat_ref'])
+		("export GITHUB_TOKEN=""{{{{{0}}}}}""" -f $Config['secrets.github_project_pat_ref'])
+		("export SOPS_AGE_KEY=""{{{{{0}}}}}""" -f $Config['secrets.age_key_ref'])
 	)
 	Set-Content -Path $envTplPath -Value $envTpl
 

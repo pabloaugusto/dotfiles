@@ -44,27 +44,49 @@ _dotfiles_load_runtime_env
 export DOTFILES_RUNTIME_ENV_LOADED=1
 
 # Keep a stable signer command name in WSL/Linux.
+# The generated wrapper fails fast when the 1Password SSH agent socket is
+# unavailable, preventing git from hanging indefinitely during signed commits.
 _dotfiles_ensure_op_ssh_sign() {
-  if command -v op-ssh-sign >/dev/null 2>&1; then
-    return
-  fi
   if ! command -v op-ssh-sign-wsl.exe >/dev/null 2>&1; then
     return
   fi
 
   mkdir -p "$HOME/.local/bin"
-  cat > "$HOME/.local/bin/op-ssh-sign" <<'EOF'
+  cat > "$HOME/.local/bin/op-ssh-sign" <<'WRAPPER'
 #!/usr/bin/env bash
+# Delegates to op-ssh-sign-wsl.exe.
+# Checks for /tmp/1password-agent.sock or an existing SSH_AUTH_SOCK.
+if [ -S /tmp/1password-agent.sock ]; then
+  export SSH_AUTH_SOCK=/tmp/1password-agent.sock
+elif [ -z "$SSH_AUTH_SOCK" ] || [ ! -S "$SSH_AUTH_SOCK" ]; then
+  printf 'op-ssh-sign: No valid SSH agent socket found.\n' >&2
+  exit 1
+fi
 exec op-ssh-sign-wsl.exe "$@"
-EOF
+WRAPPER
   chmod 700 "$HOME/.local/bin/op-ssh-sign"
 }
 
-_dotfiles_ensure_op_ssh_sign
-
-
-# Prefer 1Password SSH agent socket when available in WSL/Linux.
-[ -S /tmp/1password-agent.sock ] && export SSH_AUTH_SOCK=/tmp/1password-agent.sock
+# Bridge 1Password SSH Agent from Windows to WSL if not in VS Code and dependencies exist.
+_dotfiles_bridge_1password_ssh() {
+  local socket="/tmp/1password-agent.sock"
+  # If inside VS Code, their native forwarding usually handles SSH_AUTH_SOCK.
+  if [ -n "${VSCODE_IPC_HOOK_CLI:-}" ] && [ -S "${SSH_AUTH_SOCK:-}" ]; then
+    return
+  fi
+  # If the socket already exists, use it.
+  if [ -S "$socket" ]; then
+    export SSH_AUTH_SOCK="$socket"
+    return
+  fi
+  # Attempt to create the bridge if socat and npiperelay.exe are available.
+  if command -v socat >/dev/null 2>&1 && command -v npiperelay.exe >/dev/null 2>&1; then
+    rm -f "$socket"
+    (setsid socat UNIX-LISTEN:"$socket",fork EXEC:"npiperelay.exe -ep -s //./pipe/openssh-ssh-agent",nofork &) >/dev/null 2>&1
+    export SSH_AUTH_SOCK="$socket"
+  fi
+}
+_dotfiles_bridge_1password_ssh
 
 [ -n "$BASH" ] && [ -f ~/.bashrc ] && . ~/.bashrc
 

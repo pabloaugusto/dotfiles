@@ -110,6 +110,8 @@ $softwareList = @(
 	@{installer = 'winget'; id = 'Mirantis.Lens'; name = 'K8s Lens'; bootstrap = 'true'; url='https://k8slens.dev/' }
 	@{installer = 'pip'; id = 'uv'; name = 'uv'; bootstrap = 'true'; url='PIP alternative, much faster' } # pip package manager alternative - way faster and performatic
 	@{installer = 'pip'; id = 'ansible'; name = 'ansible'; bootstrap = 'true'; url='' }
+	@{installer = 'winget'; id = 'albertony.npiperelay'; name = 'npiperelay'; bootstrap = 'true'; url='https://github.com/albertony/npiperelay' }
+	@{installer = 'winget'; id = 'Firejox.WinSocat'; name = 'WinSocat'; bootstrap = 'true'; url='https://github.com/Firejox/winsocat' }
 	@{installer = 'choco'; id = 'pgsql'; name = 'postgre cli'; bootstrap = 'true'; url='' }
 	@{installer = 'choco'; id = 'dbeaver'; name = 'dbeaver'; bootstrap = 'true'; url='' }
 

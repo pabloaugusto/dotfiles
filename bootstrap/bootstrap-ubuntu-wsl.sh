@@ -141,7 +141,7 @@ function install_software {
 
 	# Default package installs
 	# --------------------------------------------------------------------
-	sudo apt-get install unzip build-essential procps curl file git fontconfig -y
+	sudo apt-get install unzip build-essential procps curl file git fontconfig socat -y
 
 	# Install or Update homebrew.sh
 	if [[ $(command -v brew) == "" ]]; then # can use also: "which brew" instead "command -v brew"
@@ -194,10 +194,15 @@ function install_software {
 
 
 	# --------------------------------------------------------------------
-	# Install oh-my-zsh
+	# Install oh-my-zsh (idempotente)
 	# --------------------------------------------------------------------
-	if [ "$(command -v oh-my-zsh)" == "" ]; then # can use also: "which brew" instead "command -v brew"
+	if [ -d "$HOME/.oh-my-zsh" ]; then
+		echo "oh-my-zsh já instalado em $HOME/.oh-my-zsh, pulando instalação."
+	else
 		echo "Installing oh-my-zsh"
+		# O instalador oficial retorna erro quando a pasta já existe; como
+		# checamos explicitamente acima, aqui qualquer erro passa a ser
+		# genuíno (rede, permissão, etc.).
 		sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
 	fi
 
