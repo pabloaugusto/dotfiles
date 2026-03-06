@@ -1,0 +1,61 @@
+name: Quality Foundation
+
+on:
+  pull_request:
+  push:
+
+jobs:
+  shell-lint:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Bash syntax lint
+        shell: bash
+        run: |
+          set -euo pipefail
+          while IFS= read -r file; do
+            bash -n "$file"
+          done < <(git ls-files "*.sh")
+
+  powershell-quality:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Ensure Pester
+        shell: pwsh
+        run: |
+          if (-not (Get-Command Invoke-Pester -ErrorAction SilentlyContinue)) {
+            Install-Module Pester -Scope CurrentUser -Force -SkipPublisherCheck
+          }
+
+      - name: PowerShell syntax lint
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          $failed = $false
+          git ls-files "bootstrap/*.ps1" "bootstrap/**/*.ps1" "df/*.ps1" "df/**/*.ps1" "scripts/*.ps1" "scripts/**/*.ps1" "tests/*.ps1" "tests/**/*.ps1" |
+            ForEach-Object {
+              $errors = $null
+              [System.Management.Automation.Language.Parser]::ParseFile($_, [ref]$null, [ref]$errors) | Out-Null
+              if ($errors -and $errors.Count -gt 0) {
+                $failed = $true
+                $errors | ForEach-Object {
+                  Write-Host ($_.Extent.File + ":" + $_.Extent.StartLineNumber + ": " + $_.Message)
+                }
+              }
+            }
+          if ($failed) { exit 1 }
+
+      - name: Validate AI assets
+        shell: pwsh
+        run: ./scripts/validate-ai-assets.ps1
+
+      - name: Run Pester
+        shell: pwsh
+        run: Invoke-Pester -Path ./tests/powershell

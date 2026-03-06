@@ -1,0 +1,7 @@
+interface:
+  display_name: "Governanca Dotfiles"
+  short_description: "Convencoes, prompts e repo"
+  default_prompt: "Use $dotfiles-repo-governance para aplicar convencoes, organizar prompts e manter a governanca operacional deste repo."
+
+policy:
+  allow_implicit_invocation: true

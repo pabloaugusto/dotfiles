@@ -1,0 +1,7 @@
+interface:
+  display_name: "Qualidade Dotfiles"
+  short_description: "Testes, CI e harnesses do repo"
+  default_prompt: "Use $dotfiles-test-harness para projetar, implementar e validar testes, CI e harnesses deste repo de dotfiles."
+
+policy:
+  allow_implicit_invocation: true

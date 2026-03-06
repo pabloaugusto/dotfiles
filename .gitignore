@@ -35,3 +35,8 @@ df/vscode/globalStorage
 df/vscode/History
 df/vscode/workspaceStorage
 df/vscode/sync
+
+# local AI runtime state
+.agents/
+.codex/
+.gemini/

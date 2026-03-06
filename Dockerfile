@@ -3,7 +3,7 @@ SHELL ["pwsh", "-Command"]
 RUN Install-Module -Name PSScriptAnalyzer -Scope AllUsers -Force
 RUN Import-Module PSScriptAnalyzer
 
-FROM base AS lintPowershell
+FROM base AS lint-powershell
 WORKDIR /src
 COPY [".", "."]
 RUN Invoke-ScriptAnalyzer .
@@ -12,7 +12,7 @@ RUN Invoke-ScriptAnalyzer .
 WORKDIR /src/df/powershell
 RUN Invoke-ScriptAnalyzer .
 
-FROM mcr.microsoft.com/powershell AS basePwsh
+FROM mcr.microsoft.com/powershell AS base-pwsh
 WORKDIR /src
 COPY [".", "."]
 WORKDIR /src/df/bash

@@ -1,0 +1,7 @@
+interface:
+  display_name: "Bootstrap Dotfiles"
+  short_description: "Bootstrap, links e configs"
+  default_prompt: "Use $dotfiles-bootstrap para diagnosticar, ajustar e validar bootstrap, links e configuracoes deste repo de dotfiles."
+
+policy:
+  allow_implicit_invocation: true

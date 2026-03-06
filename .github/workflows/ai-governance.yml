@@ -1,0 +1,31 @@
+name: AI Governance
+
+on:
+  pull_request:
+    paths:
+      - 'AGENTS.md'
+      - 'ai/**'
+      - 'docs/ai-operating-model.md'
+      - 'scripts/validate-ai-assets.ps1'
+      - 'Taskfile.yml'
+      - '.gitignore'
+  push:
+    paths:
+      - 'AGENTS.md'
+      - 'ai/**'
+      - 'docs/ai-operating-model.md'
+      - 'scripts/validate-ai-assets.ps1'
+      - 'Taskfile.yml'
+      - '.gitignore'
+
+jobs:
+  validate-ai-assets:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Validate AI assets
+        shell: pwsh
+        run: ./scripts/validate-ai-assets.ps1
