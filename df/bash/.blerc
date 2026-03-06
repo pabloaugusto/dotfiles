@@ -218,11 +218,10 @@
 #ble-face prompt_status_line='fg=231,bg=240'
 
 
-## "prompt_eol_mark" specifies the contents of the mark used to indicate the
-## command output is not ended with newlines. The value can contain ANSI escape
-## sequences.
-
-#bleopt prompt_eol_mark=$'\e[94m[ble: EOF]\e[m'
+# "prompt_eol_mark" specifies the contents of the mark used to indicate the
+# command output is not ended with newlines. The value can contain ANSI escape
+# sequences.
+bleopt prompt_eol_mark=
 
 
 ## "prompt_ruler" specifies the ruler between the previous command and the
