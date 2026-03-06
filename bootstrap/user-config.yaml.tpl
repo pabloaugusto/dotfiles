@@ -1,190 +1,213 @@
+# =============================================================================
 # bootstrap/user-config.yaml
-# Guia rapido (didatico) - preencha aqui tudo que o wizard pergunta.
-# Este arquivo fica apenas na sua maquina (ignorado pelo Git).
-# Dica: mantenha os comentarios para lembrar o significado de cada campo.
+# Configuracao local do bootstrap
+# =============================================================================
 #
-# Legenda de exemplos:
-# - EX: exemplo realista
-# - Opcional vazio: use ""
-# - Boolean: true | false
-version: 1
+# Este formato e compartilhado entre:
+# - bootstrap/user-config.yaml.tpl
+# - bootstrap/user-config.yaml
+# - bootstrap/bootstrap-config.ps1
+#
+# O bootstrap renderiza o user-config local a partir deste mesmo layout,
+# evitando drift entre script, template e arquivo final.
+#
+# Regra principal desta configuracao: prefira SEMPRE caminhos absolutos
+# e canonicos. Use caminho relativo apenas em ultimo caso.
+#
+# Por que evitar relativo, alias e symlink como fonte de verdade:
+# - o destino final passa a depender de outra base implicita
+# - mudar a root pode redirecionar varios links sem ficar obvio no arquivo
+# - symlinks e atalhos podem mascarar drift e apontar para destinos antigos
+# - variaveis de ambiente exigem expansao extra e falham se houver typo
+# - existe um pequeno custo extra de resolucao a cada bootstrap
+#
+# Como ler os nomes:
+# - *_root : raiz/base principal
+# - *_dir  : nome historico; aceita absoluto e deve preferir absoluto
+# - *_path : caminho absoluto explicito; quando existir, normalmente e o preferido
+version: @@VERSION@@
+
+# =============================================================================
+# 1. Identificacao desta maquina
+# =============================================================================
 profile:
-  # Nome "humano" para identificar o setup/local (aparece em logs).
-  # EX: "work-wsl", "desktop-windows", "notebook-venda"
-  name: "CHANGE_ME"
+  # Nome livre para identificar este setup em logs e mensagens do bootstrap.
+  name: "@@PROFILE_NAME@@"
+
+# =============================================================================
+# 2. Identidade Git
+# =============================================================================
 git:
-  # Nome que vai nos commits.
-  # EX: "Pablo Augusto"
-  name: "CHANGE_ME"
-  # Email usado nos commits (ideal: verificado no GitHub).
-  # EX: "pablo@pabloaugusto.com"
-  email: "you@example.com"
-  # Login do GitHub.
-  # EX: "pabloaugusto"
-  username: "your-github-user"
-  # Chave publica SSH para assinatura de commit (linha ssh-ed25519 completa).
-  # Isso e chave PUBLICA (nao segredo); a privada deve ficar no 1Password.
-  # EX: "ssh-ed25519 AAAA... user@host"
-  signing_key: "ssh-ed25519 AAAA_REPLACE_WITH_YOUR_PUBLIC_SSH_SIGNING_KEY"
+  # Nome usado nos commits.
+  name: "@@GIT_NAME@@"
+
+  # Email usado nos commits.
+  email: "@@GIT_EMAIL@@"
+
+  # Username/login no GitHub.
+  username: "@@GIT_USERNAME@@"
+
+  # Chave PUBLICA usada para assinatura SSH de commits.
+  # A chave privada deve ficar no 1Password.
+  signing_key: "@@GIT_SIGNING_KEY@@"
+
+# =============================================================================
+# 3. Caminhos e links do Windows
+# =============================================================================
 paths:
   windows:
-    # Controla se o bootstrap exige/usa OneDrive no Windows.
-    # true  = executa etapa guiada de root OneDrive ANTES de criar links:
-    #         - se OneDrive nao existir: instala e pede caminho base.
-    #         - se existir: pergunta manter/mover path base.
-    # false = ignora OneDrive e cria apenas diretorios locais de perfil.
-    # EX: true
-    onedrive_enabled: true
-    # Raiz desejada do OneDrive no Windows (ABS).
-    # Se vazio: usa root atual detectada; se nao houver setup, pergunta no wizard.
-    # EX: "D:\\OneDrive"
-    onedrive_root: ""
-    # Se root desejada diferir da root atual, tenta migracao automatica:
-    # mover dados + criar junction + atualizar root no registro (best-effort).
-    # EX: true
-    onedrive_auto_migrate: true
-    # Pasta de clients no Windows. Pode ser ABS ou relativa a onedrive_root.
-    # EX (rel): "clients" | EX (abs): "D:\\OneDrive\\clientes"
-    onedrive_clients_dir: ""
-    # Pasta de projects no Windows. Pode ser ABS ou relativa a onedrive_root.
-    # EX (rel): "clients\\pablo\\projects" | EX (abs): "D:\\OneDrive\\projects"
-    onedrive_projects_dir: ""
-    # Caminho absoluto de projetos no OneDrive (Windows).
-    # Se preenchido, tem prioridade sobre onedrive_projects_dir.
-    # EX: "D:\\OneDrive\\clients\\pablo\\projects"
-    onedrive_projects_path: ""
-    # Caminhos de link no perfil Windows (origem dos symlinks criados).
-    # Aceita variaveis como %USERPROFILE%.
-    # EX: "%USERPROFILE%\\bin"
-    links_profile_bin: "%USERPROFILE%\\bin"
-    # EX: "%USERPROFILE%\\etc"
-    links_profile_etc: "%USERPROFILE%\\etc"
-    # EX: "%USERPROFILE%\\clients"
-    links_profile_clients: "%USERPROFILE%\\clients"
-    # EX: "%USERPROFILE%\\projects"
-    links_profile_projects: "%USERPROFILE%\\projects"
-    # Ativa links adicionais na raiz de drive (atalhos d:\* por padrao).
-    # Se o drive nao existir, bootstrap apenas informa e segue.
-    # EX: true
-    links_drive_enabled: true
-    # EX: "D:\\bin"
-    links_drive_bin: "D:\\bin"
-    # EX: "D:\\etc"
-    links_drive_etc: "D:\\etc"
-    # EX: "D:\\clients"
-    links_drive_clients: "D:\\clients"
-    # EX: "D:\\projects"
-    links_drive_projects: "D:\\projects"
-    # ----------------------------------------------------------------------
-    # Links opcionais de pastas padrao do perfil para dentro do OneDrive.
-    # Cada pasta tem 2 campos: *_enabled (liga/desliga) e *_target (destino).
+    # -------------------------------------------------------------------------
+    # 3.1 Base do OneDrive no Windows
+    # -------------------------------------------------------------------------
+    # true  = o bootstrap usa OneDrive como base para os links.
+    # false = o bootstrap ignora OneDrive e trabalha so com pastas locais.
+    onedrive_enabled: @@WINDOWS_ONEDRIVE_ENABLED@@
+
+    # Raiz canonica do OneDrive no Windows.
+    # Prefira sempre o caminho absoluto real da maquina.
+    # Exemplo: "D:\\onedrive"
+    onedrive_root: "@@WINDOWS_ONEDRIVE_ROOT@@"
+
+    # Se a raiz configurada acima for diferente da raiz atual,
+    # o bootstrap tenta migrar automaticamente.
+    onedrive_auto_migrate: @@WINDOWS_ONEDRIVE_AUTO_MIGRATE@@
+
+    # -------------------------------------------------------------------------
+    # 3.2 Clients e projects dentro do OneDrive
+    # -------------------------------------------------------------------------
+    # Nome historico: aceita relativo, mas o recomendado e ABSOLUTO.
+    # Exemplo recomendado: "D:\\onedrive\\clients"
+    onedrive_clients_dir: "@@WINDOWS_ONEDRIVE_CLIENTS_DIR@@"
+
+    # Fallback/legado para projects.
+    # Se puder, deixe vazio e use `onedrive_projects_path` com valor absoluto.
+    # So use relativo aqui como ultimo caso.
+    onedrive_projects_dir: "@@WINDOWS_ONEDRIVE_PROJECTS_DIR@@"
+
+    # Campo preferido para projects: caminho absoluto e canonico.
+    # Exemplo recomendado: "D:\\onedrive\\clients\\seu-usuario\\projects"
+    onedrive_projects_path: "@@WINDOWS_ONEDRIVE_PROJECTS_PATH@@"
+
+    # -------------------------------------------------------------------------
+    # 3.3 Links criados dentro do perfil do usuario
+    # -------------------------------------------------------------------------
+    # Estes campos definem ONDE o link sera criado.
+    # Prefira caminho absoluto. Use %USERPROFILE% so em ultimo caso.
+    links_profile_bin: "@@WINDOWS_LINKS_PROFILE_BIN@@"
+    links_profile_etc: "@@WINDOWS_LINKS_PROFILE_ETC@@"
+    links_profile_clients: "@@WINDOWS_LINKS_PROFILE_CLIENTS@@"
+    links_profile_projects: "@@WINDOWS_LINKS_PROFILE_PROJECTS@@"
+
+    # -------------------------------------------------------------------------
+    # 3.4 Links extras na raiz do drive
+    # -------------------------------------------------------------------------
+    links_drive_enabled: @@WINDOWS_LINKS_DRIVE_ENABLED@@
+    links_drive_bin: "@@WINDOWS_LINKS_DRIVE_BIN@@"
+    links_drive_etc: "@@WINDOWS_LINKS_DRIVE_ETC@@"
+    links_drive_clients: "@@WINDOWS_LINKS_DRIVE_CLIENTS@@"
+    links_drive_projects: "@@WINDOWS_LINKS_DRIVE_PROJECTS@@"
+
+    # -------------------------------------------------------------------------
+    # 3.5 Pastas padrao do perfil que podem virar links para o OneDrive
+    # -------------------------------------------------------------------------
+    # Prefira sempre caminho absoluto completo em cada *_target.
+    # Use target relativo apenas quando voce quiser depender conscientemente
+    # de onedrive_root.
+    # Base atual usada caso voce ainda opte por relativo:
+    # @@RELATIVE_TARGET_BASE_HINT@@
     #
-    # Regra de resolucao do *_target (IMPORTANTE):
-    # - Se *_target for relativo (ex: "documents\\profile\\links"), o bootstrap
-    #   concatena esse valor com a BASE abaixo.
-    # - Se *_target for absoluto (ex: "D:\\OneDrive\\documents\\profile\\links"),
-    #   usa o valor diretamente, sem concatenar.
-    # Base atual desta config para targets relativos: "AUTO (registro OneDrive -> env OneDrive -> %USERPROFILE%\\OneDrive)"
-    #
-    # profile_links_migrate_content controla o comportamento de migracao:
-    # - true  = migra conteudo atual da pasta para destino OneDrive antes de linkar.
-    # - false = nao migra; apenas cria link (origem vira backup local).
-    #
-    # Exemplos reais observados no ambiente pablo:
-    # - desktop  -> "desktop"
-    # - documents -> "documents"
-    # - downloads -> "downloads"
-    # - pictures -> "Imagens"
-    # - videos -> "Vídeos"
-    # - music -> "Música"
-    #
-    # Exemplos sugeridos (quando ainda nao existe pasta no OneDrive):
-    # - contacts -> "documents\\profile\\contacts"
-    # - favorites -> "documents\\profile\\favorites"
-    # - links -> "documents\\profile\\links"
-    # ----------------------------------------------------------------------
-    # Migracao de conteudo para pastas linkadas (segura):
-    # true  = copia conteudo atual para destino e depois linka.
-    # false = nao copia conteudo; apenas backup + link.
-    profile_links_migrate_content: true
-    # Documents (%USERPROFILE%\Documents).
-    #   target atual: "documents"
-    #   caminho final com esta config: "%USERPROFILE%\\OneDrive\\documents"
-    profile_links_documents_enabled: false
-    profile_links_documents_target: "documents"
-    # Desktop (%USERPROFILE%\Desktop).
-    #   target atual: "desktop"
-    #   caminho final com esta config: "%USERPROFILE%\\OneDrive\\desktop"
-    profile_links_desktop_enabled: false
-    profile_links_desktop_target: "desktop"
-    # Downloads (%USERPROFILE%\Downloads).
-    #   target atual: "downloads"
-    #   caminho final com esta config: "%USERPROFILE%\\OneDrive\\downloads"
-    profile_links_downloads_enabled: false
-    profile_links_downloads_target: "downloads"
-    # Pictures (%USERPROFILE%\Pictures).
-    #   target atual: "Imagens"
-    #   caminho final com esta config: "%USERPROFILE%\\OneDrive\\Imagens"
-    profile_links_pictures_enabled: false
-    profile_links_pictures_target: "Imagens"
-    # Videos (%USERPROFILE%\Videos).
-    #   target atual: "Vídeos"
-    #   caminho final com esta config: "%USERPROFILE%\\OneDrive\\Vídeos"
-    profile_links_videos_enabled: false
-    profile_links_videos_target: "Vídeos"
-    # Music (%USERPROFILE%\Music).
-    #   target atual: "Música"
-    #   caminho final com esta config: "%USERPROFILE%\\OneDrive\\Música"
-    profile_links_music_enabled: false
-    profile_links_music_target: "Música"
-    # Contacts (%USERPROFILE%\Contacts).
-    #   target atual: "documents\\profile\\contacts"
-    #   caminho final com esta config: "%USERPROFILE%\\OneDrive\\documents\\profile\\contacts"
-    profile_links_contacts_enabled: false
-    profile_links_contacts_target: "documents\\profile\\contacts"
-    # Favorites (%USERPROFILE%\Favorites).
-    #   target atual: "documents\\profile\\favorites"
-    #   caminho final com esta config: "%USERPROFILE%\\OneDrive\\documents\\profile\\favorites"
-    profile_links_favorites_enabled: false
-    profile_links_favorites_target: "documents\\profile\\favorites"
-    # Links (%USERPROFILE%\Links).
-    #   target atual: "documents\\profile\\links"
-    #   caminho final com esta config: "%USERPROFILE%\\OneDrive\\documents\\profile\\links"
-    profile_links_links_enabled: false
-    profile_links_links_target: "documents\\profile\\links"
+    # true  = tenta copiar/mover o conteudo atual antes de criar o link
+    # false = nao migra automaticamente; preserva backup local e cria o link
+    profile_links_migrate_content: @@WINDOWS_PROFILE_LINKS_MIGRATE_CONTENT@@
+
+    # Documents do perfil.
+    # Destino resolvido hoje: @@WINDOWS_PROFILE_LINKS_DOCUMENTS_PREVIEW@@
+    profile_links_documents_enabled: @@WINDOWS_PROFILE_LINKS_DOCUMENTS_ENABLED@@
+    profile_links_documents_target: "@@WINDOWS_PROFILE_LINKS_DOCUMENTS_TARGET@@"
+
+    # Desktop do perfil.
+    # Destino resolvido hoje: @@WINDOWS_PROFILE_LINKS_DESKTOP_PREVIEW@@
+    profile_links_desktop_enabled: @@WINDOWS_PROFILE_LINKS_DESKTOP_ENABLED@@
+    profile_links_desktop_target: "@@WINDOWS_PROFILE_LINKS_DESKTOP_TARGET@@"
+
+    # Downloads do perfil.
+    # Destino resolvido hoje: @@WINDOWS_PROFILE_LINKS_DOWNLOADS_PREVIEW@@
+    profile_links_downloads_enabled: @@WINDOWS_PROFILE_LINKS_DOWNLOADS_ENABLED@@
+    profile_links_downloads_target: "@@WINDOWS_PROFILE_LINKS_DOWNLOADS_TARGET@@"
+
+    # Pictures do perfil.
+    # Destino resolvido hoje: @@WINDOWS_PROFILE_LINKS_PICTURES_PREVIEW@@
+    profile_links_pictures_enabled: @@WINDOWS_PROFILE_LINKS_PICTURES_ENABLED@@
+    profile_links_pictures_target: "@@WINDOWS_PROFILE_LINKS_PICTURES_TARGET@@"
+
+    # Videos do perfil.
+    # Destino resolvido hoje: @@WINDOWS_PROFILE_LINKS_VIDEOS_PREVIEW@@
+    profile_links_videos_enabled: @@WINDOWS_PROFILE_LINKS_VIDEOS_ENABLED@@
+    profile_links_videos_target: "@@WINDOWS_PROFILE_LINKS_VIDEOS_TARGET@@"
+
+    # Music do perfil.
+    # Destino resolvido hoje: @@WINDOWS_PROFILE_LINKS_MUSIC_PREVIEW@@
+    profile_links_music_enabled: @@WINDOWS_PROFILE_LINKS_MUSIC_ENABLED@@
+    profile_links_music_target: "@@WINDOWS_PROFILE_LINKS_MUSIC_TARGET@@"
+
+    # Contacts do perfil.
+    # Destino resolvido hoje: @@WINDOWS_PROFILE_LINKS_CONTACTS_PREVIEW@@
+    profile_links_contacts_enabled: @@WINDOWS_PROFILE_LINKS_CONTACTS_ENABLED@@
+    profile_links_contacts_target: "@@WINDOWS_PROFILE_LINKS_CONTACTS_TARGET@@"
+
+    # Favorites do perfil.
+    # Destino resolvido hoje: @@WINDOWS_PROFILE_LINKS_FAVORITES_PREVIEW@@
+    profile_links_favorites_enabled: @@WINDOWS_PROFILE_LINKS_FAVORITES_ENABLED@@
+    profile_links_favorites_target: "@@WINDOWS_PROFILE_LINKS_FAVORITES_TARGET@@"
+
+    # Links do perfil.
+    # Destino resolvido hoje: @@WINDOWS_PROFILE_LINKS_LINKS_PREVIEW@@
+    profile_links_links_enabled: @@WINDOWS_PROFILE_LINKS_LINKS_ENABLED@@
+    profile_links_links_target: "@@WINDOWS_PROFILE_LINKS_LINKS_TARGET@@"
+
+  # ===========================================================================
+  # 4. Caminhos equivalentes no WSL
+  # ===========================================================================
   wsl:
-    # Raiz do OneDrive no WSL.
-    # EX: "/mnt/d/OneDrive"
-    onedrive_root: "/mnt/d/OneDrive"
-    # Pasta de clients no WSL: pode ser relativa (a raiz) ou absoluta.
-    # EX (rel): "clients" | EX (abs): "/mnt/d/OneDrive/clients"
-    onedrive_clients_dir: ""
-    # Pasta de projects no WSL: pode ser relativa (a raiz) ou absoluta.
-    # EX (rel): "clients/pablo/projects" | EX (abs): "/mnt/d/OneDrive/projects"
-    onedrive_projects_dir: ""
+    # Raiz canonica do OneDrive no WSL.
+    # Prefira caminho absoluto real, ex: "/mnt/d/onedrive"
+    onedrive_root: "@@WSL_ONEDRIVE_ROOT@@"
+
+    # Nome historico: aceita relativo, mas o recomendado e ABSOLUTO.
+    # Exemplo recomendado: "/mnt/d/onedrive/clients"
+    onedrive_clients_dir: "@@WSL_ONEDRIVE_CLIENTS_DIR@@"
+
+    # Nome historico: aceita relativo, mas o recomendado e ABSOLUTO.
+    # Exemplo recomendado: "/mnt/d/onedrive/clients/seu-usuario/projects"
+    onedrive_projects_dir: "@@WSL_ONEDRIVE_PROJECTS_DIR@@"
+
+# =============================================================================
+# 5. Bootstrap extra no WSL
+# =============================================================================
 bootstrap:
   add_user:
-    # Criar usuario Linux extra no WSL (alem do principal)?
-    # Utilidade: separar contexto pessoal x automacao/deploy e aplicar permissao minima.
-    # Em desktop pessoal, normalmente deixe false.
-    # EX: false
-    enabled: false
-    # Nome do usuario adicional (somente se enabled=true).
-    # Exemplo comum: "deploy" ou "automation".
-    # EX: "deploy"
-    username: ""
-    # Hash de senha (openssl passwd -1 "senha"), somente se enabled=true.
-    password_hash: ""
+    # Criar um usuario Linux extra no WSL?
+    enabled: @@BOOTSTRAP_ADD_USER_ENABLED@@
+
+    # Nome do usuario adicional.
+    username: "@@BOOTSTRAP_ADD_USER_USERNAME@@"
+
+    # Hash da senha do usuario adicional.
+    # Exemplo de geracao: openssl passwd -1 "sua-senha"
+    password_hash: "@@BOOTSTRAP_ADD_USER_PASSWORD_HASH@@"
+
+# =============================================================================
+# 6. Segredos e refs do 1Password
+# =============================================================================
 secrets:
-  # Ref do token de service account do 1Password (entrada unica do bootstrap).
-  # EX: "op://secrets/dotfiles/1password/service-account"
-  onepassword_service_account_ref: "op://secrets/dotfiles/1password/service-account"
-  # Ref do token GitHub dedicado ao projeto (preferido).
-  # EX: "op://secrets/dotfiles/github/token"
-  github_project_pat_ref: "op://secrets/dotfiles/github/token"
-  # Ref de token GitHub amplo (fallback de contingencia).
-  # EX: "op://secrets/github/api/token"
-  github_full_access_ref: "op://secrets/github/api/token"
-  # Ref da chave age usada para criptografar/decriptar arquivos .sops.
-  # EX: "op://secrets/dotfiles/age/age.key"
-  age_key_ref: "op://secrets/dotfiles/age/age.key"
+  # Token principal de service account do 1Password para o bootstrap.
+  onepassword_service_account_ref: "@@SECRETS_ONEPASSWORD_SERVICE_ACCOUNT_REF@@"
+
+  # Token GitHub preferencial para este projeto.
+  github_project_pat_ref: "@@SECRETS_GITHUB_PROJECT_PAT_REF@@"
+
+  # Fallback caso o token acima nao esteja disponivel.
+  github_full_access_ref: "@@SECRETS_GITHUB_FULL_ACCESS_REF@@"
+
+  # Chave age usada pelo sops.
+  age_key_ref: "@@SECRETS_AGE_KEY_REF@@"

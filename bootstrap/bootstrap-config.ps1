@@ -277,11 +277,208 @@ function Escape-YamlDoubleQuotedValue {
 	return $escaped
 }
 
+function Get-CanonicalWindowsPathText {
+	param ([string]$PathValue)
+
+	$normalized = Normalize-WindowsPathTextForConfig -Value $PathValue
+	if ([string]::IsNullOrWhiteSpace($normalized)) { return '' }
+
+	$candidate = $normalized
+	$suffix = New-Object System.Collections.Generic.List[string]
+
+	while (-not [string]::IsNullOrWhiteSpace($candidate) -and -not (Test-Path -LiteralPath $candidate)) {
+		$leaf = Split-Path -Path $candidate -Leaf
+		$parent = Split-Path -Path $candidate -Parent
+		if ([string]::IsNullOrWhiteSpace($parent) -or $parent -eq $candidate) {
+			return $normalized
+		}
+		$suffix.Insert(0, $leaf)
+		$candidate = $parent
+	}
+
+	if ([string]::IsNullOrWhiteSpace($candidate) -or -not (Test-Path -LiteralPath $candidate)) {
+		return $normalized
+	}
+
+	try {
+		$resolved = (Get-Item -LiteralPath $candidate -Force).FullName
+	}
+	catch {
+		return $normalized
+	}
+
+	foreach ($segment in $suffix) {
+		$resolved = Join-Path $resolved $segment
+	}
+
+	return (Normalize-WindowsPathTextForConfig -Value $resolved)
+}
+
+function Convert-ConfigPathValueToPreferredAbsolute {
+	param (
+		[string]$Value,
+		[string]$RootPath,
+		[ValidateSet('windows', 'unix')]
+		[string]$Style
+	)
+
+	if ([string]::IsNullOrWhiteSpace($Value)) { return '' }
+
+	if ($Style -eq 'windows') {
+		$expanded = Expand-WindowsPathValue -PathValue $Value
+		$resolved = Resolve-PathWithRoot -RootPath $RootPath -PathValue $expanded -Style windows
+		return (Get-CanonicalWindowsPathText -PathValue $resolved)
+	}
+
+	return (Resolve-PathWithRoot -RootPath $RootPath -PathValue $Value -Style unix)
+}
+
+function Convert-BootstrapConfigToPreferredAbsolutePaths {
+	param ([hashtable]$Config)
+
+	$normalized = [ordered]@{}
+	foreach ($key in $Config.Keys) {
+		$normalized[$key] = [string]$Config[$key]
+	}
+
+	$windowsRoot = Convert-ConfigPathValueToPreferredAbsolute -Value $normalized['paths.windows.onedrive_root'] -RootPath '' -Style windows
+	$normalized['paths.windows.onedrive_root'] = $windowsRoot
+
+	$normalized['paths.windows.onedrive_clients_dir'] = Convert-ConfigPathValueToPreferredAbsolute -Value $normalized['paths.windows.onedrive_clients_dir'] -RootPath $windowsRoot -Style windows
+	$windowsProjectsDir = Convert-ConfigPathValueToPreferredAbsolute -Value $normalized['paths.windows.onedrive_projects_dir'] -RootPath $windowsRoot -Style windows
+	$windowsProjectsPath = Convert-ConfigPathValueToPreferredAbsolute -Value $normalized['paths.windows.onedrive_projects_path'] -RootPath $windowsRoot -Style windows
+	if ([string]::IsNullOrWhiteSpace($windowsProjectsPath) -and -not [string]::IsNullOrWhiteSpace($windowsProjectsDir)) {
+		$windowsProjectsPath = $windowsProjectsDir
+		$windowsProjectsDir = ''
+	}
+	elseif (-not [string]::IsNullOrWhiteSpace($windowsProjectsPath)) {
+		$windowsProjectsDir = ''
+	}
+	$normalized['paths.windows.onedrive_projects_dir'] = $windowsProjectsDir
+	$normalized['paths.windows.onedrive_projects_path'] = $windowsProjectsPath
+
+	foreach ($key in @(
+			'paths.windows.profile_links_documents_target',
+			'paths.windows.profile_links_desktop_target',
+			'paths.windows.profile_links_downloads_target',
+			'paths.windows.profile_links_pictures_target',
+			'paths.windows.profile_links_videos_target',
+			'paths.windows.profile_links_music_target',
+			'paths.windows.profile_links_contacts_target',
+			'paths.windows.profile_links_favorites_target',
+			'paths.windows.profile_links_links_target'
+		)) {
+		$normalized[$key] = Convert-ConfigPathValueToPreferredAbsolute -Value $normalized[$key] -RootPath $windowsRoot -Style windows
+	}
+
+	foreach ($key in @(
+			'paths.windows.links_profile_bin',
+			'paths.windows.links_profile_etc',
+			'paths.windows.links_profile_clients',
+			'paths.windows.links_profile_projects',
+			'paths.windows.links_drive_bin',
+			'paths.windows.links_drive_etc',
+			'paths.windows.links_drive_clients',
+			'paths.windows.links_drive_projects'
+		)) {
+		$normalized[$key] = Convert-ConfigPathValueToPreferredAbsolute -Value $normalized[$key] -RootPath '' -Style windows
+	}
+
+	$wslRoot = Convert-ConfigPathValueToPreferredAbsolute -Value $normalized['paths.wsl.onedrive_root'] -RootPath '' -Style unix
+	$normalized['paths.wsl.onedrive_root'] = $wslRoot
+
+	foreach ($key in @(
+			'paths.wsl.onedrive_clients_dir',
+			'paths.wsl.onedrive_projects_dir'
+		)) {
+		$normalized[$key] = Convert-ConfigPathValueToPreferredAbsolute -Value $normalized[$key] -RootPath $wslRoot -Style unix
+	}
+
+	return $normalized
+}
+
+function Test-BootstrapConfigMapsEqual {
+	param (
+		[hashtable]$Left,
+		[hashtable]$Right
+	)
+
+	if ($Left.Count -ne $Right.Count) { return $false }
+	foreach ($key in $Left.Keys) {
+		if (-not $Right.Contains($key)) { return $false }
+		if ([string]$Left[$key] -cne [string]$Right[$key]) { return $false }
+	}
+	return $true
+}
+
+function Write-BootstrapConfigPathPreferenceWarnings {
+	param ([hashtable]$Config)
+
+	$relativeEntries = New-Object System.Collections.Generic.List[string]
+
+	foreach ($key in @(
+			'paths.windows.onedrive_clients_dir',
+			'paths.windows.onedrive_projects_dir',
+			'paths.windows.onedrive_projects_path',
+			'paths.windows.links_profile_bin',
+			'paths.windows.links_profile_etc',
+			'paths.windows.links_profile_clients',
+			'paths.windows.links_profile_projects',
+			'paths.windows.links_drive_bin',
+			'paths.windows.links_drive_etc',
+			'paths.windows.links_drive_clients',
+			'paths.windows.links_drive_projects',
+			'paths.windows.profile_links_documents_target',
+			'paths.windows.profile_links_desktop_target',
+			'paths.windows.profile_links_downloads_target',
+			'paths.windows.profile_links_pictures_target',
+			'paths.windows.profile_links_videos_target',
+			'paths.windows.profile_links_music_target',
+			'paths.windows.profile_links_contacts_target',
+			'paths.windows.profile_links_favorites_target',
+			'paths.windows.profile_links_links_target'
+		)) {
+		$value = [string]$Config[$key]
+		if (-not [string]::IsNullOrWhiteSpace($value) -and -not (Test-WindowsAbsolutePath -PathValue $value)) {
+			$relativeEntries.Add(("{0} = {1}" -f $key, $value))
+		}
+	}
+
+	foreach ($key in @(
+			'paths.wsl.onedrive_clients_dir',
+			'paths.wsl.onedrive_projects_dir'
+		)) {
+		$value = [string]$Config[$key]
+		if (-not [string]::IsNullOrWhiteSpace($value) -and -not (Test-UnixAbsolutePath -PathValue $value)) {
+			$relativeEntries.Add(("{0} = {1}" -f $key, $value))
+		}
+	}
+
+	if ($relativeEntries.Count -eq 0) { return }
+
+	Write-Warning 'Ainda existem caminhos relativos no bootstrap/user-config.yaml. O padrao recomendado agora e usar caminhos absolutos e canonicos.'
+	Write-Host 'Riscos de manter relativo, alias ou symlink como fonte de verdade:'
+	Write-Host ' - o destino final passa a depender de outra base implicita'
+	Write-Host ' - mudar a root pode redirecionar varios links sem ficar obvio na config'
+	Write-Host ' - symlinks/atalhos podem mascarar drift e apontar para destinos antigos'
+	Write-Host ' - variaveis de ambiente exigem expansao extra e falham se houver typo'
+	Write-Host ' - existe um pequeno custo extra de resolucao a cada bootstrap; o maior ganho do absoluto e previsibilidade'
+	Write-Host 'Campos que ainda merecem ajuste:'
+	foreach ($entry in $relativeEntries) {
+		Write-Host (" - {0}" -f $entry)
+	}
+}
+
 function Write-BootstrapConfigYaml {
 	param (
 		[string]$Path,
 		[hashtable]$Config
 	)
+
+	$templatePath = Join-Path (Split-Path -Path $Path -Parent) 'user-config.yaml.tpl'
+	if (!(Test-Path -Path $templatePath -PathType Leaf)) {
+		throw "Config template not found: $templatePath"
+	}
 
 	$relativeTargetBaseConfigured = [string]$Config['paths.windows.onedrive_root']
 	$relativeTargetBaseForPath = if ([string]::IsNullOrWhiteSpace($relativeTargetBaseConfigured)) { '%USERPROFILE%\OneDrive' } else { $relativeTargetBaseConfigured }
@@ -307,198 +504,73 @@ function Write-BootstrapConfigYaml {
 	$favoritesTargetPreview = Resolve-PathWithRoot -RootPath $relativeTargetBaseForPath -PathValue $favoritesTargetValue -Style windows
 	$linksTargetPreview = Resolve-PathWithRoot -RootPath $relativeTargetBaseForPath -PathValue $linksTargetValue -Style windows
 
-	$yaml = @(
-		'# bootstrap/user-config.yaml'
-		'# Guia rapido (didatico) - preencha aqui tudo que o wizard pergunta.'
-		'# Este arquivo fica apenas na sua maquina (ignorado pelo Git).'
-		'# Dica: mantenha os comentarios para lembrar o significado de cada campo.'
-		'#'
-		'# Legenda de exemplos:'
-		'# - EX: exemplo realista'
-		'# - Opcional vazio: use ""'
-		'# - Boolean: true | false'
-		'version: 1'
-		'profile:'
-		'  # Nome "humano" para identificar o setup/local (aparece em logs).'
-		'  # EX: "work-wsl", "desktop-windows", "notebook-venda"'
-		("  name: ""{0}""" -f (Escape-YamlDoubleQuotedValue $Config['profile.name']))
-		'git:'
-		'  # Nome que vai nos commits.'
-		'  # EX: "Pablo Augusto"'
-		("  name: ""{0}""" -f (Escape-YamlDoubleQuotedValue $Config['git.name']))
-		'  # Email usado nos commits (ideal: verificado no GitHub).'
-		'  # EX: "pablo@pabloaugusto.com"'
-		("  email: ""{0}""" -f (Escape-YamlDoubleQuotedValue $Config['git.email']))
-		'  # Login do GitHub.'
-		'  # EX: "pabloaugusto"'
-		("  username: ""{0}""" -f (Escape-YamlDoubleQuotedValue $Config['git.username']))
-		'  # Chave publica SSH para assinatura de commit (linha ssh-ed25519 completa).'
-		'  # Isso e chave PUBLICA (nao segredo); a privada deve ficar no 1Password.'
-		'  # EX: "ssh-ed25519 AAAA... user@host"'
-		("  signing_key: ""{0}""" -f (Escape-YamlDoubleQuotedValue $Config['git.signing_key']))
-		'paths:'
-		'  windows:'
-		'    # Controla se o bootstrap exige/usa OneDrive no Windows.'
-		'    # true  = executa etapa guiada de root OneDrive ANTES de criar links:'
-		'    #         - se OneDrive nao existir: instala e pede caminho base.'
-		'    #         - se existir: pergunta manter/mover path base.'
-		'    # false = ignora OneDrive e cria apenas diretorios locais de perfil.'
-		'    # EX: true'
-		("    onedrive_enabled: {0}" -f (ConvertTo-BoolString -Value $Config['paths.windows.onedrive_enabled'] -Default 'true'))
-		'    # Raiz desejada do OneDrive no Windows (ABS).'
-		'    # Se vazio: usa root atual detectada; se nao houver setup, pergunta no wizard.'
-		'    # EX: "D:\\OneDrive"'
-		("    onedrive_root: ""{0}""" -f (Escape-YamlDoubleQuotedValue $Config['paths.windows.onedrive_root']))
-		'    # Se root desejada diferir da root atual, tenta migracao automatica:'
-		'    # mover dados + criar junction + atualizar root no registro (best-effort).'
-		'    # EX: true'
-		("    onedrive_auto_migrate: {0}" -f (ConvertTo-BoolString -Value $Config['paths.windows.onedrive_auto_migrate'] -Default 'true'))
-		'    # Pasta de clients no Windows. Pode ser ABS ou relativa a onedrive_root.'
-		'    # EX (rel): "clients" | EX (abs): "D:\\OneDrive\\clientes"'
-		("    onedrive_clients_dir: ""{0}""" -f (Escape-YamlDoubleQuotedValue $Config['paths.windows.onedrive_clients_dir']))
-		'    # Pasta de projects no Windows. Pode ser ABS ou relativa a onedrive_root.'
-		'    # EX (rel): "clients\\pablo\\projects" | EX (abs): "D:\\OneDrive\\projects"'
-		("    onedrive_projects_dir: ""{0}""" -f (Escape-YamlDoubleQuotedValue $Config['paths.windows.onedrive_projects_dir']))
-		'    # Caminho absoluto de projetos no OneDrive (Windows).'
-		'    # Se preenchido, tem prioridade sobre onedrive_projects_dir.'
-		'    # EX: "D:\\OneDrive\\clients\\pablo\\projects"'
-		("    onedrive_projects_path: ""{0}""" -f (Escape-YamlDoubleQuotedValue $Config['paths.windows.onedrive_projects_path']))
-		'    # Caminhos de link no perfil Windows (origem dos symlinks criados).'
-		'    # Aceita variaveis como %USERPROFILE%.'
-		'    # EX: "%USERPROFILE%\\bin"'
-		("    links_profile_bin: ""{0}""" -f (Escape-YamlDoubleQuotedValue $Config['paths.windows.links_profile_bin']))
-		'    # EX: "%USERPROFILE%\\etc"'
-		("    links_profile_etc: ""{0}""" -f (Escape-YamlDoubleQuotedValue $Config['paths.windows.links_profile_etc']))
-		'    # EX: "%USERPROFILE%\\clients"'
-		("    links_profile_clients: ""{0}""" -f (Escape-YamlDoubleQuotedValue $Config['paths.windows.links_profile_clients']))
-		'    # EX: "%USERPROFILE%\\projects"'
-		("    links_profile_projects: ""{0}""" -f (Escape-YamlDoubleQuotedValue $Config['paths.windows.links_profile_projects']))
-		'    # Ativa links adicionais na raiz de drive (atalhos d:\* por padrao).'
-		'    # Se o drive nao existir, bootstrap apenas informa e segue.'
-		'    # EX: true'
-		("    links_drive_enabled: {0}" -f (ConvertTo-BoolString -Value $Config['paths.windows.links_drive_enabled'] -Default 'true'))
-		'    # EX: "D:\\bin"'
-		("    links_drive_bin: ""{0}""" -f (Escape-YamlDoubleQuotedValue $Config['paths.windows.links_drive_bin']))
-		'    # EX: "D:\\etc"'
-		("    links_drive_etc: ""{0}""" -f (Escape-YamlDoubleQuotedValue $Config['paths.windows.links_drive_etc']))
-		'    # EX: "D:\\clients"'
-		("    links_drive_clients: ""{0}""" -f (Escape-YamlDoubleQuotedValue $Config['paths.windows.links_drive_clients']))
-		'    # EX: "D:\\projects"'
-		("    links_drive_projects: ""{0}""" -f (Escape-YamlDoubleQuotedValue $Config['paths.windows.links_drive_projects']))
-		'    # ----------------------------------------------------------------------'
-		'    # Links opcionais de pastas padrao do perfil para dentro do OneDrive.'
-		'    # Cada pasta tem 2 campos: *_enabled (liga/desliga) e *_target (destino).'
-		'    #'
-		'    # Regra de resolucao do *_target (IMPORTANTE):'
-		'    # - Se *_target for relativo (ex: "documents\\profile\\links"), o bootstrap'
-		'    #   concatena esse valor com a BASE abaixo.'
-		'    # - Se *_target for absoluto (ex: "D:\\OneDrive\\documents\\profile\\links"),'
-		'    #   usa o valor diretamente, sem concatenar.'
-		("    # Base atual desta config para targets relativos: ""{0}""" -f (Escape-YamlDoubleQuotedValue $relativeTargetBaseHint))
-		'    #'
-		'    # profile_links_migrate_content controla o comportamento de migracao:'
-		'    # - true  = migra conteudo atual da pasta para destino OneDrive antes de linkar.'
-		'    # - false = nao migra; apenas cria link (origem vira backup local).'
-		'    #'
-		'    # Exemplos reais observados no ambiente pablo:'
-		'    # - desktop  -> "desktop"'
-		'    # - documents -> "documents"'
-		'    # - downloads -> "downloads"'
-		'    # - pictures -> "Imagens"'
-		'    # - videos -> "Vídeos"'
-		'    # - music -> "Música"'
-		'    #'
-		'    # Exemplos sugeridos (quando ainda nao existe pasta no OneDrive):'
-		'    # - contacts -> "documents\\profile\\contacts"'
-		'    # - favorites -> "documents\\profile\\favorites"'
-		'    # - links -> "documents\\profile\\links"'
-		'    # ----------------------------------------------------------------------'
-		'    # Migracao de conteudo para pastas linkadas (segura):'
-		'    # true  = copia conteudo atual para destino e depois linka.'
-		'    # false = nao copia conteudo; apenas backup + link.'
-		("    profile_links_migrate_content: {0}" -f (ConvertTo-BoolString -Value $Config['paths.windows.profile_links_migrate_content'] -Default 'true'))
-		'    # Documents (%USERPROFILE%\Documents).'
-		("    #   target atual: ""{0}""" -f (Escape-YamlDoubleQuotedValue $documentsTargetValue))
-		("    #   caminho final com esta config: ""{0}""" -f (Escape-YamlDoubleQuotedValue $documentsTargetPreview))
-		("    profile_links_documents_enabled: {0}" -f (ConvertTo-BoolString -Value $Config['paths.windows.profile_links_documents_enabled'] -Default 'false'))
-		("    profile_links_documents_target: ""{0}""" -f (Escape-YamlDoubleQuotedValue $Config['paths.windows.profile_links_documents_target']))
-		'    # Desktop (%USERPROFILE%\Desktop).'
-		("    #   target atual: ""{0}""" -f (Escape-YamlDoubleQuotedValue $desktopTargetValue))
-		("    #   caminho final com esta config: ""{0}""" -f (Escape-YamlDoubleQuotedValue $desktopTargetPreview))
-		("    profile_links_desktop_enabled: {0}" -f (ConvertTo-BoolString -Value $Config['paths.windows.profile_links_desktop_enabled'] -Default 'false'))
-		("    profile_links_desktop_target: ""{0}""" -f (Escape-YamlDoubleQuotedValue $Config['paths.windows.profile_links_desktop_target']))
-		'    # Downloads (%USERPROFILE%\Downloads).'
-		("    #   target atual: ""{0}""" -f (Escape-YamlDoubleQuotedValue $downloadsTargetValue))
-		("    #   caminho final com esta config: ""{0}""" -f (Escape-YamlDoubleQuotedValue $downloadsTargetPreview))
-		("    profile_links_downloads_enabled: {0}" -f (ConvertTo-BoolString -Value $Config['paths.windows.profile_links_downloads_enabled'] -Default 'false'))
-		("    profile_links_downloads_target: ""{0}""" -f (Escape-YamlDoubleQuotedValue $Config['paths.windows.profile_links_downloads_target']))
-		'    # Pictures (%USERPROFILE%\Pictures).'
-		("    #   target atual: ""{0}""" -f (Escape-YamlDoubleQuotedValue $picturesTargetValue))
-		("    #   caminho final com esta config: ""{0}""" -f (Escape-YamlDoubleQuotedValue $picturesTargetPreview))
-		("    profile_links_pictures_enabled: {0}" -f (ConvertTo-BoolString -Value $Config['paths.windows.profile_links_pictures_enabled'] -Default 'false'))
-		("    profile_links_pictures_target: ""{0}""" -f (Escape-YamlDoubleQuotedValue $Config['paths.windows.profile_links_pictures_target']))
-		'    # Videos (%USERPROFILE%\Videos).'
-		("    #   target atual: ""{0}""" -f (Escape-YamlDoubleQuotedValue $videosTargetValue))
-		("    #   caminho final com esta config: ""{0}""" -f (Escape-YamlDoubleQuotedValue $videosTargetPreview))
-		("    profile_links_videos_enabled: {0}" -f (ConvertTo-BoolString -Value $Config['paths.windows.profile_links_videos_enabled'] -Default 'false'))
-		("    profile_links_videos_target: ""{0}""" -f (Escape-YamlDoubleQuotedValue $Config['paths.windows.profile_links_videos_target']))
-		'    # Music (%USERPROFILE%\Music).'
-		("    #   target atual: ""{0}""" -f (Escape-YamlDoubleQuotedValue $musicTargetValue))
-		("    #   caminho final com esta config: ""{0}""" -f (Escape-YamlDoubleQuotedValue $musicTargetPreview))
-		("    profile_links_music_enabled: {0}" -f (ConvertTo-BoolString -Value $Config['paths.windows.profile_links_music_enabled'] -Default 'false'))
-		("    profile_links_music_target: ""{0}""" -f (Escape-YamlDoubleQuotedValue $Config['paths.windows.profile_links_music_target']))
-		'    # Contacts (%USERPROFILE%\Contacts).'
-		("    #   target atual: ""{0}""" -f (Escape-YamlDoubleQuotedValue $contactsTargetValue))
-		("    #   caminho final com esta config: ""{0}""" -f (Escape-YamlDoubleQuotedValue $contactsTargetPreview))
-		("    profile_links_contacts_enabled: {0}" -f (ConvertTo-BoolString -Value $Config['paths.windows.profile_links_contacts_enabled'] -Default 'false'))
-		("    profile_links_contacts_target: ""{0}""" -f (Escape-YamlDoubleQuotedValue $Config['paths.windows.profile_links_contacts_target']))
-		'    # Favorites (%USERPROFILE%\Favorites).'
-		("    #   target atual: ""{0}""" -f (Escape-YamlDoubleQuotedValue $favoritesTargetValue))
-		("    #   caminho final com esta config: ""{0}""" -f (Escape-YamlDoubleQuotedValue $favoritesTargetPreview))
-		("    profile_links_favorites_enabled: {0}" -f (ConvertTo-BoolString -Value $Config['paths.windows.profile_links_favorites_enabled'] -Default 'false'))
-		("    profile_links_favorites_target: ""{0}""" -f (Escape-YamlDoubleQuotedValue $Config['paths.windows.profile_links_favorites_target']))
-		'    # Links (%USERPROFILE%\Links).'
-		("    #   target atual: ""{0}""" -f (Escape-YamlDoubleQuotedValue $linksTargetValue))
-		("    #   caminho final com esta config: ""{0}""" -f (Escape-YamlDoubleQuotedValue $linksTargetPreview))
-		("    profile_links_links_enabled: {0}" -f (ConvertTo-BoolString -Value $Config['paths.windows.profile_links_links_enabled'] -Default 'false'))
-		("    profile_links_links_target: ""{0}""" -f (Escape-YamlDoubleQuotedValue $Config['paths.windows.profile_links_links_target']))
-		'  wsl:'
-		'    # Raiz do OneDrive no WSL.'
-		'    # EX: "/mnt/d/OneDrive"'
-		("    onedrive_root: ""{0}""" -f (Escape-YamlDoubleQuotedValue $Config['paths.wsl.onedrive_root']))
-		'    # Pasta de clients no WSL: pode ser relativa (a raiz) ou absoluta.'
-		'    # EX (rel): "clients" | EX (abs): "/mnt/d/OneDrive/clients"'
-		("    onedrive_clients_dir: ""{0}""" -f (Escape-YamlDoubleQuotedValue $Config['paths.wsl.onedrive_clients_dir']))
-		'    # Pasta de projects no WSL: pode ser relativa (a raiz) ou absoluta.'
-		'    # EX (rel): "clients/pablo/projects" | EX (abs): "/mnt/d/OneDrive/projects"'
-		("    onedrive_projects_dir: ""{0}""" -f (Escape-YamlDoubleQuotedValue $Config['paths.wsl.onedrive_projects_dir']))
-		'bootstrap:'
-		'  add_user:'
-		'    # Criar usuario Linux extra no WSL (alem do principal)?'
-		'    # Utilidade: separar contexto pessoal x automacao/deploy e aplicar permissao minima.'
-		'    # Em desktop pessoal, normalmente deixe false.'
-		'    # EX: false'
-		("    enabled: {0}" -f (($Config['bootstrap.add_user.enabled']).ToLowerInvariant()))
-		'    # Nome do usuario adicional (somente se enabled=true).'
-		'    # Exemplo comum: "deploy" ou "automation".'
-		'    # EX: "deploy"'
-		("    username: ""{0}""" -f (Escape-YamlDoubleQuotedValue $Config['bootstrap.add_user.username']))
-		'    # Hash de senha (openssl passwd -1 "senha"), somente se enabled=true.'
-		("    password_hash: ""{0}""" -f (Escape-YamlDoubleQuotedValue $Config['bootstrap.add_user.password_hash']))
-		'secrets:'
-		'  # Ref do token de service account do 1Password (entrada unica do bootstrap).'
-		'  # EX: "op://secrets/dotfiles/1password/service-account"'
-		("  onepassword_service_account_ref: ""{0}""" -f (Escape-YamlDoubleQuotedValue $Config['secrets.onepassword_service_account_ref']))
-		'  # Ref do token GitHub dedicado ao projeto (preferido).'
-		'  # EX: "op://secrets/dotfiles/github/token"'
-		("  github_project_pat_ref: ""{0}""" -f (Escape-YamlDoubleQuotedValue $Config['secrets.github_project_pat_ref']))
-		'  # Ref de token GitHub amplo (fallback de contingencia).'
-		'  # EX: "op://secrets/github/api/token"'
-		("  github_full_access_ref: ""{0}""" -f (Escape-YamlDoubleQuotedValue $Config['secrets.github_full_access_ref']))
-		'  # Ref da chave age usada para criptografar/decriptar arquivos .sops.'
-		'  # EX: "op://secrets/dotfiles/age/age.key"'
-		("  age_key_ref: ""{0}""" -f (Escape-YamlDoubleQuotedValue $Config['secrets.age_key_ref']))
-	)
+	$yaml = Get-Content -Raw -Path $templatePath
+	$replacements = [ordered]@{
+		'@@VERSION@@' = '1'
+		'@@PROFILE_NAME@@' = Escape-YamlDoubleQuotedValue $Config['profile.name']
+		'@@GIT_NAME@@' = Escape-YamlDoubleQuotedValue $Config['git.name']
+		'@@GIT_EMAIL@@' = Escape-YamlDoubleQuotedValue $Config['git.email']
+		'@@GIT_USERNAME@@' = Escape-YamlDoubleQuotedValue $Config['git.username']
+		'@@GIT_SIGNING_KEY@@' = Escape-YamlDoubleQuotedValue $Config['git.signing_key']
+		'@@WINDOWS_ONEDRIVE_ENABLED@@' = ConvertTo-BoolString -Value $Config['paths.windows.onedrive_enabled'] -Default 'true'
+		'@@WINDOWS_ONEDRIVE_ROOT@@' = Escape-YamlDoubleQuotedValue $Config['paths.windows.onedrive_root']
+		'@@WINDOWS_ONEDRIVE_AUTO_MIGRATE@@' = ConvertTo-BoolString -Value $Config['paths.windows.onedrive_auto_migrate'] -Default 'true'
+		'@@WINDOWS_ONEDRIVE_CLIENTS_DIR@@' = Escape-YamlDoubleQuotedValue $Config['paths.windows.onedrive_clients_dir']
+		'@@WINDOWS_ONEDRIVE_PROJECTS_DIR@@' = Escape-YamlDoubleQuotedValue $Config['paths.windows.onedrive_projects_dir']
+		'@@WINDOWS_ONEDRIVE_PROJECTS_PATH@@' = Escape-YamlDoubleQuotedValue $Config['paths.windows.onedrive_projects_path']
+		'@@WINDOWS_LINKS_PROFILE_BIN@@' = Escape-YamlDoubleQuotedValue $Config['paths.windows.links_profile_bin']
+		'@@WINDOWS_LINKS_PROFILE_ETC@@' = Escape-YamlDoubleQuotedValue $Config['paths.windows.links_profile_etc']
+		'@@WINDOWS_LINKS_PROFILE_CLIENTS@@' = Escape-YamlDoubleQuotedValue $Config['paths.windows.links_profile_clients']
+		'@@WINDOWS_LINKS_PROFILE_PROJECTS@@' = Escape-YamlDoubleQuotedValue $Config['paths.windows.links_profile_projects']
+		'@@WINDOWS_LINKS_DRIVE_ENABLED@@' = ConvertTo-BoolString -Value $Config['paths.windows.links_drive_enabled'] -Default 'true'
+		'@@WINDOWS_LINKS_DRIVE_BIN@@' = Escape-YamlDoubleQuotedValue $Config['paths.windows.links_drive_bin']
+		'@@WINDOWS_LINKS_DRIVE_ETC@@' = Escape-YamlDoubleQuotedValue $Config['paths.windows.links_drive_etc']
+		'@@WINDOWS_LINKS_DRIVE_CLIENTS@@' = Escape-YamlDoubleQuotedValue $Config['paths.windows.links_drive_clients']
+		'@@WINDOWS_LINKS_DRIVE_PROJECTS@@' = Escape-YamlDoubleQuotedValue $Config['paths.windows.links_drive_projects']
+		'@@RELATIVE_TARGET_BASE_HINT@@' = Escape-YamlDoubleQuotedValue $relativeTargetBaseHint
+		'@@WINDOWS_PROFILE_LINKS_MIGRATE_CONTENT@@' = ConvertTo-BoolString -Value $Config['paths.windows.profile_links_migrate_content'] -Default 'true'
+		'@@WINDOWS_PROFILE_LINKS_DOCUMENTS_PREVIEW@@' = Escape-YamlDoubleQuotedValue $documentsTargetPreview
+		'@@WINDOWS_PROFILE_LINKS_DOCUMENTS_ENABLED@@' = ConvertTo-BoolString -Value $Config['paths.windows.profile_links_documents_enabled'] -Default 'false'
+		'@@WINDOWS_PROFILE_LINKS_DOCUMENTS_TARGET@@' = Escape-YamlDoubleQuotedValue $Config['paths.windows.profile_links_documents_target']
+		'@@WINDOWS_PROFILE_LINKS_DESKTOP_PREVIEW@@' = Escape-YamlDoubleQuotedValue $desktopTargetPreview
+		'@@WINDOWS_PROFILE_LINKS_DESKTOP_ENABLED@@' = ConvertTo-BoolString -Value $Config['paths.windows.profile_links_desktop_enabled'] -Default 'false'
+		'@@WINDOWS_PROFILE_LINKS_DESKTOP_TARGET@@' = Escape-YamlDoubleQuotedValue $Config['paths.windows.profile_links_desktop_target']
+		'@@WINDOWS_PROFILE_LINKS_DOWNLOADS_PREVIEW@@' = Escape-YamlDoubleQuotedValue $downloadsTargetPreview
+		'@@WINDOWS_PROFILE_LINKS_DOWNLOADS_ENABLED@@' = ConvertTo-BoolString -Value $Config['paths.windows.profile_links_downloads_enabled'] -Default 'false'
+		'@@WINDOWS_PROFILE_LINKS_DOWNLOADS_TARGET@@' = Escape-YamlDoubleQuotedValue $Config['paths.windows.profile_links_downloads_target']
+		'@@WINDOWS_PROFILE_LINKS_PICTURES_PREVIEW@@' = Escape-YamlDoubleQuotedValue $picturesTargetPreview
+		'@@WINDOWS_PROFILE_LINKS_PICTURES_ENABLED@@' = ConvertTo-BoolString -Value $Config['paths.windows.profile_links_pictures_enabled'] -Default 'false'
+		'@@WINDOWS_PROFILE_LINKS_PICTURES_TARGET@@' = Escape-YamlDoubleQuotedValue $Config['paths.windows.profile_links_pictures_target']
+		'@@WINDOWS_PROFILE_LINKS_VIDEOS_PREVIEW@@' = Escape-YamlDoubleQuotedValue $videosTargetPreview
+		'@@WINDOWS_PROFILE_LINKS_VIDEOS_ENABLED@@' = ConvertTo-BoolString -Value $Config['paths.windows.profile_links_videos_enabled'] -Default 'false'
+		'@@WINDOWS_PROFILE_LINKS_VIDEOS_TARGET@@' = Escape-YamlDoubleQuotedValue $Config['paths.windows.profile_links_videos_target']
+		'@@WINDOWS_PROFILE_LINKS_MUSIC_PREVIEW@@' = Escape-YamlDoubleQuotedValue $musicTargetPreview
+		'@@WINDOWS_PROFILE_LINKS_MUSIC_ENABLED@@' = ConvertTo-BoolString -Value $Config['paths.windows.profile_links_music_enabled'] -Default 'false'
+		'@@WINDOWS_PROFILE_LINKS_MUSIC_TARGET@@' = Escape-YamlDoubleQuotedValue $Config['paths.windows.profile_links_music_target']
+		'@@WINDOWS_PROFILE_LINKS_CONTACTS_PREVIEW@@' = Escape-YamlDoubleQuotedValue $contactsTargetPreview
+		'@@WINDOWS_PROFILE_LINKS_CONTACTS_ENABLED@@' = ConvertTo-BoolString -Value $Config['paths.windows.profile_links_contacts_enabled'] -Default 'false'
+		'@@WINDOWS_PROFILE_LINKS_CONTACTS_TARGET@@' = Escape-YamlDoubleQuotedValue $Config['paths.windows.profile_links_contacts_target']
+		'@@WINDOWS_PROFILE_LINKS_FAVORITES_PREVIEW@@' = Escape-YamlDoubleQuotedValue $favoritesTargetPreview
+		'@@WINDOWS_PROFILE_LINKS_FAVORITES_ENABLED@@' = ConvertTo-BoolString -Value $Config['paths.windows.profile_links_favorites_enabled'] -Default 'false'
+		'@@WINDOWS_PROFILE_LINKS_FAVORITES_TARGET@@' = Escape-YamlDoubleQuotedValue $Config['paths.windows.profile_links_favorites_target']
+		'@@WINDOWS_PROFILE_LINKS_LINKS_PREVIEW@@' = Escape-YamlDoubleQuotedValue $linksTargetPreview
+		'@@WINDOWS_PROFILE_LINKS_LINKS_ENABLED@@' = ConvertTo-BoolString -Value $Config['paths.windows.profile_links_links_enabled'] -Default 'false'
+		'@@WINDOWS_PROFILE_LINKS_LINKS_TARGET@@' = Escape-YamlDoubleQuotedValue $Config['paths.windows.profile_links_links_target']
+		'@@WSL_ONEDRIVE_ROOT@@' = Escape-YamlDoubleQuotedValue $Config['paths.wsl.onedrive_root']
+		'@@WSL_ONEDRIVE_CLIENTS_DIR@@' = Escape-YamlDoubleQuotedValue $Config['paths.wsl.onedrive_clients_dir']
+		'@@WSL_ONEDRIVE_PROJECTS_DIR@@' = Escape-YamlDoubleQuotedValue $Config['paths.wsl.onedrive_projects_dir']
+		'@@BOOTSTRAP_ADD_USER_ENABLED@@' = ($Config['bootstrap.add_user.enabled']).ToLowerInvariant()
+		'@@BOOTSTRAP_ADD_USER_USERNAME@@' = Escape-YamlDoubleQuotedValue $Config['bootstrap.add_user.username']
+		'@@BOOTSTRAP_ADD_USER_PASSWORD_HASH@@' = Escape-YamlDoubleQuotedValue $Config['bootstrap.add_user.password_hash']
+		'@@SECRETS_ONEPASSWORD_SERVICE_ACCOUNT_REF@@' = Escape-YamlDoubleQuotedValue $Config['secrets.onepassword_service_account_ref']
+		'@@SECRETS_GITHUB_PROJECT_PAT_REF@@' = Escape-YamlDoubleQuotedValue $Config['secrets.github_project_pat_ref']
+		'@@SECRETS_GITHUB_FULL_ACCESS_REF@@' = Escape-YamlDoubleQuotedValue $Config['secrets.github_full_access_ref']
+		'@@SECRETS_AGE_KEY_REF@@' = Escape-YamlDoubleQuotedValue $Config['secrets.age_key_ref']
+	}
+
+	foreach ($key in $replacements.Keys) {
+		$yaml = $yaml.Replace($key, [string]$replacements[$key])
+	}
 
 	$targetDir = Split-Path -Path $Path -Parent
 	if ($targetDir -and !(Test-Path -Path $targetDir)) {
@@ -582,6 +654,8 @@ function Invoke-BootstrapConfigWizard {
 
 	Write-Host "`nConfiguração guiada do bootstrap (YAML central)."
 	Write-Host "Pressione ENTER para manter o valor atual."
+	Write-Host "Preferencia atual: caminhos absolutos e canonicos em todos os campos de path."
+	Write-Host "Relativos, %USERPROFILE% e symlinks devem ficar como ultimo recurso."
 
 	$Config['profile.name'] = Read-ConfigPrompt -Label 'Nome do perfil local (apelido). EX: work-wsl | desktop-windows' -CurrentValue $Config['profile.name']
 	$Config['git.name'] = Read-ConfigPrompt -Label 'Git name (nome exibido nos commits). EX: Pablo Augusto' -CurrentValue $Config['git.name']
@@ -590,15 +664,15 @@ function Invoke-BootstrapConfigWizard {
 	$Config['git.signing_key'] = Read-ConfigPrompt -Label 'Chave publica SSH para assinatura. EX: ssh-ed25519 AAA... user@host' -CurrentValue $Config['git.signing_key']
 
 	$Config['paths.windows.onedrive_enabled'] = Read-BooleanPrompt -Label 'Windows: exigir/usar OneDrive no bootstrap?' -CurrentValue $Config['paths.windows.onedrive_enabled']
-	$Config['paths.windows.onedrive_root'] = Read-ConfigPrompt -Label 'Windows OneDrive root desejada (ABS, ex: D:\\OneDrive; vazio=detectar/perguntar)' -CurrentValue $Config['paths.windows.onedrive_root'] -AllowEmpty
+	$Config['paths.windows.onedrive_root'] = Read-ConfigPrompt -Label 'Windows OneDrive root canônica (prefira ABS, ex: D:\\onedrive; vazio=detectar/perguntar)' -CurrentValue $Config['paths.windows.onedrive_root'] -AllowEmpty
 	$Config['paths.windows.onedrive_auto_migrate'] = Read-BooleanPrompt -Label 'Se root mudar, migrar dados + ajustar OneDrive automaticamente?' -CurrentValue $Config['paths.windows.onedrive_auto_migrate']
-	$Config['paths.windows.onedrive_clients_dir'] = Read-ConfigPrompt -Label 'Windows clients dir (rel/abs, ex: clients ou D:\\OneDrive\\clients)' -CurrentValue $Config['paths.windows.onedrive_clients_dir'] -AllowEmpty
-	$Config['paths.windows.onedrive_projects_dir'] = Read-ConfigPrompt -Label 'Windows projects dir (rel/abs, ex: clients\\pablo\\projects)' -CurrentValue $Config['paths.windows.onedrive_projects_dir'] -AllowEmpty
-	$Config['paths.windows.onedrive_projects_path'] = Read-ConfigPrompt -Label 'Windows projects path (ABS, prioridade maxima, opcional)' -CurrentValue $Config['paths.windows.onedrive_projects_path'] -AllowEmpty
-	$Config['paths.windows.links_profile_bin'] = Read-ConfigPrompt -Label 'Link profile bin (ex: %USERPROFILE%\\bin)' -CurrentValue $Config['paths.windows.links_profile_bin']
-	$Config['paths.windows.links_profile_etc'] = Read-ConfigPrompt -Label 'Link profile etc (ex: %USERPROFILE%\\etc)' -CurrentValue $Config['paths.windows.links_profile_etc']
-	$Config['paths.windows.links_profile_clients'] = Read-ConfigPrompt -Label 'Link profile clients (ex: %USERPROFILE%\\clients)' -CurrentValue $Config['paths.windows.links_profile_clients']
-	$Config['paths.windows.links_profile_projects'] = Read-ConfigPrompt -Label 'Link profile projects (ex: %USERPROFILE%\\projects)' -CurrentValue $Config['paths.windows.links_profile_projects']
+	$Config['paths.windows.onedrive_clients_dir'] = Read-ConfigPrompt -Label 'Windows clients dir (prefira ABS, ex: D:\\onedrive\\clients; relativo so em ultimo caso)' -CurrentValue $Config['paths.windows.onedrive_clients_dir'] -AllowEmpty
+	$Config['paths.windows.onedrive_projects_dir'] = Read-ConfigPrompt -Label 'Windows projects dir (fallback legado; prefira vazio e usar onedrive_projects_path ABS)' -CurrentValue $Config['paths.windows.onedrive_projects_dir'] -AllowEmpty
+	$Config['paths.windows.onedrive_projects_path'] = Read-ConfigPrompt -Label 'Windows projects path (campo preferido; ABS canônico, ex: D:\\onedrive\\clients\\pablo\\projects)' -CurrentValue $Config['paths.windows.onedrive_projects_path'] -AllowEmpty
+	$Config['paths.windows.links_profile_bin'] = Read-ConfigPrompt -Label 'Link profile bin (prefira ABS, ex: C:\\Users\\seu-usuario\\bin)' -CurrentValue $Config['paths.windows.links_profile_bin']
+	$Config['paths.windows.links_profile_etc'] = Read-ConfigPrompt -Label 'Link profile etc (prefira ABS, ex: C:\\Users\\seu-usuario\\etc)' -CurrentValue $Config['paths.windows.links_profile_etc']
+	$Config['paths.windows.links_profile_clients'] = Read-ConfigPrompt -Label 'Link profile clients (prefira ABS, ex: C:\\Users\\seu-usuario\\clients)' -CurrentValue $Config['paths.windows.links_profile_clients']
+	$Config['paths.windows.links_profile_projects'] = Read-ConfigPrompt -Label 'Link profile projects (prefira ABS, ex: C:\\Users\\seu-usuario\\projects)' -CurrentValue $Config['paths.windows.links_profile_projects']
 	$Config['paths.windows.links_drive_enabled'] = Read-BooleanPrompt -Label 'Criar links adicionais no drive (d:\\* ou equivalente)?' -CurrentValue $Config['paths.windows.links_drive_enabled']
 	$Config['paths.windows.links_drive_bin'] = Read-ConfigPrompt -Label 'Link drive bin (ex: D:\\bin)' -CurrentValue $Config['paths.windows.links_drive_bin']
 	$Config['paths.windows.links_drive_etc'] = Read-ConfigPrompt -Label 'Link drive etc (ex: D:\\etc)' -CurrentValue $Config['paths.windows.links_drive_etc']
@@ -606,29 +680,29 @@ function Invoke-BootstrapConfigWizard {
 	$Config['paths.windows.links_drive_projects'] = Read-ConfigPrompt -Label 'Link drive projects (ex: D:\\projects)' -CurrentValue $Config['paths.windows.links_drive_projects']
 	Write-Host "Links opcionais de pastas padrao do perfil para OneDrive (Documents/Desktop/etc)."
 	$wizardRelativeBase = if ([string]::IsNullOrWhiteSpace([string]$Config['paths.windows.onedrive_root'])) { 'AUTO (registro OneDrive -> env OneDrive -> %USERPROFILE%\\OneDrive)' } else { [string]$Config['paths.windows.onedrive_root'] }
-	Write-Host "Base usada para campos *_target relativos: $wizardRelativeBase"
+	Write-Host "Se ainda usar target relativo, a base sera: $wizardRelativeBase"
 	$Config['paths.windows.profile_links_migrate_content'] = Read-BooleanPrompt -Label 'Ao linkar pastas, migrar conteudo atual automaticamente para OneDrive?' -CurrentValue $Config['paths.windows.profile_links_migrate_content']
 	$Config['paths.windows.profile_links_documents_enabled'] = Read-BooleanPrompt -Label 'Linkar Documents para OneDrive?' -CurrentValue $Config['paths.windows.profile_links_documents_enabled']
-	$Config['paths.windows.profile_links_documents_target'] = Read-ConfigPrompt -Label 'Destino Documents (relativo a onedrive_root ou ABS, ex: documents)' -CurrentValue $Config['paths.windows.profile_links_documents_target']
+	$Config['paths.windows.profile_links_documents_target'] = Read-ConfigPrompt -Label 'Destino Documents (prefira ABS, ex: D:\\onedrive\\documents; relativo so em ultimo caso)' -CurrentValue $Config['paths.windows.profile_links_documents_target']
 	$Config['paths.windows.profile_links_desktop_enabled'] = Read-BooleanPrompt -Label 'Linkar Desktop para OneDrive?' -CurrentValue $Config['paths.windows.profile_links_desktop_enabled']
-	$Config['paths.windows.profile_links_desktop_target'] = Read-ConfigPrompt -Label 'Destino Desktop (relativo a onedrive_root ou ABS, ex: desktop)' -CurrentValue $Config['paths.windows.profile_links_desktop_target']
+	$Config['paths.windows.profile_links_desktop_target'] = Read-ConfigPrompt -Label 'Destino Desktop (prefira ABS, ex: D:\\onedrive\\desktop; relativo so em ultimo caso)' -CurrentValue $Config['paths.windows.profile_links_desktop_target']
 	$Config['paths.windows.profile_links_downloads_enabled'] = Read-BooleanPrompt -Label 'Linkar Downloads para OneDrive?' -CurrentValue $Config['paths.windows.profile_links_downloads_enabled']
-	$Config['paths.windows.profile_links_downloads_target'] = Read-ConfigPrompt -Label 'Destino Downloads (relativo a onedrive_root ou ABS, ex: downloads)' -CurrentValue $Config['paths.windows.profile_links_downloads_target']
+	$Config['paths.windows.profile_links_downloads_target'] = Read-ConfigPrompt -Label 'Destino Downloads (prefira ABS, ex: D:\\onedrive\\downloads; relativo so em ultimo caso)' -CurrentValue $Config['paths.windows.profile_links_downloads_target']
 	$Config['paths.windows.profile_links_pictures_enabled'] = Read-BooleanPrompt -Label 'Linkar Pictures para OneDrive?' -CurrentValue $Config['paths.windows.profile_links_pictures_enabled']
-	$Config['paths.windows.profile_links_pictures_target'] = Read-ConfigPrompt -Label 'Destino Pictures (relativo a onedrive_root ou ABS, ex: Imagens)' -CurrentValue $Config['paths.windows.profile_links_pictures_target']
+	$Config['paths.windows.profile_links_pictures_target'] = Read-ConfigPrompt -Label 'Destino Pictures (prefira ABS, ex: D:\\onedrive\\Imagens; relativo so em ultimo caso)' -CurrentValue $Config['paths.windows.profile_links_pictures_target']
 	$Config['paths.windows.profile_links_videos_enabled'] = Read-BooleanPrompt -Label 'Linkar Videos para OneDrive?' -CurrentValue $Config['paths.windows.profile_links_videos_enabled']
-	$Config['paths.windows.profile_links_videos_target'] = Read-ConfigPrompt -Label 'Destino Videos (relativo a onedrive_root ou ABS, ex: Vídeos)' -CurrentValue $Config['paths.windows.profile_links_videos_target']
+	$Config['paths.windows.profile_links_videos_target'] = Read-ConfigPrompt -Label 'Destino Videos (prefira ABS, ex: D:\\onedrive\\Vídeos; relativo so em ultimo caso)' -CurrentValue $Config['paths.windows.profile_links_videos_target']
 	$Config['paths.windows.profile_links_music_enabled'] = Read-BooleanPrompt -Label 'Linkar Music para OneDrive?' -CurrentValue $Config['paths.windows.profile_links_music_enabled']
-	$Config['paths.windows.profile_links_music_target'] = Read-ConfigPrompt -Label 'Destino Music (relativo a onedrive_root ou ABS, ex: Música)' -CurrentValue $Config['paths.windows.profile_links_music_target']
+	$Config['paths.windows.profile_links_music_target'] = Read-ConfigPrompt -Label 'Destino Music (prefira ABS, ex: D:\\onedrive\\Música; relativo so em ultimo caso)' -CurrentValue $Config['paths.windows.profile_links_music_target']
 	$Config['paths.windows.profile_links_contacts_enabled'] = Read-BooleanPrompt -Label 'Linkar Contacts para OneDrive?' -CurrentValue $Config['paths.windows.profile_links_contacts_enabled']
-	$Config['paths.windows.profile_links_contacts_target'] = Read-ConfigPrompt -Label 'Destino Contacts (relativo a onedrive_root ou ABS, ex: documents\\profile\\contacts)' -CurrentValue $Config['paths.windows.profile_links_contacts_target']
+	$Config['paths.windows.profile_links_contacts_target'] = Read-ConfigPrompt -Label 'Destino Contacts (prefira ABS, ex: D:\\onedrive\\documents\\profile\\contacts; relativo so em ultimo caso)' -CurrentValue $Config['paths.windows.profile_links_contacts_target']
 	$Config['paths.windows.profile_links_favorites_enabled'] = Read-BooleanPrompt -Label 'Linkar Favorites para OneDrive?' -CurrentValue $Config['paths.windows.profile_links_favorites_enabled']
-	$Config['paths.windows.profile_links_favorites_target'] = Read-ConfigPrompt -Label 'Destino Favorites (relativo a onedrive_root ou ABS, ex: documents\\profile\\favorites)' -CurrentValue $Config['paths.windows.profile_links_favorites_target']
+	$Config['paths.windows.profile_links_favorites_target'] = Read-ConfigPrompt -Label 'Destino Favorites (prefira ABS, ex: D:\\onedrive\\documents\\profile\\favorites; relativo so em ultimo caso)' -CurrentValue $Config['paths.windows.profile_links_favorites_target']
 	$Config['paths.windows.profile_links_links_enabled'] = Read-BooleanPrompt -Label 'Linkar Links para OneDrive?' -CurrentValue $Config['paths.windows.profile_links_links_enabled']
-	$Config['paths.windows.profile_links_links_target'] = Read-ConfigPrompt -Label 'Destino Links (relativo a onedrive_root ou ABS, ex: documents\\profile\\links)' -CurrentValue $Config['paths.windows.profile_links_links_target']
-	$Config['paths.wsl.onedrive_root'] = Read-ConfigPrompt -Label 'WSL OneDrive root (ex: /mnt/d/OneDrive)' -CurrentValue $Config['paths.wsl.onedrive_root']
-	$Config['paths.wsl.onedrive_clients_dir'] = Read-ConfigPrompt -Label 'WSL clients dir (rel/abs, ex: clients, ou vazio)' -CurrentValue $Config['paths.wsl.onedrive_clients_dir'] -AllowEmpty
-	$Config['paths.wsl.onedrive_projects_dir'] = Read-ConfigPrompt -Label 'WSL projects dir (rel/abs, ex: clients/pablo/projects, ou vazio)' -CurrentValue $Config['paths.wsl.onedrive_projects_dir'] -AllowEmpty
+	$Config['paths.windows.profile_links_links_target'] = Read-ConfigPrompt -Label 'Destino Links (prefira ABS, ex: D:\\onedrive\\documents\\profile\\links; relativo so em ultimo caso)' -CurrentValue $Config['paths.windows.profile_links_links_target']
+	$Config['paths.wsl.onedrive_root'] = Read-ConfigPrompt -Label 'WSL OneDrive root canônica (prefira ABS, ex: /mnt/d/onedrive)' -CurrentValue $Config['paths.wsl.onedrive_root']
+	$Config['paths.wsl.onedrive_clients_dir'] = Read-ConfigPrompt -Label 'WSL clients dir (prefira ABS, ex: /mnt/d/onedrive/clients; relativo so em ultimo caso)' -CurrentValue $Config['paths.wsl.onedrive_clients_dir'] -AllowEmpty
+	$Config['paths.wsl.onedrive_projects_dir'] = Read-ConfigPrompt -Label 'WSL projects dir (prefira ABS, ex: /mnt/d/onedrive/clients/pablo/projects; relativo so em ultimo caso)' -CurrentValue $Config['paths.wsl.onedrive_projects_dir'] -AllowEmpty
 
 	$Config['bootstrap.add_user.enabled'] = Read-BooleanPrompt -Label 'Criar usuario extra no WSL? (isolamento para deploy/automacao)' -CurrentValue $Config['bootstrap.add_user.enabled']
 	if (($Config['bootstrap.add_user.enabled']).ToLowerInvariant() -eq 'true') {
@@ -835,17 +909,25 @@ function Ensure-BootstrapConfigReady {
 	}
 
 	if (!(Test-Path -Path $configPath -PathType Leaf)) {
-		Copy-Item -Path $templatePath -Destination $configPath -Force
+		$defaults = Get-BootstrapConfigDefaults
+		Write-BootstrapConfigYaml -Path $configPath -Config $defaults
 		Write-Warning "Arquivo de config local criado em: $configPath"
 	}
 
-	$config = Merge-BootstrapConfigWithDefaults (Read-SimpleYamlAsPathMap -Path $configPath)
+	$configBeforeAbsolute = Merge-BootstrapConfigWithDefaults (Read-SimpleYamlAsPathMap -Path $configPath)
+	$config = Convert-BootstrapConfigToPreferredAbsolutePaths -Config $configBeforeAbsolute
+	if (-not (Test-BootstrapConfigMapsEqual -Left $configBeforeAbsolute -Right $config)) {
+		Write-Warning "Config local continha caminhos relativos, com alias ou nao canonicos. Regravando em formato absoluto/canonico quando possivel."
+		Write-BootstrapConfigYaml -Path $configPath -Config $config
+	}
+	Write-BootstrapConfigPathPreferenceWarnings -Config $config
 	$isFilled = Test-BootstrapConfigFilled -Config $config
 
 	if ($isFilled) {
 		$choice = Read-Host -Prompt "Config YAML ja preenchido. Escolha: 1=usar como esta, 2=sobrescrever em modo guiado"
 		if ($choice -eq '2') {
 			$config = Invoke-BootstrapConfigWizard -Config $config
+			$config = Convert-BootstrapConfigToPreferredAbsolutePaths -Config $config
 			Write-BootstrapConfigYaml -Path $configPath -Config $config
 		}
 	}
@@ -853,6 +935,7 @@ function Ensure-BootstrapConfigReady {
 		$choice = Read-Host -Prompt "Config YAML incompleto. Escolha: 1=preencher agora em modo guiado, 2=preencher manualmente e abortar"
 		if ($choice -eq '1') {
 			$config = Invoke-BootstrapConfigWizard -Config $config
+			$config = Convert-BootstrapConfigToPreferredAbsolutePaths -Config $config
 			Write-BootstrapConfigYaml -Path $configPath -Config $config
 		}
 		else {
@@ -861,7 +944,13 @@ function Ensure-BootstrapConfigReady {
 		}
 	}
 
-	$config = Merge-BootstrapConfigWithDefaults (Read-SimpleYamlAsPathMap -Path $configPath)
+	$configBeforeAbsolute = Merge-BootstrapConfigWithDefaults (Read-SimpleYamlAsPathMap -Path $configPath)
+	$config = Convert-BootstrapConfigToPreferredAbsolutePaths -Config $configBeforeAbsolute
+	if (-not (Test-BootstrapConfigMapsEqual -Left $configBeforeAbsolute -Right $config)) {
+		Write-Warning "Alguns caminhos ainda foram normalizados para absoluto/canonico apos a leitura final da config."
+		Write-BootstrapConfigYaml -Path $configPath -Config $config
+	}
+	Write-BootstrapConfigPathPreferenceWarnings -Config $config
 	if (!(Test-BootstrapConfigFilled -Config $config)) {
 		Write-Warning "Config YAML ainda incompleto. Ajuste manualmente: $configPath"
 		return $false
