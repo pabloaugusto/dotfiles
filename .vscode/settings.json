@@ -6,7 +6,6 @@
   // VISUAL: repo/arquivo mais explicitos
   // =========================
   "window.title": "${folderName} - ${activeEditorShort}",
-  "window.commandCenter": true,
   // =========================
   // GIT (nativo)
   // =========================
