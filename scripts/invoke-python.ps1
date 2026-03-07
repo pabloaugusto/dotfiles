@@ -17,6 +17,10 @@ $env:PYTHONIOENCODING = 'utf-8'
 
 function Get-PythonCommand {
 	$candidates = @(
+		@('.venv/windows/Scripts/python.exe'),
+		@('.venv/windows/Scripts/python'),
+		@('.venv/linux/bin/python3'),
+		@('.venv/linux/bin/python'),
 		@('py', '-3'),
 		@('python3'),
 		@('python'),
@@ -24,12 +28,34 @@ function Get-PythonCommand {
 	)
 
 	foreach ($candidate in $candidates) {
-		$cmd = Get-Command $candidate[0] -ErrorAction SilentlyContinue
+		$candidateExe = $candidate[0]
+		$candidateArgs = @()
+		if ($candidate.Count -gt 1) {
+			$candidateArgs = $candidate[1..($candidate.Count - 1)]
+		}
+
+		if ($candidateExe -like '.venv/*') {
+			$resolved = Join-Path (Get-Location) $candidateExe
+			if (-not (Test-Path $resolved)) {
+				continue
+			}
+			& $resolved @candidateArgs -c 'import sys' *> $null
+			if ($LASTEXITCODE -eq 0) {
+				$resolvedCandidate = @($resolved)
+				if ($candidateArgs.Count -gt 0) {
+					$resolvedCandidate += $candidateArgs
+				}
+				return ,$resolvedCandidate
+			}
+			continue
+		}
+
+		$cmd = Get-Command $candidateExe -ErrorAction SilentlyContinue
 		if (-not $cmd) {
 			continue
 		}
 
-		& $candidate[0] @($candidate[1..($candidate.Count - 1)]) -c 'import sys' *> $null
+		& $candidateExe @candidateArgs -c 'import sys' *> $null
 		if ($LASTEXITCODE -eq 0) {
 			return ,$candidate
 		}

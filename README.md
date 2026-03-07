@@ -37,14 +37,35 @@ de IA versionada.
 
 ### Qualidade, testes e CI/CD
 
+- Toolchain Python gerenciada por `uv`, `pyproject.toml`, `uv.lock` e
+  `.python-version`.
+- `.venv` segregada por plataforma para worktree compartilhada:
+  - Windows: `.venv/windows`
+  - Linux/WSL: `.venv/linux`
+- Camada Python de qualidade com:
+  - `ruff` para lint e formatacao
+  - `ty` para type checking incremental
+  - `pytest` com coverage para `scripts/` e `tests/python`
 - Lint sintatico para PowerShell e shell scripts.
+- Lint documental e estrutural com:
+  - `pymarkdownlnt`
+  - `yamllint`
+  - `validate_docs.py`
+- Validadores de tooling e seguranca com:
+  - `actionlint` via wrapper pinado
+  - `gitleaks` via wrapper pinado
 - Suite unitaria em:
   - Pester para PowerShell
+  - pytest para a stack Python de qualidade
   - unittest Python para governanca e automacao de IA
   - Bats para harnesses Linux
 - Harnesses reais de integracao para `relink`:
   - Linux em container OCI
   - Windows em ambiente temporario real
+- Pinagem declarativa de ferramentas auxiliares em
+  `config/tooling.releases.yaml`.
+- Spellcheck com `cspell` ja disponivel em task dedicada, ainda fora do gate
+  canonico enquanto o dicionario tecnico PT-BR/EN e curado.
 - Workflows ativos:
   - AI Governance
   - PR Validate
@@ -73,6 +94,8 @@ de IA versionada.
 - `docs/`: documentacao tecnica, catalogos operacionais e referencia.
 - `tests/`: suites de teste, harnesses e fixtures.
 - `scripts/`: CLIs e validadores reutilizaveis do repo.
+- `config/`: pinagem declarativa de ferramentas auxiliares e configuracoes de
+  suporte ao repo.
 - `docker/`: harnesses e imagens auxiliares de integracao.
 - `archive/`: legado e historico que nao deve contaminar os caminhos ativos.
 
@@ -114,11 +137,15 @@ task sync:wsl-gate
 ### Validacao local de qualidade
 
 ```powershell
+task install:dev
+task ci:quality
 task ci:validate
 task test:integration:windows
 ```
 
 ```bash
+task install:dev
+task ci:quality
 task ci:validate
 task test:integration:linux
 ```

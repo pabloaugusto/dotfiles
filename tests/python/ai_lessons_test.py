@@ -7,7 +7,6 @@ import sys
 import tempfile
 import unittest
 
-
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 LESSONS_SCRIPT = ROOT / "scripts" / "ai-lessons.py"
 WORKLOG_SCRIPT = ROOT / "scripts" / "ai-worklog.py"
@@ -67,7 +66,15 @@ class AiLessonsTests(unittest.TestCase):
             tracker = pathlib.Path(tmp) / "tracker.md"
             lessons = pathlib.Path(tmp) / "lessons.md"
 
-            run_worklog("start", "--file", str(tracker), "--message", "Tarefa lessons", "--worklog-id", "WIP-TEST-LESSONS")
+            run_worklog(
+                "start",
+                "--file",
+                str(tracker),
+                "--message",
+                "Tarefa lessons",
+                "--worklog-id",
+                "WIP-TEST-LESSONS",
+            )
             run_lessons(
                 "add",
                 "--file",
@@ -116,7 +123,9 @@ class AiLessonsTests(unittest.TestCase):
             tracker.write_text(TRACKER_TEMPLATE, encoding="utf-8")
             run_lessons("ensure", "--file", str(lessons))
 
-            failed = run_lessons("check", "--file", str(lessons), "--tracker-file", str(tracker), check=False)
+            failed = run_lessons(
+                "check", "--file", str(lessons), "--tracker-file", str(tracker), check=False
+            )
             self.assertNotEqual(failed.returncode, 0)
             self.assertIn("WIP-TEST-MISSING", f"{failed.stdout}\n{failed.stderr}")
 
@@ -163,7 +172,9 @@ class AiLessonsTests(unittest.TestCase):
 | 2026-03-07 00:00 UTC | WIP-TEST-DUPE | capturada | Revisao duplicada | LA-001 | - |"""
             duplicated = re.sub(
                 r"<!-- ai-lessons:reviews:start -->.*?<!-- ai-lessons:reviews:end -->",
-                "<!-- ai-lessons:reviews:start -->\n" + duplicated_table + "\n<!-- ai-lessons:reviews:end -->",
+                "<!-- ai-lessons:reviews:start -->\n"
+                + duplicated_table
+                + "\n<!-- ai-lessons:reviews:end -->",
                 content,
                 flags=re.S,
             )

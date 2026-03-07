@@ -6,33 +6,23 @@ import re
 import sys
 from pathlib import Path
 
-try:
-    from scripts.ai_contract_paths import (
-        cards_root,
-        config_path,
-        evals_root,
-        legacy_codex_readme,
-        legacy_codex_root,
-        orchestration_root,
-        registry_root,
-        rules_root,
-        skills_root,
-    )
-except ModuleNotFoundError:  # pragma: no cover - execucao direta do script
-    from ai_contract_paths import (
-        cards_root,
-        config_path,
-        evals_root,
-        legacy_codex_readme,
-        legacy_codex_root,
-        orchestration_root,
-        registry_root,
-        rules_root,
-        skills_root,
-    )
+if __package__ in {None, ""}:  # pragma: no cover - execucao direta do script
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+
+from scripts.ai_contract_paths import (
+    cards_root,
+    config_path,
+    evals_root,
+    legacy_codex_readme,
+    legacy_codex_root,
+    orchestration_root,
+    registry_root,
+    rules_root,
+    skills_root,
+)
 
 try:
-    import tomllib  # type: ignore[attr-defined]
+    import tomllib
 except ModuleNotFoundError:  # pragma: no cover - fallback for Python < 3.11
     tomllib = None  # type: ignore[assignment]
 
@@ -287,14 +277,18 @@ def validate_skill_dir(skill_dir: Path, failures: list[str]) -> None:
         expected_skill_ref = f"${skill_dir.name}"
         default_prompt_re = rf'(?m)^\s*default_prompt:\s*".*{re.escape(expected_skill_ref)}.*"\s*$'
         if not re.search(default_prompt_re, agent_content):
-            failures.append(f"default_prompt precisa mencionar {expected_skill_ref} em {skill_dir.name}/agents/openai.yaml")
+            failures.append(
+                f"default_prompt precisa mencionar {expected_skill_ref} em {skill_dir.name}/agents/openai.yaml"
+            )
         short_match = re.search(r'(?m)^\s*short_description:\s*"(?P<value>.+)"\s*$', agent_content)
         if not short_match:
             failures.append(f"short_description ausente em {skill_dir.name}/agents/openai.yaml")
         else:
             short_len = len(short_match.group("value"))
             if short_len < 25 or short_len > 64:
-                failures.append(f"short_description fora do intervalo 25-64 em {skill_dir.name}/agents/openai.yaml")
+                failures.append(
+                    f"short_description fora do intervalo 25-64 em {skill_dir.name}/agents/openai.yaml"
+                )
 
 
 def validate_registry_agent(agent_file: Path, skill_names: set[str], failures: list[str]) -> None:
@@ -339,22 +333,43 @@ def validate_ai_config(repo_root: Path, failures: list[str]) -> None:
     skills_section = payload.get("skills", {})
     if isinstance(skills_section, dict):
         for skill_name in skills_section.get("required", []):
-            if isinstance(skill_name, str) and not (skills_root(repo_root) / skill_name / "SKILL.md").exists():
+            if (
+                isinstance(skill_name, str)
+                and not (skills_root(repo_root) / skill_name / "SKILL.md").exists()
+            ):
                 failures.append(f"Skill requerida ausente em .agents/config.toml: {skill_name}")
         for skill_name in skills_section.get("mandatory_parallel", []):
-            if isinstance(skill_name, str) and not (skills_root(repo_root) / skill_name / "SKILL.md").exists():
-                failures.append(f"Skill de gate paralelo ausente em .agents/config.toml: {skill_name}")
+            if (
+                isinstance(skill_name, str)
+                and not (skills_root(repo_root) / skill_name / "SKILL.md").exists()
+            ):
+                failures.append(
+                    f"Skill de gate paralelo ausente em .agents/config.toml: {skill_name}"
+                )
     agents_section = payload.get("agents", {})
     if isinstance(agents_section, dict):
         for agent_name in agents_section.get("required", []):
-            if isinstance(agent_name, str) and not (registry_root(repo_root) / f"{agent_name}.toml").exists():
+            if (
+                isinstance(agent_name, str)
+                and not (registry_root(repo_root) / f"{agent_name}.toml").exists()
+            ):
                 failures.append(f"Agente requerido ausente em .agents/config.toml: {agent_name}")
         for agent_name in agents_section.get("mandatory_global", []):
-            if isinstance(agent_name, str) and not (registry_root(repo_root) / f"{agent_name}.toml").exists():
-                failures.append(f"Agente mandatory_global ausente em .agents/config.toml: {agent_name}")
+            if (
+                isinstance(agent_name, str)
+                and not (registry_root(repo_root) / f"{agent_name}.toml").exists()
+            ):
+                failures.append(
+                    f"Agente mandatory_global ausente em .agents/config.toml: {agent_name}"
+                )
         for agent_name in agents_section.get("mandatory_platform", []):
-            if isinstance(agent_name, str) and not (registry_root(repo_root) / f"{agent_name}.toml").exists():
-                failures.append(f"Agente mandatory_platform ausente em .agents/config.toml: {agent_name}")
+            if (
+                isinstance(agent_name, str)
+                and not (registry_root(repo_root) / f"{agent_name}.toml").exists()
+            ):
+                failures.append(
+                    f"Agente mandatory_platform ausente em .agents/config.toml: {agent_name}"
+                )
 
 
 def validate_legacy_codex_stub(repo_root: Path, failures: list[str]) -> None:
@@ -475,7 +490,9 @@ def validate_agent_card(card: Path, skill_names: set[str], failures: list[str]) 
         return
     for skill_ref in skill_refs:
         if skill_ref not in skill_names:
-            failures.append(f"Skill referenciada e inexistente em .agents/cards/{card.name}: {skill_ref}")
+            failures.append(
+                f"Skill referenciada e inexistente em .agents/cards/{card.name}: {skill_ref}"
+            )
 
 
 def main(argv: list[str]) -> int:
@@ -489,33 +506,62 @@ def main(argv: list[str]) -> int:
 
     tracker_path = repo_root / "docs" / "AI-WIP-TRACKER.md"
     if tracker_path.is_file():
-        require_markers(tracker_path.read_text(encoding="utf-8"), TRACKER_MARKERS, "docs/AI-WIP-TRACKER.md", failures)
+        require_markers(
+            tracker_path.read_text(encoding="utf-8"),
+            TRACKER_MARKERS,
+            "docs/AI-WIP-TRACKER.md",
+            failures,
+        )
 
     roadmap_path = repo_root / "docs" / "ROADMAP.md"
     if roadmap_path.is_file():
-        require_markers(roadmap_path.read_text(encoding="utf-8"), ROADMAP_MARKERS, "docs/ROADMAP.md", failures)
+        require_markers(
+            roadmap_path.read_text(encoding="utf-8"), ROADMAP_MARKERS, "docs/ROADMAP.md", failures
+        )
 
     decisions_path = repo_root / "docs" / "ROADMAP-DECISIONS.md"
     if decisions_path.is_file():
-        require_markers(decisions_path.read_text(encoding="utf-8"), DECISIONS_MARKERS, "docs/ROADMAP-DECISIONS.md", failures)
+        require_markers(
+            decisions_path.read_text(encoding="utf-8"),
+            DECISIONS_MARKERS,
+            "docs/ROADMAP-DECISIONS.md",
+            failures,
+        )
 
     lessons_path = repo_root / "LICOES-APRENDIDAS.md"
     if lessons_path.is_file():
         lessons_content = lessons_path.read_text(encoding="utf-8")
         require_markers(lessons_content, LESSONS_MARKERS, "LICOES-APRENDIDAS.md", failures)
-        require_snippets(lessons_content, LESSONS_REQUIRED_SNIPPETS, "LICOES-APRENDIDAS.md", failures)
+        require_snippets(
+            lessons_content, LESSONS_REQUIRED_SNIPPETS, "LICOES-APRENDIDAS.md", failures
+        )
 
     agents_contract_path = repo_root / "AGENTS.md"
     if agents_contract_path.is_file():
-        require_snippets(agents_contract_path.read_text(encoding="utf-8"), AGENTS_REQUIRED_SNIPPETS, "AGENTS.md", failures)
+        require_snippets(
+            agents_contract_path.read_text(encoding="utf-8"),
+            AGENTS_REQUIRED_SNIPPETS,
+            "AGENTS.md",
+            failures,
+        )
 
     operating_model_path = repo_root / "docs" / "ai-operating-model.md"
     if operating_model_path.is_file():
-        require_snippets(operating_model_path.read_text(encoding="utf-8"), OPERATING_MODEL_REQUIRED_SNIPPETS, "docs/ai-operating-model.md", failures)
+        require_snippets(
+            operating_model_path.read_text(encoding="utf-8"),
+            OPERATING_MODEL_REQUIRED_SNIPPETS,
+            "docs/ai-operating-model.md",
+            failures,
+        )
 
     source_audit_path = repo_root / "docs" / "AI-SOURCE-AUDIT.md"
     if source_audit_path.is_file():
-        require_snippets(source_audit_path.read_text(encoding="utf-8"), SOURCE_AUDIT_REQUIRED_SNIPPETS, "docs/AI-SOURCE-AUDIT.md", failures)
+        require_snippets(
+            source_audit_path.read_text(encoding="utf-8"),
+            SOURCE_AUDIT_REQUIRED_SNIPPETS,
+            "docs/AI-SOURCE-AUDIT.md",
+            failures,
+        )
 
     for relative, snippets in CATALOG_REQUIRED_SNIPPETS.items():
         path = repo_root / relative
@@ -526,7 +572,9 @@ def main(argv: list[str]) -> int:
     if not skills_dir.is_dir():
         failures.append("Pasta obrigatoria ausente: .agents/skills")
     else:
-        skill_dirs = sorted([item for item in skills_dir.iterdir() if item.is_dir()], key=lambda item: item.name)
+        skill_dirs = sorted(
+            [item for item in skills_dir.iterdir() if item.is_dir()], key=lambda item: item.name
+        )
         if not skill_dirs:
             failures.append("Nenhuma skill encontrada em .agents/skills")
         skill_names = {item.name for item in skill_dirs}

@@ -27,6 +27,10 @@ Mapa das documentacoes versionadas do projeto e ordem recomendada de leitura.
 - `docs/test-strategy.md`: arquitetura de testes do repo.
 - `docs/TASKS.md`: catalogo das tasks canonicas mais importantes.
 - `docs/WORKFLOWS.md`: catalogo dos workflows ativos e suas tasks.
+- `pyproject.toml`: contrato Python da camada de qualidade e da automacao
+  auxiliar do repo.
+- `config/tooling.releases.yaml`: pinagem declarativa de ferramentas externas
+  como `actionlint` e `gitleaks`.
 - `tests/README.md`: suites, harnesses e comandos de teste.
 - `docs/repo-audit.md`: snapshot atual de riscos, achados resolvidos e backlog
   tecnico de manutencao.

@@ -6,8 +6,9 @@ Camada de testes atual do repositorio.
 
 - `tests/powershell/`: testes Pester para parser de config, helpers e logica
   PowerShell.
-- `tests/python/`: testes unitarios da governanca Git, worklog, lessons,
-  roadmap, validadores, roteamento, delegacao e sincronismo workflow-task-doc.
+- `tests/python/`: testes da camada Python do repo, incluindo governanca Git,
+  worklog, lessons, roadmap, validadores, roteamento, delegacao, sincronismo
+  workflow-task-doc e wrappers de tooling.
 - `tests/bash/`: testes Bats para harnesses Linux do bootstrap.
 - `tests/fixtures/`: fixtures auxiliares para cenarios de teste que nao devem
   viver em `df/`.
@@ -17,7 +18,8 @@ Camada de testes atual do repositorio.
 ### Unitario
 
 - PowerShell: `task test:unit:powershell`
-- Python: `task test:unit:python`
+- Python legado/compatibilidade: `task test:unit:python`
+- Python canonico de qualidade: `task test:python`
 
 Escopo atual:
 
@@ -25,6 +27,8 @@ Escopo atual:
 - validadores de governanca
 - tracker de WIP, roadmap e lessons
 - roteamento, delegacao e smoke eval da camada de IA
+- wrappers de ferramentas auxiliares (`actionlint`, `gitleaks`, `cspell`)
+- validacao documental e contratos da toolchain Python
 
 ### Integracao
 
@@ -60,6 +64,8 @@ Harnesses atuais:
 Windows:
 
 ```powershell
+task install:dev:windows
+task test:python:windows
 task test:unit:powershell
 task test:unit:python:windows
 task test:integration:windows
@@ -68,6 +74,8 @@ task test:integration:windows
 Linux/WSL:
 
 ```bash
+task install:dev:linux
+task test:python:linux
 task test:unit:python:linux
 task test:integration:linux
 ```

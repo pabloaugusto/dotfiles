@@ -10,7 +10,7 @@ Este repo adota governanca obrigatoria para:
 
 Fonte de verdade tecnica:
 
-- [`.githooks/conventional_emoji.py`](/c:/Users/pablo/dotfiles-test-harness/.githooks/conventional_emoji.py)
+- [`.githooks/conventional_emoji.py`](../.githooks/conventional_emoji.py)
 
 ## Commits e PR titles
 

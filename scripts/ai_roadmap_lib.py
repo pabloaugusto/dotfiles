@@ -354,7 +354,11 @@ def load_roadmap_items(backlog_rows: list[dict[str, str]]) -> list[RoadmapItem]:
 
 
 def validate_suggestion_rows(rows: list[dict[str, str]]) -> None:
-    invalid = [row["ID"] for row in rows if normalize_text(row["Status"]) not in ALLOWED_SUGGESTION_STATUSES]
+    invalid = [
+        row["ID"]
+        for row in rows
+        if normalize_text(row["Status"]) not in ALLOWED_SUGGESTION_STATUSES
+    ]
     if invalid:
         raise ValueError(
             "Status invalidos encontrados em sugestoes de roadmap: " + ", ".join(invalid)
@@ -405,7 +409,10 @@ def build_priority_section(
             "",
             "### Sequencia Recomendada",
             "",
-            *[f"{idx}. `{item.item_id}` - {item.initiative}" for idx, item in enumerate(combined[:5], start=1)],
+            *[
+                f"{idx}. `{item.item_id}` - {item.initiative}"
+                for idx, item in enumerate(combined[:5], start=1)
+            ],
             "",
             "### Governanca de Sugestoes",
             "",
@@ -443,9 +450,12 @@ def build_cycle_entry(
     wsjf_rank = {item.item_id: idx + 1 for idx, item in enumerate(wsjf_ranked)}
     combined = sorted(active, key=lambda item: rice_rank[item.item_id] + wsjf_rank[item.item_id])
     top = ", ".join(item.item_id for item in combined[:3]) if combined else "(sem itens)"
-    pending_ids = ", ".join(
-        row["ID"] for row in suggestion_rows if normalize_text(row["Status"]) == "pendente"
-    ) or "(nenhuma)"
+    pending_ids = (
+        ", ".join(
+            row["ID"] for row in suggestion_rows if normalize_text(row["Status"]) == "pendente"
+        )
+        or "(nenhuma)"
+    )
     return "\n".join(
         [
             f"### Ciclo {cycle} @ {updated_at}",
@@ -465,11 +475,21 @@ def load_suggestion_rows(path: Path) -> tuple[str, list[dict[str, str]]]:
 
 
 def save_suggestion_rows(path: Path, raw: str, rows: list[dict[str, str]]) -> str:
-    return replace_between(raw, SUGGESTIONS_START, SUGGESTIONS_END, render_table(SUGGESTION_HEADERS, rows), label=str(path))
+    return replace_between(
+        raw,
+        SUGGESTIONS_START,
+        SUGGESTIONS_END,
+        render_table(SUGGESTION_HEADERS, rows),
+        label=str(path),
+    )
 
 
 def load_marker_lines(raw: str, start: str, end: str, *, label: str) -> list[str]:
-    return [line.strip() for line in extract_between(raw, start, end, label=label).splitlines() if line.strip() and line.strip() != "(sem itens)"]
+    return [
+        line.strip()
+        for line in extract_between(raw, start, end, label=label).splitlines()
+        if line.strip() and line.strip() != "(sem itens)"
+    ]
 
 
 def save_marker_lines(raw: str, start: str, end: str, lines: list[str], *, label: str) -> str:
@@ -596,11 +616,19 @@ def refresh_roadmap(
     updated_at = now_human_utc()
     cycle_value = cycle.strip() or current_cycle_utc()
 
-    roadmap_raw = apply_metadata(roadmap_path.read_text(encoding="utf-8"), updated_at=updated_at, cycle=cycle_value)
-    decisions_raw = apply_metadata(decisions_path.read_text(encoding="utf-8"), updated_at=updated_at, cycle=cycle_value)
+    roadmap_raw = apply_metadata(
+        roadmap_path.read_text(encoding="utf-8"), updated_at=updated_at, cycle=cycle_value
+    )
+    decisions_raw = apply_metadata(
+        decisions_path.read_text(encoding="utf-8"), updated_at=updated_at, cycle=cycle_value
+    )
 
-    backlog_section = extract_between(roadmap_raw, BACKLOG_START, BACKLOG_END, label=str(roadmap_path))
-    suggestion_section = extract_between(decisions_raw, SUGGESTIONS_START, SUGGESTIONS_END, label=str(decisions_path))
+    backlog_section = extract_between(
+        roadmap_raw, BACKLOG_START, BACKLOG_END, label=str(roadmap_path)
+    )
+    suggestion_section = extract_between(
+        decisions_raw, SUGGESTIONS_START, SUGGESTIONS_END, label=str(decisions_path)
+    )
 
     backlog_rows = parse_table(backlog_section, BACKLOG_HEADERS, label=str(roadmap_path))
     suggestion_rows = parse_table(suggestion_section, SUGGESTION_HEADERS, label=str(decisions_path))
@@ -608,13 +636,21 @@ def refresh_roadmap(
 
     items = load_roadmap_items(backlog_rows)
     priority_block = build_priority_section(items, suggestion_rows, updated_at=updated_at)
-    roadmap_raw = replace_between(roadmap_raw, PRIORITY_START, PRIORITY_END, priority_block, label=str(roadmap_path))
+    roadmap_raw = replace_between(
+        roadmap_raw, PRIORITY_START, PRIORITY_END, priority_block, label=str(roadmap_path)
+    )
 
-    cycle_lines = load_marker_lines(decisions_raw, CYCLES_START, CYCLES_END, label=str(decisions_path))
+    cycle_lines = load_marker_lines(
+        decisions_raw, CYCLES_START, CYCLES_END, label=str(decisions_path)
+    )
     cycle_blocks = parse_cycle_blocks(cycle_lines)
-    cycle_entry = build_cycle_entry(items, suggestion_rows, updated_at=updated_at, cycle=cycle_value)
+    cycle_entry = build_cycle_entry(
+        items, suggestion_rows, updated_at=updated_at, cycle=cycle_value
+    )
     cycle_blocks = replace_cycle_block(cycle_blocks, cycle_entry, cycle=cycle_value)
-    decisions_raw = save_marker_lines(decisions_raw, CYCLES_START, CYCLES_END, cycle_blocks, label=str(decisions_path))
+    decisions_raw = save_marker_lines(
+        decisions_raw, CYCLES_START, CYCLES_END, cycle_blocks, label=str(decisions_path)
+    )
 
     write_text_lf(roadmap_path, roadmap_raw)
     write_text_lf(decisions_path, decisions_raw)
@@ -655,9 +691,13 @@ def register_roadmap_decision(
     note_suffix = f" | notas={normalize_cell(notes, max_len=140)}" if notes.strip() else ""
     roadmap_entry = f"{clean_suggestion}{note_suffix}"
 
-    roadmap_raw = apply_metadata(roadmap_path.read_text(encoding="utf-8"), updated_at=updated_at, cycle=cycle_value)
+    roadmap_raw = apply_metadata(
+        roadmap_path.read_text(encoding="utf-8"), updated_at=updated_at, cycle=cycle_value
+    )
     for marker_start, marker_end in LIST_MARKERS.values():
-        section = parse_list_section(extract_between(roadmap_raw, marker_start, marker_end, label=str(roadmap_path)))
+        section = parse_list_section(
+            extract_between(roadmap_raw, marker_start, marker_end, label=str(roadmap_path))
+        )
         cleaned = remove_matching_entries(section, clean_suggestion)
         roadmap_raw = replace_between(
             roadmap_raw,
@@ -670,7 +710,9 @@ def register_roadmap_decision(
     target_section = "pending" if normalized_decision == "pending" else normalized_horizon
     if normalized_decision != "discarded":
         marker_start, marker_end = LIST_MARKERS[target_section]
-        section = parse_list_section(extract_between(roadmap_raw, marker_start, marker_end, label=str(roadmap_path)))
+        section = parse_list_section(
+            extract_between(roadmap_raw, marker_start, marker_end, label=str(roadmap_path))
+        )
         section = add_unique_entry(section, roadmap_entry)
         roadmap_raw = replace_between(
             roadmap_raw,
@@ -691,13 +733,17 @@ def register_roadmap_decision(
     )
     decisions_raw = save_suggestion_rows(decisions_path, decisions_raw, suggestion_rows)
 
-    autolog_lines = load_marker_lines(decisions_raw, AUTOLOG_START, AUTOLOG_END, label=str(decisions_path))
+    autolog_lines = load_marker_lines(
+        decisions_raw, AUTOLOG_START, AUTOLOG_END, label=str(decisions_path)
+    )
     autolog_line = (
         f"- {updated_at} | decisao={normalized_decision} | horizonte={normalized_horizon} "
         f"| item={clean_suggestion}{note_suffix}"
     )
     autolog_lines = [autolog_line, *autolog_lines]
-    decisions_raw = save_marker_lines(decisions_raw, AUTOLOG_START, AUTOLOG_END, autolog_lines, label=str(decisions_path))
+    decisions_raw = save_marker_lines(
+        decisions_raw, AUTOLOG_START, AUTOLOG_END, autolog_lines, label=str(decisions_path)
+    )
 
     write_text_lf(roadmap_path, roadmap_raw)
     write_text_lf(decisions_path, decisions_raw)

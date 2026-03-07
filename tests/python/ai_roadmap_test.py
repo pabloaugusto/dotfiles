@@ -6,7 +6,6 @@ import sys
 import tempfile
 import unittest
 
-
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 SCRIPT = ROOT / "scripts" / "ai-roadmap.py"
 
@@ -117,7 +116,11 @@ class AiRoadmapTests(unittest.TestCase):
             end_marker = "<!-- roadmap:cycles:end -->"
             start_idx = decisions_text.index(start_marker)
             end_idx = decisions_text.index(end_marker, start_idx)
-            rewritten = decisions_text[:start_idx] + duplicated_cycles + decisions_text[end_idx + len(end_marker) :]
+            rewritten = (
+                decisions_text[:start_idx]
+                + duplicated_cycles
+                + decisions_text[end_idx + len(end_marker) :]
+            )
             decisions.write_text(rewritten, encoding="utf-8")
 
             run_roadmap(

@@ -16,6 +16,8 @@ Construir uma estrategia de qualidade para este repo de dotfiles com foco em:
 
 - PowerShell: `Pester`
 - Bash: `Bats`
+- Python: `pytest` como runner canonico da camada Python, preservando
+  `unittest` como task de compatibilidade para a suite historica
 
 Escopo:
 
@@ -137,3 +139,7 @@ Estado atual desta worktree:
 - integration Linux: harness de relink em container com Bats
 - integration Windows: harness de relink em runner Windows real com perfil temporario
 - AI routing/delegation: backend Python declarativo com smoke eval e gate de sincronismo workflow-task-doc
+- quality stack Python: `uv`, `pyproject.toml`, `uv.lock`, `ruff`, `ty`,
+  `pytest`, `pymarkdownlnt`, `yamllint`, `actionlint` e `gitleaks`
+- worktree compartilhada Windows/WSL: `.venv/windows` e `.venv/linux` para
+  evitar colisao entre runtimes

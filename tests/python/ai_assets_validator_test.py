@@ -6,7 +6,6 @@ import subprocess
 import sys
 import unittest
 
-
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 SCRIPT = ROOT / "scripts" / "validate-ai-assets.py"
 
@@ -53,7 +52,10 @@ class ValidateAiAssetsTests(unittest.TestCase):
             "## LA-007 - Integracoes criticas exigem guardiao proprio",
             module.LESSONS_REQUIRED_SNIPPETS,
         )
-        self.assertIn("$task-routing-and-decomposition", module.CATALOG_REQUIRED_SNIPPETS["docs/AI-SKILLS-CATALOG.md"])
+        self.assertIn(
+            "$task-routing-and-decomposition",
+            module.CATALOG_REQUIRED_SNIPPETS["docs/AI-SKILLS-CATALOG.md"],
+        )
 
     def test_validator_passes_on_current_repo(self) -> None:
         completed = subprocess.run(

@@ -2,9 +2,13 @@
 from __future__ import annotations
 
 import argparse
+import sys
 from pathlib import Path
 
-from ai_dispatch_lib import (
+if __package__ in {None, ""}:  # pragma: no cover - execucao direta do script
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+
+from scripts.ai_dispatch_lib import (
     DEFAULT_DECISIONS,
     DEFAULT_INTAKE_OUT,
     DEFAULT_ROUTE_OUT,
@@ -16,7 +20,9 @@ from ai_dispatch_lib import (
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Registrar intake com preflight de WIP e roteamento opcional.")
+    parser = argparse.ArgumentParser(
+        description="Registrar intake com preflight de WIP e roteamento opcional."
+    )
     parser.add_argument("--message", required=True)
     parser.add_argument("--paths", default="")
     parser.add_argument("--risk", default="medium")

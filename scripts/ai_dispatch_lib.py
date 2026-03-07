@@ -9,10 +9,10 @@ from pathlib import Path
 
 import yaml
 
-try:
-    from scripts.ai_contract_paths import orchestration_root, registry_root, skills_root
-except ModuleNotFoundError:  # pragma: no cover - execucao direta do script
-    from ai_contract_paths import orchestration_root, registry_root, skills_root
+if __package__ in {None, ""}:  # pragma: no cover - execucao direta do script
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+
+from scripts.ai_contract_paths import orchestration_root, registry_root, skills_root
 
 try:
     import tomllib
@@ -229,7 +229,9 @@ def load_capability_matrix(repo_root: Path) -> dict[str, list[str]]:
     return {key: dedupe(value) for key, value in defaults.items()}
 
 
-def load_rules(policy: dict, intent: str, paths: list[str]) -> tuple[list[str], list[str], list[dict]]:
+def load_rules(
+    policy: dict, intent: str, paths: list[str]
+) -> tuple[list[str], list[str], list[dict]]:
     matched_gates: list[str] = []
     matched_conditions: list[str] = []
     matched_routes: list[dict] = []
@@ -322,8 +324,12 @@ def build_route_payload(
         agent_defaults[agent_id].extend(skills)
         agent_defaults[agent_id] = dedupe(agent_defaults[agent_id])
 
-    matched_gates, matched_conditions, matched_routes = load_rules(policy, normalized_intent, normalized_paths)
-    mandatory_gates = dedupe([str(agent) for agent in policy.get("global_mandatory_gates", [])] + matched_gates)
+    matched_gates, matched_conditions, matched_routes = load_rules(
+        policy, normalized_intent, normalized_paths
+    )
+    mandatory_gates = dedupe(
+        [str(agent) for agent in policy.get("global_mandatory_gates", [])] + matched_gates
+    )
 
     primary_agents: list[str] = []
     support_agents: list[str] = []
@@ -338,10 +344,14 @@ def build_route_payload(
             support_agents.extend(str(agent) for agent in route["support"])
 
     if not primary_agents:
-        fallback = "orchestrator" if "orchestrator" in agent_defaults else "repo-governance-authority"
+        fallback = (
+            "orchestrator" if "orchestrator" in agent_defaults else "repo-governance-authority"
+        )
         primary_agents.append(fallback)
         if fallback == "orchestrator":
-            support_agents.extend(["repo-governance-authority", "architecture-modernization-authority"])
+            support_agents.extend(
+                ["repo-governance-authority", "architecture-modernization-authority"]
+            )
 
     required_agents = dedupe(mandatory_gates + primary_agents + support_agents)
     required_skills: list[str] = []
@@ -418,7 +428,7 @@ def run_worklog(*, repo_root: Path, args: list[str], expect_json: bool = True) -
         )
     if not expect_json:
         return completed.stdout
-    return json.loads((completed.stdout.strip() or "{}"))
+    return json.loads(completed.stdout.strip() or "{}")
 
 
 def build_intake_payload(
@@ -516,7 +526,9 @@ def build_intake_payload(
 
     route_payload = None
     if route:
-        route_payload = build_route_payload(intent=message, paths=paths, risk=inferred_risk, repo_root=repo_root)
+        route_payload = build_route_payload(
+            intent=message, paths=paths, risk=inferred_risk, repo_root=repo_root
+        )
 
     return {
         "message": normalize_text(message),

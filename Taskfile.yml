@@ -1,5 +1,12 @@
 version: '3'
 
+env:
+  PRE_COMMIT_HOME: .cache/pre-commit
+  PYTHONDONTWRITEBYTECODE: '1'
+  PYTHONPYCACHEPREFIX: .cache/pycache
+  UV_PROJECT_ENVIRONMENT: '{{if or (eq .OS "Windows_NT") (eq .OS "windows")}}.venv/windows{{else}}.venv/linux{{end}}'
+  UV_CACHE_DIR: .cache/uv
+
 tasks:
   default:
     desc: Lista tasks disponiveis
@@ -245,6 +252,215 @@ tasks:
     platforms: [linux]
     cmds:
       - bash -lc "bash '{{.TASKFILE_DIR}}/bootstrap/bootstrap-ubuntu-wsl.sh' relink"
+
+  install:dev:
+    desc: Instala dependencias Python de desenvolvimento via uv
+    cmds:
+      - task: install:dev:{{if or (eq .OS "Windows_NT") (eq .OS "windows")}}windows{{else}}linux{{end}}
+
+  install:dev:windows:
+    desc: Windows - sincroniza .venv e dependencias de desenvolvimento via uv
+    platforms: [windows]
+    dir: '{{.TASKFILE_DIR}}'
+    cmds:
+      - uv sync --locked --all-groups
+
+  install:dev:linux:
+    desc: Linux/WSL - sincroniza .venv e dependencias de desenvolvimento via uv
+    platforms: [linux]
+    dir: '{{.TASKFILE_DIR}}'
+    cmds:
+      - uv sync --locked --all-groups
+
+  lint:python:
+    desc: Executa Ruff nos scripts e testes Python do repo
+    cmds:
+      - task: lint:python:{{if or (eq .OS "Windows_NT") (eq .OS "windows")}}windows{{else}}linux{{end}}
+
+  lint:python:windows:
+    desc: Windows - Ruff check em scripts Python e hooks Python
+    platforms: [windows]
+    dir: '{{.TASKFILE_DIR}}'
+    cmds:
+      - uv run --locked ruff check scripts tests/python .githooks/ci --respect-gitignore --force-exclude
+
+  lint:python:linux:
+    desc: Linux/WSL - Ruff check em scripts Python e hooks Python
+    platforms: [linux]
+    dir: '{{.TASKFILE_DIR}}'
+    cmds:
+      - uv run --locked ruff check scripts tests/python .githooks/ci --respect-gitignore --force-exclude
+
+  format:python:check:
+    desc: Verifica formatacao Python canonica com Ruff
+    cmds:
+      - task: format:python:check:{{if or (eq .OS "Windows_NT") (eq .OS "windows")}}windows{{else}}linux{{end}}
+
+  format:python:check:windows:
+    desc: Windows - verifica formatacao Python com Ruff
+    platforms: [windows]
+    dir: '{{.TASKFILE_DIR}}'
+    cmds:
+      - uv run --locked ruff format scripts tests/python .githooks/ci --check
+
+  format:python:check:linux:
+    desc: Linux/WSL - verifica formatacao Python com Ruff
+    platforms: [linux]
+    dir: '{{.TASKFILE_DIR}}'
+    cmds:
+      - uv run --locked ruff format scripts tests/python .githooks/ci --check
+
+  type:check:
+    desc: Executa type checking com ty
+    cmds:
+      - task: type:check:{{if or (eq .OS "Windows_NT") (eq .OS "windows")}}windows{{else}}linux{{end}}
+
+  type:check:windows:
+    desc: Windows - executa ty em scripts e testes Python
+    platforms: [windows]
+    dir: '{{.TASKFILE_DIR}}'
+    cmds:
+      - uv run --locked ty check scripts/release_tool.py scripts/validate_docs.py scripts/run_actionlint.py scripts/run_gitleaks.py scripts/run-cspell.py tests/python/release_tool_test.py tests/python/validate_docs_test.py
+
+  type:check:linux:
+    desc: Linux/WSL - executa ty em scripts e testes Python
+    platforms: [linux]
+    dir: '{{.TASKFILE_DIR}}'
+    cmds:
+      - uv run --locked ty check scripts/release_tool.py scripts/validate_docs.py scripts/run_actionlint.py scripts/run_gitleaks.py scripts/run-cspell.py tests/python/release_tool_test.py tests/python/validate_docs_test.py
+
+  test:python:
+    desc: Executa a suite Python via pytest no ambiente atual
+    cmds:
+      - task: test:python:{{if or (eq .OS "Windows_NT") (eq .OS "windows")}}windows{{else}}linux{{end}}
+
+  test:python:windows:
+    desc: Windows - executa pytest para scripts e testes Python
+    platforms: [windows]
+    dir: '{{.TASKFILE_DIR}}'
+    cmds:
+      - uv run --locked python -m pytest
+
+  test:python:linux:
+    desc: Linux/WSL - executa pytest para scripts e testes Python
+    platforms: [linux]
+    dir: '{{.TASKFILE_DIR}}'
+    cmds:
+      - uv run --locked python -m pytest
+
+  docs:lint:
+    desc: Aplica lint de Markdown nos documentos canonicos do repo
+    cmds:
+      - task: docs:lint:{{if or (eq .OS "Windows_NT") (eq .OS "windows")}}windows{{else}}linux{{end}}
+
+  docs:lint:windows:
+    desc: Windows - aplica pymarkdown nos documentos canonicos do repo
+    platforms: [windows]
+    dir: '{{.TASKFILE_DIR}}'
+    cmds:
+      - uv run --locked pymarkdown --disable-rules MD001,MD013,MD032,MD034,MD036,MD038 scan README.md AGENTS.md SECURITY.md docs bootstrap/README.md tests/README.md --respect-gitignore -e docs/AI-WIP-TRACKER.md -e docs/ROADMAP-DECISIONS.md -e docs/reference -e archive
+
+  docs:lint:linux:
+    desc: Linux/WSL - aplica pymarkdown nos documentos canonicos do repo
+    platforms: [linux]
+    dir: '{{.TASKFILE_DIR}}'
+    cmds:
+      - uv run --locked pymarkdown --disable-rules MD001,MD013,MD032,MD034,MD036,MD038 scan README.md AGENTS.md SECURITY.md docs bootstrap/README.md tests/README.md --respect-gitignore -e docs/AI-WIP-TRACKER.md -e docs/ROADMAP-DECISIONS.md -e docs/reference -e archive
+
+  docs:check:
+    desc: Valida links locais e referencias documentais do repo
+    cmds:
+      - task: docs:check:{{if or (eq .OS "Windows_NT") (eq .OS "windows")}}windows{{else}}linux{{end}}
+
+  docs:check:windows:
+    desc: Windows - valida links locais e referencias documentais
+    platforms: [windows]
+    dir: '{{.TASKFILE_DIR}}'
+    cmds:
+      - "pwsh -NoProfile -File ./scripts/invoke-python.ps1 -ScriptPath ./scripts/validate_docs.py"
+
+  docs:check:linux:
+    desc: Linux/WSL - valida links locais e referencias documentais
+    platforms: [linux]
+    dir: '{{.TASKFILE_DIR}}'
+    cmds:
+      - "bash -lc 'bash ./scripts/run-python.sh ./scripts/validate_docs.py'"
+
+  spell:check:
+    desc: Valida ortografia do repo com CSpell e dicionario tecnico versionado
+    cmds:
+      - task: spell:check:{{if or (eq .OS "Windows_NT") (eq .OS "windows")}}windows{{else}}linux{{end}}
+
+  spell:check:windows:
+    desc: Windows - valida ortografia com CSpell
+    platforms: [windows]
+    dir: '{{.TASKFILE_DIR}}'
+    cmds:
+      - "pwsh -NoProfile -Command \"& './scripts/invoke-python.ps1' -ScriptPath './scripts/run-cspell.py' -Arguments @('lint', '.', '--config', '.cspell.json', '--gitignore', '--dot')\""
+
+  spell:check:linux:
+    desc: Linux/WSL - valida ortografia com CSpell
+    platforms: [linux]
+    dir: '{{.TASKFILE_DIR}}'
+    cmds:
+      - "bash -lc 'bash ./scripts/run-python.sh ./scripts/run-cspell.py lint . --config .cspell.json --gitignore --dot'"
+
+  lint:yaml:
+    desc: Aplica yamllint nos arquivos YAML do repo
+    cmds:
+      - task: lint:yaml:{{if or (eq .OS "Windows_NT") (eq .OS "windows")}}windows{{else}}linux{{end}}
+
+  lint:yaml:windows:
+    desc: Windows - aplica yamllint nos arquivos YAML do repo
+    platforms: [windows]
+    dir: '{{.TASKFILE_DIR}}'
+    cmds:
+      - uv run --locked yamllint .
+
+  lint:yaml:linux:
+    desc: Linux/WSL - aplica yamllint nos arquivos YAML do repo
+    platforms: [linux]
+    dir: '{{.TASKFILE_DIR}}'
+    cmds:
+      - uv run --locked yamllint .
+
+  validate:actions:
+    desc: Valida workflows do GitHub Actions com actionlint pinado
+    cmds:
+      - task: validate:actions:{{if or (eq .OS "Windows_NT") (eq .OS "windows")}}windows{{else}}linux{{end}}
+
+  validate:actions:windows:
+    desc: Windows - valida workflows do GitHub Actions com actionlint pinado
+    platforms: [windows]
+    dir: '{{.TASKFILE_DIR}}'
+    cmds:
+      - "pwsh -NoProfile -File ./scripts/invoke-python.ps1 -ScriptPath ./scripts/run_actionlint.py"
+
+  validate:actions:linux:
+    desc: Linux/WSL - valida workflows do GitHub Actions com actionlint pinado
+    platforms: [linux]
+    dir: '{{.TASKFILE_DIR}}'
+    cmds:
+      - "bash -lc 'bash ./scripts/run-python.sh ./scripts/run_actionlint.py'"
+
+  security:secrets:
+    desc: Escaneia o repo em busca de segredos versionados com gitleaks pinado
+    cmds:
+      - task: security:secrets:{{if or (eq .OS "Windows_NT") (eq .OS "windows")}}windows{{else}}linux{{end}}
+
+  security:secrets:windows:
+    desc: Windows - escaneia segredos versionados com gitleaks pinado
+    platforms: [windows]
+    dir: '{{.TASKFILE_DIR}}'
+    cmds:
+      - "pwsh -NoProfile -Command \"& './scripts/invoke-python.ps1' -ScriptPath './scripts/run_gitleaks.py' -Arguments @('dir', '.', '--no-banner', '--redact', '--config', '.gitleaks.toml')\""
+
+  security:secrets:linux:
+    desc: Linux/WSL - escaneia segredos versionados com gitleaks pinado
+    platforms: [linux]
+    dir: '{{.TASKFILE_DIR}}'
+    cmds:
+      - "bash -lc 'bash ./scripts/run-python.sh ./scripts/run_gitleaks.py dir . --no-banner --redact --config .gitleaks.toml'"
 
   ci:docker-build:
     desc: Auto - build Docker local
@@ -1242,7 +1458,17 @@ tasks:
     desc: Windows - camada canonica do workflow Quality Foundation
     platforms: [windows]
     deps:
+      - install:dev:windows
       - ci:lint:windows
+      - lint:python:windows
+      - format:python:check:windows
+      - type:check:windows
+      - test:python:windows
+      - docs:lint:windows
+      - docs:check:windows
+      - lint:yaml:windows
+      - validate:actions:windows
+      - security:secrets:windows
       - ai:validate:windows
       - test:unit:powershell
 
@@ -1250,7 +1476,17 @@ tasks:
     desc: Linux/WSL - camada canonica do workflow Quality Foundation
     platforms: [linux]
     deps:
+      - install:dev:linux
       - ci:lint:linux
+      - lint:python:linux
+      - format:python:check:linux
+      - type:check:linux
+      - test:python:linux
+      - docs:lint:linux
+      - docs:check:linux
+      - lint:yaml:linux
+      - validate:actions:linux
+      - security:secrets:linux
 
   ci:validate:
     desc: Auto - validacao de PR local (paridade CI) no ambiente atual
@@ -1266,7 +1502,6 @@ tasks:
       - conventions:check:commit:windows
       - ci:ai:check:windows
       - ci:quality:windows
-      - test:unit:python:windows
       - test:unit:powershell
       - ci:docker-build:windows
 
@@ -1279,7 +1514,6 @@ tasks:
       - conventions:check:commit:linux
       - ci:ai:check:linux
       - ci:quality:linux
-      - test:unit:python:linux
       - ci:docker-build:linux
 
   pr:status:

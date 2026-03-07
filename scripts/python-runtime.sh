@@ -49,6 +49,10 @@ resolve_python_cmd() {
   }
 
   local -a local_candidates=(
+    "${project_root}/.venv/linux/bin/python"
+    "${project_root}/.venv/linux/bin/python3"
+    "${project_root}/.venv/windows/Scripts/python"
+    "${project_root}/.venv/windows/Scripts/python.exe"
     "${project_root}/.venv/bin/python"
     "${project_root}/.venv/bin/python3"
     "${project_root}/.venv/Scripts/python"

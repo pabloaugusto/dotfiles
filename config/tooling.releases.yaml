@@ -1,0 +1,30 @@
+tooling:
+  cache_root: .cache/tools
+  actionlint:
+    repo: rhysd/actionlint
+    version: 1.7.11
+    executable: actionlint
+    assets:
+      windows_x64:
+        archive: actionlint_1.7.11_windows_amd64.zip
+        sha256: 5414b7124a91f4b5abee62e5c9d84802237734f8d15b9b7032732a32c3ebffa3
+      linux_x64:
+        archive: actionlint_1.7.11_linux_amd64.tar.gz
+        sha256: 900919a84f2229bac68ca9cd4103ea297abc35e9689ebb842c6e34a3d1b01b0a
+      linux_arm64:
+        archive: actionlint_1.7.11_linux_arm64.tar.gz
+        sha256: 21bc0dfb57a913fe175298c2a9e906ee630f747cb66d0a934d0d4b69f4ee1235
+  gitleaks:
+    repo: gitleaks/gitleaks
+    version: 8.30.0
+    executable: gitleaks
+    assets:
+      windows_x64:
+        archive: gitleaks_8.30.0_windows_x64.zip
+        sha256: 54fe94f644b832dd08e8c3a5915efb3bfa862386d59fb27ca0792cb687a83573
+      linux_x64:
+        archive: gitleaks_8.30.0_linux_x64.tar.gz
+        sha256: 79a3ab579b53f71efd634f3aaf7e04a0fa0cf206b7ed434638d1547a2470a66e
+      linux_arm64:
+        archive: gitleaks_8.30.0_linux_arm64.tar.gz
+        sha256: b4cbbb6ddf7d1b2a603088cd03a4e3f7ce48ee7fd449b51f7de6ee2906f5fa2f

@@ -111,6 +111,26 @@ Contribuicao util de `iageny`:
 - `scripts/validate_repo.py` com inventario declarativo do repo
 - testes para os validadores em si, nao apenas para as features de runtime
 
+### Toolchain Python, lint e validacao transversal
+
+Padrao comum em `py-bootstrap` e `cr-automations`:
+
+- `pyproject.toml`, `uv.lock` e `.python-version`
+- `ruff`
+- `pytest`, `pytest-cov` e suporte a execucao paralela
+- `ty`
+- `pymarkdownlnt`
+- tasks de `cspell`
+
+Contribuicao util de `iageny`:
+
+- `.yamllint.yml`
+- `.pre-commit-config.yaml`
+- `mypy`
+- wrappers e pinagem declarativa para `actionlint` e `gitleaks`
+- `scripts/validate_docs.py`
+- gates de qualidade maduros no `Taskfile.yml`
+
 ## Gaps no repo atual
 
 No inicio desta rodada, os gaps materiais eram:
@@ -134,6 +154,12 @@ Estado apos esta rodada de importacao:
 - `orchestrator` e `$task-routing-and-decomposition` foram importados e adaptados para intake/delegacao
 - `docs/TASKS.md` e `docs/WORKFLOWS.md` passaram a existir com gate executavel de sincronismo
 - `ai:eval:smoke` passou a executar datasets reais de roteamento e governanca
+- a camada Python do repo passou a ter `pyproject.toml`, `uv.lock`,
+  `.python-version` e `.venv` segregada por plataforma
+- `quality-foundation` passou a cobrir `ruff`, `ty`, `pytest`,
+  `pymarkdownlnt`, `yamllint`, `actionlint` e `gitleaks`
+- `validate_docs.py`, `run_actionlint.py`, `run_gitleaks.py` e
+  `config/tooling.releases.yaml` foram importados e adaptados ao repo
 
 ## Decisoes de importacao
 
@@ -161,12 +187,24 @@ Estado apos esta rodada de importacao:
 - papeis de implementation agents de `iageny` traduzidos para papeis permanentes aderentes a este repo
 - fluxo de `docs/TASKS.md`, `docs/WORKFLOWS.md` e `validate_workflow_task_sync.py` inspirado em `py-bootstrap` e `iageny`, mas ajustado aos workflows reais desta worktree
 - camada de intake/route/delegate portada dos taskfiles shell das fontes para backend Python worktree-friendly
+- stack Python de qualidade portada para `uv` com `ruff`, `ty`, `pytest`,
+  `pymarkdownlnt` e `yamllint`, mas ajustada para worktree compartilhada
+  Windows/WSL com `.venv/windows` e `.venv/linux`
+- wrappers de `actionlint` e `gitleaks` adaptados para pinagem declarativa em
+  `config/tooling.releases.yaml`
+- `validate_docs.py` adaptado para o estilo documental real deste repo, com
+  foco em links locais quebrados e sem impor reescrita massiva de Markdown
 
 ### Importar em etapas seguintes
 
 - integracao opcional com execpolicy/rules engine quando a ferramenta existir localmente
 - datasets e cenarios de eval ainda mais ricos, incluindo bootstrap full, auth real e risco operacional mais pesado
 - validadores documentais adicionais inspirados em `iageny`, quando o custo de correcoes for aceitavel para este repo
+- `pre-commit` como orquestrador unico de hooks, somente se o repo decidir
+  substituir a atual estrategia com `.githooks/`
+- promocao de `cspell` ao gate canonico, depois da curadoria do dicionario
+- type checking mais amplo na camada Python, somente apos reduzir debt nos
+  scripts historicos e fechar a configuracao alvo (`ty` amplo, `mypy` ou ambos)
 
 Motivo do fatiamento: essas camadas precisam ser adaptadas ao problema especifico deste repo e a sua arquitetura de bootstrap Windows/WSL, nao apenas copiadas.
 

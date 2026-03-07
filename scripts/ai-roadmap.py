@@ -3,9 +3,13 @@ from __future__ import annotations
 
 import argparse
 import json
+import sys
 from pathlib import Path
 
-from ai_roadmap_lib import (
+if __package__ in {None, ""}:  # pragma: no cover - execucao direta do script
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+
+from scripts.ai_roadmap_lib import (
     ensure_decisions_file,
     ensure_roadmap_file,
     refresh_roadmap,
@@ -19,7 +23,12 @@ def run_ensure(args: argparse.Namespace) -> None:
     ensure_roadmap_file(roadmap)
     ensure_decisions_file(decisions)
     refresh_roadmap(roadmap_path=roadmap, decisions_path=decisions)
-    print(json.dumps({"roadmap_file": str(roadmap), "decisions_file": str(decisions), "status": "ensured"}, ensure_ascii=False))
+    print(
+        json.dumps(
+            {"roadmap_file": str(roadmap), "decisions_file": str(decisions), "status": "ensured"},
+            ensure_ascii=False,
+        )
+    )
 
 
 def run_refresh(args: argparse.Namespace) -> None:

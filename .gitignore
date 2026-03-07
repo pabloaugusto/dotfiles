@@ -8,6 +8,7 @@ desktop.ini
 *.pyc
 __pycache__/
 .cache/
+.venv/
 
 # local runtime secrets
 .env

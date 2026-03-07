@@ -2,13 +2,14 @@
 from __future__ import annotations
 
 import json
+import sys
 from pathlib import Path
 
-try:
-    from scripts.ai_contract_paths import evals_root
-except ModuleNotFoundError:  # pragma: no cover - execucao direta do script
-    from ai_contract_paths import evals_root
-from ai_dispatch_lib import ROOT, build_route_payload
+if __package__ in {None, ""}:  # pragma: no cover - execucao direta do script
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+
+from scripts.ai_contract_paths import evals_root
+from scripts.ai_dispatch_lib import ROOT, build_route_payload
 
 
 def load_jsonl(path: Path) -> list[dict]:

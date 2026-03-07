@@ -30,11 +30,18 @@ acionadas por cada um.
 
 ### `quality-foundation.yml`
 
-- Objetivo: manter lint de shell, qualidade PowerShell e Pester no baseline do
-  repositorio.
+- Objetivo: manter o baseline canonico de qualidade do repo, cobrindo shell,
+  PowerShell, toolchain Python via `uv`, `ruff`, `ty`, `pytest`, lint
+  documental, YAML, workflows e scanner de segredos.
 - Trigger: `pull_request` e `push`
 - Plataformas: `ubuntu-latest`, `windows-latest`
 - Tasks: `ci:quality:linux`, `ci:quality:windows`
+
+## Observacao operacional
+
+- `spell:check` existe como task local com `cspell`, mas ainda nao entra no
+  workflow canonico enquanto o dicionario tecnico PT-BR/EN nao estiver curado
+  o suficiente para evitar ruido estrutural.
 
 ## Regra de manutencao
 

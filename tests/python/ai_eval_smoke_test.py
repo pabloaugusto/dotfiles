@@ -5,7 +5,6 @@ import subprocess
 import sys
 import unittest
 
-
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 
 

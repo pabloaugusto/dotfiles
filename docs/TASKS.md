@@ -133,6 +133,72 @@ Referencia operacional das tasks canonicas mais importantes do repositorio.
 
 ## Qualidade, validacao e PR
 
+### `install:dev`
+
+- Funcionalidade: sincroniza a toolchain Python de desenvolvimento via `uv`.
+- Uso manual: `task install:dev`
+
+### `lint:python:windows`
+
+- Funcionalidade: executa `ruff check` em `scripts/`, `tests/python` e hooks
+  Python no Windows.
+- Uso manual: `task lint:python:windows`
+
+### `format:python:check:windows`
+
+- Funcionalidade: verifica a formatacao canonica Python com `ruff format
+  --check` no Windows.
+- Uso manual: `task format:python:check:windows`
+
+### `type:check:windows`
+
+- Funcionalidade: executa `ty` incremental na camada Python importada de
+  qualidade no Windows.
+- Uso manual: `task type:check:windows`
+
+### `test:python:windows`
+
+- Funcionalidade: executa `pytest` com coverage na suite Python canonica do
+  repositorio no Windows.
+- Uso manual: `task test:python:windows`
+
+### `docs:lint:windows`
+
+- Funcionalidade: aplica `pymarkdownlnt` nos documentos canonicos do repo no
+  Windows.
+- Uso manual: `task docs:lint:windows`
+
+### `docs:check:windows`
+
+- Funcionalidade: valida links locais e referencias documentais com
+  `validate_docs.py` no Windows.
+- Uso manual: `task docs:check:windows`
+
+### `spell:check:windows`
+
+- Funcionalidade: executa `cspell` com dicionario tecnico versionado no
+  Windows.
+- Uso manual: `task spell:check:windows`
+- Observacao: a task existe, mas ainda nao faz parte do gate canonico
+  `ci:quality` enquanto o dicionario PT-BR/EN e curado.
+
+### `lint:yaml:windows`
+
+- Funcionalidade: aplica `yamllint` nos YAMLs do repo no Windows.
+- Uso manual: `task lint:yaml:windows`
+
+### `validate:actions:windows`
+
+- Funcionalidade: valida workflows do GitHub Actions com `actionlint` pinado no
+  Windows.
+- Uso manual: `task validate:actions:windows`
+
+### `security:secrets:windows`
+
+- Funcionalidade: escaneia o repo em busca de segredos versionados com
+  `gitleaks` pinado no Windows.
+- Uso manual: `task security:secrets:windows`
+
 ### `ci:lint:linux`
 
 - Funcionalidade: executa lint sintatico de shell e hooks Bash no Linux e CI.
@@ -152,13 +218,16 @@ Referencia operacional das tasks canonicas mais importantes do repositorio.
 ### `ci:quality:linux`
 
 - Funcionalidade: executa a camada canonica do workflow
-  `quality-foundation.yml` no Linux e CI.
+  `quality-foundation.yml` no Linux e CI, incluindo `uv`, `ruff`, `ty`,
+  `pytest`, lint documental, YAML, workflows e scanner de segredos.
 - Uso manual: `task ci:quality:linux`
 
 ### `ci:quality:windows`
 
 - Funcionalidade: executa a camada canonica do workflow
-  `quality-foundation.yml` no Windows.
+  `quality-foundation.yml` no Windows, incluindo `uv`, `ruff`, `ty`, `pytest`,
+  lint documental, YAML, workflows, scanner de segredos, validacao de IA e
+  Pester.
 - Uso manual: `task ci:quality:windows`
 
 ### `ci:bootstrap:integration:linux`
@@ -207,6 +276,12 @@ Referencia operacional das tasks canonicas mais importantes do repositorio.
 
 - Funcionalidade: executa a suite unitaria Python no Linux e CI.
 - Uso manual: `task test:unit:python:linux`
+
+### `test:python:linux`
+
+- Funcionalidade: executa `pytest` com coverage na suite Python canonica do
+  repositorio no Linux e CI.
+- Uso manual: `task test:python:linux`
 
 ### `test:unit:powershell`
 

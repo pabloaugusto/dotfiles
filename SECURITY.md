@@ -24,6 +24,8 @@ Guia de seguranca para operar e publicar este repositorio.
 - SSH e assinatura Git via 1Password SSH Agent e `op-ssh-sign`
 - `.agents/` como camada declarativa versionavel; runtime local de assistentes
   fica fora do Git
+- scanner de segredos canonico via `task security:secrets`, usando `gitleaks`
+  pinado por `config/tooling.releases.yaml`
 
 ## Checklist antes de push
 
@@ -35,6 +37,8 @@ Guia de seguranca para operar e publicar este repositorio.
    - `git diff --staged`
 4. quando a mudanca tocar auth ou bootstrap:
    - `task env:check`
+5. quando a mudanca tocar docs, workflows, scripts, automacao ou templates:
+   - `task security:secrets`
 
 ## Se uma credencial for exposta
 
@@ -51,6 +55,7 @@ Guia de seguranca para operar e publicar este repositorio.
 - auditoria periodica com `checkEnv`
 - revisao de configuracoes SSH e Git signer
 - scanner de segredos em pre-commit ou CI (`gitleaks`, `detect-secrets`)
+- manter o baseline do repo passando em `task ci:quality`
 
 ## Regra operacional
 

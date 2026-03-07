@@ -146,6 +146,26 @@ Historico incremental das regras operacionais que nao devem depender de memoria 
 - Validacao: task ai:validate:windows; task ci:workflow:sync:check:windows; task test:unit:python:windows; git diff --check
 - Worklog relacionado: `WIP-20260307-DOCS-ATUALIZACAO`
 - Fontes relacionadas: dotfiles-test-harness
+
+## LA-014 - Worktree compartilhada entre Windows e WSL exige `.venv` por plataforma
+
+- Contexto: Ao importar `uv` e a stack Python de qualidade, uma `.venv` unica na worktree passou a conflitar entre Windows host e WSL, contaminando binarios, shebangs e resolucao de executaveis.
+- Regra: Neste repo, toda virtualenv compartilhada pela mesma worktree deve ser segregada por plataforma quando Windows e WSL operarem sobre a mesma arvore.
+- Solucao validada: Padronizar `.venv/windows` e `.venv/linux`, expor isso no `Taskfile.yml` via `UV_PROJECT_ENVIRONMENT` e ajustar os wrappers `invoke-python.ps1` e `python-runtime.sh`.
+- Prevencao: Toda nova automacao Python ou task de ambiente deve assumir caminhos de venv por plataforma e nunca depender implicitamente de uma `.venv` unica na raiz.
+- Validacao: task install:dev:windows; task install:dev:linux; task ci:quality:windows; wsl task ci:quality:linux
+- Worklog relacionado: `WIP-20260307-QUALITY-IMPORTS`
+- Fontes relacionadas: py-bootstrap, cr-automations, iageny
+
+## LA-015 - Type checking em repo maduro deve entrar por fatias controladas
+
+- Contexto: A importacao de `ty` sobre uma base de scripts historicos mostrou que tentar tipar tudo de uma vez gera muito ruido, retrabalho e risco de travar a rodada sem ganho proporcional.
+- Regra: Em repos maduros e heterogeneos, type checking deve entrar por escopo pequeno, validado e com fronteira declarada, expandindo apenas depois que a base anterior estabilizar.
+- Solucao validada: Aplicar `ty` primeiro na camada nova de qualidade importada (`release_tool`, `validate_docs`, wrappers e testes associados), mantendo o restante fora do gate ate haver refactor suficiente.
+- Prevencao: Toda nova ampliacao do escopo de type checking deve ser explicitada em `pyproject.toml`, `Taskfile.yml` e nos catalogos de docs, em vez de crescer de forma acidental.
+- Validacao: task type:check:windows; wsl task type:check:linux; task ci:quality:windows
+- Worklog relacionado: `WIP-20260307-QUALITY-IMPORTS`
+- Fontes relacionadas: py-bootstrap, cr-automations, iageny
 <!-- ai-lessons:catalog:end -->
 
 ## Revisoes de rodadas
@@ -155,6 +175,7 @@ Toda finalizacao de worklog deve registrar se houve nova licao.
 <!-- ai-lessons:reviews:start -->
 | Data/Hora UTC | Worklog ID | Decisao | Resumo | Licoes | Evidencia |
 | --- | --- | --- | --- | --- | --- |
+| 2026-03-07 11:46 UTC | WIP-20260307-QUALITY-IMPORTS | capturada | A rodada consolidou a necessidade de .venv por plataforma em worktree compartilhada Windows/WSL e de adotar type checking por fatias controladas em repo maduro. | LA-014, LA-015 | Taskfile.yml, scripts/invoke-python.ps1, scripts/python-runtime.sh, pyproject.toml e gates ci:quality validos em Windows e Linux. |
 | 2026-03-07 10:47 UTC | WIP-20260307-DOCS-ATUALIZACAO | capturada | A rodada consolidou a regra de que README raiz e docs centrais devem funcionar como catalogos vivos do estado real do repo, e nao como snapshots antigos ou parciais. | LA-013 | LICOES-APRENDIDAS.md atualizado com LA-013; docs centrais reescritos e validadores do repo passando |
 | 2026-03-07 10:36 UTC | WIP-20260307-ALIASES-CANONICOS | sem_nova_licao | A rodada consolidou uma regra ja vigente do repo: loaders devem apenas carregar fontes canonicas. Nenhuma licao perene nova precisou ser adicionada. | - | bash -n em df/.aliases e df/bash/.bashrc, carga real do aliases.ps1 em pwsh e powershell, zsh -n no df/zsh/.zshrc, source do df/.aliases no WSL, parser de alias do Git em df/git/.gitconfig-base, ausencia de [alias] em... |
 | 2026-03-07 10:18 UTC | WIP-20260307-CI-TASK-PARITY | capturada | A rodada consolidou a regra de que cada workflow/job recorrente deve chamar uma task canonica unica, em vez de duplicar listas de gates dentro do YAML. | LA-012 | LICOES-APRENDIDAS.md atualizado com LA-012; ci:workflow:sync:check passou em Windows e Linux |

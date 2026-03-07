@@ -17,6 +17,10 @@ Snapshot tecnico do estado atual do repositorio, com foco em:
 - CI ativo com workflows reais para IA, PR, qualidade e integracao do bootstrap
 - camada canonica de IA consolidada em `.agents/`
 - paridade entre workflows, tasks e catalogos documentais
+- stack Python formalizada com `pyproject.toml`, `uv`, `ruff`, `ty`, `pytest`,
+  `pymarkdownlnt`, `yamllint`, `actionlint` e `gitleaks`
+- `.venv` segregada por plataforma para worktree compartilhada entre Windows e
+  WSL
 - aliases centralizados por ambiente:
   - `df/.aliases`
   - `df/powershell/aliases.ps1`
@@ -106,12 +110,22 @@ Snapshot tecnico do estado atual do repositorio, com foco em:
      realmente central para o repo.
    - Esforco: **Baixo**
 
+3. **Spellcheck versionado ainda nao entrou no gate canonico**
+   - Evidencia: `.cspell.json`, `scripts/run-cspell.py`, `Taskfile.yml`
+   - Impacto: existe task dedicada, mas a camada PT-BR/EN ainda gera ruido alto
+     demais para entrar em `ci:quality`.
+   - Recomendacao: curar o dicionario tecnico e reduzir falsos positivos antes
+     de promover `spell:check` ao baseline oficial.
+   - Esforco: **Baixo**
+
 ## Achados recentemente resolvidos
 
 - CI desabilitado por workflows `.ignore`: resolvido
 - duplicacao dos aliases Git entre `.gitconfig` e `.gitconfig-base`: resolvida
 - backups e snapshots ativos fora de `archive/`: resolvido em grande parte
 - fixtures dentro de `df/`: resolvido
+- stack Python sem contrato e sem lockfile: resolvido
+- validacao de docs, YAML, workflows e segredos sem baseline canonico: resolvido
 
 ## Proximos passos sugeridos
 
@@ -119,4 +133,5 @@ Snapshot tecnico do estado atual do repositorio, com foco em:
 2. Corrigir ou aposentar scripts legados de bootstrap Windows.
 3. Modularizar `bootstrap/software-list.ps1`.
 4. Reduzir ambiguidade do `_start.ps1` e do menu parcial Windows/Linux/Mac.
-5. Otimizar shell startup em torno de `.env.local.sops` e plugins do `op`.
+5. Curar o dicionario do `cspell` para promover spellcheck ao gate canonico.
+6. Otimizar shell startup em torno de `.env.local.sops` e plugins do `op`.

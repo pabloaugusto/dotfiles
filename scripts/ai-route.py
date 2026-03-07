@@ -2,9 +2,19 @@
 from __future__ import annotations
 
 import argparse
+import sys
 from pathlib import Path
 
-from ai_dispatch_lib import DEFAULT_ROUTE_OUT, RISK_LEVELS, build_route_payload, normalize_paths, write_json
+if __package__ in {None, ""}:  # pragma: no cover - execucao direta do script
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+
+from scripts.ai_dispatch_lib import (
+    DEFAULT_ROUTE_OUT,
+    RISK_LEVELS,
+    build_route_payload,
+    normalize_paths,
+    write_json,
+)
 
 
 def main() -> int:
@@ -18,7 +28,9 @@ def main() -> int:
     if args.risk not in RISK_LEVELS:
         raise SystemExit("--risk deve ser low, medium ou high")
 
-    payload = build_route_payload(intent=args.intent, paths=normalize_paths(args.paths), risk=args.risk)
+    payload = build_route_payload(
+        intent=args.intent, paths=normalize_paths(args.paths), risk=args.risk
+    )
     write_json(Path(args.out), payload)
     return 0
 

@@ -10,7 +10,6 @@ from pathlib import Path
 from typing import Any
 from urllib import error, parse, request
 
-
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
@@ -44,16 +43,12 @@ def get_pr_commits(repo: str, pr_number: int) -> list[dict[str, Any]]:
                 payload = response.read().decode("utf-8")
         except error.HTTPError as exc:
             detail = exc.read().decode("utf-8", errors="replace")
-            raise SystemExit(
-                f"Falha ao buscar commits do PR: HTTP {exc.code}\n{detail}"
-            )
+            raise SystemExit(f"Falha ao buscar commits do PR: HTTP {exc.code}\n{detail}")
         except error.URLError as exc:
             raise SystemExit(f"Falha de rede ao buscar commits do PR: {exc}")
 
         if status != 200:
-            raise SystemExit(
-                f"Falha ao buscar commits do PR: HTTP {status}\n{payload}"
-            )
+            raise SystemExit(f"Falha ao buscar commits do PR: HTTP {status}\n{payload}")
 
         batch = json.loads(payload)
         if not isinstance(batch, list):

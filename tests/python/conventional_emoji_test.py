@@ -5,7 +5,6 @@ import pathlib
 import sys
 import unittest
 
-
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 MODULE_PATH = ROOT / ".githooks" / "conventional_emoji.py"
 
@@ -18,22 +17,16 @@ SPEC.loader.exec_module(MODULE)
 
 class ConventionalEmojiTests(unittest.TestCase):
     def test_valid_message_with_expected_emoji(self) -> None:
-        result = MODULE.validate_message(
-            "✨ feat(test-harness): add validator", require_emoji=True
-        )
+        result = MODULE.validate_message("✨ feat(test-harness): add validator", require_emoji=True)
         self.assertTrue(result.ok)
 
     def test_rejects_wrong_emoji_for_type(self) -> None:
-        result = MODULE.validate_message(
-            "🐛 feat(test-harness): add validator", require_emoji=True
-        )
+        result = MODULE.validate_message("🐛 feat(test-harness): add validator", require_emoji=True)
         self.assertFalse(result.ok)
         self.assertIn("Esperado", result.error)
 
     def test_rejects_missing_emoji_when_required(self) -> None:
-        result = MODULE.validate_message(
-            "feat(test-harness): add validator", require_emoji=True
-        )
+        result = MODULE.validate_message("feat(test-harness): add validator", require_emoji=True)
         self.assertFalse(result.ok)
         self.assertIn("Emoji obrigatorio", result.error)
 

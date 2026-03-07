@@ -1,9 +1,8 @@
 from __future__ import annotations
 
+import re
 from datetime import datetime, timezone
 from pathlib import Path
-import re
-
 
 CATALOG_START = "<!-- ai-lessons:catalog:start -->"
 CATALOG_END = "<!-- ai-lessons:catalog:end -->"
@@ -170,7 +169,9 @@ def load_reviews(path: Path) -> list[dict[str, str]]:
 def save_reviews(path: Path, rows: list[dict[str, str]]) -> None:
     ensure_lessons_file(path)
     raw = path.read_text(encoding="utf-8")
-    updated = replace_between(raw, REVIEWS_START, REVIEWS_END, render_table(REVIEW_HEADERS, rows), label=str(path))
+    updated = replace_between(
+        raw, REVIEWS_START, REVIEWS_END, render_table(REVIEW_HEADERS, rows), label=str(path)
+    )
     write_text_lf(path, updated)
 
 
@@ -251,7 +252,9 @@ def upsert_review(
     evidence: str = "",
 ) -> None:
     ensure_lessons_file(path)
-    validate_review_request(path=path, decision=decision, summary=summary, lesson_ids=lesson_ids or [])
+    validate_review_request(
+        path=path, decision=decision, summary=summary, lesson_ids=lesson_ids or []
+    )
     rows = [row for row in load_reviews(path) if row["Worklog ID"] != worklog_id]
     rows.insert(
         0,
@@ -267,7 +270,9 @@ def upsert_review(
     save_reviews(path, rows)
 
 
-def validate_review_request(*, path: Path, decision: str, summary: str, lesson_ids: list[str]) -> None:
+def validate_review_request(
+    *, path: Path, decision: str, summary: str, lesson_ids: list[str]
+) -> None:
     ensure_lessons_file(path)
     decision_value = (decision or "").strip()
     if decision_value not in REVIEW_DECISIONS:

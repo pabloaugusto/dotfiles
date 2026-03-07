@@ -3,9 +3,13 @@ from __future__ import annotations
 
 import argparse
 import json
+import sys
 from pathlib import Path
 
-from ai_lessons_lib import (
+if __package__ in {None, ""}:  # pragma: no cover - execucao direta do script
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+
+from scripts.ai_lessons_lib import (
     add_lesson,
     check_reviews,
     ensure_lessons_file,
@@ -41,7 +45,12 @@ def run_add(args: argparse.Namespace) -> None:
         related_worklog=(args.worklog_id or "").strip(),
         source_repos=source_repos,
     )
-    print(json.dumps({"lessons_file": str(lessons), "lesson_id": lesson_id, "action": "added"}, ensure_ascii=False))
+    print(
+        json.dumps(
+            {"lessons_file": str(lessons), "lesson_id": lesson_id, "action": "added"},
+            ensure_ascii=False,
+        )
+    )
 
 
 def run_review(args: argparse.Namespace) -> None:
@@ -93,14 +102,20 @@ def run_sync(args: argparse.Namespace) -> None:
     sync_reviews(lessons)
     print(
         json.dumps(
-            {"lessons_file": str(lessons), "catalog_ids": list_catalog_ids(lessons), "status": "synced"},
+            {
+                "lessons_file": str(lessons),
+                "catalog_ids": list_catalog_ids(lessons),
+                "status": "synced",
+            },
             ensure_ascii=False,
         )
     )
 
 
 def build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(description="Gerencia o fluxo formal de licoes aprendidas do repo.")
+    parser = argparse.ArgumentParser(
+        description="Gerencia o fluxo formal de licoes aprendidas do repo."
+    )
     sub = parser.add_subparsers(dest="command", required=True)
 
     ensure = sub.add_parser("ensure")

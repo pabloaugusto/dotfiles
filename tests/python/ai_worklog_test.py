@@ -7,7 +7,6 @@ import sys
 import tempfile
 import unittest
 
-
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 SCRIPT = ROOT / "scripts" / "ai-worklog.py"
 
@@ -37,10 +36,34 @@ def extract_section(text: str, start: str, end: str) -> str:
 
 def init_git_repo(path: pathlib.Path) -> None:
     subprocess.run(["git", "init"], cwd=path, text=True, capture_output=True, check=True)
-    subprocess.run(["git", "config", "user.name", "AI Agent"], cwd=path, text=True, capture_output=True, check=True)
-    subprocess.run(["git", "config", "user.email", "ai@example.com"], cwd=path, text=True, capture_output=True, check=True)
-    subprocess.run(["git", "config", "commit.gpgsign", "false"], cwd=path, text=True, capture_output=True, check=True)
-    subprocess.run(["git", "config", "core.hooksPath", ".git/hooks"], cwd=path, text=True, capture_output=True, check=True)
+    subprocess.run(
+        ["git", "config", "user.name", "AI Agent"],
+        cwd=path,
+        text=True,
+        capture_output=True,
+        check=True,
+    )
+    subprocess.run(
+        ["git", "config", "user.email", "ai@example.com"],
+        cwd=path,
+        text=True,
+        capture_output=True,
+        check=True,
+    )
+    subprocess.run(
+        ["git", "config", "commit.gpgsign", "false"],
+        cwd=path,
+        text=True,
+        capture_output=True,
+        check=True,
+    )
+    subprocess.run(
+        ["git", "config", "core.hooksPath", ".git/hooks"],
+        cwd=path,
+        text=True,
+        capture_output=True,
+        check=True,
+    )
 
 
 class AiWorklogTests(unittest.TestCase):
@@ -112,8 +135,16 @@ class AiWorklogTests(unittest.TestCase):
                 "--lessons-file",
                 str(lessons),
             )
-            subprocess.run(["git", "add", "."], cwd=repo, text=True, capture_output=True, check=True)
-            subprocess.run(["git", "commit", "-m", "chore: init"], cwd=repo, text=True, capture_output=True, check=True)
+            subprocess.run(
+                ["git", "add", "."], cwd=repo, text=True, capture_output=True, check=True
+            )
+            subprocess.run(
+                ["git", "commit", "-m", "chore: init"],
+                cwd=repo,
+                text=True,
+                capture_output=True,
+                check=True,
+            )
             (repo / "dirty.txt").write_text("checkpoint pendente\n", encoding="utf-8")
 
             failed = run_worklog(
@@ -146,8 +177,16 @@ class AiWorklogTests(unittest.TestCase):
                 "--lessons-file",
                 str(lessons),
             )
-            subprocess.run(["git", "add", "."], cwd=repo, text=True, capture_output=True, check=True)
-            subprocess.run(["git", "commit", "-m", "chore: init"], cwd=repo, text=True, capture_output=True, check=True)
+            subprocess.run(
+                ["git", "add", "."], cwd=repo, text=True, capture_output=True, check=True
+            )
+            subprocess.run(
+                ["git", "commit", "-m", "chore: init"],
+                cwd=repo,
+                text=True,
+                capture_output=True,
+                check=True,
+            )
             run_worklog(
                 "start",
                 "--file",
@@ -175,10 +214,42 @@ class AiWorklogTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             tracker = pathlib.Path(tmp) / "tracker.md"
             lessons = pathlib.Path(tmp) / "lessons.md"
-            run_worklog("start", "--file", str(tracker), "--message", "Tarefa A", "--worklog-id", "WIP-TEST-A")
-            run_worklog("start", "--file", str(tracker), "--message", "Tarefa B", "--worklog-id", "WIP-TEST-B")
-            run_worklog("update", "--file", str(tracker), "--worklog-id", "WIP-TEST-A", "--progress", "Checkpoint A")
-            run_worklog("update", "--file", str(tracker), "--worklog-id", "WIP-TEST-B", "--progress", "Checkpoint B")
+            run_worklog(
+                "start",
+                "--file",
+                str(tracker),
+                "--message",
+                "Tarefa A",
+                "--worklog-id",
+                "WIP-TEST-A",
+            )
+            run_worklog(
+                "start",
+                "--file",
+                str(tracker),
+                "--message",
+                "Tarefa B",
+                "--worklog-id",
+                "WIP-TEST-B",
+            )
+            run_worklog(
+                "update",
+                "--file",
+                str(tracker),
+                "--worklog-id",
+                "WIP-TEST-A",
+                "--progress",
+                "Checkpoint A",
+            )
+            run_worklog(
+                "update",
+                "--file",
+                str(tracker),
+                "--worklog-id",
+                "WIP-TEST-B",
+                "--progress",
+                "Checkpoint B",
+            )
             run_worklog(
                 "done",
                 "--file",
@@ -268,7 +339,15 @@ class AiWorklogTests(unittest.TestCase):
             tracker = pathlib.Path(tmp) / "tracker.md"
             roadmap = pathlib.Path(tmp) / "ROADMAP.md"
             decisions = pathlib.Path(tmp) / "ROADMAP-DECISIONS.md"
-            run_worklog("start", "--file", str(tracker), "--message", "Tarefa roadmap", "--worklog-id", "WIP-TEST-ROADMAP")
+            run_worklog(
+                "start",
+                "--file",
+                str(tracker),
+                "--message",
+                "Tarefa roadmap",
+                "--worklog-id",
+                "WIP-TEST-ROADMAP",
+            )
             run_worklog(
                 "roadmap-pending",
                 "--file",
@@ -293,7 +372,15 @@ class AiWorklogTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             tracker = pathlib.Path(tmp) / "tracker.md"
             lessons = pathlib.Path(tmp) / "lessons.md"
-            run_worklog("start", "--file", str(tracker), "--message", "Tarefa evidencia", "--worklog-id", "WIP-TEST-EVIDENCE")
+            run_worklog(
+                "start",
+                "--file",
+                str(tracker),
+                "--message",
+                "Tarefa evidencia",
+                "--worklog-id",
+                "WIP-TEST-EVIDENCE",
+            )
             run_worklog(
                 "done",
                 "--file",
@@ -318,7 +405,15 @@ class AiWorklogTests(unittest.TestCase):
     def test_done_requires_explicit_lessons_review(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             tracker = pathlib.Path(tmp) / "tracker.md"
-            run_worklog("start", "--file", str(tracker), "--message", "Tarefa review", "--worklog-id", "WIP-TEST-LESSONS")
+            run_worklog(
+                "start",
+                "--file",
+                str(tracker),
+                "--message",
+                "Tarefa review",
+                "--worklog-id",
+                "WIP-TEST-LESSONS",
+            )
             failed = run_worklog(
                 "done",
                 "--file",

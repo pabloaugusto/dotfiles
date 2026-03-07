@@ -2,9 +2,13 @@
 from __future__ import annotations
 
 import argparse
+import sys
 from pathlib import Path
 
-from ai_dispatch_lib import (
+if __package__ in {None, ""}:  # pragma: no cover - execucao direta do script
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+
+from scripts.ai_dispatch_lib import (
     DEFAULT_DECISIONS,
     DEFAULT_DELEGATION_OUT,
     DEFAULT_TRACKER,

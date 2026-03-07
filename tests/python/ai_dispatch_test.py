@@ -9,7 +9,6 @@ import unittest
 
 from scripts.ai_dispatch_lib import build_route_payload
 
-
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 
 
@@ -22,7 +21,9 @@ class AiDispatchTests(unittest.TestCase):
         )
         self.assertIn("bootstrap-operator", payload["task_card"]["required_agents"])
         self.assertIn("critical-integrations-guardian", payload["task_card"]["required_agents"])
-        self.assertIn("architecture-modernization-authority", payload["task_card"]["required_agents"])
+        self.assertIn(
+            "architecture-modernization-authority", payload["task_card"]["required_agents"]
+        )
         self.assertIn("task test:integration", payload["delegation_plan"]["validation"])
         self.assertIn("task env:check", payload["delegation_plan"]["validation"])
 
