@@ -11,7 +11,7 @@ Evitar perda de contexto, tarefas esquecidas e encerramento prematuro de demanda
 
 ## Fluxo
 
-1. Ler [`docs/AI-WIP-TRACKER.md`](docs/AI-WIP-TRACKER.md), [`LICOES-APRENDIDAS.md`](LICOES-APRENDIDAS.md) e, quando houver pendencias adiadas, [`docs/ROADMAP.md`](docs/ROADMAP.md) e [`docs/ROADMAP-DECISIONS.md`](docs/ROADMAP-DECISIONS.md).
+1. Ler [`../../../docs/AI-WIP-TRACKER.md`](../../../docs/AI-WIP-TRACKER.md), [`LICOES-APRENDIDAS.md`](LICOES-APRENDIDAS.md) e, quando houver pendencias adiadas, [`../../../ROADMAP.md`](../../../ROADMAP.md) e [`../../../docs/ROADMAP-DECISIONS.md`](../../../docs/ROADMAP-DECISIONS.md).
 2. Rodar `task ai:worklog:check` antes de iniciar execucao relevante.
 3. Se houver pendencia, exigir decisao explicita: `concluir_primeiro` ou `roadmap_pendente`.
 4. Registrar tarefa em `Doing` com `task ai:worklog:start` ou atualizar com `task ai:worklog:update`.
@@ -23,8 +23,8 @@ Evitar perda de contexto, tarefas esquecidas e encerramento prematuro de demanda
 ## Regras
 
 - Nenhuma demanda acionavel deve ficar sem registro quando houver risco de interrupcao.
-- [`docs/AI-WIP-TRACKER.md`](docs/AI-WIP-TRACKER.md) e a fonte de verdade do estado incremental.
-- [`docs/ROADMAP.md`](docs/ROADMAP.md) e [`docs/ROADMAP-DECISIONS.md`](docs/ROADMAP-DECISIONS.md) recebem itens adiados por `roadmap_pendente`.
+- [`../../../docs/AI-WIP-TRACKER.md`](../../../docs/AI-WIP-TRACKER.md) e a fonte de verdade do estado incremental.
+- [`../../../ROADMAP.md`](../../../ROADMAP.md) e [`../../../docs/ROADMAP-DECISIONS.md`](../../../docs/ROADMAP-DECISIONS.md) recebem itens adiados por `roadmap_pendente`.
 - nenhum item em `Done` pode ficar sem revisao em [`LICOES-APRENDIDAS.md`](LICOES-APRENDIDAS.md).
 - Nao encerrar branch, PR ou entrega com item aberto em `Doing`.
 - Nao mover item para `Done` antes do ultimo passo tecnico da rodada.

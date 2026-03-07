@@ -72,9 +72,9 @@ Sem essa auditoria, o risco e alto de trazer governanca quebrada, testes incompl
 - [`CONTEXT.md`](CONTEXT.md)
 - [`docs/test-strategy.md`](docs/test-strategy.md)
 - [`docs/ai-operating-model.md`](docs/ai-operating-model.md)
-- [`docs/AI-WIP-TRACKER.md`](docs/AI-WIP-TRACKER.md)
-- [`docs/ROADMAP.md`](docs/ROADMAP.md)
-- [`docs/ROADMAP-DECISIONS.md`](docs/ROADMAP-DECISIONS.md)
+- [`AI-WIP-TRACKER.md`](AI-WIP-TRACKER.md)
+- [`../ROADMAP.md`](../ROADMAP.md)
+- [`ROADMAP-DECISIONS.md`](ROADMAP-DECISIONS.md)
 
 ### Camada 2. Skills do repo
 
@@ -143,6 +143,7 @@ Para evitar ambiguidades e drift:
 - estrutura minima dos cartoes
 - presenca dos docs estruturais de WIP
 - presenca do contrato de licoes aprendidas
+- presenca do ledger vivo de revisao especializada
 - presenca do inventario versionado de auditoria cross-repo
 - coerencia minima do contrato de auditoria exaustiva
 - ausencia de placeholders e `TODO`
@@ -161,6 +162,9 @@ Para evitar ambiguidades e drift:
 - `task ai:chat:intake`
 - `task ai:route`
 - `task ai:delegate`
+- `task ai:review:required`
+- `task ai:review:record`
+- `task ai:review:check`
 - `task ai:eval:smoke`
 - `task ai:lessons:check`
 - `task ai:rules:check`
@@ -193,9 +197,10 @@ Esses documentos nao sao "marketing" do sistema; eles sao contratos de operacao 
 - [`LICOES-APRENDIDAS.md`](LICOES-APRENDIDAS.md)
 - [`.agents/`](.agents/) e sua arvore declarativa
 - [`docs/AI-SOURCE-AUDIT.md`](docs/AI-SOURCE-AUDIT.md)
-- [`docs/AI-WIP-TRACKER.md`](docs/AI-WIP-TRACKER.md)
-- [`docs/ROADMAP.md`](docs/ROADMAP.md)
-- [`docs/ROADMAP-DECISIONS.md`](docs/ROADMAP-DECISIONS.md)
+- [`docs/AI-REVIEW-LEDGER.md`](docs/AI-REVIEW-LEDGER.md)
+- [`AI-WIP-TRACKER.md`](AI-WIP-TRACKER.md)
+- [`../ROADMAP.md`](../ROADMAP.md)
+- [`ROADMAP-DECISIONS.md`](ROADMAP-DECISIONS.md)
 - prompts e docs declarativos do repo
 - templates estaveis que precisem ser materializados pelo bootstrap
 
@@ -228,7 +233,8 @@ Como [`df/`](df/) guarda apenas o que sera utilizado na maquina apos o bootstrap
 - [`.agents/prompts/`](.agents/prompts/) guarda prompt packs versionados e historico de contexto
 - [`.agents/registry/`](.agents/registry/), [`.agents/orchestration/`](.agents/orchestration/), [`.agents/rules/`](.agents/rules/) e [`.agents/evals/`](.agents/evals/) guardam a camada declarativa
 - [`.codex/README.md`](.codex/README.md) deixa explicito que adaptadores de assistente nao sao fonte de verdade
-- [`docs/AI-WIP-TRACKER.md`](docs/AI-WIP-TRACKER.md) guarda o estado incremental do trabalho de IA
+- [`AI-WIP-TRACKER.md`](AI-WIP-TRACKER.md) guarda o estado incremental do trabalho de IA
+- [`docs/AI-REVIEW-LEDGER.md`](docs/AI-REVIEW-LEDGER.md) guarda os pareceres vivos de revisao especializada por worklog
 - [`df/`](df/) continua reservado aos dotfiles e assets materializados no ambiente
 
 ## Estrategia de evolucao

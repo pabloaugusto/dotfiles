@@ -11,7 +11,7 @@ Materializar intake, roteamento e delegacao com backend real e declarativo.
 
 ## Fluxo
 
-1. Ler [`docs/AI-WIP-TRACKER.md`](docs/AI-WIP-TRACKER.md), [`docs/ROADMAP.md`](docs/ROADMAP.md) e [`docs/AI-DELEGATION-FLOW.md`](docs/AI-DELEGATION-FLOW.md).
+1. Ler [`../../../docs/AI-WIP-TRACKER.md`](../../../docs/AI-WIP-TRACKER.md), [`../../../ROADMAP.md`](../../../ROADMAP.md) e [`docs/AI-DELEGATION-FLOW.md`](docs/AI-DELEGATION-FLOW.md).
 2. Rodar preflight de pendencias antes de iniciar nova demanda.
 3. Ler [`.agents/orchestration/capability-matrix.yaml`](.agents/orchestration/capability-matrix.yaml) e [`.agents/orchestration/routing-policy.yaml`](.agents/orchestration/routing-policy.yaml).
 4. Gerar `TaskCard` e `DelegationPlan` a partir dos agentes, skills e gates declarativos.
@@ -34,7 +34,7 @@ Materializar intake, roteamento e delegacao com backend real e declarativo.
 ## Validacao
 
 - `task ai:chat:intake MESSAGE="exemplo" ROUTE=1 PENDING_ACTION=concluir_primeiro`
-- `task ai:route INTENT="exemplo" PATHS="docs/ROADMAP.md"`
+- `task ai:route INTENT="exemplo" PATHS="ROADMAP.md"`
 - `task ai:delegate INTENT="exemplo" PATHS="AGENTS.md,docs/WORKFLOWS.md"`
 - `task ai:eval:smoke`
 - `task ci:workflow:sync:check`

@@ -1,0 +1,7 @@
+id = "automation-reviewer"
+tier = "specialist"
+purpose = "Revisar mudancas em shell, workflows, Taskfile, Docker e automacoes de CI/CD"
+default_skills = ["dotfiles-automation-review"]
+triggers = ["workflow", "taskfile", "docker", "shell", "yaml", "bats", "ci"]
+output_contract = "automation_review_report"
+handoff_to = ["repo-governance-authority", "architecture-modernization-authority", "critical-integrations-guardian"]

@@ -479,14 +479,88 @@ tasks:
     platforms: [windows]
     dir: '{{.TASKFILE_DIR}}'
     cmds:
-      - "pwsh -NoProfile -Command \"& './scripts/invoke-python.ps1' -ScriptPath './scripts/run-cspell.py' -Arguments @('lint', '.', '--config', '.cspell.json', '--gitignore', '--dot')\""
+      - "pwsh -NoProfile -File ./scripts/invoke-python.ps1 -ScriptPath ./scripts/cspell-governance.py check . --config .cspell.json"
 
   spell:check:linux:
     desc: Linux/WSL - valida ortografia com CSpell
     platforms: [linux]
     dir: '{{.TASKFILE_DIR}}'
     cmds:
-      - "bash -lc 'bash ./scripts/run-python.sh ./scripts/run-cspell.py lint . --config .cspell.json --gitignore --dot'"
+      - "bash -lc 'bash ./scripts/run-python.sh ./scripts/cspell-governance.py check . --config .cspell.json'"
+
+  spell:dictionary:audit:
+    desc: Audita o dicionario local do CSpell e falha se houver redundancias nao higienizadas
+    cmds:
+      - task: spell:dictionary:audit:{{if or (eq .OS "Windows_NT") (eq .OS "windows")}}windows{{else}}linux{{end}}
+        vars:
+          FIX: "{{.FIX}}"
+
+  spell:dictionary:audit:windows:
+    desc: Windows - audita redundancias no dicionario local do CSpell
+    platforms: [windows]
+    dir: '{{.TASKFILE_DIR}}'
+    cmds:
+      - "pwsh -NoProfile -File ./scripts/invoke-python.ps1 -ScriptPath ./scripts/cspell-governance.py dictionary-audit --config .cspell.json --project-words .cspell/project-words.txt{{if eq .FIX \"1\"}} --fix{{end}}"
+
+  spell:dictionary:audit:linux:
+    desc: Linux/WSL - audita redundancias no dicionario local do CSpell
+    platforms: [linux]
+    dir: '{{.TASKFILE_DIR}}'
+    cmds:
+      - "bash -lc 'bash ./scripts/run-python.sh ./scripts/cspell-governance.py dictionary-audit --config .cspell.json --project-words .cspell/project-words.txt{{if eq .FIX \"1\"}} --fix{{end}}'"
+
+  spell:curate:
+    desc: Curadoria assistida do dicionario do CSpell para um escopo especifico
+    cmds:
+      - task: spell:curate:{{if or (eq .OS "Windows_NT") (eq .OS "windows")}}windows{{else}}linux{{end}}
+        vars:
+          TARGETS: "{{default \".\" .TARGETS}}"
+          APPLY: "{{.APPLY}}"
+
+  spell:curate:windows:
+    desc: Windows - curadoria de palavras desconhecidas do CSpell
+    platforms: [windows]
+    dir: '{{.TASKFILE_DIR}}'
+    cmds:
+      - "pwsh -NoProfile -File ./scripts/invoke-python.ps1 -ScriptPath ./scripts/cspell-governance.py curate {{.TARGETS}} --config .cspell.json --project-words .cspell/project-words.txt{{if eq .APPLY \"1\"}} --apply{{end}}"
+
+  spell:curate:linux:
+    desc: Linux/WSL - curadoria de palavras desconhecidas do CSpell
+    platforms: [linux]
+    dir: '{{.TASKFILE_DIR}}'
+    cmds:
+      - "bash -lc 'bash ./scripts/run-python.sh ./scripts/cspell-governance.py curate {{.TARGETS}} --config .cspell.json --project-words .cspell/project-words.txt{{if eq .APPLY \"1\"}} --apply{{end}}'"
+
+  spell:review:
+    desc: Review consultivo de ortografia por arquivo via Pascoalete
+    requires:
+      vars: [WORKLOG_ID, PATHS]
+    cmds:
+      - task: spell:review:{{if or (eq .OS "Windows_NT") (eq .OS "windows")}}windows{{else}}linux{{end}}
+        vars:
+          WORKLOG_ID: "{{.WORKLOG_ID}}"
+          PATHS: "{{.PATHS}}"
+          REVIEWER: "{{default \"pascoalete\" .REVIEWER}}"
+          REGISTER_PENDING: "{{default \"1\" .REGISTER_PENDING}}"
+          FIX_DICTIONARY: "{{default \"1\" .FIX_DICTIONARY}}"
+
+  spell:review:windows:
+    desc: Windows - review consultivo de ortografia por arquivo
+    platforms: [windows]
+    dir: '{{.TASKFILE_DIR}}'
+    requires:
+      vars: [WORKLOG_ID, PATHS]
+    cmds:
+      - "pwsh -NoProfile -File ./scripts/invoke-python.ps1 -ScriptPath ./scripts/cspell-governance.py review --worklog-id \"{{.WORKLOG_ID}}\" --reviewer \"{{default \"pascoalete\" .REVIEWER}}\" --paths \"{{.PATHS}}\" --ledger-file docs/AI-ORTHOGRAPHY-LEDGER.md --config .cspell.json --project-words .cspell/project-words.txt --roadmap-file ROADMAP.md --decisions-file docs/ROADMAP-DECISIONS.md{{if eq .REGISTER_PENDING \"0\"}} --no-register-pending{{end}}{{if eq .FIX_DICTIONARY \"0\"}} --no-fix-dictionary{{end}}"
+
+  spell:review:linux:
+    desc: Linux/WSL - review consultivo de ortografia por arquivo
+    platforms: [linux]
+    dir: '{{.TASKFILE_DIR}}'
+    requires:
+      vars: [WORKLOG_ID, PATHS]
+    cmds:
+      - "bash -lc 'bash ./scripts/run-python.sh ./scripts/cspell-governance.py review --worklog-id \"{{.WORKLOG_ID}}\" --reviewer \"{{default \"pascoalete\" .REVIEWER}}\" --paths \"{{.PATHS}}\" --ledger-file docs/AI-ORTHOGRAPHY-LEDGER.md --config .cspell.json --project-words .cspell/project-words.txt --roadmap-file ROADMAP.md --decisions-file docs/ROADMAP-DECISIONS.md{{if eq .REGISTER_PENDING \"0\"}} --no-register-pending{{end}}{{if eq .FIX_DICTIONARY \"0\"}} --no-fix-dictionary{{end}}'"
 
   lint:yaml:
     desc: Aplica yamllint nos arquivos YAML do repo
@@ -662,6 +736,112 @@ tasks:
     dir: '{{.TASKFILE_DIR}}'
     cmds:
       - "bash -lc 'bash ./scripts/run-python.sh ./scripts/validate-ai-assets.py'"
+
+  ai:review:ensure:
+    desc: Garante o ledger de revisao especializada do repo
+    cmds:
+      - task: ai:review:ensure:{{if or (eq .OS "Windows_NT") (eq .OS "windows")}}windows{{else}}linux{{end}}
+
+  ai:review:ensure:windows:
+    desc: Windows - garante o ledger de revisao especializada
+    platforms: [windows]
+    dir: '{{.TASKFILE_DIR}}'
+    cmds:
+      - "pwsh -NoProfile -File ./scripts/invoke-python.ps1 -ScriptPath ./scripts/ai-review.py ensure --review-file \"{{default \"docs/AI-REVIEW-LEDGER.md\" .REVIEW_FILE}}\""
+
+  ai:review:ensure:linux:
+    desc: Linux/WSL - garante o ledger de revisao especializada
+    platforms: [linux]
+    dir: '{{.TASKFILE_DIR}}'
+    cmds:
+      - "bash -lc 'bash ./scripts/run-python.sh ./scripts/ai-review.py ensure --review-file \"{{default \"docs/AI-REVIEW-LEDGER.md\" .REVIEW_FILE}}\"'"
+
+  ai:review:required:
+    desc: Lista revisores especializados obrigatorios para o escopo informado
+    cmds:
+      - task: ai:review:required:{{if or (eq .OS \"Windows_NT\") (eq .OS \"windows\")}}windows{{else}}linux{{end}}
+        vars:
+          PATHS: "{{.PATHS}}"
+          INTENT: "{{.INTENT}}"
+          RISK: "{{.RISK}}"
+
+  ai:review:required:windows:
+    desc: Windows - lista revisores especializados obrigatorios
+    platforms: [windows]
+    dir: '{{.TASKFILE_DIR}}'
+    cmds:
+      - "pwsh -NoProfile -File ./scripts/invoke-python.ps1 -ScriptPath ./scripts/ai-review.py required --repo-root \"{{.TASKFILE_DIR}}\" --paths \"{{default \"\" .PATHS}}\" --intent \"{{default \"Revisao especializada obrigatoria\" .INTENT}}\" --risk \"{{default \"medium\" .RISK}}\""
+
+  ai:review:required:linux:
+    desc: Linux/WSL - lista revisores especializados obrigatorios
+    platforms: [linux]
+    dir: '{{.TASKFILE_DIR}}'
+    cmds:
+      - "bash -lc 'bash ./scripts/run-python.sh ./scripts/ai-review.py required --repo-root \"{{.TASKFILE_DIR}}\" --paths \"{{default \"\" .PATHS}}\" --intent \"{{default \"Revisao especializada obrigatoria\" .INTENT}}\" --risk \"{{default \"medium\" .RISK}}\"'"
+
+  ai:review:record:
+    desc: Registra parecer especializado aprovado ou reprovado para um worklog
+    requires:
+      vars: [WORKLOG_ID, REVIEWER, STATUS, SUMMARY]
+    cmds:
+      - task: ai:review:record:{{if or (eq .OS "Windows_NT") (eq .OS "windows")}}windows{{else}}linux{{end}}
+        vars:
+          WORKLOG_ID: "{{.WORKLOG_ID}}"
+          REVIEWER: "{{.REVIEWER}}"
+          STATUS: "{{.STATUS}}"
+          SUMMARY: "{{.SUMMARY}}"
+          PATHS: "{{.PATHS}}"
+          EVIDENCE: "{{.EVIDENCE}}"
+          REVIEW_FILE: "{{.REVIEW_FILE}}"
+
+  ai:review:record:windows:
+    desc: Windows - registra parecer especializado
+    platforms: [windows]
+    dir: '{{.TASKFILE_DIR}}'
+    requires:
+      vars: [WORKLOG_ID, REVIEWER, STATUS, SUMMARY]
+    cmds:
+      - "pwsh -NoProfile -File ./scripts/invoke-python.ps1 -ScriptPath ./scripts/ai-review.py record --review-file \"{{default \"docs/AI-REVIEW-LEDGER.md\" .REVIEW_FILE}}\" --worklog-id \"{{.WORKLOG_ID}}\" --reviewer \"{{.REVIEWER}}\" --status \"{{.STATUS}}\" --summary \"{{.SUMMARY}}\" --paths \"{{default \"\" .PATHS}}\" --evidence \"{{default \"\" .EVIDENCE}}\""
+
+  ai:review:record:linux:
+    desc: Linux/WSL - registra parecer especializado
+    platforms: [linux]
+    dir: '{{.TASKFILE_DIR}}'
+    requires:
+      vars: [WORKLOG_ID, REVIEWER, STATUS, SUMMARY]
+    cmds:
+      - "bash -lc 'bash ./scripts/run-python.sh ./scripts/ai-review.py record --review-file \"{{default \"docs/AI-REVIEW-LEDGER.md\" .REVIEW_FILE}}\" --worklog-id \"{{.WORKLOG_ID}}\" --reviewer \"{{.REVIEWER}}\" --status \"{{.STATUS}}\" --summary \"{{.SUMMARY}}\" --paths \"{{default \"\" .PATHS}}\" --evidence \"{{default \"\" .EVIDENCE}}\"'"
+
+  ai:review:check:
+    desc: Valida se os revisores especializados obrigatorios aprovaram o worklog
+    requires:
+      vars: [WORKLOG_ID]
+    cmds:
+      - task: ai:review:check:{{if or (eq .OS "Windows_NT") (eq .OS "windows")}}windows{{else}}linux{{end}}
+        vars:
+          WORKLOG_ID: "{{.WORKLOG_ID}}"
+          PATHS: "{{.PATHS}}"
+          INTENT: "{{.INTENT}}"
+          RISK: "{{.RISK}}"
+          REVIEW_FILE: "{{.REVIEW_FILE}}"
+
+  ai:review:check:windows:
+    desc: Windows - valida aprovacao dos revisores especializados
+    platforms: [windows]
+    dir: '{{.TASKFILE_DIR}}'
+    requires:
+      vars: [WORKLOG_ID]
+    cmds:
+      - "pwsh -NoProfile -File ./scripts/invoke-python.ps1 -ScriptPath ./scripts/ai-review.py check --review-file \"{{default \"docs/AI-REVIEW-LEDGER.md\" .REVIEW_FILE}}\" --worklog-id \"{{.WORKLOG_ID}}\" --repo-root \"{{.TASKFILE_DIR}}\" --paths \"{{default \"\" .PATHS}}\" --intent \"{{default \"Revisao especializada obrigatoria\" .INTENT}}\" --risk \"{{default \"medium\" .RISK}}\""
+
+  ai:review:check:linux:
+    desc: Linux/WSL - valida aprovacao dos revisores especializados
+    platforms: [linux]
+    dir: '{{.TASKFILE_DIR}}'
+    requires:
+      vars: [WORKLOG_ID]
+    cmds:
+      - "bash -lc 'bash ./scripts/run-python.sh ./scripts/ai-review.py check --review-file \"{{default \"docs/AI-REVIEW-LEDGER.md\" .REVIEW_FILE}}\" --worklog-id \"{{.WORKLOG_ID}}\" --repo-root \"{{.TASKFILE_DIR}}\" --paths \"{{default \"\" .PATHS}}\" --intent \"{{default \"Revisao especializada obrigatoria\" .INTENT}}\" --risk \"{{default \"medium\" .RISK}}\"'"
 
   ai:install:codex:
     desc: Materializa as skills canonicas de .agents/skills no catalogo local do Codex
@@ -973,6 +1153,7 @@ tasks:
           DECISION: "{{.DECISION}}"
           SUGGESTION: "{{.SUGGESTION}}"
           HORIZON: "{{.HORIZON}}"
+          CHANGE_TYPE: "{{.CHANGE_TYPE}}"
           NOTES: "{{.NOTES}}"
           SUGGESTION_ID: "{{.SUGGESTION_ID}}"
           ROADMAP_ID: "{{.ROADMAP_ID}}"
@@ -985,7 +1166,7 @@ tasks:
     requires:
       vars: [DECISION, SUGGESTION]
     cmds:
-      - "pwsh -NoProfile -File ./scripts/invoke-python.ps1 -ScriptPath ./scripts/ai-roadmap.py register --decision \"{{.DECISION}}\" --suggestion \"{{.SUGGESTION}}\" --horizon \"{{default \"next\" .HORIZON}}\" --notes \"{{default \"\" .NOTES}}\" --suggestion-id \"{{default \"\" .SUGGESTION_ID}}\" --roadmap-id \"{{default \"\" .ROADMAP_ID}}\" --cycle \"{{default \"\" .CYCLE}}\""
+      - "pwsh -NoProfile -File ./scripts/invoke-python.ps1 -ScriptPath ./scripts/ai-roadmap.py register --decision \"{{.DECISION}}\" --suggestion \"{{.SUGGESTION}}\" --horizon \"{{default \"next\" .HORIZON}}\" --change-type \"{{default \"improvement\" .CHANGE_TYPE}}\" --notes \"{{default \"\" .NOTES}}\" --suggestion-id \"{{default \"\" .SUGGESTION_ID}}\" --roadmap-id \"{{default \"\" .ROADMAP_ID}}\" --cycle \"{{default \"\" .CYCLE}}\""
 
   ai:roadmap:register:linux:
     desc: Linux/WSL - registra decisao de roadmap
@@ -994,7 +1175,7 @@ tasks:
     requires:
       vars: [DECISION, SUGGESTION]
     cmds:
-      - "bash -lc 'bash ./scripts/run-python.sh ./scripts/ai-roadmap.py register --decision \"{{.DECISION}}\" --suggestion \"{{.SUGGESTION}}\" --horizon \"{{default \"next\" .HORIZON}}\" --notes \"{{default \"\" .NOTES}}\" --suggestion-id \"{{default \"\" .SUGGESTION_ID}}\" --roadmap-id \"{{default \"\" .ROADMAP_ID}}\" --cycle \"{{default \"\" .CYCLE}}\"'"
+      - "bash -lc 'bash ./scripts/run-python.sh ./scripts/ai-roadmap.py register --decision \"{{.DECISION}}\" --suggestion \"{{.SUGGESTION}}\" --horizon \"{{default \"next\" .HORIZON}}\" --change-type \"{{default \"improvement\" .CHANGE_TYPE}}\" --notes \"{{default \"\" .NOTES}}\" --suggestion-id \"{{default \"\" .SUGGESTION_ID}}\" --roadmap-id \"{{default \"\" .ROADMAP_ID}}\" --cycle \"{{default \"\" .CYCLE}}\"'"
 
   ai:worklog:ensure:
     desc: Garante estrutura minima do tracker de WIP de IA
@@ -1194,6 +1375,10 @@ tasks:
           WORKLOG_ID: "{{.WORKLOG_ID}}"
           DELIVERY: "{{.DELIVERY}}"
           EVIDENCE: "{{.EVIDENCE}}"
+          REVIEW_FILE: "{{.REVIEW_FILE}}"
+          REVIEW_PATHS: "{{.REVIEW_PATHS}}"
+          REVIEW_INTENT: "{{.REVIEW_INTENT}}"
+          REVIEW_RISK: "{{.REVIEW_RISK}}"
           LESSONS_DECISION: "{{.LESSONS_DECISION}}"
           LESSONS_SUMMARY: "{{.LESSONS_SUMMARY}}"
           LESSONS_IDS: "{{.LESSONS_IDS}}"
@@ -1206,7 +1391,7 @@ tasks:
     requires:
       vars: [WORKLOG_ID, DELIVERY, LESSONS_DECISION, LESSONS_SUMMARY]
     cmds:
-      - "pwsh -NoProfile -File ./scripts/invoke-python.ps1 -ScriptPath ./scripts/ai-worklog.py done --worklog-id \"{{.WORKLOG_ID}}\" --delivery \"{{.DELIVERY}}\" --evidence \"{{default \"\" .EVIDENCE}}\" --lessons-decision \"{{.LESSONS_DECISION}}\" --lessons-summary \"{{.LESSONS_SUMMARY}}\" --lessons-ids \"{{default \"\" .LESSONS_IDS}}\" --lessons-evidence \"{{default \"\" .LESSONS_EVIDENCE}}\""
+      - "pwsh -NoProfile -File ./scripts/invoke-python.ps1 -ScriptPath ./scripts/ai-worklog.py done --review-file \"{{default \"docs/AI-REVIEW-LEDGER.md\" .REVIEW_FILE}}\" --repo-root \"{{.TASKFILE_DIR}}\" --review-paths \"{{default \"\" .REVIEW_PATHS}}\" --review-intent \"{{default \"\" .REVIEW_INTENT}}\" --review-risk \"{{default \"medium\" .REVIEW_RISK}}\" --worklog-id \"{{.WORKLOG_ID}}\" --delivery \"{{.DELIVERY}}\" --evidence \"{{default \"\" .EVIDENCE}}\" --lessons-decision \"{{.LESSONS_DECISION}}\" --lessons-summary \"{{.LESSONS_SUMMARY}}\" --lessons-ids \"{{default \"\" .LESSONS_IDS}}\" --lessons-evidence \"{{default \"\" .LESSONS_EVIDENCE}}\""
 
   ai:worklog:done:linux:
     desc: Linux/WSL - move tarefa de Doing para Done no tracker de WIP de IA
@@ -1215,7 +1400,7 @@ tasks:
     requires:
       vars: [WORKLOG_ID, DELIVERY, LESSONS_DECISION, LESSONS_SUMMARY]
     cmds:
-      - "bash -lc 'bash ./scripts/run-python.sh ./scripts/ai-worklog.py done --worklog-id \"{{.WORKLOG_ID}}\" --delivery \"{{.DELIVERY}}\" --evidence \"{{default \"\" .EVIDENCE}}\" --lessons-decision \"{{.LESSONS_DECISION}}\" --lessons-summary \"{{.LESSONS_SUMMARY}}\" --lessons-ids \"{{default \"\" .LESSONS_IDS}}\" --lessons-evidence \"{{default \"\" .LESSONS_EVIDENCE}}\"'"
+      - "bash -lc 'bash ./scripts/run-python.sh ./scripts/ai-worklog.py done --review-file \"{{default \"docs/AI-REVIEW-LEDGER.md\" .REVIEW_FILE}}\" --repo-root \"{{.TASKFILE_DIR}}\" --review-paths \"{{default \"\" .REVIEW_PATHS}}\" --review-intent \"{{default \"\" .REVIEW_INTENT}}\" --review-risk \"{{default \"medium\" .REVIEW_RISK}}\" --worklog-id \"{{.WORKLOG_ID}}\" --delivery \"{{.DELIVERY}}\" --evidence \"{{default \"\" .EVIDENCE}}\" --lessons-decision \"{{.LESSONS_DECISION}}\" --lessons-summary \"{{.LESSONS_SUMMARY}}\" --lessons-ids \"{{default \"\" .LESSONS_IDS}}\" --lessons-evidence \"{{default \"\" .LESSONS_EVIDENCE}}\"'"
 
   ai:worklog:roadmap:pendente:
     desc: Mantem item em Doing e registra sugestao pendente no roadmap

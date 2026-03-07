@@ -6,4 +6,4 @@
 - Ha risco de drift entre Windows e WSL?
 - Existe caminho mais simples, mais moderno ou mais testavel?
 - Existe otimização com impacto real em I/O, memoria, CPU ou legibilidade?
-- Ha sugestao de backlog que precisa ir para [`docs/ROADMAP.md`](docs/ROADMAP.md) ou outro registrador vivo do repo?
+- Ha sugestao de backlog que precisa ir para [`../../../../ROADMAP.md`](../../../../ROADMAP.md) ou outro registrador vivo do repo?

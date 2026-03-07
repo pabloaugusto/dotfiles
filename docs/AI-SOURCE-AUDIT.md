@@ -23,7 +23,7 @@ Esta auditoria cobre, para cada repo-fonte:
 - caminho auditado: `\\wsl.localhost\Ubuntu\home\pablo\py-bootstrap`
 - contrato global: [`AGENTS.md`](AGENTS.md), [`LICOES-APRENDIDAS.md`](LICOES-APRENDIDAS.md)
 - camada declarativa IA: [`.agents/registry`](.agents/registry), [`.agents/skills`](.agents/skills), [`.agents/orchestration`](.agents/orchestration), [`.agents/rules`](.agents/rules), [`.agents/evals`](.agents/evals), [`.agents/config.toml`](.agents/config.toml)
-- docs centrais: [`docs/AI-WIP-TRACKER.md`](docs/AI-WIP-TRACKER.md), [`docs/ROADMAP.md`](docs/ROADMAP.md), [`docs/ROADMAP-DECISIONS.md`](docs/ROADMAP-DECISIONS.md), [`docs/AI-AGENTS-CATALOG.md`](docs/AI-AGENTS-CATALOG.md), [`docs/AI-DELEGATION-FLOW.md`](docs/AI-DELEGATION-FLOW.md), [`docs/AI-GOVERNANCE-AND-REGRESSION.md`](docs/AI-GOVERNANCE-AND-REGRESSION.md), plano de implementacao equivalente na fonte, [`docs/ai-operating-model.md`](docs/ai-operating-model.md), [`docs/AI-SKILLS-CATALOG.md`](docs/AI-SKILLS-CATALOG.md), [`docs/TASKS.md`](docs/TASKS.md), [`docs/WORKFLOWS.md`](docs/WORKFLOWS.md)
+- docs centrais: [`AI-WIP-TRACKER.md`](AI-WIP-TRACKER.md), [`../ROADMAP.md`](../ROADMAP.md), [`ROADMAP-DECISIONS.md`](ROADMAP-DECISIONS.md), [`docs/AI-AGENTS-CATALOG.md`](docs/AI-AGENTS-CATALOG.md), [`docs/AI-DELEGATION-FLOW.md`](docs/AI-DELEGATION-FLOW.md), [`docs/AI-GOVERNANCE-AND-REGRESSION.md`](docs/AI-GOVERNANCE-AND-REGRESSION.md), plano de implementacao equivalente na fonte, [`docs/ai-operating-model.md`](docs/ai-operating-model.md), [`docs/AI-SKILLS-CATALOG.md`](docs/AI-SKILLS-CATALOG.md), [`docs/TASKS.md`](docs/TASKS.md), [`docs/WORKFLOWS.md`](docs/WORKFLOWS.md)
 - automacao: taskfiles dedicados de IA, roadmap e scripts auxiliares na fonte
 - testes/gates: suite dedicada de governanca do worklog na fonte
 
@@ -32,7 +32,7 @@ Esta auditoria cobre, para cada repo-fonte:
 - caminho auditado: `\\wsl.localhost\Ubuntu\home\pablo\cr-automations`
 - contrato global: [`AGENTS.md`](AGENTS.md), [`LICOES-APRENDIDAS.md`](LICOES-APRENDIDAS.md)
 - camada declarativa IA: [`.agents/registry`](.agents/registry), [`.agents/skills`](.agents/skills), [`.agents/orchestration`](.agents/orchestration), [`.agents/rules`](.agents/rules), [`.agents/evals`](.agents/evals), [`.agents/config.toml`](.agents/config.toml)
-- docs centrais: [`docs/AI-WIP-TRACKER.md`](docs/AI-WIP-TRACKER.md), [`docs/ROADMAP.md`](docs/ROADMAP.md), [`docs/ROADMAP-DECISIONS.md`](docs/ROADMAP-DECISIONS.md), [`docs/TASKS.md`](docs/TASKS.md), [`docs/WORKFLOWS.md`](docs/WORKFLOWS.md)
+- docs centrais: [`AI-WIP-TRACKER.md`](AI-WIP-TRACKER.md), [`../ROADMAP.md`](../ROADMAP.md), [`ROADMAP-DECISIONS.md`](ROADMAP-DECISIONS.md), [`docs/TASKS.md`](docs/TASKS.md), [`docs/WORKFLOWS.md`](docs/WORKFLOWS.md)
 - automacao: taskfiles dedicados de IA e scripts shell de refresh/register/pending do roadmap na fonte
 - testes/gates: suite dedicada de governanca de WIP na fonte
 
@@ -41,7 +41,7 @@ Esta auditoria cobre, para cada repo-fonte:
 - caminho auditado: `D:\projects\iageny`
 - contrato principal: docs estruturais + camada [`.agents/`](.agents/)
 - camada declarativa IA: arvores de implementation agents, implementation subagents, [`.agents/skills`](.agents/skills) e workflows dedicados na fonte
-- docs centrais: [`docs/AI-WIP-TRACKER.md`](docs/AI-WIP-TRACKER.md), [`docs/ROADMAP.md`](docs/ROADMAP.md), [`docs/ROADMAP-DECISIONS.md`](docs/ROADMAP-DECISIONS.md) e catalogos equivalentes de agentes, fases, referencias, decisoes, licoes e timezone/locale na fonte
+- docs centrais: [`AI-WIP-TRACKER.md`](AI-WIP-TRACKER.md), [`../ROADMAP.md`](../ROADMAP.md), [`ROADMAP-DECISIONS.md`](ROADMAP-DECISIONS.md) e catalogos equivalentes de agentes, fases, referencias, decisoes, licoes e timezone/locale na fonte
 - automacao: [`Taskfile.yml`](Taskfile.yml), backend equivalente de worklog/roadmap e validadores dedicados de repo, docs, implementation agents, workflow-task sync e workflows na fonte
 - testes/gates: suites dedicadas para worklog, roadmap e validadores na fonte
 
@@ -94,7 +94,7 @@ Contribuicao util de `py-bootstrap` e `cr-automations`:
 
 Contribuicao util de `iageny`:
 
-- [`ROADMAP.md`](ROADMAP.md) como contraparte explicita do tracker
+- [`../ROADMAP.md`](../ROADMAP.md) como contraparte explicita do tracker
 - registro de decisoes com `related WIP`
 - contrato de timezone/locale e retroatividade de registros
 
@@ -138,7 +138,7 @@ No inicio desta rodada, os gaps materiais eram:
 - faltava [`LICOES-APRENDIDAS.md`](LICOES-APRENDIDAS.md)
 - faltava auditoria versionada das fontes em [`docs/AI-SOURCE-AUDIT.md`](docs/AI-SOURCE-AUDIT.md)
 - a regra de auditoria exaustiva ainda nao estava endurecida em contratos e validadores
-- havia `AI-WIP-TRACKER` e `ROADMAP-DECISIONS`, mas a camada de [`ROADMAP.md`](ROADMAP.md) ainda estava incompleta
+- havia `AI-WIP-TRACKER` e `ROADMAP-DECISIONS`, mas a camada de [`../ROADMAP.md`](../ROADMAP.md) ainda estava incompleta
 - [`.agents/`](.agents/) e a antiga camada [`.codex/`](.codex/) ainda nao tinham fronteira contratual suficientemente explicita nem gate para drift conceitual
 - o repo ainda nao tinha paridade com as fontes em [`.agents/config.toml`](.agents/config.toml), [`.agents/registry`](.agents/registry), [`.agents/orchestration`](.agents/orchestration), [`.agents/rules`](.agents/rules) e [`.agents/evals`](.agents/evals)
 - a validacao local de IA ainda era superficial comparada a `iageny`
@@ -194,6 +194,11 @@ Estado apos esta rodada de importacao:
   [`config/tooling.releases.yaml`](config/tooling.releases.yaml)
 - `validate_docs.py` adaptado para o estilo documental real deste repo, com
   foco em links locais quebrados e sem impor reescrita massiva de Markdown
+- `cspell` consolidado como stack consultiva com curadoria de dicionario local,
+  baseado no padrao observado em `py-bootstrap` e `cr-automations`; os
+  dicionarios oficiais `@cspell/dict-markdown`, `@cspell/dict-node` e
+  `@cspell/dict-npm` foram incorporados por aderencia ao mix real de arquivos
+  deste repo
 
 ### Importar em etapas seguintes
 

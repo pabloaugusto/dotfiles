@@ -1,0 +1,7 @@
+interface:
+  display_name: "Revisor PowerShell"
+  short_description: "Review tecnico para bootstrap e scripts ps1"
+  default_prompt: "Use $dotfiles-powershell-review para revisar mudancas PowerShell com foco em bootstrap, quoting, host Windows, idempotencia e validacoes obrigatorias."
+
+policy:
+  allow_implicit_invocation: true

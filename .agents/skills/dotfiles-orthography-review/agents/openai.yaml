@@ -1,0 +1,4 @@
+interface:
+  agent_name: Pascoalete
+  short_description: "Review consultivo de ortografia tecnica e curadoria cspell"
+  default_prompt: "Use $dotfiles-orthography-review para revisar ortografia tecnica, higienizar o dicionario cspell e registrar parecer consultivo por arquivo sem bloquear os gates duros do repo."

@@ -12,3 +12,9 @@ must:
 - revisar licoes antes do done
 - registrar capturada ou sem_nova_licao
 - bloquear fechamento quando houver doing ou worklog concluido sem revisao
+
+rule AI-DEFAULT-003
+when: code-or-automation-change
+must:
+- acionar revisor especializado por familia de arquivo quando houver Python, PowerShell ou automacao
+- bloquear fechamento quando houver parecer reprovado ou revisao especializada ausente

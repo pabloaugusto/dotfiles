@@ -1,37 +1,55 @@
 {
   "version": "0.2",
-  "language": "en,pt-BR",
+  "language": "pt-BR,en",
+  "import": [
+    "@cspell/dict-pt-br/cspell-ext.json",
+    "@cspell/dict-python/cspell-ext.json",
+    "@cspell/dict-bash/cspell-ext.json",
+    "@cspell/dict-shell/cspell-ext.json",
+    "@cspell/dict-software-terms/cspell-ext.json",
+    "@cspell/dict-fullstack/cspell-ext.json",
+    "@cspell/dict-k8s/cspell-ext.json",
+    "@cspell/dict-docker/cspell-ext.json",
+    "@cspell/dict-companies/cspell-ext.json",
+    "@cspell/dict-fonts/cspell-ext.json",
+    "@cspell/dict-sql/cspell-ext.json",
+    "@cspell/dict-powershell/cspell-ext.json",
+    "@cspell/dict-git/cspell-ext.json",
+    "@cspell/dict-filetypes/cspell-ext.json",
+    "@cspell/dict-google/cspell-ext.json",
+    "@cspell/dict-markdown/cspell-ext.json",
+    "@cspell/dict-node/cspell-ext.json",
+    "@cspell/dict-npm/cspell-ext.json"
+  ],
   "useGitignore": true,
   "dictionaryDefinitions": [
     {
       "name": "project-words",
       "path": "./.cspell/project-words.txt",
-      "addWords": true
+      "addWords": true,
+      "description": "Dicionario tecnico customizado do projeto"
     }
   ],
   "dictionaries": [
-    "pt-br",
-    "python",
-    "bash",
-    "shell",
-    "softwareTerms",
-    "fullstack",
-    "k8s",
-    "docker",
-    "companies",
-    "fonts",
-    "sql",
-    "powershell",
-    "git",
-    "filetypes",
-    "google",
+    "pt_BR",
+    "python-common",
+    "computing-acronyms",
+    "markdown",
+    "node",
+    "npm",
     "project-words"
   ],
   "ignorePaths": [
     ".cache/**",
     ".venv/**",
     "archive/**",
-    "docs/reference/**",
+    ".cspell/project-words.txt",
     "uv.lock"
+  ],
+  "ignoreRegExpList": [
+    "/\\{\\%[^%]*\\%\\}/g",
+    "/\\{\\{[^}]*\\}\\}/g",
+    "/\\bWIP-[A-Z0-9-]+\\b/g",
+    "/\\bSG-[A-Z0-9-]+\\b/g"
   ]
 }

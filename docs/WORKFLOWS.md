@@ -42,6 +42,9 @@ acionadas por cada um.
 - `spell:check` existe como task local com `cspell`, mas ainda nao entra no
   workflow canonico enquanto o dicionario tecnico PT-BR/EN nao estiver curado
   o suficiente para evitar ruido estrutural.
+- `spell:review` e consultivo: registra parecer por arquivo em
+  [`docs/AI-ORTHOGRAPHY-LEDGER.md`](AI-ORTHOGRAPHY-LEDGER.md) e pode abrir
+  pendencia no backlog, mas nao bloqueia PR, merge, release ou `done` tecnico.
 
 ## Regra de manutencao
 

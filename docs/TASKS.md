@@ -120,6 +120,19 @@ Referencia operacional das tasks canonicas mais importantes do repositorio.
   validacoes recomendadas.
 - Uso manual: `task ai:delegate INTENT="importar governanca" PATHS="AGENTS.md,.agents/**"`
 
+### `ai:review:record`
+
+- Funcionalidade: registra parecer especializado `aprovado` ou `reprovado`
+  para um `worklog` na trilha viva de
+  [`docs/AI-REVIEW-LEDGER.md`](AI-REVIEW-LEDGER.md).
+- Uso manual: `task ai:review:record WORKLOG_ID="WIP-..." REVIEWER="python-reviewer" STATUS="aprovado" SUMMARY="Sem regressao funcional" PATHS="scripts/validate-ai-assets.py"`
+
+### `ai:review:check`
+
+- Funcionalidade: valida se todos os revisores especializados obrigatorios para
+  o escopo aprovaram o `worklog`.
+- Uso manual: `task ai:review:check WORKLOG_ID="WIP-..." PATHS="scripts/validate-ai-assets.py"`
+
 ### `ai:validate:linux`
 
 - Funcionalidade: valida a camada declarativa de IA no Linux e no CI.
@@ -140,6 +153,13 @@ Referencia operacional das tasks canonicas mais importantes do repositorio.
 - Funcionalidade: valida pendencias do tracker e bloqueia nova rodada quando a
   worktree estiver suja sem item ativo em `Doing`.
 - Uso manual: `task ai:worklog:check`
+
+### `ai:worklog:done`
+
+- Funcionalidade: move a tarefa de `Doing` para `Done`, mas bloqueia o
+  fechamento quando o escopo exigir revisor especializado ainda sem parecer
+  `aprovado`.
+- Uso manual: `task ai:worklog:done WORKLOG_ID="WIP-..." DELIVERY="..." LESSONS_DECISION="sem_nova_licao" LESSONS_SUMMARY="..." REVIEW_PATHS="scripts/validate-ai-assets.py"`
 
 ### `ai:worklog:close:gate:linux`
 
@@ -207,6 +227,29 @@ Referencia operacional das tasks canonicas mais importantes do repositorio.
 - Uso manual: `task spell:check:windows`
 - Observacao: a task existe, mas ainda nao faz parte do gate canonico
   `ci:quality` enquanto o dicionario PT-BR/EN e curado.
+
+### `spell:dictionary:audit:windows`
+
+- Funcionalidade: audita o dicionario local do `cspell` e detecta palavras
+  redundantes ja cobertas pelos dicionarios importados.
+- Uso manual: `task spell:dictionary:audit:windows`
+- Observacao: com `FIX=1`, remove redundancias seguras de
+  [`.cspell/project-words.txt`](../.cspell/project-words.txt).
+
+### `spell:curate:windows`
+
+- Funcionalidade: faz curadoria assistida das palavras desconhecidas para um
+  escopo especifico.
+- Uso manual: `task spell:curate:windows TARGETS="docs scripts" APPLY=1`
+
+### `spell:review:windows`
+
+- Funcionalidade: executa o review consultivo do Pascoalete por arquivo,
+  atualiza [`docs/AI-ORTHOGRAPHY-LEDGER.md`](AI-ORTHOGRAPHY-LEDGER.md) e abre
+  pendencia no backlog se restar falha textual nao corrigida.
+- Uso manual: `task spell:review:windows WORKLOG_ID="WIP-..." PATHS="README.md,AGENTS.md"`
+- Observacao: a task falha quando ainda ha achados, mas isso nao bloqueia PR,
+  commit ou `done`; a falha serve para evidenciar o apontamento consultivo.
 
 ### `lint:yaml:windows`
 

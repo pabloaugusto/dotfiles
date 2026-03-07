@@ -20,7 +20,7 @@ Atuar como gate paralelo obrigatorio de arquitetura, refactor, performance, mode
 - objetivo da rodada
 - arquivos tocados ou planejados
 - contrato atual do repo
-- estado atual de [`docs/AI-WIP-TRACKER.md`](docs/AI-WIP-TRACKER.md), [`docs/ROADMAP.md`](docs/ROADMAP.md), [`docs/ROADMAP-DECISIONS.md`](docs/ROADMAP-DECISIONS.md) e outros registradores de pendencias, backlog e trabalho feito
+- estado atual de [`../../docs/AI-WIP-TRACKER.md`](../../docs/AI-WIP-TRACKER.md), [`../../ROADMAP.md`](../../ROADMAP.md), [`../../docs/ROADMAP-DECISIONS.md`](../../docs/ROADMAP-DECISIONS.md) e outros registradores de pendencias, backlog e trabalho feito
 - restricoes de plataforma, performance, resiliencia e compatibilidade
 
 ## Saidas
@@ -33,7 +33,7 @@ Atuar como gate paralelo obrigatorio de arquitetura, refactor, performance, mode
 ## Fluxo
 
 1. Ler [`AGENTS.md`](AGENTS.md), [`LICOES-APRENDIDAS.md`](LICOES-APRENDIDAS.md) e [`docs/AI-DELEGATION-FLOW.md`](docs/AI-DELEGATION-FLOW.md).
-2. Ler continuamente [`docs/AI-WIP-TRACKER.md`](docs/AI-WIP-TRACKER.md), [`docs/ROADMAP.md`](docs/ROADMAP.md), [`docs/ROADMAP-DECISIONS.md`](docs/ROADMAP-DECISIONS.md) e qualquer outro artefato vivo de pendencias, backlog, itens feitos e trabalhos em andamento.
+2. Ler continuamente [`../../docs/AI-WIP-TRACKER.md`](../../docs/AI-WIP-TRACKER.md), [`../../ROADMAP.md`](../../ROADMAP.md), [`../../docs/ROADMAP-DECISIONS.md`](../../docs/ROADMAP-DECISIONS.md) e qualquer outro artefato vivo de pendencias, backlog, itens feitos e trabalhos em andamento.
 3. Mapear os contratos, limites de dominio e o custo estrutural da mudanca.
 4. Avaliar modularidade, simplificacao, performance, resiliencia, testabilidade, custo de manutencao e possibilidade de drift.
 5. Sinalizar qualquer alternativa tecnicamente superior que reduza custo, risco ou complexidade.

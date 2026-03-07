@@ -1,0 +1,7 @@
+interface:
+  display_name: "Revisor Python"
+  short_description: "Review tecnico para scripts e testes Python"
+  default_prompt: "Use $dotfiles-python-review para revisar mudancas Python com foco em corretude, tipagem, portabilidade Windows/WSL e validacoes obrigatorias."
+
+policy:
+  allow_implicit_invocation: true

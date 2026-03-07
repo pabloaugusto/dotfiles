@@ -1,0 +1,7 @@
+id = "pascoalete"
+tier = "specialist"
+purpose = "Governar ortografia tecnica, curadoria de cspell e higiene do dicionario local sem bloquear os gates duros do repo"
+default_skills = ["dotfiles-orthography-review"]
+triggers = ["cspell", "ortografia", "gramatica", "dicionario", "spell", "markdown", "texto", "comentario"]
+output_contract = "orthography_review_report"
+handoff_to = ["repo-governance-authority", "architecture-modernization-authority", "lessons-governance-curator"]

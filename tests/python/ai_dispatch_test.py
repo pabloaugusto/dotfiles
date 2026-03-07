@@ -16,21 +16,49 @@ class AiDispatchTests(unittest.TestCase):
     def test_route_payload_includes_bootstrap_and_guardrails(self) -> None:
         payload = build_route_payload(
             intent="Recriar relink do bootstrap do Windows",
-            paths=["bootstrap/bootstrap-windows.ps1", "Taskfile.yml"],
+            paths=["bootstrap/bootstrap-windows.ps1"],
             risk="high",
         )
         self.assertIn("bootstrap-operator", payload["task_card"]["required_agents"])
         self.assertIn("critical-integrations-guardian", payload["task_card"]["required_agents"])
+        self.assertIn("powershell-reviewer", payload["task_card"]["required_agents"])
         self.assertIn(
             "architecture-modernization-authority", payload["task_card"]["required_agents"]
         )
-        self.assertIn("task test:integration", payload["delegation_plan"]["validation"])
+        self.assertIn("task test:unit:powershell", payload["delegation_plan"]["validation"])
+        self.assertIn("task ci:lint", payload["delegation_plan"]["validation"])
         self.assertIn("task env:check", payload["delegation_plan"]["validation"])
+
+    def test_route_payload_requires_python_reviewer(self) -> None:
+        payload = build_route_payload(
+            intent="Refatorar validador Python da camada de IA",
+            paths=["scripts/validate-ai-assets.py"],
+            risk="medium",
+        )
+        self.assertIn("python-reviewer", payload["task_card"]["required_agents"])
+        self.assertIn(
+            "repo-governance-authority",
+            payload["delegation_plan"]["primary_agents"],
+        )
+        self.assertIn("task lint:python", payload["delegation_plan"]["validation"])
+        self.assertIn("task type:check", payload["delegation_plan"]["validation"])
+        self.assertIn("task test:unit:python", payload["delegation_plan"]["validation"])
+
+    def test_route_payload_requires_automation_reviewer(self) -> None:
+        payload = build_route_payload(
+            intent="Ajustar workflow e Taskfile do CI",
+            paths=[".github/workflows/ai-governance.yml", "Taskfile.yml"],
+            risk="medium",
+        )
+        self.assertIn("automation-reviewer", payload["task_card"]["required_agents"])
+        self.assertIn("task validate:actions", payload["delegation_plan"]["validation"])
+        self.assertIn("task lint:yaml", payload["delegation_plan"]["validation"])
+        self.assertIn("task ci:workflow:sync:check", payload["delegation_plan"]["validation"])
 
     def test_route_payload_uses_orchestrator_fallback(self) -> None:
         payload = build_route_payload(
             intent="Planejar e decompor backlog tecnico amplo",
-            paths=["docs/ROADMAP.md"],
+            paths=["ROADMAP.md"],
             risk="medium",
         )
         self.assertIn("orchestrator", payload["delegation_plan"]["primary_agents"])

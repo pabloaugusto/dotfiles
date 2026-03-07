@@ -29,10 +29,63 @@ conditional_mandatory_gates:
       - "signing"
     agents:
       - critical-integrations-guardian
+  - when_any_keyword_matches:
+      - "rotate"
+      - "rotation"
+      - "token"
+      - "ssh-key"
+      - "service-account"
+      - "pat"
+      - "secret"
+      - "secrets"
+      - "age"
+      - "sops"
+    agents:
+      - secrets-rotation-governor
+  - when_any_path_matches:
+      - "df/secrets/**"
+      - "bootstrap/secrets/**"
+      - "docs/secrets-and-auth.md"
+      - "scripts/secrets*"
+      - "config/secrets-rotation*"
+    agents:
+      - secrets-rotation-governor
+  - when_any_path_matches:
+      - "scripts/*.py"
+      - "tests/python/*"
+      - ".githooks/ci/*.py"
+      - "pyproject.toml"
+    agents:
+      - python-reviewer
+  - when_any_path_matches:
+      - "bootstrap/*.ps1"
+      - "bootstrap/**/*.ps1"
+      - "df/powershell/*.ps1"
+      - "df/powershell/**/*.ps1"
+      - "scripts/*.ps1"
+      - "scripts/**/*.ps1"
+      - "tests/powershell/*.ps1"
+      - "tests/powershell/**/*.ps1"
+    agents:
+      - powershell-reviewer
+  - when_any_path_matches:
+      - ".github/workflows/*.yml"
+      - ".github/workflows/*.yaml"
+      - "Taskfile.yml"
+      - "Dockerfile"
+      - "docker/**"
+      - "scripts/*.sh"
+      - "scripts/**/*.sh"
+      - "bootstrap/*.sh"
+      - "bootstrap/**/*.sh"
+      - "tests/bash/*"
+      - ".githooks/*"
+    agents:
+      - automation-reviewer
   - when_any_path_matches:
       - "LICOES-APRENDIDAS.md"
       - "docs/AI-WIP-TRACKER.md"
-      - "docs/ROADMAP.md"
+      - "ROADMAP.md"
       - "docs/ROADMAP-DECISIONS.md"
       - "scripts/ai-worklog.py"
       - "scripts/ai-lessons.py"
@@ -45,22 +98,39 @@ routes:
       keywords: ["bootstrap", "relink", "refresh", "link", "symlink", "user-config"]
       paths: ["bootstrap/**", "df/**"]
     primary: [bootstrap-operator]
-    support: [critical-integrations-guardian, architecture-modernization-authority]
+    support: [critical-integrations-guardian, architecture-modernization-authority, pascoalete]
   - id: route-governance-scope
     match:
       keywords: ["governanca", "agents", "skills", "workflow", "docs", "contract", "conventional"]
-      paths: ["AGENTS.md", ".agents/**", ".codex/README.md", "docs/**", "Taskfile.yml"]
+      paths:
+        [
+          "AGENTS.md",
+          ".agents/**",
+          ".codex/README.md",
+          "docs/**",
+          "Taskfile.yml",
+          "scripts/ai-*.py",
+          "scripts/validate-ai-assets.py",
+          "scripts/validate_docs.py",
+          "scripts/validate_workflow_task_sync.py",
+        ]
     primary: [repo-governance-authority]
-    support: [architecture-modernization-authority, lessons-governance-curator]
+    support: [architecture-modernization-authority, lessons-governance-curator, pascoalete]
+  - id: route-secrets-rotation-scope
+    match:
+      keywords: ["rotate", "rotation", "token", "service-account", "ssh-key", "sops", "age", "secret"]
+      paths: ["df/secrets/**", "bootstrap/secrets/**", "docs/secrets-and-auth.md", "scripts/secrets*", "config/secrets-rotation*"]
+    primary: [secrets-rotation-governor]
+    support: [critical-integrations-guardian, architecture-modernization-authority, lessons-governance-curator, pascoalete]
   - id: route-continuity-scope
     match:
       keywords: ["wip", "doing", "done", "roadmap", "continuity", "lessons", "retroativo"]
-      paths: ["LICOES-APRENDIDAS.md", "docs/AI-WIP-TRACKER.md", "docs/ROADMAP.md", "docs/ROADMAP-DECISIONS.md", "scripts/ai-*.py"]
+      paths: ["LICOES-APRENDIDAS.md", "docs/AI-WIP-TRACKER.md", "ROADMAP.md", "docs/ROADMAP-DECISIONS.md", "scripts/ai-*.py"]
     primary: [execution-worklog-governance-owner, lessons-governance-curator]
-    support: [repo-governance-authority]
+    support: [repo-governance-authority, pascoalete]
   - id: route-orchestrator-scope
     match:
       keywords: ["planejar", "decompor", "delegar", "orquestrar", "rotear", "route", "delegate"]
-      paths: ["docs/ROADMAP.md", "docs/WORKFLOWS.md", "docs/TASKS.md"]
+      paths: ["ROADMAP.md", "docs/WORKFLOWS.md", "docs/TASKS.md"]
     primary: [orchestrator]
-    support: [repo-governance-authority, architecture-modernization-authority]
+    support: [repo-governance-authority, architecture-modernization-authority, pascoalete]

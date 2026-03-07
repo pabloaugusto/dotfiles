@@ -27,10 +27,12 @@ class ValidateAiAssetsTests(unittest.TestCase):
         self.assertIn(".agents/config.toml", module.REQUIRED_FILES)
         self.assertIn(".codex/README.md", module.REQUIRED_FILES)
         self.assertIn("docs/AI-AGENTS-CATALOG.md", module.REQUIRED_FILES)
+        self.assertIn("docs/AI-ORTHOGRAPHY-LEDGER.md", module.REQUIRED_FILES)
         self.assertIn("docs/AI-SOURCE-AUDIT.md", module.REQUIRED_FILES)
         self.assertIn("docs/TASKS.md", module.REQUIRED_FILES)
         self.assertIn("docs/WORKFLOWS.md", module.REQUIRED_FILES)
         self.assertIn("scripts/ai-route.py", module.REQUIRED_FILES)
+        self.assertIn("scripts/cspell-governance.py", module.REQUIRED_FILES)
         self.assertIn("scripts/validate_workflow_task_sync.py", module.REQUIRED_FILES)
         self.assertIn("## Validacao recomendada", module.REQUIRED_AGENT_HEADINGS)
         self.assertIn("## Regras", module.REQUIRED_SKILL_HEADINGS)
@@ -55,6 +57,14 @@ class ValidateAiAssetsTests(unittest.TestCase):
         self.assertIn(
             "$task-routing-and-decomposition",
             module.CATALOG_REQUIRED_SNIPPETS["docs/AI-SKILLS-CATALOG.md"],
+        )
+        self.assertIn(
+            "$dotfiles-orthography-review",
+            module.CATALOG_REQUIRED_SNIPPETS["docs/AI-SKILLS-CATALOG.md"],
+        )
+        self.assertIn(
+            "pascoalete",
+            module.CATALOG_REQUIRED_SNIPPETS["docs/AI-AGENTS-CATALOG.md"],
         )
 
     def test_validator_passes_on_current_repo(self) -> None:

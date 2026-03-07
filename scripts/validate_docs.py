@@ -25,6 +25,8 @@ SKIP_PREFIXES = (
     ".agents/prompts/legacy/",
 )
 SKIP_FILES = {
+    "docs/AI-ORTHOGRAPHY-LEDGER.md",
+    "docs/AI-REVIEW-LEDGER.md",
     "docs/AI-WIP-TRACKER.md",
     "docs/ROADMAP-DECISIONS.md",
 }

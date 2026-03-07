@@ -27,6 +27,30 @@ DEFAULT_ROUTE_OUT = ROOT / ".cache" / "ai" / "route-output.json"
 DEFAULT_INTAKE_OUT = ROOT / ".cache" / "ai" / "chat-intake.json"
 DEFAULT_DELEGATION_OUT = ROOT / ".cache" / "ai" / "delegation-plan.md"
 RISK_LEVELS = {"low", "medium", "high"}
+PYTHON_REVIEW_PATHS = ["scripts/*.py", "tests/python/*", ".githooks/ci/*.py", "pyproject.toml"]
+POWERSHELL_REVIEW_PATHS = [
+    "bootstrap/*.ps1",
+    "bootstrap/**/*.ps1",
+    "df/powershell/*.ps1",
+    "df/powershell/**/*.ps1",
+    "scripts/*.ps1",
+    "scripts/**/*.ps1",
+    "tests/powershell/*.ps1",
+    "tests/powershell/**/*.ps1",
+]
+AUTOMATION_REVIEW_PATHS = [
+    ".github/workflows/*.yml",
+    ".github/workflows/*.yaml",
+    "Taskfile.yml",
+    "Dockerfile",
+    "docker/**",
+    "scripts/*.sh",
+    "scripts/**/*.sh",
+    "bootstrap/*.sh",
+    "bootstrap/**/*.sh",
+    "tests/bash/*",
+    ".githooks/*",
+]
 
 
 def load_yaml(path: Path) -> dict:
@@ -299,6 +323,29 @@ def build_validation_plan(paths: list[str], intent: str) -> list[str]:
 
     if path_matches([".agents/**", ".codex/README.md", "docs/**", "scripts/**"], paths):
         validations.append("task test:unit:python")
+
+    if path_matches(PYTHON_REVIEW_PATHS, paths):
+        validations.extend(
+            [
+                "task lint:python",
+                "task format:python:check",
+                "task type:check",
+                "task test:unit:python",
+            ]
+        )
+
+    if path_matches(POWERSHELL_REVIEW_PATHS, paths):
+        validations.extend(["task ci:lint", "task test:unit:powershell"])
+
+    if path_matches(AUTOMATION_REVIEW_PATHS, paths):
+        validations.extend(
+            [
+                "task ci:lint",
+                "task lint:yaml",
+                "task validate:actions",
+                "task ci:workflow:sync:check",
+            ]
+        )
 
     return dedupe(validations)
 

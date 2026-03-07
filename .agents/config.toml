@@ -8,8 +8,13 @@ required = [
   "wip-continuity-governance",
   "dotfiles-architecture-modernization",
   "dotfiles-critical-integrations",
+  "dotfiles-secrets-rotation",
   "dotfiles-lessons-governance",
   "task-routing-and-decomposition",
+  "dotfiles-python-review",
+  "dotfiles-powershell-review",
+  "dotfiles-automation-review",
+  "dotfiles-orthography-review",
 ]
 mandatory_parallel = ["dotfiles-architecture-modernization"]
 
@@ -20,8 +25,13 @@ required = [
   "execution-worklog-governance-owner",
   "architecture-modernization-authority",
   "critical-integrations-guardian",
+  "secrets-rotation-governor",
   "lessons-governance-curator",
   "orchestrator",
+  "python-reviewer",
+  "powershell-reviewer",
+  "automation-reviewer",
+  "pascoalete",
 ]
 mandatory_global = [
   "repo-governance-authority",

@@ -1,0 +1,7 @@
+interface:
+  display_name: "Revisor Automacao"
+  short_description: "Review tecnico para shell, workflows, Taskfile e Docker"
+  default_prompt: "Use $dotfiles-automation-review para revisar mudancas em shell, workflows, Taskfile e Docker com foco em determinismo, CI/CD e paridade com tasks canonicas."
+
+policy:
+  allow_implicit_invocation: true

@@ -1,0 +1,7 @@
+id = "powershell-reviewer"
+tier = "specialist"
+purpose = "Revisar mudancas PowerShell com foco em bootstrap, host Windows, sintaxe, quoting e idempotencia"
+default_skills = ["dotfiles-powershell-review"]
+triggers = ["powershell", "pwsh", "bootstrap", "ps1", "aliases", "checkEnv"]
+output_contract = "powershell_review_report"
+handoff_to = ["bootstrap-operator", "critical-integrations-guardian", "repo-governance-authority"]

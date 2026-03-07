@@ -35,6 +35,11 @@ Manter este repo de dotfiles confiavel, testavel e reproduzivel em Windows host 
 - [`.agents/skills/dotfiles-architecture-modernization`](.agents/skills/dotfiles-architecture-modernization)
 - [`.agents/skills/dotfiles-critical-integrations`](.agents/skills/dotfiles-critical-integrations)
 - [`.agents/skills/dotfiles-lessons-governance`](.agents/skills/dotfiles-lessons-governance)
+- [`.agents/skills/dotfiles-python-review`](.agents/skills/dotfiles-python-review)
+- [`.agents/skills/dotfiles-powershell-review`](.agents/skills/dotfiles-powershell-review)
+- [`.agents/skills/dotfiles-automation-review`](.agents/skills/dotfiles-automation-review)
+- [`.agents/skills/dotfiles-orthography-review/SKILL.md`](.agents/skills/dotfiles-orthography-review/SKILL.md)
+- [`.agents/skills/dotfiles-secrets-rotation`](.agents/skills/dotfiles-secrets-rotation)
 - [`.agents/skills/task-routing-and-decomposition`](.agents/skills/task-routing-and-decomposition)
 - [`.agents/skills/dotfiles-test-harness`](.agents/skills/dotfiles-test-harness)
 - [`.agents/skills/dotfiles-repo-governance`](.agents/skills/dotfiles-repo-governance)
@@ -59,9 +64,26 @@ Leia a skill mais proxima do escopo antes de editar arquivos relevantes.
   sem trabalho parcial, sem "copiar so o que parece importante" e sem pular validacao disponivel.
 - Em toda analise substantiva, acionar em paralelo o gate de arquitetura/modernizacao para revisar:
   simplificacao, modularidade, performance, resiliencia, testabilidade, I/O, memoria, CPU e possiveis tecnologias/abordagens mais adequadas.
+- Em toda mudanca versionada que altere texto, comentario, docstring, doc,
+  configuracao textual ou identificadores legiveis, acionar tambem `pascoalete`
+  com [`$dotfiles-orthography-review`](.agents/skills/dotfiles-orthography-review/SKILL.md)
+  em modo consultivo para revisar ortografia tecnica e higiene do dicionario `cspell`.
 - Em qualquer mudanca que toque bootstrap, auth, secrets, CI, CLI, sync ou integracoes do workstation,
   acionar tambem o guardiao de integracoes criticas para proteger `gh`, `op`, `sops`, `age`, `ssh-agent`,
   assinatura Git, secrets e demais ferramentas de missao critica.
+- Em qualquer mudanca que toque rotacao, revogacao, expiracao, backup ou inventario
+  de credenciais, chaves SSH, PATs, service accounts, `sops+age` ou notificacao
+  de segredos, acionar tambem `secrets-rotation-governor` com a skill
+  [`$dotfiles-secrets-rotation`](.agents/skills/dotfiles-secrets-rotation).
+- Em qualquer mudanca de codigo ou automacao, acionar a skill e o revisor
+  especialista correspondente a familia de arquivo afetada: Python com
+  [`$dotfiles-python-review`](.agents/skills/dotfiles-python-review),
+  PowerShell com
+  [`$dotfiles-powershell-review`](.agents/skills/dotfiles-powershell-review)
+  ou shell/workflow/Taskfile/Docker com
+  [`$dotfiles-automation-review`](.agents/skills/dotfiles-automation-review).
+  Fechamento com parecer reprovado ou sem revisor especializado aplicavel e
+  invalido.
 - Worktrees e rodadas de automacao local devem preferir signer tecnico dedicado,
   aplicado via `task git:signing:mode:automation`; signer humano continua como
   padrao fora da worktree tecnica e nao deve ser "bypassado" por variavel que
@@ -72,6 +94,9 @@ Leia a skill mais proxima do escopo antes de editar arquivos relevantes.
   antes de iniciar novo escopo; `task ai:worklog:check` deve bloquear worktree suja sem `Doing` ativo.
 - Nenhum `done` e valido sem revisar [`LICOES-APRENDIDAS.md`](LICOES-APRENDIDAS.md) e registrar explicitamente
   `capturada` ou `sem_nova_licao`.
+- Reprovacao de `pascoalete` nao bloqueia `done`, PR ou commit, mas deve
+  registrar log consultivo e abrir pendencia rastreavel se nao houver correcao
+  na rodada atual.
 - Branches devem seguir `<type>/<slug>` e nao usar emoji.
 - Commit e PR title devem seguir `emoji + conventional commit` com maximo recomendado de 72 caracteres.
 - Cada branch deve carregar um unico contexto coerente; separar assuntos independentes em branches diferentes.

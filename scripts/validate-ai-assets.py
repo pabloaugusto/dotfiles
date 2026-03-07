@@ -33,11 +33,13 @@ REQUIRED_FILES = [
     "docs/AI-AGENTS-CATALOG.md",
     "docs/AI-DELEGATION-FLOW.md",
     "docs/AI-GOVERNANCE-AND-REGRESSION.md",
+    "docs/AI-ORTHOGRAPHY-LEDGER.md",
+    "docs/AI-REVIEW-LEDGER.md",
     "docs/AI-SKILLS-CATALOG.md",
     "docs/AI-SOURCE-AUDIT.md",
     "docs/ai-operating-model.md",
     "docs/AI-WIP-TRACKER.md",
-    "docs/ROADMAP.md",
+    "ROADMAP.md",
     "docs/ROADMAP-DECISIONS.md",
     "docs/TASKS.md",
     "docs/WORKFLOWS.md",
@@ -63,6 +65,10 @@ REQUIRED_FILES = [
     "scripts/ai-route.py",
     "scripts/ai-delegate.py",
     "scripts/ai-eval-smoke.py",
+    "scripts/ai-review.py",
+    "scripts/ai_review_lib.py",
+    "scripts/cspell-governance.py",
+    "scripts/cspell_governance_lib.py",
     "scripts/validate_workflow_task_sync.py",
     "scripts/validate-ai-assets.ps1",
 ]
@@ -165,36 +171,59 @@ CATALOG_REQUIRED_SNIPPETS = {
         "architecture-modernization-authority",
         "critical-integrations-guardian",
         "lessons-governance-curator",
+        "pascoalete",
+        "python-reviewer",
+        "powershell-reviewer",
+        "automation-reviewer",
     ],
     "docs/AI-SKILLS-CATALOG.md": [
         "$dotfiles-architecture-modernization",
         "$dotfiles-critical-integrations",
         "$dotfiles-lessons-governance",
+        "$dotfiles-orthography-review",
         "$task-routing-and-decomposition",
+        "$dotfiles-python-review",
+        "$dotfiles-powershell-review",
+        "$dotfiles-automation-review",
     ],
     "docs/AI-DELEGATION-FLOW.md": [
         "architecture-modernization-authority",
         "critical-integrations-guardian",
         "lessons-governance-curator",
+        "pascoalete",
         "orchestrator",
+        "python-reviewer",
+        "powershell-reviewer",
+        "automation-reviewer",
     ],
     "docs/AI-GOVERNANCE-AND-REGRESSION.md": [
         "task ai:lessons:check",
+        "task ai:review:check",
+        "task spell:review",
         "architecture-modernization-authority",
         "critical-integrations-guardian",
         "task ai:eval:smoke",
         "task ci:workflow:sync:check",
+        "pascoalete",
+        "python-reviewer",
+        "powershell-reviewer",
+        "automation-reviewer",
     ],
     "docs/TASKS.md": [
         "### `ai:chat:intake`",
         "### `ai:route`",
         "### `ai:delegate`",
+        "### `ai:review:record`",
+        "### `ai:review:check`",
+        "### `spell:review:windows`",
+        "### `spell:dictionary:audit:windows`",
         "### `ci:workflow:sync:check`",
     ],
     "docs/WORKFLOWS.md": [
         "### `ai-governance.yml`",
         "### `bootstrap-integration.yml`",
         "### `pr-validate.yml`",
+        "spell:review",
     ],
 }
 
@@ -522,10 +551,10 @@ def main(argv: list[str]) -> int:
             failures,
         )
 
-    roadmap_path = repo_root / "docs" / "ROADMAP.md"
+    roadmap_path = repo_root / "ROADMAP.md"
     if roadmap_path.is_file():
         require_markers(
-            roadmap_path.read_text(encoding="utf-8"), ROADMAP_MARKERS, "docs/ROADMAP.md", failures
+            roadmap_path.read_text(encoding="utf-8"), ROADMAP_MARKERS, "ROADMAP.md", failures
         )
 
     decisions_path = repo_root / "docs" / "ROADMAP-DECISIONS.md"

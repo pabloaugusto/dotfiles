@@ -13,6 +13,15 @@ Fonte de verdade da camada declarativa e operacional de IA deste repo.
 - [`evals/`](evals/): cenarios e datasets minimos de regressao
 - [`config.toml`](config.toml): contrato central da camada declarativa
 
+## Dominios criticos permanentes
+
+- bootstrap e links canonicos
+- governanca e continuidade de IA
+- integracoes criticas de auth e CLI
+- rotacao segura de secrets, tokens, chaves SSH e `sops+age`
+- revisao especializada obrigatoria por familia de arquivo
+- revisao consultiva perene de ortografia tecnica e curadoria `cspell`
+
 ## Regra
 
 - Toda regra declarativa portavel deve nascer em [`.agents/`](.agents/).

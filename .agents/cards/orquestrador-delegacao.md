@@ -19,8 +19,8 @@ Orquestrar intake, roteamento, decomposicao e delegacao de trabalho de IA com ba
 
 - mensagem acionavel
 - paths ou areas tocadas
-- estado atual de [`docs/AI-WIP-TRACKER.md`](docs/AI-WIP-TRACKER.md)
-- estado atual de [`docs/ROADMAP.md`](docs/ROADMAP.md)
+- estado atual de [`../../docs/AI-WIP-TRACKER.md`](../../docs/AI-WIP-TRACKER.md)
+- estado atual de [`../../ROADMAP.md`](../../ROADMAP.md)
 
 ## Saidas
 
@@ -47,7 +47,7 @@ Orquestrar intake, roteamento, decomposicao e delegacao de trabalho de IA com ba
 ## Validacao recomendada
 
 - `task ai:chat:intake MESSAGE="exemplo" ROUTE=1 PENDING_ACTION=concluir_primeiro`
-- `task ai:route INTENT="exemplo" PATHS="docs/ROADMAP.md"`
+- `task ai:route INTENT="exemplo" PATHS="ROADMAP.md"`
 - `task ai:delegate INTENT="exemplo" PATHS="AGENTS.md,docs/WORKFLOWS.md"`
 - `task ai:eval:smoke`
 - `task ci:workflow:sync:check`

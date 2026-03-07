@@ -18,9 +18,9 @@ Garantir que o trabalho incremental de IA tenha rastreabilidade, retomada segura
 ## Entradas
 
 - mensagem acionavel do usuario
-- estado atual de [`docs/AI-WIP-TRACKER.md`](docs/AI-WIP-TRACKER.md)
+- estado atual de [`../../docs/AI-WIP-TRACKER.md`](../../docs/AI-WIP-TRACKER.md)
 - estado atual de [`LICOES-APRENDIDAS.md`](LICOES-APRENDIDAS.md)
-- estado atual de [`docs/ROADMAP.md`](docs/ROADMAP.md) quando houver pendencias adiadas
+- estado atual de [`../../ROADMAP.md`](../../ROADMAP.md) quando houver pendencias adiadas
 - branch atual e contexto da demanda
 
 ## Saidas
@@ -31,10 +31,10 @@ Garantir que o trabalho incremental de IA tenha rastreabilidade, retomada segura
 
 ## Fluxo
 
-1. Ler [`docs/AI-WIP-TRACKER.md`](docs/AI-WIP-TRACKER.md).
+1. Ler [`../../docs/AI-WIP-TRACKER.md`](../../docs/AI-WIP-TRACKER.md).
 2. Rodar `task ai:worklog:check`.
 3. Se houver pendencia, resolver com `concluir_primeiro` ou `roadmap_pendente`.
-4. Garantir que `roadmap_pendente` escreva em [`docs/ROADMAP.md`](docs/ROADMAP.md) e [`docs/ROADMAP-DECISIONS.md`](docs/ROADMAP-DECISIONS.md).
+4. Garantir que `roadmap_pendente` escreva em [`../../ROADMAP.md`](../../ROADMAP.md) e [`../../docs/ROADMAP-DECISIONS.md`](../../docs/ROADMAP-DECISIONS.md).
 5. Registrar ou atualizar a tarefa atual.
 6. Manter o item em `Doing` enquanto ainda houver execucao relevante em curso.
 7. Antes do `done`, revisar [`LICOES-APRENDIDAS.md`](LICOES-APRENDIDAS.md) e decidir `capturada` ou `sem_nova_licao`.

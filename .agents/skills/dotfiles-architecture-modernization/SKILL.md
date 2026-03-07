@@ -11,7 +11,7 @@ Atuar como gate paralelo obrigatorio de arquitetura e modernizacao.
 
 ## Fluxo
 
-1. Ler [`AGENTS.md`](AGENTS.md), [`LICOES-APRENDIDAS.md`](LICOES-APRENDIDAS.md), [`docs/AI-DELEGATION-FLOW.md`](docs/AI-DELEGATION-FLOW.md), [`docs/AI-WIP-TRACKER.md`](docs/AI-WIP-TRACKER.md), [`docs/ROADMAP.md`](docs/ROADMAP.md) e [`docs/ROADMAP-DECISIONS.md`](docs/ROADMAP-DECISIONS.md).
+1. Ler [`AGENTS.md`](AGENTS.md), [`LICOES-APRENDIDAS.md`](LICOES-APRENDIDAS.md), [`docs/AI-DELEGATION-FLOW.md`](docs/AI-DELEGATION-FLOW.md), [`../../../docs/AI-WIP-TRACKER.md`](../../../docs/AI-WIP-TRACKER.md), [`../../../ROADMAP.md`](../../../ROADMAP.md) e [`../../../docs/ROADMAP-DECISIONS.md`](../../../docs/ROADMAP-DECISIONS.md).
 2. Se a mudanca vier de importacao cross-repo, confirmar auditoria em [`docs/AI-SOURCE-AUDIT.md`](docs/AI-SOURCE-AUDIT.md).
 3. Mapear contratos, acoplamentos, backlog existente e custo estrutural dos arquivos tocados.
 4. Avaliar se existe alternativa mais simples, modular, testavel, performatica ou resiliente.

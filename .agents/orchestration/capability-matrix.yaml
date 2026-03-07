@@ -15,6 +15,21 @@ agents:
   - id: critical-integrations-guardian
     domains: [auth, secrets, cli, workstation, ci, signing, bootstrap]
     default_skills: [dotfiles-critical-integrations]
+  - id: secrets-rotation-governor
+    domains: [secret-rotation, token-lifecycle, ssh-keys, sops, age, recovery]
+    default_skills: [dotfiles-secrets-rotation]
+  - id: python-reviewer
+    domains: [python, typing, lint, tests, review]
+    default_skills: [dotfiles-python-review]
+  - id: powershell-reviewer
+    domains: [powershell, bootstrap, windows-host, review]
+    default_skills: [dotfiles-powershell-review]
+  - id: automation-reviewer
+    domains: [shell, workflows, taskfile, docker, ci, review]
+    default_skills: [dotfiles-automation-review]
+  - id: pascoalete
+    domains: [orthography, cspell, vocabulary, docs, comments, review]
+    default_skills: [dotfiles-orthography-review]
   - id: lessons-governance-curator
     domains: [lessons, retrospectives, closeout, backfill]
     default_skills: [dotfiles-lessons-governance]
@@ -28,3 +43,4 @@ mandatory_gates:
     - architecture-modernization-authority
   platform_sensitive:
     - critical-integrations-guardian
+    - secrets-rotation-governor

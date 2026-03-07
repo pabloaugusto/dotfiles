@@ -11,7 +11,7 @@ Transformar [`LICOES-APRENDIDAS.md`](LICOES-APRENDIDAS.md) em contrato revisado 
 
 ## Fluxo
 
-1. Ler [`LICOES-APRENDIDAS.md`](LICOES-APRENDIDAS.md), [`docs/AI-WIP-TRACKER.md`](docs/AI-WIP-TRACKER.md) e [`docs/ROADMAP.md`](docs/ROADMAP.md).
+1. Ler [`LICOES-APRENDIDAS.md`](LICOES-APRENDIDAS.md), [`../../../docs/AI-WIP-TRACKER.md`](../../../docs/AI-WIP-TRACKER.md) e [`../../../ROADMAP.md`](../../../ROADMAP.md).
 2. Determinar se a rodada gerou uma nova licao ou somente uma revisao `sem_nova_licao`.
 3. Registrar novas licoes antes do `done`, nunca depois.
 4. Garantir que cada worklog concluido tenha revisao associada.

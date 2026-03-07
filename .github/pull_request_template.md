@@ -24,7 +24,7 @@ Dica: commits locais podem receber emoji automaticamente via hook.
 - [ ] branch segue `<type>/<slug>`
 - [ ] commits seguem Conventional Commits com emoji semantico
 - [ ] escopo da branch esta coeso
-- [ ] `docs/AI-WIP-TRACKER.md` nao deixou item aberto em `Doing`
+- [ ] `../docs/AI-WIP-TRACKER.md` nao deixou item aberto em `Doing`
 - [ ] local lint executed
 - [ ] local tests executed
 - [ ] docs updated when needed
