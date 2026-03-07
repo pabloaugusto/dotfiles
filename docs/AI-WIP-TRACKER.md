@@ -1,6 +1,6 @@
 # AI WIP Tracker
 
-Atualizado em: 2026-03-07 09:28 UTC
+Atualizado em: 2026-03-07 09:43 UTC
 
 Fonte de verdade operacional para continuidade de tarefas dos agentes de IA.
 
@@ -28,6 +28,7 @@ Fonte de verdade operacional para continuidade de tarefas dos agentes de IA.
 <!-- ai-worklog:done:start -->
 | ID | Tarefa | Branch | Responsavel | Inicio UTC | Concluido UTC | Resultado |
 | --- | --- | --- | --- | --- | --- | --- |
+| WIP-20260307-ESTRUTURA | Auditar a estrutura completa do repositorio e simplificar layout de pastas/arquivos conforme boas praticas e contratos do projeto | feat/test-harness-hybrid | ai-agent | 2026-03-07 09:31 UTC | 2026-03-07 09:43 UTC | Estrutura do repo simplificada e reorganizada: legado isolado em archive/, prompt packs movidos para .agents/prompts/legacy, docs agrupados por funcao, nomes canonicos corrigido... / evidencias: task ai:validate:windo... |
 | WIP-20260307-090534 | Auditar o repo inteiro em busca de simplificacoes, codigo e arquivos desnecessarios, pontos de falha e melhorias de performance, resiliencia e manutencao | feat/test-harness-hybrid | ai-agent | 2026-03-07 09:05 UTC | 2026-03-07 09:28 UTC | Auditoria de simplificacao concluida com commits checkpoint por contexto: harnesses reais de relink, reducao de drift estrutural, refresh de docs do repo e ajustes de workspace. / evidencias: task test:unit:powershell... |
 | WIP-20260307-084440 | Auditar o repo inteiro e atualizar a documentacao para refletir as funcionalidades atuais, incluindo README raiz com catalogo de funcionalidades | feat/test-harness-hybrid | ai-agent | 2026-03-07 08:44 UTC | 2026-03-07 09:03 UTC | Duplicacao estrutural consolidada: .agents como fonte canonica, .codex reduzido a README e arvore vazia removida; quality-foundation passou a reutilizar tasks oficiais; docs e R... / evidencias: python scripts/validat... |
 | WIP-20260307-083916 | Auditar .gitignore e corrigir exclusoes indevidas da camada .agents e demais ativos versionados | feat/test-harness-hybrid | ai-agent | 2026-03-07 08:39 UTC | 2026-03-07 08:43 UTC | Auditoria completa do .gitignore concluida; regra antiga que ocultava a arvore canonica .agents foi corrigida e entradas legadas de df/powershell/Modules, df/powershell/Scripts... / evidencias: git check-ignore -v -n... |

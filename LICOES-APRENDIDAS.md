@@ -118,6 +118,15 @@ Historico incremental das regras operacionais que nao devem depender de memoria 
 - Validacao: task ai:worklog:check:windows PENDING_ACTION=concluir_primeiro; python -m unittest tests.python.ai_worklog_test; task ai:validate:windows
 - Worklog relacionado: `WIP-20260307-090534`
 - Fontes relacionadas: dotfiles-test-harness
+
+## LA-011 - Manter df estritamente como runtime materializado
+
+- Contexto: A auditoria estrutural encontrou fixtures de editor e scripts scratch dentro de df/powershell/tests, embora df deva conter apenas artefatos que vao para a maquina apos o bootstrap.
+- Regra: Tudo que nao for runtime real da workstation deve ficar fora de df. Fixtures vao para tests/fixtures, material historico vai para archive e apenas dotfiles ativos permanecem em df.
+- Solucao validada: Mover o fixture de TODO para tests/fixtures/editor, arquivar o scratch PowerShell em archive/ e deixar df livre de testes e experimentos.
+- Prevencao: Em toda revisao estrutural, varrer df em busca de tests, scratch, backups, fixtures e nomes maquina-especificos antes de aceitar novos arquivos no runtime.
+- Validacao: git ls-files df; task ai:validate:windows; task test:unit:powershell; git diff --check
+- Worklog relacionado: `WIP-20260307-ESTRUTURA`
 <!-- ai-lessons:catalog:end -->
 
 ## Revisoes de rodadas
@@ -127,6 +136,7 @@ Toda finalizacao de worklog deve registrar se houve nova licao.
 <!-- ai-lessons:reviews:start -->
 | Data/Hora UTC | Worklog ID | Decisao | Resumo | Licoes | Evidencia |
 | --- | --- | --- | --- | --- | --- |
+| 2026-03-07 09:43 UTC | WIP-20260307-ESTRUTURA | capturada | A rodada consolidou a regra de que df deve permanecer estritamente como runtime materializado; fixtures, scratch e historico devem sair para tests/fixtures ou archive. | LA-011 | LICOES-APRENDIDAS.md atualizado com LA-011; fixture movido para tests/fixtures/editor; scratch PowerShell arquivado fora de df. |
 | 2026-03-07 09:28 UTC | WIP-20260307-090534 | sem_nova_licao | LA-010 ja cobre a regra normativa desta rodada; nao surgiu nova licao perene alem do enforcement e do checkpoint commit que ja foram registrados. | - | task test:unit:powershell; task test:integration:windows; wsl task test:integration:linux; task ai:validate:windows; git diff --check; commits a36c2ba,4610fdd,1c3902c,91bd551,49a5e64 |
 | 2026-03-07 09:03 UTC | WIP-20260307-084440 | capturada | A rodada consolidou a necessidade de wrappers PowerShell dedicados para CLIs Python com flags sensiveis no Windows e reforcou a regra de manter .agents como fonte unica sem drift documental ou de workflow. | LA-009 | task ai:worklog:update:windows; task ai:validate:windows; task test:unit:powershell |
 | 2026-03-07 08:43 UTC | WIP-20260307-083916 | sem_nova_licao | A rodada aplicou regras de governanca e higiene ja existentes; nao surgiu licao nova alem do endurecimento operacional corrente do repo. | - | git check-ignore -v -n .agents/skills/dotfiles-bootstrap/SKILL.md .agents/cards/bootstrap-operador.md .agents/config.toml .codex/README.md .codex/skills/dotfiles-bootstrap/SKILL.md; git ls-files -ci --exclude-standard... |
