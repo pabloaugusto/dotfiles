@@ -1,6 +1,6 @@
 # AI WIP Tracker
 
-Atualizado em: 2026-03-07 09:17 UTC
+Atualizado em: 2026-03-07 09:28 UTC
 
 Fonte de verdade operacional para continuidade de tarefas dos agentes de IA.
 
@@ -20,7 +20,7 @@ Fonte de verdade operacional para continuidade de tarefas dos agentes de IA.
 <!-- ai-worklog:doing:start -->
 | ID | Tarefa | Branch | Responsavel | Inicio UTC | Ultima atualizacao UTC | Proximo passo | Bloqueios |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| WIP-20260307-090534 | Auditar o repo inteiro em busca de simplificacoes, codigo e arquivos desnecessarios, pontos de falha e melhorias de performance, resiliencia e manutencao | feat/test-harness-hybrid | ai-agent | 2026-03-07 09:05 UTC | 2026-03-07 09:17 UTC | Separar os pendentes em blocos coerentes de commit: governanca/IA, harnesses/bootstrap e simplificacao/higiene. | - |
+| (sem itens) | - | - | - | - | - | - | - |
 <!-- ai-worklog:doing:end -->
 
 ## Done
@@ -28,6 +28,7 @@ Fonte de verdade operacional para continuidade de tarefas dos agentes de IA.
 <!-- ai-worklog:done:start -->
 | ID | Tarefa | Branch | Responsavel | Inicio UTC | Concluido UTC | Resultado |
 | --- | --- | --- | --- | --- | --- | --- |
+| WIP-20260307-090534 | Auditar o repo inteiro em busca de simplificacoes, codigo e arquivos desnecessarios, pontos de falha e melhorias de performance, resiliencia e manutencao | feat/test-harness-hybrid | ai-agent | 2026-03-07 09:05 UTC | 2026-03-07 09:28 UTC | Auditoria de simplificacao concluida com commits checkpoint por contexto: harnesses reais de relink, reducao de drift estrutural, refresh de docs do repo e ajustes de workspace. / evidencias: task test:unit:powershell... |
 | WIP-20260307-084440 | Auditar o repo inteiro e atualizar a documentacao para refletir as funcionalidades atuais, incluindo README raiz com catalogo de funcionalidades | feat/test-harness-hybrid | ai-agent | 2026-03-07 08:44 UTC | 2026-03-07 09:03 UTC | Duplicacao estrutural consolidada: .agents como fonte canonica, .codex reduzido a README e arvore vazia removida; quality-foundation passou a reutilizar tasks oficiais; docs e R... / evidencias: python scripts/validat... |
 | WIP-20260307-083916 | Auditar .gitignore e corrigir exclusoes indevidas da camada .agents e demais ativos versionados | feat/test-harness-hybrid | ai-agent | 2026-03-07 08:39 UTC | 2026-03-07 08:43 UTC | Auditoria completa do .gitignore concluida; regra antiga que ocultava a arvore canonica .agents foi corrigida e entradas legadas de df/powershell/Modules, df/powershell/Scripts... / evidencias: git check-ignore -v -n... |
 | WIP-20260307-081800 | Revisar agentes e skills para aderencia total aos contratos, schemas e regras atualizadas | feat/test-harness-hybrid | ai-agent | 2026-03-07 08:18 UTC | 2026-03-07 08:38 UTC | Fonte canonica da camada de IA migrada para .agents com subpastas; .codex reduzido a README de compatibilidade; scripts, validator, docs e workflow ajustados para o novo contrato. / evidencias: python scripts/validate... |
@@ -46,9 +47,5 @@ Fonte de verdade operacional para continuidade de tarefas dos agentes de IA.
 <!-- ai-worklog:log:start -->
 | Data/Hora UTC | ID | Status | Resumo | Proximo passo | Bloqueios | Contexto | Notas |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| 2026-03-07 09:17 UTC | WIP-20260307-090534 | doing | Auditar o repo inteiro em busca de simplificacoes, codigo e arquivos desnecessarios, pontos de falha e melhorias de performance, resiliencia e manutencao | Inventariar hotspots por dominio e classificar em remocao segura, simplificacao segura e backlog arquitetural. | - | bootstrap,df,scripts,tests,.github,docs,.agents,Taskfile.yml,README.md | inicio da tarefa |
-| 2026-03-07 09:17 UTC | WIP-20260307-090534 | doing | Contexto operacional fixado: esta rodada deve usar sempre a worktree C:\Users\pablo\dotfiles-test-harness como fonte de verdade. Iniciando pacote de simplificacao segura: placeholder stubs, JSON valido para mcp.json e... | Aplicar ajustes de baixo risco e registrar backlog arquitetural para monolitos e legado historico. | - | bootstrap,df,docs,Taskfile.yml,ROADMAP | checkpoint incremental |
-| 2026-03-07 09:17 UTC | WIP-20260307-090534 | doing | Ajustes seguros aplicados: symlinks.ps1 virou wrapper para o fluxo canonico de relink, placeholders vazios passaram a ser stubs explicitos e mcp.json ficou um JSON valido. Sugestoes estruturais maiores foram registrad... | Rodar validacoes, revisar o roadmap atualizado e fechar a rodada com consolidado objetivo de oportunidades e riscos residuais. | - | bootstrap,df,docs,ROADMAP,LICOES-APRENDIDAS.md | checkpoint incremental |
-| 2026-03-07 09:17 UTC | WIP-20260307-090534 | doing | Enforcement de commit checkpoint entre rodadas implementado no ai:worklog:check, nos contratos de governanca e na skill de continuidade. Adicionadas regressões automatizadas para worktree dirty com e sem Doing ativo. | Validar ai:worklog:check, ai:validate e a suite Python; depois registrar a licao perene da nova regra. | - | scripts/ai-worklog.py,tests/python/ai_worklog_test.py,AGENTS.md,.agents/docs,Taskfile.yml | checkpoint incremental |
-| 2026-03-07 09:17 UTC | WIP-20260307-090534 | doing | A governanca de commit checkpoint entre rodadas foi endurecida no backend, nos contratos e na licao LA-010. O proximo passo e reorganizar o indice Git e fechar commits por contexto para reduzir o acúmulo atual de pend... | Separar os pendentes em blocos coerentes de commit: governanca/IA, harnesses/bootstrap e simplificacao/higiene. | - | scripts/ai-worklog.py,tests/python/ai_worklog_test.py,AGENTS.md,.agents,LICOES-APRENDIDAS.md,Taskfile.yml | checkpoint incremental |
+| (sem itens) | - | - | - | - | - | - | - |
 <!-- ai-worklog:log:end -->
