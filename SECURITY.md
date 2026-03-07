@@ -22,10 +22,10 @@ Guia de seguranca para operar e publicar este repositorio.
 - runtime env local cifrado em `~/.env.local.sops`
 - `SOPS_AGE_KEY` persistido no ambiente de usuario
 - SSH e assinatura Git via 1Password SSH Agent e `op-ssh-sign`
-- `.agents/` como camada declarativa versionavel; runtime local de assistentes
+- [`.agents/`](.agents/) como camada declarativa versionavel; runtime local de assistentes
   fica fora do Git
 - scanner de segredos canonico via `task security:secrets`, usando `gitleaks`
-  pinado por `config/tooling.releases.yaml`
+  pinado por [`config/tooling.releases.yaml`](config/tooling.releases.yaml)
 
 ## Checklist antes de push
 

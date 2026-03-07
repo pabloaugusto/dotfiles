@@ -6,8 +6,8 @@ Expandir a cobertura de testes, CI e harnesses do repo com foco em execucao dete
 
 ## Quando usar
 
-- mudancas em `tests/`
-- mudancas em `.github/workflows/`
+- mudancas em [`tests/`](tests/)
+- mudancas em [`.github/workflows/`](.github/workflows/)
 - mudancas em `Dockerfile` ou harnesses Linux
 - mudancas na estrategia de Pester, Bats, CI ou ambientes efemeros
 - mudancas em gates de governanca de IA, lessons, worklog ou validadores declarativos
@@ -30,7 +30,7 @@ Expandir a cobertura de testes, CI e harnesses do repo com foco em execucao dete
 
 ## Fluxo
 
-1. Ler `docs/test-strategy.md`.
+1. Ler [`docs/test-strategy.md`](docs/test-strategy.md).
 2. Ler a skill `$dotfiles-test-harness`.
 3. Separar a tarefa em unit, integration ou E2E protegido.
 4. Preferir isolamento por fixture e contexto injetavel.

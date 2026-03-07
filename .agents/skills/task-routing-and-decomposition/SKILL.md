@@ -11,9 +11,9 @@ Materializar intake, roteamento e delegacao com backend real e declarativo.
 
 ## Fluxo
 
-1. Ler `docs/AI-WIP-TRACKER.md`, `docs/ROADMAP.md` e `docs/AI-DELEGATION-FLOW.md`.
+1. Ler [`docs/AI-WIP-TRACKER.md`](docs/AI-WIP-TRACKER.md), [`docs/ROADMAP.md`](docs/ROADMAP.md) e [`docs/AI-DELEGATION-FLOW.md`](docs/AI-DELEGATION-FLOW.md).
 2. Rodar preflight de pendencias antes de iniciar nova demanda.
-3. Ler `.agents/orchestration/capability-matrix.yaml` e `.agents/orchestration/routing-policy.yaml`.
+3. Ler [`.agents/orchestration/capability-matrix.yaml`](.agents/orchestration/capability-matrix.yaml) e [`.agents/orchestration/routing-policy.yaml`](.agents/orchestration/routing-policy.yaml).
 4. Gerar `TaskCard` e `DelegationPlan` a partir dos agentes, skills e gates declarativos.
 5. Garantir que workflow, task e docs de catalogo continuem sincronizados.
 6. Encaminhar backlog residual para o roadmap quando nao entrar na rodada atual.
@@ -42,4 +42,4 @@ Materializar intake, roteamento e delegacao com backend real e declarativo.
 
 ## Referencias
 
-- `references/checklist.md`
+- [`references/checklist.md`](references/checklist.md)

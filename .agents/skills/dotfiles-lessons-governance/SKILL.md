@@ -1,17 +1,17 @@
 ---
 name: dotfiles-lessons-governance
-description: Governar o fluxo formal de LICOES-APRENDIDAS, revisoes por worklog, retroativos, curadoria de licoes e fechamento sem pendencias silenciosas. Use quando a tarefa tocar `LICOES-APRENDIDAS.md`, `scripts/ai-lessons.py`, `scripts/ai-worklog.py`, governanca de fechamento ou backfill de trabalho executado.
+description: Governar o fluxo formal de LICOES-APRENDIDAS, revisoes por worklog, retroativos, curadoria de licoes e fechamento sem pendencias silenciosas. Use quando a tarefa tocar [`LICOES-APRENDIDAS.md`](LICOES-APRENDIDAS.md), [`scripts/ai-lessons.py`](scripts/ai-lessons.py), [`scripts/ai-worklog.py`](scripts/ai-worklog.py), governanca de fechamento ou backfill de trabalho executado.
 ---
 
 # dotfiles-lessons-governance
 
 ## Objetivo
 
-Transformar `LICOES-APRENDIDAS.md` em contrato revisado a cada rodada.
+Transformar [`LICOES-APRENDIDAS.md`](LICOES-APRENDIDAS.md) em contrato revisado a cada rodada.
 
 ## Fluxo
 
-1. Ler `LICOES-APRENDIDAS.md`, `docs/AI-WIP-TRACKER.md` e `docs/ROADMAP.md`.
+1. Ler [`LICOES-APRENDIDAS.md`](LICOES-APRENDIDAS.md), [`docs/AI-WIP-TRACKER.md`](docs/AI-WIP-TRACKER.md) e [`docs/ROADMAP.md`](docs/ROADMAP.md).
 2. Determinar se a rodada gerou uma nova licao ou somente uma revisao `sem_nova_licao`.
 3. Registrar novas licoes antes do `done`, nunca depois.
 4. Garantir que cada worklog concluido tenha revisao associada.
@@ -37,4 +37,4 @@ Transformar `LICOES-APRENDIDAS.md` em contrato revisado a cada rodada.
 
 ## Referencias
 
-- `references/checklist.md`
+- [`references/checklist.md`](references/checklist.md)

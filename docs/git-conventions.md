@@ -146,7 +146,7 @@ O repo valida automaticamente:
 
 ## Hooks locais
 
-Os hooks em `.githooks/` aplicam:
+Os hooks em [`.githooks/`](.githooks/) aplicam:
 
 - injecao automatica de emoji semantico no commit local
 - validacao do subject no `commit-msg`

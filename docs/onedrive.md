@@ -4,7 +4,7 @@ Guia operacional do modelo de OneDrive aplicado no bootstrap Windows.
 
 Fluxo macro/orquestração do bootstrap (incluindo subfluxo OneDrive):
 
-- `./bootstrap-flow.md` (seção **"5) Subfluxo OneDrive (Windows)"**)
+- [`./bootstrap-flow.md`](./bootstrap-flow.md) (seção **"5) Subfluxo OneDrive (Windows)"**)
 
 ## 1) Campos de configuracao que controlam a linkagem
 
@@ -130,14 +130,14 @@ C:\Users\pablo\
 
 Origem em `C:\Users\<user>\...` para destino em `C:\Users\<user>\dotfiles\...`:
 
-- `.ssh`, `.assets`, `.editorconfig`
+- `.ssh`, `.assets`, [`.editorconfig`](.editorconfig)
 - `.gitconfig`, `.config\git`, `.gitconfig-windows`, `.gitconfig.local.sample`
 - `.bashrc`, `.bash_profile`, `.bashrc_profile`
 - `.config\winfetch`, `.oh-my-posh`
-- `.ssh\config.local` -> `df\ssh\config.windows`
+- `.ssh\config.local` -> [`df\ssh\config.windows`](df\ssh\config.windows)
 - `Documents\PowerShell\profile.ps1` e arquivos de modulo PowerShell (`env-vars.ps1`, `aliases.ps1`, etc.)
-- `%APPDATA%\Code\User` -> `df\vscode`
-- `Windows Terminal settings.json` -> `df\windows-terminal\settings.json` (quando caminho do app e detectado)
+- `%APPDATA%\Code\User` -> [`df\vscode`](df\vscode)
+- `Windows Terminal settings.json` -> [`df\windows-terminal\settings.json`](df\windows-terminal\settings.json) (quando caminho do app e detectado)
 
 ## 5) Exemplo alternativo (sem drive D:)
 

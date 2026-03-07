@@ -2,11 +2,11 @@
 
 ## Arquivos mais sensiveis
 
-- `bootstrap/bootstrap-config.ps1`
-- `bootstrap/bootstrap-windows.ps1`
-- `bootstrap/bootstrap-ubuntu-wsl.sh`
-- `bootstrap/user-config.yaml.tpl`
-- `Taskfile.yml`
+- [`bootstrap/bootstrap-config.ps1`](bootstrap/bootstrap-config.ps1)
+- [`bootstrap/bootstrap-windows.ps1`](bootstrap/bootstrap-windows.ps1)
+- [`bootstrap/bootstrap-ubuntu-wsl.sh`](bootstrap/bootstrap-ubuntu-wsl.sh)
+- [`bootstrap/user-config.yaml.tpl`](bootstrap/user-config.yaml.tpl)
+- [`Taskfile.yml`](Taskfile.yml)
 
 ## Invariantes
 

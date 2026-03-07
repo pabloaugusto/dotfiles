@@ -18,9 +18,9 @@ Garantir que o trabalho incremental de IA tenha rastreabilidade, retomada segura
 ## Entradas
 
 - mensagem acionavel do usuario
-- estado atual de `docs/AI-WIP-TRACKER.md`
-- estado atual de `LICOES-APRENDIDAS.md`
-- estado atual de `docs/ROADMAP.md` quando houver pendencias adiadas
+- estado atual de [`docs/AI-WIP-TRACKER.md`](docs/AI-WIP-TRACKER.md)
+- estado atual de [`LICOES-APRENDIDAS.md`](LICOES-APRENDIDAS.md)
+- estado atual de [`docs/ROADMAP.md`](docs/ROADMAP.md) quando houver pendencias adiadas
 - branch atual e contexto da demanda
 
 ## Saidas
@@ -31,13 +31,13 @@ Garantir que o trabalho incremental de IA tenha rastreabilidade, retomada segura
 
 ## Fluxo
 
-1. Ler `docs/AI-WIP-TRACKER.md`.
+1. Ler [`docs/AI-WIP-TRACKER.md`](docs/AI-WIP-TRACKER.md).
 2. Rodar `task ai:worklog:check`.
 3. Se houver pendencia, resolver com `concluir_primeiro` ou `roadmap_pendente`.
-4. Garantir que `roadmap_pendente` escreva em `docs/ROADMAP.md` e `docs/ROADMAP-DECISIONS.md`.
+4. Garantir que `roadmap_pendente` escreva em [`docs/ROADMAP.md`](docs/ROADMAP.md) e [`docs/ROADMAP-DECISIONS.md`](docs/ROADMAP-DECISIONS.md).
 5. Registrar ou atualizar a tarefa atual.
 6. Manter o item em `Doing` enquanto ainda houver execucao relevante em curso.
-7. Antes do `done`, revisar `LICOES-APRENDIDAS.md` e decidir `capturada` ou `sem_nova_licao`.
+7. Antes do `done`, revisar [`LICOES-APRENDIDAS.md`](LICOES-APRENDIDAS.md) e decidir `capturada` ou `sem_nova_licao`.
 8. Encerrar com `task ai:worklog:done` apenas imediatamente antes da resposta final.
 9. Se a rodada terminou e a worktree continuar dirty, exigir commit checkpoint antes de novo escopo.
 10. Validar `task ai:lessons:check` e `task ai:worklog:close:gate`.
@@ -48,7 +48,7 @@ Garantir que o trabalho incremental de IA tenha rastreabilidade, retomada segura
 - Nao ocultar pendencia fora do tracker.
 - Nao usar o roadmap como descarte silencioso; registrar sugestao e contexto.
 - Nao permitir drift entre tracker, roadmap e decisions log.
-- Nao permitir item em `Done` sem revisao correspondente em `LICOES-APRENDIDAS.md`.
+- Nao permitir item em `Done` sem revisao correspondente em [`LICOES-APRENDIDAS.md`](LICOES-APRENDIDAS.md).
 - Nao fechar `Doing` cedo demais so para "limpar" o tracker.
 - Nao permitir nova rodada com worktree suja quando nao houver item ativo em `Doing`.
 

@@ -4,8 +4,8 @@
 
 ## Implementações
 
-- PowerShell: `df/powershell/_functions.ps1` (`checkEnv`)
-- Bash: `df/bash/.inc/check-env.sh` (`checkEnv`)
+- PowerShell: [`df/powershell/_functions.ps1`](df/powershell/_functions.ps1) (`checkEnv`)
+- Bash: [`df/bash/.inc/check-env.sh`](df/bash/.inc/check-env.sh) (`checkEnv`)
 
 ## Objetivo
 
@@ -36,7 +36,7 @@ checkEnv
 1. binários essenciais (`op`, `gh`, `git`, `ssh`)
 2. binários de criptografia (`sops`, `age`)
 3. sessão 1Password (`op whoami`)
-4. leitura de refs em `df/secrets/secrets-ref.yaml`
+4. leitura de refs em [`df/secrets/secrets-ref.yaml`](df/secrets/secrets-ref.yaml)
 5. auth `gh` em `github.com` e `git_protocol=ssh`
 6. política Git de assinatura:
    - `gpg.format=ssh`
@@ -68,9 +68,9 @@ As implementações tentam reautenticar uma vez quando possível:
 
 ## Comportamento no bootstrap
 
-- Windows: `bootstrap/bootstrap-windows.ps1` roda `checkEnv` como gate final.
+- Windows: [`bootstrap/bootstrap-windows.ps1`](bootstrap/bootstrap-windows.ps1) roda `checkEnv` como gate final.
 - Windows: em seguida roda validação dedicada de OneDrive/links (`Test-OneDriveLayoutHealth`).
-- WSL: `bootstrap/bootstrap-ubuntu-wsl.sh` roda `checkEnv` como gate final.
+- WSL: [`bootstrap/bootstrap-ubuntu-wsl.sh`](bootstrap/bootstrap-ubuntu-wsl.sh) roda `checkEnv` como gate final.
 - Qualquer `FAIL` interrompe o bootstrap.
 
 ## Falhas comuns e correções

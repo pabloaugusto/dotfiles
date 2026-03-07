@@ -2,11 +2,11 @@
 
 ## Objetivo
 
-Manter `LICOES-APRENDIDAS.md` como contrato vivo, auditavel e sincronizado com o tracker de worklog, o roadmap e os gates de governanca.
+Manter [`LICOES-APRENDIDAS.md`](LICOES-APRENDIDAS.md) como contrato vivo, auditavel e sincronizado com o tracker de worklog, o roadmap e os gates de governanca.
 
 ## Quando usar
 
-- mudancas em `LICOES-APRENDIDAS.md`
+- mudancas em [`LICOES-APRENDIDAS.md`](LICOES-APRENDIDAS.md)
 - retroativas de trabalho executado
 - fechamento de worklog
 - revisao de governanca de continuidade, roadmap ou backlog
@@ -29,7 +29,7 @@ Manter `LICOES-APRENDIDAS.md` como contrato vivo, auditavel e sincronizado com o
 
 ## Fluxo
 
-1. Ler `LICOES-APRENDIDAS.md`, `docs/AI-WIP-TRACKER.md` e `docs/ROADMAP.md`.
+1. Ler [`LICOES-APRENDIDAS.md`](LICOES-APRENDIDAS.md), [`docs/AI-WIP-TRACKER.md`](docs/AI-WIP-TRACKER.md) e [`docs/ROADMAP.md`](docs/ROADMAP.md).
 2. Avaliar se a rodada produziu nova licao, regra, incidente ou workaround validado.
 3. Se houver nova licao, registrar no catalogo com evidencias e worklog relacionado.
 4. Registrar revisao explicita da rodada como `capturada` ou `sem_nova_licao`.

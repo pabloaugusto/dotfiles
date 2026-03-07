@@ -6,8 +6,8 @@ Implementar e validar mudancas em bootstrap, links, config de usuario e derivado
 
 ## Quando usar
 
-- mudancas em `bootstrap/`
-- ajustes em `bootstrap/user-config.yaml.tpl`
+- mudancas em [`bootstrap/`](bootstrap/)
+- ajustes em [`bootstrap/user-config.yaml.tpl`](bootstrap/user-config.yaml.tpl)
 - correcoes de links, relink, refresh ou refresh parcial
 - problemas de canonicalizacao de paths
 

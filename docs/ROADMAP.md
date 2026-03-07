@@ -8,7 +8,7 @@ Planejamento incremental para qualidade, testes, bootstrap e governanca do repo.
 ## Guardrails
 
 - Toda sugestao aceita deve gerar rastreabilidade no mesmo ciclo.
-- Pendencias mantidas devem aparecer em `docs/AI-WIP-TRACKER.md` e no roadmap.
+- Pendencias mantidas devem aparecer em [`docs/AI-WIP-TRACKER.md`](docs/AI-WIP-TRACKER.md) e no roadmap.
 - Priorizacao automatica ajuda a ordenar, mas a decisao final continua humana.
 
 ## Backlog Mestre
@@ -94,7 +94,7 @@ IDs pendentes: `SG-20260307-095316, SG-20260307-095305, SG-20260307-095254, SG-2
 - Adicionar hooks e policies de IA com presets de permissao por contexto, bloqueio de segredos e comandos destrutivos, e validacoes proporcionais ao risco. | notas=Inspirado em joshukraine/dotfiles e nos hooks/settings do Claude Code; fortalece seguranca operacional e reduz regressao silenciosa em ta...
 - Gerar adaptadores de assistentes e arquivos MCP a partir de uma fonte canonica unica em .agents, separando escopo global do usuario e escopo do repo. | notas=Inspirado em atxtechbro/dotfiles, basnijholt/dotfiles e na documentacao oficial do Claude Code; reduz drift entre Claude, Codex, Gemini e...
 - Criar tasks/CLIs ai:status, ai:diff, ai:sync e ai:backup para configs de IA materializadas no HOME, com fallback copy-vs-symlink por ferramenta. | notas=Inspirado em jppferguson/dotfiles e basnijholt/dotfiles; ajuda a preservar contratos ao trocar de assistente sem drift entre repo e HOME.
-- Consolidar ou arquivar o legado historico versionado que nao e fonte canonica, incluindo artefatos hoje ja movidos para `archive/` e outros scripts experimentais ou backups decla... | notas=Reduzir ruido conceitual, diminuir superficie de manutencao e deixar explicita a fronteira entre referencia historica e runtime canonico.
+- Consolidar ou arquivar o legado historico versionado que nao e fonte canonica, incluindo artefatos hoje ja movidos para [`archive/`](archive/) e outros scripts experimentais ou backups decla... | notas=Reduzir ruido conceitual, diminuir superficie de manutencao e deixar explicita a fronteira entre referencia historica e runtime canonico.
 <!-- roadmap:pending:end -->
 
 ## Riscos e bloqueios

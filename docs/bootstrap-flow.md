@@ -6,16 +6,16 @@ Documentacao visual e textual do fluxo atual de bootstrap, cobrindo etapas, deci
 
 Este documento cobre o processo end-to-end de:
 
-- `bootstrap/_start.ps1` (entrypoint no Windows);
-- `bootstrap/bootstrap-windows.ps1` (modos full e refresh);
-- `bootstrap/bootstrap-ubuntu-wsl.sh` (fluxo WSL);
+- [`bootstrap/_start.ps1`](bootstrap/_start.ps1) (entrypoint no Windows);
+- [`bootstrap/bootstrap-windows.ps1`](bootstrap/bootstrap-windows.ps1) (modos full e refresh);
+- [`bootstrap/bootstrap-ubuntu-wsl.sh`](bootstrap/bootstrap-ubuntu-wsl.sh) (fluxo WSL);
 - pre-requisito OneDrive (instalacao, setup inicial e migracao de root);
 - gates obrigatorios de conformidade (`checkEnv` e `Test-OneDriveLayoutHealth`).
 
 Limites atuais:
 
 - o menu mostra opcoes Linux/Mac no `_start.ps1`, mas o dispatch operacional real atual e focado em Windows;
-- no WSL o fluxo e executado pelo script dedicado `bootstrap/bootstrap-ubuntu-wsl.sh`.
+- no WSL o fluxo e executado pelo script dedicado [`bootstrap/bootstrap-ubuntu-wsl.sh`](bootstrap/bootstrap-ubuntu-wsl.sh).
 
 ## 2) Legenda e convencoes
 
@@ -30,7 +30,7 @@ Convencoes de label:
 - `OneDrive prereq`: etapa de pre-requisito OneDrive antes das linkagens dependentes.
 - `Refresh vs Full`: desvio de comportamento por modo.
 
-## 3) Fluxo macro (`bootstrap/_start.ps1`)
+## 3) Fluxo macro ([`bootstrap/_start.ps1`](bootstrap/_start.ps1))
 
 ```mermaid
 flowchart TD
@@ -58,9 +58,9 @@ flowchart TD
 
 Nota importante do modo `1` (Windows full):
 
-- apos o retorno de `bootstrap/bootstrap-windows.ps1`, o `_start.ps1` ainda executa ajustes adicionais (`Set-ComputerName`, regionalizacao/explorer) e reinicia o Explorer.
+- apos o retorno de [`bootstrap/bootstrap-windows.ps1`](bootstrap/bootstrap-windows.ps1), o `_start.ps1` ainda executa ajustes adicionais (`Set-ComputerName`, regionalizacao/explorer) e reinicia o Explorer.
 
-## 4) Subfluxo Windows (`bootstrap/bootstrap-windows.ps1`)
+## 4) Subfluxo Windows ([`bootstrap/bootstrap-windows.ps1`](bootstrap/bootstrap-windows.ps1))
 
 ```mermaid
 flowchart TD
@@ -151,7 +151,7 @@ Regras importantes:
 - migracao automatica e best-effort, com fallback de junction para reduzir risco de quebra;
 - sem `onedrive_enabled`, o bootstrap usa layout local e nao tenta etapa OneDrive.
 
-## 6) Subfluxo WSL (`bootstrap/bootstrap-ubuntu-wsl.sh`)
+## 6) Subfluxo WSL ([`bootstrap/bootstrap-ubuntu-wsl.sh`](bootstrap/bootstrap-ubuntu-wsl.sh))
 
 ```mermaid
 flowchart TD
@@ -205,6 +205,6 @@ flowchart LR
 
 Referencias relacionadas:
 
-- `bootstrap/README.md`
-- `docs/onedrive.md`
-- `docs/checkenv.md`
+- [`bootstrap/README.md`](bootstrap/README.md)
+- [`docs/onedrive.md`](docs/onedrive.md)
+- [`docs/checkenv.md`](docs/checkenv.md)

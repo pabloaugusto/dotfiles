@@ -12,7 +12,7 @@ Este guia descreve o modelo de segurança/autenticação usado pelos dotfiles.
 
 ## Refs de segredo
 
-Fonte canônica: `df/secrets/secrets-ref.yaml` (gerado do YAML central).
+Fonte canônica: [`df/secrets/secrets-ref.yaml`](df/secrets/secrets-ref.yaml) (gerado do YAML central).
 
 Refs principais:
 
@@ -23,7 +23,7 @@ Refs principais:
 
 ## Runtime env cifrado
 
-Template: `bootstrap/secrets/.env.local.tpl`
+Template: [`bootstrap/secrets/.env.local.tpl`](bootstrap/secrets/.env.local.tpl)
 
 Fluxo:
 
@@ -62,9 +62,9 @@ Estratégia:
 
 Arquivos:
 
-- `df/ssh/config`
-- `df/ssh/config.windows`
-- `df/ssh/config.unix`
+- [`df/ssh/config`](df/ssh/config)
+- [`df/ssh/config.windows`](df/ssh/config.windows)
+- [`df/ssh/config.unix`](df/ssh/config.unix)
 - `df/git/.gitconfig-*`
 
 Políticas:

@@ -1,6 +1,6 @@
 ---
 name: dotfiles-test-harness
-description: Projetar, implementar e validar testes, harnesses e CI/CD deste repo de dotfiles. Use quando a tarefa tocar `tests/`, `.github/workflows/`, `Dockerfile`, `Taskfile.yml`, Pester, Bats, containers Linux, runners Windows ou estrategia de qualidade.
+description: Projetar, implementar e validar testes, harnesses e CI/CD deste repo de dotfiles. Use quando a tarefa tocar [`tests/`](tests/), [`.github/workflows/`](.github/workflows/), `Dockerfile`, [`Taskfile.yml`](Taskfile.yml), Pester, Bats, containers Linux, runners Windows ou estrategia de qualidade.
 ---
 
 # Dotfiles Test Harness
@@ -11,8 +11,8 @@ Guiar a evolucao de testes e automacoes com foco em isolamento, custo baixo, evi
 
 ## Fluxo
 
-1. Ler `docs/test-strategy.md`.
-2. Ler `references/matriz.md` desta skill.
+1. Ler [`docs/test-strategy.md`](docs/test-strategy.md).
+2. Ler [`references/matriz.md`](references/matriz.md) desta skill.
 3. Classificar a tarefa em unit, integration, protected E2E ou local lab.
 4. Preferir contexto injetavel, fixture e isolamento do host.
 5. Reusar scripts, tasks e workflows antes de criar duplicacao.
@@ -43,4 +43,4 @@ Guiar a evolucao de testes e automacoes com foco em isolamento, custo baixo, evi
 
 ## Referencias
 
-- `references/matriz.md`
+- [`references/matriz.md`](references/matriz.md)

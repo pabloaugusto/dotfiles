@@ -15,18 +15,18 @@ Snapshot tecnico do estado atual do repositorio, com foco em:
 ## Melhorias ja consolidadas
 
 - CI ativo com workflows reais para IA, PR, qualidade e integracao do bootstrap
-- camada canonica de IA consolidada em `.agents/`
+- camada canonica de IA consolidada em [`.agents/`](.agents/)
 - paridade entre workflows, tasks e catalogos documentais
-- stack Python formalizada com `pyproject.toml`, `uv`, `ruff`, `ty`, `pytest`,
+- stack Python formalizada com [`pyproject.toml`](pyproject.toml), `uv`, `ruff`, `ty`, `pytest`,
   `pymarkdownlnt`, `yamllint`, `actionlint` e `gitleaks`
 - `.venv` segregada por plataforma para worktree compartilhada entre Windows e
   WSL
 - aliases centralizados por ambiente:
-  - `df/.aliases`
-  - `df/powershell/aliases.ps1`
-  - `df/git/.gitconfig-base`
+  - [`df/.aliases`](df/.aliases)
+  - [`df/powershell/aliases.ps1`](df/powershell/aliases.ps1)
+  - [`df/git/.gitconfig-base`](df/git/.gitconfig-base)
 - harnesses reais de integracao para `relink` em Linux e Windows
-- historico, backups e snapshots deslocados para `archive/` quando nao sao
+- historico, backups e snapshots deslocados para [`archive/`](archive/) quando nao sao
   fonte canonica
 
 ## Achados abertos
@@ -34,7 +34,7 @@ Snapshot tecnico do estado atual do repositorio, com foco em:
 ### Critico
 
 1. **Politica Git global insegura (`safe.directory = *`)**
-   - Evidencia: `df/git/.gitconfig`
+   - Evidencia: [`df/git/.gitconfig`](df/git/.gitconfig)
    - Impacto: desativa protecao de ownership suspeito para qualquer diretorio.
    - Recomendacao: restringir `safe.directory` a paths necessarios.
    - Esforco: **Baixo**
@@ -42,19 +42,19 @@ Snapshot tecnico do estado atual do repositorio, com foco em:
 ### Alto
 
 1. **Menu do `_start.ps1` ainda expoe Linux/Mac sem dispatch real**
-   - Evidencia: `docs/bootstrap-flow.md` e `bootstrap/_start.ps1`
+   - Evidencia: [`docs/bootstrap-flow.md`](docs/bootstrap-flow.md) e [`bootstrap/_start.ps1`](bootstrap/_start.ps1)
    - Impacto: UX ambigua e expectativa incorreta no entrypoint Windows.
    - Recomendacao: ocultar opcoes nao suportadas ou implementar dispatch real.
    - Esforco: **Baixo**
 
 2. **Scripts legados de suporte ainda usam comandos quebrados**
-   - Evidencia: `bootstrap/scripts/post-win-install-script.ps1`
+   - Evidencia: [`bootstrap/scripts/post-win-install-script.ps1`](bootstrap/scripts/post-win-install-script.ps1)
    - Impacto: reutilizacao manual pode falhar silenciosamente.
    - Recomendacao: corrigir ou marcar explicitamente como legado.
    - Esforco: **Baixo**
 
 3. **Catalogo de software Windows ainda tem ruido e fragilidade**
-   - Evidencia: `bootstrap/software-list.ps1`
+   - Evidencia: [`bootstrap/software-list.ps1`](bootstrap/software-list.ps1)
    - Exemplos:
      - duplicacao de instalacao de pacotes de auth
      - ID `Microsoft.OpenSSH.Preview ` com espaco final
@@ -65,31 +65,31 @@ Snapshot tecnico do estado atual do repositorio, com foco em:
 ### Medio
 
 1. **Plugin do `op` no Bash pode alterar comandos esperados**
-   - Evidencia: `df/bash/.bashrc`
+   - Evidencia: [`df/bash/.bashrc`](df/bash/.bashrc)
    - Impacto: wrappers podem interferir em `gh`, `ssh` e `checkEnv`.
    - Recomendacao: condicionar por flag ou normalizar chamadas com `command`.
    - Esforco: **Baixo**
 
 2. **Instalacao apt ainda usa heuristica fragil**
-   - Evidencia: `df/bash/.inc/_functions.sh`
+   - Evidencia: [`df/bash/.inc/_functions.sh`](df/bash/.inc/_functions.sh)
    - Impacto: falso positivo ou falso negativo ao decidir install vs upgrade.
    - Recomendacao: usar `dpkg -s` ou `apt-cache policy`.
    - Esforco: **Medio**
 
 3. **`checkEnv` Bash ainda usa temporarios previsiveis em partes do fluxo**
-   - Evidencia: `df/bash/.inc/check-env.sh`
+   - Evidencia: [`df/bash/.inc/check-env.sh`](df/bash/.inc/check-env.sh)
    - Impacto: risco de colisao em execucoes concorrentes.
    - Recomendacao: padronizar `mktemp` para todos os artefatos temporarios.
    - Esforco: **Baixo**
 
 4. **Decrypt de `.env.local.sops` em toda abertura de shell**
-   - Evidencia: `df/bash/.bashrc`, `df/bash/.profile`
+   - Evidencia: [`df/bash/.bashrc`](df/bash/.bashrc), [`df/bash/.profile`](df/bash/.profile)
    - Impacto: overhead de startup e criacao recorrente de temporarios.
    - Recomendacao: cache de sessao com TTL ou execucao sob demanda.
    - Esforco: **Medio**
 
 5. **Scripts legados ainda precisam de marcacao mais explicita**
-   - Evidencia: `bootstrap/symlinks.ps1` e `bootstrap/scripts/*`
+   - Evidencia: [`bootstrap/symlinks.ps1`](bootstrap/symlinks.ps1) e `bootstrap/scripts/*`
    - Impacto: arquivos antigos podem parecer caminhos ativos para quem entra no
      repo pela primeira vez.
    - Recomendacao: reforcar a fronteira entre caminho canonico e legado.
@@ -111,7 +111,7 @@ Snapshot tecnico do estado atual do repositorio, com foco em:
    - Esforco: **Baixo**
 
 3. **Spellcheck versionado ainda nao entrou no gate canonico**
-   - Evidencia: `.cspell.json`, `scripts/run-cspell.py`, `Taskfile.yml`
+   - Evidencia: [`.cspell.json`](.cspell.json), [`scripts/run-cspell.py`](scripts/run-cspell.py), [`Taskfile.yml`](Taskfile.yml)
    - Impacto: existe task dedicada, mas a camada PT-BR/EN ainda gera ruido alto
      demais para entrar em `ci:quality`.
    - Recomendacao: curar o dicionario tecnico e reduzir falsos positivos antes
@@ -122,8 +122,8 @@ Snapshot tecnico do estado atual do repositorio, com foco em:
 
 - CI desabilitado por workflows `.ignore`: resolvido
 - duplicacao dos aliases Git entre `.gitconfig` e `.gitconfig-base`: resolvida
-- backups e snapshots ativos fora de `archive/`: resolvido em grande parte
-- fixtures dentro de `df/`: resolvido
+- backups e snapshots ativos fora de [`archive/`](archive/): resolvido em grande parte
+- fixtures dentro de [`df/`](df/): resolvido
 - stack Python sem contrato e sem lockfile: resolvido
 - validacao de docs, YAML, workflows e segredos sem baseline canonico: resolvido
 
@@ -131,7 +131,7 @@ Snapshot tecnico do estado atual do repositorio, com foco em:
 
 1. Endurecer seguranca Git restringindo `safe.directory`.
 2. Corrigir ou aposentar scripts legados de bootstrap Windows.
-3. Modularizar `bootstrap/software-list.ps1`.
+3. Modularizar [`bootstrap/software-list.ps1`](bootstrap/software-list.ps1).
 4. Reduzir ambiguidade do `_start.ps1` e do menu parcial Windows/Linux/Mac.
 5. Curar o dicionario do `cspell` para promover spellcheck ao gate canonico.
 6. Otimizar shell startup em torno de `.env.local.sops` e plugins do `op`.

@@ -6,11 +6,11 @@ Guia operacional dos scripts de bootstrap para Windows e Ubuntu WSL.
 
 Scripts principais:
 
-- `bootstrap/_start.ps1`: menu e entrypoint do Windows host.
-- `bootstrap/bootstrap-windows.ps1`: fluxo Windows (`full`, `refresh`,
+- [`bootstrap/_start.ps1`](bootstrap/_start.ps1): menu e entrypoint do Windows host.
+- [`bootstrap/bootstrap-windows.ps1`](bootstrap/bootstrap-windows.ps1): fluxo Windows (`full`, `refresh`,
   `relink`).
-- `bootstrap/bootstrap-ubuntu-wsl.sh`: fluxo Ubuntu WSL (`full`, `relink`).
-- `bootstrap/bootstrap-config.ps1`: parser, wizard e sincronismo da config.
+- [`bootstrap/bootstrap-ubuntu-wsl.sh`](bootstrap/bootstrap-ubuntu-wsl.sh): fluxo Ubuntu WSL (`full`, `relink`).
+- [`bootstrap/bootstrap-config.ps1`](bootstrap/bootstrap-config.ps1): parser, wizard e sincronismo da config.
 
 Tasks oficiais:
 
@@ -25,7 +25,7 @@ Tasks oficiais:
 
 O diagrama decisorio completo do bootstrap fica em:
 
-- `../docs/bootstrap-flow.md`
+- [`../docs/bootstrap-flow.md`](../docs/bootstrap-flow.md)
 
 Este README resume o fluxo operacional e os contratos principais.
 
@@ -33,7 +33,7 @@ Este README resume o fluxo operacional e os contratos principais.
 
 Arquivos:
 
-- `bootstrap/user-config.yaml.tpl`: template versionado
+- [`bootstrap/user-config.yaml.tpl`](bootstrap/user-config.yaml.tpl): template versionado
 - `bootstrap/user-config.yaml`: arquivo local ignorado
 
 O YAML define:
@@ -49,8 +49,8 @@ O YAML define:
 
 Quando o YAML e validado ou regenerado, o bootstrap sincroniza:
 
-- `df/secrets/secrets-ref.yaml`
-- `bootstrap/secrets/.env.local.tpl`
+- [`df/secrets/secrets-ref.yaml`](df/secrets/secrets-ref.yaml)
+- [`bootstrap/secrets/.env.local.tpl`](bootstrap/secrets/.env.local.tpl)
 - `df/git/.gitconfig.local` local e nao versionado
 
 ## Fluxo Windows full

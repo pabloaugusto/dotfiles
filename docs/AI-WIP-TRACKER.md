@@ -1,6 +1,6 @@
 # AI WIP Tracker
 
-Atualizado em: 2026-03-07 11:46 UTC
+Atualizado em: 2026-03-07 12:44 UTC
 
 Fonte de verdade operacional para continuidade de tarefas dos agentes de IA.
 
@@ -28,6 +28,7 @@ Fonte de verdade operacional para continuidade de tarefas dos agentes de IA.
 <!-- ai-worklog:done:start -->
 | ID | Tarefa | Branch | Responsavel | Inicio UTC | Concluido UTC | Resultado |
 | --- | --- | --- | --- | --- | --- | --- |
+| WIP-20260307-DOC-LINKING | Endurecer a regra de linkagem interna em docs/comentarios e eliminar citacoes de arquivos do repo sem link quando viavel | feat/test-harness-hybrid | ai-agent | 2026-03-07 12:18 UTC | 2026-03-07 12:44 UTC | Regra documental endurecida para exigir links internos viaveis, Curador Repo assumido como autoridade de linkagem, validate_docs.py ampliado para cobrar referencias internas sem... / evidencias: task docs:check:window... |
 | WIP-20260307-QUALITY-IMPORTS | Importar camada de qualidade | feat/test-harness-hybrid | ai-agent | 2026-03-07 10:49 UTC | 2026-03-07 11:46 UTC | Camada de qualidade cross-repo importada com pyproject/uv, .venv por plataforma, ruff, ty, pytest, pymarkdownlnt, yamllint, actionlint, gitleaks, validacao documental e docs cen... / evidencias: task ci:workflow:sync:... |
 | WIP-20260307-DOCS-ATUALIZACAO | Auditar e atualizar a documentacao do repo para refletir as funcionalidades atuais, com README raiz servindo como catalogo confiavel do projeto. | feat/test-harness-hybrid | ai-agent | 2026-03-07 10:38 UTC | 2026-03-07 10:47 UTC | A documentacao central do repo foi auditada e atualizada para refletir o estado funcional atual: README raiz virou catalogo operacional do projeto, docs/README organizou a leitu... / evidencias: task ai:validate:windo... |
 | WIP-20260307-ALIASES-CANONICOS | Centralizar aliases por ambiente nos arquivos principais e reorganizar a estrutura dos arquivos de aliases e Git configs para ficarem mais claros e canonicos | feat/test-harness-hybrid | ai-agent | 2026-03-07 10:25 UTC | 2026-03-07 10:36 UTC | Aliases por ambiente foram centralizados nos arquivos canonicos: df/.aliases concentra o shell Unix, df/powershell/aliases.ps1 concentra o PowerShell e df/git/.gitconfig-base vi... / evidencias: bash -n em df/.aliases... |

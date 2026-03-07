@@ -19,8 +19,8 @@ Orquestrar intake, roteamento, decomposicao e delegacao de trabalho de IA com ba
 
 - mensagem acionavel
 - paths ou areas tocadas
-- estado atual de `docs/AI-WIP-TRACKER.md`
-- estado atual de `docs/ROADMAP.md`
+- estado atual de [`docs/AI-WIP-TRACKER.md`](docs/AI-WIP-TRACKER.md)
+- estado atual de [`docs/ROADMAP.md`](docs/ROADMAP.md)
 
 ## Saidas
 

@@ -20,12 +20,12 @@ task test:unit:python:windows
 
 ## Regresses que devem falhar
 
-- worklog concluido sem revisao em `LICOES-APRENDIDAS.md`
+- worklog concluido sem revisao em [`LICOES-APRENDIDAS.md`](LICOES-APRENDIDAS.md)
 - ausencia de catalogos, orchestration, rules ou evals declarativos
-- drift entre `.agents/`, `docs/` e a ponte legada em `.codex/README.md`
+- drift entre [`.agents/`](.agents/), [`docs/`](docs/) e a ponte legada em [`.codex/README.md`](.codex/README.md)
 - falta dos gates obrigatorios de arquitetura e integracoes criticas
 - datasets de roteamento ou governanca sem cobertura executavel
-- drift entre workflows, Taskfile e catalogos `docs/TASKS.md` e `docs/WORKFLOWS.md`
+- drift entre workflows, Taskfile e catalogos [`docs/TASKS.md`](docs/TASKS.md) e [`docs/WORKFLOWS.md`](docs/WORKFLOWS.md)
 
 ## Regras perenes
 

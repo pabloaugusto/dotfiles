@@ -15,7 +15,7 @@ Catalogo humano dos papeis permanentes de IA deste repo.
 | Papel | Cartao | Agente declarativo | Skill principal | Quando entra |
 | --- | --- | --- | --- | --- |
 | Bootstrap Operador | [`.agents/cards/bootstrap-operador.md`](../.agents/cards/bootstrap-operador.md) | `bootstrap-operator` | `$dotfiles-bootstrap` | bootstrap, relink, config e links |
-| Curador Repo | [`.agents/cards/curador-repo.md`](../.agents/cards/curador-repo.md) | `repo-governance-authority` | `$dotfiles-repo-governance` | contratos, naming, docs, IA e governanca |
+| Curador Repo | [`.agents/cards/curador-repo.md`](../.agents/cards/curador-repo.md) | `repo-governance-authority` | `$dotfiles-repo-governance` | contratos, naming, docs, IA, governanca e higiene de linkagem interna |
 | Governador Continuidade WIP | [`.agents/cards/governador-continuidade-wip.md`](../.agents/cards/governador-continuidade-wip.md) | `execution-worklog-governance-owner` | `$wip-continuity-governance` | worklog, roadmap, doing/done e fechamento |
 | Engenheiro Qualidade | [`.agents/cards/engenheiro-qualidade.md`](../.agents/cards/engenheiro-qualidade.md) | suporte ao `repo-governance-authority` | `$dotfiles-test-harness` | testes, CI, harnesses e quality gates |
 | Arquiteto Modernizacao | [`.agents/cards/arquiteto-modernizacao.md`](../.agents/cards/arquiteto-modernizacao.md) | `architecture-modernization-authority` | `$dotfiles-architecture-modernization` | gate paralelo de arquitetura, simplificacao, performance e monitoramento continuo de WIP/backlog |

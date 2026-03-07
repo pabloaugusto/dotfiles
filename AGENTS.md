@@ -7,12 +7,12 @@ Manter este repo de dotfiles confiavel, testavel e reproduzivel em Windows host 
 ## Escopo e precedencia
 
 - Este arquivo define as regras permanentes de trabalho da IA neste repo.
-- `LICOES-APRENDIDAS.md` complementa o contrato com memoria normativa incremental.
+- [`LICOES-APRENDIDAS.md`](LICOES-APRENDIDAS.md) complementa o contrato com memoria normativa incremental.
 - Em caso de conflito:
   1. politicas da plataforma e do sistema
   2. instrucoes explicitas do usuario na sessao atual
-  3. este `AGENTS.md`
-  4. `LICOES-APRENDIDAS.md`
+  3. este [`AGENTS.md`](AGENTS.md)
+  4. [`LICOES-APRENDIDAS.md`](LICOES-APRENDIDAS.md)
 
 ## Idioma
 
@@ -21,24 +21,24 @@ Manter este repo de dotfiles confiavel, testavel e reproduzivel em Windows host 
 
 ## Leitura minima antes de editar
 
-1. `CONTEXT.md`
-2. `docs/test-strategy.md`
-3. `docs/ai-operating-model.md`
-4. `docs/AI-WIP-TRACKER.md`
-5. `LICOES-APRENDIDAS.md`
-6. `docs/bootstrap-flow.md` quando a tarefa tocar bootstrap
-7. `Taskfile.yml`
+1. [`CONTEXT.md`](CONTEXT.md)
+2. [`docs/test-strategy.md`](docs/test-strategy.md)
+3. [`docs/ai-operating-model.md`](docs/ai-operating-model.md)
+4. [`docs/AI-WIP-TRACKER.md`](docs/AI-WIP-TRACKER.md)
+5. [`LICOES-APRENDIDAS.md`](LICOES-APRENDIDAS.md)
+6. [`docs/bootstrap-flow.md`](docs/bootstrap-flow.md) quando a tarefa tocar bootstrap
+7. [`Taskfile.yml`](Taskfile.yml)
 
 ## Skills locais
 
-- `.agents/skills/dotfiles-bootstrap`
-- `.agents/skills/dotfiles-architecture-modernization`
-- `.agents/skills/dotfiles-critical-integrations`
-- `.agents/skills/dotfiles-lessons-governance`
-- `.agents/skills/task-routing-and-decomposition`
-- `.agents/skills/dotfiles-test-harness`
-- `.agents/skills/dotfiles-repo-governance`
-- `.agents/skills/wip-continuity-governance`
+- [`.agents/skills/dotfiles-bootstrap`](.agents/skills/dotfiles-bootstrap)
+- [`.agents/skills/dotfiles-architecture-modernization`](.agents/skills/dotfiles-architecture-modernization)
+- [`.agents/skills/dotfiles-critical-integrations`](.agents/skills/dotfiles-critical-integrations)
+- [`.agents/skills/dotfiles-lessons-governance`](.agents/skills/dotfiles-lessons-governance)
+- [`.agents/skills/task-routing-and-decomposition`](.agents/skills/task-routing-and-decomposition)
+- [`.agents/skills/dotfiles-test-harness`](.agents/skills/dotfiles-test-harness)
+- [`.agents/skills/dotfiles-repo-governance`](.agents/skills/dotfiles-repo-governance)
+- [`.agents/skills/wip-continuity-governance`](.agents/skills/wip-continuity-governance)
 
 Leia a skill mais proxima do escopo antes de editar arquivos relevantes.
 
@@ -53,7 +53,7 @@ Leia a skill mais proxima do escopo antes de editar arquivos relevantes.
 - Qualquer importacao ou adaptacao cross-repo exige auditoria estrutural exaustiva antes de editar:
   contratos globais, docs, tasks, scripts, workflows, hooks, validadores, testes,
   agentes, skills, orquestracao, regras, evals e relacoes entre esses elementos.
-- Toda auditoria cross-repo deve deixar rastreabilidade versionada em `docs/AI-SOURCE-AUDIT.md`
+- Toda auditoria cross-repo deve deixar rastreabilidade versionada em [`docs/AI-SOURCE-AUDIT.md`](docs/AI-SOURCE-AUDIT.md)
   antes de importar regras, logicas ou ativos declarativos.
 - Quando houver fonte externa, agir com barra de qualidade de engenheiro/arquiteto senior:
   sem trabalho parcial, sem "copiar so o que parece importante" e sem pular validacao disponivel.
@@ -66,14 +66,19 @@ Leia a skill mais proxima do escopo antes de editar arquivos relevantes.
   imediatamente antes da resposta final ao usuario.
 - Ao concluir uma rodada e permanecerem mudancas locais coerentes, criar commit checkpoint
   antes de iniciar novo escopo; `task ai:worklog:check` deve bloquear worktree suja sem `Doing` ativo.
-- Nenhum `done` e valido sem revisar `LICOES-APRENDIDAS.md` e registrar explicitamente
+- Nenhum `done` e valido sem revisar [`LICOES-APRENDIDAS.md`](LICOES-APRENDIDAS.md) e registrar explicitamente
   `capturada` ou `sem_nova_licao`.
 - Branches devem seguir `<type>/<slug>` e nao usar emoji.
 - Commit e PR title devem seguir `emoji + conventional commit` com maximo recomendado de 72 caracteres.
 - Cada branch deve carregar um unico contexto coerente; separar assuntos independentes em branches diferentes.
-- `docs/AI-WIP-TRACKER.md` e a fonte de verdade do trabalho incremental de IA.
+- [`docs/AI-WIP-TRACKER.md`](docs/AI-WIP-TRACKER.md) e a fonte de verdade do trabalho incremental de IA.
+- Em documentacao e comentarios que suportem links clicaveis, toda citacao
+  viavel a arquivo, pasta, task, workflow ou script do repo deve usar link
+  explicito para o alvo, nao apenas texto solto ou inline code.
+- Mudancas em documentacao, catalogos e comentarios Markdown devem passar pelo
+  `Curador Repo`, que e o responsavel por higiene documental e linkagem interna.
 - Nao versionar runtime local de IA: `.gemini/`, sessoes, auth, caches, browser profiles e historico.
-- No repo, `.codex/` e apenas ponte de compatibilidade e deve conter so `README.md`.
+- No repo, [`.codex/`](.codex/) e apenas ponte de compatibilidade e deve conter so [`README.md`](README.md).
 - Se um artefato de IA for declarativo, portavel e sem segredo, mover a fonte canonica para o repo e materializar no `HOME` via bootstrap, link ou copia controlada.
 
 ## Fluxo operacional minimo

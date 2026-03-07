@@ -8,7 +8,7 @@ Garantir que ferramentas e fluxos de missao critica do workstation e da automaca
 
 - mudancas em bootstrap, auth, secrets, sync ou CI
 - ajustes em `gh`, `op`, `sops`, `age`, `ssh-agent`, assinatura Git ou `checkEnv`
-- qualquer alteracao em `bootstrap/`, `df/`, `Taskfile.yml`, `.github/workflows/` ou scripts de ambiente
+- qualquer alteracao em [`bootstrap/`](bootstrap/), [`df/`](df/), [`Taskfile.yml`](Taskfile.yml), [`.github/workflows/`](.github/workflows/) ou scripts de ambiente
 
 ## Skill principal
 

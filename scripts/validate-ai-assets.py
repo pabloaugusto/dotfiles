@@ -132,13 +132,13 @@ AGENTS_REQUIRED_SNIPPETS = [
     "Nunca operar por amostragem",
     "docs/AI-SOURCE-AUDIT.md",
     "Manter o item ativo em `Doing` durante toda a execucao relevante",
-    "Nenhum `done` e valido sem revisar `LICOES-APRENDIDAS.md`",
+    "Nenhum `done` e valido sem revisar",
     "Acionar os gates paralelos obrigatorios de arquitetura/modernizacao",
 ]
 
 OPERATING_MODEL_REQUIRED_SNIPPETS = [
     "### 5. Auditoria exaustiva antes de reuso cross-repo",
-    "### Fronteira entre `.agents/` e adaptadores de assistente",
+    "### Fronteira entre",
     "### Camada 2.1. Registry declarativo do repo",
     "### Camada 2.2. Orquestracao, rules e evals",
 ]
@@ -156,7 +156,7 @@ SOURCE_AUDIT_REQUIRED_SNIPPETS = [
     "## Inventario consolidado por dominio",
     "## Gaps no repo atual",
     "## Decisoes de importacao",
-    "## Fronteira entre `.agents` canonico e `.codex` legado",
+    "## Fronteira entre",
     "## Regra operacional permanente",
 ]
 

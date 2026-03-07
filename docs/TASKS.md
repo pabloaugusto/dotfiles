@@ -4,7 +4,7 @@ Referencia operacional das tasks canonicas mais importantes do repositorio.
 
 ## Como usar este catalogo
 
-- Este documento nao tenta listar cada alias do `Taskfile.yml`.
+- Este documento nao tenta listar cada alias do [`Taskfile.yml`](Taskfile.yml).
 - O foco aqui sao as entradas que estruturam bootstrap, operacao diaria,
   qualidade, testes, PR e governanca de IA.
 - Toda task usada por workflow ativo precisa aparecer aqui.
@@ -123,7 +123,7 @@ Referencia operacional das tasks canonicas mais importantes do repositorio.
 ### `ai:lessons:check:linux`
 
 - Funcionalidade: falha se houver worklog concluido sem revisao em
-  `LICOES-APRENDIDAS.md`.
+  [`LICOES-APRENDIDAS.md`](LICOES-APRENDIDAS.md).
 - Uso manual: `task ai:lessons:check:linux`
 
 ### `ci:ai:check:linux`
@@ -140,7 +140,7 @@ Referencia operacional das tasks canonicas mais importantes do repositorio.
 
 ### `lint:python:windows`
 
-- Funcionalidade: executa `ruff check` em `scripts/`, `tests/python` e hooks
+- Funcionalidade: executa `ruff check` em [`scripts/`](scripts/), [`tests/python`](tests/python) e hooks
   Python no Windows.
 - Uso manual: `task lint:python:windows`
 
@@ -212,7 +212,7 @@ Referencia operacional das tasks canonicas mais importantes do repositorio.
 ### `ci:workflow:sync:check`
 
 - Funcionalidade: valida sincronismo entre workflows, Taskfile e catalogos
-  `docs/TASKS.md` e `docs/WORKFLOWS.md`.
+  [`docs/TASKS.md`](docs/TASKS.md) e [`docs/WORKFLOWS.md`](docs/WORKFLOWS.md).
 - Uso manual: `task ci:workflow:sync:check`
 
 ### `ci:quality:linux`

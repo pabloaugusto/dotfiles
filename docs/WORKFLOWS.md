@@ -8,7 +8,7 @@ acionadas por cada um.
 - Objetivo: validar a camada declarativa de IA, tracker, licoes, smoke eval e
   sincronismo documental quando arquivos de governanca mudarem.
 - Trigger: `pull_request` e `push` com filtro de paths para arquivos de IA,
-  catalogos, validadores, testes e `Taskfile.yml`.
+  catalogos, validadores, testes e [`Taskfile.yml`](Taskfile.yml).
 - Plataforma: `ubuntu-latest`
 - Tasks: `ci:ai:check:linux`, `test:unit:python:linux`
 
@@ -48,6 +48,6 @@ acionadas por cada um.
 - Workflows nao devem repetir listas manuais de gates quando ja existir task
   canonica correspondente.
 - Toda mudanca em workflow precisa manter paridade com:
-  - `Taskfile.yml`
-  - `docs/TASKS.md`
+  - [`Taskfile.yml`](Taskfile.yml)
+  - [`docs/TASKS.md`](docs/TASKS.md)
   - este arquivo

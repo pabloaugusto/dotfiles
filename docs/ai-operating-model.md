@@ -14,7 +14,7 @@ Criar uma camada local de IA que seja:
 
 ### 1. Instrucoes claras e curtas
 
-As instrucoes base devem ser pequenas, diretas e estaveis. O papel de `AGENTS.md` e alinhar linguagem, guardrails e fontes de verdade; os detalhes operacionais ficam nas skills e referencias.
+As instrucoes base devem ser pequenas, diretas e estaveis. O papel de [`AGENTS.md`](AGENTS.md) e alinhar linguagem, guardrails e fontes de verdade; os detalhes operacionais ficam nas skills e referencias.
 
 ### 2. Especializacao por escopo
 
@@ -27,6 +27,13 @@ Prompts, skills e fluxos de agentes devem ser tratados como codigo: versao, revi
 ### 4. Automacao reutilizavel
 
 A automacao deve morar em scripts, tasks e workflows reutilizaveis. Isso reduz duplicacao e facilita evoluir CI/CD sem espalhar logica em varios pontos.
+
+### 4.1. Referencias internas sempre linkadas quando o formato permitir
+
+Em Markdown e comentarios com suporte a links clicaveis, referencias internas a
+arquivos, pastas, tasks, workflows e scripts do repo devem apontar para o alvo
+explicitamente. Texto solto ou apenas inline code abre espaco para drift, quebra
+de navegacao e documentacao menos auditavel.
 
 ### 5. Auditoria exaustiva antes de reuso cross-repo
 
@@ -50,29 +57,29 @@ Sem essa auditoria, o risco e alto de trazer governanca quebrada, testes incompl
 
 ### Camada 1. Contrato global
 
-- `AGENTS.md`
-- `LICOES-APRENDIDAS.md`
-- `CONTEXT.md`
-- `docs/test-strategy.md`
-- `docs/ai-operating-model.md`
-- `docs/AI-WIP-TRACKER.md`
-- `docs/ROADMAP.md`
-- `docs/ROADMAP-DECISIONS.md`
+- [`AGENTS.md`](AGENTS.md)
+- [`LICOES-APRENDIDAS.md`](LICOES-APRENDIDAS.md)
+- [`CONTEXT.md`](CONTEXT.md)
+- [`docs/test-strategy.md`](docs/test-strategy.md)
+- [`docs/ai-operating-model.md`](docs/ai-operating-model.md)
+- [`docs/AI-WIP-TRACKER.md`](docs/AI-WIP-TRACKER.md)
+- [`docs/ROADMAP.md`](docs/ROADMAP.md)
+- [`docs/ROADMAP-DECISIONS.md`](docs/ROADMAP-DECISIONS.md)
 
 ### Camada 2. Skills do repo
 
-As skills ficam em `.agents/skills/` e seguem o contrato:
+As skills ficam em [`.agents/skills/`](.agents/skills/) e seguem o contrato:
 
 - `SKILL.md` curto e acionavel
 - `agents/openai.yaml` com metadata reutilizavel
 - `references/` para detalhes que nao precisam poluir o prompt principal
 
-Prompt packs versionados tambem devem viver em `.agents/prompts/`, inclusive
+Prompt packs versionados tambem devem viver em [`.agents/prompts/`](.agents/prompts/), inclusive
 material historico, pesquisas e pacotes de contexto usados em auditorias.
 
 ### Camada 2.1. Registry declarativo do repo
 
-Os agentes tipados ficam em `.agents/registry/` e definem:
+Os agentes tipados ficam em [`.agents/registry/`](.agents/registry/) e definem:
 
 - `id` estavel do papel
 - `purpose` e `triggers`
@@ -84,13 +91,13 @@ Os agentes tipados ficam em `.agents/registry/` e definem:
 
 Para evitar roteamento implcito e drift entre docs e execucao, o repo tambem versiona:
 
-- `.agents/orchestration/` para capability matrix, routing policy e schemas
-- `.agents/rules/` para guardrails declarativos de operacao e CI
-- `.agents/evals/` para cenarios e datasets minimos de regressao
+- [`.agents/orchestration/`](.agents/orchestration/) para capability matrix, routing policy e schemas
+- [`.agents/rules/`](.agents/rules/) para guardrails declarativos de operacao e CI
+- [`.agents/evals/`](.agents/evals/) para cenarios e datasets minimos de regressao
 
 ### Camada 3. Cartoes de agentes
 
-Os papeis operacionais ficam em `.agents/cards/`. Cada cartao define:
+Os papeis operacionais ficam em [`.agents/cards/`](.agents/cards/). Cada cartao define:
 
 - objetivo
 - quando usar
@@ -102,26 +109,26 @@ Os papeis operacionais ficam em `.agents/cards/`. Cada cartao define:
 
 Esses cartoes funcionam como prompt-base para subagentes humanos ou de IA.
 
-### Fronteira entre `.agents/` e adaptadores de assistente
+### Fronteira entre [`.agents/`](.agents/) e adaptadores de assistente
 
 Para evitar ambiguidades e drift:
 
-- `.agents/` e a fonte canonica de contratos, skills, registry, orchestration, rules e evals
-- `.codex/` no repo guarda apenas um `README.md` de compatibilidade apontando para `.agents/`
-- adaptadores especificos de assistente devem ser gerados a partir de `.agents/`, nunca mantidos manualmente em paralelo
+- [`.agents/`](.agents/) e a fonte canonica de contratos, skills, registry, orchestration, rules e evals
+- [`.codex/`](.codex/) no repo guarda apenas um [`README.md`](README.md) de compatibilidade apontando para [`.agents/`](.agents/)
+- adaptadores especificos de assistente devem ser gerados a partir de [`.agents/`](.agents/), nunca mantidos manualmente em paralelo
 - runtime local de IA continua fora do Git
 
 ### Camada 4. Validacao
 
-`scripts/validate-ai-assets.ps1` valida:
+[`scripts/validate-ai-assets.ps1`](scripts/validate-ai-assets.ps1) valida:
 
 - frontmatter das skills
 - metadata dos agentes
-- estrutura minima de `.agents/cards/`
-- estrutura minima de `.agents/registry/`
-- presenca de `.agents/config.toml`
-- presenca de `.agents/README.md`
-- presenca de `.codex/README.md`
+- estrutura minima de [`.agents/cards/`](.agents/cards/)
+- estrutura minima de [`.agents/registry/`](.agents/registry/)
+- presenca de [`.agents/config.toml`](.agents/config.toml)
+- presenca de [`.agents/README.md`](.agents/README.md)
+- presenca de [`.codex/README.md`](.codex/README.md)
 - presenca de orchestration, rules e evals
 - estrutura minima dos cartoes
 - presenca dos docs estruturais de WIP
@@ -129,6 +136,13 @@ Para evitar ambiguidades e drift:
 - presenca do inventario versionado de auditoria cross-repo
 - coerencia minima do contrato de auditoria exaustiva
 - ausencia de placeholders e `TODO`
+
+[`scripts/validate_docs.py`](scripts/validate_docs.py) valida:
+
+- links locais quebrados
+- referencias internas do repo sem link explicito nos Markdown governados
+- cobertura da camada documental ativa do repo, incluindo `README`, [`docs/`](docs/),
+  [`LICOES-APRENDIDAS.md`](LICOES-APRENDIDAS.md) e [`.agents/`](.agents/) ativos
 
 ### Camada 5. Automacao
 
@@ -153,10 +167,10 @@ proxima rodada deve ser bloqueada ate existir commit do contexto anterior.
 
 Os catalogos humanos versionados ficam em:
 
-- `docs/AI-AGENTS-CATALOG.md`
-- `docs/AI-SKILLS-CATALOG.md`
-- `docs/AI-DELEGATION-FLOW.md`
-- `docs/AI-GOVERNANCE-AND-REGRESSION.md`
+- [`docs/AI-AGENTS-CATALOG.md`](docs/AI-AGENTS-CATALOG.md)
+- [`docs/AI-SKILLS-CATALOG.md`](docs/AI-SKILLS-CATALOG.md)
+- [`docs/AI-DELEGATION-FLOW.md`](docs/AI-DELEGATION-FLOW.md)
+- [`docs/AI-GOVERNANCE-AND-REGRESSION.md`](docs/AI-GOVERNANCE-AND-REGRESSION.md)
 
 Esses documentos nao sao "marketing" do sistema; eles sao contratos de operacao e precisam refletir o estado real da camada declarativa.
 
@@ -164,13 +178,13 @@ Esses documentos nao sao "marketing" do sistema; eles sao contratos de operacao 
 
 ### Versionar
 
-- `AGENTS.md`
-- `LICOES-APRENDIDAS.md`
+- [`AGENTS.md`](AGENTS.md)
+- [`LICOES-APRENDIDAS.md`](LICOES-APRENDIDAS.md)
 - `.agents/**`
-- `docs/AI-SOURCE-AUDIT.md`
-- `docs/AI-WIP-TRACKER.md`
-- `docs/ROADMAP.md`
-- `docs/ROADMAP-DECISIONS.md`
+- [`docs/AI-SOURCE-AUDIT.md`](docs/AI-SOURCE-AUDIT.md)
+- [`docs/AI-WIP-TRACKER.md`](docs/AI-WIP-TRACKER.md)
+- [`docs/ROADMAP.md`](docs/ROADMAP.md)
+- [`docs/ROADMAP-DECISIONS.md`](docs/ROADMAP-DECISIONS.md)
 - prompts e docs declarativos do repo
 - templates estaveis que precisem ser materializados pelo bootstrap
 
@@ -180,7 +194,7 @@ Esses documentos nao sao "marketing" do sistema; eles sao contratos de operacao 
 - sessoes, historico, caches, bancos sqlite e memoria local
 - perfis de navegador
 - tokens, auth, cookies, state files e configuracoes geradas por login
-- artefatos locais de ferramentas fora da arvore canonica `.agents/`
+- artefatos locais de ferramentas fora da arvore canonica [`.agents/`](.agents/)
 
 ## Decisao sobre `~/.gemini`
 
@@ -195,25 +209,25 @@ Isso torna a pasta inadequada como fonte de verdade do repo. O que faz sentido v
 
 ## Estrutura no repo
 
-Como `df/` guarda apenas o que sera utilizado na maquina apos o bootstrap, os artefatos de governanca do projeto ficam fora dele. Neste repo:
+Como [`df/`](df/) guarda apenas o que sera utilizado na maquina apos o bootstrap, os artefatos de governanca do projeto ficam fora dele. Neste repo:
 
-- `AGENTS.md` define o contrato global do projeto
-- `.agents/cards/` guarda cartoes versionados de agentes
-- `.agents/skills/` guarda skills versionadas do projeto
-- `.agents/prompts/` guarda prompt packs versionados e historico de contexto
-- `.agents/registry/`, `.agents/orchestration/`, `.agents/rules/` e `.agents/evals/` guardam a camada declarativa
-- `.codex/README.md` deixa explicito que adaptadores de assistente nao sao fonte de verdade
-- `docs/AI-WIP-TRACKER.md` guarda o estado incremental do trabalho de IA
-- `df/` continua reservado aos dotfiles e assets materializados no ambiente
+- [`AGENTS.md`](AGENTS.md) define o contrato global do projeto
+- [`.agents/cards/`](.agents/cards/) guarda cartoes versionados de agentes
+- [`.agents/skills/`](.agents/skills/) guarda skills versionadas do projeto
+- [`.agents/prompts/`](.agents/prompts/) guarda prompt packs versionados e historico de contexto
+- [`.agents/registry/`](.agents/registry/), [`.agents/orchestration/`](.agents/orchestration/), [`.agents/rules/`](.agents/rules/) e [`.agents/evals/`](.agents/evals/) guardam a camada declarativa
+- [`.codex/README.md`](.codex/README.md) deixa explicito que adaptadores de assistente nao sao fonte de verdade
+- [`docs/AI-WIP-TRACKER.md`](docs/AI-WIP-TRACKER.md) guarda o estado incremental do trabalho de IA
+- [`df/`](df/) continua reservado aos dotfiles e assets materializados no ambiente
 
 ## Estrategia de evolucao
 
-1. Manter `AGENTS.md` curto.
+1. Manter [`AGENTS.md`](AGENTS.md) curto.
 2. Criar skills pequenas e especializadas.
 3. Acionar gates paralelos de arquitetura/modernizacao e integracoes criticas nas analises substantivas.
 4. Empurrar detalhes para `references/`.
 5. Validar mudancas em CI.
-6. Tratar `LICOES-APRENDIDAS.md` como contrato revisado a cada fechamento de worklog.
+6. Tratar [`LICOES-APRENDIDAS.md`](LICOES-APRENDIDAS.md) como contrato revisado a cada fechamento de worklog.
 7. Reusar workflows e tasks sempre que possivel.
 8. Auditar exaustivamente antes de importar governanca de outro repo.
 

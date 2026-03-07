@@ -2,12 +2,12 @@
 
 ## Pipeline canonico
 
-1. Ler `AGENTS.md`, `LICOES-APRENDIDAS.md` e contexto minimo do repo.
-2. Rodar preflight de pendencias em `docs/AI-WIP-TRACKER.md`.
-3. Se houver importacao cross-repo, concluir auditoria estrutural e registrar o delta em `docs/AI-SOURCE-AUDIT.md`.
+1. Ler [`AGENTS.md`](AGENTS.md), [`LICOES-APRENDIDAS.md`](LICOES-APRENDIDAS.md) e contexto minimo do repo.
+2. Rodar preflight de pendencias em [`docs/AI-WIP-TRACKER.md`](docs/AI-WIP-TRACKER.md).
+3. Se houver importacao cross-repo, concluir auditoria estrutural e registrar o delta em [`docs/AI-SOURCE-AUDIT.md`](docs/AI-SOURCE-AUDIT.md).
 4. Acionar `repo-governance-authority`.
 5. Acionar `execution-worklog-governance-owner`.
-6. Acionar `architecture-modernization-authority` em paralelo, sempre lendo e monitorando `docs/AI-WIP-TRACKER.md`, `docs/ROADMAP.md`, `docs/ROADMAP-DECISIONS.md` e demais registradores vivos de backlog/pendencias.
+6. Acionar `architecture-modernization-authority` em paralelo, sempre lendo e monitorando [`docs/AI-WIP-TRACKER.md`](docs/AI-WIP-TRACKER.md), [`docs/ROADMAP.md`](docs/ROADMAP.md), [`docs/ROADMAP-DECISIONS.md`](docs/ROADMAP-DECISIONS.md) e demais registradores vivos de backlog/pendencias.
 7. Se a tarefa pedir triagem, decomposicao ou plano de delegacao, acionar `orchestrator` com `$task-routing-and-decomposition`.
 8. Se o escopo tocar bootstrap, auth, secrets, CI, sync, CLI ou ambiente, acionar `critical-integrations-guardian`.
 9. Se o escopo tocar `LICOES-APRENDIDAS`, fechamento de rodada ou retroativo, acionar `lessons-governance-curator`.
@@ -17,12 +17,12 @@
 ## Roteamento por escopo
 
 - `bootstrap/**`, `df/**` -> `bootstrap-operator`
-- `AGENTS.md`, `.agents/**`, `.codex/README.md`, `docs/**` -> `repo-governance-authority`
-- `docs/AI-WIP-TRACKER.md`, `docs/ROADMAP*.md`, `scripts/ai-worklog.py` -> `execution-worklog-governance-owner`
+- [`AGENTS.md`](AGENTS.md), `.agents/**`, [`.codex/README.md`](.codex/README.md), `docs/**` -> `repo-governance-authority`
+- [`docs/AI-WIP-TRACKER.md`](docs/AI-WIP-TRACKER.md), `docs/ROADMAP*.md`, [`scripts/ai-worklog.py`](scripts/ai-worklog.py) -> `execution-worklog-governance-owner`
 - triagem, intake, decomposicao, delegacao -> `orchestrator`
 - qualquer analise substantiva -> `architecture-modernization-authority`
 - auth, secrets, `gh`, `op`, `sops`, `age`, `ssh-agent`, CI, sync, signing -> `critical-integrations-guardian`
-- `LICOES-APRENDIDAS.md`, `scripts/ai-lessons.py`, retroativos -> `lessons-governance-curator`
+- [`LICOES-APRENDIDAS.md`](LICOES-APRENDIDAS.md), [`scripts/ai-lessons.py`](scripts/ai-lessons.py), retroativos -> `lessons-governance-curator`
 
 ## Gatilhos obrigatorios
 
@@ -34,11 +34,11 @@
 
 ## Artefatos declarativos
 
-- `.agents/config.toml`
+- [`.agents/config.toml`](.agents/config.toml)
 - `.agents/registry/*.toml`
 - `.agents/orchestration/*`
 - `.agents/rules/*`
 - `.agents/evals/*`
-- `docs/AI-AGENTS-CATALOG.md`
-- `docs/AI-SKILLS-CATALOG.md`
-- `docs/AI-GOVERNANCE-AND-REGRESSION.md`
+- [`docs/AI-AGENTS-CATALOG.md`](docs/AI-AGENTS-CATALOG.md)
+- [`docs/AI-SKILLS-CATALOG.md`](docs/AI-SKILLS-CATALOG.md)
+- [`docs/AI-GOVERNANCE-AND-REGRESSION.md`](docs/AI-GOVERNANCE-AND-REGRESSION.md)

@@ -11,7 +11,7 @@ Atuar como guardiao das integracoes de missao critica do repo.
 
 ## Fluxo
 
-1. Ler `AGENTS.md`, `LICOES-APRENDIDAS.md`, `CONTEXT.md` e `docs/AI-DELEGATION-FLOW.md`.
+1. Ler [`AGENTS.md`](AGENTS.md), [`LICOES-APRENDIDAS.md`](LICOES-APRENDIDAS.md), [`CONTEXT.md`](CONTEXT.md) e [`docs/AI-DELEGATION-FLOW.md`](docs/AI-DELEGATION-FLOW.md).
 2. Identificar quais ferramentas ou fluxos criticos entram no raio da mudanca.
 3. Confirmar contratos de paths canonicos, secrets, auth, signing e tasks de validacao.
 4. Proteger fluxos seguros ja existentes e evitar degradacao silenciosa.
@@ -38,4 +38,4 @@ Atuar como guardiao das integracoes de missao critica do repo.
 
 ## Referencias
 
-- `references/checklist.md`
+- [`references/checklist.md`](references/checklist.md)

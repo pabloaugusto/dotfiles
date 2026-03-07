@@ -1,6 +1,6 @@
 ---
 name: dotfiles-bootstrap
-description: Diagnosticar, ajustar e validar bootstrap, user-config, links canonicos, refresh/relink e derivados deste repo de dotfiles. Use quando a tarefa tocar `bootstrap/`, `Taskfile.yml`, `bootstrap/user-config.yaml(.tpl)`, symlinks, junctions, canonicalizacao de paths ou paridade Windows/WSL.
+description: Diagnosticar, ajustar e validar bootstrap, user-config, links canonicos, refresh/relink e derivados deste repo de dotfiles. Use quando a tarefa tocar [`bootstrap/`](bootstrap/), [`Taskfile.yml`](Taskfile.yml), `bootstrap/user-config.yaml(.tpl)`, symlinks, junctions, canonicalizacao de paths ou paridade Windows/WSL.
 ---
 
 # Dotfiles Bootstrap
@@ -11,13 +11,13 @@ Guiar mudancas no bootstrap sem perder previsibilidade, idempotencia e paridade 
 
 ## Fluxo
 
-1. Ler `CONTEXT.md`, `docs/bootstrap-flow.md` e `docs/config-reference.md`.
-2. Ler `references/checklist.md` desta skill quando a tarefa tocar layout, config ou links.
+1. Ler [`CONTEXT.md`](CONTEXT.md), [`docs/bootstrap-flow.md`](docs/bootstrap-flow.md) e [`docs/config-reference.md`](docs/config-reference.md).
+2. Ler [`references/checklist.md`](references/checklist.md) desta skill quando a tarefa tocar layout, config ou links.
 3. Identificar se a mudanca afeta Windows, WSL ou ambos.
 4. Preservar caminhos absolutos canonicos como fonte de verdade.
 5. Quando mudar contrato de config, manter em paridade:
-   - `bootstrap/user-config.yaml.tpl`
-   - `bootstrap/bootstrap-config.ps1`
+   - [`bootstrap/user-config.yaml.tpl`](bootstrap/user-config.yaml.tpl)
+   - [`bootstrap/bootstrap-config.ps1`](bootstrap/bootstrap-config.ps1)
    - documentacao relevante
 6. Validar com tasks, lints e testes aderentes ao escopo.
 
@@ -47,4 +47,4 @@ Guiar mudancas no bootstrap sem perder previsibilidade, idempotencia e paridade 
 
 ## Referencias
 
-- `references/checklist.md`
+- [`references/checklist.md`](references/checklist.md)

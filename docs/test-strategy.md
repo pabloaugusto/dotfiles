@@ -139,7 +139,7 @@ Estado atual desta worktree:
 - integration Linux: harness de relink em container com Bats
 - integration Windows: harness de relink em runner Windows real com perfil temporario
 - AI routing/delegation: backend Python declarativo com smoke eval e gate de sincronismo workflow-task-doc
-- quality stack Python: `uv`, `pyproject.toml`, `uv.lock`, `ruff`, `ty`,
+- quality stack Python: `uv`, [`pyproject.toml`](pyproject.toml), [`uv.lock`](uv.lock), `ruff`, `ty`,
   `pytest`, `pymarkdownlnt`, `yamllint`, `actionlint` e `gitleaks`
 - worktree compartilhada Windows/WSL: `.venv/windows` e `.venv/linux` para
   evitar colisao entre runtimes

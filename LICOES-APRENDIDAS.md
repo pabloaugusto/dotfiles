@@ -5,9 +5,9 @@ Historico incremental das regras operacionais que nao devem depender de memoria 
 ## Leitura obrigatoria
 
 - A cada novo comando do usuario, a IA deve ler:
-  - `AGENTS.md`
-  - `LICOES-APRENDIDAS.md`
-- Em caso de conflito entre regra normativa e licao operacional, prevalece o `AGENTS.md`.
+  - [`AGENTS.md`](AGENTS.md)
+  - [`LICOES-APRENDIDAS.md`](LICOES-APRENDIDAS.md)
+- Em caso de conflito entre regra normativa e licao operacional, prevalece o [`AGENTS.md`](AGENTS.md).
 
 ## Criterio de registro de novas licoes
 
@@ -27,7 +27,7 @@ Historico incremental das regras operacionais que nao devem depender de memoria 
 ## Curadoria e manutencao
 
 - Evitar duplicacoes; consolidar licoes equivalentes.
-- Promover para `AGENTS.md` apenas regras estaveis e amplas.
+- Promover para [`AGENTS.md`](AGENTS.md) apenas regras estaveis e amplas.
 - Manter aqui os detalhes operacionais e a memoria incremental das rodadas.
 
 ## Catalogo de licoes
@@ -38,15 +38,15 @@ Historico incremental das regras operacionais que nao devem depender de memoria 
 - Contexto: importar governanca, agentes, skills, workflows ou contratos de outros repos por amostragem gerou lacunas e drift.
 - Regra: qualquer reuso cross-repo deve comecar por auditoria estrutural exaustiva dos dominios relevantes.
 - Solucao validada: cobrir contratos globais, docs, tasks, scripts, workflows, hooks, validadores, testes, agentes, skills, orquestracao, regras, evals e relacoes entre esses elementos antes de editar.
-- Prevencao: registrar o inventario e o gap analysis em `docs/AI-SOURCE-AUDIT.md` antes da importacao.
+- Prevencao: registrar o inventario e o gap analysis em [`docs/AI-SOURCE-AUDIT.md`](docs/AI-SOURCE-AUDIT.md) antes da importacao.
 - Validacao: `task ai:validate`, revisao do inventario versionado e rastreabilidade dos ativos importados.
 
-## LA-002 - `.agents` e a fonte canonica; `.codex` e apenas ponte legada
+## LA-002 - [`.agents`](.agents) e a fonte canonica; [`.codex`](.codex) e apenas ponte legada
 
 - Contexto: fontes diferentes usam camadas distintas como origem declarativa; sem fronteira explicita, a estrutura fica ambigua.
-- Regra: neste repo, `.agents/` concentra cartoes, skills, registry, orchestration, rules, evals e config; `.codex/` deve conter somente um `README.md` de compatibilidade.
-- Solucao validada: estruturar `.agents/` com subpastas e migrar toda a camada declarativa para la, deixando `.codex/README.md` apontar para a fonte canonica.
-- Prevencao: nao permitir contratos declarativos manuais em `.codex/` nem duplicar a mesma regra em duas arvores.
+- Regra: neste repo, [`.agents/`](.agents/) concentra cartoes, skills, registry, orchestration, rules, evals e config; [`.codex/`](.codex/) deve conter somente um [`README.md`](README.md) de compatibilidade.
+- Solucao validada: estruturar [`.agents/`](.agents/) com subpastas e migrar toda a camada declarativa para la, deixando [`.codex/README.md`](.codex/README.md) apontar para a fonte canonica.
+- Prevencao: nao permitir contratos declarativos manuais em [`.codex/`](.codex/) nem duplicar a mesma regra em duas arvores.
 - Validacao: `task ai:validate` deve falhar em caso de drift estrutural ou ausencia de artefatos obrigatorios.
 
 ## LA-003 - `Doing` deve permanecer vivo ate o fechamento real da rodada
@@ -60,8 +60,8 @@ Historico incremental das regras operacionais que nao devem depender de memoria 
 ## LA-004 - Toda finalizacao de worklog exige revisao explicita de licoes
 
 - Contexto: o repo passou a ter tracker e roadmap, mas ainda permitia fechar uma rodada sem avaliar se havia aprendizado novo.
-- Regra: nenhum worklog pode ser encerrado sem registrar uma revisao explicita em `LICOES-APRENDIDAS.md`, com decisao `capturada` ou `sem_nova_licao`.
-- Solucao validada: integrar `scripts/ai-lessons.py` ao `scripts/ai-worklog.py`, registrar revisao no momento do `done` e bloquear o fechamento global se algum item concluido estiver sem revisao.
+- Regra: nenhum worklog pode ser encerrado sem registrar uma revisao explicita em [`LICOES-APRENDIDAS.md`](LICOES-APRENDIDAS.md), com decisao `capturada` ou `sem_nova_licao`.
+- Solucao validada: integrar [`scripts/ai-lessons.py`](scripts/ai-lessons.py) ao [`scripts/ai-worklog.py`](scripts/ai-worklog.py), registrar revisao no momento do `done` e bloquear o fechamento global se algum item concluido estiver sem revisao.
 - Prevencao: exigir `task ai:lessons:check` em CI e no gate local de governanca.
 - Validacao: `task ai:lessons:check`, `task ai:worklog:close:gate`.
 
@@ -70,7 +70,7 @@ Historico incremental das regras operacionais que nao devem depender de memoria 
 - Contexto: transportar apenas licoes aprendidas ou apenas snippets isolados produz governanca parcial e desconexa.
 - Regra: a adaptacao deve considerar todas as camadas uteis ainda ausentes aqui, incluindo agentes, skills, catalogos, rules, orchestration, evals, validadores, workflows, docs e gates.
 - Solucao validada: auditar `py-bootstrap`, `cr-automations` e `iageny` por dominio, comparar com o estado atual e importar os ativos compatveis com a arquitetura de dotfiles.
-- Prevencao: documentar em `docs/AI-SOURCE-AUDIT.md` o que foi adotado agora, o que foi adaptado e o que ficou de fora com justificativa.
+- Prevencao: documentar em [`docs/AI-SOURCE-AUDIT.md`](docs/AI-SOURCE-AUDIT.md) o que foi adotado agora, o que foi adaptado e o que ficou de fora com justificativa.
 - Validacao: revisao do gap map e `task ai:validate`.
 
 ## LA-006 - Arquitetura e modernizacao precisam de um gate paralelo permanente
@@ -79,7 +79,7 @@ Historico incremental das regras operacionais que nao devem depender de memoria 
 - Regra: toda analise substantiva deve passar por um agente especializado em arquitetura, refactor, performance, simplificacao, resiliencia e testabilidade, atuando em paralelo ao fluxo principal.
 - Solucao validada: manter um agente e skill dedicados para catalogar melhorias, apontar gaps, identificar drifts e retroalimentar backlog/roadmap.
 - Prevencao: registrar os proximos passos e riscos estruturais no roadmap em vez de deixar insights presos no chat.
-- Validacao: revisar `docs/AI-DELEGATION-FLOW.md`, `docs/AI-AGENTS-CATALOG.md` e os gates da camada canonica `.agents/`.
+- Validacao: revisar [`docs/AI-DELEGATION-FLOW.md`](docs/AI-DELEGATION-FLOW.md), [`docs/AI-AGENTS-CATALOG.md`](docs/AI-AGENTS-CATALOG.md) e os gates da camada canonica [`.agents/`](.agents/).
 
 ## LA-007 - Integracoes criticas exigem guardiao proprio
 
@@ -151,7 +151,7 @@ Historico incremental das regras operacionais que nao devem depender de memoria 
 
 - Contexto: Ao importar `uv` e a stack Python de qualidade, uma `.venv` unica na worktree passou a conflitar entre Windows host e WSL, contaminando binarios, shebangs e resolucao de executaveis.
 - Regra: Neste repo, toda virtualenv compartilhada pela mesma worktree deve ser segregada por plataforma quando Windows e WSL operarem sobre a mesma arvore.
-- Solucao validada: Padronizar `.venv/windows` e `.venv/linux`, expor isso no `Taskfile.yml` via `UV_PROJECT_ENVIRONMENT` e ajustar os wrappers `invoke-python.ps1` e `python-runtime.sh`.
+- Solucao validada: Padronizar `.venv/windows` e `.venv/linux`, expor isso no [`Taskfile.yml`](Taskfile.yml) via `UV_PROJECT_ENVIRONMENT` e ajustar os wrappers `invoke-python.ps1` e `python-runtime.sh`.
 - Prevencao: Toda nova automacao Python ou task de ambiente deve assumir caminhos de venv por plataforma e nunca depender implicitamente de uma `.venv` unica na raiz.
 - Validacao: task install:dev:windows; task install:dev:linux; task ci:quality:windows; wsl task ci:quality:linux
 - Worklog relacionado: `WIP-20260307-QUALITY-IMPORTS`
@@ -162,10 +162,20 @@ Historico incremental das regras operacionais que nao devem depender de memoria 
 - Contexto: A importacao de `ty` sobre uma base de scripts historicos mostrou que tentar tipar tudo de uma vez gera muito ruido, retrabalho e risco de travar a rodada sem ganho proporcional.
 - Regra: Em repos maduros e heterogeneos, type checking deve entrar por escopo pequeno, validado e com fronteira declarada, expandindo apenas depois que a base anterior estabilizar.
 - Solucao validada: Aplicar `ty` primeiro na camada nova de qualidade importada (`release_tool`, `validate_docs`, wrappers e testes associados), mantendo o restante fora do gate ate haver refactor suficiente.
-- Prevencao: Toda nova ampliacao do escopo de type checking deve ser explicitada em `pyproject.toml`, `Taskfile.yml` e nos catalogos de docs, em vez de crescer de forma acidental.
+- Prevencao: Toda nova ampliacao do escopo de type checking deve ser explicitada em [`pyproject.toml`](pyproject.toml), [`Taskfile.yml`](Taskfile.yml) e nos catalogos de docs, em vez de crescer de forma acidental.
 - Validacao: task type:check:windows; wsl task type:check:linux; task ci:quality:windows
 - Worklog relacionado: `WIP-20260307-QUALITY-IMPORTS`
 - Fontes relacionadas: py-bootstrap, cr-automations, iageny
+
+## LA-016 - Citacoes internas viaveis em Markdown devem ser links, nao texto solto
+
+- Contexto: O repo passou a citar muitos arquivos, pastas, tasks e workflows apenas em inline code, o que piora navegacao, revisao e auditoria documental.
+- Regra: Em documentacao e comentarios com suporte a links clicaveis, toda citacao viavel a um alvo interno do repo deve usar link explicito para esse alvo.
+- Solucao validada: Tornar o `Curador Repo` responsavel por essa higiene, endurecer `validate_docs.py` para cobrar referencias internas sem link nos Markdown governados e executar sweep dos docs ativos.
+- Prevencao: Toda nova rodada que tocar docs, catalogos, agentes ou comentarios Markdown deve fechar com `task docs:check` e com referencias internas navegaveis.
+- Validacao: task docs:check:windows; task docs:check:linux; task ai:validate:windows
+- Worklog relacionado: `WIP-20260307-DOC-LINKING`
+- Fontes relacionadas: dotfiles-test-harness
 <!-- ai-lessons:catalog:end -->
 
 ## Revisoes de rodadas
@@ -175,6 +185,7 @@ Toda finalizacao de worklog deve registrar se houve nova licao.
 <!-- ai-lessons:reviews:start -->
 | Data/Hora UTC | Worklog ID | Decisao | Resumo | Licoes | Evidencia |
 | --- | --- | --- | --- | --- | --- |
+| 2026-03-07 12:44 UTC | WIP-20260307-DOC-LINKING | capturada | A rodada consolidou que referencias internas viaveis em Markdown nao devem ficar soltas em inline code; elas precisam ser links explicitos e validados automaticamente. | LA-016 | AGENTS.md, docs/ai-operating-model.md, .agents/cards/curador-repo.md, scripts/validate_docs.py e o sweep dos Markdown governados foram atualizados e validados em Windows e Linux. |
 | 2026-03-07 11:46 UTC | WIP-20260307-QUALITY-IMPORTS | capturada | A rodada consolidou a necessidade de .venv por plataforma em worktree compartilhada Windows/WSL e de adotar type checking por fatias controladas em repo maduro. | LA-014, LA-015 | Taskfile.yml, scripts/invoke-python.ps1, scripts/python-runtime.sh, pyproject.toml e gates ci:quality validos em Windows e Linux. |
 | 2026-03-07 10:47 UTC | WIP-20260307-DOCS-ATUALIZACAO | capturada | A rodada consolidou a regra de que README raiz e docs centrais devem funcionar como catalogos vivos do estado real do repo, e nao como snapshots antigos ou parciais. | LA-013 | LICOES-APRENDIDAS.md atualizado com LA-013; docs centrais reescritos e validadores do repo passando |
 | 2026-03-07 10:36 UTC | WIP-20260307-ALIASES-CANONICOS | sem_nova_licao | A rodada consolidou uma regra ja vigente do repo: loaders devem apenas carregar fontes canonicas. Nenhuma licao perene nova precisou ser adicionada. | - | bash -n em df/.aliases e df/bash/.bashrc, carga real do aliases.ps1 em pwsh e powershell, zsh -n no df/zsh/.zshrc, source do df/.aliases no WSL, parser de alias do Git em df/git/.gitconfig-base, ausencia de [alias] em... |
