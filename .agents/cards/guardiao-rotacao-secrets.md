@@ -17,8 +17,8 @@ de troca, rollback objetivo e validacao pos-rotacao.
 - qualquer demanda que possa bloquear bootstrap, assinatura Git, acesso a repos
   ou leitura de secrets de runtime
 - qualquer bug de ACL, ownership, `StrictModes` ou drift em
-  [`C:\Users\pablo\.ssh\config`](C:\Users\pablo\.ssh\config) e nos configs em
-  [`df/ssh/`](df/ssh/) que possa quebrar o operador `ssh`
+  `C:\Users\pablo\.ssh\config` e nos configs em [`df/ssh/`](df/ssh/) que possa
+  quebrar o operador `ssh`
 
 ## Skill principal
 
