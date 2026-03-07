@@ -31,21 +31,53 @@ function Get-FrontmatterValue {
 $repoRoot = (Resolve-Path $RepoRoot).Path
 $failures = [System.Collections.Generic.List[string]]::new()
 
-foreach ($relativePath in @('AGENTS.md', 'docs/ai-operating-model.md')) {
+foreach ($relativePath in @('AGENTS.md', 'docs/ai-operating-model.md', 'docs/AI-WIP-TRACKER.md', 'docs/ROADMAP-DECISIONS.md')) {
 	$fullPath = Join-Path $repoRoot $relativePath
 	if (-not (Test-Path $fullPath -PathType Leaf)) {
 		Add-Failure -Failures $failures -Message "Arquivo obrigatorio ausente: $relativePath"
 	}
 }
 
-$skillsRoot = Join-Path $repoRoot 'ai/skills'
+$trackerPath = Join-Path $repoRoot 'docs/AI-WIP-TRACKER.md'
+if (Test-Path $trackerPath -PathType Leaf) {
+	$trackerContent = Get-Content $trackerPath -Raw
+	foreach ($marker in @(
+			'<!-- ai-worklog:doing:start -->',
+			'<!-- ai-worklog:doing:end -->',
+			'<!-- ai-worklog:done:start -->',
+			'<!-- ai-worklog:done:end -->',
+			'<!-- ai-worklog:log:start -->',
+			'<!-- ai-worklog:log:end -->'
+		)) {
+		if ($trackerContent -notmatch [regex]::Escape($marker)) {
+			Add-Failure -Failures $failures -Message "Marcador obrigatorio ausente em docs/AI-WIP-TRACKER.md: $marker"
+		}
+	}
+}
+
+$decisionsPath = Join-Path $repoRoot 'docs/ROADMAP-DECISIONS.md'
+if (Test-Path $decisionsPath -PathType Leaf) {
+	$decisionsContent = Get-Content $decisionsPath -Raw
+	foreach ($marker in @(
+			'<!-- roadmap:suggestions:start -->',
+			'<!-- roadmap:suggestions:end -->',
+			'<!-- roadmap:cycles:start -->',
+			'<!-- roadmap:cycles:end -->'
+		)) {
+		if ($decisionsContent -notmatch [regex]::Escape($marker)) {
+			Add-Failure -Failures $failures -Message "Marcador obrigatorio ausente em docs/ROADMAP-DECISIONS.md: $marker"
+		}
+	}
+}
+
+$skillsRoot = Join-Path $repoRoot '.codex/skills'
 if (-not (Test-Path $skillsRoot -PathType Container)) {
-	Add-Failure -Failures $failures -Message 'Pasta obrigatoria ausente: ai/skills'
+	Add-Failure -Failures $failures -Message 'Pasta obrigatoria ausente: .codex/skills'
 }
 else {
 	$skillDirs = Get-ChildItem $skillsRoot -Directory | Sort-Object Name
 	if ($skillDirs.Count -eq 0) {
-		Add-Failure -Failures $failures -Message 'Nenhuma skill encontrada em ai/skills'
+		Add-Failure -Failures $failures -Message 'Nenhuma skill encontrada em .codex/skills'
 	}
 
 	foreach ($skillDir in $skillDirs) {
@@ -121,9 +153,9 @@ else {
 	}
 }
 
-$agentsRoot = Join-Path $repoRoot 'ai/agents'
+$agentsRoot = Join-Path $repoRoot '.agents'
 if (-not (Test-Path $agentsRoot -PathType Container)) {
-	Add-Failure -Failures $failures -Message 'Pasta obrigatoria ausente: ai/agents'
+	Add-Failure -Failures $failures -Message 'Pasta obrigatoria ausente: .agents'
 }
 else {
 	$requiredHeadings = @(
@@ -138,14 +170,14 @@ else {
 
 	$agentCards = Get-ChildItem $agentsRoot -Filter '*.md' -File | Sort-Object Name
 	if ($agentCards.Count -eq 0) {
-		Add-Failure -Failures $failures -Message 'Nenhum cartao de agente encontrado em ai/agents'
+		Add-Failure -Failures $failures -Message 'Nenhum cartao de agente encontrado em .agents'
 	}
 
 	foreach ($agentCard in $agentCards) {
 		$content = Get-Content $agentCard.FullName -Raw
 		foreach ($heading in $requiredHeadings) {
 			if ($content -notmatch [regex]::Escape($heading)) {
-				Add-Failure -Failures $failures -Message "Heading obrigatorio ausente em ai/agents/$($agentCard.Name): $heading"
+				Add-Failure -Failures $failures -Message "Heading obrigatorio ausente em .agents/$($agentCard.Name): $heading"
 			}
 		}
 	}

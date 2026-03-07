@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+MSG_FILE="${1:-}"
+SOURCE="${2:-}"
+
+case "${SOURCE:-}" in
+  merge|squash|commit) exit 0 ;;
+esac
+
+ROOT_DIR="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
+bash "${ROOT_DIR}/scripts/run-python.sh" "${ROOT_DIR}/.githooks/conventional_emoji.py" --inject "${MSG_FILE}" || true

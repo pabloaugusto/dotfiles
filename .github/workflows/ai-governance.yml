@@ -4,16 +4,26 @@ on:
   pull_request:
     paths:
       - 'AGENTS.md'
-      - 'ai/**'
+      - '.agents/**'
+      - '.codex/skills/**'
+      - 'docs/AI-WIP-TRACKER.md'
+      - 'docs/ROADMAP-DECISIONS.md'
       - 'docs/ai-operating-model.md'
+      - 'scripts/ai-worklog.py'
+      - 'scripts/validate-ai-assets.py'
       - 'scripts/validate-ai-assets.ps1'
       - 'Taskfile.yml'
       - '.gitignore'
   push:
     paths:
       - 'AGENTS.md'
-      - 'ai/**'
+      - '.agents/**'
+      - '.codex/skills/**'
+      - 'docs/AI-WIP-TRACKER.md'
+      - 'docs/ROADMAP-DECISIONS.md'
       - 'docs/ai-operating-model.md'
+      - 'scripts/ai-worklog.py'
+      - 'scripts/validate-ai-assets.py'
       - 'scripts/validate-ai-assets.ps1'
       - 'Taskfile.yml'
       - '.gitignore'
@@ -27,5 +37,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Validate AI assets
-        shell: pwsh
-        run: ./scripts/validate-ai-assets.ps1
+        run: |
+          sh -c "$(curl --location https://taskfile.dev/install.sh)" -- -d -b /usr/local/bin
+          task ai:validate:linux
+          task ai:worklog:close:gate:linux

@@ -36,10 +36,11 @@ A automacao deve morar em scripts, tasks e workflows reutilizaveis. Isso reduz d
 - `CONTEXT.md`
 - `docs/test-strategy.md`
 - `docs/ai-operating-model.md`
+- `docs/AI-WIP-TRACKER.md`
 
 ### Camada 2. Skills do repo
 
-As skills ficam em `ai/skills/` e seguem o contrato:
+As skills ficam em `.codex/skills/` e seguem o contrato:
 
 - `SKILL.md` curto e acionavel
 - `agents/openai.yaml` com metadata reutilizavel
@@ -47,7 +48,7 @@ As skills ficam em `ai/skills/` e seguem o contrato:
 
 ### Camada 3. Cartoes de agentes
 
-Os papeis operacionais ficam em `ai/agents/`. Cada cartao define:
+Os papeis operacionais ficam em `.agents/`. Cada cartao define:
 
 - objetivo
 - quando usar
@@ -66,12 +67,15 @@ Esses cartoes funcionam como prompt-base para subagentes humanos ou de IA.
 - frontmatter das skills
 - metadata dos agentes
 - estrutura minima dos cartoes
+- presenca dos docs estruturais de WIP
 - ausencia de placeholders e `TODO`
 
 ### Camada 5. Automacao
 
 - `task ai:validate`
 - `task ai:install:codex`
+- `task ai:worklog:check`
+- `task ai:worklog:close:gate`
 - workflow `AI Governance`
 
 ## Politica de versionamento
@@ -79,19 +83,20 @@ Esses cartoes funcionam como prompt-base para subagentes humanos ou de IA.
 ### Versionar
 
 - `AGENTS.md`
-- `ai/skills/**`
-- `ai/agents/**`
+- `.codex/skills/**`
+- `.agents/**`
+- `docs/AI-WIP-TRACKER.md`
+- `docs/ROADMAP-DECISIONS.md`
 - prompts e docs declarativos do repo
 - templates estaveis que precisem ser materializados pelo bootstrap
 
 ### Nao versionar
 
-- `.codex/`
 - `.gemini/`
-- `.agents/`
 - sessoes, historico, caches, bancos sqlite e memoria local
 - perfis de navegador
 - tokens, auth, cookies, state files e configuracoes geradas por login
+- artefatos locais dentro de `.codex/` fora de `skills/`, `rules/`, `evals/` e `orchestration/`
 
 ## Decisao sobre `~/.gemini`
 
@@ -103,6 +108,16 @@ Com base na estrutura local inspecionada, `~/.gemini` mistura:
 - arquivos gerados por execucao
 
 Isso torna a pasta inadequada como fonte de verdade do repo. O que faz sentido versionar e somente a camada declarativa e portavel, por exemplo um `GEMINI.md` mantido no repo e depois materializado no `HOME` por bootstrap. A pasta inteira nao deve entrar no Git.
+
+## Estrutura no repo
+
+Como `df/` guarda apenas o que sera utilizado na maquina apos o bootstrap, os artefatos de governanca do projeto ficam fora dele. Neste repo:
+
+- `AGENTS.md` define o contrato global do projeto
+- `.agents/` guarda cartoes versionados de agentes
+- `.codex/skills/` guarda skills versionadas do projeto
+- `docs/AI-WIP-TRACKER.md` guarda o estado incremental do trabalho de IA
+- `df/` continua reservado aos dotfiles e assets materializados no ambiente
 
 ## Estrategia de evolucao
 

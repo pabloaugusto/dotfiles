@@ -1,0 +1,7 @@
+interface:
+  display_name: "Continuidade WIP"
+  short_description: "Governanca de WIP de IA com tracker"
+  default_prompt: "Use $wip-continuity-governance para manter continuidade operacional de tarefas IA com tracker Doing/Done, preflight de pendencias e fechamento obrigatorio."
+
+policy:
+  allow_implicit_invocation: true

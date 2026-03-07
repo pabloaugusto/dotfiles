@@ -18,7 +18,7 @@ jobs:
           set -euo pipefail
           while IFS= read -r file; do
             bash -n "$file"
-          done < <(git ls-files "*.sh")
+          done < <({ git ls-files "*.sh"; git ls-files ".githooks/commit-msg" ".githooks/pre-push" ".githooks/prepare-commit-msg"; } | sort -u)
 
   powershell-quality:
     runs-on: windows-latest

@@ -1,0 +1,92 @@
+name: PR Validate (Conventional + Emoji)
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize, reopened, ready_for_review]
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pull-requests: read
+
+concurrency:
+  group: pr-validate-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install Task CLI
+        run: |
+          sh -c "$(curl --location https://taskfile.dev/install.sh)" -- -d -b /usr/local/bin
+
+      - name: Validate AI assets and close gate
+        run: |
+          task ai:validate:linux
+          task ai:worklog:close:gate:linux
+
+      - name: Validate PR title
+        if: github.event_name == 'pull_request'
+        env:
+          PR_TITLE: ${{ github.event.pull_request.title }}
+        run: task ci:pr:title:check PR_TITLE="${PR_TITLE}"
+
+      - name: Collect commit range
+        id: commit_range
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          PUSH_BEFORE_SHA: ${{ github.event.before }}
+          PUSH_HEAD_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+
+          if [ "${EVENT_NAME}" = "pull_request" ]; then
+            RANGE="${PR_BASE_SHA}..${PR_HEAD_SHA}"
+          else
+            if [ -z "${PUSH_BEFORE_SHA}" ] || [ "${PUSH_BEFORE_SHA}" = "0000000000000000000000000000000000000000" ]; then
+              if git rev-parse --verify "${PUSH_HEAD_SHA}^" >/dev/null 2>&1; then
+                RANGE="${PUSH_HEAD_SHA}^..${PUSH_HEAD_SHA}"
+              else
+                RANGE="${PUSH_HEAD_SHA}..${PUSH_HEAD_SHA}"
+              fi
+            else
+              RANGE="${PUSH_BEFORE_SHA}..${PUSH_HEAD_SHA}"
+            fi
+          fi
+
+          echo "range=${RANGE}" >> "${GITHUB_OUTPUT}"
+
+      - name: Validate commit subjects
+        env:
+          RANGE: ${{ steps.commit_range.outputs.range }}
+        run: task ci:commits:check RANGE="${RANGE}"
+
+      - name: Validate branch name
+        if: github.event_name == 'pull_request'
+        env:
+          HEAD_REF: ${{ github.head_ref }}
+        run: task ci:branch:check BRANCH="${HEAD_REF}"
+
+      - name: Run governance unit tests
+        run: task test:unit:python:linux

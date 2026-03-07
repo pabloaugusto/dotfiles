@@ -1,0 +1,58 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+ROOT_DIR="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
+CURRENT_BRANCH="$(git rev-parse --abbrev-ref HEAD)"
+REMOTE="${1:-origin}"
+PROTECTED_BRANCHES=("main" "develop" "master")
+
+print_error() { echo "❌ $1" >&2; }
+print_info() { echo "ℹ️ $1"; }
+print_warn() { echo "⚠️ $1"; }
+
+pushes_protected_branch="0"
+while read -r local_ref _local_sha _remote_ref _remote_sha; do
+  if [[ -z "${local_ref:-}" ]]; then
+    continue
+  fi
+  if [[ "${local_ref}" == refs/heads/* ]]; then
+    for protected_branch in "${PROTECTED_BRANCHES[@]}"; do
+      if [[ "${local_ref}" == "refs/heads/${protected_branch}" ]]; then
+        pushes_protected_branch="1"
+      fi
+    done
+  fi
+done
+
+if [[ "${pushes_protected_branch}" == "1" ]]; then
+  print_error "Push bloqueado para branch protegida (${PROTECTED_BRANCHES[*]}). Use Pull Request."
+  exit 1
+fi
+
+if ! bash "${ROOT_DIR}/scripts/run-python.sh" "${ROOT_DIR}/.githooks/conventional_emoji.py" --validate-branch "${CURRENT_BRANCH}"; then
+  print_error "Nome de branch invalido: ${CURRENT_BRANCH}"
+  exit 1
+fi
+
+if command -v gh >/dev/null 2>&1 && gh auth status >/dev/null 2>&1; then
+  PR_TITLE="$(gh pr list --head "${CURRENT_BRANCH}" --state open --limit 1 --json title --jq '.[0].title' 2>/dev/null || true)"
+  if [[ -n "${PR_TITLE}" && "${PR_TITLE}" != "null" ]]; then
+    print_info "Validando titulo do PR aberto da branch atual..."
+    bash "${ROOT_DIR}/scripts/run-python.sh" "${ROOT_DIR}/.githooks/ci/validate_message.py" "${PR_TITLE}" --context "PR title"
+  fi
+else
+  print_warn "gh nao autenticado; validacao local de PR title ignorada."
+fi
+
+if git show-ref --verify --quiet "refs/remotes/${REMOTE}/main"; then
+  RANGE="${REMOTE}/main..HEAD"
+elif git show-ref --verify --quiet "refs/remotes/origin/main"; then
+  RANGE="origin/main..HEAD"
+else
+  print_warn "Base main nao encontrada no remoto; validacao de range de commits ignorada."
+  exit 0
+fi
+
+SUBJECTS_JSON="$(git log --format=%s "${RANGE}" | bash "${ROOT_DIR}/scripts/run-python.sh" -c 'import json,sys; print(json.dumps([l.strip() for l in sys.stdin if l.strip()]))')"
+print_info "Validando subjects dos commits no range ${RANGE}..."
+bash "${ROOT_DIR}/scripts/run-python.sh" "${ROOT_DIR}/.githooks/conventional_emoji.py" --validate-many-json "${SUBJECTS_JSON}" --require-emoji

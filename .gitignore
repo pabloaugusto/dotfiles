@@ -4,6 +4,9 @@
 
 *.history
 desktop.ini
+*.pyc
+__pycache__/
+.cache/
 
 # local runtime secrets
 .env
@@ -37,6 +40,15 @@ df/vscode/workspaceStorage
 df/vscode/sync
 
 # local AI runtime state
-.agents/
-.codex/
 .gemini/
+.codex/*
+!.codex/skills/
+!.codex/skills/**
+!.codex/evals/
+!.codex/evals/**
+!.codex/orchestration/
+!.codex/orchestration/**
+!.codex/rules/
+!.codex/rules/**
+.agents/*
+!.agents/*.md
