@@ -1,6 +1,6 @@
 # Decisoes do Roadmap
 
-Atualizado em: 2026-03-07 13:24 UTC
+Atualizado em: 2026-03-07 13:45 UTC
 Ciclo ativo: 2026-Q1
 
 Registro das decisoes humanas por ciclo e governanca de sugestoes.
@@ -12,6 +12,9 @@ Use status: `pendente`, `aceita`, `descartada`, `aplicar_depois`.
 <!-- roadmap:suggestions:start -->
 | ID | Descricao | Status | RM | Captura | Atualizacao |
 | --- | --- | --- | --- | --- | --- |
+| SG-20260307-ASSETS-IMG | Decidir formalmente a fronteira de [df/assets/img/](../df/assets/img/) entre runtime canonico, fontes de design e conteudo a arquivar em [archive/](../archive/). | aceita |  | 2026-03-07 | 2026-03-07 |
+| SG-20260307-SCRIPTS-SPLIT | Reavaliar a fronteira da pasta [scripts/](../scripts/) entre camadas cli e lib, agora que a base Python com uv esta formalizada. | aceita |  | 2026-03-07 | 2026-03-07 |
+| SG-20260307-OPSIGN | Resolver o bloqueio operacional de assinatura Git/1Password para permitir checkpoint commit sem interrupcao, preferindo signer tecnico de automacao por worktree/repo e preservan... | aceita |  | 2026-03-07 | 2026-03-07 |
 | SG-20260307-095316 | Criar uma camada de conhecimento global portavel para IA, separada do contexto especifico do repo, para materializacao controlada no HOME. | aceita |  | 2026-03-07 | 2026-03-07 |
 | SG-20260307-095305 | Adicionar hooks e policies de IA com presets de permissao por contexto, bloqueio de segredos e comandos destrutivos, e validacoes proporcionais ao risco. | aceita |  | 2026-03-07 | 2026-03-07 |
 | SG-20260307-095254 | Gerar adaptadores de assistentes e arquivos MCP a partir de uma fonte canonica unica em .agents, separando escopo global do usuario e escopo do repo. | aceita |  | 2026-03-07 | 2026-03-07 |
@@ -25,7 +28,7 @@ Use status: `pendente`, `aceita`, `descartada`, `aplicar_depois`.
 ## Historico de Ciclos
 
 <!-- roadmap:cycles:start -->
-### Ciclo 2026-Q1 @ 2026-03-07 13:24 UTC
+### Ciclo 2026-Q1 @ 2026-03-07 13:45 UTC
 
 - Top sequencia recomendada: `RM-001, RM-002`
 - Decisao final permanece humana.
@@ -36,6 +39,9 @@ Use status: `pendente`, `aceita`, `descartada`, `aplicar_depois`.
 ## Registro automatico
 
 <!-- roadmap:autolog:start -->
+- 2026-03-07 13:45 UTC | decisao=accepted | horizonte=next | item=Decidir formalmente a fronteira de [df/assets/img/](../df/assets/img/) entre runtime canonico, fontes de design e conteudo a arquivar em [archive/](../archive/). | notas=Aprovado como item proprio para reduzir ambiguidade entre ativos de runtime, design-fonte e legado historico.
+- 2026-03-07 13:45 UTC | decisao=accepted | horizonte=next | item=Reavaliar a fronteira da pasta [scripts/](../scripts/) entre camadas cli e lib, agora que a base Python com uv esta formalizada. | notas=Decisao estrutural aprovada para reduzir acoplamento, facilitar testes e deixar entrypoints mais claros.
+- 2026-03-07 13:45 UTC | decisao=accepted | horizonte=now | item=Resolver o bloqueio operacional de assinatura Git/1Password para permitir checkpoint commit sem interrupcao, preferindo signer tecnico de automacao por worktree/repo e preservan... | notas=Bloqueio operacional atual; priorizar perfil de assinatura de automacao sem bypass da identidade humana.
 - 2026-03-07 13:24 UTC | decisao=accepted | horizonte=next | item=Consolidar ou arquivar o legado historico versionado que nao e fonte canonica, incluindo artefatos hoje ja movidos para `archive/` e outros scripts experimentais ou backups decl... | notas=Reduzir ruido conceitual, diminuir superficie de manutencao e deixar explicita a fronteira entre referencia historica e runtime canonico.
 - 2026-03-07 13:11 UTC | decisao=accepted | horizonte=next | item=Criar tasks/CLIs ai:status, ai:diff, ai:sync e ai:backup para configs de IA materializadas no HOME, com fallback copy-vs-symlink por ferramenta. | notas=Inspirado em jppferguson/dotfiles e basnijholt/dotfiles; ajuda a preservar contratos ao trocar de assistente sem drift entre repo e HOME.
 - 2026-03-07 13:11 UTC | decisao=accepted | horizonte=next | item=Gerar adaptadores de assistentes e arquivos MCP a partir de uma fonte canonica unica em .agents, separando escopo global do usuario e escopo do repo. | notas=Inspirado em atxtechbro/dotfiles, basnijholt/dotfiles e na documentacao oficial do Claude Code; reduz drift entre Claude, Codex, Gemini e...

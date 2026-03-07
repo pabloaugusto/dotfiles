@@ -1,6 +1,6 @@
 # Roadmap do Repositorio
 
-Atualizado em: 2026-03-07 13:24 UTC
+Atualizado em: 2026-03-07 13:45 UTC
 Ciclo ativo: 2026-Q1
 
 Planejamento incremental para qualidade, testes, bootstrap e governanca do repo.
@@ -28,7 +28,7 @@ Edite apenas a tabela entre os marcadores abaixo.
 Atualizada por `task ai:roadmap:refresh`.
 
 <!-- roadmap:priority:start -->
-Atualizado em: `2026-03-07 13:24 UTC`
+Atualizado em: `2026-03-07 13:45 UTC`
 
 ### Ranking RICE
 
@@ -64,6 +64,7 @@ Sem sugestoes pendentes neste ciclo; itens aceitos ja estao rastreaveis.
 ### Now
 
 <!-- roadmap:now:start -->
+- Resolver o bloqueio operacional de assinatura Git/1Password para permitir checkpoint commit sem interrupcao, preferindo signer tecnico de automacao por worktree/repo e preservan... | notas=Bloqueio operacional atual; priorizar perfil de assinatura de automacao sem bypass da identidade humana.
 - Expandir datasets e cenarios de eval para bootstrap cross-platform, seguranca e risco operacional. | notas=entregue parcialmente nesta rodada com ai:eval:smoke e ampliacao inicial dos datasets; bootstrap full permanece evolucao futura
 - Adicionar validadores dedicados de sincronismo entre workflows, tasks, docs, catalogos e ativos declarativos da IA. | notas=entregue nesta rodada com validate_workflow_task_sync.py e catalogos TASKS/WORKFLOWS
 - Importar chat-intake, route e delegate com backend real de roteamento declarativo para a camada canonica .agents. | notas=entregue nesta rodada com backend Python, orchestrator e smoke eval
@@ -74,6 +75,8 @@ Sem sugestoes pendentes neste ciclo; itens aceitos ja estao rastreaveis.
 ### Next
 
 <!-- roadmap:next:start -->
+- Decidir formalmente a fronteira de [df/assets/img/](../df/assets/img/) entre runtime canonico, fontes de design e conteudo a arquivar em [archive/](../archive/). | notas=Aprovado como item proprio para reduzir ambiguidade entre ativos de runtime, design-fonte e legado historico.
+- Reavaliar a fronteira da pasta [scripts/](../scripts/) entre camadas cli e lib, agora que a base Python com uv esta formalizada. | notas=Decisao estrutural aprovada para reduzir acoplamento, facilitar testes e deixar entrypoints mais claros.
 - Consolidar ou arquivar o legado historico versionado que nao e fonte canonica, incluindo artefatos hoje ja movidos para [`archive/`](archive/) e outros scripts experimentais ou backups decl... | notas=Reduzir ruido conceitual, diminuir superficie de manutencao e deixar explicita a fronteira entre referencia historica e runtime canonico.
 - Criar tasks/CLIs ai:status, ai:diff, ai:sync e ai:backup para configs de IA materializadas no HOME, com fallback copy-vs-symlink por ferramenta. | notas=Inspirado em jppferguson/dotfiles e basnijholt/dotfiles; ajuda a preservar contratos ao trocar de assistente sem drift entre repo e HOME.
 - Gerar adaptadores de assistentes e arquivos MCP a partir de uma fonte canonica unica em .agents, separando escopo global do usuario e escopo do repo. | notas=Inspirado em atxtechbro/dotfiles, basnijholt/dotfiles e na documentacao oficial do Claude Code; reduz drift entre Claude, Codex, Gemini e...
