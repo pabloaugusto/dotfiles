@@ -3,6 +3,18 @@
 Repositório de dotfiles com bootstrap **multiambiente** (Windows host + Ubuntu WSL),
 focado em segurança operacional e repetibilidade.
 
+## Funcionalidades do projeto
+
+- Bootstrap multiambiente para Windows host e Ubuntu WSL, com modos `new`, `refresh` e `relink`.
+- Recriacao idempotente dos symlinks canonicos do bootstrap via `task bootstrap:relink`.
+- Validacao operacional de ambiente com `checkEnv` em PowerShell e Bash.
+- Sincronizacao Git entre Windows e WSL via tasks de `sync`, sem copia manual entre ambientes.
+- Configuracao central de bootstrap com template versionado, normalizacao de caminhos canonicos e arquivos derivados sincronizados.
+- Camada declarativa de IA versionada em `.agents/`, com skills, cartoes, registry, orchestration, rules, evals, worklog, roadmap e licoes aprendidas.
+- Governanca de Git com `emoji + conventional commits`, validacao de branch/PR/commits e gates de continuidade.
+- Suite de testes com Pester, Python e Bats, incluindo harnesses reais de integracao para `relink` em Linux e Windows.
+- Workflows de CI para governanca de IA, validacao de PR, baseline de qualidade e integracao do bootstrap.
+
 ## Objetivos
 
 - Git via SSH com 1Password SSH Agent como primeira opção.
@@ -20,6 +32,8 @@ focado em segurança operacional e repetibilidade.
 - Secrets refs: `df/secrets/secrets-ref.yaml`
 - Runtime env template: `bootstrap/secrets/.env.local.tpl`
 - Runtime env cifrado local: `~/.env.local.sops`
+- Fonte canonica da camada de IA: `.agents/`
+- Ponte de compatibilidade para assistentes especificos: `.codex/README.md`
 
 ## Modelo de segredos e autenticação
 
@@ -135,6 +149,8 @@ Tasks principais:
 - `task bootstrap` (auto) e variantes `task bootstrap:windows:new` / `task bootstrap:windows:refresh` / `task bootstrap:linux`
 - `task bootstrap:relink` (auto) e variantes `task bootstrap:windows:relink` / `task bootstrap:linux:relink` para recriar symlinks canônicos do bootstrap
 - `task ci:validate` (auto) e variantes `task ci:validate:windows` / `task ci:validate:linux`
+- `task test:integration:linux` / `task test:integration:windows`
+- `task ai:validate`, `task ai:eval:smoke`, `task ai:lessons:check`, `task ai:worklog:check`, `task ai:worklog:close:gate`
 - `task pr:status` / `task pr:checks PR=<numero>`
 
 Política de paridade:
@@ -156,6 +172,17 @@ Guia completo: `SECURITY.md` e `docs/secrets-and-auth.md`.
 ## Documentação complementar
 
 - `bootstrap/README.md`
+- `docs/ai-operating-model.md`
+- `docs/AI-WIP-TRACKER.md`
+- `docs/ROADMAP.md`
+- `docs/ROADMAP-DECISIONS.md`
+- `docs/AI-AGENTS-CATALOG.md`
+- `docs/AI-SKILLS-CATALOG.md`
+- `docs/AI-DELEGATION-FLOW.md`
+- `docs/AI-GOVERNANCE-AND-REGRESSION.md`
+- `docs/TASKS.md`
+- `docs/WORKFLOWS.md`
+- `tests/README.md`
 - `docs/bootstrap-flow.md`
 - `docs/checkenv.md`
 - `docs/onedrive.md`

@@ -17,10 +17,10 @@ Auditoria técnica dos arquivos versionados (excluindo ignorados) com foco em:
 
 ## Crítico
 
-1. **Pipelines CI desabilitados no repositório**
-   - Evidência: `.github/workflows/check-scripts.yml.ignore`, `.github/workflows/linter.yaml.ignore`
-   - Impacto: ausência de validação automática, regressões entram sem gate.
-   - Recomendação: restaurar workflows ativos (`.yml`) com checks mínimos (parse/shell/json/yaml + docs links).
+1. **Historico: pipelines CI estavam desabilitados no repositório**
+   - Evidência original: `.github/workflows/check-scripts.yml.ignore`, `.github/workflows/linter.yaml.ignore`
+   - Impacto observado na epoca: ausência de validação automática, regressões entram sem gate.
+   - Status atual: resolvido com workflows ativos versionados e gates formais de qualidade, PR, IA e integração do bootstrap.
    - Esforço: **Médio**
 
 2. **Política Git global insegura (`safe.directory = *`)**
