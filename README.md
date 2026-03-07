@@ -31,7 +31,8 @@ de IA versionada.
 ### Segredos, auth e seguranca
 
 - Refs `op://...` como fonte de verdade para segredos.
-- Runtime local cifrado em `~/.env.local.sops`, sem plaintext versionado.
+- Runtime local cifrado em [`docs/secrets-and-auth.md`](docs/secrets-and-auth.md#runtime-env-local),
+  materializado como `~/.env.local.sops`, sem plaintext versionado.
 - Assinatura Git via SSH com 1Password signer.
 - Politica de seguranca documentada em [`SECURITY.md`](SECURITY.md) e [`docs/secrets-and-auth.md`](docs/secrets-and-auth.md).
 
@@ -155,13 +156,14 @@ task test:integration:linux
 Arquivos principais:
 
 - template versionado: [`bootstrap/user-config.yaml.tpl`](bootstrap/user-config.yaml.tpl)
-- arquivo local ignorado: `bootstrap/user-config.yaml`
+- arquivo local ignorado documentado em [`docs/config-reference.md`](docs/config-reference.md#bootstrapuser-configyaml)
+- template correspondente: [`bootstrap/user-config.yaml.tpl`](bootstrap/user-config.yaml.tpl)
 
 Derivados sincronizados automaticamente:
 
 - [`df/secrets/secrets-ref.yaml`](df/secrets/secrets-ref.yaml)
 - [`bootstrap/secrets/.env.local.tpl`](bootstrap/secrets/.env.local.tpl)
-- `df/git/.gitconfig.local`
+- derivado local documentado em [`docs/secrets-and-auth.md`](docs/secrets-and-auth.md#ssh-agent-e-git-signing)
 
 Principio atual:
 

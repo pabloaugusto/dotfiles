@@ -4,7 +4,8 @@
 
 Manter convencoes operacionais, higiene de versionamento e organizacao de
 prompts, skills, docs e automacoes deste repo, incluindo a governanca de
-documentacao e a linkagem interna para ativos do proprio repositorio.
+documentacao, a linkagem interna para ativos do proprio repositorio e a
+higiene de referencias externas viaveis.
 
 ## Quando usar
 
@@ -13,7 +14,7 @@ documentacao e a linkagem interna para ativos do proprio repositorio.
 - mudancas em convencoes de commit, PR, worktree e organizacao
 - decisoes sobre versionar ou ignorar runtime local de ferramentas
 - qualquer sweep ou regra sobre referencias internas em Markdown, comentarios
-  documentais e catalogos do repo
+  documentais, referencias externas e catalogos do repo
 
 ## Skill principal
 
@@ -30,7 +31,7 @@ documentacao e a linkagem interna para ativos do proprio repositorio.
 - regra consolidada
 - automacao ou validacao quando cabivel
 - documentacao pareada
-- referencias internas clicaveis quando o formato suportar isso
+- referencias internas e externas clicaveis quando o formato suportar isso
 
 ## Fluxo
 
@@ -45,12 +46,15 @@ documentacao e a linkagem interna para ativos do proprio repositorio.
 9. Preferir commits checkpoint por rodada para evitar acumulacao de contextos nao commitados.
 10. Em Markdown e comentarios documentais, converter referencias internas
     viaveis em links explicitos para o alvo no repo.
+11. Em Markdown e comentarios documentais, converter referencias externas
+    viaveis em links explicitos para a origem quando houver URL ou alvo
+    clicavel razoavel.
 
 ## Guardrails
 
 - Nao versionar estado de runtime local.
 - Nao criar documentacao paralela para o mesmo contrato.
-- Nao deixar citacoes internas viaveis sem link em Markdown governado.
+- Nao deixar citacoes internas ou externas viaveis sem link em Markdown governado.
 - Nao espalhar naming rules sem validacao automatica correspondente.
 - Nao importar regras de outro repo por amostragem.
 - Nao permitir que [`.codex/`](.codex/) volte a acumular contratos declarativos; a fonte de verdade e [`.agents/`](.agents/).
@@ -74,3 +78,4 @@ documentacao e a linkagem interna para ativos do proprio repositorio.
 - auditoria versionada quando houver fonte cross-repo
 - documentacao navegavel sem referencias internas soltas quando o formato
   suportar link
+- referencias externas viaveis tambem navegaveis quando houver alvo clicavel

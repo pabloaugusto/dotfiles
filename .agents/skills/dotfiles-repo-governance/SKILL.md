@@ -26,8 +26,8 @@ Guiar mudancas de governanca do repo sem burocracia excessiva e com automacao mi
 - Skills e prompts devem ser curtos, especificos e versionados.
 - Estado local de ferramenta nao entra no Git.
 - Workflows, tasks e docs precisam apontar para a mesma regra.
-- Em Markdown e comentarios documentais, referencias internas viaveis ao repo
-  devem ser links explicitos para o alvo.
+- Em Markdown e comentarios documentais, referencias internas viaveis ao repo e
+  referencias externas viaveis devem ser links explicitos para o alvo.
 - Importacao cross-repo sem auditoria completa e proibida.
 - [`.codex/`](.codex/) no repo deve permanecer apenas como ponte de compatibilidade.
 - [`LICOES-APRENDIDAS.md`](LICOES-APRENDIDAS.md) tambem e contrato operacional e nao pode ficar fora do fluxo de fechamento.

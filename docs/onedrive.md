@@ -8,7 +8,7 @@ Fluxo macro/orquestração do bootstrap (incluindo subfluxo OneDrive):
 
 ## 1) Campos de configuracao que controlam a linkagem
 
-Arquivo: `bootstrap/user-config.yaml` (secao `paths.windows`).
+Arquivo local documentado em [`config-reference.md`](config-reference.md#bootstrapuser-configyaml) (secao `paths.windows`).
 
 - `onedrive_enabled`: liga/desliga o modo OneDrive no bootstrap.
 - `onedrive_root`: root desejada do OneDrive (absoluta). Se vazio, tenta auto-detect.

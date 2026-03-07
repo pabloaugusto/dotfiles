@@ -193,13 +193,13 @@ flowchart LR
 
 | Bloco do fluxo | Arquivo | Funcoes/pontos-chave |
 |---|---|---|
-| Entry macro | `bootstrap/_start.ps1` | `Ensure-WinGet`, `Ensure-BootstrapConfigReady`, `bootstrap` (menu/dispatch) |
-| Config YAML | `bootstrap/bootstrap-config.ps1` | `Ensure-BootstrapConfigReady`, `Invoke-BootstrapConfigWizard`, `Sync-BootstrapDerivedFiles` |
-| OneDrive prereq/migracao | `bootstrap/bootstrap-windows.ps1` | `Resolve-WindowsOneDriveLayout`, `Install-OneDriveClient`, `Invoke-OneDriveJunctionMigration`, `Set-OneDriveConfiguredRoot` |
-| Linkagens Windows | `bootstrap/bootstrap-windows.ps1` | `Resolve-WindowsLinkLayout`, `Ensure-OneDriveLayoutPaths`, `Invoke-ProfileFoldersToOneDriveLinking`, `Add-Symlink` |
-| Secrets/auth Windows | `bootstrap/bootstrap-windows.ps1` | `Set-LocalEnvFrom1Password`, `Import-DotEnvFromSops`, `Ensure-GitHubCliAuthFrom1Password` |
-| Gate Windows | `bootstrap/bootstrap-windows.ps1` + `df/powershell/_functions.ps1` | `checkEnv`, `Test-OneDriveLayoutHealth` |
-| Fluxo WSL | `bootstrap/bootstrap-ubuntu-wsl.sh` | `setup_prompt`, `install_software`, `setProfileSymlinks`, `ensureOpToken`, `setLocalEnvFile`, `ensureGitHubAuth`, `checkEnv` |
+| Entry macro | [`bootstrap/_start.ps1`](bootstrap/_start.ps1) | `Ensure-WinGet`, `Ensure-BootstrapConfigReady`, `bootstrap` (menu/dispatch) |
+| Config YAML | [`bootstrap/bootstrap-config.ps1`](bootstrap/bootstrap-config.ps1) | `Ensure-BootstrapConfigReady`, `Invoke-BootstrapConfigWizard`, `Sync-BootstrapDerivedFiles` |
+| OneDrive prereq/migracao | [`bootstrap/bootstrap-windows.ps1`](bootstrap/bootstrap-windows.ps1) | `Resolve-WindowsOneDriveLayout`, `Install-OneDriveClient`, `Invoke-OneDriveJunctionMigration`, `Set-OneDriveConfiguredRoot` |
+| Linkagens Windows | [`bootstrap/bootstrap-windows.ps1`](bootstrap/bootstrap-windows.ps1) | `Resolve-WindowsLinkLayout`, `Ensure-OneDriveLayoutPaths`, `Invoke-ProfileFoldersToOneDriveLinking`, `Add-Symlink` |
+| Secrets/auth Windows | [`bootstrap/bootstrap-windows.ps1`](bootstrap/bootstrap-windows.ps1) | `Set-LocalEnvFrom1Password`, `Import-DotEnvFromSops`, `Ensure-GitHubCliAuthFrom1Password` |
+| Gate Windows | [`bootstrap/bootstrap-windows.ps1`](bootstrap/bootstrap-windows.ps1) + [`df/powershell/_functions.ps1`](df/powershell/_functions.ps1) | `checkEnv`, `Test-OneDriveLayoutHealth` |
+| Fluxo WSL | [`bootstrap/bootstrap-ubuntu-wsl.sh`](bootstrap/bootstrap-ubuntu-wsl.sh) | `setup_prompt`, `install_software`, `setProfileSymlinks`, `ensureOpToken`, `setLocalEnvFile`, `ensureGitHubAuth`, `checkEnv` |
 
 ---
 

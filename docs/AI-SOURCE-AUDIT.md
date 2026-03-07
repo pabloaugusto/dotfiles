@@ -23,9 +23,9 @@ Esta auditoria cobre, para cada repo-fonte:
 - caminho auditado: `\\wsl.localhost\Ubuntu\home\pablo\py-bootstrap`
 - contrato global: [`AGENTS.md`](AGENTS.md), [`LICOES-APRENDIDAS.md`](LICOES-APRENDIDAS.md)
 - camada declarativa IA: [`.agents/registry`](.agents/registry), [`.agents/skills`](.agents/skills), [`.agents/orchestration`](.agents/orchestration), [`.agents/rules`](.agents/rules), [`.agents/evals`](.agents/evals), [`.agents/config.toml`](.agents/config.toml)
-- docs centrais: [`docs/AI-WIP-TRACKER.md`](docs/AI-WIP-TRACKER.md), [`docs/ROADMAP.md`](docs/ROADMAP.md), [`docs/ROADMAP-DECISIONS.md`](docs/ROADMAP-DECISIONS.md), [`docs/AI-AGENTS-CATALOG.md`](docs/AI-AGENTS-CATALOG.md), [`docs/AI-DELEGATION-FLOW.md`](docs/AI-DELEGATION-FLOW.md), [`docs/AI-GOVERNANCE-AND-REGRESSION.md`](docs/AI-GOVERNANCE-AND-REGRESSION.md), `docs/AI-IMPLEMENTATION-PLAN.md`, [`docs/ai-operating-model.md`](docs/ai-operating-model.md), [`docs/AI-SKILLS-CATALOG.md`](docs/AI-SKILLS-CATALOG.md), [`docs/TASKS.md`](docs/TASKS.md), [`docs/WORKFLOWS.md`](docs/WORKFLOWS.md)
-- automacao: `.taskfiles/ai.yaml`, `.taskfiles/roadmap.yaml`, `.taskfiles/scripts/*`
-- testes/gates: `tests/governance/test_ai_worklog_governance.py`
+- docs centrais: [`docs/AI-WIP-TRACKER.md`](docs/AI-WIP-TRACKER.md), [`docs/ROADMAP.md`](docs/ROADMAP.md), [`docs/ROADMAP-DECISIONS.md`](docs/ROADMAP-DECISIONS.md), [`docs/AI-AGENTS-CATALOG.md`](docs/AI-AGENTS-CATALOG.md), [`docs/AI-DELEGATION-FLOW.md`](docs/AI-DELEGATION-FLOW.md), [`docs/AI-GOVERNANCE-AND-REGRESSION.md`](docs/AI-GOVERNANCE-AND-REGRESSION.md), plano de implementacao equivalente na fonte, [`docs/ai-operating-model.md`](docs/ai-operating-model.md), [`docs/AI-SKILLS-CATALOG.md`](docs/AI-SKILLS-CATALOG.md), [`docs/TASKS.md`](docs/TASKS.md), [`docs/WORKFLOWS.md`](docs/WORKFLOWS.md)
+- automacao: taskfiles dedicados de IA, roadmap e scripts auxiliares na fonte
+- testes/gates: suite dedicada de governanca do worklog na fonte
 
 ### cr-automations
 
@@ -33,17 +33,17 @@ Esta auditoria cobre, para cada repo-fonte:
 - contrato global: [`AGENTS.md`](AGENTS.md), [`LICOES-APRENDIDAS.md`](LICOES-APRENDIDAS.md)
 - camada declarativa IA: [`.agents/registry`](.agents/registry), [`.agents/skills`](.agents/skills), [`.agents/orchestration`](.agents/orchestration), [`.agents/rules`](.agents/rules), [`.agents/evals`](.agents/evals), [`.agents/config.toml`](.agents/config.toml)
 - docs centrais: [`docs/AI-WIP-TRACKER.md`](docs/AI-WIP-TRACKER.md), [`docs/ROADMAP.md`](docs/ROADMAP.md), [`docs/ROADMAP-DECISIONS.md`](docs/ROADMAP-DECISIONS.md), [`docs/TASKS.md`](docs/TASKS.md), [`docs/WORKFLOWS.md`](docs/WORKFLOWS.md)
-- automacao: `.taskfiles/ai.yaml`, `.taskfiles/scripts/ai-wip-tracker.py`, `.taskfiles/scripts/ai-roadmap-refresh.sh`, `.taskfiles/scripts/ai-roadmap-register.sh`, `.taskfiles/scripts/ai-wip-roadmap-pending.sh`
-- testes/gates: `tests/governance/test_ai_wip_governance.py`
+- automacao: taskfiles dedicados de IA e scripts shell de refresh/register/pending do roadmap na fonte
+- testes/gates: suite dedicada de governanca de WIP na fonte
 
 ### iageny
 
 - caminho auditado: `D:\projects\iageny`
 - contrato principal: docs estruturais + camada [`.agents/`](.agents/)
-- camada declarativa IA: `.agents/implementation-agents`, `.agents/implementation-subagents`, [`.agents/skills`](.agents/skills), `.agents/workflows`
-- docs centrais: [`docs/AI-WIP-TRACKER.md`](docs/AI-WIP-TRACKER.md), [`docs/ROADMAP.md`](docs/ROADMAP.md), [`docs/ROADMAP-DECISIONS.md`](docs/ROADMAP-DECISIONS.md), `docs/agent-catalog.md`, `docs/implementation-agents.md`, `docs/phase-guide.md`, `docs/reference-catalog.md`, `docs/decisions.md`, `docs/lessons-learned.md`, `docs/time-and-locale.md`
-- automacao: [`Taskfile.yml`](Taskfile.yml), `scripts/ai_worklog.py`, `scripts/roadmap_register.py`, `scripts/validate_repo.py`, [`scripts/validate_docs.py`](scripts/validate_docs.py), `scripts/validate_implementation_agents.py`, [`scripts/validate_workflow_task_sync.py`](scripts/validate_workflow_task_sync.py), `scripts/validate_workflows.py`
-- testes/gates: `tests/test_ai_worklog.py`, `tests/test_roadmap_register.py`, `tests/test_validate_repo.py`, `tests/test_validate_docs.py`, `tests/test_validate_workflow_task_sync.py`, `tests/test_validate_workflows.py`
+- camada declarativa IA: arvores de implementation agents, implementation subagents, [`.agents/skills`](.agents/skills) e workflows dedicados na fonte
+- docs centrais: [`docs/AI-WIP-TRACKER.md`](docs/AI-WIP-TRACKER.md), [`docs/ROADMAP.md`](docs/ROADMAP.md), [`docs/ROADMAP-DECISIONS.md`](docs/ROADMAP-DECISIONS.md) e catalogos equivalentes de agentes, fases, referencias, decisoes, licoes e timezone/locale na fonte
+- automacao: [`Taskfile.yml`](Taskfile.yml), backend equivalente de worklog/roadmap e validadores dedicados de repo, docs, implementation agents, workflow-task sync e workflows na fonte
+- testes/gates: suites dedicadas para worklog, roadmap e validadores na fonte
 
 ## Inventario consolidado por dominio
 
@@ -65,13 +65,13 @@ Contribuicao util de `iageny`:
 Padrao comum em `py-bootstrap` e `cr-automations`:
 
 - [`.agents/config.toml`](.agents/config.toml)
-- `.agents/registry/*.toml`
+- [`.agents/registry/`](.agents/registry/) (`*.toml`)
 - [`.agents/orchestration/capability-matrix.yaml`](.agents/orchestration/capability-matrix.yaml)
 - [`.agents/orchestration/routing-policy.yaml`](.agents/orchestration/routing-policy.yaml)
-- `.agents/orchestration/*.schema.json`
-- `.agents/rules/*.rules`
-- `.agents/evals/*`
-- `.agents/skills/*`
+- [`.agents/orchestration/`](.agents/orchestration/) (`*.schema.json`)
+- [`.agents/rules/`](.agents/rules/) (`*.rules`)
+- [`.agents/evals/`](.agents/evals/)
+- [`.agents/skills/`](.agents/skills/)
 
 Contribuicao util de `iageny`:
 
@@ -108,7 +108,7 @@ Padrao comum:
 
 Contribuicao util de `iageny`:
 
-- `scripts/validate_repo.py` com inventario declarativo do repo
+- validador dedicado de inventario declarativo do repo na fonte
 - testes para os validadores em si, nao apenas para as features de runtime
 
 ### Toolchain Python, lint e validacao transversal
@@ -150,7 +150,7 @@ Estado apos esta rodada de importacao:
 - foram adicionados catalogos humanos de agentes, skills, delegacao e governanca/regression
 - o fluxo de fechamento ganhou gate formal de lessons integrado ao worklog
 - os papeis permanentes de arquitetura/modernizacao e integracoes criticas passaram a ser gates explicitamente versionados
-- `chat-intake`, `route` e `delegate` agora tem backend Python real baseado em `.agents/orchestration/*`
+- `chat-intake`, `route` e `delegate` agora tem backend Python real baseado em [`.agents/orchestration/`](.agents/orchestration/)
 - `orchestrator` e `$task-routing-and-decomposition` foram importados e adaptados para intake/delegacao
 - [`docs/TASKS.md`](docs/TASKS.md) e [`docs/WORKFLOWS.md`](docs/WORKFLOWS.md) passaram a existir com gate executavel de sincronismo
 - `ai:eval:smoke` passou a executar datasets reais de roteamento e governanca
@@ -171,10 +171,10 @@ Estado apos esta rodada de importacao:
 - auditoria versionada em [`docs/AI-SOURCE-AUDIT.md`](docs/AI-SOURCE-AUDIT.md)
 - consolidacao de [`.agents/`](.agents/) como fonte canonica e reducao de [`.codex/`](.codex/) a ponte legada
 - [`.agents/config.toml`](.agents/config.toml)
-- `.agents/registry/*.toml`
-- `.agents/orchestration/*`
-- `.agents/rules/*`
-- `.agents/evals/*`
+- [`.agents/registry/`](.agents/registry/) (`*.toml`)
+- [`.agents/orchestration/`](.agents/orchestration/)
+- [`.agents/rules/`](.agents/rules/)
+- [`.agents/evals/`](.agents/evals/)
 - catalogos e docs de delegacao/governanca aplicaveis
 - gates permanentes de arquitetura/modernizacao e integracoes criticas
 - endurecimento dos validadores para cobrar esses artefatos
@@ -235,7 +235,7 @@ codigo nesta rodada:
 
 ### atxtechbro/dotfiles
 
-- fonte: https://github.com/atxtechbro/dotfiles
+- fonte: [atxtechbro/dotfiles](https://github.com/atxtechbro/dotfiles)
 - sinais relevantes:
   - fonte unica de configuracao para multiplos harnesses de IA
   - `knowledge/` global separado de docs especificos do repo
@@ -247,7 +247,7 @@ codigo nesta rodada:
 
 ### jppferguson/dotfiles
 
-- fonte: https://github.com/jppferguson/dotfiles
+- fonte: [jppferguson/dotfiles](https://github.com/jppferguson/dotfiles)
 - sinais relevantes:
   - fluxo explicito para `install`, `status`, `diff`, `sync` e `backup` da configuracao de IA
   - estrategia de copia no lugar de symlink quando o harness tem bug conhecido
@@ -257,7 +257,7 @@ codigo nesta rodada:
 
 ### joshukraine/dotfiles
 
-- fonte: https://github.com/joshukraine/dotfiles
+- fonte: [joshukraine/dotfiles](https://github.com/joshukraine/dotfiles)
 - sinais relevantes:
   - comandos slash estruturados para o ciclo completo de desenvolvimento
   - presets composaveis de permissao
@@ -268,7 +268,7 @@ codigo nesta rodada:
 
 ### basnijholt/dotfiles
 
-- fonte: https://github.com/basnijholt/dotfiles
+- fonte: [basnijholt/dotfiles](https://github.com/basnijholt/dotfiles)
 - sinais relevantes:
   - arvore explicita de configs por ferramenta (`claude`, `codex`, `gemini`, `opencode`)
   - bootstrap cross-platform forte
@@ -281,10 +281,10 @@ codigo nesta rodada:
 ### Anthropic Claude Code Docs
 
 - fontes:
-  - settings: https://code.claude.com/docs/en/settings
-  - memory: https://code.claude.com/docs/en/memory
-  - hooks: https://code.claude.com/docs/en/hooks
-  - MCP: https://code.claude.com/docs/en/mcp
+  - [settings](https://code.claude.com/docs/en/settings)
+  - [memory](https://code.claude.com/docs/en/memory)
+  - [hooks](https://code.claude.com/docs/en/hooks)
+  - [MCP](https://code.claude.com/docs/en/mcp)
 - sinais relevantes:
   - hierarquia clara entre config de usuario, projeto e politica gerenciada
   - `CLAUDE.md` com imports

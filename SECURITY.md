@@ -8,8 +8,8 @@ Guia de seguranca para operar e publicar este repositorio.
 - arquivos `.env` plaintext (`.env`, `.env.local`, `.env.*`)
 - tokens exportados em texto
 - arquivos locais nao versionados:
-  - `bootstrap/user-config.yaml`
-  - `df/git/.gitconfig.local`
+  - config local do bootstrap documentada em [`docs/config-reference.md`](docs/config-reference.md#bootstrapuser-configyaml)
+  - derivado local de Git documentado em [`docs/secrets-and-auth.md`](docs/secrets-and-auth.md#ssh-agent-e-git-signing)
 - runtime local de IA:
   - `.gemini/`
   - sessoes, caches, bancos SQLite e historico

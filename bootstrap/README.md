@@ -34,7 +34,7 @@ Este README resume o fluxo operacional e os contratos principais.
 Arquivos:
 
 - [`bootstrap/user-config.yaml.tpl`](bootstrap/user-config.yaml.tpl): template versionado
-- `bootstrap/user-config.yaml`: arquivo local ignorado
+- arquivo local ignorado documentado em [`../docs/config-reference.md`](../docs/config-reference.md#bootstrapuser-configyaml)
 
 O YAML define:
 
@@ -51,7 +51,7 @@ Quando o YAML e validado ou regenerado, o bootstrap sincroniza:
 
 - [`df/secrets/secrets-ref.yaml`](df/secrets/secrets-ref.yaml)
 - [`bootstrap/secrets/.env.local.tpl`](bootstrap/secrets/.env.local.tpl)
-- `df/git/.gitconfig.local` local e nao versionado
+- derivado local nao versionado documentado em [`../docs/secrets-and-auth.md`](../docs/secrets-and-auth.md#ssh-agent-e-git-signing)
 
 ## Fluxo Windows full
 

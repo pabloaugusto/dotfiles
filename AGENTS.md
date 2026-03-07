@@ -73,8 +73,10 @@ Leia a skill mais proxima do escopo antes de editar arquivos relevantes.
 - Cada branch deve carregar um unico contexto coerente; separar assuntos independentes em branches diferentes.
 - [`docs/AI-WIP-TRACKER.md`](docs/AI-WIP-TRACKER.md) e a fonte de verdade do trabalho incremental de IA.
 - Em documentacao e comentarios que suportem links clicaveis, toda citacao
-  viavel a arquivo, pasta, task, workflow ou script do repo deve usar link
-  explicito para o alvo, nao apenas texto solto ou inline code.
+  viavel a arquivo, pasta, task, workflow, script do repo ou referencia
+  externa deve usar link explicito para o alvo, nao apenas texto solto ou
+  inline code. Paths locais fora do repo so podem ficar sem link quando nao
+  houver destino clicavel razoavel no proprio repositorio.
 - Mudancas em documentacao, catalogos e comentarios Markdown devem passar pelo
   `Curador Repo`, que e o responsavel por higiene documental e linkagem interna.
 - Nao versionar runtime local de IA: `.gemini/`, sessoes, auth, caches, browser profiles e historico.

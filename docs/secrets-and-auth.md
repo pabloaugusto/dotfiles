@@ -65,7 +65,7 @@ Arquivos:
 - [`df/ssh/config`](df/ssh/config)
 - [`df/ssh/config.windows`](df/ssh/config.windows)
 - [`df/ssh/config.unix`](df/ssh/config.unix)
-- `df/git/.gitconfig-*`
+- [diretorio `df/git/`](df/git/)
 
 Políticas:
 

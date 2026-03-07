@@ -8,11 +8,12 @@ inline seguros (JSON/TOML/etc.) ou que devem permanecer enxutos.
 - documentar significado de chaves sem quebrar sintaxe de consumidores
 - reduzir custo de manutenção para humanos e agentes de IA
 
-## `bootstrap/user-config.yaml`
+## [`bootstrap/user-config.yaml`](../bootstrap/user-config.yaml.tpl)
 
 Uso:
 
-- fonte única local de configuração do bootstrap (wizard + sincronização de derivados)
+- fonte única local de configuração do bootstrap (wizard + sincronização de derivados),
+  criada localmente a partir de [`bootstrap/user-config.yaml.tpl`](../bootstrap/user-config.yaml.tpl)
 
 Pontos críticos (OneDrive Windows):
 

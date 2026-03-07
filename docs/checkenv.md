@@ -84,5 +84,5 @@ As implementações tentam reautenticar uma vez quando possível:
 - `Signed commit test`:
   - revisar `user.signingkey`, signer e agent
 - `OneDrive root path` / `OneDrive profile links`:
-  - validar `paths.windows.*` no `bootstrap/user-config.yaml`
+  - validar `paths.windows.*` na config local documentada em [`config-reference.md`](config-reference.md#bootstrapuser-configyaml)
   - rerodar bootstrap para recriar links e revisar root ativa do OneDrive

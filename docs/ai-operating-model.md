@@ -28,12 +28,14 @@ Prompts, skills e fluxos de agentes devem ser tratados como codigo: versao, revi
 
 A automacao deve morar em scripts, tasks e workflows reutilizaveis. Isso reduz duplicacao e facilita evoluir CI/CD sem espalhar logica em varios pontos.
 
-### 4.1. Referencias internas sempre linkadas quando o formato permitir
+### 4.1. Referencias documentais sempre linkadas quando o formato permitir
 
 Em Markdown e comentarios com suporte a links clicaveis, referencias internas a
-arquivos, pastas, tasks, workflows e scripts do repo devem apontar para o alvo
-explicitamente. Texto solto ou apenas inline code abre espaco para drift, quebra
-de navegacao e documentacao menos auditavel.
+arquivos, pastas, tasks, workflows e scripts do repo, bem como referencias
+externas viaveis, devem apontar para o alvo explicitamente. Texto solto ou
+apenas inline code abre espaco para drift, quebra de navegacao e documentacao
+menos auditavel. Paths locais fora do repo podem permanecer em inline code
+somente quando nao houver destino clicavel razoavel no proprio repositorio.
 
 ### 5. Auditoria exaustiva antes de reuso cross-repo
 
@@ -141,6 +143,7 @@ Para evitar ambiguidades e drift:
 
 - links locais quebrados
 - referencias internas do repo sem link explicito nos Markdown governados
+- referencias externas viaveis sem link explicito nos Markdown governados
 - cobertura da camada documental ativa do repo, incluindo `README`, [`docs/`](docs/),
   [`LICOES-APRENDIDAS.md`](LICOES-APRENDIDAS.md) e [`.agents/`](.agents/) ativos
 
@@ -180,7 +183,7 @@ Esses documentos nao sao "marketing" do sistema; eles sao contratos de operacao 
 
 - [`AGENTS.md`](AGENTS.md)
 - [`LICOES-APRENDIDAS.md`](LICOES-APRENDIDAS.md)
-- `.agents/**`
+- [`.agents/`](.agents/) e sua arvore declarativa
 - [`docs/AI-SOURCE-AUDIT.md`](docs/AI-SOURCE-AUDIT.md)
 - [`docs/AI-WIP-TRACKER.md`](docs/AI-WIP-TRACKER.md)
 - [`docs/ROADMAP.md`](docs/ROADMAP.md)
@@ -233,8 +236,8 @@ Como [`df/`](df/) guarda apenas o que sera utilizado na maquina apos o bootstrap
 
 ## Fontes
 
-- OpenAI Prompting: https://platform.openai.com/docs/guides/prompting
-- OpenAI Evals: https://platform.openai.com/docs/guides/evals
-- OpenAI Evaluation Best Practices: https://platform.openai.com/docs/guides/evaluation-best-practices
-- GitHub Actions reusable workflows: https://docs.github.com/en/actions/reference/workflows-and-actions/reusing-workflow-configurations
-- GitHub Actions avoiding duplication: https://docs.github.com/actions/concepts/workflows-and-actions/avoiding-duplication
+- [OpenAI Prompting](https://platform.openai.com/docs/guides/prompting)
+- [OpenAI Evals](https://platform.openai.com/docs/guides/evals)
+- [OpenAI Evaluation Best Practices](https://platform.openai.com/docs/guides/evaluation-best-practices)
+- [GitHub Actions reusable workflows](https://docs.github.com/en/actions/reference/workflows-and-actions/reusing-workflow-configurations)
+- [GitHub Actions avoiding duplication](https://docs.github.com/actions/concepts/workflows-and-actions/avoiding-duplication)

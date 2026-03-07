@@ -1,6 +1,6 @@
 ---
 name: dotfiles-bootstrap
-description: Diagnosticar, ajustar e validar bootstrap, user-config, links canonicos, refresh/relink e derivados deste repo de dotfiles. Use quando a tarefa tocar [`bootstrap/`](bootstrap/), [`Taskfile.yml`](Taskfile.yml), `bootstrap/user-config.yaml(.tpl)`, symlinks, junctions, canonicalizacao de paths ou paridade Windows/WSL.
+description: Diagnosticar, ajustar e validar bootstrap, user-config, links canonicos, refresh/relink e derivados deste repo de dotfiles. Use quando a tarefa tocar [`bootstrap/`](bootstrap/), [`Taskfile.yml`](Taskfile.yml), a config de usuario do bootstrap documentada em [`docs/config-reference.md`](docs/config-reference.md#bootstrapuser-configyaml), symlinks, junctions, canonicalizacao de paths ou paridade Windows/WSL.
 ---
 
 # Dotfiles Bootstrap

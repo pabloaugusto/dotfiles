@@ -89,7 +89,7 @@ Snapshot tecnico do estado atual do repositorio, com foco em:
    - Esforco: **Medio**
 
 5. **Scripts legados ainda precisam de marcacao mais explicita**
-   - Evidencia: [`bootstrap/symlinks.ps1`](bootstrap/symlinks.ps1) e `bootstrap/scripts/*`
+   - Evidencia: [`bootstrap/symlinks.ps1`](bootstrap/symlinks.ps1) e o legado historico sob [`archive/`](archive/)
    - Impacto: arquivos antigos podem parecer caminhos ativos para quem entra no
      repo pela primeira vez.
    - Recomendacao: reforcar a fronteira entre caminho canonico e legado.

@@ -35,8 +35,13 @@ NON_REPO_REFERENCE_PREFIXES = (
 )
 LINK_RE = re.compile(r"\[[^\]]+\]\(([^)]+)\)")
 LINK_SPAN_RE = re.compile(r"\[[^\]]+\]\([^)]+\)")
+AUTO_LINK_SPAN_RE = re.compile(r"<(?:https?://[^>]+|mailto:[^>]+)>")
 INLINE_CODE_RE = re.compile(r"`([^`]+)`")
 FENCE_RE = re.compile(r"^(```|~~~)")
+URL_RE = re.compile(r"https?://[^\s<>()\]]+")
+PATH_TEXT_RE = re.compile(
+    r"(?P<target>(?:~?/)?(?:[A-Za-z0-9._-]+/)+(?:[A-Za-z0-9._-]+(?:\.[A-Za-z0-9._-]+)?/?)?)"
+)
 
 
 def iter_markdown_files() -> list[Path]:
@@ -65,6 +70,10 @@ def _is_external_link(target: str) -> bool:
     return parsed.scheme in {"http", "https", "mailto"}
 
 
+def _trim_trailing_punctuation(target: str) -> str:
+    return target.rstrip(".,;:!?")
+
+
 @lru_cache(maxsize=1)
 def _tracked_repo_entries() -> set[str]:
     """Retornar arquivos e diretorios rastreados pelo Git quando disponivel."""
@@ -91,6 +100,13 @@ def _tracked_repo_entries() -> set[str]:
     return entries
 
 
+@lru_cache(maxsize=1)
+def _repo_root_entries() -> set[str]:
+    if not ROOT.exists():
+        return set()
+    return {entry.name for entry in ROOT.iterdir()}
+
+
 def _looks_like_repo_reference(target: str) -> bool:
     cleaned = target.strip()
     if not cleaned:
@@ -107,8 +123,21 @@ def _looks_like_repo_reference(target: str) -> bool:
     )
 
 
+def _looks_like_repoish_reference(target: str) -> bool:
+    cleaned = _trim_trailing_punctuation(target.strip()).replace("\\", "/")
+    if not _looks_like_repo_reference(cleaned):
+        return False
+    if cleaned.startswith(("~/", "/")):
+        return False
+    first_segment = cleaned.split("/", maxsplit=1)[0]
+    tracked_entries = _tracked_repo_entries()
+    if tracked_entries and cleaned in tracked_entries:
+        return True
+    return first_segment in _repo_root_entries()
+
+
 def _resolve_local_target(source: Path, target: str) -> Path | None:
-    cleaned = target.strip()
+    cleaned = _trim_trailing_punctuation(target.strip())
     if not cleaned or _is_external_link(cleaned) or cleaned.startswith("#"):
         return None
 
@@ -138,6 +167,31 @@ def _span_inside_link(match_start: int, link_spans: list[tuple[int, int]]) -> bo
     return any(start <= match_start < end for start, end in link_spans)
 
 
+def _mask_spans(line: str, spans: list[tuple[int, int]]) -> str:
+    if not spans:
+        return line
+    chars = list(line)
+    for start, end in spans:
+        for idx in range(start, min(end, len(chars))):
+            chars[idx] = " "
+    return "".join(chars)
+
+
+def _iter_bare_repo_references(masked_line: str) -> list[str]:
+    hits: list[str] = []
+    occupied: list[tuple[int, int]] = []
+    for match in PATH_TEXT_RE.finditer(masked_line):
+        start, end = match.span("target")
+        if any(existing_start <= start < existing_end for existing_start, existing_end in occupied):
+            continue
+        target = _trim_trailing_punctuation(match.group("target").strip())
+        if not _looks_like_repo_reference(target):
+            continue
+        hits.append(target)
+        occupied.append((start, end))
+    return hits
+
+
 def validate_markdown_file(path: Path) -> list[str]:
     """Validar um arquivo Markdown individual."""
 
@@ -148,10 +202,15 @@ def validate_markdown_file(path: Path) -> list[str]:
         if FENCE_RE.match(line.strip()):
             inside_code_fence = not inside_code_fence
             continue
-        if inside_code_fence or line.lstrip().startswith("|"):
+        if inside_code_fence:
             continue
 
-        link_spans = [match.span() for match in LINK_SPAN_RE.finditer(line)]
+        link_spans = [
+            *[match.span() for match in LINK_SPAN_RE.finditer(line)],
+            *[match.span() for match in AUTO_LINK_SPAN_RE.finditer(line)],
+        ]
+        code_spans = [match.span() for match in INLINE_CODE_RE.finditer(line)]
+        masked_line = _mask_spans(line, [*link_spans, *code_spans])
         for match in LINK_RE.finditer(line):
             target = match.group(1)
             if _resolve_local_target(path, target) is None and not (
@@ -164,10 +223,30 @@ def validate_markdown_file(path: Path) -> list[str]:
         for match in INLINE_CODE_RE.finditer(line):
             if _span_inside_link(match.start(), link_spans):
                 continue
-            target = match.group(1).strip()
+            target = _trim_trailing_punctuation(match.group(1).strip())
+            if _is_external_link(target):
+                errors.append(
+                    f"{path.relative_to(ROOT)}:{line_number} referencia externa sem link: {target}"
+                )
+                continue
             if not _looks_like_repo_reference(target):
                 continue
-            if _resolve_local_target(path, target) is None:
+            if _resolve_local_target(path, target) is None and not _looks_like_repoish_reference(target):
+                continue
+            errors.append(
+                f"{path.relative_to(ROOT)}:{line_number} referencia interna sem link: {target}"
+            )
+
+        for match in URL_RE.finditer(masked_line):
+            target = _trim_trailing_punctuation(match.group(0).strip())
+            if not target:
+                continue
+            errors.append(
+                f"{path.relative_to(ROOT)}:{line_number} referencia externa sem link: {target}"
+            )
+
+        for target in _iter_bare_repo_references(masked_line):
+            if _resolve_local_target(path, target) is None and not _looks_like_repoish_reference(target):
                 continue
             errors.append(
                 f"{path.relative_to(ROOT)}:{line_number} referencia interna sem link: {target}"

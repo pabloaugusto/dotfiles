@@ -16,9 +16,9 @@
 
 ## Roteamento por escopo
 
-- `bootstrap/**`, `df/**` -> `bootstrap-operator`
-- [`AGENTS.md`](AGENTS.md), `.agents/**`, [`.codex/README.md`](.codex/README.md), `docs/**` -> `repo-governance-authority`
-- [`docs/AI-WIP-TRACKER.md`](docs/AI-WIP-TRACKER.md), `docs/ROADMAP*.md`, [`scripts/ai-worklog.py`](scripts/ai-worklog.py) -> `execution-worklog-governance-owner`
+- [`bootstrap/`](bootstrap/) e [`df/`](df/) -> `bootstrap-operator`
+- [`AGENTS.md`](AGENTS.md), [`.agents/`](.agents/), [`.codex/README.md`](.codex/README.md) e [`docs/`](docs/) -> `repo-governance-authority`
+- [`docs/AI-WIP-TRACKER.md`](docs/AI-WIP-TRACKER.md), [`docs/ROADMAP.md`](docs/ROADMAP.md), [`docs/ROADMAP-DECISIONS.md`](docs/ROADMAP-DECISIONS.md) e [`scripts/ai-worklog.py`](scripts/ai-worklog.py) -> `execution-worklog-governance-owner`
 - triagem, intake, decomposicao, delegacao -> `orchestrator`
 - qualquer analise substantiva -> `architecture-modernization-authority`
 - auth, secrets, `gh`, `op`, `sops`, `age`, `ssh-agent`, CI, sync, signing -> `critical-integrations-guardian`
@@ -35,10 +35,10 @@
 ## Artefatos declarativos
 
 - [`.agents/config.toml`](.agents/config.toml)
-- `.agents/registry/*.toml`
-- `.agents/orchestration/*`
-- `.agents/rules/*`
-- `.agents/evals/*`
+- [`.agents/registry/`](.agents/registry/) (`*.toml`)
+- [`.agents/orchestration/`](.agents/orchestration/)
+- [`.agents/rules/`](.agents/rules/)
+- [`.agents/evals/`](.agents/evals/)
 - [`docs/AI-AGENTS-CATALOG.md`](docs/AI-AGENTS-CATALOG.md)
 - [`docs/AI-SKILLS-CATALOG.md`](docs/AI-SKILLS-CATALOG.md)
 - [`docs/AI-GOVERNANCE-AND-REGRESSION.md`](docs/AI-GOVERNANCE-AND-REGRESSION.md)

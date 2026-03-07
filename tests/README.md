@@ -38,10 +38,10 @@ Escopo atual:
 Harnesses atuais:
 
 - [`tests/bash/bootstrap_relink_integration.bats`](tests/bash/bootstrap_relink_integration.bats)
-  - valida `bootstrap/bootstrap-ubuntu-wsl.sh relink`
+  - valida o script [`bootstrap/bootstrap-ubuntu-wsl.sh`](../bootstrap/bootstrap-ubuntu-wsl.sh) com o argumento `relink`
   - usa `HOME` temporario e repo injetado por `DOTFILES_REPO_ROOT_UNIX`
 - [`scripts/run-windows-bootstrap-integration.ps1`](scripts/run-windows-bootstrap-integration.ps1)
-  - valida `bootstrap/bootstrap-windows.ps1 -RelinkOnly`
+  - valida o script [`bootstrap/bootstrap-windows.ps1`](../bootstrap/bootstrap-windows.ps1) com a flag `-RelinkOnly`
   - usa perfil temporario, `Documents` isolado e repo injetado no Windows real
 
 ### CI canonico
