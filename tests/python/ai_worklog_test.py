@@ -9,6 +9,7 @@ import unittest
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 SCRIPT = ROOT / "scripts" / "ai-worklog.py"
+REVIEW_SCRIPT = ROOT / "scripts" / "ai-review.py"
 
 DOING_START = "<!-- ai-worklog:doing:start -->"
 DOING_END = "<!-- ai-worklog:doing:end -->"
@@ -19,6 +20,16 @@ LOG_END = "<!-- ai-worklog:log:end -->"
 def run_worklog(*args: str, check: bool = True) -> subprocess.CompletedProcess[str]:
     return subprocess.run(
         [sys.executable, str(SCRIPT), *args],
+        cwd=ROOT,
+        text=True,
+        capture_output=True,
+        check=check,
+    )
+
+
+def run_review(*args: str, check: bool = True) -> subprocess.CompletedProcess[str]:
+    return subprocess.run(
+        [sys.executable, str(REVIEW_SCRIPT), *args],
         cwd=ROOT,
         text=True,
         capture_output=True,
@@ -426,6 +437,99 @@ class AiWorklogTests(unittest.TestCase):
             )
             self.assertNotEqual(failed.returncode, 0)
             self.assertIn("--lessons-decision", f"{failed.stdout}\n{failed.stderr}")
+
+    def test_done_blocks_without_specialized_review_for_python_scope(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            tracker = pathlib.Path(tmp) / "tracker.md"
+            lessons = pathlib.Path(tmp) / "lessons.md"
+            reviews = pathlib.Path(tmp) / "reviews.md"
+            run_worklog(
+                "start",
+                "--file",
+                str(tracker),
+                "--message",
+                "Ajustar validador Python",
+                "--worklog-id",
+                "WIP-TEST-PY-REVIEW",
+            )
+            failed = run_worklog(
+                "done",
+                "--file",
+                str(tracker),
+                "--lessons-file",
+                str(lessons),
+                "--review-file",
+                str(reviews),
+                "--repo-root",
+                str(ROOT),
+                "--review-paths",
+                "scripts/validate-ai-assets.py",
+                "--worklog-id",
+                "WIP-TEST-PY-REVIEW",
+                "--delivery",
+                "Entrega Python",
+                "--lessons-decision",
+                "sem_nova_licao",
+                "--lessons-summary",
+                "Sem nova licao nesta regressao",
+                check=False,
+            )
+            self.assertNotEqual(failed.returncode, 0)
+            self.assertIn("python-reviewer", f"{failed.stdout}\n{failed.stderr}")
+
+    def test_done_allows_specialized_review_after_approval(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            tracker = pathlib.Path(tmp) / "tracker.md"
+            lessons = pathlib.Path(tmp) / "lessons.md"
+            reviews = pathlib.Path(tmp) / "reviews.md"
+            run_worklog(
+                "start",
+                "--file",
+                str(tracker),
+                "--message",
+                "Ajustar validador Python",
+                "--worklog-id",
+                "WIP-TEST-PY-REVIEW-OK",
+            )
+            run_review(
+                "record",
+                "--review-file",
+                str(reviews),
+                "--worklog-id",
+                "WIP-TEST-PY-REVIEW-OK",
+                "--reviewer",
+                "python-reviewer",
+                "--status",
+                "aprovado",
+                "--summary",
+                "Revisao especializada aprovada.",
+                "--paths",
+                "scripts/validate-ai-assets.py",
+                "--evidence",
+                "task test:unit:python:windows",
+            )
+            completed = run_worklog(
+                "done",
+                "--file",
+                str(tracker),
+                "--lessons-file",
+                str(lessons),
+                "--review-file",
+                str(reviews),
+                "--repo-root",
+                str(ROOT),
+                "--review-paths",
+                "scripts/validate-ai-assets.py",
+                "--worklog-id",
+                "WIP-TEST-PY-REVIEW-OK",
+                "--delivery",
+                "Entrega Python",
+                "--lessons-decision",
+                "sem_nova_licao",
+                "--lessons-summary",
+                "Sem nova licao nesta regressao",
+            )
+            self.assertEqual(completed.returncode, 0, msg=f"{completed.stdout}\n{completed.stderr}")
 
 
 if __name__ == "__main__":

@@ -18,6 +18,7 @@ from scripts.ai_lessons_lib import (
     upsert_review,
     validate_review_request,
 )
+from scripts.ai_review_lib import check_review_gate, ensure_review_file, parse_paths_csv
 from scripts.ai_roadmap_lib import (
     ensure_decisions_file as ensure_governed_decisions_file,
 )
@@ -67,7 +68,7 @@ LOG_HEADERS = [
     "Contexto",
     "Notas",
 ]
-SUGGESTION_HEADERS = ["ID", "Descricao", "Status", "RM", "Captura", "Atualizacao"]
+SUGGESTION_HEADERS = ["ID", "Tipo", "Descricao", "Status", "RM", "Captura", "Atualizacao"]
 ALLOWED_PENDING_ACTIONS = {"", "concluir_primeiro", "roadmap_pendente"}
 
 
@@ -433,6 +434,7 @@ def add_suggestions(
         added.append(
             {
                 "ID": suggestion_id,
+                "Tipo": "governance",
                 "Descricao": normalize_cell(description, max_len=180),
                 "Status": "pendente",
                 "RM": "",
@@ -448,10 +450,12 @@ def run_ensure(args: argparse.Namespace) -> None:
     roadmap = Path(args.roadmap_file)
     decisions = Path(args.decisions_file)
     lessons = Path(args.lessons_file)
+    reviews = Path(args.review_file)
     ensure_tracker_file(tracker)
     ensure_roadmap_file(roadmap)
     ensure_governed_decisions_file(decisions)
     ensure_lessons_file(lessons)
+    ensure_review_file(reviews)
     refresh_roadmap(roadmap_path=roadmap, decisions_path=decisions)
     print(
         json.dumps(
@@ -460,6 +464,7 @@ def run_ensure(args: argparse.Namespace) -> None:
                 "roadmap_file": str(roadmap),
                 "decisions_file": str(decisions),
                 "lessons_file": str(lessons),
+                "review_file": str(reviews),
                 "status": "ensured",
             },
             ensure_ascii=False,
@@ -677,8 +682,10 @@ def run_update(args: argparse.Namespace) -> None:
 def run_done(args: argparse.Namespace) -> None:
     tracker = Path(args.file)
     lessons = Path(args.lessons_file)
+    reviews = Path(args.review_file)
     ensure_tracker_file(tracker)
     ensure_lessons_file(lessons)
+    ensure_review_file(reviews)
     doing, done, log = load_tracker(tracker)
     target = (args.worklog_id or "").strip()
     current = None
@@ -690,6 +697,20 @@ def run_done(args: argparse.Namespace) -> None:
             remaining.append(row)
     if current is None:
         raise SystemExit(f"Worklog ID nao encontrado em Doing: {target}")
+    review_repo_root = Path(args.repo_root).resolve() if (args.repo_root or "").strip() else tracker.parent.resolve()
+    review_gate = check_review_gate(
+        review_path=reviews,
+        worklog_id=target,
+        repo_root=review_repo_root,
+        intent=args.review_intent or current["Tarefa"],
+        risk=args.review_risk,
+        paths=parse_paths_csv(args.review_paths),
+    )
+    if not review_gate["ok"]:
+        raise SystemExit(
+            "Fechamento bloqueado por revisao especializada:\n- "
+            + "\n- ".join(review_gate["errors"])
+        )
     lesson_ids = normalize_lesson_ids(args.lessons_ids or "")
     validate_review_request(
         path=lessons,
@@ -845,9 +866,10 @@ def build_parser() -> argparse.ArgumentParser:
 
     ensure = sub.add_parser("ensure")
     ensure.add_argument("--file", default="docs/AI-WIP-TRACKER.md")
-    ensure.add_argument("--roadmap-file", default="docs/ROADMAP.md")
+    ensure.add_argument("--roadmap-file", default="ROADMAP.md")
     ensure.add_argument("--decisions-file", default="docs/ROADMAP-DECISIONS.md")
     ensure.add_argument("--lessons-file", default="LICOES-APRENDIDAS.md")
+    ensure.add_argument("--review-file", default="docs/AI-REVIEW-LEDGER.md")
     ensure.set_defaults(func=run_ensure)
 
     list_cmd = sub.add_parser("list")
@@ -905,6 +927,11 @@ def build_parser() -> argparse.ArgumentParser:
     done = sub.add_parser("done")
     done.add_argument("--file", default="docs/AI-WIP-TRACKER.md")
     done.add_argument("--lessons-file", default="LICOES-APRENDIDAS.md")
+    done.add_argument("--review-file", default="docs/AI-REVIEW-LEDGER.md")
+    done.add_argument("--repo-root", default="")
+    done.add_argument("--review-paths", default="")
+    done.add_argument("--review-intent", default="")
+    done.add_argument("--review-risk", default="medium")
     done.add_argument("--worklog-id", required=True)
     done.add_argument("--delivery", required=True)
     done.add_argument("--evidence", default="")
@@ -916,7 +943,7 @@ def build_parser() -> argparse.ArgumentParser:
 
     roadmap_pending = sub.add_parser("roadmap-pending")
     roadmap_pending.add_argument("--file", default="docs/AI-WIP-TRACKER.md")
-    roadmap_pending.add_argument("--roadmap-file", default="docs/ROADMAP.md")
+    roadmap_pending.add_argument("--roadmap-file", default="ROADMAP.md")
     roadmap_pending.add_argument("--worklog-id", required=True)
     roadmap_pending.add_argument("--decisions-file", default="docs/ROADMAP-DECISIONS.md")
     roadmap_pending.add_argument("--suggestion", default="")
@@ -930,7 +957,7 @@ def build_parser() -> argparse.ArgumentParser:
 
     sync_roadmap = sub.add_parser("sync-roadmap")
     sync_roadmap.add_argument("--file", default="docs/AI-WIP-TRACKER.md")
-    sync_roadmap.add_argument("--roadmap-file", default="docs/ROADMAP.md")
+    sync_roadmap.add_argument("--roadmap-file", default="ROADMAP.md")
     sync_roadmap.add_argument("--decisions-file", default="docs/ROADMAP-DECISIONS.md")
     sync_roadmap.add_argument("--worklog-id", default="")
     sync_roadmap.add_argument("--limit", type=int, default=0)

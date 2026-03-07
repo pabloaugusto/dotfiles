@@ -64,6 +64,8 @@ class AiRoadmapTests(unittest.TestCase):
                 "pending",
                 "--horizon",
                 "next",
+                "--change-type",
+                "fix",
                 "--suggestion",
                 "Retomar hardening de harness Windows",
                 "--suggestion-id",
@@ -76,7 +78,9 @@ class AiRoadmapTests(unittest.TestCase):
             decisions_text = decisions.read_text(encoding="utf-8")
 
             self.assertIn("Retomar hardening de harness Windows", roadmap_text)
+            self.assertIn("[fix] Retomar hardening de harness Windows", roadmap_text)
             self.assertIn("SG-TEST-001", decisions_text)
+            self.assertIn("| fix | Retomar hardening de harness Windows |", decisions_text)
             self.assertIn("worklog=WIP-TEST-001", decisions_text)
 
     def test_refresh_deduplicates_cycle_history_for_same_cycle(self) -> None:
@@ -225,6 +229,8 @@ class AiRoadmapTests(unittest.TestCase):
                     "accepted",
                     "--horizon",
                     "next",
+                    "--change-type",
+                    "ops",
                     "--suggestion",
                     suggestion,
                     "--suggestion-id",
@@ -235,7 +241,7 @@ class AiRoadmapTests(unittest.TestCase):
 
             self.assertEqual(
                 decisions_text.count(
-                    "| decisao=accepted | horizonte=next | item=Criar tasks/CLIs ai:status, ai:diff, ai:sync e ai:backup."
+                    "| decisao=accepted | horizonte=next | tipo=ops | item=Criar tasks/CLIs ai:status, ai:diff, ai:sync e ai:backup."
                 ),
                 1,
             )

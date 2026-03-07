@@ -38,9 +38,9 @@ Mapa das documentacoes versionadas do projeto e ordem recomendada de leitura.
 ## Governanca e IA
 
 - [`docs/ai-operating-model.md`](docs/ai-operating-model.md): contrato da camada de IA.
-- [`docs/AI-WIP-TRACKER.md`](docs/AI-WIP-TRACKER.md): continuidade operacional do trabalho em curso.
-- [`docs/ROADMAP.md`](docs/ROADMAP.md): backlog priorizado e sugestoes.
-- [`docs/ROADMAP-DECISIONS.md`](docs/ROADMAP-DECISIONS.md): historico das decisoes do roadmap.
+- [`AI-WIP-TRACKER.md`](AI-WIP-TRACKER.md): continuidade operacional do trabalho em curso.
+- [`../ROADMAP.md`](../ROADMAP.md): backlog priorizado e sugestoes.
+- [`ROADMAP-DECISIONS.md`](ROADMAP-DECISIONS.md): historico das decisoes do roadmap.
 - [`docs/AI-AGENTS-CATALOG.md`](docs/AI-AGENTS-CATALOG.md): catalogo dos agentes do repo.
 - [`docs/AI-SKILLS-CATALOG.md`](docs/AI-SKILLS-CATALOG.md): catalogo das skills.
 - [`docs/AI-DELEGATION-FLOW.md`](docs/AI-DELEGATION-FLOW.md): fluxo de intake, roteamento e delegacao.

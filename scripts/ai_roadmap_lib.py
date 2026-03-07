@@ -26,6 +26,7 @@ AUTOLOG_END = "<!-- roadmap:autolog:end -->"
 
 BACKLOG_HEADERS = [
     "ID",
+    "Tipo",
     "Iniciativa",
     "R",
     "I",
@@ -37,7 +38,21 @@ BACKLOG_HEADERS = [
     "JS",
     "Status",
 ]
-SUGGESTION_HEADERS = ["ID", "Descricao", "Status", "RM", "Captura", "Atualizacao"]
+LEGACY_BACKLOG_HEADERS = [
+    "ID",
+    "Iniciativa",
+    "R",
+    "I",
+    "C",
+    "E",
+    "BV",
+    "TC",
+    "RR",
+    "JS",
+    "Status",
+]
+SUGGESTION_HEADERS = ["ID", "Tipo", "Descricao", "Status", "RM", "Captura", "Atualizacao"]
+LEGACY_SUGGESTION_HEADERS = ["ID", "Descricao", "Status", "RM", "Captura", "Atualizacao"]
 
 LIST_MARKERS = {
     "now": (NOW_START, NOW_END),
@@ -54,6 +69,19 @@ DECISION_TO_STATUS = {
 ALLOWED_DECISIONS = set(DECISION_TO_STATUS)
 ALLOWED_HORIZONS = {"now", "next", "later"}
 ALLOWED_SUGGESTION_STATUSES = {"pendente", "aceita", "descartada", "aplicar_depois"}
+ALLOWED_CHANGE_TYPES = {
+    "chore",
+    "docs",
+    "feat",
+    "fix",
+    "governance",
+    "improvement",
+    "ops",
+    "refactor",
+    "research",
+    "security",
+    "test",
+}
 INACTIVE_BACKLOG_STATUSES = {
     "done",
     "concluido",
@@ -68,6 +96,7 @@ INACTIVE_BACKLOG_STATUSES = {
 @dataclass(frozen=True)
 class RoadmapItem:
     item_id: str
+    change_type: str
     initiative: str
     reach: float
     impact: float
@@ -124,6 +153,13 @@ def normalize_text(value: str) -> str:
     return " ".join(plain.strip().lower().split())
 
 
+def normalize_change_type(value: str, *, default: str = "improvement") -> str:
+    normalized = normalize_text(value) or default
+    if normalized not in ALLOWED_CHANGE_TYPES:
+        return default
+    return normalized
+
+
 def normalize_cell(value: str, *, max_len: int = 220) -> str:
     compact = " ".join((value or "").split()).replace("|", "/")
     if not compact:
@@ -135,6 +171,7 @@ def normalize_cell(value: str, *, max_len: int = 220) -> str:
 
 def semantic_entry_key(value: str) -> str:
     base = (value or "").split("| notas=", 1)[0].strip()
+    base = re.sub(r"^(?:\[[^\]]+\]\s*)+", "", base)
     normalized = normalize_text(base)
     if normalized.endswith("..."):
         return normalized[:-3].rstrip()
@@ -162,18 +199,34 @@ def parse_row(line: str) -> list[str]:
     return [cell.strip() for cell in stripped.strip("|").split("|")]
 
 
-def parse_table(section: str, headers: list[str], *, label: str) -> list[dict[str, str]]:
+def parse_table(
+    section: str,
+    headers: list[str],
+    *,
+    label: str,
+    legacy_headers: list[str] | None = None,
+    default_row: dict[str, str] | None = None,
+) -> list[dict[str, str]]:
     lines = [line.strip() for line in section.splitlines() if line.strip().startswith("|")]
     if not lines:
         return []
-    if parse_row(lines[0]) != headers:
+    actual_headers = parse_row(lines[0])
+    selected_headers = headers
+    if actual_headers == headers:
+        selected_headers = headers
+    elif legacy_headers and actual_headers == legacy_headers:
+        selected_headers = legacy_headers
+    else:
         raise ValueError(f"Cabecalho inesperado em {label}")
     rows: list[dict[str, str]] = []
     for line in lines[2:]:
         values = parse_row(line)
         if values[0] == "(sem itens)":
             continue
-        rows.append({headers[idx]: values[idx] for idx in range(len(headers))})
+        row = {selected_headers[idx]: values[idx] for idx in range(len(selected_headers))}
+        normalized_row = dict(default_row or {})
+        normalized_row.update(row)
+        rows.append({header: normalized_row.get(header, "") for header in headers})
     return rows
 
 
@@ -249,11 +302,11 @@ Planejamento incremental para qualidade, testes, bootstrap e governanca do repo.
 Edite apenas a tabela entre os marcadores abaixo.
 
 <!-- roadmap:backlog:start -->
-| ID | Iniciativa | R | I | C | E | BV | TC | RR | JS | Status |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| RM-001 | Harness Linux para bootstrap e relink | 400 | 2.6 | 0.8 | 8 | 8 | 7 | 6 | 5 | proposed |
-| RM-002 | Harness Windows real em CI | 380 | 2.8 | 0.7 | 13 | 9 | 8 | 7 | 8 | proposed |
-| RM-003 | Governanca de worklog e roadmap com enforcement | 320 | 2.4 | 0.85 | 5 | 9 | 7 | 8 | 4 | in_progress |
+| ID | Tipo | Iniciativa | R | I | C | E | BV | TC | RR | JS | Status |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| RM-001 | feat | Harness Linux para bootstrap e relink | 400 | 2.6 | 0.8 | 8 | 8 | 7 | 6 | 5 | proposed |
+| RM-002 | feat | Harness Windows real em CI | 380 | 2.8 | 0.7 | 13 | 9 | 8 | 7 | 8 | proposed |
+| RM-003 | governance | Governanca de worklog e roadmap com enforcement | 320 | 2.4 | 0.85 | 5 | 9 | 7 | 8 | 4 | in_progress |
 <!-- roadmap:backlog:end -->
 
 ## Priorizacao Automatica
@@ -364,6 +417,7 @@ def load_roadmap_items(backlog_rows: list[dict[str, str]]) -> list[RoadmapItem]:
         items.append(
             RoadmapItem(
                 item_id=item_id,
+                change_type=normalize_change_type(row.get("Tipo", "")),
                 initiative=row["Iniciativa"].strip(),
                 reach=parse_float(row["R"], field_name="R", item_id=item_id),
                 impact=parse_float(row["I"], field_name="I", item_id=item_id),
@@ -388,6 +442,15 @@ def validate_suggestion_rows(rows: list[dict[str, str]]) -> None:
     if invalid:
         raise ValueError(
             "Status invalidos encontrados em sugestoes de roadmap: " + ", ".join(invalid)
+        )
+    invalid_types = [
+        row["ID"]
+        for row in rows
+        if normalize_change_type(row.get("Tipo", "")) != normalize_text(row.get("Tipo", "") or "improvement")
+    ]
+    if invalid_types:
+        raise ValueError(
+            "Tipos invalidos encontrados em sugestoes de roadmap: " + ", ".join(invalid_types)
         )
 
 
@@ -431,7 +494,10 @@ def build_priority_section(
             "",
             "### Referencia de IDs",
             "",
-            *[f"- `{item.item_id}`: {item.initiative}" for item in active],
+            *[
+                f"- `{item.item_id}` [{item.change_type}]: {item.initiative}"
+                for item in active
+            ],
             "",
             "### Sequencia Recomendada",
             "",
@@ -497,7 +563,13 @@ def build_cycle_entry(
 def load_suggestion_rows(path: Path) -> tuple[str, list[dict[str, str]]]:
     raw = path.read_text(encoding="utf-8")
     section = extract_between(raw, SUGGESTIONS_START, SUGGESTIONS_END, label=str(path))
-    return raw, parse_table(section, SUGGESTION_HEADERS, label=str(path))
+    return raw, parse_table(
+        section,
+        SUGGESTION_HEADERS,
+        label=str(path),
+        legacy_headers=LEGACY_SUGGESTION_HEADERS,
+        default_row={"Tipo": "improvement"},
+    )
 
 
 def save_suggestion_rows(path: Path, raw: str, rows: list[dict[str, str]]) -> str:
@@ -573,6 +645,7 @@ def upsert_suggestion(
     *,
     suggestion: str,
     decision: str,
+    change_type: str = "improvement",
     suggestion_id: str = "",
     roadmap_id: str = "",
 ) -> tuple[list[dict[str, str]], str]:
@@ -580,6 +653,7 @@ def upsert_suggestion(
     chosen_id = suggestion_id.strip()
     current_date = today_utc_iso()
     status = DECISION_TO_STATUS[decision]
+    normalized_type = normalize_change_type(change_type)
     updated_rows = [dict(row) for row in rows]
 
     target_index = -1
@@ -597,6 +671,7 @@ def upsert_suggestion(
 
     if target_index >= 0:
         row = updated_rows[target_index]
+        row["Tipo"] = normalized_type
         row["Descricao"] = normalize_cell(suggestion, max_len=180)
         row["Status"] = status
         row["RM"] = normalize_cell(roadmap_id, max_len=40) if roadmap_id else row.get("RM", "")
@@ -607,6 +682,7 @@ def upsert_suggestion(
             0,
             {
                 "ID": chosen_id,
+                "Tipo": normalized_type,
                 "Descricao": normalize_cell(suggestion, max_len=180),
                 "Status": status,
                 "RM": normalize_cell(roadmap_id, max_len=40) if roadmap_id else "",
@@ -631,7 +707,7 @@ def add_unique_entry(items: list[str], entry: str) -> list[str]:
 
 def autolog_signature(line: str) -> str:
     match = re.match(
-        r"^- .*?\| decisao=(?P<decision>[^|]+) \| horizonte=(?P<horizon>[^|]+) \| item=(?P<item>.*?)(?: \| notas=.*)?$",
+        r"^- .*?\| decisao=(?P<decision>[^|]+) \| horizonte=(?P<horizon>[^|]+)(?: \| tipo=(?P<change_type>[^|]+))? \| item=(?P<item>.*?)(?: \| notas=.*)?$",
         line.strip(),
     )
     if not match:
@@ -640,6 +716,7 @@ def autolog_signature(line: str) -> str:
         [
             normalize_text(match.group("decision")),
             normalize_text(match.group("horizon")),
+            normalize_text(match.group("change_type") or "improvement"),
             semantic_entry_key(match.group("item")),
         ]
     )
@@ -671,7 +748,13 @@ def refresh_roadmap(
         decisions_raw, SUGGESTIONS_START, SUGGESTIONS_END, label=str(decisions_path)
     )
 
-    backlog_rows = parse_table(backlog_section, BACKLOG_HEADERS, label=str(roadmap_path))
+    backlog_rows = parse_table(
+        backlog_section,
+        BACKLOG_HEADERS,
+        label=str(roadmap_path),
+        legacy_headers=LEGACY_BACKLOG_HEADERS,
+        default_row={"Tipo": "improvement"},
+    )
     suggestion_rows = parse_table(suggestion_section, SUGGESTION_HEADERS, label=str(decisions_path))
     validate_suggestion_rows(suggestion_rows)
 
@@ -711,6 +794,7 @@ def register_roadmap_decision(
     suggestion: str,
     decision: str,
     horizon: str = "next",
+    change_type: str = "improvement",
     notes: str = "",
     suggestion_id: str = "",
     roadmap_id: str = "",
@@ -718,6 +802,7 @@ def register_roadmap_decision(
 ) -> dict[str, object]:
     normalized_decision = decision.strip().lower()
     normalized_horizon = horizon.strip().lower() or "next"
+    normalized_change_type = normalize_change_type(change_type)
     if normalized_decision not in ALLOWED_DECISIONS:
         raise ValueError("Decisao invalida. Use: accepted, pending ou discarded.")
     if normalized_horizon not in ALLOWED_HORIZONS:
@@ -730,7 +815,7 @@ def register_roadmap_decision(
     cycle_value = cycle.strip() or current_cycle_utc()
     clean_suggestion = normalize_cell(suggestion, max_len=180)
     note_suffix = f" | notas={normalize_cell(notes, max_len=140)}" if notes.strip() else ""
-    roadmap_entry = f"{clean_suggestion}{note_suffix}"
+    roadmap_entry = f"[{normalized_change_type}] {clean_suggestion}{note_suffix}"
 
     roadmap_raw = apply_metadata(
         roadmap_path.read_text(encoding="utf-8"), updated_at=updated_at, cycle=cycle_value
@@ -769,6 +854,7 @@ def register_roadmap_decision(
         suggestion_rows,
         suggestion=clean_suggestion,
         decision=normalized_decision,
+        change_type=normalized_change_type,
         suggestion_id=suggestion_id,
         roadmap_id=roadmap_id,
     )
@@ -779,7 +865,7 @@ def register_roadmap_decision(
     )
     autolog_line = (
         f"- {updated_at} | decisao={normalized_decision} | horizonte={normalized_horizon} "
-        f"| item={clean_suggestion}{note_suffix}"
+        f"| tipo={normalized_change_type} | item={clean_suggestion}{note_suffix}"
     )
     signature = autolog_signature(autolog_line)
     autolog_lines = [line for line in autolog_lines if autolog_signature(line) != signature]
@@ -799,4 +885,5 @@ def register_roadmap_decision(
         "suggestion_id": chosen_id,
         "decision": normalized_decision,
         "horizon": normalized_horizon,
+        "change_type": normalized_change_type,
     }

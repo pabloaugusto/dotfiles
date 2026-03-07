@@ -47,6 +47,7 @@ def run_register(args: argparse.Namespace) -> None:
         suggestion=args.suggestion,
         decision=args.decision,
         horizon=args.horizon,
+        change_type=args.change_type,
         notes=args.notes,
         suggestion_id=args.suggestion_id,
         roadmap_id=args.roadmap_id,
@@ -65,22 +66,23 @@ def build_parser() -> argparse.ArgumentParser:
     sub = parser.add_subparsers(dest="command", required=True)
 
     ensure = sub.add_parser("ensure")
-    ensure.add_argument("--roadmap-file", default="docs/ROADMAP.md")
+    ensure.add_argument("--roadmap-file", default="ROADMAP.md")
     ensure.add_argument("--decisions-file", default="docs/ROADMAP-DECISIONS.md")
     ensure.set_defaults(func=run_ensure)
 
     refresh = sub.add_parser("refresh")
-    refresh.add_argument("--roadmap-file", default="docs/ROADMAP.md")
+    refresh.add_argument("--roadmap-file", default="ROADMAP.md")
     refresh.add_argument("--decisions-file", default="docs/ROADMAP-DECISIONS.md")
     refresh.add_argument("--cycle", default="")
     refresh.set_defaults(func=run_refresh)
 
     register = sub.add_parser("register")
-    register.add_argument("--roadmap-file", default="docs/ROADMAP.md")
+    register.add_argument("--roadmap-file", default="ROADMAP.md")
     register.add_argument("--decisions-file", default="docs/ROADMAP-DECISIONS.md")
     register.add_argument("--suggestion", required=True)
     register.add_argument("--decision", choices=["accepted", "pending", "discarded"], required=True)
     register.add_argument("--horizon", choices=["now", "next", "later"], default="next")
+    register.add_argument("--change-type", default="improvement")
     register.add_argument("--notes", default="")
     register.add_argument("--suggestion-id", default="")
     register.add_argument("--roadmap-id", default="")
