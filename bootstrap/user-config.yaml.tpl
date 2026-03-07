@@ -51,6 +51,12 @@ git:
   # A chave privada deve ficar no 1Password.
   signing_key: "@@GIT_SIGNING_KEY@@"
 
+  # Ref opcional do 1Password para a chave PUBLICA SSH do signer tecnico
+  # de automacao usado por worktrees/agentes.
+  # Exemplo: "op://secrets/dotfiles/git-automation/public key"
+  # Isso facilita rotacao sem espalhar configuracao manual.
+  automation_signing_key_ref: "@@GIT_AUTOMATION_SIGNING_KEY_REF@@"
+
 # =============================================================================
 # 3. Caminhos e links do Windows
 # =============================================================================

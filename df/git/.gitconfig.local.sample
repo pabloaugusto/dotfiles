@@ -25,6 +25,9 @@
     # Keep private keys only inside 1Password SSH Agent.
     signingkey = ssh-ed25519 AAAA_REPLACE_WITH_YOUR_PUBLIC_SSH_SIGNING_KEY
 
+# Worktrees/agentes podem alternar para um signer tecnico de automacao usando
+# as tasks git:signing:* e config.worktree. Nao replique essa chave aqui.
+
 [commit]
     # Sign commits by default.
     gpgsign = true

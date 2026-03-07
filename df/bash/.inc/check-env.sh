@@ -8,11 +8,28 @@
 # - Git SSH signing with 1Password signer
 
 checkEnv() {
+  local requested_mode="${1:-${DOTFILES_GIT_SIGN_MODE:-auto}}"
+  case "$requested_mode" in
+    auto|human|automation) ;;
+    *)
+      echo "checkEnv: modo de assinatura invalido: $requested_mode" >&2
+      return 1
+      ;;
+  esac
+
   # Result accumulator used to build a structured summary at the end.
   local _results=()
   local _fixes=()
   local _tmp_dir=""
   local _tmp_out=""
+  local git_probe=""
+  local git_probe_tmp=""
+  local resolved_mode=""
+  local automation_key_ref=""
+  local gpg_format=""
+  local commit_sign=""
+  local signing_key=""
+  local gpg_program=""
 
   # Adds a normalized status entry to in-memory report.
   _add_result() {
@@ -114,7 +131,12 @@ checkEnv() {
       _add_result "fail" "1Password CLI session" "op whoami falhou (inclusive apos 1 retry)." "Garanta OP_SERVICE_ACCOUNT_TOKEN valido e execute 'op whoami'."
     fi
 
-    local refs_file="$HOME/dotfiles/df/secrets/secrets-ref.yaml"
+    local refs_file=""
+    if [ -n "$git_probe" ] && [ -f "$git_probe/df/secrets/secrets-ref.yaml" ]; then
+      refs_file="$git_probe/df/secrets/secrets-ref.yaml"
+    elif [ -f "$HOME/dotfiles/df/secrets/secrets-ref.yaml" ]; then
+      refs_file="$HOME/dotfiles/df/secrets/secrets-ref.yaml"
+    fi
     if [ -f "$refs_file" ]; then
       while IFS= read -r ref; do
         [ -n "$ref" ] || continue
@@ -177,19 +199,31 @@ checkEnv() {
 
   # Git signature policy checks (resolved in context of dotfiles repo when present).
   if command -v git >/dev/null 2>&1; then
-    local git_probe="$HOME/dotfiles"
-    local git_probe_tmp=""
-    if [ ! -d "$git_probe/.git" ]; then
+    git_probe="$(git rev-parse --show-toplevel 2>/dev/null || true)"
+    if [ -z "$git_probe" ] || [ ! -d "$git_probe/.git" ]; then
       git_probe_tmp="$(mktemp -d "$HOME/checkenv-probe.XXXXXX")"
       git -C "$git_probe_tmp" init -q >/dev/null 2>&1 || true
       git_probe="$git_probe_tmp"
     fi
 
-    local gpg_format commit_sign signing_key gpg_program
     gpg_format="$(git -C "$git_probe" config --get gpg.format 2>/dev/null)"
     commit_sign="$(git -C "$git_probe" config --get commit.gpgsign 2>/dev/null)"
     signing_key="$(git -C "$git_probe" config --get user.signingkey 2>/dev/null)"
     gpg_program="$(git -C "$git_probe" config --get gpg.ssh.program 2>/dev/null)"
+    local worktree_mode
+    worktree_mode="$(git -C "$git_probe" config --worktree --get dotfiles.signing.mode 2>/dev/null || true)"
+    automation_key_ref="$(git -C "$git_probe" config --worktree --get dotfiles.signing.automationPublicKeyRef 2>/dev/null || true)"
+    if [ "$requested_mode" = "auto" ]; then
+      if [ "$worktree_mode" = "automation" ]; then
+        resolved_mode="automation"
+      else
+        resolved_mode="human"
+      fi
+    else
+      resolved_mode="$requested_mode"
+    fi
+
+    _add_result "success" "Git signing mode" "mode=$resolved_mode." ""
 
     if [ "$gpg_format" = "ssh" ]; then
       _add_result "success" "Git signing format" "gpg.format=ssh." ""
@@ -206,7 +240,31 @@ checkEnv() {
     if printf '%s' "$signing_key" | grep -q '^ssh-'; then
       _add_result "success" "Git signing key" "user.signingkey em formato SSH." ""
     else
-      _add_result "fail" "Git signing key" "user.signingkey ausente ou invalida." "Defina 'git config --global user.signingkey \"ssh-ed25519 ...\"'."
+      if [ "$resolved_mode" = "automation" ]; then
+        _add_result "fail" "Git signing key" "user.signingkey ausente ou invalida." "Execute task git:signing:mode:automation apos configurar a ref publica do signer tecnico."
+      else
+        _add_result "fail" "Git signing key" "user.signingkey ausente ou invalida." "Defina 'git config --global user.signingkey \"ssh-ed25519 ...\"'."
+      fi
+    fi
+
+    if [ "$resolved_mode" = "automation" ]; then
+      if [ -z "$automation_key_ref" ]; then
+        _add_result "fail" "Automation signing key ref" "dotfiles.signing.automationPublicKeyRef ausente na worktree." "Aplique task git:signing:mode:automation apos configurar a ref publica no bootstrap."
+      elif ! command -v op >/dev/null 2>&1; then
+        _add_result "fail" "Automation signing key ref" "op nao esta disponivel para resolver $automation_key_ref." "Instale/autentique o 1Password CLI antes de usar o signer tecnico."
+      else
+        local automation_key_value automation_key_normalized signing_key_normalized
+        automation_key_value="$(op read "$automation_key_ref" 2>/dev/null || true)"
+        automation_key_normalized="$(printf '%s' "$automation_key_value" | awk 'NF {print; exit}' | tr -s '[:space:]' ' ' | sed 's/^ //; s/ $//')"
+        signing_key_normalized="$(printf '%s' "$signing_key" | awk 'NF {print; exit}' | tr -s '[:space:]' ' ' | sed 's/^ //; s/ $//')"
+        if [ -z "$automation_key_normalized" ] || ! printf '%s' "$automation_key_normalized" | grep -q '^ssh-'; then
+          _add_result "fail" "Automation signing key ref" "$automation_key_ref nao retornou uma chave publica SSH valida." "Corrija a ref no 1Password ou rotacione a chave tecnica."
+        elif [ "$automation_key_normalized" = "$signing_key_normalized" ]; then
+          _add_result "success" "Automation signing key ref" "$automation_key_ref confere com user.signingkey da worktree." ""
+        else
+          _add_result "fail" "Automation signing key ref" "$automation_key_ref nao confere com user.signingkey atual." "Rode novamente task git:signing:mode:automation para sincronizar a worktree."
+        fi
+      fi
     fi
 
     local gpg_program_resolved=""
@@ -235,7 +293,6 @@ checkEnv() {
       _add_result "fail" "1Password signer program" "gpg.ssh.program nao definido." "Defina gpg.ssh.program para o binario do 1Password."
     fi
 
-    [ -n "$git_probe_tmp" ] && rm -rf "$git_probe_tmp"
   fi
 
   # SOPS/age readiness.
@@ -350,16 +407,28 @@ checkEnv() {
           elif grep -q '^gpgsig ' /tmp/checkenv_cat.$$ 2>/dev/null; then
             _add_result "success" "Signed commit test" "git commit -S gerou commit assinado (bloco gpgsig presente)." ""
           else
-            _add_result "fail" "Signed commit test" "Commit criado, mas sem evidencia de assinatura (gpgsig ausente)." "Revise gpg.ssh.program, user.signingkey e agent do 1Password."
+            if [ "$resolved_mode" = "automation" ]; then
+              _add_result "fail" "Signed commit test" "Commit criado, mas sem evidencia de assinatura (gpgsig ausente)." "Revise a worktree tecnica, a ref da chave publica e a autorizacao do 1Password para a chave de automacao."
+            else
+              _add_result "fail" "Signed commit test" "Commit criado, mas sem evidencia de assinatura (gpgsig ausente)." "Revise gpg.ssh.program, user.signingkey e agent do 1Password."
+            fi
           fi
           ;;
         124)
-          _add_result "fail" "Signed commit test" "git commit -S excedeu tempo limite (possivel prompt de aprovacao do 1Password)." "Aprove o prompt de assinatura no 1Password e rode checkEnv novamente."
+          if [ "$resolved_mode" = "automation" ]; then
+            _add_result "fail" "Signed commit test" "git commit -S excedeu tempo limite (possivel prompt de aprovacao da chave tecnica no 1Password)." "Autorize o signer tecnico nesta sessao do terminal e rode checkEnv novamente."
+          else
+            _add_result "fail" "Signed commit test" "git commit -S excedeu tempo limite (possivel prompt de aprovacao do 1Password)." "Aprove o prompt de assinatura no 1Password e rode checkEnv novamente."
+          fi
           ;;
         *)
           local commit_err=""
           commit_err="$(head -n1 /tmp/checkenv_commit.$$ 2>/dev/null | tr -d '\r')"
-          _add_result "fail" "Signed commit test" "git commit -S falhou em repositorio temporario (${commit_err:-sem detalhe})." "Corrija gpg.ssh.program, user.signingkey e agent do 1Password."
+          if [ "$resolved_mode" = "automation" ]; then
+            _add_result "fail" "Signed commit test" "git commit -S falhou em repositorio temporario (${commit_err:-sem detalhe})." "Corrija a worktree tecnica, a ref publica e a autorizacao do 1Password para o signer de automacao."
+          else
+            _add_result "fail" "Signed commit test" "git commit -S falhou em repositorio temporario (${commit_err:-sem detalhe})." "Corrija gpg.ssh.program, user.signingkey e agent do 1Password."
+          fi
           ;;
       esac
       rm -f /tmp/checkenv_commit.$$ /tmp/checkenv_sig.$$ /tmp/checkenv_cat.$$
@@ -368,6 +437,8 @@ checkEnv() {
       _add_result "fail" "Signed commit test" "Nao foi possivel criar diretorio temporario." "Verifique permissao de escrita em $HOME ou /tmp."
     fi
   fi
+
+  [ -n "$git_probe_tmp" ] && rm -rf "$git_probe_tmp"
 
   # Aggregate and print final summary + remediation hints.
   local _ok=0 _fail=0 _inc=0

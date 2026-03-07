@@ -19,6 +19,7 @@ function Get-BootstrapConfigDefaults {
 	$defaults['git.email'] = 'you@example.com'
 	$defaults['git.username'] = 'your-github-user'
 	$defaults['git.signing_key'] = 'ssh-ed25519 AAAA_REPLACE_WITH_YOUR_PUBLIC_SSH_SIGNING_KEY'
+	$defaults['git.automation_signing_key_ref'] = ''
 
 	$defaults['paths.windows.onedrive_enabled'] = 'true'
 	$defaults['paths.windows.onedrive_root'] = ''
@@ -512,6 +513,7 @@ function Write-BootstrapConfigYaml {
 		'@@GIT_EMAIL@@' = Escape-YamlDoubleQuotedValue $Config['git.email']
 		'@@GIT_USERNAME@@' = Escape-YamlDoubleQuotedValue $Config['git.username']
 		'@@GIT_SIGNING_KEY@@' = Escape-YamlDoubleQuotedValue $Config['git.signing_key']
+		'@@GIT_AUTOMATION_SIGNING_KEY_REF@@' = Escape-YamlDoubleQuotedValue $Config['git.automation_signing_key_ref']
 		'@@WINDOWS_ONEDRIVE_ENABLED@@' = ConvertTo-BoolString -Value $Config['paths.windows.onedrive_enabled'] -Default 'true'
 		'@@WINDOWS_ONEDRIVE_ROOT@@' = Escape-YamlDoubleQuotedValue $Config['paths.windows.onedrive_root']
 		'@@WINDOWS_ONEDRIVE_AUTO_MIGRATE@@' = ConvertTo-BoolString -Value $Config['paths.windows.onedrive_auto_migrate'] -Default 'true'
@@ -662,6 +664,7 @@ function Invoke-BootstrapConfigWizard {
 	$Config['git.email'] = Read-ConfigPrompt -Label 'Git email (ideal: verificado no GitHub). EX: pablo@pabloaugusto.com' -CurrentValue $Config['git.email']
 	$Config['git.username'] = Read-ConfigPrompt -Label 'Git username (login GitHub). EX: pabloaugusto' -CurrentValue $Config['git.username']
 	$Config['git.signing_key'] = Read-ConfigPrompt -Label 'Chave publica SSH para assinatura. EX: ssh-ed25519 AAA... user@host' -CurrentValue $Config['git.signing_key']
+	$Config['git.automation_signing_key_ref'] = Read-ConfigPrompt -Label 'Ref 1Password da chave PUBLICA SSH do signer tecnico de automacao (op://.../public key). Deixe vazio se ainda nao usar.' -CurrentValue $Config['git.automation_signing_key_ref'] -AllowEmpty
 
 	$Config['paths.windows.onedrive_enabled'] = Read-BooleanPrompt -Label 'Windows: exigir/usar OneDrive no bootstrap?' -CurrentValue $Config['paths.windows.onedrive_enabled']
 	$Config['paths.windows.onedrive_root'] = Read-ConfigPrompt -Label 'Windows OneDrive root canônica (prefira ABS, ex: D:\\onedrive; vazio=detectar/perguntar)' -CurrentValue $Config['paths.windows.onedrive_root'] -AllowEmpty
@@ -743,6 +746,12 @@ function Sync-BootstrapDerivedFiles {
 		'age:'
 		("  key: ""{0}""" -f $Config['secrets.age_key_ref'])
 	)
+	if (-not [string]::IsNullOrWhiteSpace([string]$Config['git.automation_signing_key_ref'])) {
+		$secretsRef += @(
+			'git-signing:'
+			("  automation-public-key: ""{0}""" -f $Config['git.automation_signing_key_ref'])
+		)
+	}
 	Set-Content -Path $secretsRefPath -Value $secretsRef
 
 	$envTpl = @(
@@ -767,6 +776,8 @@ function Sync-BootstrapDerivedFiles {
 		'# - Nao coloque tokens, senhas ou chaves privadas aqui.'
 		'# - "signingkey" abaixo e uma chave PUBLICA SSH (nao segredo).'
 		'# - A chave privada continua protegida no 1Password SSH Agent.'
+		'# - O signer tecnico de automacao e aplicado por worktree via tasks/CLI,'
+		'#   usando uma segunda chave PUBLICA resolvida do 1Password quando configurada.'
 		'# -----------------------------------------------------------------------------'
 		''
 		'[user]'

@@ -1413,11 +1413,72 @@ function Ensure-GitHubCliAuthFrom1Password {
 
 
 ######################################################################################
+# Internal helpers: git signing mode / SSH public key normalization for checkEnv
+######################################################################################
+function Normalize-SshPublicKeyValue {
+	[CmdletBinding()]
+	param ([string]$Value)
+
+	if ([string]::IsNullOrWhiteSpace($Value)) { return '' }
+	$firstLine = (($Value -split "\r?\n") | Where-Object { -not [string]::IsNullOrWhiteSpace($_) } | Select-Object -First 1)
+	if ([string]::IsNullOrWhiteSpace($firstLine)) { return '' }
+	return (($firstLine -replace '\s+', ' ').Trim())
+}
+
+function Get-CheckEnvGitProbeContext {
+	[CmdletBinding()]
+	param (
+		[ValidateSet('auto', 'human', 'automation')]
+		[string]$GitSigningMode = 'auto'
+	)
+
+	$repoPath = ''
+	$tempRepo = ''
+	$currentRepoPath = (& git rev-parse --show-toplevel 2>$null | Out-String).Trim()
+	if (-not [string]::IsNullOrWhiteSpace($currentRepoPath) -and (Test-Path -Path $currentRepoPath -PathType Container)) {
+		$repoPath = $currentRepoPath
+	}
+	else {
+		$tempRepo = Join-Path $Env:USERPROFILE ("checkenv-probe-" + [guid]::NewGuid().ToString("N"))
+		New-Item -Path $tempRepo -ItemType Directory -Force | Out-Null
+		& git -C $tempRepo init -q *> $null
+		$repoPath = $tempRepo
+	}
+
+	$worktreeMode = (& git -C $repoPath config --worktree --get dotfiles.signing.mode 2>$null | Out-String).Trim()
+	$automationKeyRef = (& git -C $repoPath config --worktree --get dotfiles.signing.automationPublicKeyRef 2>$null | Out-String).Trim()
+	$resolvedMode = $GitSigningMode
+	if ($resolvedMode -eq 'auto') {
+		$resolvedMode = if ($worktreeMode -eq 'automation') { 'automation' } else { 'human' }
+	}
+
+	return [PSCustomObject]@{
+		RepoPath          = $repoPath
+		TempRepoPath      = $tempRepo
+		ResolvedMode      = $resolvedMode
+		WorktreeMode      = $worktreeMode
+		AutomationKeyRef  = $automationKeyRef
+		GpgFormat         = (& git -C $repoPath config --includes --get gpg.format 2>$null | Out-String).Trim()
+		GpgProgram        = (& git -C $repoPath config --includes --get gpg.ssh.program 2>$null | Out-String).Trim()
+		SigningKey        = (& git -C $repoPath config --includes --get user.signingkey 2>$null | Out-String).Trim()
+		CommitSignDefault = (& git -C $repoPath config --includes --get commit.gpgsign 2>$null | Out-String).Trim()
+	}
+}
+
+
+######################################################################################
 # Internal helper: signed commit test in a temporary repository
 ######################################################################################
 function Invoke-CheckEnvSignedCommitTest {
 	[CmdletBinding()]
-	param ()
+	param (
+		[string]$SigningKey = '',
+		[string]$GpgFormat = '',
+		[string]$GpgProgram = '',
+		[string]$CommitSign = '',
+		[ValidateSet('human', 'automation')]
+		[string]$GitSigningMode = 'human'
+	)
 
 	$tempRepo = Join-Path ([System.IO.Path]::GetTempPath()) ("checkenv-" + [guid]::NewGuid().ToString("N"))
 	$null = New-Item -Path $tempRepo -ItemType Directory -Force
@@ -1439,15 +1500,26 @@ function Invoke-CheckEnvSignedCommitTest {
 		if ([string]::IsNullOrWhiteSpace($userName)) { & git config user.name "checkEnv" *> $null }
 		if ([string]::IsNullOrWhiteSpace($userEmail)) { & git config user.email "checkenv@local" *> $null }
 
+		if (-not [string]::IsNullOrWhiteSpace($SigningKey)) { & git config user.signingkey $SigningKey *> $null }
+		if (-not [string]::IsNullOrWhiteSpace($GpgFormat)) { & git config gpg.format $GpgFormat *> $null }
+		if (-not [string]::IsNullOrWhiteSpace($GpgProgram)) { & git config gpg.ssh.program $GpgProgram *> $null }
+		if ($CommitSign -eq 'true') { & git config commit.gpgsign true *> $null }
+
 		Set-Content -Path '.checkenv' -Value ("checkenv {0}" -f (Get-Date -Format o)) -NoNewline
 		& git add .checkenv *> $null
 
 		$commitOutput = & git commit -S -m "checkEnv signed commit" 2>&1
 		if ($LASTEXITCODE -ne 0) {
+			$hint = if ($GitSigningMode -eq 'automation') {
+				'Fix gpg.ssh.program, the automation signing key ref/worktree config and 1Password SSH agent authorization for the dedicated automation key.'
+			}
+			else {
+				'Fix gpg.ssh.program, user.signingkey and 1Password SSH agent availability.'
+			}
 			return [PSCustomObject]@{
 				Status   = 'fail'
 				Detail   = ("git commit -S failed: {0}" -f (($commitOutput | Out-String).Trim()))
-				Solution = 'Fix gpg.ssh.program, user.signingkey and 1Password SSH agent availability.'
+				Solution = $hint
 			}
 		}
 
@@ -1472,7 +1544,12 @@ function Invoke-CheckEnvSignedCommitTest {
 		return [PSCustomObject]@{
 			Status   = 'fail'
 			Detail   = 'Commit created but signature block (gpgsig) was not found.'
-			Solution = 'Fix gpg.ssh.program, user.signingkey and 1Password SSH agent availability.'
+			Solution = if ($GitSigningMode -eq 'automation') {
+				'Fix the dedicated automation signer config and confirm 1Password can sign with the automation key in this terminal.'
+			}
+			else {
+				'Fix gpg.ssh.program, user.signingkey and 1Password SSH agent availability.'
+			}
 		}
 	}
 	finally {
@@ -1487,7 +1564,10 @@ function Invoke-CheckEnvSignedCommitTest {
 ######################################################################################
 function checkEnv {
 	[CmdletBinding()]
-	param ()
+	param (
+		[ValidateSet('auto', 'human', 'automation')]
+		[string]$GitSigningMode = 'auto'
+	)
 
 	# In-memory structured report used to print a deterministic summary at the end.
 	$results = New-Object System.Collections.Generic.List[object]
@@ -1636,7 +1716,13 @@ function checkEnv {
 	}
 
 	if (Test-CommandExists op) {
-		$secretsRefPath = Join-Path $Env:USERPROFILE 'dotfiles\df\secrets\secrets-ref.yaml'
+		$currentRepoRoot = (& git rev-parse --show-toplevel 2>$null | Out-String).Trim()
+		if ([string]::IsNullOrWhiteSpace($currentRepoRoot)) {
+			$secretsRefPath = Join-Path $Env:USERPROFILE 'dotfiles\df\secrets\secrets-ref.yaml'
+		}
+		else {
+			$secretsRefPath = Join-Path $currentRepoRoot 'df\secrets\secrets-ref.yaml'
+		}
 		if (Test-Path -Path $secretsRefPath -PathType Leaf) {
 			$refs = New-Object System.Collections.Generic.HashSet[string] ([System.StringComparer]::OrdinalIgnoreCase)
 			foreach ($line in (Get-Content -Path $secretsRefPath -ErrorAction SilentlyContinue)) {
@@ -1686,20 +1772,18 @@ function checkEnv {
 		}
 	}
 
-	# 5) Git signing policy checks in repository context
-	#    (supports includeIf rules that depend on current gitdir path).
+	# 5) Git signing policy checks in repository/worktree context
 	if (Test-CommandExists git) {
-		# Use a clean temporary repo to avoid false negatives caused by local repo overrides
-		# (for example, accidental user.signingkey in .git/config).
-		$tempGitProbePath = Join-Path $Env:USERPROFILE ("checkenv-probe-" + [guid]::NewGuid().ToString("N"))
-		New-Item -Path $tempGitProbePath -ItemType Directory -Force | Out-Null
-		& git -C $tempGitProbePath init -q *> $null
-		$gitProbePath = $tempGitProbePath
+		$gitProbe = Get-CheckEnvGitProbeContext -GitSigningMode $GitSigningMode
+		$gitProbePath = $gitProbe.RepoPath
+		$gpgFormat = $gitProbe.GpgFormat
+		$gpgProgram = $gitProbe.GpgProgram
+		$signingKey = $gitProbe.SigningKey
+		$commitSign = $gitProbe.CommitSignDefault
+		$automationKeyRef = $gitProbe.AutomationKeyRef
+		$resolvedGitSigningMode = $gitProbe.ResolvedMode
 
-		$gpgFormat = (& git -C $gitProbePath config --includes --get gpg.format 2>$null | Out-String).Trim()
-		$gpgProgram = (& git -C $gitProbePath config --includes --get gpg.ssh.program 2>$null | Out-String).Trim()
-		$signingKey = (& git -C $gitProbePath config --includes --get user.signingkey 2>$null | Out-String).Trim()
-		$commitSign = (& git -C $gitProbePath config --includes --get commit.gpgsign 2>$null | Out-String).Trim()
+		Add-CheckResult -Item 'Git signing mode' -Status 'success' -Detail ("mode={0}." -f $resolvedGitSigningMode) -Solution ''
 
 		if ($gpgFormat -eq 'ssh') {
 			Add-CheckResult -Item 'Git signing format' -Status 'success' -Detail 'gpg.format=ssh.' -Solution ''
@@ -1719,7 +1803,34 @@ function checkEnv {
 			Add-CheckResult -Item 'Git signing key' -Status 'success' -Detail 'user.signingkey uses SSH key format.' -Solution ''
 		}
 		else {
-			Add-CheckResult -Item 'Git signing key' -Status 'fail' -Detail 'user.signingkey is missing or invalid.' -Solution 'Set user.signingkey to the SSH public key managed by 1Password.'
+			$signingKeySolution = if ($resolvedGitSigningMode -eq 'automation') {
+				'Run task git:signing:mode:automation after configuring git.automation_signing_key_ref in bootstrap local config.'
+			}
+			else {
+				'Set user.signingkey to the SSH public key managed by 1Password.'
+			}
+			Add-CheckResult -Item 'Git signing key' -Status 'fail' -Detail 'user.signingkey is missing or invalid.' -Solution $signingKeySolution
+		}
+
+		if ($resolvedGitSigningMode -eq 'automation') {
+			if ([string]::IsNullOrWhiteSpace($automationKeyRef)) {
+				Add-CheckResult -Item 'Automation signing key ref' -Status 'fail' -Detail 'dotfiles.signing.automationPublicKeyRef is missing in worktree config.' -Solution 'Apply task git:signing:mode:automation after configuring the 1Password public-key ref.'
+			}
+			elseif (-not (Test-CommandExists op)) {
+				Add-CheckResult -Item 'Automation signing key ref' -Status 'fail' -Detail "Cannot resolve $automationKeyRef because op is unavailable." -Solution 'Install/authenticate 1Password CLI before using automation signing mode.'
+			}
+			else {
+				$resolvedAutomationKey = Normalize-SshPublicKeyValue ((& op read $automationKeyRef 2>$null | Out-String).Trim())
+				if ([string]::IsNullOrWhiteSpace($resolvedAutomationKey)) {
+					Add-CheckResult -Item 'Automation signing key ref' -Status 'fail' -Detail "$automationKeyRef could not be resolved to an SSH public key." -Solution 'Fix the 1Password ref or rotate the automation signer item.'
+				}
+				elseif ((Normalize-SshPublicKeyValue $signingKey) -eq $resolvedAutomationKey) {
+					Add-CheckResult -Item 'Automation signing key ref' -Status 'success' -Detail "$automationKeyRef matches the current worktree signing key." -Solution ''
+				}
+				else {
+					Add-CheckResult -Item 'Automation signing key ref' -Status 'fail' -Detail "$automationKeyRef does not match user.signingkey in the current worktree." -Solution 'Rerun task git:signing:mode:automation to resync the worktree signer.'
+				}
+			}
 		}
 
 		$resolvedProgramPath = ''
@@ -1767,8 +1878,8 @@ function checkEnv {
 			Add-CheckResult -Item '1Password signer program' -Status 'fail' -Detail 'gpg.ssh.program is not set.' -Solution 'Set gpg.ssh.program to 1Password op-ssh-sign binary.'
 		}
 
-		if ($tempGitProbePath -and (Test-Path -Path $tempGitProbePath)) {
-			Remove-Item -Path $tempGitProbePath -Recurse -Force -ErrorAction SilentlyContinue
+		if ($gitProbe.TempRepoPath -and (Test-Path -Path $gitProbe.TempRepoPath)) {
+			Remove-Item -Path $gitProbe.TempRepoPath -Recurse -Force -ErrorAction SilentlyContinue
 		}
 	}
 
@@ -1841,7 +1952,7 @@ function checkEnv {
 
 	# 8) End-to-end signed commit smoke-test in disposable temp repository
 	if (Test-CommandExists git) {
-		$commitTest = Invoke-CheckEnvSignedCommitTest
+		$commitTest = Invoke-CheckEnvSignedCommitTest -SigningKey $signingKey -GpgFormat $gpgFormat -GpgProgram $gpgProgram -CommitSign $commitSign -GitSigningMode $resolvedGitSigningMode
 		Add-CheckResult -Item 'Signed commit test' -Status $commitTest.Status -Detail $commitTest.Detail -Solution $commitTest.Solution
 	}
 

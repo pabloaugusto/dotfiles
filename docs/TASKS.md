@@ -41,6 +41,32 @@ Referencia operacional das tasks canonicas mais importantes do repositorio.
 
 - Funcionalidade: executa `checkEnv` no ambiente atual.
 - Uso manual: `task env:check`
+- Observacao: aceite `SIGN_MODE=human|automation|auto` para validar
+  explicitamente o signer esperado da worktree.
+
+### `git:signing:status`
+
+- Funcionalidade: exibe o modo de assinatura efetivo da worktree e a origem do
+  signer atual.
+- Uso manual: `task git:signing:status`
+
+### `git:signing:mode:automation`
+
+- Funcionalidade: aplica signer tecnico de automacao na worktree atual usando
+  chave publica resolvida via `op`, mantendo a chave privada no 1Password SSH
+  Agent.
+- Uso manual: `task git:signing:mode:automation`
+
+### `git:signing:mode:human`
+
+- Funcionalidade: remove overrides da worktree e volta ao signer humano padrao.
+- Uso manual: `task git:signing:mode:human`
+
+### `git:signing:github:ensure`
+
+- Funcionalidade: garante que a signing key tecnica esteja cadastrada no GitHub
+  via `gh`.
+- Uso manual: `task git:signing:github:ensure`
 
 ## Bootstrap e links canonicos
 

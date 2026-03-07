@@ -199,13 +199,96 @@ tasks:
     desc: Windows - roda checkEnv no PowerShell
     platforms: [windows]
     cmds:
-      - "pwsh -NoProfile -Command \". '{{.TASKFILE_DIR}}/df/powershell/_functions.ps1'; checkEnv\""
+      - "pwsh -NoProfile -Command \". '{{.TASKFILE_DIR}}/df/powershell/_functions.ps1'; checkEnv -GitSigningMode '{{default \"auto\" .SIGN_MODE}}'\""
 
   env:check:linux:
     desc: Linux/WSL - roda checkEnv no Bash
     platforms: [linux]
     cmds:
-      - bash -lc "source '{{.TASKFILE_DIR}}/df/bash/.inc/check-env.sh' && checkEnv"
+      - bash -lc "source '{{.TASKFILE_DIR}}/df/bash/.inc/check-env.sh' && checkEnv '{{default \"auto\" .SIGN_MODE}}'"
+
+  git:signing:status:
+    desc: Exibe o estado do signer Git para a worktree atual
+    cmds:
+      - task: git:signing:status:{{if or (eq .OS "Windows_NT") (eq .OS "windows")}}windows{{else}}linux{{end}}
+
+  git:signing:status:windows:
+    desc: Windows - exibe o estado do signer Git para a worktree atual
+    platforms: [windows]
+    dir: '{{.TASKFILE_DIR}}'
+    cmds:
+      - "pwsh -NoProfile -File ./scripts/invoke-python.ps1 -ScriptPath ./scripts/git-signing-mode.py -Arguments status"
+
+  git:signing:status:linux:
+    desc: Linux/WSL - exibe o estado do signer Git para a worktree atual
+    platforms: [linux]
+    dir: '{{.TASKFILE_DIR}}'
+    cmds:
+      - "bash -lc 'bash ./scripts/run-python.sh ./scripts/git-signing-mode.py status'"
+
+  git:signing:mode:human:
+    desc: Reverte a worktree atual para o signer Git humano padrao
+    cmds:
+      - task: git:signing:mode:human:{{if or (eq .OS "Windows_NT") (eq .OS "windows")}}windows{{else}}linux{{end}}
+
+  git:signing:mode:human:windows:
+    desc: Windows - reverte a worktree para o signer Git humano
+    platforms: [windows]
+    dir: '{{.TASKFILE_DIR}}'
+    cmds:
+      - "pwsh -NoProfile -File ./scripts/invoke-python.ps1 -ScriptPath ./scripts/git-signing-mode.py -Arguments use-human"
+
+  git:signing:mode:human:linux:
+    desc: Linux/WSL - reverte a worktree para o signer Git humano
+    platforms: [linux]
+    dir: '{{.TASKFILE_DIR}}'
+    cmds:
+      - "bash -lc 'bash ./scripts/run-python.sh ./scripts/git-signing-mode.py use-human'"
+
+  git:signing:mode:automation:
+    desc: Aplica signer tecnico de automacao na worktree atual usando op + SSH agent
+    cmds:
+      - task: git:signing:mode:automation:{{if or (eq .OS "Windows_NT") (eq .OS "windows")}}windows{{else}}linux{{end}}
+        vars:
+          PUBLIC_KEY_REF: "{{.PUBLIC_KEY_REF}}"
+          TITLE: "{{.TITLE}}"
+          ENSURE_GITHUB: "{{default \"1\" .ENSURE_GITHUB}}"
+
+  git:signing:mode:automation:windows:
+    desc: Windows - aplica signer tecnico de automacao na worktree atual
+    platforms: [windows]
+    dir: '{{.TASKFILE_DIR}}'
+    cmds:
+      - "pwsh -NoProfile -File ./scripts/invoke-python.ps1 -ScriptPath ./scripts/git-signing-mode.py -Arguments use-automation --public-key-ref '{{default \"\" .PUBLIC_KEY_REF}}' --ensure-github '{{default \"1\" .ENSURE_GITHUB}}' --title '{{default \"\" .TITLE}}'"
+
+  git:signing:mode:automation:linux:
+    desc: Linux/WSL - aplica signer tecnico de automacao na worktree atual
+    platforms: [linux]
+    dir: '{{.TASKFILE_DIR}}'
+    cmds:
+      - "bash -lc 'bash ./scripts/run-python.sh ./scripts/git-signing-mode.py use-automation --public-key-ref \"{{default \"\" .PUBLIC_KEY_REF}}\" --ensure-github \"{{default \"1\" .ENSURE_GITHUB}}\" --title \"{{default \"\" .TITLE}}\"'"
+
+  git:signing:github:ensure:
+    desc: Garante que a chave publica do signer tecnico exista no GitHub como signing key
+    cmds:
+      - task: git:signing:github:ensure:{{if or (eq .OS "Windows_NT") (eq .OS "windows")}}windows{{else}}linux{{end}}
+        vars:
+          PUBLIC_KEY_REF: "{{.PUBLIC_KEY_REF}}"
+          TITLE: "{{.TITLE}}"
+
+  git:signing:github:ensure:windows:
+    desc: Windows - registra ou reaproveita a signing key tecnica no GitHub
+    platforms: [windows]
+    dir: '{{.TASKFILE_DIR}}'
+    cmds:
+      - "pwsh -NoProfile -File ./scripts/invoke-python.ps1 -ScriptPath ./scripts/git-signing-mode.py -Arguments ensure-github-signing-key --public-key-ref '{{default \"\" .PUBLIC_KEY_REF}}' --title '{{default \"\" .TITLE}}'"
+
+  git:signing:github:ensure:linux:
+    desc: Linux/WSL - registra ou reaproveita a signing key tecnica no GitHub
+    platforms: [linux]
+    dir: '{{.TASKFILE_DIR}}'
+    cmds:
+      - "bash -lc 'bash ./scripts/run-python.sh ./scripts/git-signing-mode.py ensure-github-signing-key --public-key-ref \"{{default \"\" .PUBLIC_KEY_REF}}\" --title \"{{default \"\" .TITLE}}\"'"
 
   bootstrap:
     desc: Auto - bootstrap no ambiente atual
@@ -320,14 +403,14 @@ tasks:
     platforms: [windows]
     dir: '{{.TASKFILE_DIR}}'
     cmds:
-      - uv run --locked ty check scripts/release_tool.py scripts/validate_docs.py scripts/run_actionlint.py scripts/run_gitleaks.py scripts/run-cspell.py tests/python/release_tool_test.py tests/python/validate_docs_test.py
+      - uv run --locked ty check scripts/release_tool.py scripts/validate_docs.py scripts/run_actionlint.py scripts/run_gitleaks.py scripts/run-cspell.py scripts/git-signing-mode.py scripts/git_signing_lib.py tests/python/release_tool_test.py tests/python/validate_docs_test.py tests/python/git_signing_mode_test.py
 
   type:check:linux:
     desc: Linux/WSL - executa ty em scripts e testes Python
     platforms: [linux]
     dir: '{{.TASKFILE_DIR}}'
     cmds:
-      - uv run --locked ty check scripts/release_tool.py scripts/validate_docs.py scripts/run_actionlint.py scripts/run_gitleaks.py scripts/run-cspell.py tests/python/release_tool_test.py tests/python/validate_docs_test.py
+      - uv run --locked ty check scripts/release_tool.py scripts/validate_docs.py scripts/run_actionlint.py scripts/run_gitleaks.py scripts/run-cspell.py scripts/git-signing-mode.py scripts/git_signing_lib.py tests/python/release_tool_test.py tests/python/validate_docs_test.py tests/python/git_signing_mode_test.py
 
   test:python:
     desc: Executa a suite Python via pytest no ambiente atual

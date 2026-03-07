@@ -41,6 +41,10 @@ Garantir que ferramentas e fluxos de missao critica do workstation e da automaca
 - Nao trocar fluxo seguro por conveniencia local.
 - Nao introduzir segredo em plaintext, caminho nao canonico ou dependencia oculta.
 - Nao aceitar regressao em ferramenta critica sem plano de compatibilidade claro.
+- Em worktrees de automacao, exigir signer tecnico dedicado e worktree-scoped;
+  nao aceitar "bypass" da identidade humana por variavel que desligue assinatura.
+- Validar que `op`, `gh`, `ssh-agent` e `checkEnv` continuam coerentes com o
+  modo de assinatura ativo (`human` ou `automation`).
 
 ## Validacao recomendada
 

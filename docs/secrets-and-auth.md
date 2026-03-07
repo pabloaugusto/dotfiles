@@ -12,7 +12,7 @@ Este guia descreve o modelo de segurança/autenticação usado pelos dotfiles.
 
 ## Refs de segredo
 
-Fonte canônica: [`df/secrets/secrets-ref.yaml`](df/secrets/secrets-ref.yaml) (gerado do YAML central).
+Fonte canônica: [`df/secrets/secrets-ref.yaml`](../df/secrets/secrets-ref.yaml) (gerado do YAML central).
 
 Refs principais:
 
@@ -20,10 +20,11 @@ Refs principais:
 - `op://secrets/dotfiles/github/token` (preferencial)
 - `op://secrets/github/api/token` (fallback)
 - `op://secrets/dotfiles/age/age.key`
+- `git-signing.automation-public-key` em [`df/secrets/secrets-ref.yaml`](../df/secrets/secrets-ref.yaml) quando o signer tecnico estiver configurado
 
 ## Runtime env cifrado
 
-Template: [`bootstrap/secrets/.env.local.tpl`](bootstrap/secrets/.env.local.tpl)
+Template: [`bootstrap/secrets/.env.local.tpl`](../bootstrap/secrets/.env.local.tpl)
 
 Fluxo:
 
@@ -62,10 +63,10 @@ Estratégia:
 
 Arquivos:
 
-- [`df/ssh/config`](df/ssh/config)
-- [`df/ssh/config.windows`](df/ssh/config.windows)
-- [`df/ssh/config.unix`](df/ssh/config.unix)
-- [diretorio `df/git/`](df/git/)
+- [`df/ssh/config`](../df/ssh/config)
+- [`df/ssh/config.windows`](../df/ssh/config.windows)
+- [`df/ssh/config.unix`](../df/ssh/config.unix)
+- [diretorio `df/git/`](../df/git/)
 
 Políticas:
 
@@ -74,11 +75,38 @@ Políticas:
 - `commit.gpgsign=true`
 - `gpg.ssh.program=op-ssh-sign`
 
+## Modo humano vs automação
+
+O repo passa a operar com dois perfis de assinatura:
+
+- Humano: chave pública padrão em `~/.config/git/.gitconfig.local`.
+- Automação: chave pública técnica aplicada só na worktree atual via
+  `config.worktree`, sem exportar chave privada.
+
+Fluxo recomendado para automação local:
+
+1. guardar a chave privada técnica no 1Password SSH Agent
+2. registrar a ref da chave pública em `git.automation_signing_key_ref` no
+   bootstrap local
+3. sincronizar os derivados do bootstrap
+4. aplicar `task git:signing:mode:automation`
+5. validar com `task env:check SIGN_MODE=automation`
+
+Observações:
+
+- a chave pública técnica não é segredo; a rotação continua simples porque a
+  ref no 1Password é a fonte de verdade
+- o GitHub é sincronizado via `gh`, sem manter material em plaintext no repo
+- o `op` só resolve a chave pública e os tokens; a chave privada continua no
+  1Password SSH Agent
+
 ## `user.signingkey` é segredo?
 
 Não. É material público (chave pública SSH).
 
 - Pode ficar em `~/.config/git/.gitconfig.local`
+- A worktree de automação pode sobrescrevê-lo localmente sem tocar no perfil
+  humano
 - Não precisa de `sops+age`
 - O segredo real é a chave privada, mantida no 1Password
 

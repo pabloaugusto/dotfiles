@@ -27,10 +27,16 @@ Pontos críticos (OneDrive Windows):
 
 Observação:
 
-- mudanças nesses campos impactam diretamente [`bootstrap/bootstrap-windows.ps1`](bootstrap/bootstrap-windows.ps1),
+- mudanças nesses campos impactam diretamente [`bootstrap/bootstrap-windows.ps1`](../bootstrap/bootstrap-windows.ps1),
   incluindo os gates de validação pós-bootstrap.
 
-## [`df/windows-terminal/settings.json`](df/windows-terminal/settings.json)
+Pontos críticos (Git/signing):
+
+- `git.signing_key`: signer humano padrão, mantido em paralelo ao 1Password SSH Agent
+- `git.automation_signing_key_ref`: ref opcional do 1Password para a chave
+  pública do signer técnico aplicado por worktree
+
+## [`df/windows-terminal/settings.json`](../df/windows-terminal/settings.json)
 
 Uso:
 
@@ -43,7 +49,7 @@ Pontos críticos:
 - fonte Nerd Font compatível com prompt
 - actions/keybindings que impactam produtividade diária
 
-## [`df/vscode/settings.json`](df/vscode/settings.json)
+## [`df/vscode/settings.json`](../df/vscode/settings.json)
 
 Uso:
 
@@ -55,7 +61,7 @@ Pontos críticos:
 - terminal default profile
 - opções que afetam desempenho de workspace grande
 
-## [`df/vscode/keybindings.json`](df/vscode/keybindings.json)
+## [`df/vscode/keybindings.json`](../df/vscode/keybindings.json)
 
 Uso:
 
@@ -66,7 +72,7 @@ Pontos críticos:
 - atalhos que colidem com defaults do VS Code
 - atalhos críticos de navegação/build
 
-## [`df/vscode/mcp.json`](df/vscode/mcp.json)
+## [`df/vscode/mcp.json`](../df/vscode/mcp.json)
 
 Uso:
 
@@ -78,7 +84,7 @@ Pontos críticos:
 - caminhos locais válidos
 - políticas de segurança para ferramentas externas
 
-## [`df/oh-my-posh/pablo.omp.json`](df/oh-my-posh/pablo.omp.json)
+## [`df/oh-my-posh/pablo.omp.json`](../df/oh-my-posh/pablo.omp.json)
 
 Uso:
 
@@ -89,7 +95,7 @@ Pontos críticos:
 - performance do prompt (segmentos caros)
 - ícones/fonte compatível no terminal
 
-## [`df/config/atuin/config.toml`](df/config/atuin/config.toml)
+## [`df/config/atuin/config.toml`](../df/config/atuin/config.toml)
 
 Uso:
 
@@ -100,7 +106,7 @@ Pontos críticos:
 - política de sync
 - retenção e privacidade do histórico
 
-## [`df/secrets/dotfiles.sops.yaml`](df/secrets/dotfiles.sops.yaml)
+## [`df/secrets/dotfiles.sops.yaml`](../df/secrets/dotfiles.sops.yaml)
 
 Uso:
 

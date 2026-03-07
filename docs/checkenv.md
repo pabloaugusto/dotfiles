@@ -4,8 +4,8 @@
 
 ## Implementações
 
-- PowerShell: [`df/powershell/_functions.ps1`](df/powershell/_functions.ps1) (`checkEnv`)
-- Bash: [`df/bash/.inc/check-env.sh`](df/bash/.inc/check-env.sh) (`checkEnv`)
+- PowerShell: [`df/powershell/_functions.ps1`](../df/powershell/_functions.ps1) (`checkEnv`)
+- Bash: [`df/bash/.inc/check-env.sh`](../df/bash/.inc/check-env.sh) (`checkEnv`)
 
 ## Objetivo
 
@@ -36,7 +36,7 @@ checkEnv
 1. binários essenciais (`op`, `gh`, `git`, `ssh`)
 2. binários de criptografia (`sops`, `age`)
 3. sessão 1Password (`op whoami`)
-4. leitura de refs em [`df/secrets/secrets-ref.yaml`](df/secrets/secrets-ref.yaml)
+4. leitura de refs em [`df/secrets/secrets-ref.yaml`](../df/secrets/secrets-ref.yaml)
 5. auth `gh` em `github.com` e `git_protocol=ssh`
 6. política Git de assinatura:
    - `gpg.format=ssh`
@@ -50,6 +50,28 @@ checkEnv
 8. `ssh -T git@github.com`
 9. commit assinado de teste em repo temporário
 10. (Windows) conformidade de OneDrive/profile links quando `paths.windows.onedrive_enabled=true`
+
+## Modos de assinatura Git
+
+`checkEnv` entende três modos:
+
+- `auto`: padrão. Se a worktree atual tiver `dotfiles.signing.mode=automation`,
+  valida o signer técnico; caso contrário, valida o signer humano padrão.
+- `human`: força a validação do signer humano.
+- `automation`: força a validação do signer técnico da worktree atual.
+
+Uso recomendado:
+
+```powershell
+task env:check SIGN_MODE=automation
+task git:signing:status
+```
+
+Em modo `automation`, o `checkEnv` também valida:
+
+- `dotfiles.signing.automationPublicKeyRef` na `config.worktree`
+- legibilidade da ref via `op`
+- correspondência entre a chave pública resolvida e `user.signingkey`
 
 ## Semântica de status
 
@@ -68,9 +90,9 @@ As implementações tentam reautenticar uma vez quando possível:
 
 ## Comportamento no bootstrap
 
-- Windows: [`bootstrap/bootstrap-windows.ps1`](bootstrap/bootstrap-windows.ps1) roda `checkEnv` como gate final.
+- Windows: [`bootstrap/bootstrap-windows.ps1`](../bootstrap/bootstrap-windows.ps1) roda `checkEnv` como gate final.
 - Windows: em seguida roda validação dedicada de OneDrive/links (`Test-OneDriveLayoutHealth`).
-- WSL: [`bootstrap/bootstrap-ubuntu-wsl.sh`](bootstrap/bootstrap-ubuntu-wsl.sh) roda `checkEnv` como gate final.
+- WSL: [`bootstrap/bootstrap-ubuntu-wsl.sh`](../bootstrap/bootstrap-ubuntu-wsl.sh) roda `checkEnv` como gate final.
 - Qualquer `FAIL` interrompe o bootstrap.
 
 ## Falhas comuns e correções
@@ -83,6 +105,9 @@ As implementações tentam reautenticar uma vez quando possível:
   - validar chave no GitHub + 1Password SSH Agent ativo
 - `Signed commit test`:
   - revisar `user.signingkey`, signer e agent
+  - em modo `automation`, confirmar que a worktree foi configurada via
+    `task git:signing:mode:automation` e que o 1Password autorizou a chave
+    técnica nesta sessão
 - `OneDrive root path` / `OneDrive profile links`:
   - validar `paths.windows.*` na config local documentada em [`config-reference.md`](config-reference.md#bootstrapuser-configyaml)
   - rerodar bootstrap para recriar links e revisar root ativa do OneDrive

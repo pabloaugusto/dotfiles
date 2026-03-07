@@ -1,6 +1,6 @@
 # Roadmap do Repositorio
 
-Atualizado em: 2026-03-07 13:45 UTC
+Atualizado em: 2026-03-07 14:06 UTC
 Ciclo ativo: 2026-Q1
 
 Planejamento incremental para qualidade, testes, bootstrap e governanca do repo.
@@ -28,7 +28,7 @@ Edite apenas a tabela entre os marcadores abaixo.
 Atualizada por `task ai:roadmap:refresh`.
 
 <!-- roadmap:priority:start -->
-Atualizado em: `2026-03-07 13:45 UTC`
+Atualizado em: `2026-03-07 14:06 UTC`
 
 ### Ranking RICE
 
@@ -56,7 +56,11 @@ Atualizado em: `2026-03-07 13:45 UTC`
 
 ### Governanca de Sugestoes
 
-Sem sugestoes pendentes neste ciclo; itens aceitos ja estao rastreaveis.
+Ha sugestoes pendentes sem decisao final neste ciclo.
+Pergunta obrigatoria ao usuario:
+- descartar as sugestoes pendentes, ou
+- manter no roadmap para aplicar depois.
+IDs pendentes: `SG-WIP-20260307-VSCODE-WORKSPACE`
 <!-- roadmap:priority:end -->
 
 ## Horizonte de Entrega
@@ -92,7 +96,8 @@ Sem sugestoes pendentes neste ciclo; itens aceitos ja estao rastreaveis.
 ## Sugestoes pendentes de decisao
 
 <!-- roadmap:pending:start -->
-- (sem itens)
+- Retomar tarefa pendente WIP-20260307-VSCODE-WORKSPACE: Auditar e alinhar extensoes e configuracoes do workspace .vscode com os fluxos de qualidade, CI/CD, tipos de arquivo e con... | notas=Tarefa pausada por prioridade aprovada para assinatura Git de automacao.
+- Retomar a auditoria e o endurecimento de .vscode para parear extensoes e configuracoes da IDE com os fluxos canonicos de qualidade, CI/CD e tipos de arquivo do repo. | notas=Tarefa pausada por mudanca de prioridade do usuario para automacao de assinatura Git/1Password.
 <!-- roadmap:pending:end -->
 
 ## Riscos e bloqueios

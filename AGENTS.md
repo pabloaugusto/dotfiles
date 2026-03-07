@@ -62,6 +62,10 @@ Leia a skill mais proxima do escopo antes de editar arquivos relevantes.
 - Em qualquer mudanca que toque bootstrap, auth, secrets, CI, CLI, sync ou integracoes do workstation,
   acionar tambem o guardiao de integracoes criticas para proteger `gh`, `op`, `sops`, `age`, `ssh-agent`,
   assinatura Git, secrets e demais ferramentas de missao critica.
+- Worktrees e rodadas de automacao local devem preferir signer tecnico dedicado,
+  aplicado via `task git:signing:mode:automation`; signer humano continua como
+  padrao fora da worktree tecnica e nao deve ser "bypassado" por variavel que
+  silencie a aprovacao da identidade humana.
 - Manter o item ativo em `Doing` durante toda a execucao relevante e so move-lo para `Done`
   imediatamente antes da resposta final ao usuario.
 - Ao concluir uma rodada e permanecerem mudancas locais coerentes, criar commit checkpoint

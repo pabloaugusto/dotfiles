@@ -6,11 +6,11 @@ Guia operacional dos scripts de bootstrap para Windows e Ubuntu WSL.
 
 Scripts principais:
 
-- [`bootstrap/_start.ps1`](bootstrap/_start.ps1): menu e entrypoint do Windows host.
-- [`bootstrap/bootstrap-windows.ps1`](bootstrap/bootstrap-windows.ps1): fluxo Windows (`full`, `refresh`,
+- [`bootstrap/_start.ps1`](./_start.ps1): menu e entrypoint do Windows host.
+- [`bootstrap/bootstrap-windows.ps1`](./bootstrap-windows.ps1): fluxo Windows (`full`, `refresh`,
   `relink`).
-- [`bootstrap/bootstrap-ubuntu-wsl.sh`](bootstrap/bootstrap-ubuntu-wsl.sh): fluxo Ubuntu WSL (`full`, `relink`).
-- [`bootstrap/bootstrap-config.ps1`](bootstrap/bootstrap-config.ps1): parser, wizard e sincronismo da config.
+- [`bootstrap/bootstrap-ubuntu-wsl.sh`](./bootstrap-ubuntu-wsl.sh): fluxo Ubuntu WSL (`full`, `relink`).
+- [`bootstrap/bootstrap-config.ps1`](./bootstrap-config.ps1): parser, wizard e sincronismo da config.
 
 Tasks oficiais:
 
@@ -33,12 +33,13 @@ Este README resume o fluxo operacional e os contratos principais.
 
 Arquivos:
 
-- [`bootstrap/user-config.yaml.tpl`](bootstrap/user-config.yaml.tpl): template versionado
+- [`bootstrap/user-config.yaml.tpl`](./user-config.yaml.tpl): template versionado
 - arquivo local ignorado documentado em [`../docs/config-reference.md`](../docs/config-reference.md#bootstrapuser-configyaml)
 
 O YAML define:
 
 - identidade Git
+- signer humano e ref opcional do signer tecnico de automacao
 - refs de segredos no 1Password
 - estrategia OneDrive no Windows
 - caminhos canonicos de clients, projects e links de perfil
@@ -49,9 +50,13 @@ O YAML define:
 
 Quando o YAML e validado ou regenerado, o bootstrap sincroniza:
 
-- [`df/secrets/secrets-ref.yaml`](df/secrets/secrets-ref.yaml)
-- [`bootstrap/secrets/.env.local.tpl`](bootstrap/secrets/.env.local.tpl)
+- [`df/secrets/secrets-ref.yaml`](../df/secrets/secrets-ref.yaml)
+- [`bootstrap/secrets/.env.local.tpl`](./secrets/.env.local.tpl)
 - derivado local nao versionado documentado em [`../docs/secrets-and-auth.md`](../docs/secrets-and-auth.md#ssh-agent-e-git-signing)
+
+Quando configurado, o bootstrap tambem propaga a ref da chave publica tecnica
+para `git-signing.automation-public-key` em [`df/secrets/secrets-ref.yaml`](../df/secrets/secrets-ref.yaml),
+permitindo que a worktree aplique o signer tecnico sem copiar segredo para o repo.
 
 ## Fluxo Windows full
 

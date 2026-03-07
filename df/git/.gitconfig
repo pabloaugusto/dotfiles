@@ -106,6 +106,9 @@
 [include]
     path = ~/.config/git/.gitconfig.local
 
+# Overlays por worktree (ex.: signer tecnico de automacao) devem usar
+# `config.worktree` via tasks git:signing:*.
+
 
 # Windows host (Git rodando no Windows)
 # Use gitdir/i para tratar paths como case-insensitive

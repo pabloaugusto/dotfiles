@@ -42,4 +42,24 @@ Describe 'bootstrap-config path helpers' {
 
 		$normalized['paths.windows.links_profile_bin'] | Should Be $expected
 	}
+
+	It 'writes automation signing ref into secrets-ref when configured' {
+		$config = Get-BootstrapConfigDefaults
+		$config['git.name'] = 'Pablo'
+		$config['git.email'] = 'pablo@example.com'
+		$config['git.username'] = 'pabloaugusto'
+		$config['git.signing_key'] = 'ssh-ed25519 AAAATESTLOCAL human@host'
+		$config['git.automation_signing_key_ref'] = 'op://secrets/dotfiles/git-automation/public key'
+
+		$repo = Join-Path $TestDrive 'repo'
+		New-Item -ItemType Directory -Path (Join-Path $repo 'df\secrets') -Force | Out-Null
+		New-Item -ItemType Directory -Path (Join-Path $repo 'bootstrap\secrets') -Force | Out-Null
+		New-Item -ItemType Directory -Path (Join-Path $repo 'df\git') -Force | Out-Null
+
+		Sync-BootstrapDerivedFiles -Config $config -DotFilesDirectory $repo
+
+		$secretsRef = Get-Content -Raw -Path (Join-Path $repo 'df\secrets\secrets-ref.yaml')
+		$secretsRef | Should Match 'git-signing:'
+		$secretsRef | Should Match 'automation-public-key: "op://secrets/dotfiles/git-automation/public key"'
+	}
 }

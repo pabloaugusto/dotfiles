@@ -35,7 +35,9 @@ aliases, checks e helpers de bootstrap).
   - sessão `op`,
   - auth do `gh`,
   - SSH agent/handshake GitHub,
-  - assinatura de commit SSH via 1Password.
+  - assinatura de commit SSH via 1Password,
+  - coerência entre signer humano e signer técnico de automação quando a
+    worktree atual estiver nesse modo.
 
 ## Requisitos recomendados
 

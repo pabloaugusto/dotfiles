@@ -1,6 +1,6 @@
 # Decisoes do Roadmap
 
-Atualizado em: 2026-03-07 13:45 UTC
+Atualizado em: 2026-03-07 14:06 UTC
 Ciclo ativo: 2026-Q1
 
 Registro das decisoes humanas por ciclo e governanca de sugestoes.
@@ -12,6 +12,7 @@ Use status: `pendente`, `aceita`, `descartada`, `aplicar_depois`.
 <!-- roadmap:suggestions:start -->
 | ID | Descricao | Status | RM | Captura | Atualizacao |
 | --- | --- | --- | --- | --- | --- |
+| SG-WIP-20260307-VSCODE-WORKSPACE | Retomar tarefa pendente WIP-20260307-VSCODE-WORKSPACE: Auditar e alinhar extensoes e configuracoes do workspace .vscode com os fluxos de qualidade, CI/CD, tipos de arquivo e con... | pendente |  | 2026-03-07 | 2026-03-07 |
 | SG-20260307-ASSETS-IMG | Decidir formalmente a fronteira de [df/assets/img/](../df/assets/img/) entre runtime canonico, fontes de design e conteudo a arquivar em [archive/](../archive/). | aceita |  | 2026-03-07 | 2026-03-07 |
 | SG-20260307-SCRIPTS-SPLIT | Reavaliar a fronteira da pasta [scripts/](../scripts/) entre camadas cli e lib, agora que a base Python com uv esta formalizada. | aceita |  | 2026-03-07 | 2026-03-07 |
 | SG-20260307-OPSIGN | Resolver o bloqueio operacional de assinatura Git/1Password para permitir checkpoint commit sem interrupcao, preferindo signer tecnico de automacao por worktree/repo e preservan... | aceita |  | 2026-03-07 | 2026-03-07 |
@@ -28,17 +29,19 @@ Use status: `pendente`, `aceita`, `descartada`, `aplicar_depois`.
 ## Historico de Ciclos
 
 <!-- roadmap:cycles:start -->
-### Ciclo 2026-Q1 @ 2026-03-07 13:45 UTC
+### Ciclo 2026-Q1 @ 2026-03-07 14:06 UTC
 
 - Top sequencia recomendada: `RM-001, RM-002`
 - Decisao final permanece humana.
 - Acao de governanca: decidir pendencias antes de novo escopo amplo.
-- Sugestoes pendentes no fechamento: `(nenhuma)`
+- Sugestoes pendentes no fechamento: `SG-WIP-20260307-VSCODE-WORKSPACE`
 <!-- roadmap:cycles:end -->
 
 ## Registro automatico
 
 <!-- roadmap:autolog:start -->
+- 2026-03-07 14:06 UTC | decisao=pending | horizonte=next | item=Retomar tarefa pendente WIP-20260307-VSCODE-WORKSPACE: Auditar e alinhar extensoes e configuracoes do workspace .vscode com os fluxos de qualidade, CI/CD, tipos de arquivo e con... | notas=Tarefa pausada por prioridade aprovada para assinatura Git de automacao.
+- 2026-03-07 13:47 UTC | decisao=pending | horizonte=next | item=Retomar a auditoria e o endurecimento de .vscode para parear extensoes e configuracoes da IDE com os fluxos canonicos de qualidade, CI/CD e tipos de arquivo do repo. | notas=Tarefa pausada por mudanca de prioridade do usuario para automacao de assinatura Git/1Password.
 - 2026-03-07 13:45 UTC | decisao=accepted | horizonte=next | item=Decidir formalmente a fronteira de [df/assets/img/](../df/assets/img/) entre runtime canonico, fontes de design e conteudo a arquivar em [archive/](../archive/). | notas=Aprovado como item proprio para reduzir ambiguidade entre ativos de runtime, design-fonte e legado historico.
 - 2026-03-07 13:45 UTC | decisao=accepted | horizonte=next | item=Reavaliar a fronteira da pasta [scripts/](../scripts/) entre camadas cli e lib, agora que a base Python com uv esta formalizada. | notas=Decisao estrutural aprovada para reduzir acoplamento, facilitar testes e deixar entrypoints mais claros.
 - 2026-03-07 13:45 UTC | decisao=accepted | horizonte=now | item=Resolver o bloqueio operacional de assinatura Git/1Password para permitir checkpoint commit sem interrupcao, preferindo signer tecnico de automacao por worktree/repo e preservan... | notas=Bloqueio operacional atual; priorizar perfil de assinatura de automacao sem bypass da identidade humana.

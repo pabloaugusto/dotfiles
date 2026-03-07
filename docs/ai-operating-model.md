@@ -28,6 +28,14 @@ Prompts, skills e fluxos de agentes devem ser tratados como codigo: versao, revi
 
 A automacao deve morar em scripts, tasks e workflows reutilizaveis. Isso reduz duplicacao e facilita evoluir CI/CD sem espalhar logica em varios pontos.
 
+### 4.2. Assinatura Git humana e tecnica devem ser separadas
+
+Quando a automacao local precisar gerar commits, a worktree deve usar signer
+tecnico dedicado via `config.worktree`, com chave privada mantida no 1Password
+SSH Agent e chave publica sincronizada por `op`/`gh`. O signer humano continua
+como padrao fora da worktree tecnica e nao deve ser desativado por "bypass"
+global de assinatura.
+
 ### 4.1. Referencias documentais sempre linkadas quando o formato permitir
 
 Em Markdown e comentarios com suporte a links clicaveis, referencias internas a

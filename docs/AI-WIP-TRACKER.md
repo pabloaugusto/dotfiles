@@ -1,6 +1,6 @@
 # AI WIP Tracker
 
-Atualizado em: 2026-03-07 13:46 UTC
+Atualizado em: 2026-03-07 14:18 UTC
 
 Fonte de verdade operacional para continuidade de tarefas dos agentes de IA.
 
@@ -28,6 +28,8 @@ Fonte de verdade operacional para continuidade de tarefas dos agentes de IA.
 <!-- ai-worklog:done:start -->
 | ID | Tarefa | Branch | Responsavel | Inicio UTC | Concluido UTC | Resultado |
 | --- | --- | --- | --- | --- | --- | --- |
+| WIP-20260307-GIT-AUTOMATION-SIGNING | Implementar assinatura Git de automacao por worktree, orquestrada por op/gh/ssh-agent, com checkEnv, tasks e governanca humano vs automacao. | feat/test-harness-hybrid | ai-agent | 2026-03-07 14:06 UTC | 2026-03-07 14:18 UTC | Camada de assinatura Git de automacao por worktree foi implementada com orquestracao segura por op, gh e 1Password SSH Agent: novo CLI de modo humano x automacao, tasks git:sign... / evidencias: task docs:check:window... |
+| WIP-20260307-VSCODE-WORKSPACE | Auditar e alinhar extensoes e configuracoes do workspace .vscode com os fluxos de qualidade, CI/CD, tipos de arquivo e contratos do repo. | feat/test-harness-hybrid | ai-agent | 2026-03-07 13:47 UTC | 2026-03-07 14:17 UTC | Auditoria de .vscode foi pausada e reencaminhada ao roadmap via SG-WIP-20260307-VSCODE-WORKSPACE para retomada posterior, sem perda de contexto operacional. / evidencias: docs/ROADMAP.md; docs/ROADMAP-DECISIONS.md; do... |
 | WIP-20260307-ROADMAP-EXTRA-APPROVALS | Registrar aprovacoes adicionais do usuario no roadmap para bloqueio de signing, fronteira de df/assets/img e revisao estrutural de scripts. | feat/test-harness-hybrid | ai-agent | 2026-03-07 13:44 UTC | 2026-03-07 13:46 UTC | As tres aprovacoes adicionais do usuario foram registradas no roadmap: signer de automacao para desbloquear checkpoint commit entrou em Now, e as decisoes sobre fronteira de scr... / evidencias: task ai:roadmap:regist... |
 | WIP-20260307-DOC-LINKS-HARDENING | Endurecer a governanca de links documentais e eliminar referencias internas/externas sem link nos docs governados. | feat/test-harness-hybrid | ai-agent | 2026-03-07 13:29 UTC | 2026-03-07 13:41 UTC | Endurecimento definitivo da governanca de links documentais, com varredura dos docs governados, contratos atualizados e validador ampliado para texto corrido, tabelas, URLs exte... / evidencias: task docs:check:window... |
 | WIP-20260307-ROADMAP-APPROVALS | Aplicar aprovacao em massa das sugestoes pendentes do roadmap desta worktree | feat/test-harness-hybrid | ai-agent | 2026-03-07 13:10 UTC | 2026-03-07 13:27 UTC | Todas as sugestoes pendentes do roadmap desta worktree foram aprovadas e rastreadas corretamente; o backend de roadmap passou a remover pendencias semanticas mesmo com links Mar... / evidencias: uv run --locked python... |

@@ -196,6 +196,16 @@ Historico incremental das regras operacionais que nao devem depender de memoria 
 - Validacao: uv run --locked python -m pytest [tests/python/validate_docs_test.py](tests/python/validate_docs_test.py) -q; task docs:check:windows; task docs:lint:windows; task ai:validate:windows; task test:unit:python:windows; git diff --check
 - Worklog relacionado: `WIP-20260307-DOC-LINKS-HARDENING`
 - Fontes relacionadas: dotfiles-test-harness
+
+## LA-019 - Signer tecnico deve ser worktree-scoped e orquestrado por CLIs criticos
+
+- Contexto: Bloqueio recorrente de assinatura Git/1Password em rodadas locais de automacao exigia uma alternativa segura sem desligar o signer humano global.
+- Regra: Automacao local nao pode burlar assinatura nem reaproveitar silenciosamente a identidade humana; deve usar signer tecnico dedicado por worktree, com chave publica resolvida por op, cadastro no GitHub via gh e chave privada mantida no 1Password SSH Agent.
+- Solucao validada: Criar git-signing-mode.py e git_signing_lib.py, tasks git:signing:*, campo git.automation_signing_key_ref no bootstrap e checkEnv com modos human, auto e automation.
+- Prevencao: Manter signer humano como padrao global, aplicar overrides somente via config.worktree e validar sempre com task git:signing:status e task env:check SIGN_MODE=automation antes de usar a worktree tecnica.
+- Validacao: task git:signing:status:windows; task env:check:windows SIGN_MODE=human; task docs:check:windows; task docs:check:linux; task ai:validate:windows; task ai:validate:linux; task type:check:windows; task test:unit:python:windows; task test:unit:powershell; bash -n df/bash/.inc/check-env.sh
+- Worklog relacionado: `WIP-20260307-GIT-AUTOMATION-SIGNING`
+- Fontes relacionadas: dotfiles-test-harness
 <!-- ai-lessons:catalog:end -->
 
 ## Revisoes de rodadas
@@ -205,7 +215,9 @@ Toda finalizacao de worklog deve registrar se houve nova licao.
 <!-- ai-lessons:reviews:start -->
 | Data/Hora UTC | Worklog ID | Decisao | Resumo | Licoes | Evidencia |
 | --- | --- | --- | --- | --- | --- |
-| 2026-03-07 13:46 UTC | WIP-20260307-ROADMAP-EXTRA-APPROVALS | sem_nova_licao | A rodada apenas consolidou aprovacoes adicionais em itens que ja estavam mapeados como gaps reais; nao surgiu contrato novo nem correcao estrutural que justificasse nova licao perene. | - | task ai:roadmap:register:windows (3x); task docs:check:windows; task ai:validate:windows; uv run --locked python -m pytest tests/python/ai_roadmap_test.py -q; git diff --check |
+| 2026-03-07 14:18 UTC | WIP-20260307-GIT-AUTOMATION-SIGNING | capturada | A rodada consolidou que worktrees de automacao devem usar signer tecnico dedicado e worktree-scoped, orquestrado por op + gh + 1Password SSH Agent, sem bypass da identidade humana global. | LA-019 | scripts/git-signing-mode.py; scripts/git_signing_lib.py; df/powershell/_functions.ps1; df/bash/.inc/check-env.sh; Taskfile.yml; docs/checkenv.md; docs/secrets-and-auth.md |
+| 2026-03-07 14:17 UTC | WIP-20260307-VSCODE-WORKSPACE | sem_nova_licao | A rodada nao concluiu implementacao tecnica; apenas converteu o escopo para pendencia formal de roadmap, sem novo contrato perene. | - | docs/ROADMAP.md; docs/ROADMAP-DECISIONS.md; docs/AI-WIP-TRACKER.md |
+| 2026-03-07 13:46 UTC | WIP-20260307-ROADMAP-EXTRA-APPROVALS | sem_nova_licao | A rodada apenas consolidou aprovacoes adicionais em itens que ja estavam mapeados como gaps reais; nao surgiu contrato novo nem correcao estrutural que justificasse nova licao perene. | - | task ai:roadmap:register:windows (3x); task docs:check:windows; task ai:validate:windows; uv run --locked python -m pytest [`tests/python/ai_roadmap_test.py`](tests/python/ai_roadmap_test.py) -q; git diff --check |
 | 2026-03-07 13:41 UTC | WIP-20260307-DOC-LINKS-HARDENING | capturada | A licao LA-018 formalizou que a governanca de links precisa cobrir texto corrido, tabelas e refs locais nao versionadas, com destino documentado quando o alvo real nao e versionado. | LA-018 | [`LICOES-APRENDIDAS.md`](LICOES-APRENDIDAS.md), [`scripts/validate_docs.py`](scripts/validate_docs.py) e [`tests/python/validate_docs_test.py`](tests/python/validate_docs_test.py) |
 | 2026-03-07 13:27 UTC | WIP-20260307-ROADMAP-APPROVALS | capturada | O incidente mostrou que governanca baseada em Markdown precisa comparar contratos e itens por semantica, nao por texto literal, para resistir a links, wrapping e truncamento. | LA-017 | [`scripts/ai_roadmap_lib.py`](scripts/ai_roadmap_lib.py), [`scripts/validate-ai-assets.py`](scripts/validate-ai-assets.py), [`tests/python/ai_roadmap_test.py`](tests/python/ai_roadmap_test.py) e [`LICOES-APRENDIDAS.md`](LICOES-APRENDIDAS.md) |
 | 2026-03-07 12:44 UTC | WIP-20260307-DOC-LINKING | capturada | A rodada consolidou que referencias internas viaveis em Markdown nao devem ficar soltas em inline code; elas precisam ser links explicitos e validados automaticamente. | LA-016 | [`AGENTS.md`](AGENTS.md), [`docs/ai-operating-model.md`](docs/ai-operating-model.md), [`.agents/cards/curador-repo.md`](.agents/cards/curador-repo.md), [`scripts/validate_docs.py`](scripts/validate_docs.py) e o sweep dos Markdown governados foram atualizados e validados em Windows e Linux. |

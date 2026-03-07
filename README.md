@@ -34,6 +34,8 @@ de IA versionada.
 - Runtime local cifrado em [`docs/secrets-and-auth.md`](docs/secrets-and-auth.md#runtime-env-local),
   materializado como `~/.env.local.sops`, sem plaintext versionado.
 - Assinatura Git via SSH com 1Password signer.
+- Modo humano e signer tecnico de automacao por worktree, ambos via SSH +
+  1Password, com rotacao orientada por `op`/`gh`.
 - Politica de seguranca documentada em [`SECURITY.md`](SECURITY.md) e [`docs/secrets-and-auth.md`](docs/secrets-and-auth.md).
 
 ### Qualidade, testes e CI/CD
@@ -126,6 +128,9 @@ task bootstrap:relink
 
 ```powershell
 task env:check
+task env:check SIGN_MODE=automation
+task git:signing:status
+task git:signing:mode:automation
 ```
 
 ### Sincronizacao entre ambientes
@@ -178,6 +183,7 @@ O [`Taskfile.yml`](Taskfile.yml) e a interface oficial de automacao do projeto.
 Grupos principais:
 
 - operacao do repo: `sync`, `repo:*`, `env:check`
+- signing Git por worktree: `git:signing:*`
 - bootstrap: `bootstrap:*`
 - qualidade e PR local: `ci:*`, `pr:*`, `test:*`
 - governanca de IA: `ai:*`
