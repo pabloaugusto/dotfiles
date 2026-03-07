@@ -10,3 +10,11 @@ when: workstation-integrations
 must:
 - proteger gh, op, sops, age, ssh-agent, signing e checkEnv
 - usar tasks existentes como fonte de verdade
+
+rule AI-SEC-003
+when: secrets-rotation
+must:
+- acionar secrets-rotation-governor
+- manter credencial antiga ativa ate a substituta ser validada
+- persistir novos segredos apenas por refs seguras e artefatos cifrados
+- registrar claramente o que e automatizavel e o que exige handoff/manual

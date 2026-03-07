@@ -1,0 +1,7 @@
+interface:
+  display_name: "Rotacao Secrets"
+  short_description: "Rotacao segura de secrets, SSH, tokens e sops+age"
+  default_prompt: "Use $dotfiles-secrets-rotation para planejar e executar rotacao segura de secrets, tokens, chaves SSH e artefatos sops+age sem quebrar bootstrap, signing ou auth."
+
+policy:
+  allow_implicit_invocation: true
