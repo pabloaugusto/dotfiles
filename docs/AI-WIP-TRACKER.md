@@ -1,6 +1,6 @@
 # AI WIP Tracker
 
-Atualizado em: 2026-03-07 10:36 UTC
+Atualizado em: 2026-03-07 10:47 UTC
 
 Fonte de verdade operacional para continuidade de tarefas dos agentes de IA.
 
@@ -28,6 +28,7 @@ Fonte de verdade operacional para continuidade de tarefas dos agentes de IA.
 <!-- ai-worklog:done:start -->
 | ID | Tarefa | Branch | Responsavel | Inicio UTC | Concluido UTC | Resultado |
 | --- | --- | --- | --- | --- | --- | --- |
+| WIP-20260307-DOCS-ATUALIZACAO | Auditar e atualizar a documentacao do repo para refletir as funcionalidades atuais, com README raiz servindo como catalogo confiavel do projeto. | feat/test-harness-hybrid | ai-agent | 2026-03-07 10:38 UTC | 2026-03-07 10:47 UTC | A documentacao central do repo foi auditada e atualizada para refletir o estado funcional atual: README raiz virou catalogo operacional do projeto, docs/README organizou a leitu... / evidencias: task ai:validate:windo... |
 | WIP-20260307-ALIASES-CANONICOS | Centralizar aliases por ambiente nos arquivos principais e reorganizar a estrutura dos arquivos de aliases e Git configs para ficarem mais claros e canonicos | feat/test-harness-hybrid | ai-agent | 2026-03-07 10:25 UTC | 2026-03-07 10:36 UTC | Aliases por ambiente foram centralizados nos arquivos canonicos: df/.aliases concentra o shell Unix, df/powershell/aliases.ps1 concentra o PowerShell e df/git/.gitconfig-base vi... / evidencias: bash -n em df/.aliases... |
 | WIP-20260307-CI-TASK-PARITY | Endurecer a paridade entre workflows de CI/CD, tasks canonicas e documentacao operacional do repo | feat/test-harness-hybrid | ai-agent | 2026-03-07 10:17 UTC | 2026-03-07 10:18 UTC | Paridade entre workflows, tasks e catalogos de CI/CD foi endurecida com entrypoints canonicos por workflow/job, docs atualizadas e gatilho do ai-governance ampliado para cobrir... / evidencias: task ci:workflow:sync:c... |
 | WIP-20260307-IA-REFERENCIAS | Pesquisar referencias externas de dotfiles com forte uso de IA e registrar sugestoes aderentes ao roadmap do repo | feat/test-harness-hybrid | ai-agent | 2026-03-07 09:45 UTC | 2026-03-07 09:54 UTC | Referencias externas de dotfiles com forte uso de IA foram auditadas, documentadas em AI-SOURCE-AUDIT e convertidas em quatro sugestoes pendentes no roadmap para avaliacao humana. / evidencias: docs/AI-SOURCE-AUDIT.md... |

@@ -136,6 +136,16 @@ Historico incremental das regras operacionais que nao devem depender de memoria 
 - Prevencao: Sempre modelar primeiro a task canonica e so depois apontar workflow, docs e validadores para ela.
 - Validacao: task ci:ai:check:windows; task ci:quality:windows; task ci:bootstrap:integration:windows; wsl task ci:ai:check:linux; wsl task ci:quality:linux; wsl task ci:bootstrap:integration:linux; task ci:workflow:sync:check:windows; task ci:workflow:sync:check:linux
 - Worklog relacionado: `WIP-20260307-CI-TASK-PARITY`
+
+## LA-013 - README raiz e docs centrais devem ser catalogos vivos do estado real do repo
+
+- Contexto: O repo evoluiu em bootstrap, testes, CI/CD e camada de IA, mas parte da documentacao central ainda descrevia estados iniciais ou cobertura parcial, exigindo uma auditoria documental ampla.
+- Regra: README.md deve funcionar como catalogo funcional do projeto, e docs centrais como docs/README.md, docs/TASKS.md, docs/WORKFLOWS.md, tests/README.md e bootstrap/README.md devem refletir o estado real atual, nao snapshots antigos ou incompletos.
+- Solucao validada: Auditar README, Taskfile, workflows, suites de teste, bootstrap e estrutura do repo em conjunto, depois reescrever os documentos centrais na mesma rodada para restaurar cobertura e coerencia.
+- Prevencao: Sempre que a mudanca alterar capacidades do repo, automacao, testes, bootstrap ou governanca, atualizar na mesma rodada o README raiz e os catalogos centrais afetados antes de encerrar o trabalho.
+- Validacao: task ai:validate:windows; task ci:workflow:sync:check:windows; task test:unit:python:windows; git diff --check
+- Worklog relacionado: `WIP-20260307-DOCS-ATUALIZACAO`
+- Fontes relacionadas: dotfiles-test-harness
 <!-- ai-lessons:catalog:end -->
 
 ## Revisoes de rodadas
@@ -145,6 +155,7 @@ Toda finalizacao de worklog deve registrar se houve nova licao.
 <!-- ai-lessons:reviews:start -->
 | Data/Hora UTC | Worklog ID | Decisao | Resumo | Licoes | Evidencia |
 | --- | --- | --- | --- | --- | --- |
+| 2026-03-07 10:47 UTC | WIP-20260307-DOCS-ATUALIZACAO | capturada | A rodada consolidou a regra de que README raiz e docs centrais devem funcionar como catalogos vivos do estado real do repo, e nao como snapshots antigos ou parciais. | LA-013 | LICOES-APRENDIDAS.md atualizado com LA-013; docs centrais reescritos e validadores do repo passando |
 | 2026-03-07 10:36 UTC | WIP-20260307-ALIASES-CANONICOS | sem_nova_licao | A rodada consolidou uma regra ja vigente do repo: loaders devem apenas carregar fontes canonicas. Nenhuma licao perene nova precisou ser adicionada. | - | bash -n em df/.aliases e df/bash/.bashrc, carga real do aliases.ps1 em pwsh e powershell, zsh -n no df/zsh/.zshrc, source do df/.aliases no WSL, parser de alias do Git em df/git/.gitconfig-base, ausencia de [alias] em... |
 | 2026-03-07 10:18 UTC | WIP-20260307-CI-TASK-PARITY | capturada | A rodada consolidou a regra de que cada workflow/job recorrente deve chamar uma task canonica unica, em vez de duplicar listas de gates dentro do YAML. | LA-012 | LICOES-APRENDIDAS.md atualizado com LA-012; ci:workflow:sync:check passou em Windows e Linux |
 | 2026-03-07 09:54 UTC | WIP-20260307-IA-REFERENCIAS | sem_nova_licao | A rodada gerou sugestoes de roadmap e referencia externa, mas nao introduziu regra operacional perene nova alem das governancas ja catalogadas. | - | task ai:validate:windows; git diff --check |

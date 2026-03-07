@@ -2,155 +2,133 @@
 
 Guia operacional dos scripts de bootstrap para Windows e Ubuntu WSL.
 
-## Entrypoints
+## Entrypoints e tasks oficiais
 
-- `bootstrap/_start.ps1`: menu/entrypoint para execução no Windows host.
-- `bootstrap/bootstrap-windows.ps1`: fluxo Windows (full ou refresh).
-- `bootstrap/bootstrap-ubuntu-wsl.sh`: fluxo Ubuntu WSL.
-- `bootstrap/bootstrap-config.ps1`: wizard + validação de config central.
+Scripts principais:
 
-## Fluxograma do Bootstrap
+- `bootstrap/_start.ps1`: menu e entrypoint do Windows host.
+- `bootstrap/bootstrap-windows.ps1`: fluxo Windows (`full`, `refresh`,
+  `relink`).
+- `bootstrap/bootstrap-ubuntu-wsl.sh`: fluxo Ubuntu WSL (`full`, `relink`).
+- `bootstrap/bootstrap-config.ps1`: parser, wizard e sincronismo da config.
 
-Fluxograma visual e decision-complete (macro + subfluxos Windows/WSL/OneDrive + gates):
+Tasks oficiais:
+
+- `task bootstrap`
+- `task bootstrap:windows:new`
+- `task bootstrap:windows:refresh`
+- `task bootstrap:relink`
+- `task bootstrap:windows:relink`
+- `task bootstrap:linux:relink`
+
+## Fluxograma de referencia
+
+O diagrama decisorio completo do bootstrap fica em:
 
 - `../docs/bootstrap-flow.md`
 
-Observação:
+Este README resume o fluxo operacional e os contratos principais.
 
-- esse README mantém a visão operacional textual;
-- o diagrama central de referência está no documento dedicado acima.
-
-## Config central (YAML)
+## Config central
 
 Arquivos:
 
-- `bootstrap/user-config.yaml.tpl` (template versionado)
-- `bootstrap/user-config.yaml` (local, ignorado)
+- `bootstrap/user-config.yaml.tpl`: template versionado
+- `bootstrap/user-config.yaml`: arquivo local ignorado
 
 O YAML define:
 
-- identidade Git (nome/email/username/signing key pública)
-- estratégia OneDrive no Windows (`enabled`, root, auto-migrate)
-- caminhos OneDrive no WSL
-- caminhos customizáveis de links no perfil Windows (`bin`, `etc`, `clients`, `projects`)
-- links opcionais de pastas padrão do perfil Windows para OneDrive (`Documents`, `Desktop`, etc.)
-- caminhos opcionais de atalhos em drive raiz (ex.: `D:\bin`)
+- identidade Git
 - refs de segredos no 1Password
-- opção de usuário extra no WSL
+- estrategia OneDrive no Windows
+- caminhos canonicos de clients, projects e links de perfil
+- estrategia de links opcionais em drive raiz
+- configuracao de usuario extra no WSL
 
 ## Artefatos derivados
 
-Após validar/preencher o YAML, o bootstrap sincroniza:
+Quando o YAML e validado ou regenerado, o bootstrap sincroniza:
 
 - `df/secrets/secrets-ref.yaml`
 - `bootstrap/secrets/.env.local.tpl`
-- `df/git/.gitconfig.local` (local, não versionado)
+- `df/git/.gitconfig.local` local e nao versionado
 
-## Fluxo Windows (new install)
+## Fluxo Windows full
 
-1. valida pré-requisitos básicos (winget, paths, config YAML)
-2. resolve política OneDrive (`enabled=true/false`)
-3. se OneDrive ativo:
-   - se OneDrive não estiver instalado, instala via `winget` e inicia setup guiado
-   - detecta root atual configurada
-   - pergunta se deve manter ou mover root base
-   - quando necessário, tenta migração automática (best-effort): copia dados, junction e atualização de root no registro
-   - cria links de perfil e links opcionais de drive
-4. se OneDrive desativado:
-   - cria diretórios locais no perfil (sem depender de OneDrive)
-5. instala software/módulos/fontes
-6. resolve runtime secrets via `op inject`
+1. valida pre-requisitos basicos e a config YAML
+2. resolve politica OneDrive
+3. prepara layout local ou OneDrive
+4. cria links canonicos do perfil e do repo
+5. instala software, modulos e fontes
+6. resolve runtime secrets via 1Password
 7. cifra runtime env em `~/.env.local.sops`
-8. autentica `gh` com token do 1Password e força protocolo SSH
-9. roda `checkEnv` (gate obrigatório)
-10. roda validação dedicada de OneDrive/links no pós-bootstrap (gate obrigatório)
-11. aplica preferências Windows (modo full)
+8. autentica `gh` e garante protocolo SSH
+9. roda `checkEnv`
+10. roda validacao dedicada do layout OneDrive
+11. aplica preferencias Windows quando o modo e full
 
-## Fluxo Windows (refresh)
+## Fluxo Windows refresh
 
-Semelhante ao full, porém:
+- reaproveita config, auth, signer e validacoes
+- nao reinstala o catalogo completo de software e fontes
+- nao reaplica preferencias pesadas do sistema
 
-- não reinstala catálogo completo de software/fontes
-- não reaplica preferências pesadas do sistema
-- mantém auth/signing + `checkEnv`
+## Fluxo relink
 
-## Fluxo relink (Windows/WSL)
+Use quando o objetivo for apenas reparar links quebrados.
 
-Para reparar rapidamente links quebrados sem rodar o bootstrap completo:
+Windows:
 
-- Windows: `task bootstrap:windows:relink` ou `task bootstrap:relink`
-- WSL: `task bootstrap:linux:relink` ou `task bootstrap:relink`
+- `task bootstrap:windows:relink`
+- `task bootstrap:relink`
 
-Comportamento:
+Linux/WSL:
 
-- recria os symlinks/junctions canônicos definidos pelo bootstrap atual
-- no Windows, reutiliza a mesma resolução de layout OneDrive/perfil e valida os links ao final
-- no WSL, recria apenas links de dotfiles/perfil e encerra sem reinstalar software ou refazer auth
+- `task bootstrap:linux:relink`
+- `task bootstrap:relink`
+
+Garantias atuais:
+
+- reusa o layout canonico da config
+- nao reinstala software
+- nao reexecuta bootstrap pesado
+- valida estado final dos links no fluxo correspondente
 
 ## Fluxo Ubuntu WSL
 
-1. instala base (`apt`) e stack via Homebrew
-2. cria symlinks de shell/git/ssh/config
-3. garante token `OP_SERVICE_ACCOUNT_TOKEN`
-4. gera env runtime com `op inject`, cifra em `~/.env.local.sops`
-5. persiste `SOPS_AGE_KEY` em `~/.config/dotfiles/runtime.env`
-6. garante auth `gh` (SSH)
-7. roda `checkEnv` no final
+1. instala base via `apt` e Homebrew
+2. cria symlinks de shell, Git, SSH e config
+3. resolve `OP_SERVICE_ACCOUNT_TOKEN`
+4. gera runtime env e cifra em `~/.env.local.sops`
+5. persiste `SOPS_AGE_KEY` no runtime local
+6. garante auth do `gh`
+7. roda `checkEnv`
 
-## Modelo de autenticação
+## Testabilidade atual
 
-- `op`: sessão validada e reutilizada quando possível.
-- `gh`: login por token resolvido do 1Password (preferencial token dedicado).
-- SSH: prioridade para 1Password SSH Agent.
-- Assinatura Git: `gpg.format=ssh` + `gpg.ssh.program=op-ssh-sign`.
+O bootstrap ja possui cobertura automatizada real para `relink`:
 
-## Estratégia de override OneDrive (Windows)
+- Linux em container OCI com Bats
+- Windows em ambiente temporario real com PowerShell
 
-Precedência de root desejada:
+Comandos:
 
-1. `paths.windows.onedrive_root` (YAML)
-2. `OneDrive` do ambiente
-3. `%USERPROFILE%\OneDrive`
+- `task test:integration:linux`
+- `task test:integration:windows`
 
-Comportamento:
+## Modelo de autenticacao
 
-- `paths.windows.onedrive_enabled=true`: bootstrap executa etapa de pré-requisito OneDrive antes de qualquer link.
-  - se OneDrive não existir: instala, pergunta root desejada e aguarda conclusão de login/setup.
-  - se existir: mostra root atual e pergunta se deve mover.
-- `paths.windows.onedrive_enabled=false`: bootstrap ignora OneDrive e usa diretórios locais.
-- `paths.windows.onedrive_auto_migrate=true`: quando você optar por mudar root, o bootstrap tenta automação sem fechamento manual:
-  - encerra cliente OneDrive
-  - copia dados para root nova
-  - cria junction na root antiga apontando para a nova
-  - tenta atualizar root no registro do OneDrive (best-effort)
-  - inicia cliente novamente
-- `paths.windows.profile_links_migrate_content`:
-  - `true`: migra conteúdo das pastas padrão antes de criar links para OneDrive
-  - `false`: não migra conteúdo, apenas cria links (mantendo backup local da origem)
+- `op`: fonte de refs de segredo
+- `gh`: login por token vindo do 1Password
+- SSH: prioridade para 1Password SSH Agent
+- Git signing: `gpg.format=ssh` com `op-ssh-sign`
 
-Limite importante:
+## Troubleshooting rapido
 
-- Alterar a root "oficial" do OneDrive sem interação depende do cliente Microsoft e não é 100% garantido para todos os cenários/versões.
-- O modo de junction reduz intervenção manual e mantém compatibilidade na maior parte dos casos.
-
-## Opção de usuário extra no WSL
-
-Campo: `bootstrap.add_user` no YAML.
-
-Utilidade:
-
-- separar usuário pessoal e automação/deploy
-- reduzir superfície de execução privilegiada no usuário principal
-- facilitar política de privilégio mínimo por contexto
-
-Quando evitar:
-
-- uso pessoal simples com um único usuário no WSL
-
-## Troubleshooting rápido
-
-- `checkEnv` com FAIL em `gpg.ssh.program`: validar `op-ssh-sign` no PATH.
-- `gh` sem SSH protocol: `gh config set git_protocol ssh --host github.com`.
-- SSH denied (publickey): confirmar chave no GitHub e agent 1Password ativo.
-- `.env.local.sops` ausente: rerodar bootstrap/auth step.
-- OneDrive path FAIL no pós-bootstrap: validar root atual, permissões e rerodar bootstrap com `paths.windows.onedrive_enabled=true`.
+- `checkEnv` falha em `gpg.ssh.program`: valide `op-ssh-sign` no `PATH`.
+- `gh` sem protocolo SSH: rode `gh config set git_protocol ssh --host github.com`.
+- `ssh -T git@github.com` falha: confirme chave publica e agent do 1Password.
+- `~/.env.local.sops` ausente: rerode bootstrap ou a etapa de auth/secrets.
+- links quebrados: rode `task bootstrap:relink`.
+- layout OneDrive inconsistente: valide a config e o resultado de
+  `Test-OneDriveLayoutHealth` no Windows.
