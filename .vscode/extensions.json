@@ -4,7 +4,7 @@
     "editorconfig.editorconfig",
     "emmanuelbeziat.vscode-great-icons",
     "github.github-vscode-theme",
-    "ms-vscode.powershell",
-    "tamasfe.even-better-toml"
+    "tamasfe.even-better-toml",
+    "ms-azuretools.vscode-docker"
   ]
 }

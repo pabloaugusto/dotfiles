@@ -59,5 +59,17 @@
   "telemetry.editStats.showStatusBar": true,
   "todo-tree.general.showIconsInsteadOfTagsInStatusBar": true,
   "gitlens.statusBar.command": "gitlens.showCommitsInView",
-  "gitlens.launchpad.indicator.enabled": true
+  "gitlens.launchpad.indicator.enabled": true,
+  "editor.fontFamily": "'ComicCode Nerd Font Mono', 'Hack Nerd Font Mono',  Consolas, 'Courier New', monospace",
+  "editor.codeLensFontFamily": "'ComicCode Nerd Font Mono', 'Hack Nerd Font Mono',  Consolas, 'Courier New', monospace",
+  "editor.inlayHints.fontFamily": "'ComicCode Nerd Font Mono', 'Hack Nerd Font Mono',  Consolas, 'Courier New', monospace",
+  "editor.inlineSuggest.fontFamily": "'ComicCode Nerd Font Mono', 'Hack Nerd Font Mono',  Consolas, 'Courier New', monospace",
+  "debug.console.fontFamily": "'ComicCode Nerd Font Mono', 'Hack Nerd Font Mono',  Consolas, 'Courier New', monospace",
+  "scm.inputFontFamily": "'ComicCode Nerd Font Mono', 'Hack Nerd Font Mono',  Consolas, 'Courier New', monospace",
+  "terminal.integrated.fontFamily": "'ComicCode Nerd Font Mono', 'Hack Nerd Font Mono',  Consolas, 'Courier New', monospace",
+  "notebook.markup.fontFamily": "'ComicCode Nerd Font Mono', 'Hack Nerd Font Mono',  Consolas, 'Courier New', monospace",
+  "notebook.output.fontFamily": "'ComicCode Nerd Font Mono', 'Hack Nerd Font Mono',  Consolas, 'Courier New', monospace",
+  "gitlens.currentLine.fontFamily": "'ComicCode Nerd Font Mono', 'Hack Nerd Font Mono',  Consolas, 'Courier New', monospace",
+  "gitlens.blame.fontFamily": "'ComicCode Nerd Font Mono', 'Hack Nerd Font Mono',  Consolas, 'Courier New', monospace",
+  "markdown.preview.fontFamily": "'ComicCode Nerd Font Mono', 'Hack Nerd Font Mono',  Consolas, 'Courier New', monospace,-apple-system, BlinkMacSystemFont, 'Segoe WPC', 'Segoe UI', system-ui, 'Ubuntu', 'Droid Sans', sans-serif"
 }
