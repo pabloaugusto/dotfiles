@@ -65,6 +65,9 @@ function Add-Symlink {
 
 	$fromPath = $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($from)
 	$toPath = $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($to)
+	$targetExists = Test-Path -Path $toPath
+	$targetItem = if ($targetExists) { Get-Item -Path $toPath -Force -ErrorAction SilentlyContinue } else { $null }
+	$targetIsDirectory = ($null -ne $targetItem -and $targetItem.PSIsContainer)
 
 	# Ensure parent folder exists before creating the link.
 	$parentPath = Split-Path -Path $fromPath -Parent
@@ -74,12 +77,12 @@ function Add-Symlink {
 
 	if (Test-Path -Path $fromPath) {
 		$currentItem = Get-Item -Path $fromPath -Force -ErrorAction SilentlyContinue
-		$isSymbolicLink = $null -ne $currentItem -and $currentItem.LinkType -eq 'SymbolicLink'
-		$currentTarget = if ($isSymbolicLink -and $null -ne $currentItem.Target) { [string]$currentItem.Target } else { '' }
+		$isLink = $null -ne $currentItem -and ($currentItem.LinkType -eq 'SymbolicLink' -or $currentItem.LinkType -eq 'Junction')
+		$currentTarget = if ($isLink -and $null -ne $currentItem.Target) { [string]($currentItem.Target | Select-Object -First 1) } else { '' }
 		$resolvedCurrentTarget = if ($currentTarget) { $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($currentTarget) } else { '' }
 
 		# No-op when the desired link already exists.
-		if ($isSymbolicLink -and $resolvedCurrentTarget -eq $toPath) {
+		if ($isLink -and $resolvedCurrentTarget -eq $toPath) {
 			return
 		}
 
@@ -87,6 +90,26 @@ function Add-Symlink {
 	}
 
 	New-Item -ItemType SymbolicLink -Path $fromPath -Target $toPath -Force -WarningAction SilentlyContinue -InformationAction Ignore -ErrorAction SilentlyContinue | Out-Null
+	$createdItem = Get-Item -Path $fromPath -Force -ErrorAction SilentlyContinue
+	$createdLinkType = if ($null -ne $createdItem) { [string]$createdItem.LinkType } else { '' }
+	if ($createdLinkType -eq 'SymbolicLink') {
+		return
+	}
+
+	if (Test-Path -Path $fromPath) {
+		Remove-Item -Path $fromPath -Recurse -Force -Confirm:$false -ErrorAction SilentlyContinue
+	}
+
+	if ($targetIsDirectory) {
+		New-Item -ItemType Junction -Path $fromPath -Target $toPath -Force -ErrorAction SilentlyContinue | Out-Null
+	}
+	elseif ($targetExists) {
+		New-Item -ItemType HardLink -Path $fromPath -Target $toPath -Force -ErrorAction SilentlyContinue | Out-Null
+	}
+
+	if (-not (Test-Path -Path $fromPath)) {
+		throw "Unable to create link '$fromPath' -> '$toPath'."
+	}
 }
 
 ######################################################################################

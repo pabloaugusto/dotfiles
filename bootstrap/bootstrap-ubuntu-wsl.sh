@@ -23,6 +23,7 @@
 SCRIPT_PATH="${BASH_SOURCE[0]}"
 BASE_DIR="$(cd "$(dirname "$SCRIPT_PATH")" && pwd -P)"
 BOOTSTRAP_MODE="${1:-full}"
+DOTFILES_REPO_ROOT="${DOTFILES_REPO_ROOT_UNIX:-$HOME/dotfiles}"
 
 is_sourced() {
 	[[ "${BASH_SOURCE[0]}" != "$0" ]]
@@ -99,7 +100,7 @@ resolve_unix_path_with_root() {
 }
 
 load_onedrive_overrides_from_user_config() {
-	local cfg="$HOME/dotfiles/bootstrap/user-config.yaml"
+	local cfg="$DOTFILES_REPO_ROOT/bootstrap/user-config.yaml"
 	[ -f "$cfg" ] || return 0
 
 	# Use local YAML values only when env overrides are absent.
@@ -135,6 +136,9 @@ fi
 
 # ----------------------------------------------------------------------------------------
 function setup_prompt {
+	if [[ "${DOTFILES_BOOTSTRAP_ASSUME_POLO:-}" == "1" ]]; then
+		return 0
+	fi
 	echo "Starting up dotfiles bootstrap (nix flavored)"
 	echo "This script will override some of your home files"
 	echo "If you are okay with that complete the sentence below, ALL CAPS please..."
@@ -227,7 +231,7 @@ function install_software {
 # --------------------------------------------------------------------
 function setup_fonts {
 	mkdir -p ~/.local/share/fonts >/dev/null
-	ln -sfn ~/dotfiles/.assets/fonts ~/.local/share/fonts
+	ln -sfn "$DOTFILES_REPO_ROOT/df/assets/fonts" ~/.local/share/fonts
 	fc-cache -f -v >/dev/null
 }
 
@@ -262,43 +266,46 @@ function setProfileSymlinks {
 	if [ -L ~/.git ] && [ "$(readlink ~/.git)" = "$HOME/dotfiles/df/git" ]; then
 		rm -f ~/.git
 	fi
+	if [ -L ~/.git ] && [ "$(readlink ~/.git)" = "$DOTFILES_REPO_ROOT/df/git" ]; then
+		rm -f ~/.git
+	fi
 
 	# ---------------------------------------------------------------
 	# symlink dotfiles
 	# ---------------------------------------------------------------
 
 	# dotfiles root directories
-	ln -sfn ~/dotfiles/df/ssh ~/.ssh
-	ln -sfn ~/dotfiles/df/assets ~/.assets
-	ln -sfn ~/dotfiles/df/config/atuin ~/.config/atuin
-	ln -sfn ~/dotfiles/df/secrets ~/.secrets
-	ln -sfn ~/dotfiles/df/git ~/.config/git
+	ln -sfn "$DOTFILES_REPO_ROOT/df/ssh" ~/.ssh
+	ln -sfn "$DOTFILES_REPO_ROOT/df/assets" ~/.assets
+	ln -sfn "$DOTFILES_REPO_ROOT/df/config/atuin" ~/.config/atuin
+	ln -sfn "$DOTFILES_REPO_ROOT/df/secrets" ~/.secrets
+	ln -sfn "$DOTFILES_REPO_ROOT/df/git" ~/.config/git
 
 	# vscode
 	mkdir -p ~/.config/Code
-	ln -sfn ~/dotfiles/df/vscode ~/.config/Code/User
+	ln -sfn "$DOTFILES_REPO_ROOT/df/vscode" ~/.config/Code/User
 
 	# oh-my-posh
-	ln -sfn ~/dotfiles/df/oh-my-posh ~/.oh-my-posh
+	ln -sfn "$DOTFILES_REPO_ROOT/df/oh-my-posh" ~/.oh-my-posh
 
 	# dotfile root files
-	ln -sf ~/dotfiles/df/.editorconfig ~/.editorconfig
-	ln -sf ~/dotfiles/df/git/.gitconfig ~/.gitconfig
+	ln -sf "$DOTFILES_REPO_ROOT/df/.editorconfig" ~/.editorconfig
+	ln -sf "$DOTFILES_REPO_ROOT/df/git/.gitconfig" ~/.gitconfig
 	#ln -f ~/dotfiles/df/git/.gitconfig.local.sample ~/.gitconfig.local.sample
 
 	# multi platform shell .aliases
-	ln -sf ~/dotfiles/df/.aliases ~/.aliases
+	ln -sf "$DOTFILES_REPO_ROOT/df/.aliases" ~/.aliases
 
 	# bash
-	ln -sf ~/dotfiles/df/bash/.bash_logout ~/.bash_logout
-	ln -sf ~/dotfiles/df/bash/.bashrc ~/.bashrc
-	ln -sf ~/dotfiles/df/bash/.profile ~/.profile
-	ln -sf ~/dotfiles/df/bash/.blerc ~/.blerc
+	ln -sf "$DOTFILES_REPO_ROOT/df/bash/.bash_logout" ~/.bash_logout
+	ln -sf "$DOTFILES_REPO_ROOT/df/bash/.bashrc" ~/.bashrc
+	ln -sf "$DOTFILES_REPO_ROOT/df/bash/.profile" ~/.profile
+	ln -sf "$DOTFILES_REPO_ROOT/df/bash/.blerc" ~/.blerc
 
 	# zsh
-	ln -sf ~/dotfiles/df/zsh/.zshrc ~/.zshrc
-	ln -sf ~/dotfiles/df/zsh/.zprofile ~/.zprofile
-	ln -sf ~/dotfiles/df/zsh/.zshenv ~/.zshenv
+	ln -sf "$DOTFILES_REPO_ROOT/df/zsh/.zshrc" ~/.zshrc
+	ln -sf "$DOTFILES_REPO_ROOT/df/zsh/.zprofile" ~/.zprofile
+	ln -sf "$DOTFILES_REPO_ROOT/df/zsh/.zshenv" ~/.zshenv
 
 	# If is Windows WSL and onedrive installed
 	# set useful profile aliases to common dirs
@@ -369,7 +376,7 @@ function add_user {
 # Generate encrypted runtime env (.env.local.sops) from 1Password template
 # --------------------------------------------------------------------
 function setLocalEnvFile {
-	local template="$HOME/dotfiles/bootstrap/secrets/.env.local.tpl"
+	local template="$DOTFILES_REPO_ROOT/bootstrap/secrets/.env.local.tpl"
 	local output="$HOME/.env.local.sops"
 	local tmp_plain
 	local tmp_age

@@ -1,0 +1,36 @@
+name: Bootstrap Integration
+
+on:
+  pull_request:
+  push:
+  workflow_dispatch:
+
+jobs:
+  linux-relink:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Task
+        uses: go-task/setup-task@v1
+
+      - name: Run Linux bootstrap relink integration
+        run: task test:integration:linux
+
+  windows-relink:
+    runs-on: windows-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Task
+        uses: go-task/setup-task@v1
+
+      - name: Run Windows bootstrap relink integration
+        shell: pwsh
+        run: task test:integration:windows

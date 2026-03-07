@@ -108,6 +108,11 @@ Contrato inicial recomendado:
 - `Disable1Password`
 - `DisableGhAuth`
 
+Primeiros pontos de injecao efetivamente adotados nesta worktree:
+
+- Linux: `DOTFILES_REPO_ROOT_UNIX`, `DOTFILES_BOOTSTRAP_ASSUME_POLO`
+- Windows: `DOTFILES_REPO_ROOT_WINDOWS`, `DOTFILES_WINDOWS_DOCUMENTS_PATH`, `DOTFILES_WINDOWS_CODE_USER_PATH`, `DOTFILES_WINDOWS_TERMINAL_SETTINGS_PATH`
+
 ## Requisitos formais
 
 - idempotencia obrigatoria para `refresh` e `relink`
@@ -125,3 +130,10 @@ Contrato inicial recomendado:
 5. integration Linux em container
 6. integration Windows em runner hospedado
 7. protected E2E com approvals
+
+Estado atual desta worktree:
+
+- governance/worklog/roadmap: camada formal entregue com worklog, roadmap, licoes aprendidas, smoke eval e gates de sincronismo
+- integration Linux: harness de relink em container com Bats
+- integration Windows: harness de relink em runner Windows real com perfil temporario
+- AI routing/delegation: backend Python declarativo com smoke eval e gate de sincronismo workflow-task-doc

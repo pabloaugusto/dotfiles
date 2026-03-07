@@ -106,6 +106,34 @@ function Resolve-PathOrDefault {
 	return $resolved
 }
 
+function Resolve-WindowsRepoRoot {
+	$defaultRepoRoot = Join-Path $Env:USERPROFILE 'dotfiles'
+	return (Resolve-PathOrDefault -Candidate $Env:DOTFILES_REPO_ROOT_WINDOWS -DefaultPath $defaultRepoRoot)
+}
+
+function Resolve-WindowsDocumentsPath {
+	$defaultDocuments = [Environment]::GetFolderPath('MyDocuments')
+	return (Resolve-PathOrDefault -Candidate $Env:DOTFILES_WINDOWS_DOCUMENTS_PATH -DefaultPath $defaultDocuments)
+}
+
+function Resolve-WindowsCodeUserPath {
+	$defaultCodeUser = Join-Path $Env:APPDATA 'Code\User'
+	return (Resolve-PathOrDefault -Candidate $Env:DOTFILES_WINDOWS_CODE_USER_PATH -DefaultPath $defaultCodeUser)
+}
+
+function Resolve-WindowsTerminalSettingsPath {
+	$override = Normalize-WindowsPath -PathValue $Env:DOTFILES_WINDOWS_TERMINAL_SETTINGS_PATH
+	if (-not [string]::IsNullOrWhiteSpace($override)) {
+		return $override
+	}
+
+	$windowsTerminalDir = Get-ChildItem "$Env:USERPROFILE\AppData\Local\Packages\*Microsoft.WindowsTerminal*" -Directory -ErrorAction SilentlyContinue | Select-Object -First 1
+	if ($windowsTerminalDir) {
+		return (Normalize-WindowsPath -PathValue (Join-Path $windowsTerminalDir.FullName 'LocalState\settings.json'))
+	}
+	return ''
+}
+
 function Resolve-WindowsPathWithRoot {
 	param (
 		[string]$RootPath,
@@ -864,9 +892,9 @@ function Test-OneDriveLayoutHealth {
 #################################################################################
 # verify: dotfiles was cloned from github?
 #################################################################################
-	$DotFilesDirectory = "$Env:USERPROFILE\dotfiles"
+	$DotFilesDirectory = Resolve-WindowsRepoRoot
 	if (!(Test-Path "$DotFilesDirectory")) {
-		throw "Folder $Env:USERPROFILE\dotfiles. Did you forgot clone dotfiles?"
+		throw "Folder $DotFilesDirectory. Did you forgot clone dotfiles?"
 	} else {
 		. "${DotFilesDirectory}\df\powershell\_functions.ps1"
 	}
@@ -874,8 +902,12 @@ function Test-OneDriveLayoutHealth {
 #################################################################################
 # verify: runnning bootstrap on elevated powershell (as admin)?
 #################################################################################
-	if (! (Test-PowershellElevated)){
+	$allowUnelevatedRelinkHarness = $RelinkOnly -and (ConvertTo-BoolFlag -Value $Env:DOTFILES_BOOTSTRAP_ALLOW_UNELEVATED_RELINK -Default $false)
+	if (! (Test-PowershellElevated) -and -not $allowUnelevatedRelinkHarness){
 		throw "This script must run on elevated powershell (as admin)"
+	}
+	if ($allowUnelevatedRelinkHarness) {
+		Write-Warning "Unelevated relink harness enabled by DOTFILES_BOOTSTRAP_ALLOW_UNELEVATED_RELINK."
 	}
 
 #################################################################################
@@ -1000,7 +1032,7 @@ catch {
 	# ----------------------------------------------------
 	# Symlink Powershell dotfiles
 	# ----------------------------------------------------
-	$mydocs =  [Environment]::GetFolderPath("MyDocuments")
+	$mydocs = Resolve-WindowsDocumentsPath
 	Add-Symlink "${mydocs}\Powershell\profile.ps1" "$DotFilesDirectory\df\powershell\profile.ps1" > $null
 	Add-Symlink "${mydocs}\Powershell\Microsoft.PowerShell_profile.ps1" "$DotFilesDirectory\df\powershell\Microsoft.PowerShell_profile.ps1" > $null
 	Add-Symlink "${mydocs}\WindowsPowerShell\Microsoft.PowerShell_profile.ps1" "$DotFilesDirectory\df\powershell\Microsoft.PowerShell_profile.ps1" > $null
@@ -1021,11 +1053,12 @@ catch {
 	# remove previous root dotfile dirs symlinks
 	# make this check/delete a functionality into add-symlink function
 	# ---------------------------------------------------------------
-	if (Test-Path -Path "$Env:APPDATA\Code\User") {
-		Remove-Item -r "$Env:APPDATA\Code\User"
+	$codeUserPath = Resolve-WindowsCodeUserPath
+	if (Test-Path -Path $codeUserPath) {
+		Remove-Item -r $codeUserPath
 	}
 
-	Add-Symlink "$Env:APPDATA\Code\User" "$DotFilesDirectory\df\vscode" > $null
+	Add-Symlink $codeUserPath "$DotFilesDirectory\df\vscode" > $null
 	#Add-Symlink "$Env:APPDATA\Code\User\settings.json" "$DotFilesDirectory\df\vscode\settings.json" > $null
 	#Add-Symlink "$Env:APPDATA\Code\User\keybindings.json" "$DotFilesDirectory\df\vscode\keybindings.json" > $null
 	#Add-Symlink "$Env:APPDATA\Code\User\snippets" "$DotFilesDirectory\df\vscode\snippets" > $null
@@ -1033,9 +1066,9 @@ catch {
 #################################################################################
 # bootstrap: symlink Windows Terminal setting
 #################################################################################
-		$WindowsTerminalDir = Get-ChildItem "$Env:USERPROFILE\AppData\Local\Packages\*Microsoft.WindowsTerminal*" -Directory -ErrorAction SilentlyContinue | Select-Object -First 1
-		if ($WindowsTerminalDir) {
-			Add-Symlink "$($WindowsTerminalDir.FullName)\LocalState\settings.json" "$DotFilesDirectory\df\windows-terminal\settings.json" > $null
+		$windowsTerminalSettingsPath = Resolve-WindowsTerminalSettingsPath
+		if (-not [string]::IsNullOrWhiteSpace($windowsTerminalSettingsPath)) {
+			Add-Symlink $windowsTerminalSettingsPath "$DotFilesDirectory\df\windows-terminal\settings.json" > $null
 		}
 
 #################################################################################
@@ -1176,4 +1209,10 @@ catch {
 	Write-Output "`n"
 
 	# Reloads the Profile
-	. $PROFILE.CurrentUserAllHosts
+	$skipProfileReload = ConvertTo-BoolFlag -Value $Env:DOTFILES_BOOTSTRAP_SKIP_PROFILE_RELOAD -Default $false
+	if ($skipProfileReload) {
+		Write-Output "Profile reload skipped by DOTFILES_BOOTSTRAP_SKIP_PROFILE_RELOAD."
+	}
+	else {
+		. $PROFILE.CurrentUserAllHosts
+	}
