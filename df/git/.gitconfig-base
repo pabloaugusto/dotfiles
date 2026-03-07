@@ -120,35 +120,84 @@
 [url "git://gist.github.com/"]
     insteadOf = "gist:"
 
+################################################################################
+# Aliases Git canonicos
+# - todos os aliases versionados devem ficar aqui
+# - overlays por ambiente nao devem duplicar [alias]
+################################################################################
+
 [alias]
-    a       = add
-    aa      = add .
-    b       = branch
-    cl      = clone --recursive
-    c       = commit
-    cm      = commit -m
-    cu      = commit -m "updated"
-    cf      = commit -a -m "fixed"
-    cwip    = "!f() { git commit -am \"wip: $(date +%Y-%m-%d_%H-%M-%S)\"; }; f"
-    d       = diff
-    co      = checkout
-    sw      = switch
-    rs      = restore
-    g       = grep
-    p       = push
-    fpush   = push --force-with-lease
-    rv      = remote -v
-    r       = rebase
-    ri      = rebase --interactive
-    s       = status
-    ss      = status -s
-    sb      = show-branch
-    hist    = log --pretty=format:"%h %ad | %s%d [%an]" --graph --date=short
-    l       = log --pretty=nice --max-count=15 --date=short --reverse --date=format:"%d/%m/%Y %H:%M:%S"
-    lg      = log --graph --pretty=format:"%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr)%Creset" --abbrev-commit --date=relative
-    msg     = commit --allow-empty -m
-    root    = "!f() { cd $(git rev-parse --show-toplevel); }; f"
-    sync    = "! git pull --rebase && git push"
-    sync-tags = "! git fetch --tags && git push --tags"
-    sync-all  = "! git pull --rebase && git push --progress && git push --tags"
+    # Basicos
+    a           = add
+    aa          = add .
+    b           = branch
+    cl          = clone --recursive
+    co          = checkout
+    sw          = switch
+    rs          = restore
+    d           = diff
+    g           = grep
+    p           = push
+    fpush       = push --force-with-lease
+
+    # Commit e status
+    c           = commit
+    ci          = "!git commit -am \"[empty] Initial commit\" --allow-empty"
+    cm          = commit -m
+    cu          = commit -m "updated"
+    cf          = commit -a -m "fixed"
+    cwip        = "!f() { git commit -am \"wip: $(date +%Y-%m-%d_%H-%M-%S)\"; }; f"
+    msg         = commit --allow-empty -m
+    acp         = "!f() { git add -A && git commit -m \"$1\" && git push; }; f"
+    acpu        = "!f() { git add -A && git commit -m \"updated\" && git push; }; f"
+    acpf        = "!f() { git add -A && git commit -m \"fixed\" && git push; }; f"
+    s           = status
+    ss          = status -s
+    sb          = show-branch
+
+    # Historico, navegacao e review
+    hist        = log --pretty=format:"%h %ad | %s%d [%an]" --graph --date=short
+    l           = log --pretty=nice --max-count=15 --date=short --reverse --date=format:"%d/%m/%Y %H:%M:%S"
+    lg          = log --graph --pretty=format:"%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr)%Creset" --abbrev-commit --date=relative
+    root        = "!f() { cd $(git rev-parse --show-toplevel); }; f"
+    rv          = remote -v
+    r           = rebase
+    ri          = rebase --interactive
+    new         = "!f() { case \"$1\" in -*|\"\") b=;; *) b=$1; shift;; esac; git log $b@{1}..$b@{0} \"$@\"; }; f"
+    fb          = "!f() { git branch -a --contains $1; }; f"
+    ft          = "!f() { git describe --always --contains $1; }; f"
+    fc          = "!f() { git log --pretty=format:'%C(yellow)%h\t%Cblue%ad  %Creset%s%Cgreen  [%cn] %Cred%d' --decorate --date=short -S$1; }; f"
+    fm          = "!f() { git log --pretty=format:'%C(yellow)%h\t%Cblue%ad  %Creset%s%Cgreen  [%cn] %Cred%d' --decorate --date=short --grep=$1; }; f"
+    dm          = "!git branch --merged | grep -v '\\*' | xargs -n 1 git branch -d; git remote -v update -p"
+    team        = shortlog --summary --numbered
+    gh-url      = "!f() { \
+        if ! remote=${1:-$(git config --get \
+            branch.$(git symbolic-ref --short HEAD).remote)}; \
+        then \
+            echo no remote specified and could not get remote for HEAD; \
+            exit; \
+        fi; \
+        if ! remote_url=$(git config --get remote.$remote.url); \
+        then \
+            echo \"could not get URL for remote \\`$remote\\`\"; \
+            exit; \
+        fi; \
+        case $remote_url in \
+            git@github.com:*.git) \
+                repo=$(echo $remote_url \
+                    | sed 's/git@github.com:\\(.*\\).git/\\1/');; \
+            https://github.com/*) \
+                repo=$(echo $remote_url \
+                    | sed 's+https://github.com/\\(.*\\).git+\\1+');; \
+            *) \
+                echo \"\\`$remote\\` does not appear to have a GitHub remote url: $remote_url\"; \
+                exit 1;; \
+        esac; \
+        echo https://github.com/$repo; \
+    }; f"
+
+    # Sincronismo e bootstrap rapido de repos
+    sync        = "! git pull --rebase && git push"
+    sync-tags   = "! git fetch --tags && git push --tags"
+    sync-all    = "! git pull --rebase && git push --progress && git push --tags"
     clone-https = "! [ $# -ne 1 ] && echo 'Args: USERNAME/REPO_NAME' || git clone https://github.com/$1.git"

@@ -100,3 +100,6 @@ plugins=(git ansible terraform kubectl kubectx )
 # Example aliases
 # alias zshconfig="mate ~/.zshrc"
 # alias ohmyzsh="mate ~/.oh-my-zsh"
+
+# Aliases canonicos compartilhados com o shell Unix deste repo.
+[ -f ~/.aliases ] && source ~/.aliases
