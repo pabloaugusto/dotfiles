@@ -127,6 +127,15 @@ Historico incremental das regras operacionais que nao devem depender de memoria 
 - Prevencao: Em toda revisao estrutural, varrer df em busca de tests, scratch, backups, fixtures e nomes maquina-especificos antes de aceitar novos arquivos no runtime.
 - Validacao: git ls-files df; task ai:validate:windows; task test:unit:powershell; git diff --check
 - Worklog relacionado: `WIP-20260307-ESTRUTURA`
+
+## LA-012 - Cada workflow deve chamar tasks canonicas, nao listas duplicadas de gates
+
+- Contexto: A paridade entre CI/CD, Taskfile e documentacao ficou fragil quando workflows passaram a repetir listas de gates manualmente, em vez de apontar para uma task canonica por job.
+- Regra: Todo workflow ou job recorrente deve ter uma task canonica correspondente no Taskfile; o workflow deve chamar essa task, e os catalogos devem documentar a mesma entrada canonica.
+- Solucao validada: Criar `ci:ai:check:{windows,linux}`, `ci:quality:{windows,linux}` e `ci:bootstrap:integration:{windows,linux}`, depois atualizar workflows e docs para consumir essas entradas unicas.
+- Prevencao: Sempre modelar primeiro a task canonica e so depois apontar workflow, docs e validadores para ela.
+- Validacao: task ci:ai:check:windows; task ci:quality:windows; task ci:bootstrap:integration:windows; wsl task ci:ai:check:linux; wsl task ci:quality:linux; wsl task ci:bootstrap:integration:linux; task ci:workflow:sync:check:windows; task ci:workflow:sync:check:linux
+- Worklog relacionado: `WIP-20260307-CI-TASK-PARITY`
 <!-- ai-lessons:catalog:end -->
 
 ## Revisoes de rodadas
@@ -136,6 +145,8 @@ Toda finalizacao de worklog deve registrar se houve nova licao.
 <!-- ai-lessons:reviews:start -->
 | Data/Hora UTC | Worklog ID | Decisao | Resumo | Licoes | Evidencia |
 | --- | --- | --- | --- | --- | --- |
+| 2026-03-07 10:18 UTC | WIP-20260307-CI-TASK-PARITY | capturada | A rodada consolidou a regra de que cada workflow/job recorrente deve chamar uma task canonica unica, em vez de duplicar listas de gates dentro do YAML. | LA-012 | LICOES-APRENDIDAS.md atualizado com LA-012; ci:workflow:sync:check passou em Windows e Linux |
+| 2026-03-07 09:54 UTC | WIP-20260307-IA-REFERENCIAS | sem_nova_licao | A rodada gerou sugestoes de roadmap e referencia externa, mas nao introduziu regra operacional perene nova alem das governancas ja catalogadas. | - | task ai:validate:windows; git diff --check |
 | 2026-03-07 09:43 UTC | WIP-20260307-ESTRUTURA | capturada | A rodada consolidou a regra de que df deve permanecer estritamente como runtime materializado; fixtures, scratch e historico devem sair para tests/fixtures ou archive. | LA-011 | LICOES-APRENDIDAS.md atualizado com LA-011; fixture movido para tests/fixtures/editor; scratch PowerShell arquivado fora de df. |
 | 2026-03-07 09:28 UTC | WIP-20260307-090534 | sem_nova_licao | LA-010 ja cobre a regra normativa desta rodada; nao surgiu nova licao perene alem do enforcement e do checkpoint commit que ja foram registrados. | - | task test:unit:powershell; task test:integration:windows; wsl task test:integration:linux; task ai:validate:windows; git diff --check; commits a36c2ba,4610fdd,1c3902c,91bd551,49a5e64 |
 | 2026-03-07 09:03 UTC | WIP-20260307-084440 | capturada | A rodada consolidou a necessidade de wrappers PowerShell dedicados para CLIs Python com flags sensiveis no Windows e reforcou a regra de manter .agents como fonte unica sem drift documental ou de workflow. | LA-009 | task ai:worklog:update:windows; task ai:validate:windows; task test:unit:powershell |

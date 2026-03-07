@@ -1,6 +1,6 @@
 # AI WIP Tracker
 
-Atualizado em: 2026-03-07 09:43 UTC
+Atualizado em: 2026-03-07 10:18 UTC
 
 Fonte de verdade operacional para continuidade de tarefas dos agentes de IA.
 
@@ -28,6 +28,8 @@ Fonte de verdade operacional para continuidade de tarefas dos agentes de IA.
 <!-- ai-worklog:done:start -->
 | ID | Tarefa | Branch | Responsavel | Inicio UTC | Concluido UTC | Resultado |
 | --- | --- | --- | --- | --- | --- | --- |
+| WIP-20260307-CI-TASK-PARITY | Endurecer a paridade entre workflows de CI/CD, tasks canonicas e documentacao operacional do repo | feat/test-harness-hybrid | ai-agent | 2026-03-07 10:17 UTC | 2026-03-07 10:18 UTC | Paridade entre workflows, tasks e catalogos de CI/CD foi endurecida com entrypoints canonicos por workflow/job, docs atualizadas e gatilho do ai-governance ampliado para cobrir... / evidencias: task ci:workflow:sync:c... |
+| WIP-20260307-IA-REFERENCIAS | Pesquisar referencias externas de dotfiles com forte uso de IA e registrar sugestoes aderentes ao roadmap do repo | feat/test-harness-hybrid | ai-agent | 2026-03-07 09:45 UTC | 2026-03-07 09:54 UTC | Referencias externas de dotfiles com forte uso de IA foram auditadas, documentadas em AI-SOURCE-AUDIT e convertidas em quatro sugestoes pendentes no roadmap para avaliacao humana. / evidencias: docs/AI-SOURCE-AUDIT.md... |
 | WIP-20260307-ESTRUTURA | Auditar a estrutura completa do repositorio e simplificar layout de pastas/arquivos conforme boas praticas e contratos do projeto | feat/test-harness-hybrid | ai-agent | 2026-03-07 09:31 UTC | 2026-03-07 09:43 UTC | Estrutura do repo simplificada e reorganizada: legado isolado em archive/, prompt packs movidos para .agents/prompts/legacy, docs agrupados por funcao, nomes canonicos corrigido... / evidencias: task ai:validate:windo... |
 | WIP-20260307-090534 | Auditar o repo inteiro em busca de simplificacoes, codigo e arquivos desnecessarios, pontos de falha e melhorias de performance, resiliencia e manutencao | feat/test-harness-hybrid | ai-agent | 2026-03-07 09:05 UTC | 2026-03-07 09:28 UTC | Auditoria de simplificacao concluida com commits checkpoint por contexto: harnesses reais de relink, reducao de drift estrutural, refresh de docs do repo e ajustes de workspace. / evidencias: task test:unit:powershell... |
 | WIP-20260307-084440 | Auditar o repo inteiro e atualizar a documentacao para refletir as funcionalidades atuais, incluindo README raiz com catalogo de funcionalidades | feat/test-harness-hybrid | ai-agent | 2026-03-07 08:44 UTC | 2026-03-07 09:03 UTC | Duplicacao estrutural consolidada: .agents como fonte canonica, .codex reduzido a README e arvore vazia removida; quality-foundation passou a reutilizar tasks oficiais; docs e R... / evidencias: python scripts/validat... |

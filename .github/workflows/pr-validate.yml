@@ -39,12 +39,9 @@ jobs:
         run: |
           sh -c "$(curl --location https://taskfile.dev/install.sh)" -- -d -b /usr/local/bin
 
-      - name: Validate AI assets and close gate
+      - name: Run canonical AI governance gate
         run: |
-          task ai:validate:linux
-          task ai:eval:smoke:linux
-          task ci:workflow:sync:check:linux
-          task ai:worklog:close:gate:linux
+          task ci:ai:check:linux
 
       - name: Validate PR title
         if: github.event_name == 'pull_request'

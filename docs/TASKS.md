@@ -32,6 +32,11 @@ Referencia operacional das tasks mais criticas para governanca, roteamento e CI 
 - Funcionalidade: valida a camada declarativa de IA no Windows.
 - Uso manual: `task ai:validate:windows`
 
+### `ci:ai:check:linux`
+
+- Funcionalidade: executa o gate canonico do workflow `ai-governance.yml` no Linux/CI.
+- Uso manual: `task ci:ai:check:linux`
+
 ### `ci:lint:linux`
 
 - Funcionalidade: executa lint sintatico de shell e hooks Bash no Linux/CI.
@@ -76,6 +81,26 @@ Referencia operacional das tasks mais criticas para governanca, roteamento e CI 
 
 - Funcionalidade: executa o gate de sincronismo no Linux/CI.
 - Uso manual: `task ci:workflow:sync:check:linux`
+
+### `ci:quality:linux`
+
+- Funcionalidade: executa a camada canonica do workflow `quality-foundation.yml` no Linux/CI.
+- Uso manual: `task ci:quality:linux`
+
+### `ci:quality:windows`
+
+- Funcionalidade: executa a camada canonica do workflow `quality-foundation.yml` no Windows.
+- Uso manual: `task ci:quality:windows`
+
+### `ci:bootstrap:integration:linux`
+
+- Funcionalidade: executa a camada canonica do workflow `bootstrap-integration.yml` no Linux/CI.
+- Uso manual: `task ci:bootstrap:integration:linux`
+
+### `ci:bootstrap:integration:windows`
+
+- Funcionalidade: executa a camada canonica do workflow `bootstrap-integration.yml` no Windows.
+- Uso manual: `task ci:bootstrap:integration:windows`
 
 ### `ci:pr:title:check`
 

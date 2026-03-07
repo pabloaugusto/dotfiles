@@ -15,8 +15,8 @@ jobs:
       - name: Set up Task
         uses: go-task/setup-task@v1
 
-      - name: Run Linux lint baseline
-        run: task ci:lint:linux
+      - name: Run canonical Linux quality gate
+        run: task ci:quality:linux
 
   powershell-quality:
     runs-on: windows-latest
@@ -35,14 +35,6 @@ jobs:
             Install-Module Pester -Scope CurrentUser -Force -SkipPublisherCheck
           }
 
-      - name: Run PowerShell lint
+      - name: Run canonical Windows quality gate
         shell: pwsh
-        run: task ci:lint:windows
-
-      - name: Validate AI assets
-        shell: pwsh
-        run: task ai:validate:windows
-
-      - name: Run Pester
-        shell: pwsh
-        run: task test:unit:powershell
+        run: task ci:quality:windows

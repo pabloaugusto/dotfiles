@@ -309,6 +309,23 @@ tasks:
     cmds:
       - "bash ./scripts/run-linux-bootstrap-integration.sh"
 
+  ci:bootstrap:integration:
+    desc: Executa a camada canonica do workflow Bootstrap Integration no ambiente atual
+    cmds:
+      - task: ci:bootstrap:integration:{{if or (eq .OS "Windows_NT") (eq .OS "windows")}}windows{{else}}linux{{end}}
+
+  ci:bootstrap:integration:windows:
+    desc: Windows - camada canonica do workflow Bootstrap Integration
+    platforms: [windows]
+    deps:
+      - test:integration:windows
+
+  ci:bootstrap:integration:linux:
+    desc: Linux/WSL - camada canonica do workflow Bootstrap Integration
+    platforms: [linux]
+    deps:
+      - test:integration:linux
+
   test:unit:python:
     desc: Executa testes unitarios Python da pasta tests/python
     cmds:
@@ -1193,12 +1210,47 @@ tasks:
 
   ci:ai:check:
     desc: Gate local de governanca IA
+    cmds:
+      - task: ci:ai:check:{{if or (eq .OS "Windows_NT") (eq .OS "windows")}}windows{{else}}linux{{end}}
+
+  ci:ai:check:windows:
+    desc: Windows - camada canonica do workflow AI Governance
+    platforms: [windows]
     deps:
-      - ai:validate
-      - ai:lessons:check
-      - ai:worklog:close:gate
-      - ai:eval:smoke
-      - ci:workflow:sync:check
+      - ai:validate:windows
+      - ai:lessons:check:windows
+      - ai:worklog:close:gate:windows
+      - ai:eval:smoke:windows
+      - ci:workflow:sync:check:windows
+
+  ci:ai:check:linux:
+    desc: Linux/WSL - camada canonica do workflow AI Governance
+    platforms: [linux]
+    deps:
+      - ai:validate:linux
+      - ai:lessons:check:linux
+      - ai:worklog:close:gate:linux
+      - ai:eval:smoke:linux
+      - ci:workflow:sync:check:linux
+
+  ci:quality:
+    desc: Executa a camada canonica do workflow Quality Foundation no ambiente atual
+    cmds:
+      - task: ci:quality:{{if or (eq .OS "Windows_NT") (eq .OS "windows")}}windows{{else}}linux{{end}}
+
+  ci:quality:windows:
+    desc: Windows - camada canonica do workflow Quality Foundation
+    platforms: [windows]
+    deps:
+      - ci:lint:windows
+      - ai:validate:windows
+      - test:unit:powershell
+
+  ci:quality:linux:
+    desc: Linux/WSL - camada canonica do workflow Quality Foundation
+    platforms: [linux]
+    deps:
+      - ci:lint:linux
 
   ci:validate:
     desc: Auto - validacao de PR local (paridade CI) no ambiente atual
@@ -1212,12 +1264,8 @@ tasks:
       - repo:status:windows
       - conventions:check:branch:windows
       - conventions:check:commit:windows
-      - ai:validate:windows
-      - ai:lessons:check:windows
-      - ai:worklog:close:gate:windows
-      - ai:eval:smoke:windows
-      - ci:workflow:sync:check:windows
-      - ci:lint:windows
+      - ci:ai:check:windows
+      - ci:quality:windows
       - test:unit:python:windows
       - test:unit:powershell
       - ci:docker-build:windows
@@ -1229,12 +1277,8 @@ tasks:
       - repo:status:linux
       - conventions:check:branch:linux
       - conventions:check:commit:linux
-      - ai:validate:linux
-      - ai:lessons:check:linux
-      - ai:worklog:close:gate:linux
-      - ai:eval:smoke:linux
-      - ci:workflow:sync:check:linux
-      - ci:lint:linux
+      - ci:ai:check:linux
+      - ci:quality:linux
       - test:unit:python:linux
       - ci:docker-build:linux
 

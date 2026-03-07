@@ -17,8 +17,8 @@ jobs:
       - name: Set up Task
         uses: go-task/setup-task@v1
 
-      - name: Run Linux bootstrap relink integration
-        run: task test:integration:linux
+      - name: Run canonical Linux bootstrap integration gate
+        run: task ci:bootstrap:integration:linux
 
   windows-relink:
     runs-on: windows-latest
@@ -31,6 +31,6 @@ jobs:
       - name: Set up Task
         uses: go-task/setup-task@v1
 
-      - name: Run Windows bootstrap relink integration
+      - name: Run canonical Windows bootstrap integration gate
         shell: pwsh
-        run: task test:integration:windows
+        run: task ci:bootstrap:integration:windows

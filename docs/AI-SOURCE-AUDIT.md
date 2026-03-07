@@ -189,3 +189,70 @@ Sequencia obrigatoria:
 2. registrar o inventario e o gap analysis
 3. decidir o que sera adotado, adaptado ou adiado
 4. so entao editar codigo, docs, tasks, workflows ou ativos declarativos
+
+## Referencias externas complementares (2026-03-07)
+
+Fontes adicionais pesquisadas para ideias de roadmap, sem importacao direta de
+codigo nesta rodada:
+
+### atxtechbro/dotfiles
+
+- fonte: https://github.com/atxtechbro/dotfiles
+- sinais relevantes:
+  - fonte unica de configuracao para multiplos harnesses de IA
+  - `knowledge/` global separado de docs especificos do repo
+  - MCP global e simetria entre harnesses
+  - procedimentos reproduziveis em comandos e worktrees paralelas
+- aproveitamento potencial aqui:
+  - geracao multiplataforma de adaptadores de IA a partir de uma fonte canonica
+  - camada de conhecimento portavel separada do contexto especifico do repo
+
+### jppferguson/dotfiles
+
+- fonte: https://github.com/jppferguson/dotfiles
+- sinais relevantes:
+  - fluxo explicito para `install`, `status`, `diff`, `sync` e `backup` da configuracao de IA
+  - estrategia de copia no lugar de symlink quando o harness tem bug conhecido
+- aproveitamento potencial aqui:
+  - commands/tasks de sincronismo e diff entre repo e `HOME` da ferramenta
+  - fallback copy-vs-symlink por adaptador, em vez de assumir que todo harness aceita link
+
+### joshukraine/dotfiles
+
+- fonte: https://github.com/joshukraine/dotfiles
+- sinais relevantes:
+  - comandos slash estruturados para o ciclo completo de desenvolvimento
+  - presets composaveis de permissao
+  - hooks de seguranca e deny rules para operacoes perigosas
+- aproveitamento potencial aqui:
+  - presets de permissao por contexto (`dotfiles`, `review`, `sprint`, `ci`)
+  - hooks/policies para bloquear leitura de segredos e comandos destrutivos
+
+### basnijholt/dotfiles
+
+- fonte: https://github.com/basnijholt/dotfiles
+- sinais relevantes:
+  - arvore explicita de configs por ferramenta (`claude`, `codex`, `gemini`, `opencode`)
+  - bootstrap cross-platform forte
+  - `Dockerfile` para experimentar o ambiente sem instalar tudo
+  - branch publica sanitizada e install declarativo
+- aproveitamento potencial aqui:
+  - adaptadores dedicados por ferramenta de IA no `HOME`
+  - export publico/sanitizado quando quisermos separar runtime privado de perfil compartilhavel
+
+### Anthropic Claude Code Docs
+
+- fontes:
+  - settings: https://code.claude.com/docs/en/settings
+  - memory: https://code.claude.com/docs/en/memory
+  - hooks: https://code.claude.com/docs/en/hooks
+  - MCP: https://code.claude.com/docs/en/mcp
+- sinais relevantes:
+  - hierarquia clara entre config de usuario, projeto e politica gerenciada
+  - `CLAUDE.md` com imports
+  - hooks, inclusive agent hooks e async hooks
+  - expansao de variaveis em `.mcp.json`
+- aproveitamento potencial aqui:
+  - reforcar politicas de seguranca por harness
+  - manter separacao entre escopo global e escopo do repo
+  - gerar MCP/config com placeholders canonicos e expansao de env
