@@ -186,7 +186,9 @@ Guia completo: `SECURITY.md` e `docs/secrets-and-auth.md`.
 - `docs/bootstrap-flow.md`
 - `docs/checkenv.md`
 - `docs/onedrive.md`
-- `docs/user-home-estructure.md`
+- `docs/user-home-structure.md`
 - `docs/secrets-and-auth.md`
 - `docs/config-reference.md`
 - `docs/repo-audit.md`
+- `docs/README.md`
+- `archive/README.md`

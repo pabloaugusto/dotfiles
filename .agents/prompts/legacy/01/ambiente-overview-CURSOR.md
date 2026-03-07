@@ -179,7 +179,7 @@ Saída:
 
 ### 6. Estrutura de diretórios de usuário (Windows + WSL)
 
-Documentada em detalhe em `docs/user-home-estructure.md`. Resumo:
+Documentada em detalhe em `docs/user-home-structure.md`. Resumo:
 
 - **Windows (`C:\Users\<user>`)**:
   - Links principais:
@@ -248,4 +248,3 @@ Scripts de suporte importantes:
   - Branch protection no GitHub com require‑checks.
   - Tokens dedicados por projeto com privilégio mínimo.
   - Uso regular de `checkEnv` após qualquer mudança na pilha de auth/SSH/Git.
-

@@ -6,6 +6,7 @@ Estrutura inicial:
 - `tests/python`: testes unitarios da governanca Git, do tracker de WIP de IA e dos validadores de governanca
 - `tests/python`: tambem cobre roteamento/delegacao de IA, smoke eval e sincronismo workflow-task-doc
 - `tests/bash`: testes Bats para harnesses Linux do bootstrap
+- `tests/fixtures`: fixtures auxiliares para editores e cenarios manuais que nao pertencem ao runtime de `df/`
 
 Regra:
 

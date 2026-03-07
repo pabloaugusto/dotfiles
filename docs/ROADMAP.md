@@ -90,7 +90,7 @@ IDs pendentes: `SG-20260307-090831`
 ## Sugestoes pendentes de decisao
 
 <!-- roadmap:pending:start -->
-- Consolidar ou arquivar o legado historico versionado que nao e fonte canonica, incluindo bootstrap/bootstrap-ubuntu.original.sh, scripts experimentais e backups declaradamente n... | notas=Reduzir ruido conceitual, diminuir superficie de manutencao e deixar explicita a fronteira entre referencia historica e runtime canonico.
+- Consolidar ou arquivar o legado historico versionado que nao e fonte canonica, incluindo artefatos hoje ja movidos para `archive/` e outros scripts experimentais ou backups decla... | notas=Reduzir ruido conceitual, diminuir superficie de manutencao e deixar explicita a fronteira entre referencia historica e runtime canonico.
 <!-- roadmap:pending:end -->
 
 ## Riscos e bloqueios

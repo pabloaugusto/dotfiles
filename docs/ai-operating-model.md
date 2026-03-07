@@ -67,6 +67,9 @@ As skills ficam em `.agents/skills/` e seguem o contrato:
 - `agents/openai.yaml` com metadata reutilizavel
 - `references/` para detalhes que nao precisam poluir o prompt principal
 
+Prompt packs versionados tambem devem viver em `.agents/prompts/`, inclusive
+material historico, pesquisas e pacotes de contexto usados em auditorias.
+
 ### Camada 2.1. Registry declarativo do repo
 
 Os agentes tipados ficam em `.agents/registry/` e definem:
@@ -197,6 +200,7 @@ Como `df/` guarda apenas o que sera utilizado na maquina apos o bootstrap, os ar
 - `AGENTS.md` define o contrato global do projeto
 - `.agents/cards/` guarda cartoes versionados de agentes
 - `.agents/skills/` guarda skills versionadas do projeto
+- `.agents/prompts/` guarda prompt packs versionados e historico de contexto
 - `.agents/registry/`, `.agents/orchestration/`, `.agents/rules/` e `.agents/evals/` guardam a camada declarativa
 - `.codex/README.md` deixa explicito que adaptadores de assistente nao sao fonte de verdade
 - `docs/AI-WIP-TRACKER.md` guarda o estado incremental do trabalho de IA

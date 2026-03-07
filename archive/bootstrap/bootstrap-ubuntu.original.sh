@@ -1,7 +1,7 @@
 #!/bin/bash
 
 ###############################################################################
-# bootstrap/bootstrap-ubuntu.original.sh
+# archive/bootstrap/bootstrap-ubuntu.original.sh
 #
 # Legacy Ubuntu bootstrap preserved for historical reference.
 # Current canonical Linux/WSL flow lives in:
@@ -15,8 +15,8 @@ ONEDRIVE_ROOT="${DOTFILES_ONEDRIVE_ROOT:-/mnt/d/OneDrive}"
 ONEDRIVE_CLIENTS_DIR="${DOTFILES_ONEDRIVE_CLIENTS_DIR:-$ONEDRIVE_ROOT/clients}"
 ONEDRIVE_PROJECTS_DIR="${DOTFILES_ONEDRIVE_PROJECTS_DIR:-$ONEDRIVE_CLIENTS_DIR/$USER/projects}"
 
-# shellcheck source=../df/bash/.inc/_functions.sh
-source "$BASE_DIR/../df/bash/.inc/_functions.sh"
+# shellcheck source=../../df/bash/.inc/_functions.sh
+source "$BASE_DIR/../../df/bash/.inc/_functions.sh"
 
 # ----------------------------------------------------------------------------------------
 

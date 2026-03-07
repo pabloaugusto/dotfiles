@@ -1,4 +1,7 @@
-. ${PSScriptRoot}\..\.config\powershell\.inc\_functions.ps1
+# Arquivo historico de experimentacao em PowerShell.
+# Nao faz parte do runtime, do bootstrap atual ou da suite oficial de testes.
+# Include original preservado apenas como referencia de contexto:
+# . ${PSScriptRoot}\..\.config\powershell\.inc\_functions.ps1
 
 
 ####################################################################

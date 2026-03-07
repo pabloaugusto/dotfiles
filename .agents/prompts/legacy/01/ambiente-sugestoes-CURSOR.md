@@ -98,7 +98,7 @@ Este documento consolida pontos de melhoria, riscos e ideias de evolução para 
       - Usar `brew list --versions` ou `brew info --json` quando necessário.
 
 - **Tema: Arquivos de backup/legado versionados**
-  - **Problema**: Arquivos como `bootstrap/bootstrap-ubuntu.original.sh`, `df/oh-my-posh/pablo.omp.json.bak` permanecem versionados.
+  - **Problema**: Artefatos historicos como `archive/bootstrap/bootstrap-ubuntu.original.sh` e `archive/df/oh-my-posh/pablo.omp.json.bak` nao podem contaminar os caminhos canonicos ativos.
   - **Risco**: Ambiguidade sobre qual é a fonte “verdadeira”, dificuldade para ferramentas de IA entenderem o fluxo canônico.
   - **Sugestão**:
     - Mover esses artefatos para uma pasta `archive/` com README explicando o contexto **ou** removê‑los se não forem mais necessários.
@@ -138,7 +138,7 @@ Este documento consolida pontos de melhoria, riscos e ideias de evolução para 
 
 - **Tema: Auditar/reparar estrutura pós‑bootstrap**
   - **Ideia**: Criar um comando `task env:repair` que:
-    - Reusa parte da lógica de `Test-OneDriveLayoutHealth` e `user-home-estructure.md`.
+    - Reusa parte da lógica de `Test-OneDriveLayoutHealth` e `user-home-structure.md`.
     - Tenta corrigir automaticamente:
       - Symlinks quebrados em Windows/WSL.
       - Pastas `.dotfiles-prelink-*` residuais sem conteúdo ou já migradas.
@@ -155,7 +155,7 @@ Este documento consolida pontos de melhoria, riscos e ideias de evolução para 
     - Criar um `task bootstrap:guide` (ou script dedicado) que:
       - Leia `bootstrap/user-config.yaml`.
       - Valide campos críticos.
-      - Abra docs relevantes (`docs/bootstrap-flow.md`, `docs/onedrive.md`, `docs/user-home-estructure.md`) com um resumo.
+      - Abra docs relevantes (`docs/bootstrap-flow.md`, `docs/onedrive.md`, `docs/user-home-structure.md`) com um resumo.
 
 - **Tema: IA / Regras e skills**
   - **Ideia**:

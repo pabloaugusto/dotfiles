@@ -122,9 +122,10 @@ Auditoria técnica dos arquivos versionados (excluindo ignorados) com foco em:
    - Esforço: **Médio**
 
 6. **Acúmulo de arquivos legados/backups no versionamento**
-   - Evidência: `bootstrap/bootstrap-ubuntu.original.sh`, `df/oh-my-posh/pablo.omp.json.bak`, `df/powertoys/settings_133470085785000868.ptb`
+   - Evidência original: `bootstrap/bootstrap-ubuntu.original.sh`, `df/oh-my-posh/pablo.omp.json.bak`, `df/powertoys/settings_133470085785000868.ptb`
+   - Status atual: `bootstrap-ubuntu.original.sh` e `pablo.omp.json.bak` foram movidos para `archive/`; o export do PowerToys foi canonizado para `df/powertoys/settings.ptb`.
    - Impacto: ruído de manutenção e ambiguidade sobre fonte canônica.
-   - Recomendação: mover para `archive/` ou remover versionamento se não essenciais.
+   - Recomendação: continuar empurrando snapshots, backups e artefatos históricos para `archive/` ou removê-los do Git quando não forem essenciais.
    - Esforço: **Baixo**
 
 7. **Script legacy `bootstrap/symlinks.ps1` com path de include antigo**

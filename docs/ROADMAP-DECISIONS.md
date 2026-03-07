@@ -12,7 +12,7 @@ Use status: `pendente`, `aceita`, `descartada`, `aplicar_depois`.
 <!-- roadmap:suggestions:start -->
 | ID | Descricao | Status | RM | Captura | Atualizacao |
 | --- | --- | --- | --- | --- | --- |
-| SG-20260307-090831 | Consolidar ou arquivar o legado historico versionado que nao e fonte canonica, incluindo bootstrap/bootstrap-ubuntu.original.sh, scripts experimentais e backups declaradamente n... | pendente |  | 2026-03-07 | 2026-03-07 |
+| SG-20260307-090831 | Consolidar ou arquivar o legado historico versionado que nao e fonte canonica, incluindo artefatos hoje ja movidos para `archive/` e outros scripts experimentais ou backups decla... | pendente |  | 2026-03-07 | 2026-03-07 |
 | SG-20260307-041349-01 | Expandir datasets e cenarios de eval para bootstrap cross-platform, seguranca e risco operacional. | aceita |  | 2026-03-07 | 2026-03-07 |
 | SG-20260307-041349 | Adicionar validadores dedicados de sincronismo entre workflows, tasks, docs, catalogos e ativos declarativos da IA. | aceita |  | 2026-03-07 | 2026-03-07 |
 | SG-20260307-041348 | Importar chat-intake, route e delegate com backend real de roteamento declarativo para a camada canonica .agents. | aceita |  | 2026-03-07 | 2026-03-07 |
@@ -32,7 +32,7 @@ Use status: `pendente`, `aceita`, `descartada`, `aplicar_depois`.
 ## Registro automatico
 
 <!-- roadmap:autolog:start -->
-- 2026-03-07 09:08 UTC | decisao=pending | horizonte=next | item=Consolidar ou arquivar o legado historico versionado que nao e fonte canonica, incluindo bootstrap/bootstrap-ubuntu.original.sh, scripts experimentais e backups declaradamente n... | notas=Reduzir ruido conceitual, diminuir superficie de manutencao e deixar explicita a fronteira entre referencia historica e runtime canonico.
+- 2026-03-07 09:08 UTC | decisao=pending | horizonte=next | item=Consolidar ou arquivar o legado historico versionado que nao e fonte canonica, incluindo artefatos hoje ja movidos para `archive/` e outros scripts experimentais ou backups decla... | notas=Reduzir ruido conceitual, diminuir superficie de manutencao e deixar explicita a fronteira entre referencia historica e runtime canonico.
 - 2026-03-07 08:10 UTC | decisao=accepted | horizonte=now | item=Expandir datasets e cenarios de eval para bootstrap cross-platform, seguranca e risco operacional. | notas=entregue parcialmente nesta rodada com ai:eval:smoke e ampliacao inicial dos datasets; bootstrap full permanece evolucao futura
 - 2026-03-07 08:10 UTC | decisao=accepted | horizonte=now | item=Adicionar validadores dedicados de sincronismo entre workflows, tasks, docs, catalogos e ativos declarativos da IA. | notas=entregue nesta rodada com validate_workflow_task_sync.py e catalogos TASKS/WORKFLOWS
 - 2026-03-07 08:10 UTC | decisao=accepted | horizonte=now | item=Importar chat-intake, route e delegate com backend real de roteamento declarativo para a camada canonica .agents. | notas=entregue nesta rodada com backend Python, orchestrator e smoke eval
