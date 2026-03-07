@@ -138,6 +138,108 @@ class AiRoadmapTests(unittest.TestCase):
             self.assertEqual(decisions_text.count("### Ciclo 2026-Q1 @"), 1)
             self.assertEqual(decisions_text.count("### Ciclo 2025-Q4 @"), 1)
 
+    def test_register_accepted_removes_pending_entry_even_with_markdown_link(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            roadmap = pathlib.Path(tmp) / "ROADMAP.md"
+            decisions = pathlib.Path(tmp) / "ROADMAP-DECISIONS.md"
+
+            suggestion = (
+                "Consolidar ou arquivar o legado historico versionado que nao e fonte canonica, "
+                "incluindo artefatos hoje ja movidos para `archive/` e outros scripts experimentais."
+            )
+
+            run_roadmap(
+                "ensure",
+                "--roadmap-file",
+                str(roadmap),
+                "--decisions-file",
+                str(decisions),
+            )
+            run_roadmap(
+                "register",
+                "--roadmap-file",
+                str(roadmap),
+                "--decisions-file",
+                str(decisions),
+                "--decision",
+                "pending",
+                "--horizon",
+                "next",
+                "--suggestion",
+                suggestion,
+                "--suggestion-id",
+                "SG-TEST-LINK",
+            )
+
+            roadmap_text = roadmap.read_text(encoding="utf-8").replace(
+                "`archive/`", "[`archive/`](archive/)"
+            )
+            roadmap_text = roadmap_text.replace("backups decl...", "backups decla...")
+            roadmap.write_text(roadmap_text, encoding="utf-8")
+
+            run_roadmap(
+                "register",
+                "--roadmap-file",
+                str(roadmap),
+                "--decisions-file",
+                str(decisions),
+                "--decision",
+                "accepted",
+                "--horizon",
+                "next",
+                "--suggestion",
+                suggestion,
+                "--suggestion-id",
+                "SG-TEST-LINK",
+            )
+
+            roadmap_text = roadmap.read_text(encoding="utf-8")
+
+            self.assertIn("### Next", roadmap_text)
+            self.assertIn("Consolidar ou arquivar o legado historico versionado", roadmap_text)
+            self.assertIn("<!-- roadmap:pending:start -->\n- (sem itens)\n<!-- roadmap:pending:end -->", roadmap_text)
+
+    def test_register_deduplicates_same_autolog_signature_on_retry(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            roadmap = pathlib.Path(tmp) / "ROADMAP.md"
+            decisions = pathlib.Path(tmp) / "ROADMAP-DECISIONS.md"
+
+            suggestion = "Criar tasks/CLIs ai:status, ai:diff, ai:sync e ai:backup."
+
+            run_roadmap(
+                "ensure",
+                "--roadmap-file",
+                str(roadmap),
+                "--decisions-file",
+                str(decisions),
+            )
+
+            for _ in range(2):
+                run_roadmap(
+                    "register",
+                    "--roadmap-file",
+                    str(roadmap),
+                    "--decisions-file",
+                    str(decisions),
+                    "--decision",
+                    "accepted",
+                    "--horizon",
+                    "next",
+                    "--suggestion",
+                    suggestion,
+                    "--suggestion-id",
+                    "SG-TEST-DUPE",
+                )
+
+            decisions_text = decisions.read_text(encoding="utf-8")
+
+            self.assertEqual(
+                decisions_text.count(
+                    "| decisao=accepted | horizonte=next | item=Criar tasks/CLIs ai:status, ai:diff, ai:sync e ai:backup."
+                ),
+                1,
+            )
+
 
 if __name__ == "__main__":
     unittest.main()

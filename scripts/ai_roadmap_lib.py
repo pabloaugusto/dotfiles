@@ -117,7 +117,11 @@ def write_text_lf(path: Path, content: str) -> None:
 
 
 def normalize_text(value: str) -> str:
-    return " ".join((value or "").strip().lower().split())
+    plain = value or ""
+    plain = re.sub(r"!\[([^\]]*)\]\([^)]+\)", r"\1", plain)
+    plain = re.sub(r"\[([^\]]+)\]\([^)]+\)", r"\1", plain)
+    plain = plain.replace("`", "")
+    return " ".join(plain.strip().lower().split())
 
 
 def normalize_cell(value: str, *, max_len: int = 220) -> str:
@@ -127,6 +131,28 @@ def normalize_cell(value: str, *, max_len: int = 220) -> str:
     if len(compact) <= max_len:
         return compact
     return compact[: max_len - 3].rstrip() + "..."
+
+
+def semantic_entry_key(value: str) -> str:
+    base = (value or "").split("| notas=", 1)[0].strip()
+    normalized = normalize_text(base)
+    if normalized.endswith("..."):
+        return normalized[:-3].rstrip()
+    return normalized
+
+
+def semantic_entries_match(left: str, right: str) -> bool:
+    left_key = semantic_entry_key(left)
+    right_key = semantic_entry_key(right)
+    if not left_key or not right_key:
+        return False
+    return (
+        left_key == right_key
+        or left_key.startswith(right_key)
+        or right_key.startswith(left_key)
+        or left_key in right_key
+        or right_key in left_key
+    )
 
 
 def parse_row(line: str) -> list[str]:
@@ -593,8 +619,7 @@ def upsert_suggestion(
 
 
 def remove_matching_entries(items: list[str], suggestion: str) -> list[str]:
-    needle = normalize_text(suggestion)
-    return [item for item in items if needle not in normalize_text(item)]
+    return [item for item in items if not semantic_entries_match(item, suggestion)]
 
 
 def add_unique_entry(items: list[str], entry: str) -> list[str]:
@@ -602,6 +627,22 @@ def add_unique_entry(items: list[str], entry: str) -> list[str]:
     if any(normalized_entry == normalize_text(item) for item in items):
         return items
     return [entry, *items]
+
+
+def autolog_signature(line: str) -> str:
+    match = re.match(
+        r"^- .*?\| decisao=(?P<decision>[^|]+) \| horizonte=(?P<horizon>[^|]+) \| item=(?P<item>.*?)(?: \| notas=.*)?$",
+        line.strip(),
+    )
+    if not match:
+        return normalize_text(line)
+    return "|".join(
+        [
+            normalize_text(match.group("decision")),
+            normalize_text(match.group("horizon")),
+            semantic_entry_key(match.group("item")),
+        ]
+    )
 
 
 def refresh_roadmap(
@@ -740,6 +781,8 @@ def register_roadmap_decision(
         f"- {updated_at} | decisao={normalized_decision} | horizonte={normalized_horizon} "
         f"| item={clean_suggestion}{note_suffix}"
     )
+    signature = autolog_signature(autolog_line)
+    autolog_lines = [line for line in autolog_lines if autolog_signature(line) != signature]
     autolog_lines = [autolog_line, *autolog_lines]
     decisions_raw = save_marker_lines(
         decisions_raw, AUTOLOG_START, AUTOLOG_END, autolog_lines, label=str(decisions_path)

@@ -1,6 +1,6 @@
 # Roadmap do Repositorio
 
-Atualizado em: 2026-03-07 09:53 UTC
+Atualizado em: 2026-03-07 13:24 UTC
 Ciclo ativo: 2026-Q1
 
 Planejamento incremental para qualidade, testes, bootstrap e governanca do repo.
@@ -28,7 +28,7 @@ Edite apenas a tabela entre os marcadores abaixo.
 Atualizada por `task ai:roadmap:refresh`.
 
 <!-- roadmap:priority:start -->
-Atualizado em: `2026-03-07 09:53 UTC`
+Atualizado em: `2026-03-07 13:24 UTC`
 
 ### Ranking RICE
 
@@ -56,11 +56,7 @@ Atualizado em: `2026-03-07 09:53 UTC`
 
 ### Governanca de Sugestoes
 
-Ha sugestoes pendentes sem decisao final neste ciclo.
-Pergunta obrigatoria ao usuario:
-- descartar as sugestoes pendentes, ou
-- manter no roadmap para aplicar depois.
-IDs pendentes: `SG-20260307-095316, SG-20260307-095305, SG-20260307-095254, SG-20260307-095241, SG-20260307-090831`
+Sem sugestoes pendentes neste ciclo; itens aceitos ja estao rastreaveis.
 <!-- roadmap:priority:end -->
 
 ## Horizonte de Entrega
@@ -78,23 +74,22 @@ IDs pendentes: `SG-20260307-095316, SG-20260307-095305, SG-20260307-095254, SG-2
 ### Next
 
 <!-- roadmap:next:start -->
-- (sem itens)
+- Consolidar ou arquivar o legado historico versionado que nao e fonte canonica, incluindo artefatos hoje ja movidos para `archive/` e outros scripts experimentais ou backups decl... | notas=Reduzir ruido conceitual, diminuir superficie de manutencao e deixar explicita a fronteira entre referencia historica e runtime canonico.
+- Criar tasks/CLIs ai:status, ai:diff, ai:sync e ai:backup para configs de IA materializadas no HOME, com fallback copy-vs-symlink por ferramenta. | notas=Inspirado em jppferguson/dotfiles e basnijholt/dotfiles; ajuda a preservar contratos ao trocar de assistente sem drift entre repo e HOME.
+- Gerar adaptadores de assistentes e arquivos MCP a partir de uma fonte canonica unica em .agents, separando escopo global do usuario e escopo do repo. | notas=Inspirado em atxtechbro/dotfiles, basnijholt/dotfiles e na documentacao oficial do Claude Code; reduz drift entre Claude, Codex, Gemini e...
+- Adicionar hooks e policies de IA com presets de permissao por contexto, bloqueio de segredos e comandos destrutivos, e validacoes proporcionais ao risco. | notas=Inspirado em joshukraine/dotfiles e nos hooks/settings do Claude Code; fortalece seguranca operacional e reduz regressao silenciosa em ta...
 <!-- roadmap:next:end -->
 
 ### Later
 
 <!-- roadmap:later:start -->
-- (sem itens)
+- Criar uma camada de conhecimento global portavel para IA, separada do contexto especifico do repo, para materializacao controlada no HOME. | notas=Inspirado em atxtechbro/dotfiles e no modelo de memory/imports do Claude Code; util para padroes cross-repo sem misturar memoria global c...
 <!-- roadmap:later:end -->
 
 ## Sugestoes pendentes de decisao
 
 <!-- roadmap:pending:start -->
-- Criar uma camada de conhecimento global portavel para IA, separada do contexto especifico do repo, para materializacao controlada no HOME. | notas=Inspirado em atxtechbro/dotfiles e no modelo de memory/imports do Claude Code; util para padroes cross-repo sem misturar memoria global c...
-- Adicionar hooks e policies de IA com presets de permissao por contexto, bloqueio de segredos e comandos destrutivos, e validacoes proporcionais ao risco. | notas=Inspirado em joshukraine/dotfiles e nos hooks/settings do Claude Code; fortalece seguranca operacional e reduz regressao silenciosa em ta...
-- Gerar adaptadores de assistentes e arquivos MCP a partir de uma fonte canonica unica em .agents, separando escopo global do usuario e escopo do repo. | notas=Inspirado em atxtechbro/dotfiles, basnijholt/dotfiles e na documentacao oficial do Claude Code; reduz drift entre Claude, Codex, Gemini e...
-- Criar tasks/CLIs ai:status, ai:diff, ai:sync e ai:backup para configs de IA materializadas no HOME, com fallback copy-vs-symlink por ferramenta. | notas=Inspirado em jppferguson/dotfiles e basnijholt/dotfiles; ajuda a preservar contratos ao trocar de assistente sem drift entre repo e HOME.
-- Consolidar ou arquivar o legado historico versionado que nao e fonte canonica, incluindo artefatos hoje ja movidos para [`archive/`](archive/) e outros scripts experimentais ou backups decla... | notas=Reduzir ruido conceitual, diminuir superficie de manutencao e deixar explicita a fronteira entre referencia historica e runtime canonico.
+- (sem itens)
 <!-- roadmap:pending:end -->
 
 ## Riscos e bloqueios

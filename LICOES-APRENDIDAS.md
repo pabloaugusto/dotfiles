@@ -176,6 +176,16 @@ Historico incremental das regras operacionais que nao devem depender de memoria 
 - Validacao: task docs:check:windows; task docs:check:linux; task ai:validate:windows
 - Worklog relacionado: `WIP-20260307-DOC-LINKING`
 - Fontes relacionadas: dotfiles-test-harness
+
+## LA-017 - Validadores de governanca devem comparar Markdown por semantica
+
+- Contexto: O round de aprovacao em massa do roadmap expôs dois bugs: o backend de roadmap nao removia sugestoes aceitas quando o item tinha links Markdown e truncamento levemente diferente, e o validador de contratos quebrava ao exigir snippets literais em AGENTS.md com links e quebra de linha.
+- Regra: Backends e validadores de governanca que leem Markdown do repo devem normalizar links, crases, wrapping e variantes truncadas antes de comparar itens ou contratos; substring literal nao e criterio suficiente de conformidade.
+- Solucao validada: Adicionar normalizacao semantica no ai_roadmap_lib.py para casar itens equivalentes com links/truncamento e no validate-ai-assets.py para validar snippets por significado, nao por formato bruto.
+- Prevencao: Toda nova automacao de governanca baseada em Markdown deve ter regressao cobrindo links clicaveis, bullets multiline e retries idempotentes antes de entrar no gate oficial.
+- Validacao: uv run --locked python -m pytest tests/python/ai_roadmap_test.py -q; task test:unit:python:windows; task ai:validate:windows; git diff --check
+- Worklog relacionado: `WIP-20260307-ROADMAP-APPROVALS`
+- Fontes relacionadas: dotfiles-test-harness
 <!-- ai-lessons:catalog:end -->
 
 ## Revisoes de rodadas
@@ -185,6 +195,7 @@ Toda finalizacao de worklog deve registrar se houve nova licao.
 <!-- ai-lessons:reviews:start -->
 | Data/Hora UTC | Worklog ID | Decisao | Resumo | Licoes | Evidencia |
 | --- | --- | --- | --- | --- | --- |
+| 2026-03-07 13:27 UTC | WIP-20260307-ROADMAP-APPROVALS | capturada | O incidente mostrou que governanca baseada em Markdown precisa comparar contratos e itens por semantica, nao por texto literal, para resistir a links, wrapping e truncamento. | LA-017 | scripts/ai_roadmap_lib.py, scripts/validate-ai-assets.py, tests/python/ai_roadmap_test.py e LICOES-APRENDIDAS.md |
 | 2026-03-07 12:44 UTC | WIP-20260307-DOC-LINKING | capturada | A rodada consolidou que referencias internas viaveis em Markdown nao devem ficar soltas em inline code; elas precisam ser links explicitos e validados automaticamente. | LA-016 | AGENTS.md, docs/ai-operating-model.md, .agents/cards/curador-repo.md, scripts/validate_docs.py e o sweep dos Markdown governados foram atualizados e validados em Windows e Linux. |
 | 2026-03-07 11:46 UTC | WIP-20260307-QUALITY-IMPORTS | capturada | A rodada consolidou a necessidade de .venv por plataforma em worktree compartilhada Windows/WSL e de adotar type checking por fatias controladas em repo maduro. | LA-014, LA-015 | Taskfile.yml, scripts/invoke-python.ps1, scripts/python-runtime.sh, pyproject.toml e gates ci:quality validos em Windows e Linux. |
 | 2026-03-07 10:47 UTC | WIP-20260307-DOCS-ATUALIZACAO | capturada | A rodada consolidou a regra de que README raiz e docs centrais devem funcionar como catalogos vivos do estado real do repo, e nao como snapshots antigos ou parciais. | LA-013 | LICOES-APRENDIDAS.md atualizado com LA-013; docs centrais reescritos e validadores do repo passando |

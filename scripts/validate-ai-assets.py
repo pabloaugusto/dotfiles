@@ -132,13 +132,13 @@ AGENTS_REQUIRED_SNIPPETS = [
     "Nunca operar por amostragem",
     "docs/AI-SOURCE-AUDIT.md",
     "Manter o item ativo em `Doing` durante toda a execucao relevante",
-    "Nenhum `done` e valido sem revisar",
+    "Nenhum `done` e valido sem revisar `LICOES-APRENDIDAS.md`",
     "Acionar os gates paralelos obrigatorios de arquitetura/modernizacao",
 ]
 
 OPERATING_MODEL_REQUIRED_SNIPPETS = [
     "### 5. Auditoria exaustiva antes de reuso cross-repo",
-    "### Fronteira entre",
+    "### Fronteira entre `.agents/` e adaptadores de assistente",
     "### Camada 2.1. Registry declarativo do repo",
     "### Camada 2.2. Orquestracao, rules e evals",
 ]
@@ -218,6 +218,14 @@ def frontmatter_value(frontmatter: str, key: str) -> str | None:
     return match.group(1).strip().strip("'\"")
 
 
+def normalize_contract_text(value: str) -> str:
+    normalized = value or ""
+    normalized = re.sub(r"!\[([^\]]*)\]\([^)]+\)", r"\1", normalized)
+    normalized = re.sub(r"\[([^\]]+)\]\([^)]+\)", r"\1", normalized)
+    normalized = normalized.replace("`", "")
+    return " ".join(normalized.split())
+
+
 def require_markers(content: str, markers: list[str], label: str, failures: list[str]) -> None:
     for marker in markers:
         if marker not in content:
@@ -225,8 +233,9 @@ def require_markers(content: str, markers: list[str], label: str, failures: list
 
 
 def require_snippets(content: str, snippets: list[str], label: str, failures: list[str]) -> None:
+    normalized_content = normalize_contract_text(content)
     for snippet in snippets:
-        if snippet not in content:
+        if normalize_contract_text(snippet) not in normalized_content:
             failures.append(f"Trecho obrigatorio ausente em {label}: {snippet}")
 
 
