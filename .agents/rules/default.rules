@@ -1,0 +1,14 @@
+rule AI-DEFAULT-001
+when: any
+must:
+- reler AGENTS.md e LICOES-APRENDIDAS.md
+- manter docs/AI-WIP-TRACKER.md fiel ao estado real
+- usar auditoria exaustiva antes de importacao cross-repo
+- acionar architecture-modernization-authority em paralelo nas analises substantivas
+
+rule AI-DEFAULT-002
+when: closeout
+must:
+- revisar licoes antes do done
+- registrar capturada ou sem_nova_licao
+- bloquear fechamento quando houver doing ou worklog concluido sem revisao

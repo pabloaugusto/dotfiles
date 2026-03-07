@@ -1,0 +1,7 @@
+id = "architecture-modernization-authority"
+tier = "core"
+purpose = "Revisar em paralelo arquitetura, simplificacao, modernizacao, performance, resiliencia e testabilidade"
+default_skills = ["dotfiles-architecture-modernization"]
+triggers = ["arquitetura", "refactor", "performance", "simplificacao", "modernizacao", "workflow", "estrutura", "drift"]
+output_contract = "architecture_modernization_report"
+handoff_to = ["repo-governance-authority", "bootstrap-operator", "critical-integrations-guardian"]

@@ -247,7 +247,7 @@ tasks:
       - bash -lc "bash '{{.TASKFILE_DIR}}/bootstrap/bootstrap-ubuntu-wsl.sh' relink"
 
   ci:docker-build:
-    desc: Auto - build Docker local (paridade check-scripts.yml.ignore)
+    desc: Auto - build Docker local
     cmds:
       - task: ci:docker-build:{{if or (eq .OS "Windows_NT") (eq .OS "windows")}}windows{{else}}linux{{end}}
 
@@ -290,6 +290,25 @@ tasks:
     cmds:
       - "pwsh -NoProfile -Command \"if (-not (Get-Command Invoke-Pester -ErrorAction SilentlyContinue)) { throw 'Invoke-Pester nao encontrado. Instale Pester antes de rodar esta task.' }; Invoke-Pester -Path './tests/powershell'\""
 
+  test:integration:
+    desc: Executa harness de integracao do bootstrap no ambiente atual
+    cmds:
+      - task: test:integration:{{if or (eq .OS "Windows_NT") (eq .OS "windows")}}windows{{else}}linux{{end}}
+
+  test:integration:windows:
+    desc: Windows - relink integration em perfil temporario isolado
+    platforms: [windows]
+    dir: '{{.TASKFILE_DIR}}'
+    cmds:
+      - "pwsh -NoProfile -File ./scripts/run-windows-bootstrap-integration.ps1"
+
+  test:integration:linux:
+    desc: Linux/WSL - relink integration em container OCI com Bats
+    platforms: [linux]
+    dir: '{{.TASKFILE_DIR}}'
+    cmds:
+      - "bash ./scripts/run-linux-bootstrap-integration.sh"
+
   test:unit:python:
     desc: Executa testes unitarios Python da pasta tests/python
     cmds:
@@ -329,7 +348,7 @@ tasks:
       - "bash -lc 'bash ./scripts/run-python.sh ./scripts/validate-ai-assets.py'"
 
   ai:install:codex:
-    desc: Instala as skills locais do repo no catalogo do Codex via links locais
+    desc: Materializa as skills canonicas de .agents/skills no catalogo local do Codex
     dir: '{{.TASKFILE_DIR}}'
     deps:
       - ai:validate
@@ -340,6 +359,326 @@ tasks:
     desc: Alias para ai:validate
     cmds:
       - task: ai:validate
+
+  ai:rules:check:
+    desc: Valida rules, orchestration e contratos declarativos da camada de IA
+    cmds:
+      - task: ai:validate
+
+  ai:chat:intake:
+    desc: Registra intake de IA com preflight de pendencias e roteamento opcional
+    requires:
+      vars: [MESSAGE]
+    cmds:
+      - task: ai:chat:intake:{{if or (eq .OS "Windows_NT") (eq .OS "windows")}}windows{{else}}linux{{end}}
+        vars:
+          MESSAGE: "{{.MESSAGE}}"
+          PATHS: "{{.PATHS}}"
+          RISK: "{{.RISK}}"
+          ROUTE: "{{.ROUTE}}"
+          PENDING_ACTION: "{{.PENDING_ACTION}}"
+          WORKLOG_FILE: "{{.WORKLOG_FILE}}"
+          WORKLOG_ID: "{{.WORKLOG_ID}}"
+          DECISIONS_FILE: "{{.DECISIONS_FILE}}"
+          OUT: "{{.OUT}}"
+          ROUTE_OUT: "{{.ROUTE_OUT}}"
+
+  ai:chat:intake:windows:
+    desc: Windows - registra intake de IA com preflight de pendencias
+    platforms: [windows]
+    dir: '{{.TASKFILE_DIR}}'
+    requires:
+      vars: [MESSAGE]
+    cmds:
+      - "pwsh -NoProfile -File ./scripts/invoke-python.ps1 -ScriptPath ./scripts/ai-chat-intake.py --message \"{{.MESSAGE}}\" --paths \"{{default \"\" .PATHS}}\" --risk \"{{default \"medium\" .RISK}}\" --route \"{{default \"0\" .ROUTE}}\" --pending-action \"{{default \"\" .PENDING_ACTION}}\" --worklog-file \"{{default \"docs/AI-WIP-TRACKER.md\" .WORKLOG_FILE}}\" --worklog-id \"{{default \"\" .WORKLOG_ID}}\" --decisions-file \"{{default \"docs/ROADMAP-DECISIONS.md\" .DECISIONS_FILE}}\" --out \"{{default \".cache/ai/chat-intake.json\" .OUT}}\" --route-out \"{{default \".cache/ai/route-output.json\" .ROUTE_OUT}}\""
+
+  ai:chat:intake:linux:
+    desc: Linux/WSL - registra intake de IA com preflight de pendencias
+    platforms: [linux]
+    dir: '{{.TASKFILE_DIR}}'
+    requires:
+      vars: [MESSAGE]
+    cmds:
+      - "bash -lc 'bash ./scripts/run-python.sh ./scripts/ai-chat-intake.py --message \"{{.MESSAGE}}\" --paths \"{{default \"\" .PATHS}}\" --risk \"{{default \"medium\" .RISK}}\" --route \"{{default \"0\" .ROUTE}}\" --pending-action \"{{default \"\" .PENDING_ACTION}}\" --worklog-file \"{{default \"docs/AI-WIP-TRACKER.md\" .WORKLOG_FILE}}\" --worklog-id \"{{default \"\" .WORKLOG_ID}}\" --decisions-file \"{{default \"docs/ROADMAP-DECISIONS.md\" .DECISIONS_FILE}}\" --out \"{{default \".cache/ai/chat-intake.json\" .OUT}}\" --route-out \"{{default \".cache/ai/route-output.json\" .ROUTE_OUT}}\"'"
+
+  ai:route:
+    desc: Gera task card e delegation plan declarativos para a demanda informada
+    requires:
+      vars: [INTENT]
+    cmds:
+      - task: ai:route:{{if or (eq .OS "Windows_NT") (eq .OS "windows")}}windows{{else}}linux{{end}}
+        vars:
+          INTENT: "{{.INTENT}}"
+          PATHS: "{{.PATHS}}"
+          RISK: "{{.RISK}}"
+          OUT: "{{.OUT}}"
+
+  ai:route:windows:
+    desc: Windows - gera roteamento declarativo
+    platforms: [windows]
+    dir: '{{.TASKFILE_DIR}}'
+    requires:
+      vars: [INTENT]
+    cmds:
+      - "pwsh -NoProfile -File ./scripts/invoke-python.ps1 -ScriptPath ./scripts/ai-route.py --intent \"{{.INTENT}}\" --paths \"{{default \"\" .PATHS}}\" --risk \"{{default \"medium\" .RISK}}\" --out \"{{default \".cache/ai/route-output.json\" .OUT}}\""
+
+  ai:route:linux:
+    desc: Linux/WSL - gera roteamento declarativo
+    platforms: [linux]
+    dir: '{{.TASKFILE_DIR}}'
+    requires:
+      vars: [INTENT]
+    cmds:
+      - "bash -lc 'bash ./scripts/run-python.sh ./scripts/ai-route.py --intent \"{{.INTENT}}\" --paths \"{{default \"\" .PATHS}}\" --risk \"{{default \"medium\" .RISK}}\" --out \"{{default \".cache/ai/route-output.json\" .OUT}}\"'"
+
+  ai:delegate:
+    desc: Gera plano de delegacao em Markdown para revisao humana
+    requires:
+      vars: [INTENT]
+    cmds:
+      - task: ai:delegate:{{if or (eq .OS "Windows_NT") (eq .OS "windows")}}windows{{else}}linux{{end}}
+        vars:
+          INTENT: "{{.INTENT}}"
+          PATHS: "{{.PATHS}}"
+          RISK: "{{.RISK}}"
+          PENDING_ACTION: "{{.PENDING_ACTION}}"
+          WORKLOG_FILE: "{{.WORKLOG_FILE}}"
+          WORKLOG_ID: "{{.WORKLOG_ID}}"
+          DECISIONS_FILE: "{{.DECISIONS_FILE}}"
+          OUT: "{{.OUT}}"
+
+  ai:delegate:windows:
+    desc: Windows - gera plano de delegacao em Markdown
+    platforms: [windows]
+    dir: '{{.TASKFILE_DIR}}'
+    requires:
+      vars: [INTENT]
+    cmds:
+      - "pwsh -NoProfile -File ./scripts/invoke-python.ps1 -ScriptPath ./scripts/ai-delegate.py --intent \"{{.INTENT}}\" --paths \"{{default \"\" .PATHS}}\" --risk \"{{default \"medium\" .RISK}}\" --pending-action \"{{default \"\" .PENDING_ACTION}}\" --worklog-file \"{{default \"docs/AI-WIP-TRACKER.md\" .WORKLOG_FILE}}\" --worklog-id \"{{default \"\" .WORKLOG_ID}}\" --decisions-file \"{{default \"docs/ROADMAP-DECISIONS.md\" .DECISIONS_FILE}}\" --out \"{{default \".cache/ai/delegation-plan.md\" .OUT}}\""
+
+  ai:delegate:linux:
+    desc: Linux/WSL - gera plano de delegacao em Markdown
+    platforms: [linux]
+    dir: '{{.TASKFILE_DIR}}'
+    requires:
+      vars: [INTENT]
+    cmds:
+      - "bash -lc 'bash ./scripts/run-python.sh ./scripts/ai-delegate.py --intent \"{{.INTENT}}\" --paths \"{{default \"\" .PATHS}}\" --risk \"{{default \"medium\" .RISK}}\" --pending-action \"{{default \"\" .PENDING_ACTION}}\" --worklog-file \"{{default \"docs/AI-WIP-TRACKER.md\" .WORKLOG_FILE}}\" --worklog-id \"{{default \"\" .WORKLOG_ID}}\" --decisions-file \"{{default \"docs/ROADMAP-DECISIONS.md\" .DECISIONS_FILE}}\" --out \"{{default \".cache/ai/delegation-plan.md\" .OUT}}\"'"
+
+  ai:eval:smoke:
+    desc: Executa smoke eval de roteamento e governanca declarativa
+    cmds:
+      - task: ai:eval:smoke:{{if or (eq .OS "Windows_NT") (eq .OS "windows")}}windows{{else}}linux{{end}}
+
+  ai:eval:smoke:windows:
+    desc: Windows - executa smoke eval de roteamento e governanca declarativa
+    platforms: [windows]
+    dir: '{{.TASKFILE_DIR}}'
+    cmds:
+      - "pwsh -NoProfile -File ./scripts/invoke-python.ps1 -ScriptPath ./scripts/ai-eval-smoke.py"
+
+  ai:eval:smoke:linux:
+    desc: Linux/WSL - executa smoke eval de roteamento e governanca declarativa
+    platforms: [linux]
+    dir: '{{.TASKFILE_DIR}}'
+    cmds:
+      - "bash -lc 'bash ./scripts/run-python.sh ./scripts/ai-eval-smoke.py'"
+
+  ai:lessons:ensure:
+    desc: Garante estrutura minima de LICOES-APRENDIDAS.md
+    cmds:
+      - task: ai:lessons:ensure:{{if or (eq .OS "Windows_NT") (eq .OS "windows")}}windows{{else}}linux{{end}}
+
+  ai:lessons:ensure:windows:
+    desc: Windows - garante estrutura minima de LICOES-APRENDIDAS.md
+    platforms: [windows]
+    dir: '{{.TASKFILE_DIR}}'
+    cmds:
+      - "pwsh -NoProfile -File ./scripts/invoke-python.ps1 -ScriptPath ./scripts/ai-lessons.py ensure"
+
+  ai:lessons:ensure:linux:
+    desc: Linux/WSL - garante estrutura minima de LICOES-APRENDIDAS.md
+    platforms: [linux]
+    dir: '{{.TASKFILE_DIR}}'
+    cmds:
+      - "bash -lc 'bash ./scripts/run-python.sh ./scripts/ai-lessons.py ensure'"
+
+  ai:lessons:add:
+    desc: Registra uma nova licao aprendida no catalogo
+    requires:
+      vars: [TITLE, CONTEXT, RULE, VALIDATED_SOLUTION, PREVENTION, VALIDATION]
+    cmds:
+      - task: ai:lessons:add:{{if or (eq .OS "Windows_NT") (eq .OS "windows")}}windows{{else}}linux{{end}}
+        vars:
+          LESSON_ID: "{{.LESSON_ID}}"
+          TITLE: "{{.TITLE}}"
+          CONTEXT: "{{.CONTEXT}}"
+          RULE: "{{.RULE}}"
+          VALIDATED_SOLUTION: "{{.VALIDATED_SOLUTION}}"
+          PREVENTION: "{{.PREVENTION}}"
+          VALIDATION: "{{.VALIDATION}}"
+          WORKLOG_ID: "{{.WORKLOG_ID}}"
+          SOURCE_REPOS: "{{.SOURCE_REPOS}}"
+
+  ai:lessons:add:windows:
+    desc: Windows - registra uma nova licao aprendida
+    platforms: [windows]
+    dir: '{{.TASKFILE_DIR}}'
+    requires:
+      vars: [TITLE, CONTEXT, RULE, VALIDATED_SOLUTION, PREVENTION, VALIDATION]
+    cmds:
+      - "pwsh -NoProfile -File ./scripts/invoke-python.ps1 -ScriptPath ./scripts/ai-lessons.py add --lesson-id \"{{default \"\" .LESSON_ID}}\" --title \"{{.TITLE}}\" --context \"{{.CONTEXT}}\" --rule \"{{.RULE}}\" --validated-solution \"{{.VALIDATED_SOLUTION}}\" --prevention \"{{.PREVENTION}}\" --validation \"{{.VALIDATION}}\" --worklog-id \"{{default \"\" .WORKLOG_ID}}\" --source-repos \"{{default \"\" .SOURCE_REPOS}}\""
+
+  ai:lessons:add:linux:
+    desc: Linux/WSL - registra uma nova licao aprendida
+    platforms: [linux]
+    dir: '{{.TASKFILE_DIR}}'
+    requires:
+      vars: [TITLE, CONTEXT, RULE, VALIDATED_SOLUTION, PREVENTION, VALIDATION]
+    cmds:
+      - "bash -lc 'bash ./scripts/run-python.sh ./scripts/ai-lessons.py add --lesson-id \"{{default \"\" .LESSON_ID}}\" --title \"{{.TITLE}}\" --context \"{{.CONTEXT}}\" --rule \"{{.RULE}}\" --validated-solution \"{{.VALIDATED_SOLUTION}}\" --prevention \"{{.PREVENTION}}\" --validation \"{{.VALIDATION}}\" --worklog-id \"{{default \"\" .WORKLOG_ID}}\" --source-repos \"{{default \"\" .SOURCE_REPOS}}\"'"
+
+  ai:lessons:review:
+    desc: Registra a revisao de licoes de um worklog concluido
+    requires:
+      vars: [WORKLOG_ID, DECISION, SUMMARY]
+    cmds:
+      - task: ai:lessons:review:{{if or (eq .OS "Windows_NT") (eq .OS "windows")}}windows{{else}}linux{{end}}
+        vars:
+          WORKLOG_ID: "{{.WORKLOG_ID}}"
+          DECISION: "{{.DECISION}}"
+          SUMMARY: "{{.SUMMARY}}"
+          LESSON_IDS: "{{.LESSON_IDS}}"
+          EVIDENCE: "{{.EVIDENCE}}"
+
+  ai:lessons:review:windows:
+    desc: Windows - registra a revisao de licoes de um worklog
+    platforms: [windows]
+    dir: '{{.TASKFILE_DIR}}'
+    requires:
+      vars: [WORKLOG_ID, DECISION, SUMMARY]
+    cmds:
+      - "pwsh -NoProfile -File ./scripts/invoke-python.ps1 -ScriptPath ./scripts/ai-lessons.py review --worklog-id \"{{.WORKLOG_ID}}\" --decision \"{{.DECISION}}\" --summary \"{{.SUMMARY}}\" --lesson-ids \"{{default \"\" .LESSON_IDS}}\" --evidence \"{{default \"\" .EVIDENCE}}\""
+
+  ai:lessons:review:linux:
+    desc: Linux/WSL - registra a revisao de licoes de um worklog
+    platforms: [linux]
+    dir: '{{.TASKFILE_DIR}}'
+    requires:
+      vars: [WORKLOG_ID, DECISION, SUMMARY]
+    cmds:
+      - "bash -lc 'bash ./scripts/run-python.sh ./scripts/ai-lessons.py review --worklog-id \"{{.WORKLOG_ID}}\" --decision \"{{.DECISION}}\" --summary \"{{.SUMMARY}}\" --lesson-ids \"{{default \"\" .LESSON_IDS}}\" --evidence \"{{default \"\" .EVIDENCE}}\"'"
+
+  ai:lessons:check:
+    desc: Falha se houver worklog concluido sem revisao de licoes
+    cmds:
+      - task: ai:lessons:check:{{if or (eq .OS "Windows_NT") (eq .OS "windows")}}windows{{else}}linux{{end}}
+
+  ai:lessons:check:windows:
+    desc: Windows - valida revisoes de licoes
+    platforms: [windows]
+    dir: '{{.TASKFILE_DIR}}'
+    cmds:
+      - "pwsh -NoProfile -File ./scripts/invoke-python.ps1 -ScriptPath ./scripts/ai-lessons.py check"
+
+  ai:lessons:check:linux:
+    desc: Linux/WSL - valida revisoes de licoes
+    platforms: [linux]
+    dir: '{{.TASKFILE_DIR}}'
+    cmds:
+      - "bash -lc 'bash ./scripts/run-python.sh ./scripts/ai-lessons.py check'"
+
+  ai:lessons:sync:
+    desc: Normaliza e deduplica revisoes de licoes
+    cmds:
+      - task: ai:lessons:sync:{{if or (eq .OS "Windows_NT") (eq .OS "windows")}}windows{{else}}linux{{end}}
+
+  ai:lessons:sync:windows:
+    desc: Windows - normaliza revisoes de licoes
+    platforms: [windows]
+    dir: '{{.TASKFILE_DIR}}'
+    cmds:
+      - "pwsh -NoProfile -File ./scripts/invoke-python.ps1 -ScriptPath ./scripts/ai-lessons.py sync"
+
+  ai:lessons:sync:linux:
+    desc: Linux/WSL - normaliza revisoes de licoes
+    platforms: [linux]
+    dir: '{{.TASKFILE_DIR}}'
+    cmds:
+      - "bash -lc 'bash ./scripts/run-python.sh ./scripts/ai-lessons.py sync'"
+
+  ai:roadmap:ensure:
+    desc: Garante estrutura minima de roadmap e decisions do repo
+    cmds:
+      - task: ai:roadmap:ensure:{{if or (eq .OS "Windows_NT") (eq .OS "windows")}}windows{{else}}linux{{end}}
+
+  ai:roadmap:ensure:windows:
+    desc: Windows - garante estrutura minima de roadmap e decisions
+    platforms: [windows]
+    dir: '{{.TASKFILE_DIR}}'
+    cmds:
+      - "pwsh -NoProfile -File ./scripts/invoke-python.ps1 -ScriptPath ./scripts/ai-roadmap.py ensure"
+
+  ai:roadmap:ensure:linux:
+    desc: Linux/WSL - garante estrutura minima de roadmap e decisions
+    platforms: [linux]
+    dir: '{{.TASKFILE_DIR}}'
+    cmds:
+      - "bash -lc 'bash ./scripts/run-python.sh ./scripts/ai-roadmap.py ensure'"
+
+  ai:roadmap:refresh:
+    desc: Recalcula priorizacao e historico de ciclo do roadmap
+    cmds:
+      - task: ai:roadmap:refresh:{{if or (eq .OS "Windows_NT") (eq .OS "windows")}}windows{{else}}linux{{end}}
+        vars:
+          CYCLE: "{{.CYCLE}}"
+
+  ai:roadmap:refresh:windows:
+    desc: Windows - recalcula priorizacao e historico de ciclo do roadmap
+    platforms: [windows]
+    dir: '{{.TASKFILE_DIR}}'
+    cmds:
+      - "pwsh -NoProfile -File ./scripts/invoke-python.ps1 -ScriptPath ./scripts/ai-roadmap.py refresh --cycle \"{{default \"\" .CYCLE}}\""
+
+  ai:roadmap:refresh:linux:
+    desc: Linux/WSL - recalcula priorizacao e historico de ciclo do roadmap
+    platforms: [linux]
+    dir: '{{.TASKFILE_DIR}}'
+    cmds:
+      - "bash -lc 'bash ./scripts/run-python.sh ./scripts/ai-roadmap.py refresh --cycle \"{{default \"\" .CYCLE}}\"'"
+
+  ai:roadmap:register:
+    desc: Registra decisao de roadmap e sincroniza roadmap + decisions
+    requires:
+      vars: [DECISION, SUGGESTION]
+    cmds:
+      - task: ai:roadmap:register:{{if or (eq .OS "Windows_NT") (eq .OS "windows")}}windows{{else}}linux{{end}}
+        vars:
+          DECISION: "{{.DECISION}}"
+          SUGGESTION: "{{.SUGGESTION}}"
+          HORIZON: "{{.HORIZON}}"
+          NOTES: "{{.NOTES}}"
+          SUGGESTION_ID: "{{.SUGGESTION_ID}}"
+          ROADMAP_ID: "{{.ROADMAP_ID}}"
+          CYCLE: "{{.CYCLE}}"
+
+  ai:roadmap:register:windows:
+    desc: Windows - registra decisao de roadmap
+    platforms: [windows]
+    dir: '{{.TASKFILE_DIR}}'
+    requires:
+      vars: [DECISION, SUGGESTION]
+    cmds:
+      - "pwsh -NoProfile -File ./scripts/invoke-python.ps1 -ScriptPath ./scripts/ai-roadmap.py register --decision \"{{.DECISION}}\" --suggestion \"{{.SUGGESTION}}\" --horizon \"{{default \"next\" .HORIZON}}\" --notes \"{{default \"\" .NOTES}}\" --suggestion-id \"{{default \"\" .SUGGESTION_ID}}\" --roadmap-id \"{{default \"\" .ROADMAP_ID}}\" --cycle \"{{default \"\" .CYCLE}}\""
+
+  ai:roadmap:register:linux:
+    desc: Linux/WSL - registra decisao de roadmap
+    platforms: [linux]
+    dir: '{{.TASKFILE_DIR}}'
+    requires:
+      vars: [DECISION, SUGGESTION]
+    cmds:
+      - "bash -lc 'bash ./scripts/run-python.sh ./scripts/ai-roadmap.py register --decision \"{{.DECISION}}\" --suggestion \"{{.SUGGESTION}}\" --horizon \"{{default \"next\" .HORIZON}}\" --notes \"{{default \"\" .NOTES}}\" --suggestion-id \"{{default \"\" .SUGGESTION_ID}}\" --roadmap-id \"{{default \"\" .ROADMAP_ID}}\" --cycle \"{{default \"\" .CYCLE}}\"'"
 
   ai:worklog:ensure:
     desc: Garante estrutura minima do tracker de WIP de IA
@@ -412,14 +751,14 @@ tasks:
     platforms: [windows]
     dir: '{{.TASKFILE_DIR}}'
     cmds:
-      - "pwsh -NoProfile -File ./scripts/invoke-python.ps1 -ScriptPath ./scripts/ai-worklog.py check --pending-action \"{{default \"\" .PENDING_ACTION}}\""
+      - "pwsh -NoProfile -File ./scripts/invoke-python.ps1 -ScriptPath ./scripts/ai-worklog.py check --pending-action \"{{default \"\" .PENDING_ACTION}}\" --repo-root \"{{.TASKFILE_DIR}}\""
 
   ai:worklog:check:linux:
     desc: Linux/WSL - valida pendencias do tracker de WIP de IA
     platforms: [linux]
     dir: '{{.TASKFILE_DIR}}'
     cmds:
-      - "bash -lc 'bash ./scripts/run-python.sh ./scripts/ai-worklog.py check --pending-action \"{{default \"\" .PENDING_ACTION}}\"'"
+      - "bash -lc 'bash ./scripts/run-python.sh ./scripts/ai-worklog.py check --pending-action \"{{default \"\" .PENDING_ACTION}}\" --repo-root \"{{.TASKFILE_DIR}}\"'"
 
   ai:worklog:close:gate:
     desc: Bloqueia encerramento quando ainda existem itens em Doing
@@ -518,7 +857,7 @@ tasks:
     requires:
       vars: [WORKLOG_ID, PROGRESS]
     cmds:
-      - "pwsh -NoProfile -File ./scripts/invoke-python.ps1 -ScriptPath ./scripts/ai-worklog.py update --worklog-id \"{{.WORKLOG_ID}}\" --progress \"{{.PROGRESS}}\" --next-step \"{{default \"\" .NEXT_STEP}}\" --blockers \"{{default \"-\" .BLOCKERS}}\" --message \"{{default \"\" .MESSAGE}}\" --scope \"{{default \"\" .SCOPE}}\" --branch \"{{default \"\" .BRANCH}}\" --owner \"{{default \"\" .OWNER}}\""
+      - "pwsh -NoProfile -File ./scripts/run-ai-worklog-update.ps1 -WorklogId \"{{.WORKLOG_ID}}\" -ProgressText \"{{.PROGRESS}}\" -NextStep \"{{default \"\" .NEXT_STEP}}\" -Blockers \"{{default \"-\" .BLOCKERS}}\" -TaskMessage \"{{default \"\" .MESSAGE}}\" -ScopeText \"{{default \"\" .SCOPE}}\" -BranchName \"{{default \"\" .BRANCH}}\" -OwnerName \"{{default \"\" .OWNER}}\""
 
   ai:worklog:update:linux:
     desc: Linux/WSL - atualiza tarefa em Doing no tracker de WIP de IA
@@ -532,31 +871,35 @@ tasks:
   ai:worklog:done:
     desc: Move tarefa de Doing para Done no tracker de WIP de IA
     requires:
-      vars: [WORKLOG_ID, DELIVERY]
+      vars: [WORKLOG_ID, DELIVERY, LESSONS_DECISION, LESSONS_SUMMARY]
     cmds:
       - task: ai:worklog:done:{{if or (eq .OS "Windows_NT") (eq .OS "windows")}}windows{{else}}linux{{end}}
         vars:
           WORKLOG_ID: "{{.WORKLOG_ID}}"
           DELIVERY: "{{.DELIVERY}}"
           EVIDENCE: "{{.EVIDENCE}}"
+          LESSONS_DECISION: "{{.LESSONS_DECISION}}"
+          LESSONS_SUMMARY: "{{.LESSONS_SUMMARY}}"
+          LESSONS_IDS: "{{.LESSONS_IDS}}"
+          LESSONS_EVIDENCE: "{{.LESSONS_EVIDENCE}}"
 
   ai:worklog:done:windows:
     desc: Windows - move tarefa de Doing para Done no tracker de WIP de IA
     platforms: [windows]
     dir: '{{.TASKFILE_DIR}}'
     requires:
-      vars: [WORKLOG_ID, DELIVERY]
+      vars: [WORKLOG_ID, DELIVERY, LESSONS_DECISION, LESSONS_SUMMARY]
     cmds:
-      - "pwsh -NoProfile -File ./scripts/invoke-python.ps1 -ScriptPath ./scripts/ai-worklog.py done --worklog-id \"{{.WORKLOG_ID}}\" --delivery \"{{.DELIVERY}}\" --evidence \"{{default \"\" .EVIDENCE}}\""
+      - "pwsh -NoProfile -File ./scripts/invoke-python.ps1 -ScriptPath ./scripts/ai-worklog.py done --worklog-id \"{{.WORKLOG_ID}}\" --delivery \"{{.DELIVERY}}\" --evidence \"{{default \"\" .EVIDENCE}}\" --lessons-decision \"{{.LESSONS_DECISION}}\" --lessons-summary \"{{.LESSONS_SUMMARY}}\" --lessons-ids \"{{default \"\" .LESSONS_IDS}}\" --lessons-evidence \"{{default \"\" .LESSONS_EVIDENCE}}\""
 
   ai:worklog:done:linux:
     desc: Linux/WSL - move tarefa de Doing para Done no tracker de WIP de IA
     platforms: [linux]
     dir: '{{.TASKFILE_DIR}}'
     requires:
-      vars: [WORKLOG_ID, DELIVERY]
+      vars: [WORKLOG_ID, DELIVERY, LESSONS_DECISION, LESSONS_SUMMARY]
     cmds:
-      - "bash -lc 'bash ./scripts/run-python.sh ./scripts/ai-worklog.py done --worklog-id \"{{.WORKLOG_ID}}\" --delivery \"{{.DELIVERY}}\" --evidence \"{{default \"\" .EVIDENCE}}\"'"
+      - "bash -lc 'bash ./scripts/run-python.sh ./scripts/ai-worklog.py done --worklog-id \"{{.WORKLOG_ID}}\" --delivery \"{{.DELIVERY}}\" --evidence \"{{default \"\" .EVIDENCE}}\" --lessons-decision \"{{.LESSONS_DECISION}}\" --lessons-summary \"{{.LESSONS_SUMMARY}}\" --lessons-ids \"{{default \"\" .LESSONS_IDS}}\" --lessons-evidence \"{{default \"\" .LESSONS_EVIDENCE}}\"'"
 
   ai:worklog:roadmap:pendente:
     desc: Mantem item em Doing e registra sugestao pendente no roadmap
@@ -653,13 +996,17 @@ tasks:
   ai:wip:done:
     desc: Alias para ai:worklog:done
     requires:
-      vars: [WORKLOG_ID, DELIVERY]
+      vars: [WORKLOG_ID, DELIVERY, LESSONS_DECISION, LESSONS_SUMMARY]
     cmds:
       - task: ai:worklog:done
         vars:
           WORKLOG_ID: "{{.WORKLOG_ID}}"
           DELIVERY: "{{.DELIVERY}}"
           EVIDENCE: "{{.EVIDENCE}}"
+          LESSONS_DECISION: "{{.LESSONS_DECISION}}"
+          LESSONS_SUMMARY: "{{.LESSONS_SUMMARY}}"
+          LESSONS_IDS: "{{.LESSONS_IDS}}"
+          LESSONS_EVIDENCE: "{{.LESSONS_EVIDENCE}}"
 
   ai:wip:branch:check:
     desc: Alias para ai:worklog:branch:check
@@ -825,11 +1172,33 @@ tasks:
         vars:
           RANGE: "{{.RANGE}}"
 
+  ci:workflow:sync:check:
+    desc: Valida sincronismo entre workflows, tasks e catalogos do repo
+    cmds:
+      - task: ci:workflow:sync:check:{{if or (eq .OS "Windows_NT") (eq .OS "windows")}}windows{{else}}linux{{end}}
+
+  ci:workflow:sync:check:windows:
+    desc: Windows - valida sincronismo entre workflows, tasks e catalogos
+    platforms: [windows]
+    dir: '{{.TASKFILE_DIR}}'
+    cmds:
+      - "pwsh -NoProfile -File ./scripts/invoke-python.ps1 -ScriptPath ./scripts/validate_workflow_task_sync.py"
+
+  ci:workflow:sync:check:linux:
+    desc: Linux/WSL - valida sincronismo entre workflows, tasks e catalogos
+    platforms: [linux]
+    dir: '{{.TASKFILE_DIR}}'
+    cmds:
+      - "bash -lc 'bash ./scripts/run-python.sh ./scripts/validate_workflow_task_sync.py'"
+
   ci:ai:check:
     desc: Gate local de governanca IA
     deps:
       - ai:validate
+      - ai:lessons:check
       - ai:worklog:close:gate
+      - ai:eval:smoke
+      - ci:workflow:sync:check
 
   ci:validate:
     desc: Auto - validacao de PR local (paridade CI) no ambiente atual
@@ -844,7 +1213,10 @@ tasks:
       - conventions:check:branch:windows
       - conventions:check:commit:windows
       - ai:validate:windows
+      - ai:lessons:check:windows
       - ai:worklog:close:gate:windows
+      - ai:eval:smoke:windows
+      - ci:workflow:sync:check:windows
       - ci:lint:windows
       - test:unit:python:windows
       - test:unit:powershell
@@ -858,7 +1230,10 @@ tasks:
       - conventions:check:branch:linux
       - conventions:check:commit:linux
       - ai:validate:linux
+      - ai:lessons:check:linux
       - ai:worklog:close:gate:linux
+      - ai:eval:smoke:linux
+      - ci:workflow:sync:check:linux
       - ci:lint:linux
       - test:unit:python:linux
       - ci:docker-build:linux

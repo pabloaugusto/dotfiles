@@ -6,7 +6,7 @@ param(
 $ErrorActionPreference = 'Stop'
 
 $repoRoot = (Resolve-Path $RepoRoot).Path
-$skillsRoot = Join-Path $repoRoot '.codex/skills'
+$skillsRoot = Join-Path $repoRoot '.agents/skills'
 
 if (-not (Test-Path $skillsRoot -PathType Container)) {
 	throw "Pasta de skills nao encontrada: $skillsRoot"

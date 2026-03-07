@@ -1,0 +1,7 @@
+interface:
+  display_name: "Roteamento e Delegacao"
+  short_description: "Intake, roteamento e delegacao"
+  default_prompt: "Use $task-routing-and-decomposition para intake, roteamento declarativo, decomposicao e delegacao de trabalho de IA neste repo."
+
+policy:
+  allow_implicit_invocation: true

@@ -1,0 +1,7 @@
+interface:
+  display_name: "Integracoes Criticas"
+  short_description: "Secrets, auth e CLI critica"
+  default_prompt: "Use $dotfiles-critical-integrations para revisar bootstrap, auth, secrets, checkEnv, signing e ferramentas criticas do workstation."
+
+policy:
+  allow_implicit_invocation: true

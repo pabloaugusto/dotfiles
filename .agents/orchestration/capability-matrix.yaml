@@ -1,0 +1,30 @@
+version: 1
+agents:
+  - id: bootstrap-operator
+    domains: [bootstrap, links, config, canonical-paths]
+    default_skills: [dotfiles-bootstrap]
+  - id: repo-governance-authority
+    domains: [contracts, docs, naming, governance, ai-assets]
+    default_skills: [dotfiles-repo-governance]
+  - id: execution-worklog-governance-owner
+    domains: [worklog, roadmap, continuity, closeout]
+    default_skills: [wip-continuity-governance]
+  - id: architecture-modernization-authority
+    domains: [architecture, refactor, performance, simplification, resilience, testability]
+    default_skills: [dotfiles-architecture-modernization]
+  - id: critical-integrations-guardian
+    domains: [auth, secrets, cli, workstation, ci, signing, bootstrap]
+    default_skills: [dotfiles-critical-integrations]
+  - id: lessons-governance-curator
+    domains: [lessons, retrospectives, closeout, backfill]
+    default_skills: [dotfiles-lessons-governance]
+  - id: orchestrator
+    domains: [routing, decomposition, delegation, orchestration]
+    default_skills: [task-routing-and-decomposition]
+mandatory_gates:
+  always:
+    - repo-governance-authority
+    - execution-worklog-governance-owner
+    - architecture-modernization-authority
+  platform_sensitive:
+    - critical-integrations-guardian

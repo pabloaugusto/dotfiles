@@ -7,6 +7,20 @@ import subprocess
 from datetime import datetime, timezone
 from pathlib import Path
 
+from ai_lessons_lib import (
+    check_reviews,
+    ensure_lessons_file,
+    normalize_lesson_ids,
+    upsert_review,
+    validate_review_request,
+)
+from ai_roadmap_lib import (
+    ensure_decisions_file as ensure_governed_decisions_file,
+    ensure_roadmap_file,
+    refresh_roadmap,
+    register_roadmap_decision,
+)
+
 DOING_START = "<!-- ai-worklog:doing:start -->"
 DOING_END = "<!-- ai-worklog:doing:end -->"
 DONE_START = "<!-- ai-worklog:done:start -->"
@@ -57,6 +71,12 @@ def now_human_utc() -> str:
 
 def today_utc_iso() -> str:
     return datetime.now(timezone.utc).date().isoformat()
+
+
+def write_text_lf(path: Path, content: str) -> None:
+    normalized = content.replace("\r\n", "\n").replace("\r", "\n")
+    with path.open("w", encoding="utf-8", newline="\n") as handle:
+        handle.write(normalized)
 
 
 def normalize_cell(value: str, *, max_len: int = 220) -> str:
@@ -224,6 +244,7 @@ Fonte de verdade operacional para continuidade de tarefas dos agentes de IA.
   - concluir pendencias antes (`concluir_primeiro`), ou
   - manter pendencias e registrar no roadmap (`roadmap_pendente`).
 - Durante execucao, registrar progresso incremental no ledger.
+- O item ativo deve permanecer em `Doing` enquanto a execucao estiver em curso.
 - Ultimo passo obrigatorio antes de encerrar demanda: mover item ativo de
   `Doing` para `Done` e remover do log incremental as demandas finalizadas.
 
@@ -270,13 +291,13 @@ Use status: `pendente`, `aceita`, `descartada`, `aplicar_depois`.
 def ensure_tracker_file(path: Path) -> None:
     if not path.exists():
         path.parent.mkdir(parents=True, exist_ok=True)
-        path.write_text(tracker_template(), encoding="utf-8")
+        write_text_lf(path, tracker_template())
 
 
 def ensure_decisions_file(path: Path) -> None:
     if not path.exists():
         path.parent.mkdir(parents=True, exist_ok=True)
-        path.write_text(roadmap_template(), encoding="utf-8")
+        write_text_lf(path, roadmap_template())
 
 
 def load_tracker(path: Path) -> tuple[list[dict[str, str]], list[dict[str, str]], list[str]]:
@@ -294,7 +315,7 @@ def save_tracker(path: Path, doing: list[dict[str, str]], done: list[dict[str, s
     active_ids = {row["ID"] for row in doing}
     filtered = [line for line in log if parse_log_id(line) in active_ids]
     content = replace_between(content, LOG_START, LOG_END, render_log_table(filtered), label=str(path))
-    path.write_text(content, encoding="utf-8")
+    write_text_lf(path, content)
 
 
 def load_suggestions(path: Path) -> tuple[str, list[dict[str, str]]]:
@@ -306,7 +327,7 @@ def load_suggestions(path: Path) -> tuple[str, list[dict[str, str]]]:
 def save_suggestions(path: Path, raw: str, rows: list[dict[str, str]]) -> None:
     updated = replace_between(raw, SUGGESTIONS_START, SUGGESTIONS_END, render_table(SUGGESTION_HEADERS, rows), label=str(path))
     _ = extract_between(updated, CYCLES_START, CYCLES_END, label=str(path))
-    path.write_text(updated, encoding="utf-8")
+    write_text_lf(path, updated)
 
 
 def resolve_branch() -> str:
@@ -315,6 +336,30 @@ def resolve_branch() -> str:
     except Exception:
         return "unknown"
     return completed.stdout.strip() or "unknown"
+
+
+def collect_dirty_paths(repo_root_value: str) -> list[str]:
+    repo_root = (repo_root_value or "").strip()
+    if not repo_root:
+        return []
+    try:
+        root = Path(repo_root).expanduser().resolve()
+        probe = subprocess.run(["git", "rev-parse", "--show-toplevel"], cwd=root, check=False, capture_output=True, text=True)
+        if probe.returncode != 0:
+            return []
+        status = subprocess.run(["git", "status", "--porcelain"], cwd=root, check=False, capture_output=True, text=True)
+        if status.returncode != 0:
+            return []
+    except OSError:
+        return []
+
+    dirty_paths: list[str] = []
+    for raw_line in status.stdout.splitlines():
+        line = raw_line.rstrip()
+        if not line:
+            continue
+        dirty_paths.append(line[3:] if len(line) > 3 else line)
+    return dirty_paths
 
 
 def next_worklog_id(existing_ids: set[str]) -> str:
@@ -357,10 +402,26 @@ def add_suggestions(
 
 def run_ensure(args: argparse.Namespace) -> None:
     tracker = Path(args.file)
+    roadmap = Path(args.roadmap_file)
     decisions = Path(args.decisions_file)
+    lessons = Path(args.lessons_file)
     ensure_tracker_file(tracker)
-    ensure_decisions_file(decisions)
-    print(json.dumps({"tracker_file": str(tracker), "decisions_file": str(decisions), "status": "ensured"}, ensure_ascii=False))
+    ensure_roadmap_file(roadmap)
+    ensure_governed_decisions_file(decisions)
+    ensure_lessons_file(lessons)
+    refresh_roadmap(roadmap_path=roadmap, decisions_path=decisions)
+    print(
+        json.dumps(
+            {
+                "tracker_file": str(tracker),
+                "roadmap_file": str(roadmap),
+                "decisions_file": str(decisions),
+                "lessons_file": str(lessons),
+                "status": "ensured",
+            },
+            ensure_ascii=False,
+        )
+    )
 
 
 def run_list(args: argparse.Namespace) -> None:
@@ -384,6 +445,16 @@ def run_check(args: argparse.Namespace) -> None:
     pending_action = (args.pending_action or "").strip()
     if pending_action not in ALLOWED_PENDING_ACTIONS:
         raise SystemExit("Acao pendente invalida. Use concluir_primeiro ou roadmap_pendente.")
+    dirty_paths = collect_dirty_paths(args.repo_root or "")
+    if args.enforce_clean_checkpoint == 1 and not doing and dirty_paths:
+        preview = ", ".join(dirty_paths[:8])
+        suffix = " ..." if len(dirty_paths) > 8 else ""
+        raise SystemExit(
+            "Checkpoint commit obrigatorio antes de nova rodada: worktree suja sem item em Doing. "
+            "Faca commit do contexto atual antes de seguir. Arquivos pendentes: "
+            + preview
+            + suffix
+        )
     if args.strict == 1 and doing and not pending_action:
         raise SystemExit("Existem tarefas em Doing. Defina uma decisao humana explicita: concluir_primeiro ou roadmap_pendente.")
     print(json.dumps({"tracker_file": str(tracker), "pending_count": len(doing), "pending_ids": [row["ID"] for row in doing], "pending_action": pending_action or "(none)", "ok": True}, ensure_ascii=False))
@@ -391,11 +462,25 @@ def run_check(args: argparse.Namespace) -> None:
 
 def run_close_gate(args: argparse.Namespace) -> None:
     tracker = Path(args.file)
+    lessons = Path(args.lessons_file)
     ensure_tracker_file(tracker)
     doing, _, _ = load_tracker(tracker)
     if doing:
         raise SystemExit("Finalizacao bloqueada: existem tarefas em Doing no docs/AI-WIP-TRACKER.md. IDs pendentes: " + ", ".join(row["ID"] for row in doing))
-    print(json.dumps({"tracker_file": str(tracker), "pending_count": 0, "status": "close_gate_passed"}, ensure_ascii=False))
+    lessons_failures = check_reviews(tracker_path=tracker, lessons_path=lessons)
+    if lessons_failures:
+        raise SystemExit("Finalizacao bloqueada por governanca de licoes:\n" + "\n".join(lessons_failures))
+    print(
+        json.dumps(
+            {
+                "tracker_file": str(tracker),
+                "lessons_file": str(lessons),
+                "pending_count": 0,
+                "status": "close_gate_passed",
+            },
+            ensure_ascii=False,
+        )
+    )
 
 
 def run_branch_check(args: argparse.Namespace) -> None:
@@ -439,6 +524,7 @@ def run_update(args: argparse.Namespace) -> None:
     ensure_tracker_file(tracker)
     doing, done, log = load_tracker(tracker)
     target = (args.worklog_id or "").strip()
+    progress_summary = normalize_cell((args.progress or "").strip())
     updated = None
     for row in doing:
         if row["ID"] != target:
@@ -456,14 +542,16 @@ def run_update(args: argparse.Namespace) -> None:
         break
     if updated is None:
         raise SystemExit(f"Worklog ID nao encontrado em Doing: {target}")
-    log.append(format_log_line(worklog_id=target, status="doing", summary=updated["Tarefa"], next_step=updated["Proximo passo"], blockers=updated["Bloqueios"], context=args.scope or "", notes="checkpoint incremental"))
+    log.append(format_log_line(worklog_id=target, status="doing", summary=progress_summary, next_step=updated["Proximo passo"], blockers=updated["Bloqueios"], context=args.scope or "", notes="checkpoint incremental"))
     save_tracker(tracker, doing, done, log)
     print(json.dumps({"tracker_file": str(tracker), "worklog_id": target, "action": "updated"}, ensure_ascii=False))
 
 
 def run_done(args: argparse.Namespace) -> None:
     tracker = Path(args.file)
+    lessons = Path(args.lessons_file)
     ensure_tracker_file(tracker)
+    ensure_lessons_file(lessons)
     doing, done, log = load_tracker(tracker)
     target = (args.worklog_id or "").strip()
     current = None
@@ -475,19 +563,46 @@ def run_done(args: argparse.Namespace) -> None:
             remaining.append(row)
     if current is None:
         raise SystemExit(f"Worklog ID nao encontrado em Doing: {target}")
+    lesson_ids = normalize_lesson_ids(args.lessons_ids or "")
+    validate_review_request(
+        path=lessons,
+        decision=(args.lessons_decision or "").strip(),
+        summary=(args.lessons_summary or "").strip(),
+        lesson_ids=lesson_ids,
+    )
     result = normalize_cell(args.delivery, max_len=180)
     if (args.evidence or "").strip():
         result = normalize_cell(f"{result} / evidencias: {args.evidence.strip()}", max_len=220)
     done.insert(0, {"ID": current["ID"], "Tarefa": current["Tarefa"], "Branch": current["Branch"], "Responsavel": current["Responsavel"], "Inicio UTC": current["Inicio UTC"], "Concluido UTC": now_human_utc(), "Resultado": result})
     save_tracker(tracker, remaining, done, log)
-    print(json.dumps({"tracker_file": str(tracker), "worklog_id": target, "action": "done"}, ensure_ascii=False))
+    upsert_review(
+        path=lessons,
+        worklog_id=target,
+        decision=(args.lessons_decision or "").strip(),
+        summary=(args.lessons_summary or "").strip(),
+        lesson_ids=lesson_ids,
+        evidence=(args.lessons_evidence or args.evidence or "").strip(),
+    )
+    print(
+        json.dumps(
+            {
+                "tracker_file": str(tracker),
+                "lessons_file": str(lessons),
+                "worklog_id": target,
+                "action": "done",
+            },
+            ensure_ascii=False,
+        )
+    )
 
 
 def run_roadmap_pending(args: argparse.Namespace) -> None:
     tracker = Path(args.file)
+    roadmap = Path(args.roadmap_file)
     decisions = Path(args.decisions_file)
     ensure_tracker_file(tracker)
-    ensure_decisions_file(decisions)
+    ensure_roadmap_file(roadmap)
+    ensure_governed_decisions_file(decisions)
     doing, done, log = load_tracker(tracker)
     target = (args.worklog_id or "").strip()
     row = None
@@ -503,29 +618,48 @@ def run_roadmap_pending(args: argparse.Namespace) -> None:
         raise SystemExit(f"Worklog ID nao encontrado em Doing: {target}")
     log.append(format_log_line(worklog_id=target, status="doing", summary=row["Tarefa"], next_step=row["Proximo passo"], blockers=row["Bloqueios"], context=args.context or "resolucao roadmap_pendente", notes=args.notes or "opcao=roadmap_pendente"))
     save_tracker(tracker, doing, done, log)
-    raw, suggestions = load_suggestions(decisions)
-    next_rows, added = add_suggestions(suggestions=suggestions, rows=[row], description_overrides={target: args.suggestion or ""})
-    if added:
-        save_suggestions(decisions, raw, next_rows)
-    print(json.dumps({"tracker_file": str(tracker), "decisions_file": str(decisions), "worklog_id": target, "action": "roadmap_pending", "added_ids": [item["ID"] for item in added]}, ensure_ascii=False))
+    suggestion = (args.suggestion or "").strip() or f"Retomar tarefa pendente {target}: {row['Tarefa']}"
+    registered = register_roadmap_decision(
+        roadmap_path=roadmap,
+        decisions_path=decisions,
+        suggestion=suggestion,
+        decision="pending",
+        horizon="next",
+        notes=args.notes or f"worklog={target}",
+        suggestion_id=f"SG-{target}",
+    )
+    refresh_roadmap(roadmap_path=roadmap, decisions_path=decisions)
+    print(json.dumps({"tracker_file": str(tracker), "roadmap_file": str(roadmap), "decisions_file": str(decisions), "worklog_id": target, "action": "roadmap_pending", "added_ids": [registered["suggestion_id"]]}, ensure_ascii=False))
 
 
 def run_sync_roadmap(args: argparse.Namespace) -> None:
     tracker = Path(args.file)
+    roadmap = Path(args.roadmap_file)
     decisions = Path(args.decisions_file)
     ensure_tracker_file(tracker)
-    ensure_decisions_file(decisions)
+    ensure_roadmap_file(roadmap)
+    ensure_governed_decisions_file(decisions)
     doing, _, _ = load_tracker(tracker)
     rows = doing
     if args.worklog_id:
         rows = [row for row in rows if row["ID"] == args.worklog_id]
     if args.limit > 0:
         rows = rows[: args.limit]
-    raw, suggestions = load_suggestions(decisions)
-    next_rows, added = add_suggestions(suggestions=suggestions, rows=rows)
-    if added:
-        save_suggestions(decisions, raw, next_rows)
-    print(json.dumps({"tracker_file": str(tracker), "decisions_file": str(decisions), "added_count": len(added), "added_ids": [item["ID"] for item in added]}, ensure_ascii=False))
+    registered_ids: list[str] = []
+    for row in rows:
+        suggestion = f"Retomar tarefa pendente {row['ID']}: {row['Tarefa']}"
+        registered = register_roadmap_decision(
+            roadmap_path=roadmap,
+            decisions_path=decisions,
+            suggestion=suggestion,
+            decision="pending",
+            horizon="next",
+            notes=f"sync-roadmap; worklog={row['ID']}",
+            suggestion_id=f"SG-{row['ID']}",
+        )
+        registered_ids.append(str(registered["suggestion_id"]))
+    refresh_roadmap(roadmap_path=roadmap, decisions_path=decisions)
+    print(json.dumps({"tracker_file": str(tracker), "roadmap_file": str(roadmap), "decisions_file": str(decisions), "added_count": len(registered_ids), "added_ids": registered_ids}, ensure_ascii=False))
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -534,7 +668,9 @@ def build_parser() -> argparse.ArgumentParser:
 
     ensure = sub.add_parser("ensure")
     ensure.add_argument("--file", default="docs/AI-WIP-TRACKER.md")
+    ensure.add_argument("--roadmap-file", default="docs/ROADMAP.md")
     ensure.add_argument("--decisions-file", default="docs/ROADMAP-DECISIONS.md")
+    ensure.add_argument("--lessons-file", default="LICOES-APRENDIDAS.md")
     ensure.set_defaults(func=run_ensure)
 
     list_cmd = sub.add_parser("list")
@@ -550,10 +686,13 @@ def build_parser() -> argparse.ArgumentParser:
     check.add_argument("--file", default="docs/AI-WIP-TRACKER.md")
     check.add_argument("--pending-action", default="")
     check.add_argument("--strict", type=int, choices=[0, 1], default=1)
+    check.add_argument("--repo-root", default="")
+    check.add_argument("--enforce-clean-checkpoint", type=int, choices=[0, 1], default=1)
     check.set_defaults(func=run_check)
 
     close_gate = sub.add_parser("close-gate")
     close_gate.add_argument("--file", default="docs/AI-WIP-TRACKER.md")
+    close_gate.add_argument("--lessons-file", default="LICOES-APRENDIDAS.md")
     close_gate.set_defaults(func=run_close_gate)
 
     branch_check = sub.add_parser("branch-check")
@@ -588,13 +727,19 @@ def build_parser() -> argparse.ArgumentParser:
 
     done = sub.add_parser("done")
     done.add_argument("--file", default="docs/AI-WIP-TRACKER.md")
+    done.add_argument("--lessons-file", default="LICOES-APRENDIDAS.md")
     done.add_argument("--worklog-id", required=True)
     done.add_argument("--delivery", required=True)
     done.add_argument("--evidence", default="")
+    done.add_argument("--lessons-decision", required=True, choices=["capturada", "sem_nova_licao"])
+    done.add_argument("--lessons-summary", required=True)
+    done.add_argument("--lessons-ids", default="")
+    done.add_argument("--lessons-evidence", default="")
     done.set_defaults(func=run_done)
 
     roadmap_pending = sub.add_parser("roadmap-pending")
     roadmap_pending.add_argument("--file", default="docs/AI-WIP-TRACKER.md")
+    roadmap_pending.add_argument("--roadmap-file", default="docs/ROADMAP.md")
     roadmap_pending.add_argument("--worklog-id", required=True)
     roadmap_pending.add_argument("--decisions-file", default="docs/ROADMAP-DECISIONS.md")
     roadmap_pending.add_argument("--suggestion", default="")
@@ -606,6 +751,7 @@ def build_parser() -> argparse.ArgumentParser:
 
     sync_roadmap = sub.add_parser("sync-roadmap")
     sync_roadmap.add_argument("--file", default="docs/AI-WIP-TRACKER.md")
+    sync_roadmap.add_argument("--roadmap-file", default="docs/ROADMAP.md")
     sync_roadmap.add_argument("--decisions-file", default="docs/ROADMAP-DECISIONS.md")
     sync_roadmap.add_argument("--worklog-id", default="")
     sync_roadmap.add_argument("--limit", type=int, default=0)

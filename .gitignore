@@ -4,6 +4,7 @@
 
 *.history
 desktop.ini
+!df/**/desktop.ini
 *.pyc
 __pycache__/
 .cache/
@@ -25,30 +26,22 @@ df/git/.gitconfig.local
 !*.pub
 !*.sops.yaml
 
-df/ssh/sockets
+# machine-local SSH runtime and overlays
+df/ssh/sockets/
 df/ssh/known_hosts
 df/ssh/known_hosts.old
 df/ssh/config.local
-#.ssh/authorized_keys
+
+# machine-local secret material
 df/secrets/dotfiles.age.local.key
-df/powershell/Modules
-df/powershell/Scripts
-df/NuGet/
-df/vscode/globalStorage
-df/vscode/History
-df/vscode/workspaceStorage
-df/vscode/sync
+
+# VS Code runtime state generated under df/vscode when linked into Code/User
+df/vscode/globalStorage/
+df/vscode/History/
+df/vscode/workspaceStorage/
+df/vscode/sync/
 
 # local AI runtime state
 .gemini/
 .codex/*
-!.codex/skills/
-!.codex/skills/**
-!.codex/evals/
-!.codex/evals/**
-!.codex/orchestration/
-!.codex/orchestration/**
-!.codex/rules/
-!.codex/rules/**
-.agents/*
-!.agents/*.md
+!.codex/README.md

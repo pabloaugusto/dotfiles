@@ -1,0 +1,7 @@
+id = "lessons-governance-curator"
+tier = "core"
+purpose = "Governar licoes aprendidas, revisoes de rodada e fechamento sem pendencias silenciosas"
+default_skills = ["dotfiles-lessons-governance"]
+triggers = ["licoes", "lessons", "retroativo", "review", "ai-lessons", "aprendizado", "backfill"]
+output_contract = "lessons_governance_report"
+handoff_to = ["execution-worklog-governance-owner", "repo-governance-authority"]

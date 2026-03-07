@@ -1,0 +1,66 @@
+version: 1
+settings:
+  multi_agent_default: true
+  max_primary_agents: 2
+global_mandatory_gates:
+  - repo-governance-authority
+  - execution-worklog-governance-owner
+  - architecture-modernization-authority
+
+conditional_mandatory_gates:
+  - when_any_path_matches:
+      - "bootstrap/**"
+      - "df/**"
+      - "Taskfile.yml"
+      - ".github/workflows/**"
+      - "scripts/**"
+    agents:
+      - critical-integrations-guardian
+  - when_any_keyword_matches:
+      - "gh"
+      - "op"
+      - "sops"
+      - "age"
+      - "ssh-agent"
+      - "auth"
+      - "secret"
+      - "bootstrap"
+      - "checkEnv"
+      - "signing"
+    agents:
+      - critical-integrations-guardian
+  - when_any_path_matches:
+      - "LICOES-APRENDIDAS.md"
+      - "docs/AI-WIP-TRACKER.md"
+      - "docs/ROADMAP.md"
+      - "docs/ROADMAP-DECISIONS.md"
+      - "scripts/ai-worklog.py"
+      - "scripts/ai-lessons.py"
+    agents:
+      - lessons-governance-curator
+
+routes:
+  - id: route-bootstrap-scope
+    match:
+      keywords: ["bootstrap", "relink", "refresh", "link", "symlink", "user-config"]
+      paths: ["bootstrap/**", "df/**"]
+    primary: [bootstrap-operator]
+    support: [critical-integrations-guardian, architecture-modernization-authority]
+  - id: route-governance-scope
+    match:
+      keywords: ["governanca", "agents", "skills", "workflow", "docs", "contract", "conventional"]
+      paths: ["AGENTS.md", ".agents/**", ".codex/README.md", "docs/**", "Taskfile.yml"]
+    primary: [repo-governance-authority]
+    support: [architecture-modernization-authority, lessons-governance-curator]
+  - id: route-continuity-scope
+    match:
+      keywords: ["wip", "doing", "done", "roadmap", "continuity", "lessons", "retroativo"]
+      paths: ["LICOES-APRENDIDAS.md", "docs/AI-WIP-TRACKER.md", "docs/ROADMAP.md", "docs/ROADMAP-DECISIONS.md", "scripts/ai-*.py"]
+    primary: [execution-worklog-governance-owner, lessons-governance-curator]
+    support: [repo-governance-authority]
+  - id: route-orchestrator-scope
+    match:
+      keywords: ["planejar", "decompor", "delegar", "orquestrar", "rotear", "route", "delegate"]
+      paths: ["docs/ROADMAP.md", "docs/WORKFLOWS.md", "docs/TASKS.md"]
+    primary: [orchestrator]
+    support: [repo-governance-authority, architecture-modernization-authority]

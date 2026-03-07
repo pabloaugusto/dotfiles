@@ -1,0 +1,7 @@
+id = "bootstrap-operator"
+tier = "core"
+purpose = "Implementar e validar bootstrap, relink, user-config e paridade Windows/WSL"
+default_skills = ["dotfiles-bootstrap"]
+triggers = ["bootstrap", "relink", "refresh", "link", "symlink", "user-config", "paths canonicos"]
+output_contract = "bootstrap_change_report"
+handoff_to = ["critical-integrations-guardian", "architecture-modernization-authority"]

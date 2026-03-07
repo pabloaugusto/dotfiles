@@ -1,0 +1,12 @@
+rule AI-SEC-001
+when: bootstrap-or-auth
+must:
+- acionar critical-integrations-guardian
+- preservar caminhos canonicos absolutos
+- nao introduzir secrets em plaintext
+
+rule AI-SEC-002
+when: workstation-integrations
+must:
+- proteger gh, op, sops, age, ssh-agent, signing e checkEnv
+- usar tasks existentes como fonte de verdade

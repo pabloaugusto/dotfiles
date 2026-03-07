@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "DotfilesTaskCard",
+  "type": "object",
+  "required": ["intent", "risk", "paths", "required_agents", "required_skills"],
+  "properties": {
+    "intent": { "type": "string", "minLength": 3 },
+    "risk": { "type": "string", "enum": ["low", "medium", "high"] },
+    "paths": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "required_agents": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "required_skills": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "notes": { "type": "string" }
+  },
+  "additionalProperties": false
+}

@@ -1,0 +1,7 @@
+id = "repo-governance-authority"
+tier = "core"
+purpose = "Manter contratos, naming, docs, skills, agentes e regras operacionais do repo"
+default_skills = ["dotfiles-repo-governance"]
+triggers = ["governanca", "AGENTS", "skills", "agents", "conventional commits", "PR", "branch", "catalogo"]
+output_contract = "repo_governance_report"
+handoff_to = ["architecture-modernization-authority", "lessons-governance-curator"]

@@ -42,6 +42,8 @@ jobs:
       - name: Validate AI assets and close gate
         run: |
           task ai:validate:linux
+          task ai:eval:smoke:linux
+          task ci:workflow:sync:check:linux
           task ai:worklog:close:gate:linux
 
       - name: Validate PR title

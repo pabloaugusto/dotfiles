@@ -1,0 +1,7 @@
+interface:
+  display_name: "Arquitetura Modernizacao"
+  short_description: "Arquitetura, refactor e performance"
+  default_prompt: "Use $dotfiles-architecture-modernization para revisar arquitetura, simplificacao, performance, resiliencia e proximos passos tecnicos deste repo."
+
+policy:
+  allow_implicit_invocation: true

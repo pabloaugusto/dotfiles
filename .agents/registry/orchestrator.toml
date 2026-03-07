@@ -1,0 +1,11 @@
+id = "orchestrator"
+tier = "core"
+purpose = "Orquestrar intake, roteamento, decomposicao e delegacao das tarefas de IA"
+default_skills = ["task-routing-and-decomposition"]
+triggers = ["planejar", "decompor", "delegar", "orquestrar", "route", "delegate", "intake"]
+output_contract = "delegation_plan_report"
+handoff_to = [
+  "repo-governance-authority",
+  "execution-worklog-governance-owner",
+  "architecture-modernization-authority",
+]

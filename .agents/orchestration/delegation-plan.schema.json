@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "DotfilesDelegationPlan",
+  "type": "object",
+  "required": ["primary_agents", "support_agents", "mandatory_gates", "validation"],
+  "properties": {
+    "primary_agents": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "support_agents": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "mandatory_gates": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "validation": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "roadmap_followups": {
+      "type": "array",
+      "items": { "type": "string" }
+    }
+  },
+  "additionalProperties": false
+}

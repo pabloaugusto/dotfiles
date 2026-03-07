@@ -1,0 +1,7 @@
+interface:
+  display_name: "Licoes Aprendidas"
+  short_description: "Curadoria e fechamento lessons"
+  default_prompt: "Use $dotfiles-lessons-governance para revisar lessons, fechar worklogs com rastreabilidade e evitar pendencias silenciosas."
+
+policy:
+  allow_implicit_invocation: true

@@ -1,0 +1,7 @@
+id = "critical-integrations-guardian"
+tier = "core"
+purpose = "Proteger integracoes criticas como gh, op, sops, age, ssh-agent, signing, checkEnv, bootstrap e sync"
+default_skills = ["dotfiles-critical-integrations"]
+triggers = ["gh", "op", "sops", "age", "ssh-agent", "auth", "secrets", "checkEnv", "bootstrap", "sync", "CI"]
+output_contract = "critical_integrations_report"
+handoff_to = ["bootstrap-operator", "repo-governance-authority", "execution-worklog-governance-owner"]

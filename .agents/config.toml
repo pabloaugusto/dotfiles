@@ -1,0 +1,49 @@
+version = 1
+
+[skills]
+required = [
+  "dotfiles-bootstrap",
+  "dotfiles-repo-governance",
+  "dotfiles-test-harness",
+  "wip-continuity-governance",
+  "dotfiles-architecture-modernization",
+  "dotfiles-critical-integrations",
+  "dotfiles-lessons-governance",
+  "task-routing-and-decomposition",
+]
+mandatory_parallel = ["dotfiles-architecture-modernization"]
+
+[agents]
+required = [
+  "bootstrap-operator",
+  "repo-governance-authority",
+  "execution-worklog-governance-owner",
+  "architecture-modernization-authority",
+  "critical-integrations-guardian",
+  "lessons-governance-curator",
+  "orchestrator",
+]
+mandatory_global = [
+  "repo-governance-authority",
+  "execution-worklog-governance-owner",
+  "architecture-modernization-authority",
+]
+mandatory_platform = ["critical-integrations-guardian"]
+
+[orchestration]
+capability_matrix = ".agents/orchestration/capability-matrix.yaml"
+routing_policy = ".agents/orchestration/routing-policy.yaml"
+task_card_schema = ".agents/orchestration/task-card.schema.json"
+delegation_plan_schema = ".agents/orchestration/delegation-plan.schema.json"
+
+[rules]
+default = ".agents/rules/default.rules"
+ci = ".agents/rules/ci.rules"
+security = ".agents/rules/security.rules"
+
+[evals]
+smoke = ".agents/evals/scenarios/smoke.md"
+regression = ".agents/evals/scenarios/regression.md"
+security = ".agents/evals/scenarios/security.md"
+routing_dataset = ".agents/evals/datasets/routing.jsonl"
+governance_dataset = ".agents/evals/datasets/governance.jsonl"

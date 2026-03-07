@@ -1,0 +1,7 @@
+id = "execution-worklog-governance-owner"
+tier = "core"
+purpose = "Garantir continuidade operacional, worklog em tempo real e fechamento correto"
+default_skills = ["wip-continuity-governance"]
+triggers = ["wip", "doing", "done", "tracker", "continuidade", "roadmap_pendente", "close-gate"]
+output_contract = "worklog_governance_report"
+handoff_to = ["lessons-governance-curator", "repo-governance-authority"]

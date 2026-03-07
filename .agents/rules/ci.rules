@@ -1,0 +1,12 @@
+rule AI-CI-001
+when: ci
+must:
+- executar task ai:validate
+- executar task ai:lessons:check
+- executar task ai:worklog:close:gate
+- manter testes Python de governanca verdes
+
+rule AI-CI-002
+when: ai-assets-changed
+must:
+- manter catalogos, docs, rules, orchestration e evals em paridade
