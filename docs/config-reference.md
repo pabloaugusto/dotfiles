@@ -70,6 +70,7 @@ Pontos críticos:
 Uso:
 
 - configuração de integração MCP do ambiente local
+- placeholder neutro e válido quando não houver servidores configurados (`{}`)
 
 Pontos críticos:
 

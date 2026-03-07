@@ -1,10 +1,8 @@
 ###############################################################
-# .gitconfig segmentado por Devcontainer (por host)
-#
-# OBS: Git só consegue diferenciar pelo caminho do repo (gitdir).
-# Isso só funciona se o *workspace dentro do container* variar
-# conforme o host, por exemplo:
-#   Windows host -> /workspaces-win/<repo>/
-#   Linux host   -> /workspaces-linux/<repo>/
-#   WSL host     -> /workspaces-wsl/<repo>/
+# Overlay de Devcontainer para host Windows.
+# Mantenha aqui apenas overrides especificos; a base comum fica
+# em ~/.config/git/.gitconfig-devcontainer-host-common.
 ###############################################################
+
+[include]
+	path = ~/.config/git/.gitconfig-devcontainer-host-common

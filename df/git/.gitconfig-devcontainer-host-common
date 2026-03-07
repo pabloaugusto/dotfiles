@@ -1,0 +1,10 @@
+###############################################################
+# .gitconfig segmentado por Devcontainer (por host)
+#
+# OBS: Git so consegue diferenciar pelo caminho do repo (gitdir).
+# Isso so funciona se o workspace dentro do container variar
+# conforme o host, por exemplo:
+#   Windows host -> /workspaces-win/<repo>/
+#   Linux host   -> /workspaces-linux/<repo>/
+#   WSL host     -> /workspaces-wsl/<repo>/
+###############################################################
