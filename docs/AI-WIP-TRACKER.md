@@ -20,7 +20,7 @@ Fonte de verdade operacional para continuidade de tarefas dos agentes de IA.
 <!-- ai-worklog:doing:start -->
 | ID | Tarefa | Branch | Responsavel | Inicio UTC | Ultima atualizacao UTC | Proximo passo | Bloqueios |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| WIP-20260307-SECRETS-ROTATION | Projetar e implementar a governanca e o core de rotacionamento automatizado de secrets, chaves SSH e artefatos criptografados, com orquestracao segura por CLIs criticos e agente especializado. | feat/test-harness-hybrid | ai-agent | 2026-03-07 14:20 UTC | 2026-03-07 17:28 UTC | Revalidar a worktree consolidada e publicar feat/test-harness-hybrid no remoto. | - |
+| WIP-20260307-SECRETS-ROTATION | Projetar e implementar a governanca e o core de rotacionamento automatizado de secrets, chaves SSH e artefatos criptografados, com orquestracao segura por CLIs criticos e agente especializado. | main | ai-agent | 2026-03-07 14:20 UTC | 2026-03-07 17:28 UTC | Retomar em `main` as prioridades P0 da rodada atual antes de avancar no core do rotacionador. | - |
 <!-- ai-worklog:doing:end -->
 
 ## Done
