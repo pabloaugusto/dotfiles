@@ -4,8 +4,7 @@
 - Data-base: `2026-03-08`
 - Relacionados:
   - [`2026-03-08-github-jira-confluence-traceability.md`](2026-03-08-github-jira-confluence-traceability.md)
-  - [`artifacts/jira-writing-standards.md`](artifacts/jira-writing-standards.md)
-  - [`artifacts/agent-operations.md`](artifacts/agent-operations.md)
+  - [`../../docs/ai-operating-model.md`](../../docs/ai-operating-model.md)
   - [`../../docs/git-conventions.md`](../../docs/git-conventions.md)
   - [`../../Taskfile.yml`](../../Taskfile.yml)
 

@@ -3,10 +3,8 @@
 - Status: `research-backed-planning`
 - Data-base: `2026-03-08`
 - Relacionados:
-  - [`2026-03-07-parecer-e-plano-inicial.md`](2026-03-07-parecer-e-plano-inicial.md)
   - [`2026-03-08-github-for-atlassian-runbook.md`](2026-03-08-github-for-atlassian-runbook.md)
-  - [`artifacts/jira-writing-standards.md`](artifacts/jira-writing-standards.md)
-  - [`artifacts/agent-operations.md`](artifacts/agent-operations.md)
+  - [`../../docs/ai-operating-model.md`](../../docs/ai-operating-model.md)
   - [`../../Taskfile.yml`](../../Taskfile.yml)
   - [`../../docs/git-conventions.md`](../../docs/git-conventions.md)
 
