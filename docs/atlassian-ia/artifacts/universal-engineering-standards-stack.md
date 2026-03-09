@@ -302,5 +302,5 @@ Para cada nova especialidade:
 
 - [`reviewer-standards-catalog.md`](reviewer-standards-catalog.md)
 - [`agent-operations.md`](agent-operations.md)
-- [`jira-writing-standards.md`](jira-writing-standards.md)
-- [`../2026-03-08-manual-agilidade-control-plane.md`](../2026-03-08-manual-agilidade-control-plane.md)
+- [`../2026-03-07-operacao-agentes-jira-confluence.md`](../2026-03-07-operacao-agentes-jira-confluence.md)
+- [`../2026-03-07-melhores-praticas-mercado.md`](../2026-03-07-melhores-praticas-mercado.md)
