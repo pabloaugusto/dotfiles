@@ -217,7 +217,7 @@ tasks:
     platforms: [windows]
     dir: '{{.TASKFILE_DIR}}'
     cmds:
-      - "pwsh -NoProfile -File ./scripts/invoke-python.ps1 -ScriptPath ./scripts/git-signing-mode.py -Arguments status"
+      - "pwsh -NoProfile -Command \"& './scripts/invoke-python.ps1' -ScriptPath './scripts/git-signing-mode.py' -Arguments @('status')\""
 
   git:signing:status:linux:
     desc: Linux/WSL - exibe o estado do signer Git para a worktree atual
@@ -236,7 +236,7 @@ tasks:
     platforms: [windows]
     dir: '{{.TASKFILE_DIR}}'
     cmds:
-      - "pwsh -NoProfile -File ./scripts/invoke-python.ps1 -ScriptPath ./scripts/git-signing-mode.py -Arguments use-human"
+      - "pwsh -NoProfile -Command \"& './scripts/invoke-python.ps1' -ScriptPath './scripts/git-signing-mode.py' -Arguments @('use-human')\""
 
   git:signing:mode:human:linux:
     desc: Linux/WSL - reverte a worktree para o signer Git humano
@@ -246,11 +246,12 @@ tasks:
       - "bash -lc 'bash ./scripts/run-python.sh ./scripts/git-signing-mode.py use-human'"
 
   git:signing:mode:automation:
-    desc: Aplica signer tecnico de automacao na worktree atual usando op + SSH agent
+    desc: Aplica signer tecnico de automacao na worktree atual usando op + SSH agent ou chave publica explicita
     cmds:
       - task: git:signing:mode:automation:{{if or (eq .OS "Windows_NT") (eq .OS "windows")}}windows{{else}}linux{{end}}
         vars:
           PUBLIC_KEY_REF: "{{.PUBLIC_KEY_REF}}"
+          PUBLIC_KEY: "{{.PUBLIC_KEY}}"
           TITLE: "{{.TITLE}}"
           ENSURE_GITHUB: "{{default \"1\" .ENSURE_GITHUB}}"
 
@@ -259,14 +260,14 @@ tasks:
     platforms: [windows]
     dir: '{{.TASKFILE_DIR}}'
     cmds:
-      - "pwsh -NoProfile -File ./scripts/invoke-python.ps1 -ScriptPath ./scripts/git-signing-mode.py -Arguments use-automation --public-key-ref '{{default \"\" .PUBLIC_KEY_REF}}' --ensure-github '{{default \"1\" .ENSURE_GITHUB}}' --title '{{default \"\" .TITLE}}'"
+      - "pwsh -NoProfile -Command \"& './scripts/invoke-python.ps1' -ScriptPath './scripts/git-signing-mode.py' -Arguments @('use-automation','--public-key-ref','{{default \"\" .PUBLIC_KEY_REF}}','--public-key','{{default \"\" .PUBLIC_KEY}}','--ensure-github','{{default \"1\" .ENSURE_GITHUB}}','--title','{{default \"\" .TITLE}}')\""
 
   git:signing:mode:automation:linux:
     desc: Linux/WSL - aplica signer tecnico de automacao na worktree atual
     platforms: [linux]
     dir: '{{.TASKFILE_DIR}}'
     cmds:
-      - "bash -lc 'bash ./scripts/run-python.sh ./scripts/git-signing-mode.py use-automation --public-key-ref \"{{default \"\" .PUBLIC_KEY_REF}}\" --ensure-github \"{{default \"1\" .ENSURE_GITHUB}}\" --title \"{{default \"\" .TITLE}}\"'"
+      - "bash -lc 'bash ./scripts/run-python.sh ./scripts/git-signing-mode.py use-automation --public-key-ref \"{{default \"\" .PUBLIC_KEY_REF}}\" --public-key \"{{default \"\" .PUBLIC_KEY}}\" --ensure-github \"{{default \"1\" .ENSURE_GITHUB}}\" --title \"{{default \"\" .TITLE}}\"'"
 
   git:signing:github:ensure:
     desc: Garante que a chave publica do signer tecnico exista no GitHub como signing key
@@ -274,6 +275,7 @@ tasks:
       - task: git:signing:github:ensure:{{if or (eq .OS "Windows_NT") (eq .OS "windows")}}windows{{else}}linux{{end}}
         vars:
           PUBLIC_KEY_REF: "{{.PUBLIC_KEY_REF}}"
+          PUBLIC_KEY: "{{.PUBLIC_KEY}}"
           TITLE: "{{.TITLE}}"
 
   git:signing:github:ensure:windows:
@@ -281,14 +283,14 @@ tasks:
     platforms: [windows]
     dir: '{{.TASKFILE_DIR}}'
     cmds:
-      - "pwsh -NoProfile -File ./scripts/invoke-python.ps1 -ScriptPath ./scripts/git-signing-mode.py -Arguments ensure-github-signing-key --public-key-ref '{{default \"\" .PUBLIC_KEY_REF}}' --title '{{default \"\" .TITLE}}'"
+      - "pwsh -NoProfile -Command \"& './scripts/invoke-python.ps1' -ScriptPath './scripts/git-signing-mode.py' -Arguments @('ensure-github-signing-key','--public-key-ref','{{default \"\" .PUBLIC_KEY_REF}}','--public-key','{{default \"\" .PUBLIC_KEY}}','--title','{{default \"\" .TITLE}}')\""
 
   git:signing:github:ensure:linux:
     desc: Linux/WSL - registra ou reaproveita a signing key tecnica no GitHub
     platforms: [linux]
     dir: '{{.TASKFILE_DIR}}'
     cmds:
-      - "bash -lc 'bash ./scripts/run-python.sh ./scripts/git-signing-mode.py ensure-github-signing-key --public-key-ref \"{{default \"\" .PUBLIC_KEY_REF}}\" --title \"{{default \"\" .TITLE}}\"'"
+      - "bash -lc 'bash ./scripts/run-python.sh ./scripts/git-signing-mode.py ensure-github-signing-key --public-key-ref \"{{default \"\" .PUBLIC_KEY_REF}}\" --public-key \"{{default \"\" .PUBLIC_KEY}}\" --title \"{{default \"\" .TITLE}}\"'"
 
   bootstrap:
     desc: Auto - bootstrap no ambiente atual
