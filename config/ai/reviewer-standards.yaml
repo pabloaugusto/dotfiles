@@ -1,0 +1,240 @@
+version: 1
+
+metadata:
+  model_id: ai-control-plane-atlassian-pilot
+  owner_role: ai-engineering-architect
+  purpose: normative-review-basis
+
+profiles:
+  python-review:
+    roles:
+      - ai-reviewer-python
+    scope:
+      - python
+      - pyproject
+      - python-tests
+    governance_layers:
+      - layer: language-standard
+        references:
+          - authority: Python Software Foundation
+            title: Python Language Reference
+            identifier: python-language-reference
+            url: https://docs.python.org/3/reference/
+          - authority: Python Enhancement Proposals
+            title: PEP 8 - Style Guide for Python Code
+            identifier: PEP-8
+            url: https://peps.python.org/pep-0008/
+          - authority: Python Enhancement Proposals
+            title: PEP 20 - The Zen of Python
+            identifier: PEP-20
+            url: https://peps.python.org/pep-0020/
+          - authority: Python Enhancement Proposals
+            title: PEP 257 - Docstring Conventions
+            identifier: PEP-257
+            url: https://peps.python.org/pep-0257/
+          - authority: Python Enhancement Proposals
+            title: PEP 484 - Type Hints
+            identifier: PEP-484
+            url: https://peps.python.org/pep-0484/
+      - layer: automated-enforcement
+        references:
+          - authority: Astral
+            title: Ruff documentation
+            identifier: ruff
+            url: https://docs.astral.sh/ruff/
+          - authority: Python typing team
+            title: mypy documentation
+            identifier: mypy
+            url: https://mypy.readthedocs.io/
+    mandatory_checks:
+      - sintaxe e semantica da linguagem
+      - tipagem e contratos publicos
+      - design, legibilidade e manutencao
+      - portabilidade Windows e WSL quando aplicavel
+      - cobertura de testes e risco de regressao
+      - performance e uso indevido de I/O quando relevante
+
+  powershell-review:
+    roles:
+      - ai-reviewer-powershell
+    scope:
+      - powershell
+      - ps1
+      - psm1
+      - psd1
+    governance_layers:
+      - layer: language-standard
+        references:
+          - authority: Microsoft
+            title: Approved Verbs for PowerShell Commands
+            identifier: approved-verbs
+            url: https://learn.microsoft.com/powershell/scripting/developer/cmdlet/approved-verbs-for-windows-powershell-commands?view=powershell-7.5
+          - authority: Microsoft
+            title: about_Functions_Advanced
+            identifier: about-functions-advanced
+            url: https://learn.microsoft.com/powershell/module/microsoft.powershell.core/about/about_functions_advanced?view=powershell-7.5
+          - authority: Microsoft
+            title: about_Language_Modes
+            identifier: about-language-modes
+            url: https://learn.microsoft.com/powershell/module/microsoft.powershell.core/about/about_language_modes?view=powershell-7.5
+      - layer: automated-enforcement
+        references:
+          - authority: Microsoft
+            title: PSScriptAnalyzer rules
+            identifier: psscriptanalyzer-rules
+            url: https://learn.microsoft.com/powershell/utility-modules/psscriptanalyzer/rules/readme?view=ps-modules
+    mandatory_checks:
+      - compatibilidade entre Windows PowerShell e pwsh quando aplicavel
+      - approved verbs e ergonomia de cmdlets e funcoes
+      - quoting, idempotencia e seguranca operacional
+      - integracao com host Windows e WSL quando relevante
+      - evidencias de teste ou dry-run quando o risco operacional for alto
+
+  automation-review:
+    roles:
+      - ai-reviewer-automation
+    scope:
+      - bash
+      - shell
+      - taskfile
+      - workflow
+      - dockerfile
+      - ci-cd
+    governance_layers:
+      - layer: language-standard
+        references:
+          - authority: The Open Group
+            title: POSIX Shell Command Language
+            identifier: POSIX-Shell
+            url: https://pubs.opengroup.org/onlinepubs/9699919799/utilities/V3_chap02.html
+          - authority: Docker
+            title: Dockerfile reference
+            identifier: dockerfile-reference
+            url: https://docs.docker.com/reference/dockerfile/
+          - authority: GitHub
+            title: Workflow syntax for GitHub Actions
+            identifier: github-actions-workflow-syntax
+            url: https://docs.github.com/actions/using-workflows/workflow-syntax-for-github-actions
+      - layer: automated-enforcement
+        references:
+          - authority: ShellCheck
+            title: ShellCheck documentation
+            identifier: shellcheck
+            url: https://www.shellcheck.net/
+          - authority: actionlint
+            title: actionlint documentation
+            identifier: actionlint
+            url: https://github.com/rhysd/actionlint
+          - authority: Hadolint
+            title: Hadolint documentation
+            identifier: hadolint
+            url: https://github.com/hadolint/hadolint
+    mandatory_checks:
+      - portabilidade e quoting defensivo em shell
+      - determinismo de workflows e tasks
+      - seguranca de pipeline, segredos e artefatos
+      - rollback, retry e idempotencia operacional
+      - paridade entre task local e CI quando aplicavel
+
+  config-policy-review:
+    roles:
+      - ai-reviewer-config-policy
+    scope:
+      - yaml
+      - yml
+      - json
+      - json5
+      - toml
+      - markdown
+      - declarative-schema
+    governance_layers:
+      - layer: language-standard
+        references:
+          - authority: YAML Language Development Team
+            title: YAML 1.2.2 Specification
+            identifier: YAML-1.2.2
+            url: https://yaml.org/spec/1.2.2/
+          - authority: IETF
+            title: RFC 8259 - The JavaScript Object Notation (JSON) Data Interchange Format
+            identifier: RFC-8259
+            url: https://www.rfc-editor.org/rfc/rfc8259
+          - authority: JSON Schema
+            title: JSON Schema documentation
+            identifier: JSON-Schema
+            url: https://json-schema.org/
+          - authority: JSON5
+            title: JSON5 specification
+            identifier: JSON5
+            url: https://spec.json5.org/
+          - authority: TOML
+            title: TOML v1.0.0
+            identifier: TOML-1.0.0
+            url: https://toml.io/en/v1.0.0
+          - authority: CommonMark
+            title: CommonMark Spec
+            identifier: CommonMark
+            url: https://spec.commonmark.org/
+      - layer: automated-enforcement
+        references:
+          - authority: yamllint
+            title: yamllint documentation
+            identifier: yamllint
+            url: https://yamllint.readthedocs.io/
+          - authority: Spectral
+            title: Spectral documentation
+            identifier: spectral
+            url: https://docs.stoplight.io/docs/spectral/674b27b261c3c-overview
+          - authority: markdownlint
+            title: markdownlint documentation
+            identifier: markdownlint
+            url: https://github.com/DavidAnson/markdownlint
+    mandatory_checks:
+      - aderencia a especificacao sintatica do formato
+      - consistencia de schema e contratos declarativos
+      - backward compatibility explicitamente analisada quando aplicavel
+      - legibilidade humana e semantica dos campos versionados
+      - linkagem explicita e rastreabilidade documental em Markdown
+
+future_profiles:
+  javascript-review:
+    intended_roles:
+      - ai-reviewer-javascript
+    governance_layers:
+      - layer: language-standard
+        references:
+          - authority: Ecma International
+            title: ECMA-262 - ECMAScript Language Specification
+            identifier: ECMA-262
+            url: https://ecma-international.org/publications-and-standards/standards/ecma-262/
+          - authority: Ecma International
+            title: ECMA-402 - ECMAScript Internationalization API Specification
+            identifier: ECMA-402
+            url: https://ecma-international.org/publications-and-standards/standards/ecma-402/
+          - authority: WHATWG
+            title: HTML Living Standard
+            identifier: WHATWG-HTML
+            url: https://html.spec.whatwg.org/
+          - authority: TC39
+            title: TC39 Process
+            identifier: TC39-Process
+            url: https://tc39.es/process-document/
+      - layer: style-guide
+        references:
+          - authority: Airbnb
+            title: Airbnb JavaScript Style Guide
+            identifier: airbnb-js-style-guide
+            url: https://github.com/airbnb/javascript
+          - authority: Google
+            title: Google JavaScript Style Guide
+            identifier: google-js-style-guide
+            url: https://google.github.io/styleguide/jsguide.html
+      - layer: automated-enforcement
+        references:
+          - authority: ESLint
+            title: ESLint documentation
+            identifier: eslint
+            url: https://eslint.org/docs/latest/
+          - authority: Prettier
+            title: Prettier documentation
+            identifier: prettier
+            url: https://prettier.io/docs/
