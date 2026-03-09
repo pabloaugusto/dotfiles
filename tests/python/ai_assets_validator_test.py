@@ -25,6 +25,9 @@ class ValidateAiAssetsTests(unittest.TestCase):
         self.assertIn("LICOES-APRENDIDAS.md", module.REQUIRED_FILES)
         self.assertIn(".agents/README.md", module.REQUIRED_FILES)
         self.assertIn(".agents/config.toml", module.REQUIRED_FILES)
+        self.assertIn(".agents/cerimonias/README.md", module.REQUIRED_FILES)
+        self.assertIn(".agents/cerimonias/ceremony.schema.json", module.REQUIRED_FILES)
+        self.assertIn(".agents/cerimonias/retrospectiva.yaml", module.REQUIRED_FILES)
         self.assertIn(".codex/README.md", module.REQUIRED_FILES)
         self.assertIn("docs/AI-AGENTS-CATALOG.md", module.REQUIRED_FILES)
         self.assertIn("docs/AI-CHAT-CONTRACTS-REGISTER.md", module.REQUIRED_FILES)
@@ -77,6 +80,7 @@ class ValidateAiAssetsTests(unittest.TestCase):
             "### Fronteira entre `.agents/` e adaptadores de assistente",
             module.OPERATING_MODEL_REQUIRED_SNIPPETS,
         )
+        self.assertIn("ceremonies", module.REQUIRED_AI_CONFIG_SECTIONS)
         self.assertIn(
             "## LA-007 - Integracoes criticas exigem guardiao proprio",
             module.LESSONS_REQUIRED_SNIPPETS,

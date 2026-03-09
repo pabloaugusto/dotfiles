@@ -188,6 +188,29 @@ scrum_master_enforcement:
     - Resultado
     - Jira/Confluence
 
+ceremonies:
+  root: .agents/cerimonias
+  log_root: .agents/cerimonias/logs
+  owner_role: ai-scrum-master
+  mandatory_rules:
+    - retrospective-required-for-every-closed-branch
+    - every-ceremony-must-generate-markdown-log
+    - uncataloged-problem-must-create-jira-issue
+    - new-issues-from-ceremony-must-carry-cerimonia-and-ceremony-name-labels
+  retrospective:
+    title: Retrospectiva
+    trigger: every-branch-finished
+    fallback_trigger: accumulated-problems-justify
+    labels:
+      - cerimonia
+      - retrospectiva
+    confluence:
+      root_page: Cerimonias
+      tree_path:
+        - retrospectiva
+        - historico
+      title_template: Retrospectiva - {yyyy-MM-dd HH:mm}
+
 testing:
   required_layers:
     - api

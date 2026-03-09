@@ -209,6 +209,7 @@ roles:
     operating_steps:
       - recalcular board, WIP, ownership, comentarios, branches e worktrees relevantes
       - recarregar os contratos e artefatos vivos antes de fiscalizar a rodada
+      - carregar a definicao de cerimonia em .agents/cerimonias antes de executar o ritual correspondente
       - registrar no docs/AI-SCRUM-MASTER-LEDGER.md a inconformidade ou cerimonia com impacto, acao corretiva e resultado
       - espelhar no chat a inconformidade relevante ou a cerimonia executada
       - registrar anomalias e evidencias no Jira com o papel responsavel e o impacto

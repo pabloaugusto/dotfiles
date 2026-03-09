@@ -25,6 +25,7 @@ ownership, papeis, **cerimonias** e conformidade dos agentes.
 
 - estado vivo de `Jira`, `Confluence`, `GitHub`, branches e worktrees
 - contratos versionados, cards, skills, workflows, tasks e registradores vivos
+- definicoes de **cerimonia** em [`.agents/cerimonias/`](../cerimonias/)
 - comentarios estruturados, evidencias, handoffs e artefatos dos outros agentes
 - referencias oficiais do processo agil quando a definicao do papel exigir
   fonte primaria
@@ -56,9 +57,11 @@ ownership, papeis, **cerimonias** e conformidade dos agentes.
    executadas, sem substituir o log canonico nem o `Jira`.
 7. Garantir que as **cerimonias** obrigatorias acontecam, gerem artefatos e
    resultem em plano de acao rastreavel.
-8. Corrigir drift pequeno diretamente, cobrar ajuste do papel responsavel ou
+8. Executar a **cerimonia** conforme a definicao versionada correspondente em
+   [`.agents/cerimonias/`](../cerimonias/).
+9. Corrigir drift pequeno diretamente, cobrar ajuste do papel responsavel ou
    abrir bug de governanca quando a anomalia persistir.
-9. Escalar ao usuario e ao papel certo quando houver risco sistemico ou
+10. Escalar ao usuario e ao papel certo quando houver risco sistemico ou
    bloqueio sem saida autonoma.
 
 ## Guardrails

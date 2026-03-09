@@ -54,6 +54,11 @@ REQUIRED_FILES = [
     "config/ai/contracts.yaml",
     ".agents/README.md",
     ".agents/config.toml",
+    ".agents/cerimonias/README.md",
+    ".agents/cerimonias/ceremony.schema.json",
+    ".agents/cerimonias/retrospectiva.yaml",
+    ".agents/cerimonias/logs/retrospectiva-template.md",
+    ".agents/cerimonias/logs/retrospectiva/README.md",
     ".codex/README.md",
     ".agents/orchestration/capability-matrix.yaml",
     ".agents/orchestration/routing-policy.yaml",
@@ -202,6 +207,27 @@ SOURCE_AUDIT_REQUIRED_SNIPPETS = [
     "## Regra operacional permanente",
 ]
 
+CEREMONY_REQUIRED_SNIPPETS = {
+    ".agents/cerimonias/README.md": [
+        "ceremony.schema.json",
+        "retrospectiva.yaml",
+        "Toda execucao real de **cerimonia** deve gerar log Markdown proprio.",
+    ],
+    ".agents/cerimonias/retrospectiva.yaml": [
+        "id: retrospectiva",
+        "title: Retrospectiva",
+        "mode: every-branch-finished",
+        "- cerimonia",
+        "- retrospectiva",
+        "title_template: Retrospectiva - {yyyy-MM-dd HH:mm}",
+    ],
+    ".agents/cerimonias/logs/retrospectiva-template.md": [
+        "# Retrospectiva - {{data_hora_utc}} - {{branch}}",
+        "## Problemas catalogados",
+        "## Encaminhamento",
+    ],
+}
+
 CATALOG_REQUIRED_SNIPPETS = {
     "docs/AI-AGENTS-CATALOG.md": [
         "architecture-modernization-authority",
@@ -279,7 +305,7 @@ REQUIRED_REGISTRY_AGENT_KEYS = [
     "handoff_to",
 ]
 
-REQUIRED_AI_CONFIG_SECTIONS = ["skills", "agents", "orchestration", "rules", "evals"]
+REQUIRED_AI_CONFIG_SECTIONS = ["skills", "agents", "orchestration", "rules", "evals", "ceremonies"]
 
 
 def frontmatter_value(frontmatter: str, key: str) -> str | None:
@@ -671,6 +697,11 @@ def main(argv: list[str]) -> int:
             failures,
         )
 
+    for relative, snippets in CEREMONY_REQUIRED_SNIPPETS.items():
+        path = repo_root / relative
+        if path.is_file():
+            require_snippets(path.read_text(encoding="utf-8"), snippets, relative, failures)
+
     for relative, snippets in CATALOG_REQUIRED_SNIPPETS.items():
         path = repo_root / relative
         if path.is_file():
@@ -706,6 +737,7 @@ def main(argv: list[str]) -> int:
     for schema_path in (
         orchestration_root(repo_root) / "task-card.schema.json",
         orchestration_root(repo_root) / "delegation-plan.schema.json",
+        repo_root / ".agents" / "cerimonias" / "ceremony.schema.json",
     ):
         if schema_path.is_file():
             validate_json_schema(schema_path, failures)

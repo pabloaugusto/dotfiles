@@ -1,0 +1,61 @@
+version: 1
+id: retrospectiva
+title: Retrospectiva
+owner_role: ai-scrum-master
+
+periodicity:
+  mode: every-branch-finished
+  fallback_trigger: accumulated-problems-justify
+
+purpose: >
+  Analisar todos os problemas enfrentados durante o ciclo da branch e definir um
+  plano de acao para o que ainda nao foi sanado.
+
+context_fields:
+  - repo
+  - branch
+  - work_items
+  - increment_summary
+
+participants:
+  required:
+    - ai-scrum-master
+  include_all_agents_that_worked_on_branch: true
+
+agenda:
+  - revisar objetivo da branch e o resultado entregue
+  - catalogar problemas que atrapalharam o fluxo ou a execucao
+  - classificar o que foi resolvido, o que segue pendente e o que exige nova issue
+  - definir plano de acao, responsavel e proximo passo
+
+artifacts_generated:
+  - markdown-log
+  - scrum-master-ledger-entry
+  - confluence-page
+  - jira-issues-for-new-problems
+
+issue_policy:
+  create_when_problem_untracked: true
+  preferred_issue_type: Bug
+  labels:
+    - cerimonia
+    - retrospectiva
+
+log:
+  template: .agents/cerimonias/logs/retrospectiva-template.md
+  directory: .agents/cerimonias/logs/retrospectiva
+  required_fields:
+    - data_hora_utc
+    - repo
+    - branch
+    - participantes
+    - contexto
+    - problemas_catalogados
+    - artefatos_gerados
+
+confluence:
+  root_page: Cerimonias
+  tree_path:
+    - retrospectiva
+    - historico
+  title_template: Retrospectiva - {yyyy-MM-dd HH:mm}

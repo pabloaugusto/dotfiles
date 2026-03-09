@@ -146,6 +146,15 @@ Para evitar roteamento implcito e drift entre docs e execucao, o repo tambem ver
 - [`.agents/rules/`](.agents/rules/) para guardrails declarativos de operacao e CI
 - [`.agents/evals/`](.agents/evals/) para cenarios e datasets minimos de regressao
 
+### Camada 2.3. Cerimonias versionadas
+
+As **cerimonias** ageis do time ficam em [`.agents/cerimonias/`](.agents/cerimonias/)
+com:
+
+- schema declarativo da **cerimonia**
+- definicoes por ritual, como a **Retrospectiva**
+- templates e contratos dos logs de execucao
+
 ### Camada 3. Cartoes de agentes
 
 Os papeis operacionais ficam em [`.agents/cards/`](.agents/cards/). Cada cartao define:
@@ -288,6 +297,7 @@ Como [`df/`](df/) guarda apenas o que sera utilizado na maquina apos o bootstrap
 - [`.agents/skills/`](.agents/skills/) guarda skills versionadas do projeto
 - [`.agents/prompts/`](.agents/prompts/) guarda prompt packs versionados e historico de contexto
 - [`.agents/registry/`](.agents/registry/), [`.agents/orchestration/`](.agents/orchestration/), [`.agents/rules/`](.agents/rules/) e [`.agents/evals/`](.agents/evals/) guardam a camada declarativa
+- [`.agents/cerimonias/`](.agents/cerimonias/) guarda as definicoes e templates das **cerimonias** ageis
 - [`.codex/README.md`](.codex/README.md) deixa explicito que adaptadores de assistente nao sao fonte de verdade
 - [`AI-WIP-TRACKER.md`](AI-WIP-TRACKER.md) guarda o estado incremental do trabalho de IA
 - [`docs/AI-REVIEW-LEDGER.md`](docs/AI-REVIEW-LEDGER.md) guarda os pareceres vivos de revisao especializada por worklog

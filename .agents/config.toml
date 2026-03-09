@@ -75,3 +75,8 @@ regression = ".agents/evals/scenarios/regression.md"
 security = ".agents/evals/scenarios/security.md"
 routing_dataset = ".agents/evals/datasets/routing.jsonl"
 governance_dataset = ".agents/evals/datasets/governance.jsonl"
+
+[ceremonies]
+root = ".agents/cerimonias"
+schema = ".agents/cerimonias/ceremony.schema.json"
+default_log_root = ".agents/cerimonias/logs"
