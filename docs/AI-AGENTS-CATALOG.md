@@ -37,7 +37,7 @@ Catalogo humano dos papeis permanentes de IA deste repo.
 
 | Papel | Cartao | Agente declarativo | Skill principal | Quando entra |
 | --- | --- | --- | --- | --- |
-| PO | [`.agents/cards/ai-product-owner.md`](../.agents/cards/ai-product-owner.md) | `ai-product-owner` | `$task-routing-and-decomposition` | intake, backlog, prioridade, refinement, ready e timeline |
+| PO | [`.agents/cards/ai-product-owner.md`](../.agents/cards/ai-product-owner.md) | `ai-product-owner` | `$task-routing-and-decomposition` | valor, intake, backlog, prioridade, refinement, ready, product goal e timeline |
 | Scrum Master | [`.agents/cards/ai-scrum-master.md`](../.agents/cards/ai-scrum-master.md) | `ai-scrum-master` | `$wip-continuity-governance` | gate global de **board**, **WIP**, ownership, comunicacao, conformidade de agentes, ledger de enforcement e **cerimonias** |
 | Arquiteto | [`.agents/cards/ai-engineering-architect.md`](../.agents/cards/ai-engineering-architect.md) | `ai-engineering-architect` | `$dotfiles-architecture-modernization` | discovery tecnico, ADR, enriquecimento de backlog e refinement |
 | Engenheiro | [`.agents/cards/ai-engineering-manager.md`](../.agents/cards/ai-engineering-manager.md) | `ai-engineering-manager` | `$wip-continuity-governance` | capacidade, gargalos, pausas, riscos, bloqueios e escalacoes |

@@ -147,8 +147,9 @@ roles:
     profile: governance-common
     jira:
       primary_issue_actions:
+        - maximizar valor e manter uma voz unica de decisao sobre backlog e prioridade
         - criar issues principais do backlog
-        - consolidar escopo, descricao, prioridade e criterios de aceitacao
+        - consolidar objetivo, escopo, descricao, prioridade e criterios de aceitacao
         - manter backlog, refinement e ready ordenados por prioridade real
         - ler o board da direita para a esquerda antes de puxar novo trabalho
         - permitir nova puxada apenas quando ela destravar diretamente um item ja iniciado
@@ -162,7 +163,7 @@ roles:
         - priority-change
         - progress-update
       required_evidence:
-        - link para backlog local, Product Discovery ou artefato de intake
+        - link para issue pai, diretriz do usuario, Product Discovery ou artefato oficial de intake
         - link para pagina do Confluence quando houver contexto formal
         - justificativa de prioridade e impacto no roadmap quando houver reordenacao relevante
     confluence:
@@ -174,12 +175,14 @@ roles:
         - validar se o contexto oficial esta linkado na issue
     operating_steps:
       - revisar intake, backlog bruto ou idea promovida
+      - explicitar valor, objetivo e prioridade antes de mover a issue no fluxo
       - posicionar o item novo no ponto correto da prioridade do backlog e das filas ordenadas do board
       - criar ou atualizar a issue principal no Jira
       - revisar se Start date e Due date precisam ser estimados ou recalculados
       - registrar comentario estruturado com escopo, prioridade e evidencias
       - garantir links para o Confluence ou registrar n/a explicito
       - mover a issue para Refinement ou Ready e definir o proximo papel
+      - nao assumir implementacao tecnica nem substituir Scrum Master, Arquiteto ou Tech Lead
 
   ai-scrum-master:
     profile: governance-common

@@ -20,6 +20,12 @@ Registro consultivo do agente Pascoalete para ortografia e higiene vocabular.
 <!-- ai-orthography:records:start -->
 | Data/Hora UTC | Worklog ID | Revisor | Status | Arquivo | Achados | Evidencia |
 | --- | --- | --- | --- | --- | --- | --- |
+| 2026-03-09 21:44 UTC | DOT-122 | pascoalete | reprovado | docs/atlassian-ia/artifacts/agent-operations.md | canonica, Sincronizacao, governanca, comentarios, tecnicos, atuacao, documentacao, tambem (+61) | task spell:check |
+| 2026-03-09 21:44 UTC | DOT-122 | pascoalete | reprovado | docs/AI-AGENTS-CATALOG.md | obrigatorios, comunicacao, obrigatorio, mudanca, obrigatorio, mudanca, rotacao, expiracao (+58) | task spell:check |
+| 2026-03-09 21:44 UTC | DOT-122 | pascoalete | reprovado | config/ai/agents.yaml | figma | task spell:check |
+| 2026-03-09 21:44 UTC | DOT-122 | pascoalete | reprovado | config/ai/agent-operations.yaml | atlassian, decisao, documentacao, linkar, mudanca, atualizacao, necessario, linkar (+115) | task spell:check |
+| 2026-03-09 21:44 UTC | DOT-122 | pascoalete | aprovado | .agents/registry/ai-product-owner.toml | sem achados | task spell:check |
+| 2026-03-09 21:44 UTC | DOT-122 | pascoalete | reprovado | .agents/cards/ai-product-owner.md | repositorio, agil, repriorizacao, epicos, manutencao, usuario, decisao, orientacoes (+23) | task spell:check |
 | 2026-03-09 23:24 UTC | DOT-118 | pascoalete | reprovado | tests/python/ai_assets_validator_test.py | possivel, LICOES, atlassian, Validacao, LICOES, Orquestracao, evals, Integracoes (+4) | task spell:check |
 | 2026-03-09 23:24 UTC | DOT-118 | pascoalete | reprovado | scripts/validate-ai-assets.py | execucao, evals, LICOES, evals, evals, evals, evals, atlassian (+59) | task spell:check |
 | 2026-03-09 23:24 UTC | DOT-118 | pascoalete | reprovado | docs/ai-operating-model.md | reutilizavel, testavel, worktree, Principios, Instrucoes, instrucoes, estaveis, Especializacao (+149) | task spell:check |
