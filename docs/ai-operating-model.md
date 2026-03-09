@@ -186,6 +186,8 @@ Os catalogos humanos versionados ficam em:
 - [`docs/AI-SKILLS-CATALOG.md`](docs/AI-SKILLS-CATALOG.md)
 - [`docs/AI-DELEGATION-FLOW.md`](docs/AI-DELEGATION-FLOW.md)
 - [`docs/AI-GOVERNANCE-AND-REGRESSION.md`](docs/AI-GOVERNANCE-AND-REGRESSION.md)
+- [`docs/atlassian-ia/README.md`](docs/atlassian-ia/README.md) para contexto,
+  pareceres, planos e rastreabilidade da trilha Atlassian + IA
 
 Esses documentos nao sao "marketing" do sistema; eles sao contratos de operacao e precisam refletir o estado real da camada declarativa.
 
@@ -198,6 +200,8 @@ Esses documentos nao sao "marketing" do sistema; eles sao contratos de operacao 
 - [`.agents/`](.agents/) e sua arvore declarativa
 - [`docs/AI-SOURCE-AUDIT.md`](docs/AI-SOURCE-AUDIT.md)
 - [`docs/AI-REVIEW-LEDGER.md`](docs/AI-REVIEW-LEDGER.md)
+- [`docs/atlassian-ia/README.md`](docs/atlassian-ia/README.md) e os arquivos
+  desta trilha quando houver estudos, contextos ou planos da camada Atlassian + IA
 - [`AI-WIP-TRACKER.md`](AI-WIP-TRACKER.md)
 - [`../ROADMAP.md`](../ROADMAP.md)
 - [`ROADMAP-DECISIONS.md`](ROADMAP-DECISIONS.md)
@@ -235,6 +239,9 @@ Como [`df/`](df/) guarda apenas o que sera utilizado na maquina apos o bootstrap
 - [`.codex/README.md`](.codex/README.md) deixa explicito que adaptadores de assistente nao sao fonte de verdade
 - [`AI-WIP-TRACKER.md`](AI-WIP-TRACKER.md) guarda o estado incremental do trabalho de IA
 - [`docs/AI-REVIEW-LEDGER.md`](docs/AI-REVIEW-LEDGER.md) guarda os pareceres vivos de revisao especializada por worklog
+- [`config/ai/`](config/ai/) guarda a control plane dev-time de plataformas,
+  contratos e optionalidade dos agentes, desacoplada de [`bootstrap/`](bootstrap/)
+  e de [`df/`](df/)
 - [`df/`](df/) continua reservado aos dotfiles e assets materializados no ambiente
 
 ## Estrategia de evolucao

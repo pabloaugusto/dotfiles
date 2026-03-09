@@ -1,0 +1,123 @@
+version: 1
+
+backlog:
+  system_of_record: jira
+  issue_creation_policy: product-owner-only
+  require_issue_before_execution: true
+  pull_model: true
+  subtask_creation_policy: any-authorized-agent
+
+documentation:
+  system_of_record: confluence
+  repo_docs_mode: espelho-essencial
+  require_bidirectional_links: true
+  artifact_governance:
+    mode: repo-first-then-sync
+    owner_role: ai-documentation-agent
+    migration_bundle:
+      required: true
+      format: zip
+      attach_to_jira_issue: true
+      link_from_confluence_page: true
+    required_before_apply:
+      - jira-schema-artifact
+      - confluence-schema-artifact
+      - endpoint-catalog-artifact
+      - migration-bundle-plan
+    required_before_seed:
+      - jira-schema-synced
+      - confluence-schema-synced
+      - migration-bundle-attached
+    enforcement:
+      - no-schema-apply-without-repo-artifact
+      - no-seed-without-artifact-sync-plan
+      - every-generated-asset-must-be-documented
+      - every-export-batch-must-have-auditable-bundle
+  linking_contract:
+    owner_role: ai-documentation-agent
+    required_links:
+      - jira-issue-to-confluence-page
+      - confluence-page-to-jira-issue
+    enforcement:
+      - no-done-without-doc-link-or-explicit-na
+      - no-doc-page-without-related-issue-when-work-driven
+      - comments-must-capture-doc-links-when-created-or-updated
+
+workflow:
+  always_enabled_columns:
+    - Backlog
+    - Refinement
+    - Ready
+    - Doing
+    - Testing
+    - Review
+    - Changes Requested
+    - Done
+  optional_columns:
+    - name: SEO Review
+      enabled_when_role: ai-seo-specialist
+  definition_of_ready:
+    - descricao-clara
+    - contexto-tecnico
+    - criterios-de-aceitacao
+    - escopo-definido
+    - links-de-documentacao
+  evidence_comment_types:
+    - progress-update
+    - technical-decision
+    - unexpected-finding
+    - documentation-link
+    - test-evidence
+    - test-failure
+    - test-success
+    - review-feedback
+    - approval
+    - blocker
+    - schema-artifact
+
+agent_activity:
+  system_of_record:
+    execution_activity: jira-comment-and-attachment
+    documentation_activity: confluence-page-and-jira-comment
+  required_comment_fields:
+    - Agent
+    - Interaction Type
+    - Status
+    - Contexto
+    - Evidencias
+    - Proximo passo
+  required_on_every_touch:
+    - structured-comment
+    - evidence-or-explicit-na
+    - current-and-next-role-synced
+  mandatory_before_transition:
+    - structured-comment-recorded
+    - evidence-linked-or-attached
+    - next-required-role-defined-or-explicit-na
+  mandatory_before_done:
+    - qa-evidence-or-explicit-na
+    - reviewer-approval
+    - documentation-link-or-explicit-na
+  accepted_evidence:
+    - jira-attachment
+    - jira-comment-link
+    - commit-link
+    - pull-request-link
+    - pipeline-link
+    - test-log
+    - screenshot
+    - confluence-page-link
+    - migration-bundle-attachment
+  reject_when:
+    - comment-without-proof
+    - generic-status-update-without-context
+    - handoff-without-next-role
+    - done-without-doc-trace
+
+testing:
+  required_layers:
+    - api
+  optional_layers:
+    - name: browser-validation
+      tool: playwright
+      enabled_when_role: ai-browser-validator

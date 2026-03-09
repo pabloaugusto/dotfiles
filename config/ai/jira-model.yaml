@@ -1,0 +1,383 @@
+version: 1
+
+metadata:
+  model_id: ai-control-plane-atlassian-pilot
+  owner_role: ai-product-owner
+  source_of_truth:
+    backlog: jira
+    documentation: confluence
+
+project:
+  key: DOT
+  name: dotfiles
+  style: company-managed-software
+  target_board:
+    name: DOT - Autonomous Engineering
+    type: kanban
+    project_key: DOT
+    layout_confirmed: false
+    board_api_scopes:
+      - read:project:jira
+      - read:board-scope:jira-software
+      - write:board-scope:jira-software
+      - read:board-scope.admin:jira-software
+      - write:board-scope.admin:jira-software
+    columns:
+      - name: Backlog
+        statuses:
+          - Backlog
+      - name: Refinement
+        statuses:
+          - Refinement
+      - name: Ready
+        statuses:
+          - Ready
+      - name: Doing
+        statuses:
+          - Doing
+      - name: Testing
+        statuses:
+          - Testing
+      - name: Review
+        statuses:
+          - Review
+      - name: Changes Requested
+        statuses:
+          - Changes Requested
+      - name: Done
+        statuses:
+          - Done
+    optional_columns:
+      - name: SEO Review
+        enabled_when_role: ai-seo-specialist
+        statuses:
+          - SEO Review
+    swimlanes:
+      mode: epic
+    quick_filters:
+      - name: Blocked
+        jql: 'labels = blocked OR Flagged = Impediment'
+      - name: Needs Docs
+        jql: 'labels = docs-needed OR component = "documentation-governance"'
+      - name: Ready for Dev
+        jql: 'status = Ready AND "Next Required Role" in ("ai-developer-python", "ai-developer-powershell", "ai-developer-automation", "ai-developer-config-policy")'
+      - name: Ready for QA
+        jql: 'status = Testing AND "Next Required Role" = "ai-qa"'
+      - name: Ready for Review
+        jql: 'status = Review AND "Next Required Role" = "ai-reviewer"'
+      - name: Needs PO
+        jql: '"Current Agent Role" = "ai-product-owner" OR "Next Required Role" = "ai-product-owner"'
+
+issue_types:
+  standard:
+    - Epic
+    - Story
+    - Task
+    - Bug
+    - Sub-task
+  target_usage:
+    Epic:
+      purpose: iniciativa ou frente de entrega
+    Story:
+      purpose: entrega funcional refinada
+    Task:
+      purpose: entrega tecnica, operacional ou de governanca
+    Bug:
+      purpose: defeito, regressao ou incidente
+    Sub-task:
+      purpose: decomposicao autorizada dentro de item pai
+  policies:
+    top_level_creation: ai-product-owner-only
+    subtask_creation: any-authorized-agent
+
+workflow:
+  name: DOT - Autonomous Delivery Workflow
+  description: Workflow canonico do piloto de control plane autonomo.
+  scope: global
+  scheme_name: DOT - Autonomous Delivery Workflow Scheme
+  statuses:
+    - name: Backlog
+      category: To Do
+    - name: Refinement
+      category: To Do
+    - name: Ready
+      category: To Do
+    - name: Doing
+      category: In Progress
+    - name: Testing
+      category: In Progress
+    - name: Review
+      category: In Progress
+    - name: Changes Requested
+      category: In Progress
+    - name: Done
+      category: Done
+  optional_statuses:
+    - name: SEO Review
+      category: In Progress
+      enabled_when_role: ai-seo-specialist
+  blocked_model:
+    mode: flag-or-label
+    label: blocked
+  transitions:
+    - from: Backlog
+      to: Refinement
+      roles:
+        - ai-product-owner
+        - ai-engineering-architect
+        - ai-tech-lead
+    - from: Refinement
+      to: Ready
+      roles:
+        - ai-product-owner
+    - from: Ready
+      to: Doing
+      roles:
+        - ai-developer-python
+        - ai-developer-powershell
+        - ai-developer-automation
+        - ai-developer-config-policy
+        - ai-devops
+    - from: Doing
+      to: Testing
+      roles:
+        - ai-qa
+    - from: Testing
+      to: Review
+      roles:
+        - ai-reviewer
+    - from: Review
+      to: Done
+      roles:
+        - ai-documentation-agent
+        - ai-product-owner
+    - from: Testing
+      to: Changes Requested
+      roles:
+        - ai-qa
+        - ai-reviewer
+    - from: Review
+      to: Changes Requested
+      roles:
+        - ai-reviewer
+        - ai-engineering-architect
+    - from: Changes Requested
+      to: Doing
+      roles:
+        - ai-developer-python
+        - ai-developer-powershell
+        - ai-developer-automation
+        - ai-developer-config-policy
+        - ai-devops
+  execution_rules:
+    - only_ready_can_be_pulled
+    - no_execution_without_jira_issue
+    - comments_must_register_evidence_and_decisions
+    - done_requires_docs_link_or_explicit_n_a
+
+fields:
+  strategy:
+    prefer_native_first: true
+    avoid_field_sprawl: true
+    definition_of_ready_in_v1: issue-template-and-status-policy
+    definition_of_done_in_v1: issue-template-evidence-and-status-policy
+  custom_fields:
+    - name: Work Kind
+      type: single_select
+      required: true
+      options:
+        - feature
+        - bug
+        - tech-debt
+        - automation
+        - documentation
+        - spike
+        - governance
+    - name: Workstream
+      type: single_select
+      required: true
+      options:
+        - ai-control-plane
+        - jira-confluence-integration
+        - documentation-governance
+        - bootstrap
+        - developer-experience
+        - cross-platform
+        - ci-cd
+        - security
+    - name: Affected Platforms
+      type: multi_select
+      required: false
+      options:
+        - windows
+        - linux
+        - wsl
+        - cross-platform
+        - cloud
+    - name: Risk
+      type: single_select
+      required: false
+      options:
+        - low
+        - medium
+        - high
+        - critical
+    - name: Current Agent Role
+      type: single_select
+      required: false
+      options:
+        - ai-product-owner
+        - ai-engineering-architect
+        - ai-engineering-manager
+        - ai-tech-lead
+        - ai-developer-python
+        - ai-developer-powershell
+        - ai-developer-automation
+        - ai-developer-config-policy
+        - ai-qa
+        - ai-reviewer
+        - ai-devops
+        - ai-documentation-agent
+    - name: Next Required Role
+      type: single_select
+      required: false
+      options:
+        - ai-product-owner
+        - ai-engineering-architect
+        - ai-engineering-manager
+        - ai-tech-lead
+        - ai-developer-python
+        - ai-developer-powershell
+        - ai-developer-automation
+        - ai-developer-config-policy
+        - ai-qa
+        - ai-reviewer
+        - ai-devops
+        - ai-documentation-agent
+    - name: Confluence Source
+      type: url
+      required: false
+    - name: Evidence Links
+      type: paragraph
+      required: false
+    - name: Automation Mode
+      type: single_select
+      required: false
+      options:
+        - human-in-the-loop
+        - autonomous-approved
+    - name: Needs Design
+      type: checkbox
+      required: false
+      enabled_when_role: ai-designer
+    - name: Needs UX Review
+      type: checkbox
+      required: false
+      enabled_when_role: ai-ux-cro-analyst
+    - name: Needs SEO Review
+      type: checkbox
+      required: false
+      enabled_when_role: ai-seo-specialist
+  native_fields_to_use:
+    - Summary
+    - Description
+    - Labels
+    - Components
+    - Priority
+    - Assignee
+    - Reporter
+    - Epic Link
+    - Parent
+
+components:
+  - ai-control-plane
+  - jira-confluence-integration
+  - documentation-governance
+  - bootstrap
+  - environment
+  - secrets
+  - ci
+  - developer-experience
+  - cross-platform
+
+labels:
+  baseline:
+    - atlassian-ia
+    - bootstrap
+    - powershell
+    - python
+    - automation
+    - windows
+    - linux
+    - wsl
+    - ci
+    - security
+    - docs
+    - governance
+  operational:
+    - blocked
+    - docs-needed
+    - ready-for-dev
+    - ready-for-qa
+    - ready-for-review
+
+comments:
+  required_rules:
+    - every-acting-role-must-comment-before-handoff
+    - every-comment-must-include-evidence-or-explicit-na
+    - qa-and-review-comments-must-link-runs-logs-or-checklists
+    - documentation-comments-must-link-confluence-or-explicit-na
+  template_fields:
+    - Agent
+    - Interaction Type
+    - Status
+    - Contexto
+    - Evidencias
+    - Proximo passo
+  evidence_examples:
+    - jira-attachment
+    - confluence-url
+    - commit-url
+    - pull-request-url
+    - pipeline-url
+    - screenshot
+    - test-log
+  interaction_types:
+    - progress-update
+    - technical-decision
+    - unexpected-finding
+    - scope-change
+    - priority-change
+    - test-evidence
+    - test-failure
+    - test-success
+    - review-feedback
+    - approval
+    - blocker
+    - documentation-link
+    - schema-artifact
+
+dashboards:
+  - name: DOT - Autonomous Engineering Overview
+    gadgets:
+      - Filter Results
+      - Two Dimensional Filter Statistics
+      - Pie Chart
+      - Created vs Resolved
+      - Activity Stream
+  - name: DOT - AI Delivery Ops
+    gadgets:
+      - Sprint Health
+      - Average Age Chart
+      - Filter Results
+      - Rich Text
+
+apply_order:
+  - validar service account e token com scopes de Jira Platform e Jira Software
+  - criar ou ajustar statuses alvo
+  - criar workflow company-managed e mapear transicoes
+  - associar workflow aos issue types padrao
+  - criar campos customizados minimos
+  - adicionar componentes e labels baseline
+  - criar board Kanban com colunas alvo
+  - criar dashboards

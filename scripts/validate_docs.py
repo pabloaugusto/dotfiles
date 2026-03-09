@@ -109,6 +109,19 @@ def _repo_root_entries() -> set[str]:
     return {entry.name for entry in ROOT.iterdir()}
 
 
+@lru_cache(maxsize=2048)
+def _is_git_ignored(relative_path: str) -> bool:
+    try:
+        result = subprocess.run(
+            ["git", "-C", str(ROOT), "check-ignore", "-q", "--", relative_path],
+            check=False,
+            capture_output=True,
+        )
+    except FileNotFoundError:
+        return False
+    return result.returncode == 0
+
+
 def _looks_like_repo_reference(target: str) -> bool:
     cleaned = target.strip()
     if not cleaned:
@@ -158,6 +171,8 @@ def _resolve_local_target(source: Path, target: str) -> Path | None:
         normalized = relative.rstrip("/")
         if tracked_entries:
             if normalized in tracked_entries:
+                return candidate
+            if candidate.exists() and not _is_git_ignored(normalized):
                 return candidate
             continue
         if candidate.exists():

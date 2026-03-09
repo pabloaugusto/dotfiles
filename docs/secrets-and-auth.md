@@ -22,6 +22,61 @@ Refs principais:
 - `op://secrets/dotfiles/age/age.key`
 - `git-signing.automation-public-key` em [`df/secrets/secrets-ref.yaml`](../df/secrets/secrets-ref.yaml) quando o signer tecnico estiver configurado
 
+## Fronteira runtime x dev-time
+
+Nem todo ref do repo pertence ao runtime do bootstrap.
+
+- [`df/secrets/secrets-ref.yaml`](../df/secrets/secrets-ref.yaml): runtime do
+  ambiente materializado na maquina
+- [`config/ai/platforms.yaml`](../config/ai/platforms.yaml): control plane
+  dev-time da camada de IA, desacoplada de [`bootstrap/`](../bootstrap/) e de
+  [`df/`](../df/)
+- o overlay local derivado de
+  [`config/ai/platforms.local.yaml.tpl`](../config/ai/platforms.local.yaml.tpl)
+  fica ignorado no Git e guarda refs reais de `Jira`/`Confluence` sem acoplar
+  o contrato base do repo
+
+No corte Atlassian, `Jira` e `Confluence` entram nesta segunda categoria.
+Esses refs servem a adapters, migracao de backlog, comentarios, evidencias e
+documentacao operacional, nao ao bootstrap do workstation.
+
+Referencia canonica de scopes/permissoes e rotacao Atlassian:
+
+- [`docs/atlassian-ia/2026-03-07-atlassian-auth-scopes-and-permissions.md`](atlassian-ia/2026-03-07-atlassian-auth-scopes-and-permissions.md)
+
+Para `service-account-api-token`, o acesso REST oficial usa o gateway
+`api.atlassian.com` com `cloud_id`. Nessa modalidade:
+
+- `ATLASSIAN_SITE_URL` continua util para links navegaveis e automacao de UI
+- `ATLASSIAN_CLOUD_ID` passa a ser obrigatorio para chamadas REST
+- o token pode ser enviado como `Bearer`, sem depender do e-mail humano
+
+## Resolucao em lote no 1Password
+
+Para evitar `rate limit`, latencia desnecessaria e erros por leituras
+consecutivas, a regra do control plane e:
+
+1. preferir `op run` para resolver refs `op://...` em lote na borda do processo
+2. usar `op item get --format json` como fallback por item, nunca como loop por
+   campo
+3. proibir `op read` repetitivo espalhado pelo codigo de dominio
+4. carregar os valores uma vez por execucao e manter cache apenas em memoria
+
+Aplicacao pratica na trilha Atlassian:
+
+- `resolve_atlassian_platform()` tenta primeiro resolver os refs do item
+  Atlassian em lote com `op run`
+- se o batch falhar, o resolver cai para leitura por item com `op item get`
+- `op read` fica reservado a fallback pontual, nao ao fluxo-base
+
+Regra perene:
+
+- `1Password` entra apenas na borda do processo; depois disso, scripts e
+  adapters trabalham com cache local em memoria
+- fallback de service account so ajuda quando o bloqueio estiver no token ou na
+  identidade especifica; se o cap estourado for `account.read_write`, um segundo
+  token da mesma conta nao resolve sozinho
+
 ## Runtime env cifrado
 
 Template: [`bootstrap/secrets/.env.local.tpl`](../bootstrap/secrets/.env.local.tpl)
@@ -38,6 +93,17 @@ Variáveis relevantes:
 - `OP_SERVICE_ACCOUNT_TOKEN`
 - `GH_TOKEN` (e `GITHUB_TOKEN` por compatibilidade)
 - `SOPS_AGE_KEY`
+- `ATLASSIAN_SITE_URL`
+- `ATLASSIAN_EMAIL`
+- `ATLASSIAN_API_TOKEN`
+- `ATLASSIAN_SERVICE_ACCOUNT`
+- `ATLASSIAN_CLOUD_ID`
+- `ATLASSIAN_PROJECT_KEY`
+- `ATLASSIAN_SPACE_KEY`
+
+Quando o overlay local derivado do template existir, ele pode apontar
+diretamente para refs `op://...` e elimina a necessidade de exportar essas
+variaveis manualmente no shell.
 
 ## Persistência segura
 
