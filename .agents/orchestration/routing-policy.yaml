@@ -5,6 +5,7 @@ settings:
 global_mandatory_gates:
   - repo-governance-authority
   - execution-worklog-governance-owner
+  - ai-scrum-master
   - architecture-modernization-authority
 
 conditional_mandatory_gates:
@@ -116,6 +117,20 @@ routes:
         ]
     primary: [repo-governance-authority]
     support: [architecture-modernization-authority, lessons-governance-curator, pascoalete]
+  - id: route-scrum-master-scope
+    match:
+      keywords: ["scrum", "board", "wip", "cerimonia", "retrospectiva", "workflow agil", "kanban"]
+      paths:
+        [
+          ".agents/cards/ai-scrum-master.md",
+          ".agents/registry/ai-scrum-master.toml",
+          "config/ai/contracts.yaml",
+          "config/ai/jira-model.yaml",
+          "docs/AI-DELEGATION-FLOW.md",
+          "docs/AI-GOVERNANCE-AND-REGRESSION.md",
+        ]
+    primary: [ai-scrum-master]
+    support: [repo-governance-authority, execution-worklog-governance-owner, architecture-modernization-authority, pascoalete]
   - id: route-secrets-rotation-scope
     match:
       keywords: ["rotate", "rotation", "token", "service-account", "ssh-key", "sops", "age", "secret"]

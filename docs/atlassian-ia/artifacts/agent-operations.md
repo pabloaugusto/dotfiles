@@ -114,6 +114,13 @@ Essa visibilidade em chat:
 - garante link para pagina relevante no `Confluence` ou `n/a`
 - move `Backlog -> Refinement -> Ready`
 
+### `ai-scrum-master`
+
+- fiscaliza **board**, **WIP**, ownership, handoffs e comentarios no `Jira`
+- garante aderencia ao processo agil, aos contratos e as **cerimonias**
+- abre ou exige bug de governanca quando a anomalia persistir
+- registra evidencia objetiva e o papel responsavel por cada desvio
+
 ### `ai-engineering-architect`
 
 - registra decisao arquitetural e riscos no `Jira`
@@ -123,8 +130,8 @@ Essa visibilidade em chat:
 
 ### `ai-engineering-manager`
 
-- registra bloqueios, riscos e replanejamento no `Jira`
-- usa evidencia operacional, dependencia concreta ou dado de fila
+- registra bloqueios, riscos, capacidade e replanejamento no `Jira`
+- coordena com o `ai-scrum-master` a saude do fluxo e das escalacoes
 - atualiza runbooks/processo no `Confluence` quando a regra mudar
 - move `Doing -> Paused` ou `Paused -> Doing` quando houver espera operacional real
 - quando nenhum agente conseguir destravar a demanda, escala o bloqueio ao

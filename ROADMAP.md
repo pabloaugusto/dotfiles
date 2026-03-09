@@ -76,6 +76,7 @@ Sem sugestoes pendentes neste ciclo; itens aceitos ja estao rastreaveis.
 ### Next
 
 <!-- roadmap:next:start -->
+- [fix] Corrigir pendencias ortograficas remanescentes do worklog `DOT-115` em .agents/cards/ai-engineering-manager.md, .agents/cards/ai-scrum-master.md, .agents/config.toml, .agents/ev... | notas=Pendencia automatica criada por Pascoalete apos review consultivo reprovado sem correcao automatica.
 - [fix] Corrigir pendencias ortograficas remanescentes do worklog `DOT-128` em bootstrap/bootstrap-config.ps1, bootstrap/bootstrap-ubuntu-wsl.sh, bootstrap/user-config.yaml.tpl, config/... | notas=Pendencia automatica criada por Pascoalete apos review consultivo reprovado sem correcao automatica.
 - [fix] Corrigir pendencias ortograficas remanescentes do worklog `DOT-127` em .agents/cards/governador-continuidade-wip.md, .agents/cards/orquestrador-delegacao.md, .agents/skills/task... | notas=Pendencia automatica criada por Pascoalete apos review consultivo reprovado sem correcao automatica.
 - [fix] Corrigir pendencias ortograficas remanescentes do worklog `DOT-117` em config/ai/agent-operations.yaml, config/ai/agents.yaml, config/ai/jira-model.yaml, config/ai/reviewer-poli... | notas=Pendencia automatica criada por Pascoalete apos review consultivo reprovado sem correcao automatica.

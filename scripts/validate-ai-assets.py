@@ -203,6 +203,7 @@ CATALOG_REQUIRED_SNIPPETS = {
         "python-reviewer",
         "powershell-reviewer",
         "automation-reviewer",
+        "ai-scrum-master",
     ],
     "docs/AI-SKILLS-CATALOG.md": [
         "$dotfiles-architecture-modernization",
@@ -223,12 +224,14 @@ CATALOG_REQUIRED_SNIPPETS = {
         "python-reviewer",
         "powershell-reviewer",
         "automation-reviewer",
+        "ai-scrum-master",
     ],
     "docs/AI-GOVERNANCE-AND-REGRESSION.md": [
         "task ai:lessons:check",
         "task ai:review:check",
         "task spell:review",
         "architecture-modernization-authority",
+        "ai-scrum-master",
         "critical-integrations-guardian",
         "task ai:eval:smoke",
         "task ci:workflow:sync:check",

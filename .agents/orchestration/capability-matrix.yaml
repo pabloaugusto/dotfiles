@@ -33,6 +33,9 @@ agents:
   - id: lessons-governance-curator
     domains: [lessons, retrospectives, closeout, backfill]
     default_skills: [dotfiles-lessons-governance]
+  - id: ai-scrum-master
+    domains: [board, wip, ceremonies, governance-enforcement, agent-compliance, communication]
+    default_skills: [wip-continuity-governance, dotfiles-repo-governance]
   - id: orchestrator
     domains: [routing, decomposition, delegation, orchestration]
     default_skills: [task-routing-and-decomposition]
@@ -40,6 +43,7 @@ mandatory_gates:
   always:
     - repo-governance-authority
     - execution-worklog-governance-owner
+    - ai-scrum-master
     - architecture-modernization-authority
   platform_sensitive:
     - critical-integrations-guardian

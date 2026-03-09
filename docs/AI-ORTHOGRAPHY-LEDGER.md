@@ -20,6 +20,25 @@ Registro consultivo do agente Pascoalete para ortografia e higiene vocabular.
 <!-- ai-orthography:records:start -->
 | Data/Hora UTC | Worklog ID | Revisor | Status | Arquivo | Achados | Evidencia |
 | --- | --- | --- | --- | --- | --- | --- |
+| 2026-03-09 21:21 UTC | DOT-115 | pascoalete | reprovado | scripts/validate-ai-assets.py | execucao, evals, LICOES, evals, evals, evals, evals, atlassian (+47) | task spell:check |
+| 2026-03-09 21:21 UTC | DOT-115 | pascoalete | reprovado | .agents/evals/datasets/routing.jsonl | governanca, tecnico, agil | task spell:check |
+| 2026-03-09 21:21 UTC | DOT-115 | pascoalete | reprovado | docs/atlassian-ia/artifacts/agent-operations.md | canonica, Sincronizacao, governanca, comentarios, tecnicos, atuacao, documentacao, tambem (+56) | task spell:check |
+| 2026-03-09 21:21 UTC | DOT-115 | pascoalete | reprovado | docs/config-reference.md | worktree, generica, materializacao, atlassian, atlassian, precedencia, atlassian, atlassian (+42) | task spell:check |
+| 2026-03-09 21:21 UTC | DOT-115 | pascoalete | reprovado | docs/ai-operating-model.md | reutilizavel, testavel, worktree, Principios, Instrucoes, instrucoes, estaveis, Especializacao (+126) | task spell:check |
+| 2026-03-09 21:21 UTC | DOT-115 | pascoalete | reprovado | docs/AI-GOVERNANCE-AND-REGRESSION.md | Principios, governanca, licoes, importacao, minimo, concluido, revisao, LICOES (+25) | task spell:check |
+| 2026-03-09 21:21 UTC | DOT-115 | pascoalete | reprovado | docs/AI-DELEGATION-FLOW.md | canonico, LICOES, minimo, importacao, comunicacao, decomposicao, delegacao, rotacao (+47) | task spell:check |
+| 2026-03-09 21:21 UTC | DOT-115 | pascoalete | reprovado | docs/AI-AGENTS-CATALOG.md | obrigatorios, comunicacao, obrigatorio, mudanca, obrigatorio, mudanca, rotacao, expiracao (+58) | task spell:check |
+| 2026-03-09 21:21 UTC | DOT-115 | pascoalete | reprovado | config/ai/jira-model.yaml | atlassian, tecnica, governanca, regressao, decomposicao, canonico, autonomo, Workstream (+4) | task spell:check |
+| 2026-03-09 21:21 UTC | DOT-115 | pascoalete | reprovado | config/ai/contracts.yaml | descricao, tecnico, criterios, aceitacao, documentacao | task spell:check |
+| 2026-03-09 21:21 UTC | DOT-115 | pascoalete | reprovado | config/ai/agent-operations.yaml | atlassian, decisao, documentacao, linkar, mudanca, atualizacao, necessario, linkar (+110) | task spell:check |
+| 2026-03-09 21:21 UTC | DOT-115 | pascoalete | reprovado | config/ai/agents.yaml | figma | task spell:check |
+| 2026-03-09 21:21 UTC | DOT-115 | pascoalete | reprovado | .agents/orchestration/routing-policy.yaml | LICOES, LICOES, pascoalete, mypy, pytest, governanca, pascoalete, pascoalete (+3) | task spell:check |
+| 2026-03-09 21:21 UTC | DOT-115 | pascoalete | reprovado | .agents/orchestration/capability-matrix.yaml | pascoalete | task spell:check |
+| 2026-03-09 21:21 UTC | DOT-115 | pascoalete | reprovado | .agents/config.toml | pascoalete, evals, evals, evals, evals, evals | task spell:check |
+| 2026-03-09 21:21 UTC | DOT-115 | pascoalete | reprovado | .agents/registry/ai-engineering-manager.toml | escalacoes | task spell:check |
+| 2026-03-09 21:21 UTC | DOT-115 | pascoalete | reprovado | .agents/registry/ai-scrum-master.toml | comunicacao | task spell:check |
+| 2026-03-09 21:21 UTC | DOT-115 | pascoalete | reprovado | .agents/cards/ai-engineering-manager.md | escalacoes, colaboracao, saturacao, escalacao, usuario, Saidas, necessario, escalacoes (+16) | task spell:check |
+| 2026-03-09 21:21 UTC | DOT-115 | pascoalete | reprovado | .agents/cards/ai-scrum-master.md | agil, aderencia, comunicacao, fiscalizacao, comunicacao, escalacao, governanca, worktrees (+38) | task spell:check |
 | 2026-03-10 14:17 UTC | DOT-128 | pascoalete | reprovado | tests/powershell/BootstrapConfig.Tests.ps1 | pablo, pablo, pabloaugusto, AAAATESTLOCAL | task spell:check |
 | 2026-03-10 14:17 UTC | DOT-128 | pascoalete | reprovado | docs/secrets-and-auth.md | tecnico, migracao, comentarios, documentacao, canonica, permissoes, rotacao, atlassian (+25) | task spell:check |
 | 2026-03-10 14:17 UTC | DOT-128 | pascoalete | reprovado | docs/checkenv.md | gpgsign, signingkey, identityagent, identityfile, worktree, worktree, worktree, signingkey (+3) | task spell:check |

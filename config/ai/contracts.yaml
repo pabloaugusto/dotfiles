@@ -108,6 +108,11 @@ workflow:
     - prioritize-finishing-or-directly-unblocking-active-work-before-pulling-new-work
     - direct-unblocking-work-item-may-be-pulled-when-it-is-the-minimal-dependency-of-active-work
     - do-not-pull-unrelated-new-work-while-blocked-active-item-exists
+    - status-represents-flow-phase
+    - current-agent-role-represents-active-ownership
+    - only-ready-can-be-pulled
+    - only-one-active-doing-item-per-agent
+    - scrum-master-must-monitor-board-wip-communication-and-ceremony-compliance
 
 agent_activity:
   system_of_record:
@@ -124,6 +129,7 @@ agent_activity:
     - structured-comment
     - evidence-or-explicit-na
     - current-and-next-role-synced
+    - scrum-master-must-be-able-to-audit-the-touch-from-live-or-versioned-evidence
   mandatory_before_transition:
     - structured-comment-recorded
     - evidence-linked-or-attached
@@ -147,6 +153,14 @@ agent_activity:
     - generic-status-update-without-context
     - handoff-without-next-role
     - done-without-doc-trace
+
+operator_chat_visibility:
+  enabled: true
+  owner_role: ai-scrum-master
+  mandatory_rules:
+    - every-meaningful-agent-milestone-must-be-mirrored-to-chat
+    - scrum-master-must-audit-chat-contract-compliance
+    - chat-summary-does-not-replace-jira-or-confluence-logging
 
 testing:
   required_layers:

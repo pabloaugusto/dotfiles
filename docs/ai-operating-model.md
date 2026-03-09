@@ -236,6 +236,10 @@ Os catalogos humanos versionados ficam em:
 
 Esses documentos nao sao "marketing" do sistema; eles sao contratos de operacao e precisam refletir o estado real da camada declarativa.
 
+O gate global de **Scrum Master** faz parte dessa camada: ele precisa existir na
+orquestracao, nos catalogos, nas evals e nos contratos para fiscalizar
+continuamente **board**, **WIP**, ownership, comunicacao e **cerimonias**.
+
 ## Politica de versionamento
 
 ### Versionar

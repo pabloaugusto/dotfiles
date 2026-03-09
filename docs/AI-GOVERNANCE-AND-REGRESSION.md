@@ -25,13 +25,15 @@ task test:unit:python:windows
 - worklog concluido sem revisao em [`LICOES-APRENDIDAS.md`](LICOES-APRENDIDAS.md)
 - ausencia de catalogos, orchestration, rules ou evals declarativos
 - drift entre [`.agents/`](.agents/), [`docs/`](docs/) e a ponte legada em [`.codex/README.md`](.codex/README.md)
-- falta dos gates obrigatorios de arquitetura e integracoes criticas
+- falta dos gates obrigatorios de arquitetura, **Scrum Master** e integracoes criticas
 - datasets de roteamento ou governanca sem cobertura executavel
 - drift entre workflows, Taskfile e catalogos [`docs/TASKS.md`](docs/TASKS.md) e [`docs/WORKFLOWS.md`](docs/WORKFLOWS.md)
 
 ## Regras perenes
 
 - `architecture-modernization-authority` revisa toda analise substantiva.
+- `ai-scrum-master` fiscaliza continuamente **board**, **WIP**, ownership,
+  comunicacao, conformidade dos agentes e **cerimonias**.
 - `critical-integrations-guardian` protege toda mudanca sensivel a bootstrap, auth, secrets, CI, sync ou CLI critica.
 - `secrets-rotation-governor` protege toda mudanca de lifecycle de credenciais e exige ordem segura de substituicao.
 - `pascoalete` revisa ortografia tecnica e higiene do dicionario `cspell` em modo consultivo; quando reprova e a rodada nao corrige, a falha deve gerar pendencia rastreavel no backlog vigente.
