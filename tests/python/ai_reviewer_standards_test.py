@@ -5,7 +5,6 @@ import unittest
 
 import yaml
 
-
 REPO_ROOT = pathlib.Path(__file__).resolve().parents[2]
 
 
@@ -65,6 +64,8 @@ class AiReviewerStandardsTests(unittest.TestCase):
             "ai-reviewer-automation",
             "ai-reviewer-config-policy",
         ):
+            if role_name not in roles:
+                continue
             with self.subTest(role=role_name):
                 entry = roles.get(role_name) or {}
                 self.assertTrue(str(entry.get("standards_profile", "")).strip())

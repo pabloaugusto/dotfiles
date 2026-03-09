@@ -146,5 +146,5 @@ Enforcement automatizado recomendado:
 ## Relacionados
 
 - [`agent-operations.md`](agent-operations.md)
-- [`jira-writing-standards.md`](jira-writing-standards.md)
-- [`../2026-03-08-spike-cobertura-agentes-e-review-especializado.md`](../2026-03-08-spike-cobertura-agentes-e-review-especializado.md)
+- [`../2026-03-07-operacao-agentes-jira-confluence.md`](../2026-03-07-operacao-agentes-jira-confluence.md)
+- [`../2026-03-07-parecer-e-plano-inicial.md`](../2026-03-07-parecer-e-plano-inicial.md)
