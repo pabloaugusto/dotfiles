@@ -182,3 +182,26 @@ Não. É material público (chave pública SSH).
 2. manter token amplo só como contingência
 3. rodar `checkEnv` após mudanças em auth/SSH/Git
 4. rotacionar imediatamente qualquer credencial exposta
+
+## Rotacao canonica
+
+Arquitetura de referencia:
+
+- [`docs/reference/secrets-rotation-architecture.md`](reference/secrets-rotation-architecture.md)
+
+Interface oficial:
+
+- [`scripts/secrets-rotation.py`](../scripts/secrets-rotation.py)
+
+Tasks:
+
+- `task secrets:rotation:preflight`
+- `task secrets:rotation:plan`
+- `task secrets:rotation:validate`
+
+Contrato:
+
+1. `preflight` primeiro
+2. `plan` antes de qualquer substituicao
+3. `validate` depois da mudanca, sem pular `checkEnv`
+4. nenhuma revogacao e valida sem substituta ja validada
