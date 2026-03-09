@@ -403,14 +403,14 @@ tasks:
     platforms: [windows]
     dir: '{{.TASKFILE_DIR}}'
     cmds:
-      - uv run --locked ty check scripts/release_tool.py scripts/validate_docs.py scripts/run_actionlint.py scripts/run_gitleaks.py scripts/run-cspell.py scripts/git-signing-mode.py scripts/git_signing_lib.py scripts/ai-control-plane.py scripts/ai_control_plane_lib.py scripts/ai-session-startup.py scripts/ai_session_startup_lib.py scripts/atlassian_platform_lib.py scripts/ai-atlassian-openapi.py scripts/ai_atlassian_openapi_lib.py scripts/ai-jira-model.py scripts/ai_jira_model_lib.py scripts/ai-jira-apply.py scripts/ai_jira_apply_lib.py scripts/ai-atlassian-backfill.py scripts/ai_atlassian_backfill_lib.py scripts/ai-atlassian-migration-bundle.py scripts/ai_atlassian_migration_bundle_lib.py scripts/ai-atlassian-seed.py scripts/ai_atlassian_seed_lib.py scripts/ai-atlassian-docs-sync.py scripts/secrets-rotation.py scripts/secrets_rotation_lib.py tests/python/release_tool_test.py tests/python/validate_docs_test.py tests/python/git_signing_mode_test.py tests/python/ai_control_plane_test.py tests/python/ai_session_startup_test.py tests/python/atlassian_platform_test.py tests/python/ai_atlassian_openapi_test.py tests/python/ai_jira_model_test.py tests/python/ai_jira_apply_test.py tests/python/ai_atlassian_backfill_test.py tests/python/ai_atlassian_migration_bundle_test.py tests/python/ai_atlassian_seed_test.py tests/python/secrets_rotation_test.py
+      - uv run --locked ty check scripts/release_tool.py scripts/validate_docs.py scripts/run_actionlint.py scripts/run_gitleaks.py scripts/run-cspell.py scripts/git-signing-mode.py scripts/git_signing_lib.py scripts/ai-control-plane.py scripts/ai_control_plane_lib.py scripts/ai-session-startup.py scripts/ai_session_startup_lib.py scripts/atlassian_platform_lib.py scripts/ai-atlassian-openapi.py scripts/ai_atlassian_openapi_lib.py scripts/ai-jira-model.py scripts/ai_jira_model_lib.py scripts/ai-jira-apply.py scripts/ai_jira_apply_lib.py scripts/ai-atlassian-backfill.py scripts/ai_atlassian_backfill_lib.py scripts/ai-atlassian-migration-bundle.py scripts/ai_atlassian_migration_bundle_lib.py scripts/ai-atlassian-seed.py scripts/ai_atlassian_seed_lib.py scripts/ai-atlassian-docs-sync.py scripts/ai-agent-execution.py scripts/ai_agent_execution_lib.py scripts/secrets-rotation.py scripts/secrets_rotation_lib.py tests/python/release_tool_test.py tests/python/validate_docs_test.py tests/python/git_signing_mode_test.py tests/python/ai_control_plane_test.py tests/python/ai_session_startup_test.py tests/python/atlassian_platform_test.py tests/python/ai_atlassian_openapi_test.py tests/python/ai_jira_model_test.py tests/python/ai_jira_apply_test.py tests/python/ai_atlassian_backfill_test.py tests/python/ai_atlassian_migration_bundle_test.py tests/python/ai_atlassian_seed_test.py tests/python/ai_agent_execution_test.py tests/python/secrets_rotation_test.py
 
   type:check:linux:
     desc: Linux/WSL - executa ty em scripts e testes Python
     platforms: [linux]
     dir: '{{.TASKFILE_DIR}}'
     cmds:
-      - uv run --locked ty check scripts/release_tool.py scripts/validate_docs.py scripts/run_actionlint.py scripts/run_gitleaks.py scripts/run-cspell.py scripts/git-signing-mode.py scripts/git_signing_lib.py scripts/ai-control-plane.py scripts/ai_control_plane_lib.py scripts/ai-session-startup.py scripts/ai_session_startup_lib.py scripts/atlassian_platform_lib.py scripts/ai-atlassian-openapi.py scripts/ai_atlassian_openapi_lib.py scripts/ai-jira-model.py scripts/ai_jira_model_lib.py scripts/ai-jira-apply.py scripts/ai_jira_apply_lib.py scripts/ai-atlassian-backfill.py scripts/ai_atlassian_backfill_lib.py scripts/ai-atlassian-migration-bundle.py scripts/ai_atlassian_migration_bundle_lib.py scripts/ai-atlassian-seed.py scripts/ai_atlassian_seed_lib.py scripts/ai-atlassian-docs-sync.py scripts/secrets-rotation.py scripts/secrets_rotation_lib.py tests/python/release_tool_test.py tests/python/validate_docs_test.py tests/python/git_signing_mode_test.py tests/python/ai_control_plane_test.py tests/python/ai_session_startup_test.py tests/python/atlassian_platform_test.py tests/python/ai_atlassian_openapi_test.py tests/python/ai_jira_model_test.py tests/python/ai_jira_apply_test.py tests/python/ai_atlassian_backfill_test.py tests/python/ai_atlassian_migration_bundle_test.py tests/python/ai_atlassian_seed_test.py tests/python/secrets_rotation_test.py
+      - uv run --locked ty check scripts/release_tool.py scripts/validate_docs.py scripts/run_actionlint.py scripts/run_gitleaks.py scripts/run-cspell.py scripts/git-signing-mode.py scripts/git_signing_lib.py scripts/ai-control-plane.py scripts/ai_control_plane_lib.py scripts/ai-session-startup.py scripts/ai_session_startup_lib.py scripts/atlassian_platform_lib.py scripts/ai-atlassian-openapi.py scripts/ai_atlassian_openapi_lib.py scripts/ai-jira-model.py scripts/ai_jira_model_lib.py scripts/ai-jira-apply.py scripts/ai_jira_apply_lib.py scripts/ai-atlassian-backfill.py scripts/ai_atlassian_backfill_lib.py scripts/ai-atlassian-migration-bundle.py scripts/ai_atlassian_migration_bundle_lib.py scripts/ai-atlassian-seed.py scripts/ai_atlassian_seed_lib.py scripts/ai-atlassian-docs-sync.py scripts/ai-agent-execution.py scripts/ai_agent_execution_lib.py scripts/secrets-rotation.py scripts/secrets_rotation_lib.py tests/python/release_tool_test.py tests/python/validate_docs_test.py tests/python/git_signing_mode_test.py tests/python/ai_control_plane_test.py tests/python/ai_session_startup_test.py tests/python/atlassian_platform_test.py tests/python/ai_atlassian_openapi_test.py tests/python/ai_jira_model_test.py tests/python/ai_jira_apply_test.py tests/python/ai_atlassian_backfill_test.py tests/python/ai_atlassian_migration_bundle_test.py tests/python/ai_atlassian_seed_test.py tests/python/ai_agent_execution_test.py tests/python/secrets_rotation_test.py
 
   test:python:
     desc: Executa a suite Python via pytest no ambiente atual
@@ -1101,6 +1101,195 @@ tasks:
       vars: [WORKLOG_ID]
     cmds:
       - "bash -lc 'bash ./scripts/run-python.sh ./scripts/ai-review.py check --review-file \"{{default \"docs/AI-REVIEW-LEDGER.md\" .REVIEW_FILE}}\" --worklog-id \"{{.WORKLOG_ID}}\" --repo-root \"{{.TASKFILE_DIR}}\" --paths \"{{default \"\" .PATHS}}\" --intent \"{{default \"Revisao especializada obrigatoria\" .INTENT}}\" --risk \"{{default \"medium\" .RISK}}\"'"
+
+  ai:agent:execution:status:
+    desc: Exibe o contexto local ativo por agente/issue
+    cmds:
+      - task: ai:agent:execution:status:{{if or (eq .OS "Windows_NT") (eq .OS "windows")}}windows{{else}}linux{{end}}
+
+  ai:agent:execution:status:windows:
+    desc: Windows - exibe o contexto local ativo por agente/issue
+    platforms: [windows]
+    dir: '{{.TASKFILE_DIR}}'
+    cmds:
+      - "pwsh -NoProfile -File ./scripts/invoke-python.ps1 -ScriptPath ./scripts/ai-agent-execution.py status --repo-root \"{{.TASKFILE_DIR}}\""
+
+  ai:agent:execution:status:linux:
+    desc: Linux/WSL - exibe o contexto local ativo por agente/issue
+    platforms: [linux]
+    dir: '{{.TASKFILE_DIR}}'
+    cmds:
+      - "bash -lc 'bash ./scripts/run-python.sh ./scripts/ai-agent-execution.py status --repo-root \"{{.TASKFILE_DIR}}\"'"
+
+  ai:agent:execution:start:
+    desc: Inicia contexto local ativo de agente/issue e sincroniza comentario/ownership no Jira
+    requires:
+      vars: [ISSUE_KEY, AGENT]
+    cmds:
+      - task: ai:agent:execution:start:{{if or (eq .OS "Windows_NT") (eq .OS "windows")}}windows{{else}}linux{{end}}
+        vars:
+          ISSUE_KEY: "{{.ISSUE_KEY}}"
+          AGENT: "{{.AGENT}}"
+          STATUS: "{{default \"doing\" .STATUS}}"
+          CONTEXTO: "{{default \"\" .CONTEXTO}}"
+          EVIDENCIAS: "{{default \"\" .EVIDENCIAS}}"
+          PROXIMO_PASSO: "{{default \"\" .PROXIMO_PASSO}}"
+          NEXT_REQUIRED_ROLE: "{{default \"\" .NEXT_REQUIRED_ROLE}}"
+          TRANSITION: "{{default \"1\" .TRANSITION}}"
+          INTERACTION_TYPE: "{{default \"progress-update\" .INTERACTION_TYPE}}"
+
+  ai:agent:execution:start:windows:
+    desc: Windows - inicia contexto local ativo de agente/issue
+    platforms: [windows]
+    dir: '{{.TASKFILE_DIR}}'
+    requires:
+      vars: [ISSUE_KEY, AGENT]
+    cmds:
+      - "pwsh -NoProfile -Command \"& './scripts/invoke-python.ps1' -ScriptPath './scripts/ai-agent-execution.py' -Arguments @('start','--repo-root','{{.TASKFILE_DIR}}','--issue-key','{{.ISSUE_KEY}}','--agent','{{.AGENT}}','--status','{{default \"doing\" .STATUS}}','--contexto','{{default \"\" .CONTEXTO}}','--evidencias','{{default \"\" .EVIDENCIAS}}','--proximo-passo','{{default \"\" .PROXIMO_PASSO}}','--next-required-role','{{default \"\" .NEXT_REQUIRED_ROLE}}','--transition','{{default \"1\" .TRANSITION}}','--interaction-type','{{default \"progress-update\" .INTERACTION_TYPE}}')\""
+
+  ai:agent:execution:start:linux:
+    desc: Linux/WSL - inicia contexto local ativo de agente/issue
+    platforms: [linux]
+    dir: '{{.TASKFILE_DIR}}'
+    requires:
+      vars: [ISSUE_KEY, AGENT]
+    cmds:
+      - "bash -lc 'bash ./scripts/run-python.sh ./scripts/ai-agent-execution.py start --repo-root \"{{.TASKFILE_DIR}}\" --issue-key \"{{.ISSUE_KEY}}\" --agent \"{{.AGENT}}\" --status \"{{default \"doing\" .STATUS}}\" --contexto \"{{default \"\" .CONTEXTO}}\" --evidencias \"{{default \"\" .EVIDENCIAS}}\" --proximo-passo \"{{default \"\" .PROXIMO_PASSO}}\" --next-required-role \"{{default \"\" .NEXT_REQUIRED_ROLE}}\" --transition \"{{default \"1\" .TRANSITION}}\" --interaction-type \"{{default \"progress-update\" .INTERACTION_TYPE}}\"'"
+
+  ai:agent:execution:progress:
+    desc: Atualiza contexto local ativo e adiciona progresso estruturado no Jira
+    requires:
+      vars: [AGENT]
+    cmds:
+      - task: ai:agent:execution:progress:{{if or (eq .OS "Windows_NT") (eq .OS "windows")}}windows{{else}}linux{{end}}
+        vars:
+          ISSUE_KEY: "{{.ISSUE_KEY}}"
+          AGENT: "{{.AGENT}}"
+          STATUS: "{{default \"doing\" .STATUS}}"
+          CONTEXTO: "{{default \"\" .CONTEXTO}}"
+          EVIDENCIAS: "{{default \"\" .EVIDENCIAS}}"
+          PROXIMO_PASSO: "{{default \"\" .PROXIMO_PASSO}}"
+          NEXT_REQUIRED_ROLE: "{{default \"\" .NEXT_REQUIRED_ROLE}}"
+          TRANSITION: "{{default \"1\" .TRANSITION}}"
+          INTERACTION_TYPE: "{{default \"progress-update\" .INTERACTION_TYPE}}"
+
+  ai:agent:execution:progress:windows:
+    desc: Windows - atualiza contexto local ativo e adiciona progresso estruturado no Jira
+    platforms: [windows]
+    dir: '{{.TASKFILE_DIR}}'
+    requires:
+      vars: [AGENT]
+    cmds:
+      - "pwsh -NoProfile -Command \"& './scripts/invoke-python.ps1' -ScriptPath './scripts/ai-agent-execution.py' -Arguments @('progress','--repo-root','{{.TASKFILE_DIR}}','--issue-key','{{default \"\" .ISSUE_KEY}}','--agent','{{.AGENT}}','--status','{{default \"doing\" .STATUS}}','--contexto','{{default \"\" .CONTEXTO}}','--evidencias','{{default \"\" .EVIDENCIAS}}','--proximo-passo','{{default \"\" .PROXIMO_PASSO}}','--next-required-role','{{default \"\" .NEXT_REQUIRED_ROLE}}','--transition','{{default \"1\" .TRANSITION}}','--interaction-type','{{default \"progress-update\" .INTERACTION_TYPE}}')\""
+
+  ai:agent:execution:progress:linux:
+    desc: Linux/WSL - atualiza contexto local ativo e adiciona progresso estruturado no Jira
+    platforms: [linux]
+    dir: '{{.TASKFILE_DIR}}'
+    requires:
+      vars: [AGENT]
+    cmds:
+      - "bash -lc 'bash ./scripts/run-python.sh ./scripts/ai-agent-execution.py progress --repo-root \"{{.TASKFILE_DIR}}\" --issue-key \"{{default \"\" .ISSUE_KEY}}\" --agent \"{{.AGENT}}\" --status \"{{default \"doing\" .STATUS}}\" --contexto \"{{default \"\" .CONTEXTO}}\" --evidencias \"{{default \"\" .EVIDENCIAS}}\" --proximo-passo \"{{default \"\" .PROXIMO_PASSO}}\" --next-required-role \"{{default \"\" .NEXT_REQUIRED_ROLE}}\" --transition \"{{default \"1\" .TRANSITION}}\" --interaction-type \"{{default \"progress-update\" .INTERACTION_TYPE}}\"'"
+
+  ai:agent:execution:handoff:
+    desc: Registra handoff no Jira e limpa o contexto local ativo
+    requires:
+      vars: [AGENT, NEXT_REQUIRED_ROLE]
+    cmds:
+      - task: ai:agent:execution:handoff:{{if or (eq .OS "Windows_NT") (eq .OS "windows")}}windows{{else}}linux{{end}}
+        vars:
+          ISSUE_KEY: "{{.ISSUE_KEY}}"
+          AGENT: "{{.AGENT}}"
+          STATUS: "{{default \"doing\" .STATUS}}"
+          CONTEXTO: "{{default \"\" .CONTEXTO}}"
+          EVIDENCIAS: "{{default \"\" .EVIDENCIAS}}"
+          PROXIMO_PASSO: "{{default \"\" .PROXIMO_PASSO}}"
+          NEXT_REQUIRED_ROLE: "{{.NEXT_REQUIRED_ROLE}}"
+          TRANSITION: "{{default \"1\" .TRANSITION}}"
+
+  ai:agent:execution:handoff:windows:
+    desc: Windows - registra handoff no Jira e limpa o contexto local ativo
+    platforms: [windows]
+    dir: '{{.TASKFILE_DIR}}'
+    requires:
+      vars: [AGENT, NEXT_REQUIRED_ROLE]
+    cmds:
+      - "pwsh -NoProfile -Command \"& './scripts/invoke-python.ps1' -ScriptPath './scripts/ai-agent-execution.py' -Arguments @('handoff','--repo-root','{{.TASKFILE_DIR}}','--issue-key','{{default \"\" .ISSUE_KEY}}','--agent','{{.AGENT}}','--status','{{default \"doing\" .STATUS}}','--contexto','{{default \"\" .CONTEXTO}}','--evidencias','{{default \"\" .EVIDENCIAS}}','--proximo-passo','{{default \"\" .PROXIMO_PASSO}}','--next-required-role','{{.NEXT_REQUIRED_ROLE}}','--transition','{{default \"1\" .TRANSITION}}')\""
+
+  ai:agent:execution:handoff:linux:
+    desc: Linux/WSL - registra handoff no Jira e limpa o contexto local ativo
+    platforms: [linux]
+    dir: '{{.TASKFILE_DIR}}'
+    requires:
+      vars: [AGENT, NEXT_REQUIRED_ROLE]
+    cmds:
+      - "bash -lc 'bash ./scripts/run-python.sh ./scripts/ai-agent-execution.py handoff --repo-root \"{{.TASKFILE_DIR}}\" --issue-key \"{{default \"\" .ISSUE_KEY}}\" --agent \"{{.AGENT}}\" --status \"{{default \"doing\" .STATUS}}\" --contexto \"{{default \"\" .CONTEXTO}}\" --evidencias \"{{default \"\" .EVIDENCIAS}}\" --proximo-passo \"{{default \"\" .PROXIMO_PASSO}}\" --next-required-role \"{{.NEXT_REQUIRED_ROLE}}\" --transition \"{{default \"1\" .TRANSITION}}\"'"
+
+  ai:agent:execution:pause:
+    desc: Registra pausa no Jira e limpa o contexto local ativo
+    requires:
+      vars: [AGENT]
+    cmds:
+      - task: ai:agent:execution:pause:{{if or (eq .OS "Windows_NT") (eq .OS "windows")}}windows{{else}}linux{{end}}
+        vars:
+          ISSUE_KEY: "{{.ISSUE_KEY}}"
+          AGENT: "{{.AGENT}}"
+          CONTEXTO: "{{default \"\" .CONTEXTO}}"
+          EVIDENCIAS: "{{default \"\" .EVIDENCIAS}}"
+          PROXIMO_PASSO: "{{default \"\" .PROXIMO_PASSO}}"
+          NEXT_REQUIRED_ROLE: "{{default \"\" .NEXT_REQUIRED_ROLE}}"
+          TRANSITION: "{{default \"1\" .TRANSITION}}"
+          BLOCKER: "{{default \"1\" .BLOCKER}}"
+
+  ai:agent:execution:pause:windows:
+    desc: Windows - registra pausa no Jira e limpa o contexto local ativo
+    platforms: [windows]
+    dir: '{{.TASKFILE_DIR}}'
+    requires:
+      vars: [AGENT]
+    cmds:
+      - "pwsh -NoProfile -Command \"& './scripts/invoke-python.ps1' -ScriptPath './scripts/ai-agent-execution.py' -Arguments @('pause','--repo-root','{{.TASKFILE_DIR}}','--issue-key','{{default \"\" .ISSUE_KEY}}','--agent','{{.AGENT}}','--contexto','{{default \"\" .CONTEXTO}}','--evidencias','{{default \"\" .EVIDENCIAS}}','--proximo-passo','{{default \"\" .PROXIMO_PASSO}}','--next-required-role','{{default \"\" .NEXT_REQUIRED_ROLE}}','--transition','{{default \"1\" .TRANSITION}}','--blocker','{{default \"1\" .BLOCKER}}')\""
+
+  ai:agent:execution:pause:linux:
+    desc: Linux/WSL - registra pausa no Jira e limpa o contexto local ativo
+    platforms: [linux]
+    dir: '{{.TASKFILE_DIR}}'
+    requires:
+      vars: [AGENT]
+    cmds:
+      - "bash -lc 'bash ./scripts/run-python.sh ./scripts/ai-agent-execution.py pause --repo-root \"{{.TASKFILE_DIR}}\" --issue-key \"{{default \"\" .ISSUE_KEY}}\" --agent \"{{.AGENT}}\" --contexto \"{{default \"\" .CONTEXTO}}\" --evidencias \"{{default \"\" .EVIDENCIAS}}\" --proximo-passo \"{{default \"\" .PROXIMO_PASSO}}\" --next-required-role \"{{default \"\" .NEXT_REQUIRED_ROLE}}\" --transition \"{{default \"1\" .TRANSITION}}\" --blocker \"{{default \"1\" .BLOCKER}}\"'"
+
+  ai:agent:execution:done:
+    desc: Registra fechamento no Jira e limpa o contexto local ativo
+    requires:
+      vars: [AGENT]
+    cmds:
+      - task: ai:agent:execution:done:{{if or (eq .OS "Windows_NT") (eq .OS "windows")}}windows{{else}}linux{{end}}
+        vars:
+          ISSUE_KEY: "{{.ISSUE_KEY}}"
+          AGENT: "{{.AGENT}}"
+          CONTEXTO: "{{default \"\" .CONTEXTO}}"
+          EVIDENCIAS: "{{default \"\" .EVIDENCIAS}}"
+          PROXIMO_PASSO: "{{default \"\" .PROXIMO_PASSO}}"
+          TRANSITION: "{{default \"1\" .TRANSITION}}"
+
+  ai:agent:execution:done:windows:
+    desc: Windows - registra fechamento no Jira e limpa o contexto local ativo
+    platforms: [windows]
+    dir: '{{.TASKFILE_DIR}}'
+    requires:
+      vars: [AGENT]
+    cmds:
+      - "pwsh -NoProfile -Command \"& './scripts/invoke-python.ps1' -ScriptPath './scripts/ai-agent-execution.py' -Arguments @('done','--repo-root','{{.TASKFILE_DIR}}','--issue-key','{{default \"\" .ISSUE_KEY}}','--agent','{{.AGENT}}','--contexto','{{default \"\" .CONTEXTO}}','--evidencias','{{default \"\" .EVIDENCIAS}}','--proximo-passo','{{default \"\" .PROXIMO_PASSO}}','--transition','{{default \"1\" .TRANSITION}}')\""
+
+  ai:agent:execution:done:linux:
+    desc: Linux/WSL - registra fechamento no Jira e limpa o contexto local ativo
+    platforms: [linux]
+    dir: '{{.TASKFILE_DIR}}'
+    requires:
+      vars: [AGENT]
+    cmds:
+      - "bash -lc 'bash ./scripts/run-python.sh ./scripts/ai-agent-execution.py done --repo-root \"{{.TASKFILE_DIR}}\" --issue-key \"{{default \"\" .ISSUE_KEY}}\" --agent \"{{.AGENT}}\" --contexto \"{{default \"\" .CONTEXTO}}\" --evidencias \"{{default \"\" .EVIDENCIAS}}\" --proximo-passo \"{{default \"\" .PROXIMO_PASSO}}\" --transition \"{{default \"1\" .TRANSITION}}\"'"
 
   ai:install:codex:
     desc: Materializa as skills canonicas de .agents/skills no catalogo local do Codex
