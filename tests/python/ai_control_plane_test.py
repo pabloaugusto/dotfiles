@@ -12,8 +12,12 @@ from unittest.mock import patch
 from scripts.ai_control_plane_lib import (
     AiControlPlaneError,
     clear_secret_resolver_cache,
+    github_blob_url,
+    linkify_repo_relative_paths,
     load_ai_control_plane,
+    normalize_github_remote_url,
     resolve_atlassian_platform,
+    resolve_repo_web_context,
     resolve_value_spec,
     service_account_ratelimit_payload,
     summary_payload,
@@ -196,6 +200,115 @@ class AiControlPlaneTests(unittest.TestCase):
             "https://env.atlassian.net",
         )
 
+    def test_normalize_github_remote_url_supports_ssh_origin(self) -> None:
+        self.assertEqual(
+            normalize_github_remote_url("git@github.com:pabloaugusto/dotfiles.git"),
+            "https://github.com/pabloaugusto/dotfiles",
+        )
+
+    def test_resolve_repo_web_context_reads_origin_and_default_branch(self) -> None:
+        def fake_run_command(
+            args: list[str],
+            *,
+            cwd: pathlib.Path | None = None,
+            check: bool = True,
+        ) -> subprocess.CompletedProcess[str]:
+            if args == ["git", "remote", "get-url", "origin"]:
+                return subprocess.CompletedProcess(
+                    args=args,
+                    returncode=0,
+                    stdout="git@github.com:pabloaugusto/dotfiles.git\n",
+                    stderr="",
+                )
+            if args == ["git", "symbolic-ref", "refs/remotes/origin/HEAD"]:
+                return subprocess.CompletedProcess(
+                    args=args,
+                    returncode=0,
+                    stdout="refs/remotes/origin/main\n",
+                    stderr="",
+                )
+            raise AssertionError(args)
+
+        with patch("scripts.ai_control_plane_lib.run_command", side_effect=fake_run_command):
+            context = resolve_repo_web_context(ROOT)
+
+        self.assertEqual(context.github_base_url, "https://github.com/pabloaugusto/dotfiles")
+        self.assertEqual(context.default_branch, "main")
+
+    def test_github_blob_url_uses_default_branch(self) -> None:
+        with patch(
+            "scripts.ai_control_plane_lib.resolve_repo_web_context",
+            return_value=type(
+                "RepoWebContextStub",
+                (),
+                {
+                    "github_base_url": "https://github.com/pabloaugusto/dotfiles",
+                    "default_branch": "main",
+                },
+            )(),
+        ):
+            url = github_blob_url(ROOT, "docs/AI-WIP-TRACKER.md")
+
+        self.assertEqual(
+            url,
+            "https://github.com/pabloaugusto/dotfiles/blob/main/docs/AI-WIP-TRACKER.md",
+        )
+
+    def test_linkify_repo_relative_paths_converts_tracked_file_references(self) -> None:
+        text = "Evidencias:\n- docs/AI-WIP-TRACKER.md\n- ROADMAP.md"
+        linked = linkify_repo_relative_paths(text, repo_root=ROOT)
+
+        self.assertIn(
+            "[docs/AI-WIP-TRACKER.md](https://github.com/pabloaugusto/dotfiles/blob/main/docs/AI-WIP-TRACKER.md)",
+            linked,
+        )
+        self.assertIn(
+            "[ROADMAP.md](https://github.com/pabloaugusto/dotfiles/blob/main/ROADMAP.md)",
+            linked,
+        )
+
+    def test_linkify_repo_relative_paths_ignores_untracked_runtime_paths(self) -> None:
+        with patch(
+            "scripts.ai_control_plane_lib.resolve_repo_web_context",
+            return_value=type(
+                "RepoWebContextStub",
+                (),
+                {
+                    "github_base_url": "https://github.com/pabloaugusto/dotfiles",
+                    "default_branch": "main",
+                },
+            )(),
+        ):
+            with patch(
+                "scripts.ai_control_plane_lib.resolve_tracked_repo_files",
+                return_value={"docs/AI-WIP-TRACKER.md"},
+            ):
+                linked = linkify_repo_relative_paths(
+                    "Evidencia: .cache/playwright/atlassian/storage-state.json",
+                    repo_root=ROOT,
+                )
+
+        self.assertEqual(linked, "Evidencia: .cache/playwright/atlassian/storage-state.json")
+
+    def test_github_blob_url_preserves_dot_prefixed_paths(self) -> None:
+        with patch(
+            "scripts.ai_control_plane_lib.resolve_repo_web_context",
+            return_value=type(
+                "RepoWebContextStub",
+                (),
+                {
+                    "github_base_url": "https://github.com/pabloaugusto/dotfiles",
+                    "default_branch": "main",
+                },
+            )(),
+        ):
+            url = github_blob_url(ROOT, ".github/pull_request_template.md")
+
+        self.assertEqual(
+            url,
+            "https://github.com/pabloaugusto/dotfiles/blob/main/.github/pull_request_template.md",
+        )
+
     def test_resolve_value_spec_reads_op_item_once_for_multiple_fields(self) -> None:
         item_payload = {
             "fields": [
@@ -238,7 +351,9 @@ class AiControlPlaneTests(unittest.TestCase):
                 return ratelimit_completed
             raise AssertionError(args)
 
-        with patch("scripts.ai_control_plane_lib.run_command", side_effect=fake_run_command) as mocked:
+        with patch(
+            "scripts.ai_control_plane_lib.run_command", side_effect=fake_run_command
+        ) as mocked:
             with patch(
                 "scripts.ai_control_plane_lib.run_op_command",
                 return_value=item_completed,
@@ -350,8 +465,12 @@ class AiControlPlaneTests(unittest.TestCase):
                     stderr="",
                 )
 
-            with patch("scripts.ai_control_plane_lib.run_command", side_effect=fake_run_command) as mocked:
-                with patch("scripts.ai_control_plane_lib.run_op_command", side_effect=fake_run_op_command):
+            with patch(
+                "scripts.ai_control_plane_lib.run_command", side_effect=fake_run_command
+            ) as mocked:
+                with patch(
+                    "scripts.ai_control_plane_lib.run_op_command", side_effect=fake_run_op_command
+                ):
                     resolved = resolve_atlassian_platform(
                         control_plane.atlassian_definition(),
                         repo_root=repo_root,
@@ -368,7 +487,14 @@ class AiControlPlaneTests(unittest.TestCase):
 
     def test_service_account_ratelimit_payload_detects_exhausted_account_limit(self) -> None:
         ratelimit_rows = [
-            {"type": "token", "action": "read", "limit": 1000, "used": 42, "remaining": 958, "reset": 2198},
+            {
+                "type": "token",
+                "action": "read",
+                "limit": 1000,
+                "used": 42,
+                "remaining": 958,
+                "reset": 2198,
+            },
             {
                 "type": "account",
                 "action": "read_write",

@@ -1,0 +1,211 @@
+from __future__ import annotations
+
+import unittest
+
+from scripts.ai_atlassian_agent_comment_audit_lib import (
+    evaluate_issue_comment_contract,
+    parse_structured_comment,
+)
+from scripts.atlassian_platform_lib import adf_text_document
+
+
+def structured_comment(*, agent: str, status: str, interaction_type: str = "progress-update") -> dict[str, object]:
+    raw = "\n".join(
+        [
+            f"Agente: {agent}",
+            f"Tipo de interacao: {interaction_type}",
+            f"Status atual: {status}",
+            "",
+            "## Contexto",
+            "- checkpoint",
+        ]
+    )
+    return {
+        "id": f"{agent}-{status}",
+        "created": "2026-03-08T10:00:00.000+0000",
+        "updated": "2026-03-08T10:00:00.000+0000",
+        "body": adf_text_document(raw),
+    }
+
+
+class ParseStructuredCommentTest(unittest.TestCase):
+    def test_parse_structured_comment_extracts_header_and_lists(self) -> None:
+        parsed = parse_structured_comment(
+            "\n".join(
+                [
+                    "Agente: ai-devops",
+                    "Tipo de interacao: progress-update",
+                    "Status atual: doing",
+                    "",
+                    "## Contexto",
+                    "- item 1",
+                    "- item 2",
+                ]
+            )
+        )
+        self.assertIsNotNone(parsed)
+        assert parsed is not None
+        self.assertEqual(parsed["agent"], "ai-devops")
+        self.assertEqual(parsed["status"], "doing")
+        self.assertEqual(parsed["contexto"], ["item 1", "item 2"])
+
+
+class EvaluateIssueCommentContractTest(unittest.TestCase):
+    def test_accepts_status_alias_when_comment_matches_issue_semantically(self) -> None:
+        issue = {
+            "key": "DOT-0",
+            "fields": {
+                "summary": "Teste",
+                "status": {"name": "DOING"},
+                "issuetype": {"name": "Task"},
+                "priority": {"name": "Medium"},
+                "customfield_1": {"value": "ai-developer-python"},
+                "customfield_2": {"value": "ai-reviewer"},
+            },
+        }
+        comments = [structured_comment(agent="ai-developer-python", status="In Progress")]
+        report = evaluate_issue_comment_contract(
+            issue,
+            comments,
+            current_agent_field_id="customfield_1",
+            next_required_field_id="customfield_2",
+        )
+        self.assertNotIn(
+            "latest_comment_status_mismatch",
+            {entry["code"] for entry in report["findings"]},
+        )
+
+    def test_flags_latest_comment_status_mismatch(self) -> None:
+        issue = {
+            "key": "DOT-1",
+            "fields": {
+                "summary": "Teste",
+                "status": {"name": "Backlog"},
+                "issuetype": {"name": "Task"},
+                "priority": {"name": "Medium"},
+                "customfield_1": {"value": "ai-product-owner"},
+                "customfield_2": {"value": "ai-engineering-architect"},
+            },
+        }
+        comments = [structured_comment(agent="ai-product-owner", status="doing")]
+        report = evaluate_issue_comment_contract(
+            issue,
+            comments,
+            current_agent_field_id="customfield_1",
+            next_required_field_id="customfield_2",
+        )
+        self.assertIn(
+            "latest_comment_status_mismatch",
+            {entry["code"] for entry in report["findings"]},
+        )
+
+    def test_flags_missing_current_agent_comment(self) -> None:
+        issue = {
+            "key": "DOT-2",
+            "fields": {
+                "summary": "Teste",
+                "status": {"name": "DOING"},
+                "issuetype": {"name": "Task"},
+                "priority": {"name": "High"},
+                "customfield_1": {"value": "ai-devops"},
+                "customfield_2": {"value": "ai-reviewer"},
+            },
+        }
+        comments = [structured_comment(agent="ai-product-owner", status="doing")]
+        report = evaluate_issue_comment_contract(
+            issue,
+            comments,
+            current_agent_field_id="customfield_1",
+            next_required_field_id="customfield_2",
+        )
+        self.assertIn(
+            "missing_current_agent_comment",
+            {entry["code"] for entry in report["findings"]},
+        )
+
+    def test_flags_done_delivery_issue_missing_qa_and_reviewer(self) -> None:
+        issue = {
+            "key": "DOT-3",
+            "fields": {
+                "summary": "Teste",
+                "status": {"name": "Done"},
+                "issuetype": {"name": "Task"},
+                "priority": {"name": "Medium"},
+                "customfield_1": None,
+                "customfield_2": None,
+            },
+        }
+        comments = [structured_comment(agent="ai-devops", status="done")]
+        report = evaluate_issue_comment_contract(
+            issue,
+            comments,
+            current_agent_field_id="customfield_1",
+            next_required_field_id="customfield_2",
+        )
+        codes = {entry["code"] for entry in report["findings"]}
+        self.assertIn("missing_qa_comment", codes)
+        self.assertIn("missing_reviewer_comment", codes)
+
+    def test_accepts_specialized_reviewer_roles(self) -> None:
+        issue = {
+            "key": "DOT-4",
+            "fields": {
+                "summary": "Teste",
+                "status": {"name": "Done"},
+                "issuetype": {"name": "Task"},
+                "priority": {"name": "Medium"},
+                "customfield_1": None,
+                "customfield_2": None,
+            },
+        }
+        comments = [
+            structured_comment(agent="ai-developer-python", status="done"),
+            structured_comment(agent="ai-qa", status="done", interaction_type="test-success"),
+            structured_comment(
+                agent="ai-reviewer-config-policy",
+                status="done",
+                interaction_type="approval",
+            ),
+        ]
+        report = evaluate_issue_comment_contract(
+            issue,
+            comments,
+            current_agent_field_id="customfield_1",
+            next_required_field_id="customfield_2",
+        )
+        self.assertNotIn(
+            "missing_reviewer_comment",
+            {entry["code"] for entry in report["findings"]},
+        )
+
+    def test_accepts_documentation_agent_as_delivery_for_done_issue(self) -> None:
+        issue = {
+            "key": "DOT-5",
+            "fields": {
+                "summary": "Teste",
+                "status": {"name": "Done"},
+                "issuetype": {"name": "Task"},
+                "priority": {"name": "Medium"},
+                "customfield_1": None,
+                "customfield_2": None,
+            },
+        }
+        comments = [
+            structured_comment(agent="ai-documentation-agent", status="done"),
+            structured_comment(agent="ai-qa", status="done", interaction_type="test-success"),
+            structured_comment(agent="pascoalete", status="done", interaction_type="approval"),
+        ]
+        report = evaluate_issue_comment_contract(
+            issue,
+            comments,
+            current_agent_field_id="customfield_1",
+            next_required_field_id="customfield_2",
+        )
+        self.assertNotIn(
+            "missing_delivery_agent_comment",
+            {entry["code"] for entry in report["findings"]},
+        )
+
+
+if __name__ == "__main__":
+    unittest.main()

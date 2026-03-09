@@ -14,6 +14,8 @@ roles:
     responsibilities:
       - backlog
       - prioritization
+      - continuous-prioritization
+      - queue-ordering
       - jira-issue-creation
 
   ai-engineering-architect:
@@ -76,12 +78,37 @@ roles:
       - validation
       - evidence
 
+  ai-reviewer-python:
+    enabled: true
+    required: false
+    category: quality
+    specialization: python-review
+
+  ai-reviewer-powershell:
+    enabled: true
+    required: false
+    category: quality
+    specialization: powershell-review
+
+  ai-reviewer-automation:
+    enabled: true
+    required: false
+    category: quality
+    specialization: automation-review
+
+  ai-reviewer-config-policy:
+    enabled: true
+    required: false
+    category: quality
+    specialization: config-policy-review
+
   ai-reviewer:
     enabled: true
     required: true
     category: quality
     responsibilities:
-      - technical-review
+      - cross-cutting-review
+      - review-orchestration
       - approval
 
   ai-devops:

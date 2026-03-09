@@ -1,45 +1,84 @@
 from __future__ import annotations
 
+import re
 from dataclasses import dataclass
 from html import escape
 from pathlib import Path
 from typing import Any
 
+import markdown as markdown_lib
+
 from scripts.ai_atlassian_backfill_lib import build_backfill_plan
 from scripts.ai_atlassian_migration_bundle_lib import build_migration_bundle
 from scripts.ai_control_plane_lib import (
     AiControlPlaneError,
+    github_blob_url,
+    linkify_repo_relative_paths,
     load_ai_control_plane,
     load_yaml_map,
     resolve_atlassian_platform,
     resolve_repo_root,
+    resolve_tracked_repo_files,
 )
 from scripts.atlassian_platform_lib import (
     AtlassianHttpClient,
     AtlassianPlatformError,
     ConfluenceAdapter,
     JiraAdapter,
+    adf_to_text,
+    canonicalize_workflow_status,
     render_structured_comment,
 )
 
 DEFAULT_CONFLUENCE_MODEL_PATH = Path("config/ai/confluence-model.yaml")
 DEFAULT_JIRA_MODEL_PATH = Path("config/ai/jira-model.yaml")
-MIGRATION_ISSUE_SUMMARY = "[MIGRATION] Bootstrap retro-sync Atlassian AI control plane"
+MIGRATION_ISSUE_SUMMARY = "Migrar backlog e documentacao para Jira e Confluence"
 MIGRATION_ISSUE_LABELS = [
     "atlassian-ia",
     "migration",
     "retro-sync",
     "control-plane",
 ]
+MIGRATION_REPO_REFERENCES = (
+    (
+        "Plano vivo da migracao",
+        "docs/atlassian-ia/2026-03-07-parecer-e-plano-inicial.md",
+    ),
+    (
+        "Contrato do migration bundle",
+        "docs/atlassian-ia/artifacts/migration-bundle.md",
+    ),
+    (
+        "Padrao de escrita das issues",
+        "docs/atlassian-ia/artifacts/jira-writing-standards.md",
+    ),
+    (
+        "Estrategia GitHub Jira Confluence",
+        "docs/atlassian-ia/2026-03-08-github-jira-confluence-traceability.md",
+    ),
+)
 WORKFLOW_ORDER = [
     ("backlog", ["backlog"]),
     ("refinement", ["refinement"]),
     ("ready", ["ready"]),
     ("doing", ["doing", "doing".upper()]),
+    ("paused", ["paused"]),
     ("testing", ["testing", "testing".upper()]),
     ("review", ["review"]),
     ("done", ["done"]),
 ]
+WORKFLOW_TRANSITION_GRAPH = {
+    "backlog": ["refinement"],
+    "refinement": ["ready"],
+    "ready": ["doing"],
+    "doing": ["testing", "paused"],
+    "paused": ["doing"],
+    "testing": ["review"],
+    "review": ["done"],
+    "done": [],
+}
+LEGACY_EXTERNAL_ID_RE = re.compile(r"^\[(?P<external_id>[^\]]+)\]\s+")
+MARKDOWN_LINK_TARGET_RE = re.compile(r"\[([^\]]+)\]\(([^)]+)\)")
 
 
 @dataclass(frozen=True)
@@ -141,12 +180,52 @@ def normalize_status_label(name: str) -> str:
     return " ".join(name.strip().split()).casefold()
 
 
+def logical_status_from_name(name: str) -> str:
+    normalized = normalize_status_label(name)
+    for logical, candidates in WORKFLOW_ORDER:
+        candidate_set = {normalize_status_label(value) for value in candidates}
+        if normalized in candidate_set:
+            return logical
+    return ""
+
+
+def workflow_transition_path(
+    current_logical_status: str,
+    target_logical_status: str,
+) -> list[str]:
+    current = current_logical_status.strip().casefold()
+    target = target_logical_status.strip().casefold()
+    if not current or not target:
+        return []
+    if current == target:
+        return [current]
+    if current not in WORKFLOW_TRANSITION_GRAPH or target not in WORKFLOW_TRANSITION_GRAPH:
+        return []
+
+    queue: list[list[str]] = [[current]]
+    visited = {current}
+    while queue:
+        path = queue.pop(0)
+        node = path[-1]
+        for neighbor in WORKFLOW_TRANSITION_GRAPH.get(node, []):
+            if neighbor in visited:
+                continue
+            next_path = [*path, neighbor]
+            if neighbor == target:
+                return next_path
+            visited.add(neighbor)
+            queue.append(next_path)
+    return []
+
+
 def state_hint_to_logical_status(state_hint: str) -> str:
     normalized = state_hint.strip().lower()
     if normalized in {"done", "aceita"}:
         return "done"
     if normalized in {"doing", "in progress", "executando"}:
         return "doing"
+    if normalized in {"paused", "on hold", "pausado"}:
+        return "paused"
     if normalized in {"triage", "pendente"}:
         return "backlog"
     return "backlog"
@@ -154,6 +233,110 @@ def state_hint_to_logical_status(state_hint: str) -> str:
 
 def build_issue_description(lines: list[str]) -> str:
     return "\n".join(line.strip() for line in lines if line.strip())
+
+
+def build_migration_issue_description(
+    repo_root: Path,
+    *,
+    bundle_attachment_name: str,
+) -> str:
+    reference_lines = [
+        f"- [{label}]({github_blob_url(repo_root, repo_path)})"
+        for label, repo_path in MIGRATION_REPO_REFERENCES
+    ]
+    reference_lines.append(f"- Bundle auditavel anexado nesta issue: {bundle_attachment_name}")
+    reference_lines.append(
+        "- Paginas oficiais do Confluence vinculadas por comentarios estruturados nesta propria issue."
+    )
+    return build_issue_description(
+        [
+            "## Contexto",
+            "- Esta issue concentra a migracao inicial do backlog e da documentacao oficial para Jira e Confluence.",
+            "- Ela tambem funciona como ancora auditavel para bundles, comentarios estruturados e checkpoints da transicao.",
+            "",
+            "## Resultado esperado",
+            "- O tenant reflete o backlog retroativo, a documentacao oficial e as evidencias centrais desta trilha.",
+            "",
+            "## Escopo tecnico",
+            "- anexar o bundle auditavel da migracao",
+            "- sincronizar as paginas oficiais no Confluence",
+            "- semear e corrigir o backlog retroativo no Jira",
+            "",
+            "## Criterios de aceite",
+            "- O bundle auditavel desta rodada esta anexado nesta issue.",
+            "- As paginas oficiais do Confluence relacionadas a migracao foram criadas ou atualizadas.",
+            "- O backlog retroativo ficou legivel, rastreavel e com links oficiais entre Jira, Confluence e GitHub quando aplicavel.",
+            "",
+            "## Referencias",
+            *reference_lines,
+        ]
+    )
+
+
+def extract_external_id(issue: dict[str, Any]) -> str:
+    fields = issue.get("fields") or {}
+    summary = str(fields.get("summary", "")).strip()
+    match = LEGACY_EXTERNAL_ID_RE.match(summary)
+    if match:
+        return match.group("external_id").strip()
+    description_text = adf_to_text(fields.get("description")).strip()
+    for line in description_text.splitlines():
+        stripped = line.strip()
+        if stripped.startswith("- "):
+            stripped = stripped[2:].strip()
+        if stripped.startswith("ID local:"):
+            return stripped.split(":", 1)[1].strip()
+        if stripped.startswith("Worklog local:"):
+            return stripped.split(":", 1)[1].strip()
+    return ""
+
+
+def build_existing_issue_index(
+    issues: list[dict[str, Any]],
+) -> dict[tuple[str, str], dict[str, Any]]:
+    index: dict[tuple[str, str], dict[str, Any]] = {}
+    for issue in issues:
+        fields = issue.get("fields") or {}
+        issue_type = str(((fields.get("issuetype") or {}).get("name")) or "").strip()
+        external_id = extract_external_id(issue)
+        if issue_type and external_id:
+            index[(issue_type, external_id)] = issue
+    return index
+
+
+def issue_extra_fields(record: dict[str, Any]) -> dict[str, Any]:
+    extra_fields: dict[str, Any] = {}
+    components = [
+        {"name": str(component).strip()}
+        for component in record.get("components") or []
+        if str(component).strip()
+    ]
+    if components:
+        extra_fields["components"] = components
+    priority = str(record.get("priority", "")).strip()
+    if priority:
+        extra_fields["priority"] = {"name": priority}
+    return extra_fields
+
+
+def sync_issue_content(
+    jira: JiraAdapter,
+    issue_key: str,
+    *,
+    summary: str,
+    description: str,
+    labels: list[str],
+    extra_fields: dict[str, Any] | None = None,
+) -> None:
+    jira.update_issue_fields(
+        issue_key,
+        {
+            "summary": summary.strip(),
+            "description": description,
+            "labels": [str(label).strip() for label in labels if str(label).strip()],
+            **(extra_fields or {}),
+        },
+    )
 
 
 def build_list_html(items: list[tuple[str, str]]) -> str:
@@ -165,6 +348,55 @@ def build_list_html(items: list[tuple[str, str]]) -> str:
     return f"<ul>{rendered}</ul>"
 
 
+def markdown_to_storage_html(source_body: str) -> str:
+    rendered = markdown_lib.markdown(
+        source_body,
+        extensions=["extra", "sane_lists"],
+        output_format="xhtml",
+    ).strip()
+    return rendered or "<p>Sem conteudo renderizavel.</p>"
+
+
+def rewrite_markdown_repo_links(
+    source_body: str,
+    *,
+    repo_root: Path,
+    repo_artifact: str,
+) -> str:
+    source_file = (repo_root / repo_artifact).resolve()
+    tracked_files = resolve_tracked_repo_files(repo_root)
+
+    def replacer(match: re.Match[str]) -> str:
+        label = match.group(1)
+        raw_target = match.group(2).strip()
+        if not raw_target or "://" in raw_target or raw_target.startswith(("mailto:", "#")):
+            return match.group(0)
+        target_path, hash_separator, fragment = raw_target.partition("#")
+        candidate = (source_file.parent / target_path).resolve()
+        try:
+            repo_relative = candidate.relative_to(repo_root).as_posix()
+        except ValueError:
+            return match.group(0)
+        if repo_relative not in tracked_files or not candidate.is_file():
+            return match.group(0)
+        github_url = github_blob_url(repo_root, repo_relative)
+        if hash_separator and fragment.strip():
+            github_url = f"{github_url}#{fragment.strip()}"
+        return f"[{label}]({github_url})"
+
+    rewritten = MARKDOWN_LINK_TARGET_RE.sub(replacer, source_body)
+    return linkify_repo_relative_paths(rewritten, repo_root=repo_root)
+
+
+def confluence_expand_macro(title: str, body_html: str) -> str:
+    return (
+        '<ac:structured-macro ac:name="expand">'
+        f'<ac:parameter ac:name="title">{escape(title)}</ac:parameter>'
+        f"<ac:rich-text-body>{body_html}</ac:rich-text-body>"
+        "</ac:structured-macro>"
+    )
+
+
 def build_storage_snapshot(
     *,
     title: str,
@@ -174,20 +406,28 @@ def build_storage_snapshot(
     extra_notes: list[str] | None = None,
 ) -> str:
     source_path = repo_root / repo_artifact
-    source_body = source_path.read_text(encoding="utf-8")
+    source_body = rewrite_markdown_repo_links(
+        source_path.read_text(encoding="utf-8"),
+        repo_root=repo_root,
+        repo_artifact=repo_artifact,
+    )
+    rendered_source = markdown_to_storage_html(source_body)
+    source_url = github_blob_url(repo_root, repo_artifact)
     notes = extra_notes or []
     notes_html = "".join(f"<li>{escape(note)}</li>" for note in notes if note.strip())
     notes_block = f"<ul>{notes_html}</ul>" if notes_html else "<p>n/a</p>"
     return (
         f"<h1>{escape(title)}</h1>"
         "<p>Pagina sincronizada a partir do artefato versionado no repositorio.</p>"
-        f"<p><strong>Origem no repo:</strong> <code>{escape(repo_artifact)}</code></p>"
+        f'<p><strong>Origem no GitHub:</strong> <a href="{escape(source_url, quote=True)}">{escape(repo_artifact)}</a></p>'
         "<h2>Issues relacionadas</h2>"
         f"{build_list_html(related_issues)}"
         "<h2>Notas de sincronizacao</h2>"
         f"{notes_block}"
+        "<h2>Conteudo sincronizado</h2>"
+        f"{rendered_source}"
         "<h2>Conteudo de origem</h2>"
-        f"<pre>{escape(source_body)}</pre>"
+        f"{confluence_expand_macro('Expandir documento de origem', rendered_source)}"
     )
 
 
@@ -266,7 +506,11 @@ def sync_confluence_page_tree(
     version_message: str = "sync-atlassian-seed",
 ) -> dict[str, dict[str, str]]:
     space = adapter.get_space(resolved.confluence_space_key)
-    actual_space_key = str(space.get("key", "")).strip() or resolved.confluence_space_key
+    actual_space_key = (
+        str(space.get("currentActiveAlias", "")).strip()
+        or str(space.get("key", "")).strip()
+        or resolved.confluence_space_key
+    )
     page_lookup: dict[str, dict[str, str]] = {}
     parent_ids: dict[str, str] = {}
     sync_notes = [note for note in (notes or []) if str(note).strip()]
@@ -352,9 +596,13 @@ def ensure_migration_issue(
     jira: JiraAdapter,
     project_key: str,
     site_url: str,
+    repo_root: Path,
     bundle_zip_path: Path,
-    bundle_manifest_path: str,
 ) -> tuple[dict[str, Any], list[str]]:
+    desired_description = build_migration_issue_description(
+        repo_root,
+        bundle_attachment_name=bundle_zip_path.name,
+    )
     existing = jira.find_issue_by_summary(
         project_key=project_key,
         summary=MIGRATION_ISSUE_SUMMARY,
@@ -362,20 +610,31 @@ def ensure_migration_issue(
     )
     if existing:
         issue = existing
+        issue_key = str(issue.get("key", "")).strip()
+        if not issue_key:
+            raise AtlassianPlatformError("Nao foi possivel resolver a key da issue de migracao.")
+        sync_issue_content(
+            jira,
+            issue_key,
+            summary=MIGRATION_ISSUE_SUMMARY,
+            description=desired_description,
+            labels=MIGRATION_ISSUE_LABELS,
+            extra_fields={
+                "components": [{"name": "ai-control-plane"}],
+                "priority": {"name": "High"},
+            },
+        )
     else:
         issue = jira.create_issue(
             project_key=project_key,
             issue_type="Task",
             summary=MIGRATION_ISSUE_SUMMARY,
-            description=build_issue_description(
-                [
-                    "Issue de governanca da migracao retroativa do piloto AI control plane.",
-                    f"Bundle local: {bundle_zip_path}",
-                    f"Manifesto local: {bundle_manifest_path}",
-                    "Objetivo: anexar o bundle auditavel, sincronizar paginas Confluence e semear backlog/worklog no Jira.",
-                ]
-            ),
+            description=desired_description,
             labels=MIGRATION_ISSUE_LABELS,
+            extra_fields={
+                "components": [{"name": "ai-control-plane"}],
+                "priority": {"name": "High"},
+            },
         )
     issue_key = str(issue.get("key", "")).strip()
     if not issue_key:
@@ -384,9 +643,7 @@ def ensure_migration_issue(
     current = jira.get_issue(issue_key, fields=["attachment", "status"])
     attachments = ((current.get("fields") or {}).get("attachment")) or []
     existing_names = {
-        str(entry.get("filename", "")).strip()
-        for entry in attachments
-        if isinstance(entry, dict)
+        str(entry.get("filename", "")).strip() for entry in attachments if isinstance(entry, dict)
     }
     uploaded: list[dict[str, Any]] = []
     if bundle_zip_path.name not in existing_names:
@@ -403,18 +660,24 @@ def ensure_issue_reaches_status(
     issue = jira.get_issue(issue_key, fields=["status"])
     fields = issue.get("fields") or {}
     current_status = str(((fields.get("status") or {}).get("name")) or "").strip()
-    current_index = -1
-    target_index = -1
-    for index, (logical, candidates) in enumerate(WORKFLOW_ORDER):
-        candidate_set = {normalize_status_label(value) for value in candidates}
-        if normalize_status_label(current_status) in candidate_set:
-            current_index = index
-        if logical == target_logical_status:
-            target_index = index
-    if target_index < 0 or current_index >= target_index:
+    current_logical_status = logical_status_from_name(current_status)
+    target = target_logical_status.strip().casefold()
+    if not current_logical_status or not target:
         return
-    for next_index in range(current_index + 1, target_index + 1):
-        _, candidates = WORKFLOW_ORDER[next_index]
+    transition_path = workflow_transition_path(current_logical_status, target)
+    if not transition_path:
+        raise AtlassianPlatformError(
+            "Nao foi encontrado caminho logico de transicao "
+            f"de {current_logical_status!r} para {target!r} na issue {issue_key}."
+        )
+    if len(transition_path) == 1:
+        return
+    for next_logical_status in transition_path[1:]:
+        candidates = next(
+            candidate_values
+            for logical, candidate_values in WORKFLOW_ORDER
+            if logical == next_logical_status
+        )
         candidate_set = {normalize_status_label(value) for value in candidates}
         transitions = jira.get_transitions(issue_key)
         chosen = None
@@ -456,7 +719,9 @@ def sync_confluence_docs(
     if migration_issue:
         migration_issue_key = str(migration_issue.get("key", "")).strip()
         if migration_issue_key:
-            related_links.append((migration_issue_key, issue_url(resolved.site_url, migration_issue_key)))
+            related_links.append(
+                (migration_issue_key, issue_url(resolved.site_url, migration_issue_key))
+            )
             seen_issue_keys.add(migration_issue_key)
 
     for raw_key in issue_keys or []:
@@ -481,13 +746,13 @@ def sync_confluence_docs(
     )
 
     if migration_issue_key:
-        jira.add_comment(
+        jira.ensure_comment(
             migration_issue_key,
             render_structured_comment(
                 {
                     "agent": "ai-documentation-agent",
                     "interaction_type": "documentation-sync",
-                    "status": "Doing",
+                    "status": canonicalize_workflow_status("Doing"),
                     "contexto": [
                         "Confluence resincronizado por task dedicada, sem depender da semeadura completa.",
                         "O objetivo e manter a documentacao oficial viva enquanto o board do Jira Software ainda esta em tratamento.",
@@ -558,8 +823,8 @@ def seed_atlassian(
         jira=jira,
         project_key=resolved.jira_project_key,
         site_url=resolved.site_url,
+        repo_root=control_plane.repo_root,
         bundle_zip_path=Path(bundle["zip_path"]),
-        bundle_manifest_path=str(bundle["manifest_path"]),
     )
     migration_issue_key = str(migration_issue.get("key", "")) or MIGRATION_ISSUE_SUMMARY
     migration_issue_url = issue_url(resolved.site_url, migration_issue_key)
@@ -570,28 +835,47 @@ def seed_atlassian(
     jira_records.extend(backfill["jira"]["roadmap_suggestions"])
     jira_records.extend(backfill["jira"]["worklog_doing"])
     jira_records.extend(backfill["jira"]["worklog_done"])
+    existing_project_issues = jira.search_issues(
+        f'project = "{resolved.jira_project_key}" ORDER BY created ASC',
+        fields=["summary", "description", "issuetype", "labels"],
+        max_results=500,
+    )
+    existing_issue_index = build_existing_issue_index(existing_project_issues)
 
     for record in jira_records:
-        existing = jira.find_issue_by_summary(
-            project_key=resolved.jira_project_key,
-            summary=str(record["summary"]).strip(),
-            issue_types=[str(record["issue_type"]).strip()],
-        )
+        record_issue_type = str(record["issue_type"]).strip()
+        record_external_id = str(record["external_id"]).strip()
+        existing = existing_issue_index.get((record_issue_type, record_external_id))
+        if existing is None:
+            existing = jira.find_issue_by_summary(
+                project_key=resolved.jira_project_key,
+                summary=str(record["summary"]).strip(),
+                issue_types=[record_issue_type],
+            )
         if existing:
             issue = existing
-            created = False
         else:
             issue = jira.create_issue(
                 project_key=resolved.jira_project_key,
-                issue_type=str(record["issue_type"]).strip(),
+                issue_type=record_issue_type,
                 summary=str(record["summary"]).strip(),
                 description=build_issue_description(record["description_lines"]),
                 labels=[str(label).strip() for label in record["labels"] if str(label).strip()],
+                extra_fields=issue_extra_fields(record),
             )
-            created = True
         issue_key = str(issue.get("key", "")).strip()
         if not issue_key:
-            raise AtlassianPlatformError(f"Nao foi possivel resolver a key da issue para {record['summary']!r}.")
+            raise AtlassianPlatformError(
+                f"Nao foi possivel resolver a key da issue para {record['summary']!r}."
+            )
+        sync_issue_content(
+            jira,
+            issue_key,
+            summary=str(record["summary"]).strip(),
+            description=build_issue_description(record["description_lines"]),
+            labels=[str(label).strip() for label in record["labels"] if str(label).strip()],
+            extra_fields=issue_extra_fields(record),
+        )
         seeded_issues.append(
             {
                 "external_id": str(record["external_id"]).strip(),
@@ -600,14 +884,22 @@ def seed_atlassian(
                 "summary": str(record["summary"]).strip(),
             }
         )
-        if created:
-            ensure_issue_reaches_status(
-                jira=jira,
-                issue_key=issue_key,
-                target_logical_status=state_hint_to_logical_status(str(record["state_hint"]).strip()),
-            )
-
-    seed_issue_links = [(entry["key"], issue_url(resolved.site_url, entry["key"])) for entry in seeded_issues]
+        existing_issue_index[(record_issue_type, record_external_id)] = {
+            "key": issue_key,
+            "fields": {
+                "summary": str(record["summary"]).strip(),
+                "description": build_issue_description(record["description_lines"]),
+                "issuetype": {"name": record_issue_type},
+            },
+        }
+        ensure_issue_reaches_status(
+            jira=jira,
+            issue_key=issue_key,
+            target_logical_status=state_hint_to_logical_status(str(record["state_hint"]).strip()),
+        )
+    seed_issue_links = [
+        (entry["key"], issue_url(resolved.site_url, entry["key"])) for entry in seeded_issues
+    ]
     migration_link = (migration_issue_key, migration_issue_url)
     page_lookup = sync_confluence_page_tree(
         adapter=confluence,
@@ -629,13 +921,13 @@ def seed_atlassian(
         page_lookup["DOT - Migration Plan"]["url"],
         *bundle_attachment_urls,
     ]
-    jira.add_comment(
+    jira.ensure_comment(
         migration_issue_key,
         render_structured_comment(
             {
                 "agent": "ai-documentation-agent",
                 "interaction_type": "schema-artifact",
-                "status": "Doing",
+                "status": canonicalize_workflow_status("Doing"),
                 "contexto": [
                     "Schema Jira aplicado e bundle auditavel gerado antes da semeadura.",
                     "Confluence sincronizado como fonte oficial de documentacao viva.",
@@ -660,7 +952,7 @@ def seed_atlassian(
         evidencias = list(record["seed_activity"]["evidencias"])
         evidencias.extend(related_pages)
         evidencias.append(migration_issue_url)
-        jira.add_comment(
+        jira.ensure_comment(
             issue_key,
             render_structured_comment(
                 {

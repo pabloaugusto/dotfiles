@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import time
 import uuid
 from pathlib import Path
 from typing import Any
@@ -75,6 +76,24 @@ def active_custom_fields(model: dict[str, Any], *, role_ids: set[str]) -> list[d
             continue
         result.append(entry)
     return result
+
+
+def configured_custom_field_options(
+    field: dict[str, Any],
+    spec: dict[str, Any],
+    *,
+    role_ids: set[str],
+) -> list[str]:
+    options_source = str(field.get("options_source", "")).strip()
+    if options_source == "enabled_roles":
+        return sorted(role_ids)
+    raw_options = field.get("options")
+    if isinstance(raw_options, list):
+        return [str(option).strip() for option in raw_options if str(option).strip()]
+    default_options = spec.get("default_options")
+    if isinstance(default_options, list):
+        return [str(option).strip() for option in default_options if str(option).strip()]
+    return []
 
 
 def workflow_status_entries(
@@ -157,6 +176,50 @@ def transition_payload(
     }
 
 
+def default_workflow_transition_specs() -> list[dict[str, Any]]:
+    return [
+        {"from": "Backlog", "to": "Refinement"},
+        {"from": "Refinement", "to": "Ready"},
+        {"from": "Ready", "to": "Doing"},
+        {"from": "Doing", "to": "Paused"},
+        {"from": "Paused", "to": "Doing"},
+        {"from": "Doing", "to": "Testing"},
+        {"from": "Testing", "to": "Review"},
+        {"from": "Review", "to": "Done"},
+        {"from": "Testing", "to": "Changes Requested"},
+        {"from": "Review", "to": "Changes Requested"},
+        {"from": "Changes Requested", "to": "Doing"},
+    ]
+
+
+def workflow_transition_entries(
+    workflow: dict[str, Any],
+    *,
+    status_references: dict[str, str],
+) -> list[dict[str, Any]]:
+    raw_transitions = workflow.get("transitions") or default_workflow_transition_specs()
+    if not isinstance(raw_transitions, list):
+        raise AiControlPlaneError("workflow.transitions precisa ser lista.")
+    payload: list[dict[str, Any]] = []
+    for index, entry in enumerate(raw_transitions, start=1):
+        if not isinstance(entry, dict):
+            raise AiControlPlaneError("workflow.transitions aceita apenas mapas.")
+        from_status = str(entry.get("from", "")).strip()
+        to_status = str(entry.get("to", "")).strip()
+        if not from_status or not to_status:
+            raise AiControlPlaneError("Cada transicao precisa de from e to.")
+        transition_id = int(entry.get("id") or (index * 10 + 1))
+        payload.append(
+            transition_payload(
+                transition_id,
+                from_status,
+                to_status,
+                status_references=status_references,
+            )
+        )
+    return payload
+
+
 def workflow_create_payload(
     model: dict[str, Any],
     *,
@@ -180,15 +243,10 @@ def workflow_create_payload(
             "actions": [],
             "triggers": [],
         },
-        transition_payload(11, "Backlog", "Refinement", status_references=status_references),
-        transition_payload(21, "Refinement", "Ready", status_references=status_references),
-        transition_payload(31, "Ready", "Doing", status_references=status_references),
-        transition_payload(41, "Doing", "Testing", status_references=status_references),
-        transition_payload(51, "Testing", "Review", status_references=status_references),
-        transition_payload(61, "Review", "Done", status_references=status_references),
-        transition_payload(71, "Testing", "Changes Requested", status_references=status_references),
-        transition_payload(81, "Review", "Changes Requested", status_references=status_references),
-        transition_payload(91, "Changes Requested", "Doing", status_references=status_references),
+        *workflow_transition_entries(
+            workflow,
+            status_references=status_references,
+        ),
     ]
     return {
         "scope": {"type": "GLOBAL"},
@@ -212,6 +270,151 @@ def workflow_validation_payload(payload: dict[str, Any]) -> dict[str, Any]:
             "levels": ["ERROR", "WARNING"],
         },
     }
+
+
+def workflow_update_validation_payload(payload: dict[str, Any]) -> dict[str, Any]:
+    return {
+        "payload": payload,
+        "validationOptions": {
+            "levels": ["ERROR", "WARNING"],
+        },
+    }
+
+
+def workflow_transition_signature(transition: dict[str, Any]) -> tuple[Any, ...]:
+    links = transition.get("links") or []
+    normalized_links = []
+    for entry in links:
+        if not isinstance(entry, dict):
+            continue
+        normalized_links.append(
+            (
+                str(entry.get("fromStatusReference", "")).strip(),
+                int(entry.get("fromPort", 0)),
+                int(entry.get("toPort", 0)),
+            )
+        )
+    return (
+        str(transition.get("id", "")).strip(),
+        str(transition.get("name", "")).strip(),
+        str(transition.get("type", "")).strip(),
+        str(transition.get("toStatusReference", "")).strip(),
+        tuple(sorted(normalized_links)),
+    )
+
+
+def workflow_status_layout_signature(status: dict[str, Any]) -> tuple[Any, ...]:
+    layout = status.get("layout") or {}
+    properties = status.get("properties") or {}
+    return (
+        str(status.get("statusReference", "")).strip(),
+        float(layout.get("x", 0.0)),
+        float(layout.get("y", 0.0)),
+        tuple(sorted((str(key), str(value)) for key, value in properties.items())),
+    )
+
+
+def current_workflow_detail_by_name(
+    client: AtlassianHttpClient,
+    workflow_name: str,
+) -> dict[str, Any] | None:
+    payload = client.request_json(
+        "jira",
+        "/rest/api/3/workflows/search",
+        params={
+            "workflowName": workflow_name,
+            "expand": "usage,values.transitions",
+        },
+    )
+    values = payload.get("values", [])
+    if not isinstance(values, list):
+        return None
+    for entry in values:
+        if not isinstance(entry, dict):
+            continue
+        name = str(entry.get("name", "")).strip()
+        if name == workflow_name:
+            return entry
+    return None
+
+
+def workflow_requires_update(existing_workflow: dict[str, Any], desired_payload: dict[str, Any]) -> bool:
+    workflows = desired_payload.get("workflows", [])
+    if not isinstance(workflows, list) or not workflows:
+        raise AiControlPlaneError("Payload de workflow invalido para comparacao de drift.")
+    desired_workflow = workflows[0]
+    existing_statuses = existing_workflow.get("statuses") or []
+    desired_statuses = desired_workflow.get("statuses") or []
+    if {
+        workflow_status_layout_signature(entry)
+        for entry in existing_statuses
+        if isinstance(entry, dict)
+    } != {
+        workflow_status_layout_signature(entry)
+        for entry in desired_statuses
+        if isinstance(entry, dict)
+    }:
+        return True
+    existing_transitions = existing_workflow.get("transitions") or []
+    desired_transitions = desired_workflow.get("transitions") or []
+    if {
+        workflow_transition_signature(entry)
+        for entry in existing_transitions
+        if isinstance(entry, dict)
+    } != {
+        workflow_transition_signature(entry)
+        for entry in desired_transitions
+        if isinstance(entry, dict)
+    }:
+        return True
+    current_description = str(existing_workflow.get("description", "")).strip()
+    desired_description = str(desired_workflow.get("description", "")).strip()
+    return current_description != desired_description
+
+
+def workflow_update_payload(
+    model: dict[str, Any],
+    *,
+    current_statuses: dict[str, dict[str, Any]],
+    existing_workflow: dict[str, Any],
+) -> dict[str, Any]:
+    create_payload = workflow_create_payload(model, current_statuses=current_statuses)
+    desired_workflow = create_payload["workflows"][0]
+    workflow_id = str(existing_workflow.get("id", "")).strip()
+    version = existing_workflow.get("version")
+    if not workflow_id or not isinstance(version, dict):
+        raise AtlassianPlatformError("Workflow existente nao retornou id/version para update.")
+    return {
+        "statuses": create_payload["statuses"],
+        "workflows": [
+            {
+                "id": workflow_id,
+                "description": desired_workflow.get("description", ""),
+                "startPointLayout": desired_workflow.get("startPointLayout", {}),
+                "statuses": desired_workflow.get("statuses", []),
+                "transitions": desired_workflow.get("transitions", []),
+                "version": version,
+            }
+        ],
+    }
+
+
+def wait_for_workflow_convergence(
+    client: AtlassianHttpClient,
+    workflow_name: str,
+    desired_workflow_payload: dict[str, Any],
+    *,
+    attempts: int = 5,
+    sleep_seconds: float = 1.0,
+) -> dict[str, Any] | None:
+    latest: dict[str, Any] | None = None
+    for index in range(attempts):
+        latest = current_workflow_detail_by_name(client, workflow_name)
+        if latest is not None and not workflow_requires_update(latest, desired_workflow_payload):
+            return latest
+        if index < attempts - 1:
+            time.sleep(sleep_seconds)
+    return latest
 
 
 def current_project_statuses(client: AtlassianHttpClient, project_key: str) -> dict[str, dict[str, Any]]:
@@ -403,6 +606,21 @@ def ensure_field_options(client: AtlassianHttpClient, field_id: str, options: li
     return {"context_id": context_id, "created_options": missing}
 
 
+def field_screens(client: AtlassianHttpClient, field_id: str) -> list[dict[str, Any]]:
+    payload = client.request_json("jira", f"/rest/api/3/field/{field_id}/screens")
+    values = payload.get("values", [])
+    if not isinstance(values, list):
+        raise AtlassianPlatformError("Jira field screens retornou values em formato inesperado.")
+    return [entry for entry in values if isinstance(entry, dict)]
+
+
+def ensure_field_on_default_screen(client: AtlassianHttpClient, field_id: str) -> bool:
+    if field_screens(client, field_id):
+        return False
+    client.request_json("jira", f"/rest/api/3/screens/addToDefault/{field_id}", method="POST")
+    return True
+
+
 def build_apply_plan(repo_root: str | Path | None = None) -> dict[str, Any]:
     control_plane = load_ai_control_plane(repo_root)
     resolved = resolve_atlassian_platform(
@@ -425,6 +643,8 @@ def build_apply_plan(repo_root: str | Path | None = None) -> dict[str, Any]:
     workflow_name = str(workflow.get("name", "")).strip()
     scheme_name = str(workflow.get("scheme_name", "")).strip()
     active_fields = active_custom_fields(model, role_ids=role_ids)
+    desired_workflow_payload = workflow_create_payload(model, current_statuses=statuses)
+    live_workflow = current_workflow_detail_by_name(client, workflow_name)
 
     return {
         "model_path": str(model_path),
@@ -439,7 +659,12 @@ def build_apply_plan(repo_root: str | Path | None = None) -> dict[str, Any]:
             "exists": workflow_name in workflows,
             "scheme_name": scheme_name,
             "scheme_exists": scheme_name in workflow_schemes,
-            "payload": workflow_create_payload(model, current_statuses=statuses),
+            "requires_update": (
+                workflow_name in workflows
+                and live_workflow is not None
+                and workflow_requires_update(live_workflow, desired_workflow_payload)
+            ),
+            "payload": desired_workflow_payload,
         },
         "custom_fields": {
             "active_names": [str(entry.get("name", "")).strip() for entry in active_fields],
@@ -447,6 +672,16 @@ def build_apply_plan(repo_root: str | Path | None = None) -> dict[str, Any]:
                 str(entry.get("name", "")).strip()
                 for entry in active_fields
                 if str(entry.get("name", "")).strip() not in fields
+            ],
+            "detached_from_screens": [
+                str(entry.get("name", "")).strip()
+                for entry in active_fields
+                if str(entry.get("name", "")).strip() in fields
+                and str((fields[str(entry.get("name", "")).strip()] or {}).get("id", "")).strip()
+                and not field_screens(
+                    client,
+                    str((fields[str(entry.get("name", "")).strip()] or {}).get("id", "")).strip(),
+                )
             ],
         },
         "dashboards": {
@@ -495,31 +730,82 @@ def apply_jira_model(repo_root: str | Path | None = None) -> dict[str, Any]:
     workflow = model.get("workflow") or {}
     workflow_name = str(workflow.get("name", "")).strip()
     scheme_name = str(workflow.get("scheme_name", "")).strip()
+    desired_workflow_payload = workflow_create_payload(model, current_statuses=statuses)
+    live_workflow = current_workflow_detail_by_name(client, workflow_name) if workflow_name in workflows else None
     results: dict[str, Any] = {
         "model_path": str(model_path),
         "project": {"id": project_id, "key": resolved.jira_project_key, "has_issues": has_issues},
-        "workflow": {"name": workflow_name, "created": False, "validated": False},
+        "workflow": {
+            "name": workflow_name,
+            "created": False,
+            "validated": False,
+            "updated": False,
+            "update_validated": False,
+        },
         "workflow_scheme": {"name": scheme_name, "created": False, "assigned": False},
-        "custom_fields": {"created": [], "options_updated": []},
+        "custom_fields": {"created": [], "options_updated": [], "added_to_default_screen": []},
         "dashboards": {"created": []},
         "board": {"status": "deferred-until-agile-api-is-green"},
     }
 
     if workflow_name not in workflows:
-        payload = workflow_create_payload(model, current_statuses=statuses)
         client.request_json(
             "jira",
             "/rest/api/3/workflows/create/validation",
             method="POST",
-            payload=workflow_validation_payload(payload),
+            payload=workflow_validation_payload(desired_workflow_payload),
         )
         results["workflow"]["validated"] = True
-        client.request_json("jira", "/rest/api/3/workflows/create", method="POST", payload=payload)
+        client.request_json(
+            "jira",
+            "/rest/api/3/workflows/create",
+            method="POST",
+            payload=desired_workflow_payload,
+        )
         results["workflow"]["created"] = True
         workflows = current_workflows_by_name(client)
+        live_workflow = current_workflow_detail_by_name(client, workflow_name)
 
     if workflow_name not in workflows:
         raise AtlassianPlatformError(f"Workflow {workflow_name!r} nao apareceu apos a criacao.")
+
+    live_workflow = wait_for_workflow_convergence(
+        client,
+        workflow_name,
+        desired_workflow_payload,
+    )
+    if live_workflow is None:
+        raise AtlassianPlatformError(f"Nao foi possivel carregar o workflow publicado {workflow_name!r}.")
+
+    if workflow_requires_update(live_workflow, desired_workflow_payload):
+        update_payload = workflow_update_payload(
+            model,
+            current_statuses=statuses,
+            existing_workflow=live_workflow,
+        )
+        client.request_json(
+            "jira",
+            "/rest/api/3/workflows/update/validation",
+            method="POST",
+            payload=workflow_update_validation_payload(update_payload),
+        )
+        results["workflow"]["update_validated"] = True
+        client.request_json(
+            "jira",
+            "/rest/api/3/workflows/update",
+            method="POST",
+            payload=update_payload,
+        )
+        results["workflow"]["updated"] = True
+        live_workflow = wait_for_workflow_convergence(
+            client,
+            workflow_name,
+            desired_workflow_payload,
+        )
+        if live_workflow is None or workflow_requires_update(live_workflow, desired_workflow_payload):
+            raise AtlassianPlatformError(
+                f"Workflow {workflow_name!r} permaneceu em drift apos o update."
+            )
 
     scheme = workflow_schemes.get(scheme_name)
     if scheme is None:
@@ -572,32 +858,44 @@ def apply_jira_model(repo_root: str | Path | None = None) -> dict[str, Any]:
             "type": spec["type"],
             "searcherKey": spec["searcherKey"],
         }
-        created = client.request_json("jira", "/rest/api/3/field", method="POST", payload=payload)
-        field_id = str(created.get("id", "")).strip()
+        client.request_json("jira", "/rest/api/3/field", method="POST", payload=payload)
         results["custom_fields"]["created"].append(field_name)
-        if spec.get("supports_options"):
-            raw_options = field.get("options")
-            if isinstance(raw_options, list):
-                configured_options = raw_options
-            else:
-                default_options = spec.get("default_options")
-                if isinstance(default_options, list):
-                    configured_options = default_options
-                else:
-                    configured_options = []
-            ensure_result = ensure_field_options(
-                client,
-                field_id,
-                [str(option).strip() for option in configured_options if str(option).strip()],
-            )
-            results["custom_fields"]["options_updated"].append(
-                {
-                    "field": field_name,
-                    "context_id": ensure_result["context_id"],
-                    "created_options": ensure_result["created_options"],
-                }
-            )
         fields = current_fields_by_name(client)
+    for field in active_fields:
+        field_name = str(field.get("name", "")).strip()
+        field_kind = str(field.get("type", "")).strip()
+        spec = FIELD_TYPE_MAP.get(field_kind)
+        if not field_name or spec is None or not spec.get("supports_options"):
+            continue
+        field_entry = fields.get(field_name) or {}
+        field_id = str((field_entry or {}).get("id", "")).strip()
+        if not field_id:
+            continue
+        configured_options = configured_custom_field_options(
+            field,
+            spec,
+            role_ids=role_ids,
+        )
+        ensure_result = ensure_field_options(
+            client,
+            field_id,
+            configured_options,
+        )
+        results["custom_fields"]["options_updated"].append(
+            {
+                "field": field_name,
+                "context_id": ensure_result["context_id"],
+                "created_options": ensure_result["created_options"],
+            }
+        )
+    for field in active_fields:
+        field_name = str(field.get("name", "")).strip()
+        field_entry = fields.get(field_name) or {}
+        field_id = str((field_entry or {}).get("id", "")).strip()
+        if not field_name or not field_id:
+            continue
+        if ensure_field_on_default_screen(client, field_id):
+            results["custom_fields"]["added_to_default_screen"].append(field_name)
 
     for dashboard in model.get("dashboards") or []:
         if not isinstance(dashboard, dict):

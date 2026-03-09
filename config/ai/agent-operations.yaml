@@ -18,10 +18,43 @@ global_contract:
       - Proximo passo
     mandatory_rules:
       - no-transition-without-structured-comment
+      - every-agent-touch-on-tracked-issue-must-log-in-jira
+      - every-acting-role-must-comment-when-work-starts
+      - every-acting-role-must-comment-on-meaningful-progress-while-working
+      - every-acting-role-must-comment-before-handoff-or-pause
+      - every-relevant-operation-must-have-explicit-owner-agent
+      - if-no-agent-fits-the-operation-create-or-formalize-one-through-backlog
+      - jira-status-must-reflect-real-time-state-of-work
+      - jira-status-and-agent-comments-must-stay-in-parity
       - every-acting-role-must-update-current-and-next-role
       - every-acting-role-must-attach-evidence-or-explicit-na
+      - repo-artifact-references-must-use-github-links
+      - every-commit-must-map-to-a-single-jira-scope
+      - every-branch-must-map-to-a-single-jira-scope
+      - every-pr-must-map-to-a-single-jira-scope
+      - tags-and-releases-must-stay-jira-traceable
+      - jira-key-in-git-metadata-must-belong-to-real-work-performed
+      - doing-must-reflect-active-execution-only
+      - interrupted-work-must-move-to-paused-with-reason
       - documentation-changes-must-be-mentioned-in-related-issue
       - comments-without-proof-do-not-count-as-complete-work
+      - consultive-reviewers-must-log-findings-in-jira-when-scope-is-tracked
+      - blockers-that-no-agent-can-unblock-must-escalate-to-the-user
+      - blocker-escalation-must-use-all-available-channels
+      - blocker-escalation-attempts-must-be-logged-in-jira-and-confluence
+      - every-meaningful-agent-milestone-must-also-be-summarized-in-chat
+      - chat-summaries-must-stay-human-short-and-non-robotic
+      - chat-summaries-must-start-with-bracketed-dd-mm-hh-mm-timestamp-and-bold-agent-name-prefix
+      - chat-summary-timestamp-must-use-real-local-system-clock-at-send-time
+      - chat-summary-body-must-start-on-the-line-after-the-prefix
+      - repo-references-in-chat-must-use-ide-openable-links
+      - repo-file-chat-links-must-use-absolute-path-markdown-targets
+      - repo-file-chat-links-must-not-use-vscode-resource-or-custom-uri
+      - jira-and-confluence-work-items-in-chat-must-use-canonical-web-links
+      - chat-summaries-do-not-replace-jira-or-confluence-traceability
+      - closed-issues-must-trigger-commit-checkpoint-evaluation
+      - commit-must-happen-immediately-after-issue-close-when-scope-is-already-valid
+      - deferred-commit-after-issue-close-must-be-justified-by-parent-scope
     accepted_evidence:
       - jira-attachment
       - jira-comment-link
@@ -46,6 +79,10 @@ profiles:
         - progress-update
         - technical-decision
         - blocker
+      cadence_rules:
+        - registrar comentario ao iniciar a atuacao na issue
+        - registrar comentario a cada marco relevante, descoberta ou decisao
+        - registrar comentario antes de handoff, pausa ou transicao
       evidence_expectations:
         - link para issue, epic, idea ou artefato usado na decisao
         - link para pagina do Confluence quando houver documentacao
@@ -64,6 +101,11 @@ profiles:
         - technical-decision
         - unexpected-finding
         - blocker
+      cadence_rules:
+        - developer puxa trabalho apenas de Ready, nunca por empurrar item manualmente para Doing
+        - registrar comentario quando iniciar a implementacao
+        - registrar comentario ao concluir cada marco tecnico relevante
+        - registrar comentario antes de pausar, pedir ajuda ou fazer handoff
       evidence_expectations:
         - commits, PRs, logs, testes locais ou resultados de dry-run
         - diff ou referencia objetiva para a mudanca aplicada
@@ -74,6 +116,9 @@ profiles:
       default_actions:
         - solicitar atualizacao documental ao documentation-agent quando necessario
         - linkar ADR ou runbook quando a implementacao depender deles
+    operating_rules:
+      - se houver duvida de escopo, prioridade, destino ou forma de executar, consultar o ai-product-owner ou ai-tech-lead antes de seguir
+      - developer nao reprioriza backlog nem muda sozinho a ordem da fila
 
   quality-common:
     jira:
@@ -83,6 +128,10 @@ profiles:
         - test-success
         - review-feedback
         - approval
+      cadence_rules:
+        - registrar comentario ao iniciar validacao ou revisao
+        - registrar comentario a cada rodada relevante de achados ou evidencias
+        - registrar comentario antes de aprovar, reprovar, pausar ou devolver
       evidence_expectations:
         - logs, screenshots, links de pipeline, checklist ou referencias de codigo
         - falha sem evidencia nao encerra validacao
@@ -100,6 +149,8 @@ roles:
       primary_issue_actions:
         - criar issues principais do backlog
         - consolidar escopo, descricao, prioridade e criterios de aceitacao
+        - manter backlog, refinement e ready ordenados por prioridade real
+        - manter timeline, start date e due date atualizados para itens acima de subtarefa
         - promover item de Backlog para Refinement e de Refinement para Ready
       transitions_owned:
         - Backlog -> Refinement
@@ -111,6 +162,7 @@ roles:
       required_evidence:
         - link para backlog local, Product Discovery ou artefato de intake
         - link para pagina do Confluence quando houver contexto formal
+        - justificativa de prioridade e impacto no roadmap quando houver reordenacao relevante
     confluence:
       pages_owned:
         - migration-plan
@@ -120,7 +172,9 @@ roles:
         - validar se o contexto oficial esta linkado na issue
     operating_steps:
       - revisar intake, backlog bruto ou idea promovida
+      - posicionar o item novo no ponto correto da prioridade do backlog e das filas ordenadas do board
       - criar ou atualizar a issue principal no Jira
+      - revisar se Start date e Due date precisam ser estimados ou recalculados
       - registrar comentario estruturado com escopo, prioridade e evidencias
       - garantir links para o Confluence ou registrar n/a explicito
       - mover a issue para Refinement ou Ready e definir o proximo papel
@@ -131,6 +185,7 @@ roles:
       primary_issue_actions:
         - validar arquitetura e fronteiras tecnicas
         - registrar decisoes arquiteturais e riscos estruturais
+        - enriquecer itens em Backlog e Refinement com contexto tecnico previo
       transitions_owned:
         - Backlog -> Refinement
         - Review -> Changes Requested
@@ -148,6 +203,7 @@ roles:
         - criar ou atualizar ADRs
         - manter a documentacao arquitetural linkada na issue
     operating_steps:
+      - inspecionar proativamente backlog e refinement em busca de demandas que precisem de discovery tecnico
       - revisar a demanda refinada e mapear impacto estrutural
       - registrar decisao arquitetural no Jira com evidencias
       - criar ou atualizar ADR no Confluence quando a decisao for perene
@@ -160,22 +216,28 @@ roles:
       primary_issue_actions:
         - gerir fluxo, riscos, bloqueios e saude do trabalho
         - replanejar prioridades operacionais quando necessario
+        - estimular e coordenar enriquecimento proativo do backlog e refinement
       transitions_owned:
-        - sem-transicao-exclusiva
+        - Doing -> Paused
+        - Paused -> Doing
       required_comment_types:
         - progress-update
         - blocker
         - priority-change
       required_evidence:
         - dados de fila, risco, bloqueio ou dependencia concreta
+        - log dos canais de notificacao acionados quando houver bloqueio sem saida autonoma
     confluence:
       pages_owned:
         - delivery-ops
       page_actions:
         - atualizar runbooks operacionais e politicas de fluxo quando mudarem
     operating_steps:
+      - inspecionar backlog e refinement para acionar discovery tecnico antes de o item ser puxado
       - inspecionar fila, dependencias e gargalos
       - registrar comentario operacional com risco, impacto e evidencia
+      - pausar ou retomar item interrompido quando houver espera operacional real
+      - escalar bloqueio para o usuario por todos os canais disponiveis quando nenhum agente conseguir destravar a demanda
       - ajustar ownership, proximo papel e escalacoes necessarias
       - refletir mudancas de processo relevantes no Confluence
 
@@ -185,8 +247,11 @@ roles:
       primary_issue_actions:
         - decompor trabalho em subtasks
         - coordenar handoffs entre dev, QA, review e docs
+        - preparar insumos tecnicos para itens em Backlog e Refinement
       transitions_owned:
         - Ready -> Doing
+        - Doing -> Paused
+        - Paused -> Doing
         - Changes Requested -> Doing
       required_comment_types:
         - progress-update
@@ -200,9 +265,11 @@ roles:
       page_actions:
         - referenciar runbooks, playbooks e decressoes tecnicas
     operating_steps:
+      - inspecionar proativamente backlog e refinement para decompor e amadurecer demandas antes da execucao
       - revisar issue pronta para execucao
       - quebrar o escopo em subtasks quando necessario
       - registrar plano tecnico e evidencias do handoff no Jira
+      - mover item interrompido de Doing para Paused quando a execucao parar
       - garantir links para playbooks e ADRs no Confluence
       - definir o developer ou papel executor seguinte
 
@@ -214,6 +281,8 @@ roles:
         - atualizar a issue com progresso, achados e bloqueios
       transitions_owned:
         - Ready -> Doing
+        - Doing -> Paused
+        - Paused -> Doing
         - Changes Requested -> Doing
       required_comment_types:
         - progress-update
@@ -227,6 +296,7 @@ roles:
     operating_steps:
       - puxar issue em Ready para Doing
       - implementar a mudanca e registrar progresso com evidencias
+      - mover para Paused quando a execucao interromper e houver espera real
       - comentar descobertas e decisoes tecnicas antes do handoff
       - anexar logs, links ou resultados de teste e definir proximo papel
 
@@ -238,6 +308,8 @@ roles:
         - atualizar a issue com progresso, achados e bloqueios
       transitions_owned:
         - Ready -> Doing
+        - Doing -> Paused
+        - Paused -> Doing
         - Changes Requested -> Doing
       required_comment_types:
         - progress-update
@@ -251,6 +323,7 @@ roles:
     operating_steps:
       - puxar issue em Ready para Doing
       - implementar a mudanca e registrar progresso com evidencias
+      - mover para Paused quando a execucao interromper e houver espera real
       - comentar limitacoes de ambiente, compatibilidade e bloqueios
       - anexar logs, links ou resultados de teste e definir proximo papel
 
@@ -262,6 +335,8 @@ roles:
         - atualizar a issue com progresso, achados e bloqueios
       transitions_owned:
         - Ready -> Doing
+        - Doing -> Paused
+        - Paused -> Doing
         - Changes Requested -> Doing
       required_comment_types:
         - progress-update
@@ -275,6 +350,7 @@ roles:
     operating_steps:
       - puxar issue em Ready para Doing
       - aplicar a mudanca de automacao e registrar progresso com evidencias
+      - mover para Paused quando a execucao interromper e houver espera real
       - comentar risco operacional, rollback e achados relevantes
       - anexar logs, links ou resultados de validacao e definir proximo papel
 
@@ -286,6 +362,8 @@ roles:
         - atualizar a issue com progresso, achados e bloqueios
       transitions_owned:
         - Ready -> Doing
+        - Doing -> Paused
+        - Paused -> Doing
         - Changes Requested -> Doing
       required_comment_types:
         - progress-update
@@ -299,6 +377,7 @@ roles:
     operating_steps:
       - puxar issue em Ready para Doing
       - ajustar o contrato declarativo e registrar progresso com evidencias
+      - mover para Paused quando a execucao interromper e houver espera real
       - comentar impactos de schema, governanca e compatibilidade
       - anexar validacoes e definir proximo papel
 
@@ -327,26 +406,143 @@ roles:
       - anexar evidencias objetivas ou explicitar n/a quando nao houver artefato
       - aprovar para Review ou devolver para Changes Requested
 
-  ai-reviewer:
+  ai-reviewer-python:
     profile: quality-common
+    standards_profile: python-review
+    decision_policy: python-review-policy
     jira:
       primary_issue_actions:
-        - revisar implementacao, risco e aderencia ao contrato
-        - aprovar Review -> Done ou devolver para Changes Requested
+        - revisar codigo Python, tipagem, testes, performance e manutencao
+        - aprovar tecnicamente ou devolver para Changes Requested
       transitions_owned:
-        - Testing -> Review
         - Review -> Done
         - Review -> Changes Requested
       required_comment_types:
         - review-feedback
         - approval
       required_evidence:
-        - checklist de revisao, referencias de codigo ou justificativa objetiva
+        - referencias de codigo Python, testes, tipagem, lint ou risco tecnico
+    confluence:
+      page_actions:
+        - exigir guideline Python ou ADR quando a revisao depender disso
+    operating_steps:
+      - revisar a issue em Review quando o escopo tocar Python
+      - registrar comentario estruturado com achados, riscos e evidencias objetivas
+      - aprovar tecnicamente ou devolver para Changes Requested
+      - definir o proximo papel de handoff, inclusive review final ou docs
+    operating_rules:
+      - citar ao menos uma referencia normativa ou primaria quando o achado depender dela
+      - distinguir violacao de especificacao, convencao e tooling automatizado no comentario
+      - deixar explicito quando a aprovacao se apoia em lint, typing ou testes
+
+  ai-reviewer-powershell:
+    profile: quality-common
+    standards_profile: powershell-review
+    decision_policy: powershell-review-policy
+    jira:
+      primary_issue_actions:
+        - revisar codigo PowerShell, idempotencia, seguranca e compatibilidade
+        - aprovar tecnicamente ou devolver para Changes Requested
+      transitions_owned:
+        - Review -> Done
+        - Review -> Changes Requested
+      required_comment_types:
+        - review-feedback
+        - approval
+      required_evidence:
+        - referencias de script, Pester, dry-run ou risco operacional
+    confluence:
+      page_actions:
+        - exigir runbook ou guideline PowerShell quando a revisao depender disso
+    operating_steps:
+      - revisar a issue em Review quando o escopo tocar PowerShell
+      - registrar comentario estruturado com achados, riscos e evidencias objetivas
+      - aprovar tecnicamente ou devolver para Changes Requested
+      - definir o proximo papel de handoff, inclusive review final ou docs
+    operating_rules:
+      - citar ao menos uma referencia normativa ou primaria quando o achado depender dela
+      - distinguir regra de linguagem, host e analyzer no comentario
+      - explicitar risco de compatibilidade Windows PowerShell ou pwsh quando existir
+
+  ai-reviewer-automation:
+    profile: quality-common
+    standards_profile: automation-review
+    decision_policy: automation-review-policy
+    jira:
+      primary_issue_actions:
+        - revisar shell, workflows, Taskfile, CI e automacao
+        - aprovar tecnicamente ou devolver para Changes Requested
+      transitions_owned:
+        - Review -> Done
+        - Review -> Changes Requested
+      required_comment_types:
+        - review-feedback
+        - approval
+      required_evidence:
+        - logs, validadores, workflows, diffs declarativos ou risco de automacao
+    confluence:
+      page_actions:
+        - exigir runbook de automacao quando a revisao depender disso
+    operating_steps:
+      - revisar a issue em Review quando o escopo tocar automacao
+      - registrar comentario estruturado com achados, riscos e evidencias objetivas
+      - aprovar tecnicamente ou devolver para Changes Requested
+      - definir o proximo papel de handoff, inclusive review final ou docs
+    operating_rules:
+      - citar ao menos uma referencia normativa ou primaria quando o achado depender dela
+      - separar risco de shell, workflow, container ou pipeline no comentario
+      - explicitar impacto em determinismo, rollback ou seguranca operacional
+
+  ai-reviewer-config-policy:
+    profile: quality-common
+    standards_profile: config-policy-review
+    decision_policy: config-policy-review-policy
+    jira:
+      primary_issue_actions:
+        - revisar YAML, JSON, TOML, schemas, contratos e politicas declarativas
+        - aprovar tecnicamente ou devolver para Changes Requested
+      transitions_owned:
+        - Review -> Done
+        - Review -> Changes Requested
+      required_comment_types:
+        - review-feedback
+        - approval
+      required_evidence:
+        - diffs declarativos, validacao de schema ou impacto contratual objetivo
+    confluence:
+      page_actions:
+        - exigir pagina de schema ou politica quando a revisao depender disso
+    operating_steps:
+      - revisar a issue em Review quando o escopo tocar contratos ou config declarativa
+      - registrar comentario estruturado com achados, riscos e evidencias objetivas
+      - aprovar tecnicamente ou devolver para Changes Requested
+      - definir o proximo papel de handoff, inclusive review final ou docs
+    operating_rules:
+      - citar ao menos uma referencia normativa ou primaria quando o achado depender dela
+      - diferenciar erro sintatico, quebra de schema e problema de governanca documental
+      - explicitar impacto contratual e risco de compatibilidade quando aplicavel
+
+  ai-reviewer:
+    profile: quality-common
+    jira:
+      primary_issue_actions:
+        - consolidar pareceres especializados e revisar risco transversal
+        - aprovar Review -> Done ou devolver para Changes Requested quando houver necessidade cross-cutting
+      transitions_owned:
+        - Review -> Done
+        - Testing -> Review
+        - Review -> Changes Requested
+      required_comment_types:
+        - review-feedback
+        - approval
+      required_evidence:
+        - checklist cross-cutting, consolidacao dos pareceres especializados ou justificativa objetiva
     confluence:
       page_actions:
         - exigir link de ADR ou pagina relevante quando a revisao depender disso
     operating_steps:
-      - revisar a issue em Review
+      - revisar a issue em Review quando houver multiplas linguagens, alto risco ou dependencia cross-cutting
+      - consolidar pareceres dos revisores especialistas quando o escopo exigir
       - registrar comentario estruturado com parecer e evidencias
       - apontar achados objetivos ou aprovar explicitamente
       - encaminhar para Done ou Changes Requested com o proximo papel correto
@@ -359,6 +555,8 @@ roles:
         - atualizar a issue com progresso, achados e bloqueios
       transitions_owned:
         - Ready -> Doing
+        - Doing -> Paused
+        - Paused -> Doing
         - Changes Requested -> Doing
       required_comment_types:
         - progress-update
@@ -372,6 +570,7 @@ roles:
     operating_steps:
       - puxar issue em Ready ou em retorno de Changes Requested
       - aplicar a mudanca operacional e registrar progresso com evidencias
+      - mover para Paused quando a execucao interromper e houver espera real
       - comentar risco de ambiente, rollback e dependencias
       - anexar links de pipeline ou runbook e definir proximo papel
 

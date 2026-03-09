@@ -15,7 +15,12 @@ project:
     name: DOT - Autonomous Engineering
     type: kanban
     project_key: DOT
-    layout_confirmed: false
+    layout_confirmed: true
+    card_layout_fields:
+      - Current Agent Role
+      - Next Required Role
+      - Priority
+      - Work Kind
     board_api_scopes:
       - read:project:jira
       - read:board-scope:jira-software
@@ -35,6 +40,9 @@ project:
       - name: Doing
         statuses:
           - Doing
+      - name: Paused
+        statuses:
+          - Paused
       - name: Testing
         statuses:
           - Testing
@@ -47,6 +55,7 @@ project:
       - name: Done
         statuses:
           - Done
+          - Cancelled
     optional_columns:
       - name: SEO Review
         enabled_when_role: ai-seo-specialist
@@ -64,7 +73,19 @@ project:
       - name: Ready for QA
         jql: 'status = Testing AND "Next Required Role" = "ai-qa"'
       - name: Ready for Review
-        jql: 'status = Review AND "Next Required Role" = "ai-reviewer"'
+        jql: 'status = Review AND "Next Required Role" in ("ai-reviewer", "ai-reviewer-python", "ai-reviewer-powershell", "ai-reviewer-automation", "ai-reviewer-config-policy")'
+      - name: Ready for Python Review
+        jql: 'status = Review AND "Next Required Role" = "ai-reviewer-python"'
+      - name: Ready for PowerShell Review
+        jql: 'status = Review AND "Next Required Role" = "ai-reviewer-powershell"'
+      - name: Ready for Automation Review
+        jql: 'status = Review AND "Next Required Role" = "ai-reviewer-automation"'
+      - name: Ready for Config Review
+        jql: 'status = Review AND "Next Required Role" = "ai-reviewer-config-policy"'
+      - name: Paused
+        jql: 'status = Paused'
+      - name: Needs Spike
+        jql: 'status = Refinement AND issuetype in (Story, Task)'
       - name: Needs PO
         jql: '"Current Agent Role" = "ai-product-owner" OR "Next Required Role" = "ai-product-owner"'
 
@@ -74,6 +95,7 @@ issue_types:
     - Story
     - Task
     - Bug
+    - Spike
     - Sub-task
   target_usage:
     Epic:
@@ -84,11 +106,102 @@ issue_types:
       purpose: entrega tecnica, operacional ou de governanca
     Bug:
       purpose: defeito, regressao ou incidente
+    Spike:
+      purpose: pesquisa, discovery, benchmark e reducao de incerteza
     Sub-task:
       purpose: decomposicao autorizada dentro de item pai
   policies:
     top_level_creation: ai-product-owner-only
     subtask_creation: any-authorized-agent
+  hierarchy_rules:
+    - use-epics-for-small-to-medium-contexts
+    - prefer-parent-over-mass-relates-for-context-grouping
+    - prefer-stories-for-business-rules-global-definitions-and-user-facing-value
+    - prefer-tasks-for-technical-operational-and-governance-work
+    - prefer-bugs-for-defects-and-regressions
+    - prefer-spikes-for-research-and-refinement-evidence
+    - use-subtasks-only-for-execution-breakdown
+  spike_policy:
+    story_default: required
+    task_default: conditional
+    gating_status: Refinement
+    parent_cannot_leave_refinement_until_required_spike_is_done: true
+    required_sections:
+      - Perguntas de pesquisa
+      - Achados
+      - Evidencias
+      - Viabilidade
+      - Riscos
+      - Alternativas
+      - Ganhos esperados
+      - Custo operacional
+      - Pendencias abertas
+      - Recomendacao
+      - Referencias
+  narrative_schema:
+    common_sections:
+      - Contexto
+      - Resultado esperado
+      - Criterios de aceite
+      - Referencias
+    per_type:
+      Epic:
+        required_sections:
+          - Contexto
+          - Resultado esperado
+          - Criterios de aceite
+        optional_sections:
+          - Escopo do epic
+          - Medida de progresso
+      Story:
+        preferred_pattern: card-conversation-confirmation
+        required_sections:
+          - Historia
+          - Contexto
+          - Resultado esperado
+          - Criterios de aceite
+          - Referencias
+      Task:
+        required_sections:
+          - Contexto
+          - Resultado esperado
+          - Escopo tecnico
+          - Criterios de aceite
+          - Referencias
+      Bug:
+        required_sections:
+          - Problema observado
+          - Impacto
+          - Resultado esperado
+          - Criterios de aceite
+          - Evidencias
+      Spike:
+        required_sections:
+          - Perguntas de pesquisa
+          - Achados
+          - Evidencias
+          - Viabilidade
+          - Riscos
+          - Alternativas
+          - Ganhos esperados
+          - Custo operacional
+          - Pendencias abertas
+          - Recomendacao
+          - Referencias
+      Sub-task:
+        required_sections:
+          - Contexto da execucao
+          - Entrega esperada
+          - Evidencias
+          - Dependencias
+  epic_contexts:
+    - Migracao retroativa Jira e Confluence
+    - Workflow DOT e evidencias visuais
+    - 1Password, SSH e assinatura Git
+    - Governanca operacional de IA
+    - Documentacao e backlog retroativo
+    - Plataforma de desenvolvimento e qualidade
+    - Arquitetura portavel e assistentes
 
 workflow:
   name: DOT - Autonomous Delivery Workflow
@@ -104,6 +217,8 @@ workflow:
       category: To Do
     - name: Doing
       category: In Progress
+    - name: Paused
+      category: In Progress
     - name: Testing
       category: In Progress
     - name: Review
@@ -111,6 +226,8 @@ workflow:
     - name: Changes Requested
       category: In Progress
     - name: Done
+      category: Done
+    - name: Cancelled
       category: Done
   optional_statuses:
     - name: SEO Review
@@ -139,6 +256,26 @@ workflow:
         - ai-developer-config-policy
         - ai-devops
     - from: Doing
+      to: Paused
+      roles:
+        - ai-engineering-manager
+        - ai-tech-lead
+        - ai-developer-python
+        - ai-developer-powershell
+        - ai-developer-automation
+        - ai-developer-config-policy
+        - ai-devops
+    - from: Paused
+      to: Doing
+      roles:
+        - ai-engineering-manager
+        - ai-tech-lead
+        - ai-developer-python
+        - ai-developer-powershell
+        - ai-developer-automation
+        - ai-developer-config-policy
+        - ai-devops
+    - from: Doing
       to: Testing
       roles:
         - ai-qa
@@ -146,20 +283,42 @@ workflow:
       to: Review
       roles:
         - ai-reviewer
+        - ai-reviewer-python
+        - ai-reviewer-powershell
+        - ai-reviewer-automation
+        - ai-reviewer-config-policy
     - from: Review
       to: Done
       roles:
+        - ai-reviewer
+        - ai-reviewer-python
+        - ai-reviewer-powershell
+        - ai-reviewer-automation
+        - ai-reviewer-config-policy
         - ai-documentation-agent
         - ai-product-owner
+    - from: Review
+      to: Cancelled
+      roles:
+        - ai-product-owner
+        - ai-engineering-manager
     - from: Testing
       to: Changes Requested
       roles:
         - ai-qa
         - ai-reviewer
+        - ai-reviewer-python
+        - ai-reviewer-powershell
+        - ai-reviewer-automation
+        - ai-reviewer-config-policy
     - from: Review
       to: Changes Requested
       roles:
         - ai-reviewer
+        - ai-reviewer-python
+        - ai-reviewer-powershell
+        - ai-reviewer-automation
+        - ai-reviewer-config-policy
         - ai-engineering-architect
     - from: Changes Requested
       to: Doing
@@ -171,8 +330,21 @@ workflow:
         - ai-devops
   execution_rules:
     - only_ready_can_be_pulled
+    - status-is-flow-phase-current-agent-role-is-active-ownership
+    - every-relevant-operation-must-have-explicit-owner-agent
+    - if-no-agent-fits-the-operation-create-or-formalize-one-through-backlog
+    - one-active-doing-item-per-agent
+    - ordered-lists-must-remain-prioritized
+    - new-demand-must-enter-the-right-priority-position
+    - product-owner-must-maintain-start-and-due-dates-for-non-subtasks
+    - doing-only-for-actively-executing-work
+    - clear-current-agent-role-when-no-agent-is-actively-working
+    - story-spike-required-before-ready
+    - task-spike-is-conditional-but-preferred-when-uncertainty-exists
+    - interrupted-work-must-move-to-paused
     - no_execution_without_jira_issue
     - comments_must_register_evidence_and_decisions
+    - specialist-review-required-for-relevant-file-families
     - done_requires_docs_link_or_explicit_n_a
 
 fields:
@@ -225,35 +397,11 @@ fields:
     - name: Current Agent Role
       type: single_select
       required: false
-      options:
-        - ai-product-owner
-        - ai-engineering-architect
-        - ai-engineering-manager
-        - ai-tech-lead
-        - ai-developer-python
-        - ai-developer-powershell
-        - ai-developer-automation
-        - ai-developer-config-policy
-        - ai-qa
-        - ai-reviewer
-        - ai-devops
-        - ai-documentation-agent
+      options_source: enabled_roles
     - name: Next Required Role
       type: single_select
       required: false
-      options:
-        - ai-product-owner
-        - ai-engineering-architect
-        - ai-engineering-manager
-        - ai-tech-lead
-        - ai-developer-python
-        - ai-developer-powershell
-        - ai-developer-automation
-        - ai-developer-config-policy
-        - ai-qa
-        - ai-reviewer
-        - ai-devops
-        - ai-documentation-agent
+      options_source: enabled_roles
     - name: Confluence Source
       type: url
       required: false
@@ -324,7 +472,13 @@ labels:
 comments:
   required_rules:
     - every-acting-role-must-comment-before-handoff
+    - every-acting-role-must-comment-when-work-starts
+    - every-acting-role-must-comment-on-meaningful-progress-while-working
+    - every-relevant-operation-must-have-explicit-owner-agent
+    - jira-status-must-reflect-real-time-state-of-work
+    - jira-status-and-agent-comments-must-stay-in-parity
     - every-comment-must-include-evidence-or-explicit-na
+    - paused-transitions-must-explain-stop-and-resume-criteria
     - qa-and-review-comments-must-link-runs-logs-or-checklists
     - documentation-comments-must-link-confluence-or-explicit-na
   template_fields:

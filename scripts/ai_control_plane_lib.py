@@ -11,6 +11,7 @@ from collections.abc import Mapping
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
+from urllib.parse import quote
 
 import yaml
 
@@ -21,6 +22,8 @@ OP_REF_RE = re.compile(r"^op://(?P<body>.+)$")
 _OP_ITEM_CACHE: dict[tuple[str, str], dict[str, str]] = {}
 _OP_VALUE_CACHE: dict[str, str] = {}
 _OP_RATELIMIT_CACHE: dict[str, Any] | None = None
+_REPO_WEB_CONTEXT_CACHE: dict[str, RepoWebContext] = {}
+_TRACKED_REPO_FILES_CACHE: dict[str, set[str]] = {}
 
 
 class AiControlPlaneError(RuntimeError):
@@ -66,6 +69,12 @@ class OpReference:
     item: str
     section: str
     field: str
+
+
+@dataclass(frozen=True)
+class RepoWebContext:
+    github_base_url: str
+    default_branch: str
 
 
 @dataclass(frozen=True)
@@ -236,6 +245,126 @@ def run_command(
     return completed
 
 
+def normalize_github_remote_url(raw_remote_url: str) -> str:
+    normalized = raw_remote_url.strip()
+    if not normalized:
+        raise AiControlPlaneError("Remote origin do repo esta vazio.")
+    if normalized.startswith("git@github.com:"):
+        normalized = normalized.replace("git@github.com:", "https://github.com/", 1)
+    elif normalized.startswith("ssh://git@github.com/"):
+        normalized = normalized.replace("ssh://git@github.com/", "https://github.com/", 1)
+    if normalized.endswith(".git"):
+        normalized = normalized[:-4]
+    if normalized.startswith("https://github.com/"):
+        return normalized.rstrip("/")
+    raise AiControlPlaneError(
+        f"Remote origin nao aponta para um repositorio GitHub suportado: {raw_remote_url}"
+    )
+
+
+def resolve_repo_web_context(repo_root: str | Path | None = None) -> RepoWebContext:
+    resolved_repo_root = resolve_repo_root(repo_root)
+    cache_key = str(resolved_repo_root).lower()
+    cached = _REPO_WEB_CONTEXT_CACHE.get(cache_key)
+    if cached is not None:
+        return cached
+    remote_url = run_command(
+        ["git", "remote", "get-url", "origin"],
+        cwd=resolved_repo_root,
+    ).stdout.strip()
+    branch_ref = run_command(
+        ["git", "symbolic-ref", "refs/remotes/origin/HEAD"],
+        cwd=resolved_repo_root,
+        check=False,
+    ).stdout.strip()
+    default_branch = "main"
+    if branch_ref.startswith("refs/remotes/origin/"):
+        default_branch = branch_ref.split("/", 3)[-1].strip() or "main"
+    context = RepoWebContext(
+        github_base_url=normalize_github_remote_url(remote_url),
+        default_branch=default_branch,
+    )
+    _REPO_WEB_CONTEXT_CACHE[cache_key] = context
+    return context
+
+
+def github_blob_url(
+    repo_root: str | Path | None,
+    repo_relative_path: str | Path,
+    *,
+    ref: str = "",
+) -> str:
+    context = resolve_repo_web_context(repo_root)
+    raw_path = str(repo_relative_path).replace("\\", "/").strip()
+    while raw_path.startswith("./"):
+        raw_path = raw_path[2:]
+    raw_path = raw_path.lstrip("/")
+    if not raw_path:
+        raise AiControlPlaneError("github_blob_url exige um path relativo do repo.")
+    encoded_path = quote(raw_path, safe="/._-")
+    effective_ref = ref.strip() or context.default_branch
+    return f"{context.github_base_url}/blob/{quote(effective_ref, safe='._-/')}/{encoded_path}"
+
+
+REPO_PATH_RE = re.compile(
+    r"(?P<prefix>^|[\s(>:-])(?P<path>(?:[A-Za-z0-9_.-]+/)*[A-Za-z0-9_.-]+\.[A-Za-z0-9_.-]+)(?P<suffix>$|[\s),.;:!?])",
+    re.MULTILINE,
+)
+
+
+def resolve_tracked_repo_files(repo_root: str | Path | None = None) -> set[str]:
+    resolved_repo_root = resolve_repo_root(repo_root)
+    cache_key = str(resolved_repo_root).lower()
+    cached = _TRACKED_REPO_FILES_CACHE.get(cache_key)
+    if cached is not None:
+        return cached
+    completed = run_command(
+        ["git", "ls-files", "-z"],
+        cwd=resolved_repo_root,
+    )
+    tracked = {
+        entry.replace("\\", "/").strip()
+        for entry in completed.stdout.split("\0")
+        if entry.strip()
+    }
+    _TRACKED_REPO_FILES_CACHE[cache_key] = tracked
+    return tracked
+
+
+def linkify_repo_relative_paths(text: str, *, repo_root: str | Path | None) -> str:
+    try:
+        resolved_repo_root = resolve_repo_root(repo_root)
+        resolve_repo_web_context(resolved_repo_root)
+        tracked_files = resolve_tracked_repo_files(resolved_repo_root)
+    except AiControlPlaneError:
+        return text
+
+    def replacer(match: re.Match[str]) -> str:
+        prefix = match.group("prefix")
+        raw_path = match.group("path")
+        suffix = match.group("suffix")
+        normalized_path = raw_path.replace("\\", "/").strip()
+        while normalized_path.startswith("./"):
+            normalized_path = normalized_path[2:]
+        normalized_path = normalized_path.lstrip("/")
+        if normalized_path not in tracked_files:
+            return match.group(0)
+        candidate = (resolved_repo_root / raw_path).resolve()
+        try:
+            candidate.relative_to(resolved_repo_root)
+        except ValueError:
+            return match.group(0)
+        if not candidate.exists() or not candidate.is_file():
+            return match.group(0)
+        try:
+            github_url = github_blob_url(resolved_repo_root, normalized_path)
+        except AiControlPlaneError:
+            return match.group(0)
+        return f"{prefix}[{normalized_path}]({github_url}){suffix}"
+
+    return REPO_PATH_RE.sub(replacer, text)
+
+
 def is_op_rate_limited(detail: str) -> bool:
     normalized = (detail or "").strip().lower()
     return "too many requests" in normalized or "rate-limited" in normalized or "429" in normalized
@@ -377,6 +506,8 @@ def clear_secret_resolver_cache() -> None:
     global _OP_RATELIMIT_CACHE
     _OP_ITEM_CACHE.clear()
     _OP_VALUE_CACHE.clear()
+    _REPO_WEB_CONTEXT_CACHE.clear()
+    _TRACKED_REPO_FILES_CACHE.clear()
     _OP_RATELIMIT_CACHE = None
 
 
@@ -460,7 +591,8 @@ def service_account_ratelimit_payload(
         "rows": rows,
         "by_key": by_key,
         "account_read_write": account_row,
-        "account_read_write_exhausted": bool(account_row) and int(account_row.get("remaining", 0)) <= 0,
+        "account_read_write_exhausted": bool(account_row)
+        and int(account_row.get("remaining", 0)) <= 0,
     }
     _OP_RATELIMIT_CACHE = dict(payload)
     return payload
@@ -526,7 +658,9 @@ def prime_op_ref_cache(raw_specs: list[str], *, repo_root: Path) -> None:
     try:
         payload = json.loads(completed.stdout or "{}")
     except json.JSONDecodeError as exc:
-        raise AiControlPlaneError("op run retornou JSON invalido ao resolver secrets em lote.") from exc
+        raise AiControlPlaneError(
+            "op run retornou JSON invalido ao resolver secrets em lote."
+        ) from exc
     if not isinstance(payload, dict):
         raise AiControlPlaneError("op run retornou payload invalido ao resolver secrets em lote.")
 
