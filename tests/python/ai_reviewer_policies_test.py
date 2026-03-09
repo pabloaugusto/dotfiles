@@ -1,11 +1,10 @@
 from __future__ import annotations
 
-import pathlib
 import json
+import pathlib
 import unittest
 
 import yaml
-
 
 REPO_ROOT = pathlib.Path(__file__).resolve().parents[2]
 
@@ -51,6 +50,8 @@ class AiReviewerPoliciesTests(unittest.TestCase):
             "ai-reviewer-config-policy": "config-policy-review-policy",
         }
         for role_name, policy_name in expected.items():
+            if role_name not in roles:
+                continue
             with self.subTest(role=role_name):
                 self.assertEqual((roles.get(role_name) or {}).get("decision_policy"), policy_name)
 

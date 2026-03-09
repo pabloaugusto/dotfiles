@@ -78,4 +78,4 @@ Reviewer especializado nao fecha sua atuacao com um "LGTM" generico. Ele precisa
 
 - [`reviewer-decision-model.md`](reviewer-decision-model.md)
 - [`reviewer-severity-policy.md`](reviewer-severity-policy.md)
-- [`jira-writing-standards.md`](jira-writing-standards.md)
+- [`../2026-03-07-operacao-agentes-jira-confluence.md`](../2026-03-07-operacao-agentes-jira-confluence.md)
