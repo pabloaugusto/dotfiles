@@ -1,0 +1,21 @@
+deployments:
+  environmentMapping:
+    development:
+      - "control-plane-development"
+      - "control-plane-dev"
+      - "dotfiles-development"
+      - "dotfiles-dev"
+    testing:
+      - "control-plane-testing"
+      - "control-plane-test"
+      - "dotfiles-testing"
+      - "dotfiles-test"
+      - "pilot-validation"
+    staging:
+      - "control-plane-staging"
+      - "dotfiles-staging"
+      - "preview"
+    production:
+      - "control-plane-production"
+      - "dotfiles-production"
+      - "release"
