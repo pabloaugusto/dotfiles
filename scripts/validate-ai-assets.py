@@ -188,6 +188,7 @@ OPERATING_MODEL_REQUIRED_SNIPPETS = [
     "### Fronteira entre `.agents/` e adaptadores de assistente",
     "### Camada 2.1. Registry declarativo do repo",
     "### Camada 2.2. Orquestracao, rules e evals",
+    "## Politica de leitura do board",
 ]
 
 LESSONS_REQUIRED_SNIPPETS = [
@@ -225,6 +226,36 @@ CEREMONY_REQUIRED_SNIPPETS = {
         "# Retrospectiva - {{data_hora_utc}} - {{branch}}",
         "## Problemas catalogados",
         "## Encaminhamento",
+    ],
+}
+
+BOARD_OPERATION_REQUIRED_SNIPPETS = {
+    "config/ai/contracts.yaml": [
+        "board-must-be-read-right-to-left",
+        "finish-before-start-is-mandatory",
+        "reading_order: right-to-left",
+        "pull_strategy: finish-before-start",
+        "delegate-idle-agents-to-finishable-work",
+    ],
+    "config/ai/jira-model.yaml": [
+        "reading_order: right-to-left",
+        "dispatch_owner_role: ai-scrum-master",
+        "idle_agent_policy: assign-rightmost-finishable-item-first",
+    ],
+    "config/ai/agent-operations.yaml": [
+        "ler o board da direita para a esquerda",
+        "priorizar agentes ociosos para o item mais a direita com avanco real possivel",
+        "tentar fazer a equipe comecar a terminar antes de autorizar nova puxada",
+    ],
+    ".agents/cards/ai-scrum-master.md": [
+        "Ler o **board** da direita para a esquerda",
+        "**comecar a terminar**",
+        "agente ocioso puxar trabalho novo",
+    ],
+    ".agents/cards/ai-engineering-manager.md": [
+        "agentes ociosos ajudem a mover o item",
+        "da direita para a esquerda",
+        "Nao deixar agente ocioso puxar trabalho novo",
     ],
 }
 
@@ -698,6 +729,11 @@ def main(argv: list[str]) -> int:
         )
 
     for relative, snippets in CEREMONY_REQUIRED_SNIPPETS.items():
+        path = repo_root / relative
+        if path.is_file():
+            require_snippets(path.read_text(encoding="utf-8"), snippets, relative, failures)
+
+    for relative, snippets in BOARD_OPERATION_REQUIRED_SNIPPETS.items():
         path = repo_root / relative
         if path.is_file():
             require_snippets(path.read_text(encoding="utf-8"), snippets, relative, failures)

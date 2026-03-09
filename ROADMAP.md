@@ -76,6 +76,7 @@ Sem sugestoes pendentes neste ciclo; itens aceitos ja estao rastreaveis.
 ### Next
 
 <!-- roadmap:next:start -->
+- [fix] Corrigir pendencias ortograficas remanescentes do worklog `DOT-119` em .agents/cards/ai-engineering-manager.md, .agents/cards/ai-scrum-master.md, config/ai/agent-operations.yaml... | notas=Pendencia automatica criada por Pascoalete apos review consultivo reprovado sem correcao automatica.
 - [fix] Corrigir pendencias ortograficas remanescentes do worklog `DOT-120` em .agents/cards/ai-developer-automation.md, .agents/cards/ai-developer-powershell.md, .agents/cards/ai-devel... | notas=Pendencia automatica criada por Pascoalete apos review consultivo reprovado sem correcao automatica.
 - [fix] Corrigir pendencias ortograficas remanescentes do worklog `DOT-121` em docs/AI-REVIEW-LEDGER.md | notas=Pendencia automatica criada por Pascoalete apos review consultivo reprovado sem correcao automatica.
 - [fix] Corrigir pendencias ortograficas remanescentes do worklog `DOT-121` em .agents/cards/ai-scrum-master.md, .agents/cerimonias/README.md, .agents/cerimonias/logs/retrospectiva-temp... | notas=Pendencia automatica criada por Pascoalete apos review consultivo reprovado sem correcao automatica.

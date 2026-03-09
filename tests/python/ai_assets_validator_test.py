@@ -77,8 +77,17 @@ class ValidateAiAssetsTests(unittest.TestCase):
             module.OPERATING_MODEL_REQUIRED_SNIPPETS,
         )
         self.assertIn(
+            "## Politica de leitura do board",
+            module.OPERATING_MODEL_REQUIRED_SNIPPETS,
+        )
+        self.assertIn(
             "### Fronteira entre `.agents/` e adaptadores de assistente",
             module.OPERATING_MODEL_REQUIRED_SNIPPETS,
+        )
+        self.assertIn("config/ai/contracts.yaml", module.BOARD_OPERATION_REQUIRED_SNIPPETS)
+        self.assertIn(
+            "reading_order: right-to-left",
+            module.BOARD_OPERATION_REQUIRED_SNIPPETS["config/ai/contracts.yaml"],
         )
         self.assertIn("ceremonies", module.REQUIRED_AI_CONFIG_SECTIONS)
         self.assertIn(
