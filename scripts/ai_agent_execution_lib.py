@@ -23,6 +23,8 @@ WORKFLOW_ORDER = [
     ("done", {"done", "completed", "complete", "closed", "concluido", "concluida"}),
     ("cancelled", {"cancelled", "canceled"}),
 ]
+MAINLINE_ORDER = ["backlog", "refinement", "ready", "doing", "testing", "review", "done"]
+MAINLINE_INDEX = {name: idx for idx, name in enumerate(MAINLINE_ORDER)}
 WORKFLOW_INDEX = {name: idx for idx, (name, _) in enumerate(WORKFLOW_ORDER)}
 WORKFLOW_STATUS_ALIASES = {
     "backlog": "backlog",
@@ -296,22 +298,23 @@ def ensure_issue_status(jira: JiraAdapter, issue_key: str, target_status: str) -
     if current == target:
         return
     while current != target:
-        current_index = WORKFLOW_INDEX.get(current, -1)
-        target_index = WORKFLOW_INDEX.get(target, -1)
-        if current_index < 0 or target_index < 0:
-            raise AgentExecutionError(
-                f"Nao foi possivel mapear a transicao logica de {current!r} para {target!r}."
-            )
         transition = None
-        if current_index == target_index:
-            return
-        direction = 1 if target_index > current_index else -1
-        next_index = current_index + direction
-        next_status = WORKFLOW_ORDER[next_index][0]
         try:
-            transition = _choose_transition(jira, issue_key, next_status)
-        except AgentExecutionError:
             transition = _choose_transition(jira, issue_key, target)
+        except AgentExecutionError:
+            if current in {"paused", "changes requested"} and target != current:
+                transition = _choose_transition(jira, issue_key, "doing")
+            else:
+                current_index = MAINLINE_INDEX.get(current, -1)
+                target_index = MAINLINE_INDEX.get(target, -1)
+                if current_index < 0 or target_index < 0:
+                    raise AgentExecutionError(
+                        f"Nao foi possivel mapear a transicao logica de {current!r} para {target!r}."
+                    )
+                direction = 1 if target_index > current_index else -1
+                next_index = current_index + direction
+                next_status = MAINLINE_ORDER[next_index]
+                transition = _choose_transition(jira, issue_key, next_status)
         jira.transition_issue(issue_key, str(transition.get("id", "")).strip())
         issue = jira.get_issue(issue_key, fields=["status"])
         updated = normalize_status(

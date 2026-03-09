@@ -221,6 +221,29 @@ class AgentExecutionTests(unittest.TestCase):
         self.assertEqual(fake_jira.transitions_taken, ["6"])
         self.assertIsNone(payload["context"])
 
+    def test_paused_issue_resumes_to_doing_before_advancing(self) -> None:
+        fake_jira = FakeJira()
+        fake_jira.status = "Paused"
+        with tempfile.TemporaryDirectory() as tmp:
+            repo = Path(tmp)
+            with patch("scripts.ai_agent_execution_lib.resolve_jira", return_value=fake_jira), patch(
+                "scripts.ai_agent_execution_lib.current_branch",
+                return_value="feat/DOT-101-agent-issue-instrumentation",
+            ):
+                payload = record_activity(
+                    repo_root=repo,
+                    issue_key="DOT-101",
+                    agent="ai-qa",
+                    interaction_type="progress-update",
+                    status="testing",
+                    current_agent_role="ai-qa",
+                    next_required_role="ai-reviewer-automation",
+                )
+
+        self.assertEqual(fake_jira.status, "Testing")
+        self.assertEqual(fake_jira.transitions_taken, ["7", "2"])
+        self.assertEqual(payload["jira"]["status"], "testing")
+
     def test_requires_issue_and_agent_when_no_context_exists(self) -> None:
         fake_jira = FakeJira()
         with tempfile.TemporaryDirectory() as tmp:
