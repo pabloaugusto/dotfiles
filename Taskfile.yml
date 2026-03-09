@@ -259,7 +259,7 @@ tasks:
     platforms: [windows]
     dir: '{{.TASKFILE_DIR}}'
     cmds:
-      - "pwsh -NoProfile -File ./scripts/invoke-python.ps1 -ScriptPath ./scripts/git-signing-mode.py -Arguments use-automation --public-key-ref '{{default \"\" .PUBLIC_KEY_REF}}' --ensure-github '{{default \"1\" .ENSURE_GITHUB}}' --title '{{default \"\" .TITLE}}'"
+      - "pwsh -NoProfile -Command \"& { . './scripts/invoke-python.ps1' -ScriptPath './scripts/git-signing-mode.py' -Arguments @('use-automation','--public-key-ref','{{default \"\" .PUBLIC_KEY_REF}}','--ensure-github','{{default \"1\" .ENSURE_GITHUB}}','--title','{{default \"\" .TITLE}}') }\""
 
   git:signing:mode:automation:linux:
     desc: Linux/WSL - aplica signer tecnico de automacao na worktree atual
@@ -281,7 +281,7 @@ tasks:
     platforms: [windows]
     dir: '{{.TASKFILE_DIR}}'
     cmds:
-      - "pwsh -NoProfile -File ./scripts/invoke-python.ps1 -ScriptPath ./scripts/git-signing-mode.py -Arguments ensure-github-signing-key --public-key-ref '{{default \"\" .PUBLIC_KEY_REF}}' --title '{{default \"\" .TITLE}}'"
+      - "pwsh -NoProfile -Command \"& { . './scripts/invoke-python.ps1' -ScriptPath './scripts/git-signing-mode.py' -Arguments @('ensure-github-signing-key','--public-key-ref','{{default \"\" .PUBLIC_KEY_REF}}','--title','{{default \"\" .TITLE}}') }\""
 
   git:signing:github:ensure:linux:
     desc: Linux/WSL - registra ou reaproveita a signing key tecnica no GitHub

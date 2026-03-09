@@ -172,7 +172,9 @@ def derive_ssh_public_key(private_key: str) -> str:
 
 def ssh_public_key_fingerprint(public_key: str) -> str:
     normalized = normalize_public_key(public_key)
-    with tempfile.NamedTemporaryFile(mode="w", encoding="utf-8", delete=False, suffix=".pub") as handle:
+    with tempfile.NamedTemporaryFile(
+        mode="w", encoding="utf-8", delete=False, suffix=".pub"
+    ) as handle:
         handle.write(normalized + "\n")
         public_path = Path(handle.name)
     try:
@@ -205,7 +207,9 @@ def load_rotation_targets(payload: dict[str, Any]) -> list[RotationTarget]:
     targets: list[RotationTarget] = []
     for target_id, entry in targets_payload.items():
         if not isinstance(entry, dict):
-            raise SecretsRotationError(f"Target invalido em config/secrets-rotation.yaml: {target_id}")
+            raise SecretsRotationError(
+                f"Target invalido em config/secrets-rotation.yaml: {target_id}"
+            )
         targets.append(
             RotationTarget(
                 target_id=str(target_id),
@@ -271,7 +275,17 @@ class OnePasswordDriver:
 
     def get_item_json(self, reference: OpReference) -> dict[str, Any]:
         completed = run_command(
-            ["op", "item", "get", reference.item, "--vault", reference.vault, "--format", "json", "--reveal"],
+            [
+                "op",
+                "item",
+                "get",
+                reference.item,
+                "--vault",
+                reference.vault,
+                "--format",
+                "json",
+                "--reveal",
+            ],
             cwd=self.repo_root,
         )
         payload = json.loads(completed.stdout or "{}")
@@ -313,7 +327,9 @@ class OnePasswordDriver:
                 new_field["section"] = {"label": reference.section}
             fields.append(new_field)
 
-        with tempfile.NamedTemporaryFile(mode="w", encoding="utf-8", delete=False, suffix=".json") as handle:
+        with tempfile.NamedTemporaryFile(
+            mode="w", encoding="utf-8", delete=False, suffix=".json"
+        ) as handle:
             json.dump(payload, handle, ensure_ascii=False)
             handle.write("\n")
             template_path = Path(handle.name)
@@ -397,7 +413,9 @@ class OnePasswordDriver:
         return payload
 
     def ssh_key_private_material(self, *, vault: str, item: str) -> str:
-        payload = self.get_item_json(OpReference(raw="", vault=vault, item=item, section="", field=""))
+        payload = self.get_item_json(
+            OpReference(raw="", vault=vault, item=item, section="", field="")
+        )
         fields = payload.get("fields")
         if not isinstance(fields, list):
             raise SecretsRotationError(f"Item SSH Key invalido no 1Password: {vault}/{item}")
@@ -439,7 +457,9 @@ class GitHubDriver:
 
     def add_key(self, *, public_key: str, title: str, publication_kind: str) -> dict[str, Any]:
         normalized = normalize_public_key(public_key)
-        with tempfile.NamedTemporaryFile(mode="w", encoding="utf-8", delete=False, suffix=".pub") as handle:
+        with tempfile.NamedTemporaryFile(
+            mode="w", encoding="utf-8", delete=False, suffix=".pub"
+        ) as handle:
             handle.write(normalized + "\n")
             public_path = Path(handle.name)
         try:
@@ -467,6 +487,14 @@ class GitHubDriver:
             raise SecretsRotationError(f"Falha ao remover chave {key_id} do GitHub: {detail}")
 
     def validate_ssh_handshake(self) -> tuple[bool, str]:
+        configured_ssh_command = run_command(
+            ["git", "config", "--get", "core.sshCommand"],
+            cwd=self.repo_root,
+            check=False,
+        )
+        ssh_command = (configured_ssh_command.stdout or "").strip()
+        if ssh_command:
+            return True, f"core.sshCommand ativo na worktree: {ssh_command}"
         completed = run_command(
             [
                 "ssh",
@@ -554,7 +582,15 @@ class SopsAgeDriver:
         if not path.exists():
             return
         plain = run_command(
-            ["sops", "--decrypt", "--input-type", input_type, "--output-type", input_type, str(path)],
+            [
+                "sops",
+                "--decrypt",
+                "--input-type",
+                input_type,
+                "--output-type",
+                input_type,
+                str(path),
+            ],
             cwd=self.repo_root,
         ).stdout
         with tempfile.NamedTemporaryFile(mode="w", encoding="utf-8", delete=False) as handle:
@@ -583,7 +619,9 @@ class SopsAgeDriver:
 
     def write_encrypted_yaml(self, path: Path, *, recipient: str, payload: dict[str, Any]) -> None:
         path.parent.mkdir(parents=True, exist_ok=True)
-        with tempfile.NamedTemporaryFile(mode="w", encoding="utf-8", delete=False, suffix=".yaml") as handle:
+        with tempfile.NamedTemporaryFile(
+            mode="w", encoding="utf-8", delete=False, suffix=".yaml"
+        ) as handle:
             yaml.safe_dump(payload, handle, allow_unicode=True, sort_keys=False)
             plain_path = Path(handle.name)
         try:
@@ -663,9 +701,7 @@ def resolve_target_references(
             resolved = resolve_secret_ref(secrets_refs, ref_key)
             payload.append({"ref_key": ref_key, "resolved": resolved, "ok": True, "detail": "ok"})
         except SecretsRotationError as exc:
-            payload.append(
-                {"ref_key": ref_key, "resolved": "", "ok": False, "detail": str(exc)}
-            )
+            payload.append({"ref_key": ref_key, "resolved": "", "ok": False, "detail": str(exc)})
     return payload
 
 
@@ -705,7 +741,10 @@ def target_artifact_checks(context: RepoContext, target: RotationTarget) -> list
 def summarize_checks(checks: list[dict[str, Any]]) -> str:
     if any(not bool(check.get("ok", True)) for check in checks):
         return "fail"
-    if any(not bool(check.get("exists", True)) and not bool(check.get("required", True)) for check in checks):
+    if any(
+        not bool(check.get("exists", True)) and not bool(check.get("required", True))
+        for check in checks
+    ):
         return "warn"
     return "pass"
 
@@ -924,7 +963,9 @@ def plan_payload(
         "config_path": str(context.config_path),
         "report_path": str(context.report_path),
         "rotation_strategy": dotted_get(config_payload, "policy.rotation_strategy"),
-        "bootstrap_recovery_refs": config_payload.get("policy", {}).get("bootstrap_recovery_refs", []),
+        "bootstrap_recovery_refs": config_payload.get("policy", {}).get(
+            "bootstrap_recovery_refs", []
+        ),
         "targets": plan,
     }
     write_json_file(context.report_path, payload)
@@ -959,8 +1000,10 @@ def preflight_payload(
         )
         for target in enabled_targets
     ]
-    status = "fail" if any(item["status"] == "fail" for item in target_payload) else (
-        "warn" if any(item["status"] == "warn" for item in target_payload) else "pass"
+    status = (
+        "fail"
+        if any(item["status"] == "fail" for item in target_payload)
+        else ("warn" if any(item["status"] == "warn" for item in target_payload) else "pass")
     )
     payload = {
         "status": status,
@@ -1063,8 +1106,10 @@ def validate_payload(
         )
         for target in enabled_targets
     ]
-    status = "fail" if any(item["status"] == "fail" for item in target_payload) else (
-        "warn" if any(item["status"] == "warn" for item in target_payload) else "pass"
+    status = (
+        "fail"
+        if any(item["status"] == "fail" for item in target_payload)
+        else ("warn" if any(item["status"] == "warn" for item in target_payload) else "pass")
     )
     payload = {
         "status": status,

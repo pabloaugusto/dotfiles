@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 import os
 import re
+import shutil
 import socket
 import subprocess
 import tempfile
@@ -10,7 +11,6 @@ from dataclasses import dataclass
 from pathlib import Path
 
 import yaml
-
 
 PUBLIC_KEY_RE = re.compile(r"^ssh-[A-Za-z0-9@._+-]+\s+[A-Za-z0-9+/=]+(?:\s+.+)?$")
 
@@ -36,12 +36,14 @@ def run_command(
     cwd: Path | None = None,
     check: bool = True,
     input_text: str | None = None,
+    env: dict[str, str] | None = None,
 ) -> subprocess.CompletedProcess[str]:
     completed = subprocess.run(
         args,
         cwd=cwd,
         text=True,
         input=input_text,
+        env=env,
         capture_output=True,
         check=False,
     )
@@ -57,7 +59,9 @@ def resolve_repo_context(repo_root: str | Path | None = None) -> RepoContext:
     cwd = Path(repo_root).resolve() if repo_root else Path.cwd()
     repo = Path(run_command(["git", "rev-parse", "--show-toplevel"], cwd=cwd).stdout.strip())
     git_dir = Path(run_command(["git", "rev-parse", "--git-dir"], cwd=repo).stdout.strip())
-    common_dir = Path(run_command(["git", "rev-parse", "--git-common-dir"], cwd=repo).stdout.strip())
+    common_dir = Path(
+        run_command(["git", "rev-parse", "--git-common-dir"], cwd=repo).stdout.strip()
+    )
     return RepoContext(
         repo_root=(repo if repo.is_absolute() else (cwd / repo)).resolve(),
         git_dir=(git_dir if git_dir.is_absolute() else (repo / git_dir)).resolve(),
@@ -85,6 +89,12 @@ def normalize_public_key(public_key: str) -> str:
     return normalized
 
 
+def public_key_identity(public_key: str) -> str:
+    normalized = normalize_public_key(public_key)
+    parts = normalized.split(" ")
+    return " ".join(parts[:2])
+
+
 def load_secrets_refs(repo_root: Path) -> dict[str, str]:
     refs_path = repo_root / "df" / "secrets" / "secrets-ref.yaml"
     if not refs_path.exists():
@@ -97,6 +107,14 @@ def load_secrets_refs(repo_root: Path) -> dict[str, str]:
     return {
         "automation_public_key_ref": str(value or "").strip(),
     }
+
+
+def load_local_automation_public_key(repo_root: Path) -> str:
+    context = resolve_repo_context(repo_root)
+    public_key_path = build_automation_public_key_path(context)
+    if not public_key_path.exists():
+        return ""
+    return normalize_public_key(public_key_path.read_text(encoding="utf-8"))
 
 
 def resolve_public_key_ref(
@@ -113,6 +131,9 @@ def resolve_public_key_ref(
         "automation_public_key_ref", ""
     )
     if not chosen_ref:
+        local_public_key = load_local_automation_public_key(repo_root)
+        if local_public_key:
+            return "", local_public_key
         raise GitSigningError(
             "Nenhuma ref de chave publica de automacao configurada. "
             "Configure git.automation_signing_key_ref no bootstrap local ou passe --public-key-ref."
@@ -135,20 +156,89 @@ def build_default_title(hostname: str | None = None) -> str:
     return f"dotfiles-automation-signing-{suffix or 'host'}"
 
 
-def list_github_signing_keys(repo_root: Path) -> list[dict[str, object]]:
-    completed = run_command(
-        ["gh", "api", "user/ssh_signing_keys"],
-        cwd=repo_root,
+def build_default_auth_title(hostname: str | None = None) -> str:
+    suffix = re.sub(r"[^A-Za-z0-9._-]+", "-", (hostname or socket.gethostname()).strip()).strip("-")
+    return f"dotfiles-automation-auth-{suffix or 'host'}"
+
+
+def build_automation_private_key_path(context: RepoContext) -> Path:
+    return context.common_dir / "dotfiles" / "automation-signing" / "id_ed25519"
+
+
+def build_automation_public_key_path(context: RepoContext) -> Path:
+    return context.common_dir / "dotfiles" / "automation-signing" / "id_ed25519.pub"
+
+
+def build_git_ssh_command(private_key_path: Path) -> str:
+    normalized = private_key_path.resolve().as_posix()
+    return (
+        f'ssh -i "{normalized}" '
+        "-o IdentitiesOnly=yes "
+        "-o IdentityAgent=none "
+        "-o StrictHostKeyChecking=accept-new "
+        "-o ConnectTimeout=10"
     )
+
+
+def resolve_local_ssh_sign_program() -> str:
+    for candidate in ("ssh-keygen.exe", "ssh-keygen"):
+        resolved = shutil.which(candidate)
+        if resolved:
+            return resolved
+    return "ssh-keygen"
+
+
+def _github_cli_env_without_runtime_tokens() -> dict[str, str]:
+    sanitized = dict(os.environ)
+    sanitized.pop("GH_TOKEN", None)
+    sanitized.pop("GITHUB_TOKEN", None)
+    return sanitized
+
+
+def run_github_command(
+    repo_root: Path,
+    args: list[str],
+    *,
+    check: bool = True,
+) -> subprocess.CompletedProcess[str]:
+    completed = run_command(args, cwd=repo_root, check=False)
+    detail = (completed.stderr or completed.stdout or "").strip()
+    if completed.returncode == 0:
+        return completed
+
+    should_retry_without_env_token = (
+        "Resource not accessible by personal access token" in detail
+        or "Resource not accessible by integration" in detail
+    ) and (os.environ.get("GH_TOKEN") or os.environ.get("GITHUB_TOKEN"))
+    if should_retry_without_env_token:
+        completed = run_command(
+            args,
+            cwd=repo_root,
+            check=False,
+            env=_github_cli_env_without_runtime_tokens(),
+        )
+
+    if check and completed.returncode != 0:
+        final_detail = (completed.stderr or completed.stdout or "").strip()
+        raise GitSigningError(
+            f"GitHub command failed ({' '.join(args)}): {final_detail or f'exit={completed.returncode}'}"
+        )
+    return completed
+
+
+def list_github_keys(repo_root: Path, *, publication_kind: str) -> list[dict[str, object]]:
+    endpoint = "user/ssh_signing_keys" if publication_kind == "signing" else "user/keys"
+    completed = run_github_command(repo_root, ["gh", "api", endpoint])
     payload = json.loads(completed.stdout or "[]")
     if not isinstance(payload, list):
-        raise GitSigningError("Resposta inesperada de gh api user/ssh_signing_keys.")
+        raise GitSigningError(f"Resposta inesperada de gh api {endpoint}.")
     return [item for item in payload if isinstance(item, dict)]
 
 
-def ensure_github_signing_key(
+def ensure_github_key(
     repo_root: Path,
     *,
+    publication_kind: str,
     public_key_ref: str = "",
     public_key: str = "",
     title: str = "",
@@ -159,17 +249,20 @@ def ensure_github_signing_key(
         public_key=public_key,
     )
 
-    for item in list_github_signing_keys(repo_root):
-        if normalize_public_key(str(item.get("key", ""))) == resolved_key:
+    for item in list_github_keys(repo_root, publication_kind=publication_kind):
+        if public_key_identity(str(item.get("key", ""))) == public_key_identity(resolved_key):
             return {
                 "status": "already_present",
                 "id": item.get("id"),
                 "title": item.get("title"),
+                "publication_kind": publication_kind,
                 "public_key_ref": chosen_ref,
                 "public_key": resolved_key,
             }
 
-    desired_title = title.strip() or build_default_title()
+    desired_title = title.strip() or (
+        build_default_title() if publication_kind == "signing" else build_default_auth_title()
+    )
     temp_path: str | None = None
     try:
         with tempfile.NamedTemporaryFile(
@@ -181,25 +274,60 @@ def ensure_github_signing_key(
             handle.write(resolved_key + "\n")
             temp_path = handle.name
 
-        run_command(
-            ["gh", "ssh-key", "add", temp_path, "--type", "signing", "--title", desired_title],
-            cwd=repo_root,
-        )
+        args = ["gh", "ssh-key", "add", temp_path, "--title", desired_title]
+        if publication_kind == "signing":
+            args.extend(["--type", "signing"])
+        run_github_command(repo_root, args)
     finally:
         if temp_path and os.path.exists(temp_path):
             os.remove(temp_path)
 
-    for item in list_github_signing_keys(repo_root):
-        if normalize_public_key(str(item.get("key", ""))) == resolved_key:
+    for item in list_github_keys(repo_root, publication_kind=publication_kind):
+        if public_key_identity(str(item.get("key", ""))) == public_key_identity(resolved_key):
             return {
                 "status": "created",
                 "id": item.get("id"),
                 "title": item.get("title"),
+                "publication_kind": publication_kind,
                 "public_key_ref": chosen_ref,
                 "public_key": resolved_key,
             }
 
-    raise GitSigningError("A chave foi enviada ao GitHub, mas nao foi localizada na listagem final.")
+    raise GitSigningError(
+        "A chave foi enviada ao GitHub, mas nao foi localizada na listagem final."
+    )
+
+
+def ensure_github_signing_key(
+    repo_root: Path,
+    *,
+    public_key_ref: str = "",
+    public_key: str = "",
+    title: str = "",
+) -> dict[str, object]:
+    return ensure_github_key(
+        repo_root,
+        publication_kind="signing",
+        public_key_ref=public_key_ref,
+        public_key=public_key,
+        title=title,
+    )
+
+
+def ensure_github_auth_key(
+    repo_root: Path,
+    *,
+    public_key_ref: str = "",
+    public_key: str = "",
+    title: str = "",
+) -> dict[str, object]:
+    return ensure_github_key(
+        repo_root,
+        publication_kind="authentication",
+        public_key_ref=public_key_ref,
+        public_key=public_key,
+        title=title,
+    )
 
 
 def status_payload(repo_root: str | Path | None = None) -> dict[str, object]:
@@ -209,14 +337,36 @@ def status_payload(repo_root: str | Path | None = None) -> dict[str, object]:
         context.repo_root, "config", "--worktree", "--get", "dotfiles.signing.mode"
     )
     worktree_ref = git_get(
-        context.repo_root, "config", "--worktree", "--get", "dotfiles.signing.automationPublicKeyRef"
+        context.repo_root,
+        "config",
+        "--worktree",
+        "--get",
+        "dotfiles.signing.automationPublicKeyRef",
+    )
+    worktree_auth_mode = git_get(
+        context.repo_root, "config", "--worktree", "--get", "dotfiles.github.authMode"
+    )
+    worktree_auth_key_path = git_get(
+        context.repo_root, "config", "--worktree", "--get", "dotfiles.github.automationSshKeyPath"
+    )
+    worktree_signing_private_key_path = git_get(
+        context.repo_root,
+        "config",
+        "--worktree",
+        "--get",
+        "dotfiles.signing.automationPrivateKeyPath",
     )
     effective_key = git_get(context.repo_root, "config", "--includes", "--get", "user.signingkey")
-    effective_program = git_get(context.repo_root, "config", "--includes", "--get", "gpg.ssh.program")
+    effective_program = git_get(
+        context.repo_root, "config", "--includes", "--get", "gpg.ssh.program"
+    )
     effective_commit_sign = git_get(
         context.repo_root, "config", "--includes", "--get", "commit.gpgsign"
     )
     effective_format = git_get(context.repo_root, "config", "--includes", "--get", "gpg.format")
+    effective_core_ssh_command = git_get(
+        context.repo_root, "config", "--includes", "--get", "core.sshCommand"
+    )
     return {
         "repo_root": str(context.repo_root),
         "git_dir": str(context.git_dir),
@@ -230,10 +380,14 @@ def status_payload(repo_root: str | Path | None = None) -> dict[str, object]:
         "worktree_mode": worktree_mode or "",
         "configured_automation_public_key_ref": refs.get("automation_public_key_ref", ""),
         "worktree_automation_public_key_ref": worktree_ref,
+        "worktree_auth_mode": worktree_auth_mode,
+        "worktree_auth_key_path": worktree_auth_key_path,
+        "worktree_signing_private_key_path": worktree_signing_private_key_path,
         "effective_signing_key": effective_key,
         "effective_gpg_program": effective_program,
         "effective_commit_gpgsign": effective_commit_sign,
         "effective_gpg_format": effective_format,
+        "effective_core_ssh_command": effective_core_ssh_command,
     }
 
 
@@ -262,18 +416,81 @@ def apply_automation_mode(
             "dotfiles.signing.automationPublicKeyRef",
             chosen_ref,
         )
+    else:
+        git_unset(
+            context.repo_root,
+            "config",
+            "--worktree",
+            "--unset-all",
+            "dotfiles.signing.automationPublicKeyRef",
+        )
     git_set(context.repo_root, "config", "--worktree", "gpg.format", "ssh")
     git_set(context.repo_root, "config", "--worktree", "commit.gpgsign", "true")
-    git_set(context.repo_root, "config", "--worktree", "user.signingkey", resolved_key)
 
-    github_payload: dict[str, object] | None = None
+    automation_private_key = build_automation_private_key_path(context)
+    if automation_private_key.exists():
+        git_set(
+            context.repo_root,
+            "config",
+            "--worktree",
+            "dotfiles.signing.automationPrivateKeyPath",
+            str(automation_private_key),
+        )
+        git_set(
+            context.repo_root,
+            "config",
+            "--worktree",
+            "gpg.ssh.program",
+            resolve_local_ssh_sign_program(),
+        )
+        git_set(
+            context.repo_root,
+            "config",
+            "--worktree",
+            "user.signingkey",
+            str(automation_private_key),
+        )
+        git_set(context.repo_root, "config", "--worktree", "dotfiles.github.authMode", "automation")
+        git_set(
+            context.repo_root,
+            "config",
+            "--worktree",
+            "dotfiles.github.automationSshKeyPath",
+            str(automation_private_key),
+        )
+        git_set(
+            context.repo_root,
+            "config",
+            "--worktree",
+            "core.sshCommand",
+            build_git_ssh_command(automation_private_key),
+        )
+    else:
+        git_unset(
+            context.repo_root,
+            "config",
+            "--worktree",
+            "--unset-all",
+            "dotfiles.signing.automationPrivateKeyPath",
+        )
+        git_set(context.repo_root, "config", "--worktree", "user.signingkey", resolved_key)
+
+    github_signing_payload: dict[str, object] | None = None
+    github_auth_payload: dict[str, object] | None = None
     if ensure_github:
-        github_payload = ensure_github_signing_key(
+        github_signing_payload = ensure_github_signing_key(
             context.repo_root,
             public_key_ref=chosen_ref,
             public_key=resolved_key,
             title=title,
         )
+        if automation_private_key.exists():
+            github_auth_payload = ensure_github_auth_key(
+                context.repo_root,
+                public_key=build_automation_public_key_path(context)
+                .read_text(encoding="utf-8")
+                .strip(),
+            )
 
     payload = status_payload(context.repo_root)
     payload.update(
@@ -282,7 +499,9 @@ def apply_automation_mode(
             "changed_worktree_config": changed_worktree_config,
             "public_key_ref": chosen_ref,
             "public_key": resolved_key,
-            "github": github_payload,
+            "github_signing": github_signing_payload,
+            "github_auth": github_auth_payload,
+            "automation_private_key_path": str(automation_private_key),
         }
     )
     return payload
@@ -294,9 +513,13 @@ def apply_human_mode(repo_root: str | Path | None = None) -> dict[str, object]:
     keys = [
         "dotfiles.signing.mode",
         "dotfiles.signing.automationPublicKeyRef",
+        "dotfiles.signing.automationPrivateKeyPath",
+        "dotfiles.github.authMode",
+        "dotfiles.github.automationSshKeyPath",
         "gpg.format",
         "commit.gpgsign",
         "user.signingkey",
+        "core.sshCommand",
     ]
     for key in keys:
         git_unset(context.repo_root, "config", "--worktree", "--unset-all", key)

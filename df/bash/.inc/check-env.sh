@@ -26,6 +26,7 @@ checkEnv() {
   local git_probe_tmp=""
   local resolved_mode=""
   local automation_key_ref=""
+  local git_ssh_command=""
   local gpg_format=""
   local commit_sign=""
   local signing_key=""
@@ -210,9 +211,12 @@ checkEnv() {
     commit_sign="$(git -C "$git_probe" config --get commit.gpgsign 2>/dev/null)"
     signing_key="$(git -C "$git_probe" config --get user.signingkey 2>/dev/null)"
     gpg_program="$(git -C "$git_probe" config --get gpg.ssh.program 2>/dev/null)"
+    git_ssh_command="$(git -C "$git_probe" config --get core.sshCommand 2>/dev/null || true)"
     local worktree_mode
+    local automation_private_key_path
     worktree_mode="$(git -C "$git_probe" config --worktree --get dotfiles.signing.mode 2>/dev/null || true)"
     automation_key_ref="$(git -C "$git_probe" config --worktree --get dotfiles.signing.automationPublicKeyRef 2>/dev/null || true)"
+    automation_private_key_path="$(git -C "$git_probe" config --worktree --get dotfiles.signing.automationPrivateKeyPath 2>/dev/null || true)"
     if [ "$requested_mode" = "auto" ]; then
       if [ "$worktree_mode" = "automation" ]; then
         resolved_mode="automation"
@@ -237,19 +241,35 @@ checkEnv() {
       _add_result "fail" "Git commit signing default" "commit.gpgsign='$commit_sign'." "Defina 'git config --global commit.gpgsign true'."
     fi
 
+    local has_automation_private_key=0
+    if [ "$resolved_mode" = "automation" ] && [ -n "$automation_private_key_path" ] && [ -f "$automation_private_key_path" ] && [ "$signing_key" = "$automation_private_key_path" ]; then
+      has_automation_private_key=1
+    fi
+
     if printf '%s' "$signing_key" | grep -q '^ssh-'; then
       _add_result "success" "Git signing key" "user.signingkey em formato SSH." ""
+    elif [ $has_automation_private_key -eq 1 ]; then
+      _add_result "success" "Git signing key" "user.signingkey aponta para a chave tecnica local: $automation_private_key_path." ""
     else
       if [ "$resolved_mode" = "automation" ]; then
-        _add_result "fail" "Git signing key" "user.signingkey ausente ou invalida." "Execute task git:signing:mode:automation apos configurar a ref publica do signer tecnico."
+        _add_result "fail" "Git signing key" "user.signingkey ausente ou invalida." "Execute task git:signing:mode:automation para sincronizar a chave tecnica local e o signer da worktree."
       else
         _add_result "fail" "Git signing key" "user.signingkey ausente ou invalida." "Defina 'git config --global user.signingkey \"ssh-ed25519 ...\"'."
       fi
     fi
 
     if [ "$resolved_mode" = "automation" ]; then
+      local local_automation_public_key=""
+      if [ $has_automation_private_key -eq 1 ] && [ -f "${automation_private_key_path}.pub" ]; then
+        local_automation_public_key="$(awk 'NF {print; exit}' "${automation_private_key_path}.pub" | tr -s '[:space:]' ' ' | sed 's/^ //; s/ $//')"
+      fi
+
       if [ -z "$automation_key_ref" ]; then
-        _add_result "fail" "Automation signing key ref" "dotfiles.signing.automationPublicKeyRef ausente na worktree." "Aplique task git:signing:mode:automation apos configurar a ref publica no bootstrap."
+        if [ -n "$local_automation_public_key" ] && printf '%s' "$local_automation_public_key" | grep -q '^ssh-'; then
+          _add_result "success" "Automation signing key ref" "A worktree esta usando o par de chaves tecnico local; a ref publica e opcional neste modo." ""
+        else
+          _add_result "fail" "Automation signing key ref" "Nem dotfiles.signing.automationPublicKeyRef nem a chave publica local da worktree foram encontrados." "Aplique task git:signing:mode:automation apos provisionar o par tecnico local ou configurar a ref publica."
+        fi
       elif ! command -v op >/dev/null 2>&1; then
         _add_result "fail" "Automation signing key ref" "op nao esta disponivel para resolver $automation_key_ref." "Instale/autentique o 1Password CLI antes de usar o signer tecnico."
       else
@@ -259,7 +279,7 @@ checkEnv() {
         signing_key_normalized="$(printf '%s' "$signing_key" | awk 'NF {print; exit}' | tr -s '[:space:]' ' ' | sed 's/^ //; s/ $//')"
         if [ -z "$automation_key_normalized" ] || ! printf '%s' "$automation_key_normalized" | grep -q '^ssh-'; then
           _add_result "fail" "Automation signing key ref" "$automation_key_ref nao retornou uma chave publica SSH valida." "Corrija a ref no 1Password ou rotacione a chave tecnica."
-        elif [ "$automation_key_normalized" = "$signing_key_normalized" ]; then
+        elif [ "$automation_key_normalized" = "$signing_key_normalized" ] || [ "$automation_key_normalized" = "$local_automation_public_key" ]; then
           _add_result "success" "Automation signing key ref" "$automation_key_ref confere com user.signingkey da worktree." ""
         else
           _add_result "fail" "Automation signing key ref" "$automation_key_ref nao confere com user.signingkey atual." "Rode novamente task git:signing:mode:automation para sincronizar a worktree."
@@ -331,37 +351,54 @@ checkEnv() {
       _add_result "fail" "1Password agent socket" "/tmp/1password-agent.sock ausente e sem fallback de agent via Windows." "Ative a integracao SSH do 1Password com WSL e reinicie o terminal."
     fi
 
-    if command -v timeout >/dev/null 2>&1; then
-      ssh_t_out="$(timeout 10 ssh -T git@github.com -o BatchMode=yes -o NumberOfPasswordPrompts=0 -o ConnectTimeout=5 -o StrictHostKeyChecking=accept-new 2>&1)"
-    else
-      ssh_t_out="$(ssh -T git@github.com -o BatchMode=yes -o NumberOfPasswordPrompts=0 -o ConnectTimeout=5 -o StrictHostKeyChecking=accept-new 2>&1)"
-    fi
-    ssh_t_rc=$?
-    if printf '%s' "$ssh_t_out" | grep -qi "successfully authenticated"; then
-      _add_result "success" "SSH auth to GitHub" "Handshake SSH com GitHub OK." ""
-    elif command -v ssh.exe >/dev/null 2>&1; then
-      local ssh_win_out ssh_win_rc
+    if [ "$resolved_mode" = "automation" ] && [ -n "$git_ssh_command" ]; then
+      local git_remote_out git_remote_rc
       if command -v timeout >/dev/null 2>&1; then
-        ssh_win_out="$(timeout 12 ssh.exe -T git@github.com -o BatchMode=yes -o NumberOfPasswordPrompts=0 -o ConnectTimeout=5 -o StrictHostKeyChecking=accept-new 2>&1)"
+        git_remote_out="$(timeout 15 git -C "$git_probe" ls-remote origin 2>&1)"
       else
-        ssh_win_out="$(ssh.exe -T git@github.com -o BatchMode=yes -o NumberOfPasswordPrompts=0 -o ConnectTimeout=5 -o StrictHostKeyChecking=accept-new 2>&1)"
+        git_remote_out="$(git -C "$git_probe" ls-remote origin 2>&1)"
       fi
-      ssh_win_rc=$?
-      if printf '%s' "$ssh_win_out" | grep -qi "successfully authenticated"; then
-        _add_result "success" "SSH auth to GitHub" "Handshake SSH com GitHub OK via fallback ssh.exe." ""
-      elif [ $ssh_t_rc -eq 124 ] || [ $ssh_win_rc -eq 124 ]; then
-        _add_result "fail" "SSH auth to GitHub" "Teste SSH excedeu tempo limite." "Verifique conectividade e rode novamente."
-      elif [ $ssh_t_rc -eq 255 ] || [ $ssh_win_rc -eq 255 ]; then
-        _add_result "fail" "SSH auth to GitHub" "Falha de autenticacao SSH (ssh/ssh.exe): $ssh_t_out | $ssh_win_out" "Verifique chave autorizada no GitHub e agent do 1Password."
+      git_remote_rc=$?
+      if [ $git_remote_rc -eq 0 ]; then
+        _add_result "success" "SSH auth to GitHub" "Acesso GitHub validado via core.sshCommand da worktree." ""
+      elif [ $git_remote_rc -eq 124 ]; then
+        _add_result "fail" "SSH auth to GitHub" "git ls-remote origin excedeu tempo limite com core.sshCommand ativo." "Verifique a chave tecnica registrada no GitHub e a conectividade SSH."
       else
-        _add_result "fail" "SSH auth to GitHub" "Retorno nao deterministico (ssh/ssh.exe): $ssh_t_out | $ssh_win_out" "Rode manualmente 'ssh -T git@github.com' para confirmar."
+        _add_result "fail" "SSH auth to GitHub" "git ls-remote origin falhou com core.sshCommand ativo: $git_remote_out" "Rode task git:signing:mode:automation novamente ou valide a chave tecnica de autenticacao no GitHub."
       fi
-    elif [ $ssh_t_rc -eq 124 ]; then
-      _add_result "fail" "SSH auth to GitHub" "Teste SSH excedeu tempo limite." "Verifique conectividade e rode novamente."
-    elif [ $ssh_t_rc -eq 255 ]; then
-      _add_result "fail" "SSH auth to GitHub" "Falha de autenticacao SSH: $ssh_t_out" "Verifique chave autorizada no GitHub e agent do 1Password."
     else
-      _add_result "fail" "SSH auth to GitHub" "Retorno nao deterministico: $ssh_t_out" "Rode manualmente 'ssh -T git@github.com' para confirmar."
+      if command -v timeout >/dev/null 2>&1; then
+        ssh_t_out="$(timeout 10 ssh -T git@github.com -o BatchMode=yes -o NumberOfPasswordPrompts=0 -o ConnectTimeout=5 -o StrictHostKeyChecking=accept-new 2>&1)"
+      else
+        ssh_t_out="$(ssh -T git@github.com -o BatchMode=yes -o NumberOfPasswordPrompts=0 -o ConnectTimeout=5 -o StrictHostKeyChecking=accept-new 2>&1)"
+      fi
+      ssh_t_rc=$?
+      if printf '%s' "$ssh_t_out" | grep -qi "successfully authenticated"; then
+        _add_result "success" "SSH auth to GitHub" "Handshake SSH com GitHub OK." ""
+      elif command -v ssh.exe >/dev/null 2>&1; then
+        local ssh_win_out ssh_win_rc
+        if command -v timeout >/dev/null 2>&1; then
+          ssh_win_out="$(timeout 12 ssh.exe -T git@github.com -o BatchMode=yes -o NumberOfPasswordPrompts=0 -o ConnectTimeout=5 -o StrictHostKeyChecking=accept-new 2>&1)"
+        else
+          ssh_win_out="$(ssh.exe -T git@github.com -o BatchMode=yes -o NumberOfPasswordPrompts=0 -o ConnectTimeout=5 -o StrictHostKeyChecking=accept-new 2>&1)"
+        fi
+        ssh_win_rc=$?
+        if printf '%s' "$ssh_win_out" | grep -qi "successfully authenticated"; then
+          _add_result "success" "SSH auth to GitHub" "Handshake SSH com GitHub OK via fallback ssh.exe." ""
+        elif [ $ssh_t_rc -eq 124 ] || [ $ssh_win_rc -eq 124 ]; then
+          _add_result "fail" "SSH auth to GitHub" "Teste SSH excedeu tempo limite." "Verifique conectividade e rode novamente."
+        elif [ $ssh_t_rc -eq 255 ] || [ $ssh_win_rc -eq 255 ]; then
+          _add_result "fail" "SSH auth to GitHub" "Falha de autenticacao SSH (ssh/ssh.exe): $ssh_t_out | $ssh_win_out" "Verifique chave autorizada no GitHub e agent do 1Password."
+        else
+          _add_result "fail" "SSH auth to GitHub" "Retorno nao deterministico (ssh/ssh.exe): $ssh_t_out | $ssh_win_out" "Rode manualmente 'ssh -T git@github.com' para confirmar."
+        fi
+      elif [ $ssh_t_rc -eq 124 ]; then
+        _add_result "fail" "SSH auth to GitHub" "Teste SSH excedeu tempo limite." "Verifique conectividade e rode novamente."
+      elif [ $ssh_t_rc -eq 255 ]; then
+        _add_result "fail" "SSH auth to GitHub" "Falha de autenticacao SSH: $ssh_t_out" "Verifique chave autorizada no GitHub e agent do 1Password."
+      else
+        _add_result "fail" "SSH auth to GitHub" "Retorno nao deterministico: $ssh_t_out" "Rode manualmente 'ssh -T git@github.com' para confirmar."
+      fi
     fi
   fi
 
@@ -425,7 +462,7 @@ checkEnv() {
           local commit_err=""
           commit_err="$(head -n1 /tmp/checkenv_commit.$$ 2>/dev/null | tr -d '\r')"
           if [ "$resolved_mode" = "automation" ]; then
-            _add_result "fail" "Signed commit test" "git commit -S falhou em repositorio temporario (${commit_err:-sem detalhe})." "Corrija a worktree tecnica, a ref publica e a autorizacao do 1Password para o signer de automacao."
+            _add_result "fail" "Signed commit test" "git commit -S falhou em repositorio temporario (${commit_err:-sem detalhe})." "Corrija a worktree tecnica, a chave privada local e o gpg.ssh.program do signer tecnico."
           else
             _add_result "fail" "Signed commit test" "git commit -S falhou em repositorio temporario (${commit_err:-sem detalhe})." "Corrija gpg.ssh.program, user.signingkey e agent do 1Password."
           fi
