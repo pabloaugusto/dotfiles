@@ -1,4 +1,5 @@
 id = "ai-developer-powershell"
+display_name = "PowerShell Dev"
 tier = "specialist"
 purpose = "Implementar mudancas PowerShell com foco em idempotencia e compatibilidade"
 default_skills = ["dotfiles-powershell-review", "dotfiles-critical-integrations"]

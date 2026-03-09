@@ -37,20 +37,20 @@ Catalogo humano dos papeis permanentes de IA deste repo.
 
 | Papel | Cartao | Agente declarativo | Skill principal | Quando entra |
 | --- | --- | --- | --- | --- |
-| AI Product Owner | [`.agents/cards/ai-product-owner.md`](../.agents/cards/ai-product-owner.md) | `ai-product-owner` | `$task-routing-and-decomposition` | intake, backlog, prioridade, refinement, ready e timeline |
+| PO | [`.agents/cards/ai-product-owner.md`](../.agents/cards/ai-product-owner.md) | `ai-product-owner` | `$task-routing-and-decomposition` | intake, backlog, prioridade, refinement, ready e timeline |
 | Scrum Master | [`.agents/cards/ai-scrum-master.md`](../.agents/cards/ai-scrum-master.md) | `ai-scrum-master` | `$wip-continuity-governance` | gate global de **board**, **WIP**, ownership, comunicacao, conformidade de agentes, ledger de enforcement e **cerimonias** |
-| AI Engineering Architect | [`.agents/cards/ai-engineering-architect.md`](../.agents/cards/ai-engineering-architect.md) | `ai-engineering-architect` | `$dotfiles-architecture-modernization` | discovery tecnico, ADR, enriquecimento de backlog e refinement |
-| AI Engineering Manager | [`.agents/cards/ai-engineering-manager.md`](../.agents/cards/ai-engineering-manager.md) | `ai-engineering-manager` | `$wip-continuity-governance` | capacidade, gargalos, pausas, riscos, bloqueios e escalacoes |
-| AI Tech Lead | [`.agents/cards/ai-tech-lead.md`](../.agents/cards/ai-tech-lead.md) | `ai-tech-lead` | `$task-routing-and-decomposition` | decomposicao, handoff tecnico e coordenacao de execucao |
-| AI Developer Python | [`.agents/cards/ai-developer-python.md`](../.agents/cards/ai-developer-python.md) | `ai-developer-python` | `$dotfiles-python-review` | implementacao Python e evidencias tecnicas |
-| AI Developer PowerShell | [`.agents/cards/ai-developer-powershell.md`](../.agents/cards/ai-developer-powershell.md) | `ai-developer-powershell` | `$dotfiles-powershell-review` | implementacao PowerShell e automacao Windows |
-| AI Developer Automation | [`.agents/cards/ai-developer-automation.md`](../.agents/cards/ai-developer-automation.md) | `ai-developer-automation` | `$dotfiles-automation-review` | shell, workflow, Docker, Taskfile e CI/CD |
-| AI Developer Config Policy | [`.agents/cards/ai-developer-config-policy.md`](../.agents/cards/ai-developer-config-policy.md) | `ai-developer-config-policy` | `$dotfiles-repo-governance` | schemas, contracts, metadata e policies declarativas |
-| AI QA | [`.agents/cards/ai-qa.md`](../.agents/cards/ai-qa.md) | `ai-qa` | `$dotfiles-test-harness` | testing, acceptance criteria e evidencias |
-| AI Reviewer | [`.agents/cards/ai-reviewer.md`](../.agents/cards/ai-reviewer.md) | `ai-reviewer` | `$task-routing-and-decomposition` | consolidacao de review, risco transversal e paridade Jira x fluxo |
+| Arquiteto | [`.agents/cards/ai-engineering-architect.md`](../.agents/cards/ai-engineering-architect.md) | `ai-engineering-architect` | `$dotfiles-architecture-modernization` | discovery tecnico, ADR, enriquecimento de backlog e refinement |
+| Engenheiro | [`.agents/cards/ai-engineering-manager.md`](../.agents/cards/ai-engineering-manager.md) | `ai-engineering-manager` | `$wip-continuity-governance` | capacidade, gargalos, pausas, riscos, bloqueios e escalacoes |
+| Tech Lead | [`.agents/cards/ai-tech-lead.md`](../.agents/cards/ai-tech-lead.md) | `ai-tech-lead` | `$task-routing-and-decomposition` | decomposicao, handoff tecnico e coordenacao de execucao |
+| Dev Python | [`.agents/cards/ai-developer-python.md`](../.agents/cards/ai-developer-python.md) | `ai-developer-python` | `$dotfiles-python-review` | implementacao Python e evidencias tecnicas |
+| PowerShell Dev | [`.agents/cards/ai-developer-powershell.md`](../.agents/cards/ai-developer-powershell.md) | `ai-developer-powershell` | `$dotfiles-powershell-review` | implementacao PowerShell e automacao Windows |
+| Automation Dev | [`.agents/cards/ai-developer-automation.md`](../.agents/cards/ai-developer-automation.md) | `ai-developer-automation` | `$dotfiles-automation-review` | shell, workflow, Docker, Taskfile e CI/CD |
+| Engenheiro Agentes IA | [`.agents/cards/ai-developer-config-policy.md`](../.agents/cards/ai-developer-config-policy.md) | `ai-developer-config-policy` | `$dotfiles-repo-governance` | schemas, contracts, metadata e policies declarativas |
+| Testador (QA) | [`.agents/cards/ai-qa.md`](../.agents/cards/ai-qa.md) | `ai-qa` | `$dotfiles-test-harness` | testing, acceptance criteria e evidencias |
+| Revisor | [`.agents/cards/ai-reviewer.md`](../.agents/cards/ai-reviewer.md) | `ai-reviewer` | `$task-routing-and-decomposition` | consolidacao de review, risco transversal e paridade Jira x fluxo |
 | AI Reviewer Python | [`.agents/cards/revisor-python.md`](../.agents/cards/revisor-python.md) | `ai-reviewer-python` | `$dotfiles-python-review` | review especializado de Python |
 | AI Reviewer PowerShell | [`.agents/cards/revisor-powershell.md`](../.agents/cards/revisor-powershell.md) | `ai-reviewer-powershell` | `$dotfiles-powershell-review` | review especializado de PowerShell |
 | AI Reviewer Automation | [`.agents/cards/revisor-automacao.md`](../.agents/cards/revisor-automacao.md) | `ai-reviewer-automation` | `$dotfiles-automation-review` | review especializado de automacao |
 | AI Reviewer Config Policy | [`.agents/cards/revisor-config-policy.md`](../.agents/cards/revisor-config-policy.md) | `ai-reviewer-config-policy` | `$dotfiles-repo-governance` | review especializado de YAML, JSON, TOML, Markdown e schemas |
-| AI DevOps | [`.agents/cards/ai-devops.md`](../.agents/cards/ai-devops.md) | `ai-devops` | `$dotfiles-critical-integrations` | pipelines, releases, integracoes e infraestrutura de fluxo |
-| AI Documentation Agent | [`.agents/cards/ai-documentation-agent.md`](../.agents/cards/ai-documentation-agent.md) | `ai-documentation-agent` | `$dotfiles-repo-governance` | sync Jira <-> Confluence, docs vivas e bundles auditaveis |
+| Devops | [`.agents/cards/ai-devops.md`](../.agents/cards/ai-devops.md) | `ai-devops` | `$dotfiles-critical-integrations` | pipelines, releases, integracoes e infraestrutura de fluxo |
+| Escrivão | [`.agents/cards/ai-documentation-agent.md`](../.agents/cards/ai-documentation-agent.md) | `ai-documentation-agent` | `$dotfiles-repo-governance` | sync Jira <-> Confluence, docs vivas e bundles auditaveis |

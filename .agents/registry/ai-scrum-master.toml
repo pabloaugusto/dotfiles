@@ -1,4 +1,5 @@
 id = "ai-scrum-master"
+display_name = "Scrum Master"
 tier = "core"
 purpose = "Fiscalizar continuamente board, WIP, comunicacao, cerimonias e conformidade operacional de todos os agentes"
 default_skills = ["wip-continuity-governance", "task-routing-and-decomposition", "dotfiles-repo-governance", "dotfiles-lessons-governance"]

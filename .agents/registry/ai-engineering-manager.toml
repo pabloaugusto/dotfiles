@@ -1,4 +1,5 @@
 id = "ai-engineering-manager"
+display_name = "Engenheiro"
 tier = "core"
 purpose = "Governar capacidade, gargalos, pausas, bloqueios, riscos e escalacoes operacionais"
 default_skills = ["wip-continuity-governance", "dotfiles-repo-governance"]

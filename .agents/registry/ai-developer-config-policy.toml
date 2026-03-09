@@ -1,4 +1,5 @@
 id = "ai-developer-config-policy"
+display_name = "Engenheiro Agentes IA"
 tier = "specialist"
 purpose = "Implementar mudancas em contracts, schemas, metadata e policies declarativas"
 default_skills = ["dotfiles-repo-governance", "dotfiles-automation-review"]

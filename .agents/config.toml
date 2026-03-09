@@ -80,3 +80,9 @@ governance_dataset = ".agents/evals/datasets/governance.jsonl"
 root = ".agents/cerimonias"
 schema = ".agents/cerimonias/ceremony.schema.json"
 default_log_root = ".agents/cerimonias/logs"
+
+[identity]
+registry_root = ".agents/registry"
+display_name_field = "display_name"
+card_title_mirror_required = true
+fallback_display = "technical-id"

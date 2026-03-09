@@ -1,4 +1,5 @@
 id = "ai-developer-python"
+display_name = "Dev Python"
 tier = "specialist"
 purpose = "Implementar mudancas Python com evidencias, testes e handoff rastreavel"
 default_skills = ["dotfiles-python-review"]

@@ -1,4 +1,5 @@
 id = "ai-reviewer"
+display_name = "Revisor"
 tier = "core"
 purpose = "Consolidar reviews especializados e atuar como gate transversal de qualidade"
 default_skills = ["task-routing-and-decomposition", "dotfiles-repo-governance", "dotfiles-architecture-modernization"]

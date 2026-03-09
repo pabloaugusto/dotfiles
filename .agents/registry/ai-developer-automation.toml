@@ -1,4 +1,5 @@
 id = "ai-developer-automation"
+display_name = "Automation Dev"
 tier = "specialist"
 purpose = "Implementar automacoes, workflows, shell e Taskfile com foco em determinismo"
 default_skills = ["dotfiles-automation-review", "dotfiles-critical-integrations"]

@@ -20,6 +20,28 @@ Registro consultivo do agente Pascoalete para ortografia e higiene vocabular.
 <!-- ai-orthography:records:start -->
 | Data/Hora UTC | Worklog ID | Revisor | Status | Arquivo | Achados | Evidencia |
 | --- | --- | --- | --- | --- | --- | --- |
+| 2026-03-09 23:24 UTC | DOT-118 | pascoalete | reprovado | tests/python/ai_assets_validator_test.py | possivel, LICOES, atlassian, Validacao, LICOES, Orquestracao, evals, Integracoes (+4) | task spell:check |
+| 2026-03-09 23:24 UTC | DOT-118 | pascoalete | reprovado | scripts/validate-ai-assets.py | execucao, evals, LICOES, evals, evals, evals, evals, atlassian (+59) | task spell:check |
+| 2026-03-09 23:24 UTC | DOT-118 | pascoalete | reprovado | docs/ai-operating-model.md | reutilizavel, testavel, worktree, Principios, Instrucoes, instrucoes, estaveis, Especializacao (+149) | task spell:check |
+| 2026-03-09 23:24 UTC | DOT-118 | pascoalete | reprovado | docs/AI-AGENTS-CATALOG.md | obrigatorios, comunicacao, obrigatorio, mudanca, obrigatorio, mudanca, rotacao, expiracao (+58) | task spell:check |
+| 2026-03-09 23:24 UTC | DOT-118 | pascoalete | reprovado | config/ai/contracts.yaml | descricao, tecnico, criterios, aceitacao, documentacao, finishable, finishable, Acao (+1) | task spell:check |
+| 2026-03-09 23:24 UTC | DOT-118 | pascoalete | reprovado | config/ai/agents.yaml | figma | task spell:check |
+| 2026-03-09 23:24 UTC | DOT-118 | pascoalete | reprovado | .agents/registry/pascoalete.toml | pascoalete, Pascoalete, tecnica, comentario | task spell:check |
+| 2026-03-09 23:24 UTC | DOT-118 | pascoalete | reprovado | .agents/registry/ai-tech-lead.toml | execucao, tecnica, tecnico | task spell:check |
+| 2026-03-09 23:24 UTC | DOT-118 | pascoalete | reprovado | .agents/registry/ai-scrum-master.toml | comunicacao | task spell:check |
+| 2026-03-09 23:24 UTC | DOT-118 | pascoalete | aprovado | .agents/registry/ai-reviewer.toml | sem achados | task spell:check |
+| 2026-03-09 23:24 UTC | DOT-118 | pascoalete | reprovado | .agents/registry/ai-qa.toml | criterios | task spell:check |
+| 2026-03-09 23:24 UTC | DOT-118 | pascoalete | aprovado | .agents/registry/ai-product-owner.toml | sem achados | task spell:check |
+| 2026-03-09 23:24 UTC | DOT-118 | pascoalete | reprovado | .agents/registry/ai-engineering-manager.toml | escalacoes | task spell:check |
+| 2026-03-09 23:24 UTC | DOT-118 | pascoalete | reprovado | .agents/registry/ai-engineering-architect.toml | tecnicas, tecnico | task spell:check |
+| 2026-03-09 23:24 UTC | DOT-118 | pascoalete | reprovado | .agents/registry/ai-documentation-agent.toml | documentacao, rastreavel, pascoalete | task spell:check |
+| 2026-03-09 23:24 UTC | DOT-118 | pascoalete | reprovado | .agents/registry/ai-devops.toml | integracoes | task spell:check |
+| 2026-03-09 23:24 UTC | DOT-118 | pascoalete | reprovado | .agents/registry/ai-developer-python.toml | mudancas, rastreavel | task spell:check |
+| 2026-03-09 23:24 UTC | DOT-118 | pascoalete | reprovado | .agents/registry/ai-developer-powershell.toml | mudancas, idempotencia | task spell:check |
+| 2026-03-09 23:24 UTC | DOT-118 | pascoalete | reprovado | .agents/registry/ai-developer-config-policy.toml | mudancas | task spell:check |
+| 2026-03-09 23:24 UTC | DOT-118 | pascoalete | reprovado | .agents/registry/ai-developer-automation.toml | automacoes | task spell:check |
+| 2026-03-09 23:24 UTC | DOT-118 | pascoalete | reprovado | .agents/config.toml | pascoalete, evals, evals, evals, evals, evals | task spell:check |
+| 2026-03-09 23:24 UTC | DOT-118 | pascoalete | reprovado | .agents/cards/ai-developer-config-policy.md | mudancas, mudancas, catalogos, execucao, criterios, Saidas, validacoes, execucao (+9) | task spell:check |
 | 2026-03-09 22:58 UTC | DOT-119 | pascoalete | reprovado | tests/python/ai_assets_validator_test.py | possivel, LICOES, atlassian, Validacao, LICOES, Orquestracao, evals, Integracoes (+4) | task spell:check |
 | 2026-03-09 22:58 UTC | DOT-119 | pascoalete | reprovado | scripts/validate-ai-assets.py | execucao, evals, LICOES, evals, evals, evals, evals, atlassian (+57) | task spell:check |
 | 2026-03-09 22:58 UTC | DOT-119 | pascoalete | reprovado | docs/ai-operating-model.md | reutilizavel, testavel, worktree, Principios, Instrucoes, instrucoes, estaveis, Especializacao (+138) | task spell:check |

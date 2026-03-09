@@ -1,4 +1,5 @@
 id = "pascoalete"
+display_name = "Pascoalete"
 tier = "specialist"
 purpose = "Governar ortografia tecnica, curadoria de cspell e higiene do dicionario local sem bloquear os gates duros do repo"
 default_skills = ["dotfiles-orthography-review"]

@@ -189,6 +189,7 @@ OPERATING_MODEL_REQUIRED_SNIPPETS = [
     "### Camada 2.1. Registry declarativo do repo",
     "### Camada 2.2. Orquestracao, rules e evals",
     "## Politica de leitura do board",
+    "## Camada de identidade humana dos agentes",
 ]
 
 LESSONS_REQUIRED_SNIPPETS = [
@@ -226,6 +227,46 @@ CEREMONY_REQUIRED_SNIPPETS = {
         "# Retrospectiva - {{data_hora_utc}} - {{branch}}",
         "## Problemas catalogados",
         "## Encaminhamento",
+    ],
+}
+
+AGENT_IDENTITY_REQUIRED_SNIPPETS = {
+    ".agents/config.toml": [
+        "[identity]",
+        'display_name_field = "display_name"',
+        'fallback_display = "technical-id"',
+    ],
+    "config/ai/contracts.yaml": [
+        "agent_identity:",
+        "source_of_truth: .agents/registry/*.toml::display_name",
+        "startup-and-restart-must-load-display-name-layer",
+        "jira-must-prefer-display-name-when-surface-allows",
+    ],
+    "config/ai/agents.yaml": [
+        "display_name: PO",
+        "display_name: Scrum Master",
+        "display_name: Engenheiro Agentes IA",
+    ],
+    "docs/AI-AGENTS-CATALOG.md": [
+        "| PO |",
+        "| Scrum Master |",
+        "| Engenheiro Agentes IA |",
+        "| Escrivão |",
+    ],
+    ".agents/cards/ai-developer-config-policy.md": [
+        "# Engenheiro Agentes IA",
+    ],
+    ".agents/registry/ai-product-owner.toml": [
+        'display_name = "PO"',
+    ],
+    ".agents/registry/ai-scrum-master.toml": [
+        'display_name = "Scrum Master"',
+    ],
+    ".agents/registry/ai-developer-config-policy.toml": [
+        'display_name = "Engenheiro Agentes IA"',
+    ],
+    ".agents/registry/pascoalete.toml": [
+        'display_name = "Pascoalete"',
     ],
 }
 
@@ -336,7 +377,7 @@ REQUIRED_REGISTRY_AGENT_KEYS = [
     "handoff_to",
 ]
 
-REQUIRED_AI_CONFIG_SECTIONS = ["skills", "agents", "orchestration", "rules", "evals", "ceremonies"]
+REQUIRED_AI_CONFIG_SECTIONS = ["skills", "agents", "orchestration", "rules", "evals", "ceremonies", "identity"]
 
 
 def frontmatter_value(frontmatter: str, key: str) -> str | None:
@@ -729,6 +770,11 @@ def main(argv: list[str]) -> int:
         )
 
     for relative, snippets in CEREMONY_REQUIRED_SNIPPETS.items():
+        path = repo_root / relative
+        if path.is_file():
+            require_snippets(path.read_text(encoding="utf-8"), snippets, relative, failures)
+
+    for relative, snippets in AGENT_IDENTITY_REQUIRED_SNIPPETS.items():
         path = repo_root / relative
         if path.is_file():
             require_snippets(path.read_text(encoding="utf-8"), snippets, relative, failures)

@@ -1,4 +1,5 @@
 id = "ai-documentation-agent"
+display_name = "Escrivão"
 tier = "core"
 purpose = "Sincronizar repo, Jira e Confluence com documentacao viva e rastreavel"
 default_skills = ["dotfiles-repo-governance", "dotfiles-lessons-governance", "dotfiles-orthography-review"]

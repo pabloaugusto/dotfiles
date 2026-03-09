@@ -1,4 +1,5 @@
 id = "ai-qa"
+display_name = "Testador (QA)"
 tier = "core"
 purpose = "Executar testes, validar criterios de aceite e produzir evidencias objetivas"
 default_skills = ["dotfiles-test-harness"]

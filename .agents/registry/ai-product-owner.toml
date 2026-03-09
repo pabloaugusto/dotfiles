@@ -1,4 +1,5 @@
 id = "ai-product-owner"
+display_name = "PO"
 tier = "core"
 purpose = "Governar backlog, prioridade, escrita de historias e timeline do projeto"
 default_skills = ["task-routing-and-decomposition", "dotfiles-repo-governance"]

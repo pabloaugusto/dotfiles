@@ -177,6 +177,18 @@ operator_chat_visibility:
     - scrum-master-must-report-dysfunctions-and-ceremonies-to-chat
     - chat-summary-does-not-replace-jira-or-confluence-logging
 
+agent_identity:
+  source_of_truth: .agents/registry/*.toml::display_name
+  card_title_mirror_required: true
+  fallback_display: technical-id
+  operating_rules:
+    - official-display-name-must-live-in-registry
+    - card-title-must-mirror-official-display-name-when-defined
+    - chat-must-prefer-display-name-over-technical-id
+    - startup-and-restart-must-load-display-name-layer
+    - jira-must-prefer-display-name-when-surface-allows
+    - technical-id-remains-internal-automation-key
+
 scrum_master_enforcement:
   canonical_ledger: docs/AI-SCRUM-MASTER-LEDGER.md
   mandatory_rules:
