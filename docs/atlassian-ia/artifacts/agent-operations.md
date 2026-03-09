@@ -13,7 +13,39 @@
 Cada agente deve registrar sua atuacao de forma estruturada no `Jira` e, quando
 houver documentacao correspondente, refletir isso tambem no `Confluence`.
 
+Toda acao em demanda rastreada no `Jira` exige log do agente na propria issue,
+inclusive atuacoes consultivas como `pascoalete`.
+
+Esse log nao deve acontecer so no fim. A regra perene passa a ser:
+
+- comentar ao iniciar a atuacao na issue
+- comentar em cada marco relevante, descoberta, decisao ou mudanca de estado
+  durante a execucao
+- comentar antes de handoff, pausa, aprovacao, reprovacao ou encerramento da
+  participacao do agente
+- manter o status da issue em tempo real, sempre coerente com o comentario mais
+  recente do agente e com o estado real da execucao
+
 Comentario solto sem prova nao conta como trabalho concluido.
+
+Quando um comentario, descricao ou evidencia citar artefato versionado deste
+repo, a referencia precisa apontar para a URL oficial do arquivo no `GitHub`.
+Esse contrato tambem vale para correcao retroativa do que ja foi semeado.
+
+Toda issue ativa tambem deve manter descricao legivel, curta e humana, com
+`Contexto`, `Resultado esperado`, `Criterios de aceite` e `Referencias`.
+
+## Regra adicional de visibilidade no chat
+
+Além de `Jira` e `Confluence`, cada marco relevante da atuacao dos agentes deve
+ser espelhado no chat com uma mensagem curta, natural e humana.
+
+Essa visibilidade em chat:
+
+- nao substitui o log oficial em `Jira` e `Confluence`
+- deve resumir marcos relevantes, nao microacoes ruidosas
+- deve manter a pessoa usuaria ciente do estado real sem parecer template
+  robotizado
 
 ## Campos obrigatorios em comentarios de atividade
 
@@ -38,15 +70,40 @@ Comentario solto sem prova nao conta como trabalho concluido.
 ## Regras globais do Jira
 
 - nenhuma transicao vale sem comentario estruturado
+- todo agente que tocar uma issue rastreada deve registrar comentario no `Jira`
+- todo papel atuante deve comentar no inicio da propria execucao na issue
+- todo papel atuante deve comentar progresso relevante enquanto trabalha na issue
+- todo papel atuante deve comentar antes de handoff, pausa ou saida do fluxo
+- o status no `Jira` deve refletir o estado real da demanda no momento, sem
+  atualizacao tardia ou em lote
+- comentario e status precisam permanecer em paridade temporal e semantica
 - todo papel que atuar deve atualizar `Current Agent Role` e `Next Required Role`
 - todo papel que atuar deve anexar evidencia ou registrar `n/a` explicito
+- `Doing` vale apenas para trabalho em execucao ativa
+- item interrompido deve sair de `Doing` para `Paused` com motivo e criterio de retomada
+- bloqueio que nenhum agente consiga destravar deve ser escalado ao usuario
+- a escalacao de bloqueio deve usar todos os canais disponiveis no sistema
+- cada tentativa de notificacao precisa ficar registrada no `Jira` e, quando
+  houver pagina oficial, tambem no `Confluence`
 - mudanca documental relevante deve aparecer tambem na issue correspondente
+- review consultivo tambem precisa aparecer na issue quando o escopo estiver rastreado
 
 ## Regras globais do Confluence
 
 - toda pagina gerada por trabalho deve linkar a issue correspondente no `Jira`
 - atualizacao documental relevante deve ser mencionada na issue correspondente
 - o `AI Documentation Agent` governa a arvore de paginas, backlinks e espelhos
+
+## Semantica operacional de `Paused`
+
+- `Paused` representa trabalho interrompido, aguardando dependencia, decisao,
+  janela operacional ou retomada explicita
+- `Doing` representa apenas trabalho sendo executado agora
+- transicoes `Doing -> Paused` e `Paused -> Doing` exigem comentario estruturado
+  com motivo, evidencia e criterio de retomada
+- `Paused` nao substitui `Changes Requested`
+  - `Paused`: espera operacional
+  - `Changes Requested`: retrabalho exigido por validacao
 
 ## Passo a passo por papel
 
@@ -69,6 +126,9 @@ Comentario solto sem prova nao conta como trabalho concluido.
 - registra bloqueios, riscos e replanejamento no `Jira`
 - usa evidencia operacional, dependencia concreta ou dado de fila
 - atualiza runbooks/processo no `Confluence` quando a regra mudar
+- move `Doing -> Paused` ou `Paused -> Doing` quando houver espera operacional real
+- quando nenhum agente conseguir destravar a demanda, escala o bloqueio ao
+  usuario por todos os canais disponiveis e registra a trilha completa
 
 ### `ai-tech-lead`
 
@@ -76,6 +136,7 @@ Comentario solto sem prova nao conta como trabalho concluido.
 - registra plano tecnico, handoff e dependencias no `Jira`
 - referencia playbooks e runbooks no `Confluence`
 - governa `Ready -> Doing` e retornos `Changes Requested -> Doing`
+- governa tambem `Doing -> Paused` e `Paused -> Doing`
 
 ### `ai-developer-python`
 
@@ -114,10 +175,46 @@ Comentario solto sem prova nao conta como trabalho concluido.
 
 ### `ai-reviewer`
 
-- revisa implementacao e aderencia ao contrato
+- consolida pareceres especializados e revisa risco transversal
 - registra feedback ou aprovacao com evidencia no `Jira`
 - exige links para `ADR` ou pagina relevante quando aplicavel
 - move `Review -> Done` ou `Review -> Changes Requested`
+
+### `ai-reviewer-python`
+
+- revisa Python, tipagem, testes, manutencao e performance
+- registra feedback ou aprovacao com evidencia objetiva no `Jira`
+- aponta risco tecnico especifico da stack Python
+- usa como base normativa o catalogo em [`reviewer-standards-catalog.md`](reviewer-standards-catalog.md)
+- decide com base no modelo formal em [`reviewer-decision-model.md`](reviewer-decision-model.md)
+- diferencia no comentario o que e quebra de especificacao, convencao ou tooling
+
+### `ai-reviewer-powershell`
+
+- revisa PowerShell, idempotencia, seguranca e compatibilidade do host
+- registra feedback ou aprovacao com evidencia objetiva no `Jira`
+- aponta risco tecnico especifico da stack PowerShell
+- usa como base normativa o catalogo em [`reviewer-standards-catalog.md`](reviewer-standards-catalog.md)
+- decide com base no modelo formal em [`reviewer-decision-model.md`](reviewer-decision-model.md)
+- diferencia no comentario regra de linguagem, host e analyzer
+
+### `ai-reviewer-automation`
+
+- revisa shell, workflows, Taskfile, CI e automacao
+- registra feedback ou aprovacao com evidencia objetiva no `Jira`
+- aponta risco tecnico especifico de automacao e entrega
+- usa como base normativa o catalogo em [`reviewer-standards-catalog.md`](reviewer-standards-catalog.md)
+- decide com base no modelo formal em [`reviewer-decision-model.md`](reviewer-decision-model.md)
+- explicita no comentario impacto em determinismo, rollback e seguranca operacional
+
+### `ai-reviewer-config-policy`
+
+- revisa YAML, JSON, TOML, schemas, contratos e politicas declarativas
+- registra feedback ou aprovacao com evidencia objetiva no `Jira`
+- aponta risco tecnico especifico da camada declarativa
+- usa como base normativa o catalogo em [`reviewer-standards-catalog.md`](reviewer-standards-catalog.md)
+- decide com base no modelo formal em [`reviewer-decision-model.md`](reviewer-decision-model.md)
+- diferencia erro sintatico, quebra de schema e problema contratual
 
 ### `ai-devops`
 
@@ -132,6 +229,14 @@ Comentario solto sem prova nao conta como trabalho concluido.
 - garante backlinks `Jira <-> Confluence`
 - registra comentario `documentation-link` com prova no `Jira`
 - so libera `Done` quando a rastreabilidade estiver completa
+
+### `pascoalete`
+
+- registra parecer consultivo de ortografia tecnica no `Jira` quando o escopo
+  estiver rastreado
+- referencia o ledger local e a pendencia aberta no backlog quando houver
+  reprovacao nao corrigida na rodada
+- nao bloqueia `Done` tecnico, mas precisa deixar a trilha audivel na issue
 
 ### `ai-browser-validator`
 

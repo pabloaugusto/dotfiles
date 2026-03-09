@@ -77,6 +77,15 @@ Atualizacao tecnica validada durante a implementacao:
 - a linkagem bidirecional `Jira <-> Confluence` passa a ser contrato perene,
   governado pelo `AI Documentation Agent` e exigido no fechamento sempre que a
   demanda gerar trabalho nas duas plataformas
+- referencias a documentos, arquivos e artefatos do repo publicadas em `Jira`
+  ou `Confluence` devem usar URL oficial do `GitHub`; `path` local so pode
+  aparecer como apoio textual quando o artefato nao for versionado
+- o control plane deve promover para URL oficial apenas arquivos rastreados no
+  `Git`, evitando gerar links falsos para caches, `storageState`, perfis de
+  browser e outros artefatos efemeros
+- para arquivos novos ou alterados nesta worktree, a validade externa do link
+  depende de `commit checkpoint + push`; isso precisa ficar explicito nas
+  evidencias ate a publicacao remota
 - a operacao de cada papel em `Jira` e `Confluence` precisa nascer como
   contrato declarativo proprio, com passo a passo, transicoes, tipos de
   comentario e evidencia obrigatoria por atuacao
@@ -87,6 +96,9 @@ Atualizacao tecnica validada durante a implementacao:
   maturidade deve evoluir o nucleo para um `modular monolith` com pacotes
   importaveis por dominio, deixando microservicos como etapa posterior e
   seletiva
+- a autenticacao visual via `Playwright` deve seguir bootstrap humano inicial
+  com `storageState` local ignorado e reuso de sessao nas execucoes
+  automatizadas, em vez de tentar automatizar `SSO` ou `MFA`
 
 ## O que manter do blueprint
 
@@ -118,12 +130,16 @@ Sugestao mais robusta:
 - `Refinement`
 - `Ready`
 - `In Progress`
+- `Paused`
 - `In Validation`
 - `In Review`
 - `Changes Requested`
 - `Done`
 
 `Blocked` deve ser flag, label ou campo, nao uma coluna primaria.
+
+`Paused` deve existir como status proprio para separar trabalho interrompido de
+trabalho ativamente em execucao.
 
 ### 2. Nao mover todo Markdown para Confluence
 
@@ -214,6 +230,11 @@ Todos esses papeis devem operar por contrato nas ferramentas:
   [`../../config/ai/agent-operations.yaml`](../../config/ai/agent-operations.yaml)
   e no artefato
   [`artifacts/agent-operations.md`](artifacts/agent-operations.md)
+- bloqueios que nenhum agente consiga destravar sozinho devem escalar o usuario
+  por todos os canais disponiveis, com trilha obrigatoria em `Jira` e
+  `Confluence`
+- marcos relevantes da atuacao dos agentes tambem devem ser resumidos no chat
+  em linguagem humana e curta, sem substituir a rastreabilidade oficial
 
 ## Camada especialista
 
@@ -241,16 +262,37 @@ arquivo, em vez de introduzir um `reviewer` genericamente opaco.
 Sugestao inicial:
 
 - `Epic`
-- `Feature`
+- `Story`
 - `Task`
 - `Bug`
-- `Tech Debt`
-- `Spike`
-- `Automation`
-- `Documentation`
+- `Sub-task`
 
-`Research` pode ser absorvido por `Spike`, a menos que o time queira separar
-pesquisa exploratoria de investigacao tecnica curta.
+Regra de uso recomendada:
+
+- `Epic`
+  - agrupar contexto pequeno ou medio, com progresso observavel e ownership claro
+- `Story`
+  - expressar regra de negocio, definicao global, fluxo funcional ou entrega com valor legivel
+- `Task`
+  - representar trabalho tecnico, operacional, documental ou de governanca
+- `Bug`
+  - registrar falha, regressao ou comportamento incorreto
+- `Sub-task`
+  - quebrar execucao dentro de um item pai quando isso melhorar fluxo ou handoff
+
+Melhor pratica adotada:
+
+- usar `Epic` e `Parent` como agrupamento principal
+- evitar `Relates` em massa quando o objetivo for apenas agrupamento tematico
+- reservar `issue links` para bloqueio, dependencia, duplicidade ou relacao tecnica real
+
+Padrao de escrita adotado:
+
+- titulos curtos, humanos e sem prefixo com `ID` local
+- descricoes com `Contexto`, `Resultado esperado`, `Criterios de aceite` e `Referencias`
+- `Story` preferindo `Card / Conversation / Confirmation`
+- `Task` explicitando `Escopo tecnico` quando necessario
+- `Bug` explicitando `Problema observado` e `Impacto`
 
 Se houver fluxo de produto, design e aquisicao organica, pode valer adicionar:
 
@@ -265,18 +307,20 @@ Sugestao:
 - `Backlog`
 - `Refinement`
 - `Ready`
-- `In Progress`
-- `In Validation`
-- `In Review`
+- `Doing`
+- `Paused`
+- `Testing`
+- `Review`
 - `Changes Requested`
 - `Done`
 
 Transicoes principais:
 
 ```text
-Backlog -> Refinement -> Ready -> In Progress -> In Validation -> In Review -> Done
-In Validation -> Changes Requested -> In Progress
-In Review -> Changes Requested -> In Progress
+Backlog -> Refinement -> Ready -> Doing -> Testing -> Review -> Done
+Doing -> Paused -> Doing
+Testing -> Changes Requested -> Doing
+Review -> Changes Requested -> Doing
 ```
 
 Extensao opcional para escopos web e growth:
@@ -298,8 +342,6 @@ uteis:
 - `Workstream`
 - `Affected Platforms`
 - `Risk`
-- `Definition of Ready`
-- `Definition of Done`
 - `Confluence Source`
 - `Evidence Links`
 - `Branch / PR`
@@ -311,6 +353,24 @@ uteis:
 - `Needs SEO Review`
 - `Definition of Ready`
 - `Subtask Creation Policy`
+
+## Criterios de aceite
+
+Todo item que possa entrar em `Refinement` ou `Ready` precisa ter criterios de
+aceite iniciais.
+
+Esses criterios devem ser:
+
+- verificaveis
+- observaveis
+- ligados ao resultado esperado
+- suficientes para `QA` e `Reviewer`
+
+Evitar:
+
+- `funcionar corretamente`
+- repetir o titulo como criterio
+- omitir forma de validacao
 
 ## Labels iniciais sugeridas
 
@@ -336,6 +396,14 @@ Cada comentario de agente deve ser estruturado e tipado. Campos minimos:
 - `Contexto`
 - `Evidencias`
 - `Proximo passo`
+
+Cadencia minima obrigatoria:
+
+- comentario ao iniciar a atuacao do papel na issue
+- comentario em cada marco relevante, descoberta, decisao ou mudanca de estado
+- comentario antes de handoff, pausa, aprovacao, reprovacao ou saida do fluxo
+- atualizacao de status em tempo real, sempre coerente com o comentario mais
+  recente e com o estado real da demanda
 
 Tipos recomendados:
 
@@ -522,25 +590,57 @@ passar a usar adapters.
 - o schema alvo ja foi aplicado no projeto `DOT`
 - a semeadura retroativa ja foi executada:
   - seed inicial com `64` issues reais confirmadas por API em `DOT`
-  - total atual no tenant: `66` issues apos abertura de [`DOT-65`](https://pabloaugusto.atlassian.net/browse/DOT-65) e [`DOT-66`](https://pabloaugusto.atlassian.net/browse/DOT-66)
+  - total atual no tenant: `84` issues, agora com epicos tematicos, `DOT-75`
+    para padronizacao do backlog, `DOT-76` para avaliar a fronteira `/app`,
+    `DOT-77` para corrigir o falso negativo do browser validator e `DOT-78` /
+    `DOT-79` para abrir a frente oficial de rastreabilidade `GitHub` + `Jira`
+    + `Confluence`
+  - o retroativo ja foi reescrito com titulos mais curtos e descricoes mais
+    humanas
   - issue de migracao [`DOT-1`](https://pabloaugusto.atlassian.net/browse/DOT-1)
     com bundle auditavel anexado
-- `24` paginas oficiais sincronizadas no `Confluence` apos a introducao do docs sync
-  dedicado
+- `29` paginas oficiais sincronizadas no `Confluence`, incluindo as paginas
+  `DOT - Jira Writing Standards`, `DOT - GitHub Jira Confluence Traceability`
+  e `DOT - GitHub Atlassian Runbook`
 - o gap residual do board agora esta rastreado no backlog oficial em
   [`DOT-65`](https://pabloaugusto.atlassian.net/browse/DOT-65)
-- a ativacao futura do browser validator via `Playwright` agora esta rastreada
+- a ativacao do browser validator via `Playwright` agora esta rastreada
   em [`DOT-66`](https://pabloaugusto.atlassian.net/browse/DOT-66)
-- a primeira tentativa real de validacao visual via `Playwright` ja foi
-  executada e bloqueou em `id.atlassian.com/login`, deixando evidencia
-  anexada em [`DOT-66`](https://pabloaugusto.atlassian.net/browse/DOT-66)
+- o falso negativo de titulo generico no validator browser ja foi corrigido em
+  [`DOT-77`](https://pabloaugusto.atlassian.net/browse/DOT-77)
+- o bootstrap humano inicial do `Playwright` foi concluido com sucesso e a
+  sessao autenticada agora e reutilizavel por `storageState`
+- a primeira validacao browser positiva ja foi executada no board settings do
+  `DOT`, com `PAUSED` visivel e sem warnings amarelos
+- a heuristica do validator agora tambem aceita `title_match_mode =
+  body-fallback` para paginas SPA do Atlassian cujo tab title seja generico
+- [`DOT-76`](https://pabloaugusto.atlassian.net/browse/DOT-76) foi concluida em
+  `Done`, com recomendacao final indicando que a fronteira `/app` faz sentido
+  como direcao arquitetural, mas nao como migracao fisica imediata
+- a frente de integracao `GitHub` + `Jira` + `Confluence` agora possui estudo
+  oficial proprio em
+  [`2026-03-08-github-jira-confluence-traceability.md`](2026-03-08-github-jira-confluence-traceability.md),
+  e ja foi promovida para o backlog oficial em [`DOT-78`](https://pabloaugusto.atlassian.net/browse/DOT-78)
+  e [`DOT-79`](https://pabloaugusto.atlassian.net/browse/DOT-79), com
+  subtasks de execucao entre [`DOT-80`](https://pabloaugusto.atlassian.net/browse/DOT-80)
+  e [`DOT-84`](https://pabloaugusto.atlassian.net/browse/DOT-84)
+- o runbook operacional desta frente agora tambem existe como artefato
+  versionado no repo em
+  [`2026-03-08-github-for-atlassian-runbook.md`](2026-03-08-github-for-atlassian-runbook.md)
+  e como pagina oficial no `Confluence`
+- o repair retroativo agora tambem normaliza referencias a artefatos do repo em
+  `Jira` e `Confluence` para links oficiais do `GitHub`
+- o repair retroativo mais recente zerou residuos conhecidos de `paths` locais
+  em descricoes e comentarios gerados pela automacao no `Jira`
+- o linkificador central agora so promove para URL oficial arquivos rastreados
+  no `Git`, deixando artefatos nao versionados apenas como contexto textual
 - o unico gap residual confirmado nesta trilha continua sendo o board do
   `Jira Software`:
   - `GET /rest/agile/1.0/board` segue em `401 Unauthorized; scope does not match`
-  - o layout visual do board continua em drift com statuses legados
-- a rodada de seed foi liberada por uma excecao humana unica; as proximas
-  execucoes voltam a bloquear por padrao enquanto
-  `project.target_board.layout_confirmed` permanecer `false`
+  - o layout visual do board ja foi alinhado por UI autenticada
+- `project.target_board.layout_confirmed` agora pode permanecer `true` no
+  modelo local, porque o bloqueio remanescente deixou de ser visual e passou a
+  ser apenas de API
 
 ## Sequencia recomendada de branches
 

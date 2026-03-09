@@ -60,6 +60,39 @@ governanca.
 - [`2026-03-07-python-modular-architecture-research.md`](2026-03-07-python-modular-architecture-research.md):
   pesquisa e recomendacao para evoluir o piloto para um monolito modular com
   pacotes importaveis por dominio e extracao futura seletiva para microservicos.
+- [`2026-03-08-analise-fronteira-app-runtime.md`](2026-03-08-analise-fronteira-app-runtime.md):
+  diagnostico inicial sobre mover o runtime materializado para uma futura pasta
+  [`/app`](../../), com recomendacao faseada de desacoplamento antes do move
+  fisico.
+- [`2026-03-08-playwright-atlassian-auth-bootstrap.md`](2026-03-08-playwright-atlassian-auth-bootstrap.md):
+  contrato canonico do bootstrap humano inicial de autenticacao web via
+  `Playwright`, com `storageState` local, reuso de sessao e evidencias visuais.
+- [`2026-03-08-atlassian-agile-hub-inventory.md`](2026-03-08-atlassian-agile-hub-inventory.md):
+  inventario versionado do crawl oficial do hub `Atlassian Agile`, com
+  cobertura ampla do diretorio `/br/agile` e catalogo de URLs lidas.
+- [`2026-03-08-manual-agilidade-control-plane.md`](2026-03-08-manual-agilidade-control-plane.md):
+  manual agil consolidado do projeto, derivado do hub oficial da Atlassian e
+  traduzido para o fluxo real `Jira + Confluence + repo`.
+- [`2026-03-08-spike-cobertura-agentes-e-review-especializado.md`](2026-03-08-spike-cobertura-agentes-e-review-especializado.md):
+  spike dedicada a cobertura de agentes, review especializado, qualidade de
+  spikes e priorizacao continua do backlog pelo `PO`.
+- [`2026-03-08-blocker-escalation-and-notifications.md`](2026-03-08-blocker-escalation-and-notifications.md):
+  contrato vitalicio de escalacao de bloqueios, com notificacao do usuario por
+  todos os canais disponiveis e trilha obrigatoria em `Jira` e `Confluence`.
+- [`2026-03-08-github-for-atlassian-runbook.md`](2026-03-08-github-for-atlassian-runbook.md):
+  runbook operacional da integracao oficial `GitHub for Atlassian`, com
+  checklist de setup, convencoes obrigatorias, evidencias minimas e diagnostico
+  rapido.
+- [`2026-03-08-github-jira-confluence-traceability.md`](2026-03-08-github-jira-confluence-traceability.md):
+  estrategia oficial para integrar `GitHub`, `Jira` e `Confluence` com
+  rastreabilidade ponta a ponta de branches, commits, PRs, workflows,
+  deployments, releases e referencias documentais.
+- [`artifacts/onepassword-runtime-read-inventory.md`](artifacts/onepassword-runtime-read-inventory.md):
+  inventario versionado dos hotspots de `op` no runtime, usado para fechar
+  `DOT-85` e preparar `DOT-86` / `DOT-87`.
+- [`artifacts/onepassword-runtime-cache-contract.md`](artifacts/onepassword-runtime-cache-contract.md):
+  contrato versionado de classes de material, TTL, invalidacao e locais
+  permitidos para o cache de runtime do `1Password`.
 - [`2026-03-07-parecer-e-plano-inicial.md`](2026-03-07-parecer-e-plano-inicial.md):
   parecer arquitetural consolidado e primeira versao do plano de implementacao.
 - [`artifacts/README.md`](artifacts/README.md):
@@ -67,6 +100,25 @@ governanca.
 - [`artifacts/agent-operations.md`](artifacts/agent-operations.md):
   contrato artifact-first do passo a passo operacional de cada papel em `Jira`
   e `Confluence`, com evidencia obrigatoria por atuacao.
+- [`artifacts/jira-writing-standards.md`](artifacts/jira-writing-standards.md):
+  padrao canonico de escrita de epics, stories, tasks, bugs e subtasks, com
+  criterios de aceite e referencias oficiais da Atlassian.
+- [`artifacts/reviewer-standards-catalog.md`](artifacts/reviewer-standards-catalog.md):
+  catalogo normativo dos reviewers especializados, com especificacoes oficiais,
+  RFCs, convencoes secundarias e tooling de enforcement por especialidade.
+- [`artifacts/reviewer-decision-model.md`](artifacts/reviewer-decision-model.md):
+  modelo formal de decisao tecnica dos reviewers especializados, inspirado na
+  blueprint de reviewer Python e adaptado ao workflow Jira + Confluence.
+- [`artifacts/reviewer-severity-policy.md`](artifacts/reviewer-severity-policy.md):
+  politica canonica de severidade para os reviewers especializados.
+- [`artifacts/reviewer-jira-workflow-policy.md`](artifacts/reviewer-jira-workflow-policy.md):
+  politica operacional que transforma review em comentario + evidencia + transicao coerente no Jira.
+- [`artifacts/python-quality-review-agent.md`](artifacts/python-quality-review-agent.md):
+  blueprint canonico do reviewer Python como sistema formal de decisao tecnica.
+- [`artifacts/universal-engineering-standards-stack.md`](artifacts/universal-engineering-standards-stack.md):
+  stack universal de governanca tecnica para engenharia moderna, cobrindo
+  especificacoes, style guides, lint, format, seguranca, Git, CI/CD, containers
+  e AI.
 - [`artifacts/migration-bundle.md`](artifacts/migration-bundle.md):
   contrato do bundle auditavel que deve acompanhar cada lote de exportacao para
   `Jira` e `Confluence`.

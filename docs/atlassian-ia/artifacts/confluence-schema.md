@@ -29,19 +29,25 @@
 - `DOT - Endpoint Catalog`
 - `DOT - Agent Operations Contract`
 - `DOT - Migration Bundle Contract`
+- `DOT - 1Password Runtime Inventory`
+- `DOT - 1Password Runtime Cache Contract`
 - `Delivery e Backfill`
 - `DOT - Jira Backfill Ledger`
 - `DOT - Migration Plan`
 - `DOT - AI Product Owner Blueprint`
 - `DOT - Agent Operation Playbook`
 - `Operacao e Governanca`
+- `DOT - GitHub Atlassian Runbook`
 - `DOT - Auth and Permissions`
 - `DOT - Tenant Diagnostics`
 - `DOT - 1Password Batch Resolution`
+- `DOT - Browser Validator Auth Bootstrap`
 - `DOT - Dev-Time Foundation`
 - `Estrategia e Evolucao`
+- `DOT - GitHub Jira Confluence Traceability`
 - `DOT - Atlassian OpenAPI Strategy`
 - `DOT - Python Modular Architecture Research`
+- `DOT - App Runtime Frontier Analysis`
 - `DOT - Atlassian Product Discovery`
 - `DOT - Market Best Practices`
 - `DOT - Optional Capabilities Figma UX SEO`
@@ -51,6 +57,12 @@
 - cada schema nasce primeiro no repo
 - cada artefato sincronizado para o `Confluence` deve manter link de volta para
   a issue correspondente no `Jira`
+- toda referencia a arquivo ou artefato do repo dentro do `Confluence` deve
+  apontar para o arquivo no `GitHub`
+- toda pagina sincronizada deve publicar o conteudo renderizado de forma
+  visivel no corpo da pagina
+- a secao `Conteudo de origem` deve ficar dentro de um `expand`, mas com o
+  markdown renderizado normalmente, sem `code macro`
 - cada issue do `Jira` que gerar pagina ou atualizar pagina deve receber
   comentario `documentation-link`
 - artefatos do repo permanecem versionados como espelho essencial

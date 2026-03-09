@@ -34,11 +34,11 @@
   - seed inicial no `Jira`: `64` issues reais criadas e verificadas por API
     (`DOT-1` a `DOT-64`)
   - total atual no tenant apos abertura dos backlogs residuais:
-    `66` issues (`DOT-1` a `DOT-66`)
-  - `Confluence`: `24` paginas oficiais sincronizadas e verificadas por API
+    `84` issues (`DOT-1` a `DOT-84`)
+  - `Confluence`: `29` paginas oficiais sincronizadas e verificadas por API
     apos o docs sync dedicado
-  - total bruto atual visivel no `space`: `25` paginas, incluindo a pagina
-    nativa `dotfiles Home` fora da arvore oficial do control plane
+  - a pagina nativa `dotfiles Home` continua fora da arvore oficial do control
+    plane
   - issue de migracao: [`DOT-1`](https://pabloaugusto.atlassian.net/browse/DOT-1)
     com bundle auditavel anexado e comentarios estruturados de evidencia
   - linkagem bidirecional validada por API:
@@ -52,36 +52,99 @@
   - `gateway + Basic`: `401 Unauthorized`
   - `site + Basic`: `401 Client must be authenticated to access this resource`
   - `site + Bearer`: `403 Failed to parse Connect Session Auth Token`
-- o board visivel na UI do projeto `DOT` continua em drift estrutural:
-  - colunas default ainda usam `Selected for development` e `In progress`
-  - statuses do workflow oficial (`Refinement`, `Ready`, `Doing`, `Testing`,
-    `Review`, `Changes Requested`) aparecem como `Unmapped statuses`
-  - a UI mostra o erro `This status isn't available in any workflows used by this board`
+- o workflow publicado do tenant foi atualizado com sucesso e agora inclui o
+  status `Paused`
+- o board visivel na UI do projeto `DOT` foi normalizado por browser
+  autenticado:
+  - as colunas canonicas do fluxo agora aparecem no board settings
+  - o status `Paused` esta mapeado em coluna propria
+  - a validacao browser do board retornou `PASS`
+  - o board settings ficou com `warning_count = 0`
 - o backlog oficial agora possui um item dedicado para esse gap:
   - [`DOT-65`](https://pabloaugusto.atlassian.net/browse/DOT-65) -
     normalizacao do layout do board ao workflow oficial
 - a ativacao do browser validator ficou rastreada separadamente em:
   - [`DOT-66`](https://pabloaugusto.atlassian.net/browse/DOT-66) -
     validacao visual via `Playwright` apos estabilizacao da fase base
-- a primeira tentativa real de `Playwright` nesta trilha ficou bloqueada por
-  fronteira de autenticacao browser:
-  - a sessao isolada do navegador foi redirecionada para
-    [`id.atlassian.com/login`](https://id.atlassian.com/login)
-  - a evidencia visual foi anexada em
+- o falso negativo residual do browser validator agora esta rastreado e
+  concluido em:
+  - [`DOT-77`](https://pabloaugusto.atlassian.net/browse/DOT-77) -
+    fallback semantico para titulos genericos em telas SPA do Atlassian
+- a frente de rastreabilidade `GitHub` + `Jira` + `Confluence` agora esta
+  oficialmente aberta no backlog:
+  - [`DOT-78`](https://pabloaugusto.atlassian.net/browse/DOT-78) - epic da
+    frente
+  - [`DOT-79`](https://pabloaugusto.atlassian.net/browse/DOT-79) - story em
+    `Refinement`
+  - [`DOT-80`](https://pabloaugusto.atlassian.net/browse/DOT-80) ->
+    [`DOT-84`](https://pabloaugusto.atlassian.net/browse/DOT-84) - subtasks de
+    execucao
+- a pagina oficial da frente nova ja foi publicada no `Confluence`:
+  - [`DOT - GitHub Jira Confluence Traceability`](https://pabloaugusto.atlassian.net/wiki/spaces/DOT/pages/254739915)
+  - [`DOT - GitHub Atlassian Runbook`](https://pabloaugusto.atlassian.net/wiki/spaces/DOT/pages/254740135)
+- o bootstrap humano inicial do `Playwright` foi concluido com `storageState`
+  persistido localmente
+- a primeira validacao browser positiva desta trilha ja foi executada:
+  - board settings do `DOT` validado com `PASS`
+  - criterios confirmados: `PAUSED` presente e `Map statuses to columns`
+  - evidencias locais e anexos remotos ficaram ligados a
     [`DOT-66`](https://pabloaugusto.atlassian.net/browse/DOT-66)
-  - o proximo passo para essa capacidade e prover bootstrap de sessao
-    autenticada antes de reexecutar a validacao visual
-- o tenant reaproveitou o status global `DOING` para os itens em execucao:
-  - isso nao impede a semeadura
-  - mas confirma que a normalizacao visual do board continua pendente
+- a segunda validacao browser positiva desta trilha confirmou que:
+  - o validator agora aceita `title_match_mode = body-fallback` quando o
+    titulo do navegador for generico
+  - a URL, a sessao autenticada e o conteudo esperado continuam obrigatorios
+  - os anexos e comentarios de aceite ficaram centralizados em
+    [`DOT-77`](https://pabloaugusto.atlassian.net/browse/DOT-77)
+- a validacao de uma pagina do `Confluence` tambem confirmou sessao
+  autenticada; o unico drift restante foi de criterio textual esperado, nao de
+  acesso browser
+
+## Diagnostico atual do signer tecnico
+
+- a worktree atual ainda esta em `mode = human` no retorno real de
+  `task git:signing:status`
+- o problema ativo ja nao e o wrapper da task:
+  `task git:signing:mode:automation` agora falha cedo por configuracao ausente
+  de `git.automation_signing_key_ref`
+- o `checkEnv` em `SIGN_MODE=automation` mostrou que:
+  - o signer humano ainda consegue produzir commit assinado
+  - a worktree continua sem `dotfiles.signing.automationPublicKeyRef`
+  - refs de `op://...` ligadas a service account ainda aparecem como nao
+    legiveis nesse contexto
+- quando a task foi forçada com
+  `PUBLIC_KEY_REF=op://secrets/dotfiles/git-automation/public key`, a falha
+  real mudou para rate limit do `1Password CLI` (`Too many requests`)
+- implicacao pratica:
+  - o bloqueio residual do signer tecnico agora esta concentrado em
+    configuracao local da ref publica + leitura do `1Password` na borda
+  - o wrapper PowerShell deixou de ser o gargalo principal desta trilha
+- backlog oficial relacionado:
+  - [`DOT-12`](https://pabloaugusto.atlassian.net/browse/DOT-12) -
+    desbloquear o `1Password SSH Agent` para GitHub e assinatura local
+  - [`DOT-28`](https://pabloaugusto.atlassian.net/browse/DOT-28) -
+    destravar checkpoint commit com signer tecnico
 ## Leitura operacional atual
 
 - `Jira`: pronto para backlog core, issues, comentarios, transicoes e
   configuracoes de projeto cobertas por `Jira Platform`
 - `Confluence`: pronto para bootstrap de paginas e documentacao oficial
 - `Jira + Confluence`: seed retroativo ja executado e validado no tenant atual
-- `Jira Software board`: ainda bloqueado por gap de scope efetivo e/ou acesso
-  ao produto, com drift adicional no layout do board atual
+- o repair retroativo mais recente:
+  - regravou descricoes e comentarios gerados para normalizar links, narrativa e
+    referencias de artefatos do repo
+  - promoveu referencias de arquivos versionados para links oficiais do
+    `GitHub` em `Jira` e `Confluence`
+  - removeu residuos de `paths` locais e de artefatos nao versionados, como o
+    `storageState` local do `Playwright`, do material publicado no tenant
+  - passou a linkar apenas arquivos rastreados no `Git`, evitando URLs falsas
+    para caches, sessao de browser e outros artefatos efemeros
+  - passou a valer tambem como contrato perene para novas issues, comentarios e
+    paginas sincronizadas
+  - depende de `commit checkpoint + push` para que arquivos novos desta
+    worktree tenham URL oficial realmente valida no `GitHub`
+- `Jira Software board`: layout visual ja alinhado; permanece bloqueado apenas
+  o caminho de automacao pela API por gap de scope efetivo e/ou acesso ao
+  produto
 - `Jira admin modelagem estrutural`: parcialmente desbloqueado no plano
   `Jira Platform`; o unico bloqueio confirmado nesta trilha continua sendo a
   API de `board`
@@ -97,11 +160,15 @@
     layout ou ajuste do flag no modelo
 - resultado real dessa excecao:
   - seed executado com sucesso no tenant
-  - o bloqueio futuro continua ativo por padrao na CLI de seed e no modelo
-- o ajuste fino do board Kanban continua como proxima prioridade tecnica e
-  depende de fechar a `Jira Software board API` e remover o layout legado com
-  statuses default presos nas colunas
+  - o bloqueio futuro deixou de depender do layout visual e agora se resume ao
+    uso da `Jira Software board API`
+- o ajuste fino do board Kanban agora esta concluido na UI; a prioridade
+  tecnica residual e fechar a `Jira Software board API`
 - o control plane deve usar `Jira v3` e `Confluence v2` como padrao, evitando
   `Confluence v1` no fluxo-base
 - a documentacao de rotacao precisa manter o gap de board explicito ate o
   primeiro probe verde em `/rest/agile/1.0/board`
+- [`DOT-76`](https://pabloaugusto.atlassian.net/browse/DOT-76) foi concluida
+  como analise arquitetural, com pagina oficial
+  [`DOT - App Runtime Frontier Analysis`](https://pabloaugusto.atlassian.net/wiki/spaces/DOT/pages/254707273)
+  e recomendacao final sincronizada entre repo, Jira e Confluence

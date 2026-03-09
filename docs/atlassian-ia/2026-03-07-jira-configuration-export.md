@@ -49,6 +49,7 @@
   - `Refinement`
   - `Ready`
   - `Doing`
+  - `Paused`
   - `Testing`
   - `Review`
   - `Changes Requested`
@@ -60,39 +61,43 @@
   - migration issue criada: [`DOT-1`](https://pabloaugusto.atlassian.net/browse/DOT-1)
   - bundle auditavel anexado em `DOT-1`
   - issues criadas no seed inicial e verificadas por API: `64`
-  - total atual confirmado no tenant apos `DOT-66`: `66`
-  - intervalo atual confirmado: `DOT-1` -> `DOT-66`
-  - status atuais apos seed:
-    - `Backlog`: `35`
-    - `Done`: `27`
-    - `DOING`: `2`
-- `board`: segue com dois gaps:
+- total atual confirmado no tenant apos `DOT-84`: `84`
+- intervalo atual confirmado: `DOT-1` -> `DOT-84`
+  - status atuais no tenant:
+    - `Backlog`: `42`
+    - `Done`: `32`
+    - `DOING`: `6`
+    - `Refinement`: `1`
+    - `PAUSED`: `2`
+    - `TESTING`: `1`
+- nova frente oficial de rastreabilidade aberta:
+  - [`DOT-78`](https://pabloaugusto.atlassian.net/browse/DOT-78): epic
+    `Rastreabilidade GitHub no fluxo Atlassian`
+  - [`DOT-79`](https://pabloaugusto.atlassian.net/browse/DOT-79): story
+    `Integrar GitHub, Jira Dev e Confluence`
+  - [`DOT-80`](https://pabloaugusto.atlassian.net/browse/DOT-80) ->
+    [`DOT-84`](https://pabloaugusto.atlassian.net/browse/DOT-84): subtasks de
+    conexao, naming, workflows/deployments, runbook e validacao ponta a ponta
+- `board`: segue com um gap residual:
   - API oficial em `401 Unauthorized; scope does not match`
-  - layout visual ainda preso a statuses legados do board default
+  - o layout visual ja foi alinhado na UI autenticada e nao e mais o bloqueio principal
 
 ## Delta restante
-
-### Statuses legados que precisam ser substituidos ou remapeados
-
-- `Selected for Development`
-- `In Progress`
 
 ### Board e dashboards pendentes
 
 - alinhar o board `DOT board` ou substitui-lo pelo board alvo
   `DOT - Autonomous Engineering`
-- mapear visualmente as colunas alvo para:
+- manter por API o mesmo mapeamento de colunas ja validado visualmente na UI:
   - `Backlog`
   - `Refinement`
   - `Ready`
   - `Doing`
+  - `Paused`
   - `Testing`
   - `Review`
   - `Changes Requested`
   - `Done`
-- remover das colunas os statuses legados:
-  - `Selected for Development`
-  - `In Progress`
 - os dashboards alvo ja existem:
   - `DOT - Autonomous Engineering Overview`
   - `DOT - AI Delivery Ops`
@@ -102,6 +107,14 @@
 - manter a governanca pos-seed em paralelo no repo, `Jira` e `Confluence`
 - preservar o bundle auditavel por lote em `DOT-1` ou na issue de migracao
   correspondente
+- manter como contrato perene que referencias ao repo em descricoes,
+  comentarios e paginas sincronizadas usem URL oficial do `GitHub`, nunca
+  `path` local
+- permitir promocao automatica para URL oficial apenas quando o arquivo estiver
+  rastreado no `Git`; caches, sessoes de browser e outros artefatos efemeros
+  ficam como texto descritivo e nao como link
+- tratar como ressalva operacional que arquivos novos desta worktree exigem
+  `commit checkpoint + push` antes de terem URL valida no `GitHub`
 - tratar o gap visual/API do board sob backlog explicito em
   [`DOT-65`](https://pabloaugusto.atlassian.net/browse/DOT-65)
 - tratar a validacao visual browser-level sob backlog explicito em
@@ -128,7 +141,8 @@ Validado em `2026-03-08`:
 - `GET /rest/api/3/field/search`: `ok`
 - apply de workflow, workflow scheme, custom fields e dashboards: `ok`
 - `GET /rest/agile/1.0/board`: continua `401 Unauthorized; scope does not match`
-- board UI atual: continua em drift com statuses legados nas colunas
+- board UI atual: alinhada ao workflow oficial; o gap remanescente e apenas de
+  automacao pela API
 
 ## Ordem de aplicacao assim que o acesso subir
 

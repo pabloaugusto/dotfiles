@@ -71,6 +71,20 @@ Cada interacao deve ser registrada como comentario estruturado. Tipos citados:
 - bloqueio
 - proposta de melhoria
 
+## Cadencia obrigatoria de comentarios
+
+O comentario do agente nao deve acontecer apenas ao final da sua participacao.
+
+Para toda issue rastreada no `Jira`, a regra correta passa a ser:
+
+- comentar quando iniciar a propria atuacao
+- comentar ao longo da execucao sempre que houver marco relevante, descoberta,
+  decisao ou mudanca de estado
+- comentar antes de handoff, pausa, aprovacao, reprovacao ou encerramento da
+  participacao naquele item
+- atualizar o status da issue em tempo real, em paridade com o comentario mais
+  recente e com o estado real da demanda
+
 ## Registros operacionais esperados
 
 ### Progresso
