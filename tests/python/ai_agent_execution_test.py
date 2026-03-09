@@ -113,6 +113,12 @@ class FakeJira:
         return "https://example.atlassian.net"
 
 
+class FakeJiraStatusDrift(FakeJira):
+    def transition_issue(self, issue_key: str, transition_id: str) -> dict[str, object]:
+        self.transitions_taken.append(transition_id)
+        return {}
+
+
 class AgentExecutionTests(unittest.TestCase):
     def test_start_records_local_context_and_transitions_issue(self) -> None:
         fake_jira = FakeJira()
@@ -223,6 +229,23 @@ class AgentExecutionTests(unittest.TestCase):
                 with self.assertRaises(AgentExecutionError):
                     record_activity(
                         repo_root=repo,
+                        interaction_type="progress-update",
+                        status="doing",
+                    )
+
+    def test_fails_when_jira_status_remains_divergent_after_transition(self) -> None:
+        fake_jira = FakeJiraStatusDrift()
+        with tempfile.TemporaryDirectory() as tmp:
+            repo = Path(tmp)
+            with patch("scripts.ai_agent_execution_lib.resolve_jira", return_value=fake_jira), patch(
+                "scripts.ai_agent_execution_lib.current_branch",
+                return_value="feat/DOT-101-agent-issue-instrumentation",
+            ):
+                with self.assertRaises(AgentExecutionError):
+                    record_activity(
+                        repo_root=repo,
+                        issue_key="DOT-101",
+                        agent="ai-developer-automation",
                         interaction_type="progress-update",
                         status="doing",
                     )

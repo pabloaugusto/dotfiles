@@ -314,9 +314,22 @@ def ensure_issue_status(jira: JiraAdapter, issue_key: str, target_status: str) -
             transition = _choose_transition(jira, issue_key, target)
         jira.transition_issue(issue_key, str(transition.get("id", "")).strip())
         issue = jira.get_issue(issue_key, fields=["status"])
-        current = normalize_status(
+        updated = normalize_status(
             str(((issue.get("fields") or {}).get("status") or {}).get("name") or "")
         )
+        if updated == current:
+            raise AgentExecutionError(
+                "Jira nao refletiu a transicao esperada para a issue "
+                f"{issue_key}: status permaneceu em {current!r}."
+            )
+        current = updated
+
+
+def read_issue_status(jira: JiraAdapter, issue_key: str) -> str:
+    issue = jira.get_issue(issue_key, fields=["status"])
+    return normalize_status(
+        str(((issue.get("fields") or {}).get("status") or {}).get("name") or "")
+    )
 
 
 def build_context(
@@ -374,6 +387,12 @@ def record_activity(
     normalized_status = normalize_status(status)
     if transition_issue:
         ensure_issue_status(jira, resolved_issue_key, normalized_status)
+        actual_status = read_issue_status(jira, resolved_issue_key)
+        if actual_status != normalized_status:
+            raise AgentExecutionError(
+                "Jira ficou em status divergente apos a transicao: "
+                f"{resolved_issue_key} esperado={normalized_status!r} atual={actual_status!r}."
+            )
     rendered_comment = render_structured_comment(
         agent=resolved_agent,
         interaction_type=interaction_type,
