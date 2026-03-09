@@ -208,4 +208,16 @@ Registro consultivo do agente Pascoalete para ortografia e higiene vocabular.
 | 2026-03-07 16:37 UTC | WIP-20260307-SECRETS-ROTATION | pascoalete | reprovado | .agents/cards/revisor-automacao.md | Automacao, mudancas, automacao, resiliencia, mudancas, automacao, validacoes, Saidas (+23) | task spell:check |
 | 2026-03-07 16:37 UTC | WIP-20260307-SECRETS-ROTATION | pascoalete | reprovado | .agents/cards/pascoalete.md | Pascoalete, tecnica, worktree, comentarios, dicionarios, Saidas, ortografico, correcao (+17) | task spell:check |
 | 2026-03-07 16:37 UTC | WIP-20260307-SECRETS-ROTATION | pascoalete | reprovado | AGENTS.md | Missao, confiavel, testavel, reproduzivel, precedencia, LICOES, instrucoes, usuario (+100) | task spell:check |
+| 2026-03-09 20:47 UTC | DOT-120 | pascoalete | reprovado | .agents/cards/engenheiro-qualidade.md | execucao, deterministica, mudancas, mudancas, mudancas, mudancas, efemeros, mudancas (+17) | task spell:check |
+| 2026-03-09 20:47 UTC | DOT-120 | pascoalete | reprovado | .agents/cards/ai-reviewer.md | aprovacao, consolidacao, multiplas, governanca, revisoes, comentarios, Saidas, aprovacao (+16) | task spell:check |
+| 2026-03-09 20:47 UTC | DOT-120 | pascoalete | reprovado | .agents/cards/ai-qa.md | criterios, avancar, validacoes, tecnicas, verificacao, criterios, regressao, criterios (+13) | task spell:check |
+| 2026-03-09 20:47 UTC | DOT-120 | pascoalete | reprovado | .agents/cards/ai-documentation-agent.md | documentacao, auditaveis, atualizacao, criacao, migracao, Saidas, comentario, linkagem (+10) | task spell:check |
+| 2026-03-09 20:47 UTC | DOT-120 | pascoalete | reprovado | .agents/cards/ai-devops.md | integracoes, integracoes, execucao, tecnico, criterios, integracoes, Saidas, mudanca (+18) | task spell:check |
+| 2026-03-09 20:47 UTC | DOT-120 | pascoalete | reprovado | .agents/cards/ai-developer-automation.md | automacoes, seguranca, mudancas, execucao, tecnico, criterios, Saidas, automacao (+12) | task spell:check |
+| 2026-03-09 20:47 UTC | DOT-120 | pascoalete | reprovado | .agents/cards/ai-developer-powershell.md | mudancas, idempotencia, seguranca, mudancas, execucao, tecnico, criterios, restricoes (+16) | task spell:check |
+| 2026-03-09 20:47 UTC | DOT-120 | pascoalete | reprovado | .agents/cards/ai-developer-python.md | mudancas, corretude, mudancas, execucao, tecnico, criterios, tecnicas, Saidas (+15) | task spell:check |
+| 2026-03-09 20:47 UTC | DOT-120 | pascoalete | reprovado | .agents/cards/ai-tech-lead.md | tecnico, decomposicao, devs, tecnico, dependencias, Saidas, tecnico, execucao (+12) | task spell:check |
+| 2026-03-09 20:47 UTC | DOT-120 | pascoalete | reprovado | .agents/cards/ai-engineering-manager.md | escalacoes, intransponiveis, disponiveis, escalacao, usuario, tatico, Saidas, escalacoes (+13) | task spell:check |
+| 2026-03-09 20:47 UTC | DOT-120 | pascoalete | reprovado | .agents/cards/ai-engineering-architect.md | opcoes, decisoes, implementacao, alem, revisao, tecnico, decisoes, dominio (+19) | task spell:check |
+| 2026-03-09 20:47 UTC | DOT-120 | pascoalete | reprovado | .agents/cards/ai-product-owner.md | epicos, legiveis, agil, repriorizacao, epicos, manutencao, orientacoes, Saidas (+11) | task spell:check |
 <!-- ai-orthography:records:end -->
