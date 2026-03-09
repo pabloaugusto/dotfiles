@@ -19,6 +19,7 @@ WORKTREE_PUBLIC_KEY_REF_KEY = "dotfiles.signing.automationPublicKeyRef"
 WORKTREE_PUBLIC_KEY_CACHE_KEY = "dotfiles.signing.automationPublicKey"
 WORKTREE_PRIVATE_KEY_PATH_KEY = "dotfiles.signing.automationPrivateKeyPath"
 WORKTREE_BACKEND_KEY = "dotfiles.signing.automationBackend"
+WORKTREE_ALLOWED_SIGNERS_PATH_KEY = "dotfiles.signing.automationAllowedSignersFile"
 
 
 class GitSigningError(RuntimeError):
@@ -228,6 +229,30 @@ def default_local_automation_key_path(context: RepoContext) -> Path:
     return context.git_dir / "dotfiles" / "automation-signing" / "id_ed25519"
 
 
+def default_allowed_signers_path(context: RepoContext) -> Path:
+    return context.git_dir / "dotfiles" / "automation-signing" / "allowed_signers"
+
+
+def resolve_signing_principal(repo_root: Path) -> str:
+    return git_get(repo_root, "config", "--includes", "--get", "user.email").strip()
+
+
+def ensure_allowed_signers_file(context: RepoContext, public_key: str) -> dict[str, str]:
+    principal = resolve_signing_principal(context.repo_root)
+    if not principal:
+        return {"path": "", "principal": ""}
+    allowed_signers_path = default_allowed_signers_path(context)
+    allowed_signers_path.parent.mkdir(parents=True, exist_ok=True)
+    allowed_signers_path.write_text(
+        f"{principal} {normalize_public_key(public_key)}\n",
+        encoding="ascii",
+    )
+    return {
+        "path": str(allowed_signers_path),
+        "principal": principal,
+    }
+
+
 def ensure_local_automation_keypair(
     context: RepoContext,
     *,
@@ -390,6 +415,13 @@ def status_payload(repo_root: str | Path | None = None) -> dict[str, object]:
     effective_program = git_get(
         context.repo_root, "config", "--includes", "--get", "gpg.ssh.program"
     )
+    effective_allowed_signers_file = git_get(
+        context.repo_root,
+        "config",
+        "--includes",
+        "--get",
+        "gpg.ssh.allowedSignersFile",
+    )
     effective_commit_sign = git_get(
         context.repo_root, "config", "--includes", "--get", "commit.gpgsign"
     )
@@ -414,8 +446,17 @@ def status_payload(repo_root: str | Path | None = None) -> dict[str, object]:
             "automation_private_key_path", ""
         ),
         "worktree_automation_backend": worktree_refs.get("automation_backend", ""),
+        "worktree_automation_allowed_signers_file": git_get(
+            context.repo_root,
+            "config",
+            "--worktree",
+            "--get",
+            WORKTREE_ALLOWED_SIGNERS_PATH_KEY,
+        ),
+        "effective_signing_principal": resolve_signing_principal(context.repo_root),
         "effective_signing_key": effective_key,
         "effective_gpg_program": effective_program,
+        "effective_allowed_signers_file": effective_allowed_signers_file,
         "effective_commit_gpgsign": effective_commit_sign,
         "effective_gpg_format": effective_format,
     }
@@ -512,6 +553,37 @@ def apply_automation_mode(
         WORKTREE_PUBLIC_KEY_CACHE_KEY,
         resolved_key,
     )
+    allowed_signers = ensure_allowed_signers_file(context, resolved_key)
+    if allowed_signers["path"]:
+        git_set(
+            context.repo_root,
+            "config",
+            "--worktree",
+            WORKTREE_ALLOWED_SIGNERS_PATH_KEY,
+            allowed_signers["path"],
+        )
+        git_set(
+            context.repo_root,
+            "config",
+            "--worktree",
+            "gpg.ssh.allowedSignersFile",
+            allowed_signers["path"],
+        )
+    else:
+        git_unset(
+            context.repo_root,
+            "config",
+            "--worktree",
+            "--unset-all",
+            WORKTREE_ALLOWED_SIGNERS_PATH_KEY,
+        )
+        git_unset(
+            context.repo_root,
+            "config",
+            "--worktree",
+            "--unset-all",
+            "gpg.ssh.allowedSignersFile",
+        )
     git_set(context.repo_root, "config", "--worktree", "gpg.format", "ssh")
     git_set(context.repo_root, "config", "--worktree", "commit.gpgsign", "true")
     git_set(
@@ -556,9 +628,11 @@ def apply_human_mode(repo_root: str | Path | None = None) -> dict[str, object]:
         WORKTREE_PUBLIC_KEY_REF_KEY,
         WORKTREE_PUBLIC_KEY_CACHE_KEY,
         WORKTREE_PRIVATE_KEY_PATH_KEY,
+        WORKTREE_ALLOWED_SIGNERS_PATH_KEY,
         "gpg.format",
         "commit.gpgsign",
         "gpg.ssh.program",
+        "gpg.ssh.allowedSignersFile",
         "user.signingkey",
     ]
     for key in keys:

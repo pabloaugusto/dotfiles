@@ -12,6 +12,7 @@ from scripts.git_signing_lib import (
     apply_automation_mode,
     apply_human_mode,
     build_default_title,
+    default_allowed_signers_path,
     default_local_automation_key_path,
     ensure_github_signing_key,
     ensure_local_automation_keypair,
@@ -65,6 +66,7 @@ class GitSigningModeTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             repo = pathlib.Path(tmp)
             subprocess.run(["git", "init", "-q"], cwd=repo, check=True)
+            subprocess.run(["git", "-C", str(repo), "config", "user.email", "test@example.com"], check=True)
 
             payload = apply_automation_mode(repo, public_key=VALID_KEY)
 
@@ -94,6 +96,23 @@ class GitSigningModeTests(unittest.TestCase):
                     check=True,
                 ).stdout.strip(),
                 VALID_KEY,
+            )
+            self.assertEqual(
+                subprocess.run(
+                    [
+                        "git",
+                        "-C",
+                        str(repo),
+                        "config",
+                        "--worktree",
+                        "--get",
+                        "gpg.ssh.allowedSignersFile",
+                    ],
+                    text=True,
+                    capture_output=True,
+                    check=True,
+                ).stdout.strip(),
+                str(default_allowed_signers_path(RepoContext(repo, repo / ".git", repo / ".git"))),
             )
             self.assertEqual(
                 subprocess.run(
@@ -134,6 +153,7 @@ class GitSigningModeTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             repo = pathlib.Path(tmp)
             subprocess.run(["git", "init", "-q"], cwd=repo, check=True)
+            subprocess.run(["git", "-C", str(repo), "config", "user.email", "test@example.com"], check=True)
 
             payload = apply_automation_mode(repo)
 
@@ -185,10 +205,6 @@ class GitSigningModeTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             repo = pathlib.Path(tmp)
             subprocess.run(["git", "init", "-q"], cwd=repo, check=True)
-
-            payload = apply_automation_mode(repo)
-            self.assertEqual(payload["backend"], "local-key")
-
             subprocess.run(
                 ["git", "-C", str(repo), "config", "user.name", "dotfiles automation"],
                 check=True,
@@ -197,6 +213,9 @@ class GitSigningModeTests(unittest.TestCase):
                 ["git", "-C", str(repo), "config", "user.email", "automation@example.com"],
                 check=True,
             )
+
+            payload = apply_automation_mode(repo)
+            self.assertEqual(payload["backend"], "local-key")
 
             completed = subprocess.run(
                 [
@@ -217,11 +236,19 @@ class GitSigningModeTests(unittest.TestCase):
                 0,
                 msg=f"git commit -S falhou: stdout={completed.stdout!r} stderr={completed.stderr!r}",
             )
+            verification = subprocess.run(
+                ["git", "-C", str(repo), "log", "--show-signature", "-1", "--format=fuller", "HEAD"],
+                text=True,
+                capture_output=True,
+                check=True,
+            )
+            self.assertIn('Good "git" signature for automation@example.com', verification.stdout)
 
     def test_apply_human_mode_unsets_worktree_overrides(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             repo = pathlib.Path(tmp)
             subprocess.run(["git", "init", "-q"], cwd=repo, check=True)
+            subprocess.run(["git", "-C", str(repo), "config", "user.email", "test@example.com"], check=True)
             apply_automation_mode(repo, public_key=VALID_KEY)
 
             payload = apply_human_mode(repo)
@@ -239,6 +266,7 @@ class GitSigningModeTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             repo = pathlib.Path(tmp)
             subprocess.run(["git", "init", "-q"], cwd=repo, check=True)
+            subprocess.run(["git", "-C", str(repo), "config", "user.email", "test@example.com"], check=True)
             apply_automation_mode(repo, public_key=VALID_KEY)
 
             payload = status_payload(repo)
@@ -248,6 +276,8 @@ class GitSigningModeTests(unittest.TestCase):
             self.assertEqual(payload["effective_signing_key"], VALID_KEY)
             self.assertTrue(payload["worktree_automation_public_key_cached"])
             self.assertEqual(payload["worktree_automation_backend"], "agent-backed")
+            self.assertEqual(payload["effective_signing_principal"], "test@example.com")
+            self.assertTrue(str(payload["effective_allowed_signers_file"]).endswith("allowed_signers"))
 
     def test_resolve_public_key_ref_falls_back_to_cached_key_when_op_read_fails(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
