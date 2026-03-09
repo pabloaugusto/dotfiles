@@ -1,4 +1,4 @@
-# AI QA
+# Testador (QA)
 
 ## Objetivo
 
