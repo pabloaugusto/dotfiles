@@ -1,6 +1,6 @@
 # Roadmap do Repositorio
 
-Atualizado em: 2026-03-07 17:03 UTC
+Atualizado em: 2026-03-09 10:02 UTC
 Ciclo ativo: 2026-Q1
 
 Planejamento incremental para qualidade, testes, bootstrap e governanca do repo.
@@ -28,7 +28,7 @@ Edite apenas a tabela entre os marcadores abaixo.
 Atualizada por `task ai:roadmap:refresh`.
 
 <!-- roadmap:priority:start -->
-Atualizado em: `2026-03-07 17:03 UTC`
+Atualizado em: 2026-03-09 10:02 UTC
 
 ### Ranking RICE
 
@@ -76,6 +76,7 @@ Sem sugestoes pendentes neste ciclo; itens aceitos ja estao rastreaveis.
 ### Next
 
 <!-- roadmap:next:start -->
+- [fix] Corrigir pendencias ortograficas remanescentes do worklog `WIP-20260307-SECRETS-ROTATION` em README.md, Taskfile.yml, docs/README.md, docs/TASKS.md, docs/reference/secrets-rotat... | notas=Pendencia automatica criada por Pascoalete apos review consultivo reprovado sem correcao automatica.
 - [governance] Criar historico versionado de planos sugeridos, aprovados e implementados em docs/plans/, com arquivo por plano contendo data-hora, resumo do plano e status atual no nome e no c... | notas=Demanda aprovada pelo usuario. Manter por enquanto em docs/, com naming canonico orientado a historico e rastreabilidade; quando o item d...
 - [fix] Padronizar datas, horas, locale e idioma de docs, scripts, agentes, workflows e logs para respeitar a configuracao canonica do repo e eliminar timestamps hardcoded em UTC quando o contrato exigir locale configurado. | notas=Proxima prioridade imediata apos concluir as prioridades 0 da rodada atual: signer tecnico em modo automacao e ajustes remanescentes do Pascoalete.
 - [improvement] Executar a auditoria e o endurecimento de .vscode para parear extensoes, settings, suporte a tipos de arquivo e UX do workspace com os fluxos canonicos de qualidade, CI/CD, testes, secrets e automacao do repo. | notas=Prioridade 3 aprovada pelo usuario; manter abaixo das prioridades 0, da normalizacao de locale/timezone e da retomada tecnica do rotacionador de secrets.

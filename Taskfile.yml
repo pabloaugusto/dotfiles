@@ -290,6 +290,63 @@ tasks:
     cmds:
       - "bash -lc 'bash ./scripts/run-python.sh ./scripts/git-signing-mode.py ensure-github-signing-key --public-key-ref \"{{default \"\" .PUBLIC_KEY_REF}}\" --title \"{{default \"\" .TITLE}}\"'"
 
+  secrets:rotation:preflight:
+    desc: Executa preflight nao-destrutivo da trilha de rotacao de secrets
+    cmds:
+      - task: secrets:rotation:preflight:{{if or (eq .OS "Windows_NT") (eq .OS "windows")}}windows{{else}}linux{{end}}
+
+  secrets:rotation:preflight:windows:
+    desc: Windows - preflight nao-destrutivo da trilha de rotacao de secrets
+    platforms: [windows]
+    dir: '{{.TASKFILE_DIR}}'
+    cmds:
+      - "pwsh -NoProfile -Command \"& { . './scripts/invoke-python.ps1' -ScriptPath './scripts/secrets-rotation.py' -Arguments @('preflight','--repo-root','{{.TASKFILE_DIR}}','--config-path','{{default \"config/secrets-rotation.yaml\" .CONFIG_PATH}}') }\""
+
+  secrets:rotation:preflight:linux:
+    desc: Linux/WSL - preflight nao-destrutivo da trilha de rotacao de secrets
+    platforms: [linux]
+    dir: '{{.TASKFILE_DIR}}'
+    cmds:
+      - "bash -lc 'bash ./scripts/run-python.sh ./scripts/secrets-rotation.py preflight --repo-root \"{{.TASKFILE_DIR}}\" --config-path \"{{default \"config/secrets-rotation.yaml\" .CONFIG_PATH}}\"'"
+
+  secrets:rotation:plan:
+    desc: Gera plano ordenado e auditavel da trilha de rotacao de secrets
+    cmds:
+      - task: secrets:rotation:plan:{{if or (eq .OS "Windows_NT") (eq .OS "windows")}}windows{{else}}linux{{end}}
+
+  secrets:rotation:plan:windows:
+    desc: Windows - plano ordenado da trilha de rotacao de secrets
+    platforms: [windows]
+    dir: '{{.TASKFILE_DIR}}'
+    cmds:
+      - "pwsh -NoProfile -Command \"& { . './scripts/invoke-python.ps1' -ScriptPath './scripts/secrets-rotation.py' -Arguments @('plan','--repo-root','{{.TASKFILE_DIR}}','--config-path','{{default \"config/secrets-rotation.yaml\" .CONFIG_PATH}}') }\""
+
+  secrets:rotation:plan:linux:
+    desc: Linux/WSL - plano ordenado da trilha de rotacao de secrets
+    platforms: [linux]
+    dir: '{{.TASKFILE_DIR}}'
+    cmds:
+      - "bash -lc 'bash ./scripts/run-python.sh ./scripts/secrets-rotation.py plan --repo-root \"{{.TASKFILE_DIR}}\" --config-path \"{{default \"config/secrets-rotation.yaml\" .CONFIG_PATH}}\"'"
+
+  secrets:rotation:validate:
+    desc: Executa validacao nao-destrutiva dos alvos de rotacao de secrets
+    cmds:
+      - task: secrets:rotation:validate:{{if or (eq .OS "Windows_NT") (eq .OS "windows")}}windows{{else}}linux{{end}}
+
+  secrets:rotation:validate:windows:
+    desc: Windows - validacao nao-destrutiva dos alvos de rotacao de secrets
+    platforms: [windows]
+    dir: '{{.TASKFILE_DIR}}'
+    cmds:
+      - "pwsh -NoProfile -Command \"& { . './scripts/invoke-python.ps1' -ScriptPath './scripts/secrets-rotation.py' -Arguments @('validate','--repo-root','{{.TASKFILE_DIR}}','--config-path','{{default \"config/secrets-rotation.yaml\" .CONFIG_PATH}}') }\""
+
+  secrets:rotation:validate:linux:
+    desc: Linux/WSL - validacao nao-destrutiva dos alvos de rotacao de secrets
+    platforms: [linux]
+    dir: '{{.TASKFILE_DIR}}'
+    cmds:
+      - "bash -lc 'bash ./scripts/run-python.sh ./scripts/secrets-rotation.py validate --repo-root \"{{.TASKFILE_DIR}}\" --config-path \"{{default \"config/secrets-rotation.yaml\" .CONFIG_PATH}}\"'"
+
   bootstrap:
     desc: Auto - bootstrap no ambiente atual
     cmds:
@@ -403,14 +460,14 @@ tasks:
     platforms: [windows]
     dir: '{{.TASKFILE_DIR}}'
     cmds:
-      - uv run --locked ty check scripts/release_tool.py scripts/validate_docs.py scripts/run_actionlint.py scripts/run_gitleaks.py scripts/run-cspell.py scripts/git-signing-mode.py scripts/git_signing_lib.py tests/python/release_tool_test.py tests/python/validate_docs_test.py tests/python/git_signing_mode_test.py
+      - uv run --locked ty check scripts/release_tool.py scripts/validate_docs.py scripts/run_actionlint.py scripts/run_gitleaks.py scripts/run-cspell.py scripts/git-signing-mode.py scripts/git_signing_lib.py scripts/secrets-rotation.py scripts/secrets_rotation_lib.py tests/python/release_tool_test.py tests/python/validate_docs_test.py tests/python/git_signing_mode_test.py tests/python/secrets_rotation_test.py
 
   type:check:linux:
     desc: Linux/WSL - executa ty em scripts e testes Python
     platforms: [linux]
     dir: '{{.TASKFILE_DIR}}'
     cmds:
-      - uv run --locked ty check scripts/release_tool.py scripts/validate_docs.py scripts/run_actionlint.py scripts/run_gitleaks.py scripts/run-cspell.py scripts/git-signing-mode.py scripts/git_signing_lib.py tests/python/release_tool_test.py tests/python/validate_docs_test.py tests/python/git_signing_mode_test.py
+      - uv run --locked ty check scripts/release_tool.py scripts/validate_docs.py scripts/run_actionlint.py scripts/run_gitleaks.py scripts/run-cspell.py scripts/git-signing-mode.py scripts/git_signing_lib.py scripts/secrets-rotation.py scripts/secrets_rotation_lib.py tests/python/release_tool_test.py tests/python/validate_docs_test.py tests/python/git_signing_mode_test.py tests/python/secrets_rotation_test.py
 
   test:python:
     desc: Executa a suite Python via pytest no ambiente atual
