@@ -44,15 +44,11 @@ else
   print_warn "gh nao autenticado; validacao local de PR title ignorada."
 fi
 
-if git show-ref --verify --quiet "refs/remotes/${REMOTE}/main"; then
-  RANGE="${REMOTE}/main..HEAD"
-elif git show-ref --verify --quiet "refs/remotes/origin/main"; then
-  RANGE="origin/main..HEAD"
-else
-  print_warn "Base main nao encontrada no remoto; validacao de range de commits ignorada."
+SUBJECTS_JSON="$(bash "${ROOT_DIR}/scripts/run-python.sh" "${ROOT_DIR}/scripts/git-commit-subjects.py" --repo-root "${ROOT_DIR}" --remote "${REMOTE}")"
+if [[ "${SUBJECTS_JSON}" == "[]" ]]; then
+  print_info "Nenhum commit exclusivo para validar no remoto ${REMOTE}."
   exit 0
 fi
 
-SUBJECTS_JSON="$(git log --format=%s "${RANGE}" | bash "${ROOT_DIR}/scripts/run-python.sh" -c 'import json,sys; print(json.dumps([l.strip() for l in sys.stdin if l.strip()]))')"
-print_info "Validando subjects dos commits no range ${RANGE}..."
+print_info "Validando subjects dos commits exclusivos ainda nao presentes em ${REMOTE}..."
 bash "${ROOT_DIR}/scripts/run-python.sh" "${ROOT_DIR}/.githooks/conventional_emoji.py" --validate-many-json "${SUBJECTS_JSON}" --require-emoji --require-issue-key

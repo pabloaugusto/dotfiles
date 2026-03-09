@@ -1,15 +1,22 @@
 param(
-	[string]$Range = ''
+	[string]$Range = '',
+	[string]$Remote = 'origin'
 )
 
 $ErrorActionPreference = 'Stop'
 
+$scriptPath = Join-Path $PSScriptRoot 'git-commit-subjects.py'
+$pythonArgs = @('--repo-root', (Resolve-Path (Join-Path $PSScriptRoot '..')).Path)
 if ([string]::IsNullOrWhiteSpace($Range)) {
-	$Range = 'origin/main..HEAD'
+	$pythonArgs += @('--remote', $Remote)
+} else {
+	$pythonArgs += @('--range', $Range)
 }
 
-$subjects = @(git log --format=%s $Range)
-$payload = @($subjects | Where-Object { -not [string]::IsNullOrWhiteSpace($_) }) | ConvertTo-Json -Compress -AsArray
+$payload = & (Join-Path $PSScriptRoot 'invoke-python.ps1') -ScriptPath $scriptPath @pythonArgs
+if ($LASTEXITCODE -ne 0) {
+	exit $LASTEXITCODE
+}
 
 & (Join-Path $PSScriptRoot 'invoke-python.ps1') -ScriptPath (Join-Path $PSScriptRoot '..\.githooks\conventional_emoji.py') --validate-many-json $payload --require-emoji
 exit $LASTEXITCODE
