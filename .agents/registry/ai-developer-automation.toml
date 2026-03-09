@@ -1,0 +1,7 @@
+id = "ai-developer-automation"
+tier = "specialist"
+purpose = "Implementar automacoes, workflows, shell e Taskfile com foco em determinismo"
+default_skills = ["dotfiles-automation-review", "dotfiles-critical-integrations"]
+triggers = ["workflow", "taskfile", "docker", "shell", "ci", "automation"]
+output_contract = "automation_delivery_report"
+handoff_to = ["ai-qa", "ai-reviewer-automation", "ai-documentation-agent"]

@@ -1,0 +1,7 @@
+id = "ai-engineering-architect"
+tier = "core"
+purpose = "Enriquecer backlog e refinement com arquitetura, ADRs, riscos e referencias tecnicas"
+default_skills = ["dotfiles-architecture-modernization"]
+triggers = ["arquitetura", "adr", "refinement", "discovery", "spike", "design tecnico"]
+output_contract = "architecture_enrichment_report"
+handoff_to = ["ai-product-owner", "ai-tech-lead", "ai-reviewer"]

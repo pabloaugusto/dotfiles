@@ -1,0 +1,7 @@
+id = "ai-engineering-manager"
+tier = "core"
+purpose = "Governar WIP, gargalos, pausas, bloqueios e escalacoes operacionais"
+default_skills = ["wip-continuity-governance", "dotfiles-repo-governance"]
+triggers = ["wip", "blocked", "paused", "gargalo", "flow", "escalation", "timeline"]
+output_contract = "flow_governance_report"
+handoff_to = ["ai-product-owner", "ai-tech-lead", "ai-devops"]

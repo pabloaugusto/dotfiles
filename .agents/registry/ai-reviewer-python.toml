@@ -1,0 +1,7 @@
+id = "ai-reviewer-python"
+tier = "specialist"
+purpose = "Revisar mudancas Python como sistema formal de decisao tecnica"
+default_skills = ["dotfiles-python-review", "dotfiles-architecture-modernization"]
+triggers = ["python", ".py", "typing", "ruff", "mypy", "tests/python"]
+output_contract = "python_review_report_v2"
+handoff_to = ["ai-reviewer", "ai-documentation-agent", "ai-product-owner"]

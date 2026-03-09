@@ -1,0 +1,7 @@
+id = "ai-developer-python"
+tier = "specialist"
+purpose = "Implementar mudancas Python com evidencias, testes e handoff rastreavel"
+default_skills = ["dotfiles-python-review"]
+triggers = ["python", ".py", "scripts", "tests/python", "ty", "ruff"]
+output_contract = "python_delivery_report"
+handoff_to = ["ai-qa", "ai-reviewer-python", "ai-documentation-agent"]
