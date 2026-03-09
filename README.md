@@ -36,6 +36,8 @@ de IA versionada.
 - Assinatura Git via SSH com 1Password signer.
 - Modo humano e signer tecnico de automacao por worktree, ambos via SSH +
   1Password, com rotacao orientada por `op`/`gh`.
+- Trilhas canonicas de `preflight`, `plan` e `validate` para rotacao segura em
+  [`docs/reference/secrets-rotation-architecture.md`](docs/reference/secrets-rotation-architecture.md).
 - Politica de seguranca documentada em [`SECURITY.md`](SECURITY.md) e [`docs/secrets-and-auth.md`](docs/secrets-and-auth.md).
 
 ### Qualidade, testes e CI/CD

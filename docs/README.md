@@ -19,6 +19,7 @@ Mapa das documentacoes versionadas do projeto e ordem recomendada de leitura.
 - [`docs/config-reference.md`](docs/config-reference.md): referencia comentada do YAML de bootstrap.
 - [`docs/onedrive.md`](docs/onedrive.md): layout, migracao e troubleshooting do OneDrive.
 - [`docs/secrets-and-auth.md`](docs/secrets-and-auth.md): modelo de segredos, auth e runtime cifrado.
+- [`docs/reference/secrets-rotation-architecture.md`](reference/secrets-rotation-architecture.md): arquitetura e trilha canonica de rotacao de secrets.
 - [`docs/user-home-structure.md`](docs/user-home-structure.md): layout esperado do `HOME` apos bootstrap.
 - [`bootstrap/README.md`](bootstrap/README.md): guia operacional textual do bootstrap.
 

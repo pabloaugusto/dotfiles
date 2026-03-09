@@ -1,6 +1,6 @@
 # Decisoes do Roadmap
 
-Atualizado em: 2026-03-07 17:03 UTC
+Atualizado em: 2026-03-09 10:02 UTC
 Ciclo ativo: 2026-Q1
 
 Registro das decisoes humanas por ciclo e governanca de sugestoes.
@@ -14,7 +14,7 @@ Use status: `pendente`, `aceita`, `descartada`, `aplicar_depois`.
 | --- | --- | --- | --- | --- | --- | --- |
 | SG-20260307-PLAN-HISTORY | governance | Criar historico versionado de planos sugeridos, aprovados e implementados em docs/plans/, com arquivo por plano contendo data-hora, resumo do plano e status atual no nome e no c... | aceita |  | 2026-03-07 | 2026-03-07 |
 | SG-20260307-SSH-CONFIG-ACL | fix | Corrigir ACL e ownership indevidos de C:\Users\pablo\.ssh\config, removendo principals orfaos ou nao permitidos que hoje quebram ssh no Windows e no WSL via /mnt/c. | aceita |  | 2026-03-07 | 2026-03-07 |
-| SG-ORTHO-WIP-20260307-SECRETS-ROTATION | fix | Corrigir pendencias ortograficas remanescentes do worklog WIP-20260307-SECRETS-ROTATION com o Pascoalete, incluindo higiene do dicionario cspell, ledger consultivo e backlog aut... | aceita |  | 2026-03-07 | 2026-03-07 |
+| SG-ORTHO-WIP-20260307-SECRETS-ROTATION | fix | Corrigir pendencias ortograficas remanescentes do worklog `WIP-20260307-SECRETS-ROTATION` em README.md, Taskfile.yml, docs/README.md, docs/TASKS.md, docs/reference/secrets-rotat... | aceita |  | 2026-03-07 | 2026-03-09 |
 | SG-20260307-REVIEWER-STACK-PARITY | improvement | Tornar obrigatorio que todo revisor especializado use toda a stack de qualidade, lint, tipagem, testes e validacoes disponivel para sua familia de arquivo; quando faltar cobertu... | aceita |  | 2026-03-07 | 2026-03-07 |
 | SG-20260307-EPHEMERAL-CLEANUP | improvement | Criar governanca e automacao de limpeza de artefatos efemeros do repo, garantindo remocao de worktrees, branches temporarias, pastas e arquivos de teste, outputs gerados e demai... | aceita |  | 2026-03-07 | 2026-03-07 |
 | SG-20260307-DOCS-RESTRUCTURE | improvement | Rever toda a arvore [docs/](docs/) e reestruturá-la por semantica operacional, separando documentacao de referencia, contratos, catalogos, auditorias, notas e registradores vivo... | aceita |  | 2026-03-07 | 2026-03-07 |
@@ -52,6 +52,7 @@ Use status: `pendente`, `aceita`, `descartada`, `aplicar_depois`.
 ## Registro automatico
 
 <!-- roadmap:autolog:start -->
+- 2026-03-09 10:02 UTC | decisao=accepted | horizonte=next | tipo=fix | item=Corrigir pendencias ortograficas remanescentes do worklog `WIP-20260307-SECRETS-ROTATION` em README.md, Taskfile.yml, docs/README.md, docs/TASKS.md, docs/reference/secrets-rotat... | notas=Pendencia automatica criada por Pascoalete apos review consultivo reprovado sem correcao automatica.
 - 2026-03-07 17:03 UTC | decisao=accepted | horizonte=next | tipo=governance | item=Criar historico versionado de planos sugeridos, aprovados e implementados em docs/plans/, com arquivo por plano contendo data-hora, resumo do plano e status atual no nome e no c... | notas=Demanda aprovada pelo usuario. Manter por enquanto em docs/, com naming canonico orientado a historico e rastreabilidade; quando o item d...
 - 2026-03-07 17:02 UTC | decisao=accepted | horizonte=now | tipo=fix | item=Corrigir ACL e ownership indevidos de C:\Users\pablo\.ssh\config, removendo principals orfaos ou nao permitidos que hoje quebram ssh no Windows e no WSL via /mnt/c. | notas=P0 imediato: bug operacional confirmado localmente. Impacta acesso SSH real, validacao de Git/SSH, signer tecnico, rotacao de secrets e q...
 - 2026-03-07 16:48 UTC | decisao=accepted | horizonte=next | tipo=improvement | item=Executar a auditoria e o endurecimento de .vscode para parear extensoes, settings, suporte a tipos de arquivo e UX do workspace com os fluxos canonicos de qualidade, CI/CD, test... | notas=Prioridade 3 aprovada pelo usuario; manter abaixo das prioridades 0, da normalizacao de locale/timezone e da retomada tecnica do rotacion...
