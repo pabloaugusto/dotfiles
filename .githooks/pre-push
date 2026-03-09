@@ -55,4 +55,4 @@ fi
 
 SUBJECTS_JSON="$(git log --format=%s "${RANGE}" | bash "${ROOT_DIR}/scripts/run-python.sh" -c 'import json,sys; print(json.dumps([l.strip() for l in sys.stdin if l.strip()]))')"
 print_info "Validando subjects dos commits no range ${RANGE}..."
-bash "${ROOT_DIR}/scripts/run-python.sh" "${ROOT_DIR}/.githooks/conventional_emoji.py" --validate-many-json "${SUBJECTS_JSON}" --require-emoji
+bash "${ROOT_DIR}/scripts/run-python.sh" "${ROOT_DIR}/.githooks/conventional_emoji.py" --validate-many-json "${SUBJECTS_JSON}" --require-emoji --require-issue-key

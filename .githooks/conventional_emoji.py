@@ -105,6 +105,7 @@ KEYWORD_EMOJI = {
 class ValidationResult:
     ok: bool
     error: str | None = None
+    warning: str | None = None
 
 
 def _read_text_from_file_or_stdin(path: str) -> str:
@@ -146,7 +147,15 @@ def inject_emoji(commit_msg_text: str) -> str:
     return raw
 
 
-def validate_message(text: str, *, require_emoji: bool) -> ValidationResult:
+JIRA_KEY_RE = re.compile(r"(?<![A-Z0-9-])([A-Z][A-Z0-9]+-\d+)(?![A-Z0-9-])")
+
+
+def validate_message(
+    text: str,
+    *,
+    require_emoji: bool,
+    require_issue_key: bool = False,
+) -> ValidationResult:
     message = (text or "").strip()
     if not message or message.startswith("#"):
         return ValidationResult(ok=True)
@@ -210,6 +219,15 @@ def validate_message(text: str, *, require_emoji: bool) -> ValidationResult:
     if len(description) < 3:
         return ValidationResult(ok=False, error="Descricao muito curta.")
 
+    if require_issue_key and not JIRA_KEY_RE.search(first_line):
+        return ValidationResult(
+            ok=False,
+            error=(
+                "Chave Jira obrigatoria. Inclua um work item no subject, por "
+                "exemplo: '🔧 chore(git): DOT-81 endurecer convencoes'."
+            ),
+        )
+
     return ValidationResult(ok=True)
 
 
@@ -220,15 +238,25 @@ def validate_branch_name(branch: str) -> ValidationResult:
     if branch_name.startswith(("dependabot/", "renovate/")):
         return ValidationResult(ok=True)
 
-    pattern = re.compile(
+    canonical_pattern = re.compile(
+        r"^(?P<type>[a-z]+)(?:\([^\)]+\))?/"
+        r"(?P<issue>[A-Z][A-Z0-9]+-\d+)-(?P<slug>[a-z0-9][a-z0-9._-]{2,})$"
+    )
+    legacy_pattern = re.compile(
         r"^(?P<type>[a-z]+)(?:\([^\)]+\))?/(?P<slug>[a-z0-9][a-z0-9._-]{2,})$"
     )
-    match = pattern.match(branch_name)
+    match = canonical_pattern.match(branch_name)
+    legacy_match = legacy_pattern.match(branch_name)
     if not match:
-        return ValidationResult(
-            ok=False,
-            error="Branch deve seguir '<type>/<slug>' (ex: feat/add-login).",
-        )
+        if not legacy_match:
+            return ValidationResult(
+                ok=False,
+                error=(
+                    "Branch deve seguir '<type>/<jira-key>-<slug>' "
+                    "(ex: feat/DOT-81-git-traceability)."
+                ),
+            )
+        match = legacy_match
 
     branch_type = match.group("type")
     if branch_type not in VALID_BRANCH_TYPES:
@@ -238,6 +266,14 @@ def validate_branch_name(branch: str) -> ValidationResult:
             error=f"Tipo de branch invalido: '{branch_type}'. Tipos permitidos: {valid}.",
         )
 
+    if legacy_match and not canonical_pattern.match(branch_name):
+        return ValidationResult(
+            ok=True,
+            warning=(
+                "Branch legada aceita temporariamente sem chave Jira. Novo "
+                "padrao canonico: '<type>/<jira-key>-<slug>'."
+            ),
+        )
     return ValidationResult(ok=True)
 
 
@@ -262,12 +298,15 @@ def main(argv: list[str]) -> int:
     parser.add_argument("--text", default=None)
     parser.add_argument("--validate-many-json", default=None)
     parser.add_argument("--require-emoji", action="store_true")
+    parser.add_argument("--require-issue-key", action="store_true")
     parser.add_argument("--validate-branch", default=None)
     args = parser.parse_args(argv)
 
     if args.validate_branch is not None:
         result = validate_branch_name(args.validate_branch)
         if result.ok:
+            if result.warning:
+                print(result.warning, file=sys.stderr)
             return 0
         _print_error_block("BRANCH INVALIDA", f"│ {result.error:<63} │")
         return 1
@@ -295,7 +334,11 @@ def main(argv: list[str]) -> int:
                 failed = True
                 print(f"❌ Item invalido (nao-string): {subject!r}", file=sys.stderr)
                 continue
-            result = validate_message(subject, require_emoji=args.require_emoji)
+            result = validate_message(
+                subject,
+                require_emoji=args.require_emoji,
+                require_issue_key=args.require_issue_key,
+            )
             if not result.ok:
                 failed = True
                 print(f"❌ Invalid commit subject: {subject}", file=sys.stderr)
@@ -324,7 +367,11 @@ def main(argv: list[str]) -> int:
         return 0
 
     if mode_validate:
-        result = validate_message(text, require_emoji=args.require_emoji)
+        result = validate_message(
+            text,
+            require_emoji=args.require_emoji,
+            require_issue_key=args.require_issue_key,
+        )
         if result.ok:
             return 0
         _print_error_block("COMMIT/PR INVALIDO", f"│ {result.error:<63} │")
