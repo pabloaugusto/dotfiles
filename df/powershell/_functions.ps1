@@ -1448,6 +1448,7 @@ function Get-CheckEnvGitProbeContext {
 
 	$worktreeMode = (& git -C $repoPath config --worktree --get dotfiles.signing.mode 2>$null | Out-String).Trim()
 	$automationKeyRef = (& git -C $repoPath config --worktree --get dotfiles.signing.automationPublicKeyRef 2>$null | Out-String).Trim()
+	$automationPrivateKeyPath = (& git -C $repoPath config --worktree --get dotfiles.signing.automationPrivateKeyPath 2>$null | Out-String).Trim()
 	$resolvedMode = $GitSigningMode
 	if ($resolvedMode -eq 'auto') {
 		$resolvedMode = if ($worktreeMode -eq 'automation') { 'automation' } else { 'human' }
@@ -1459,6 +1460,7 @@ function Get-CheckEnvGitProbeContext {
 		ResolvedMode      = $resolvedMode
 		WorktreeMode      = $worktreeMode
 		AutomationKeyRef  = $automationKeyRef
+		AutomationPrivateKeyPath = $automationPrivateKeyPath
 		GpgFormat         = (& git -C $repoPath config --includes --get gpg.format 2>$null | Out-String).Trim()
 		GpgProgram        = (& git -C $repoPath config --includes --get gpg.ssh.program 2>$null | Out-String).Trim()
 		SigningKey        = (& git -C $repoPath config --includes --get user.signingkey 2>$null | Out-String).Trim()
@@ -1512,10 +1514,10 @@ function Invoke-CheckEnvSignedCommitTest {
 		$commitOutput = & git commit -S -m "checkEnv signed commit" 2>&1
 		if ($LASTEXITCODE -ne 0) {
 			$hint = if ($GitSigningMode -eq 'automation') {
-				'Fix gpg.ssh.program, the automation signing key ref/worktree config and 1Password SSH agent authorization for the dedicated automation key.'
+				'Corrija o gpg.ssh.program, a chave tecnica local da worktree e a configuracao do signer de automacao.'
 			}
 			else {
-				'Fix gpg.ssh.program, user.signingkey and 1Password SSH agent availability.'
+				'Corrija gpg.ssh.program, user.signingkey e a disponibilidade do agent SSH do 1Password.'
 			}
 			return [PSCustomObject]@{
 				Status   = 'fail'
@@ -1546,10 +1548,10 @@ function Invoke-CheckEnvSignedCommitTest {
 			Status   = 'fail'
 			Detail   = 'Commit created but signature block (gpgsig) was not found.'
 			Solution = if ($GitSigningMode -eq 'automation') {
-				'Fix the dedicated automation signer config and confirm 1Password can sign with the automation key in this terminal.'
+				'Corrija a chave tecnica local, o gpg.ssh.program e a configuracao do signer de automacao da worktree.'
 			}
 			else {
-				'Fix gpg.ssh.program, user.signingkey and 1Password SSH agent availability.'
+				'Corrija gpg.ssh.program, user.signingkey e a disponibilidade do agent SSH do 1Password.'
 			}
 		}
 	}
@@ -1782,7 +1784,9 @@ function checkEnv {
 		$signingKey = $gitProbe.SigningKey
 		$commitSign = $gitProbe.CommitSignDefault
 		$automationKeyRef = $gitProbe.AutomationKeyRef
+		$automationPrivateKeyPath = $gitProbe.AutomationPrivateKeyPath
 		$resolvedGitSigningMode = $gitProbe.ResolvedMode
+		$gitSshCommand = (& git -C $gitProbe.RepoPath config --get core.sshCommand 2>$null | Out-String).Trim()
 
 		Add-CheckResult -Item 'Git signing mode' -Status 'success' -Detail ("mode={0}." -f $resolvedGitSigningMode) -Solution ''
 
@@ -1800,12 +1804,22 @@ function checkEnv {
 			Add-CheckResult -Item 'Git commit signing default' -Status 'fail' -Detail "commit.gpgsign='$commitSign'." -Solution 'Run git config --global commit.gpgsign true.'
 		}
 
+		$hasAutomationPrivateKey = (
+			$resolvedGitSigningMode -eq 'automation' -and
+			-not [string]::IsNullOrWhiteSpace($automationPrivateKeyPath) -and
+			(Test-Path -Path $automationPrivateKeyPath -PathType Leaf) -and
+			$signingKey -eq $automationPrivateKeyPath
+		)
+
 		if ($signingKey -match '^ssh-') {
 			Add-CheckResult -Item 'Git signing key' -Status 'success' -Detail 'user.signingkey uses SSH key format.' -Solution ''
 		}
+		elseif ($hasAutomationPrivateKey) {
+			Add-CheckResult -Item 'Git signing key' -Status 'success' -Detail "user.signingkey aponta para a chave tecnica local: $automationPrivateKeyPath." -Solution ''
+		}
 		else {
 			$signingKeySolution = if ($resolvedGitSigningMode -eq 'automation') {
-				'Run task git:signing:mode:automation after configuring git.automation_signing_key_ref in bootstrap local config.'
+				'Rode task git:signing:mode:automation para sincronizar a chave tecnica local e o signer da worktree atual.'
 			}
 			else {
 				'Set user.signingkey to the SSH public key managed by 1Password.'
@@ -1814,8 +1828,21 @@ function checkEnv {
 		}
 
 		if ($resolvedGitSigningMode -eq 'automation') {
+			$localAutomationPublicKey = ''
+			if ($hasAutomationPrivateKey) {
+				$localAutomationPublicKeyPath = "$automationPrivateKeyPath.pub"
+				if (Test-Path -Path $localAutomationPublicKeyPath -PathType Leaf) {
+					$localAutomationPublicKey = Normalize-SshPublicKeyValue ((Get-Content -Path $localAutomationPublicKeyPath -Raw -ErrorAction SilentlyContinue) ?? '')
+				}
+			}
+
 			if ([string]::IsNullOrWhiteSpace($automationKeyRef)) {
-				Add-CheckResult -Item 'Automation signing key ref' -Status 'fail' -Detail 'dotfiles.signing.automationPublicKeyRef is missing in worktree config.' -Solution 'Apply task git:signing:mode:automation after configuring the 1Password public-key ref.'
+				if (-not [string]::IsNullOrWhiteSpace($localAutomationPublicKey)) {
+					Add-CheckResult -Item 'Automation signing key ref' -Status 'success' -Detail 'A worktree esta usando o par de chaves tecnico local; a ref publica e opcional neste modo.' -Solution ''
+				}
+				else {
+					Add-CheckResult -Item 'Automation signing key ref' -Status 'fail' -Detail 'Nem dotfiles.signing.automationPublicKeyRef nem a chave publica local da worktree foram encontrados.' -Solution 'Rode task git:signing:mode:automation apos provisionar o par tecnico local ou configurar a ref publica.'
+				}
 			}
 			elseif (-not (Test-CommandExists op)) {
 				Add-CheckResult -Item 'Automation signing key ref' -Status 'fail' -Detail "Cannot resolve $automationKeyRef because op is unavailable." -Solution 'Install/authenticate 1Password CLI before using automation signing mode.'
@@ -1825,7 +1852,7 @@ function checkEnv {
 				if ([string]::IsNullOrWhiteSpace($resolvedAutomationKey)) {
 					Add-CheckResult -Item 'Automation signing key ref' -Status 'fail' -Detail "$automationKeyRef could not be resolved to an SSH public key." -Solution 'Fix the 1Password ref or rotate the automation signer item.'
 				}
-				elseif ((Normalize-SshPublicKeyValue $signingKey) -eq $resolvedAutomationKey) {
+				elseif ((Normalize-SshPublicKeyValue $signingKey) -eq $resolvedAutomationKey -or $localAutomationPublicKey -eq $resolvedAutomationKey) {
 					Add-CheckResult -Item 'Automation signing key ref' -Status 'success' -Detail "$automationKeyRef matches the current worktree signing key." -Solution ''
 				}
 				else {
@@ -1918,19 +1945,34 @@ function checkEnv {
 			Add-CheckResult -Item '1Password WSL agent socket' -Status 'fail' -Detail '/tmp/1password-agent.sock not found and no Windows named-pipe fallback detected.' -Solution 'Enable 1Password SSH agent integration for Linux/WSL and restart shell.'
 		}
 
-		$sshTestOutput = & ssh -T git@github.com -o BatchMode=yes -o NumberOfPasswordPrompts=0 -o ConnectTimeout=10 -o ConnectionAttempts=1 -o StrictHostKeyChecking=accept-new 2>&1
-		$sshTestText = ($sshTestOutput | Out-String).Trim()
-		if ($sshTestText -match 'successfully authenticated') {
-			Add-CheckResult -Item 'SSH auth to GitHub' -Status 'success' -Detail 'SSH handshake with GitHub succeeded.' -Solution ''
-		}
-		elseif ($sshTestText -match 'timed out') {
-			Add-CheckResult -Item 'SSH auth to GitHub' -Status 'fail' -Detail $sshTestText -Solution 'Check network connectivity and run checkEnv again.'
-		}
-		elseif ($LASTEXITCODE -eq 255) {
-			Add-CheckResult -Item 'SSH auth to GitHub' -Status 'fail' -Detail $sshTestText -Solution 'Ensure GitHub account has the 1Password-managed SSH public key and the agent is active.'
+		if ($resolvedGitSigningMode -eq 'automation' -and -not [string]::IsNullOrWhiteSpace($gitSshCommand)) {
+			$gitRemoteOutput = & git -C $gitProbe.RepoPath ls-remote origin 2>&1
+			$gitRemoteText = ($gitRemoteOutput | Out-String).Trim()
+			if ($LASTEXITCODE -eq 0) {
+				Add-CheckResult -Item 'SSH auth to GitHub' -Status 'success' -Detail 'GitHub access validated via worktree core.sshCommand.' -Solution ''
+			}
+			elseif ($gitRemoteText -match 'timed out') {
+				Add-CheckResult -Item 'SSH auth to GitHub' -Status 'fail' -Detail $gitRemoteText -Solution 'Check SSH connectivity and validate the automation key registered in GitHub.'
+			}
+			else {
+				Add-CheckResult -Item 'SSH auth to GitHub' -Status 'fail' -Detail $gitRemoteText -Solution 'Rerun task git:signing:mode:automation or verify the automation auth key registered in GitHub.'
+			}
 		}
 		else {
-			Add-CheckResult -Item 'SSH auth to GitHub' -Status 'fail' -Detail $sshTestText -Solution 'Run ssh -T git@github.com manually and inspect host/key output.'
+			$sshTestOutput = & ssh -T git@github.com -o BatchMode=yes -o NumberOfPasswordPrompts=0 -o ConnectTimeout=10 -o ConnectionAttempts=1 -o StrictHostKeyChecking=accept-new 2>&1
+			$sshTestText = ($sshTestOutput | Out-String).Trim()
+			if ($sshTestText -match 'successfully authenticated') {
+				Add-CheckResult -Item 'SSH auth to GitHub' -Status 'success' -Detail 'SSH handshake with GitHub succeeded.' -Solution ''
+			}
+			elseif ($sshTestText -match 'timed out') {
+				Add-CheckResult -Item 'SSH auth to GitHub' -Status 'fail' -Detail $sshTestText -Solution 'Check network connectivity and run checkEnv again.'
+			}
+			elseif ($LASTEXITCODE -eq 255) {
+				Add-CheckResult -Item 'SSH auth to GitHub' -Status 'fail' -Detail $sshTestText -Solution 'Ensure GitHub account has the 1Password-managed SSH public key and the agent is active.'
+			}
+			else {
+				Add-CheckResult -Item 'SSH auth to GitHub' -Status 'fail' -Detail $sshTestText -Solution 'Run ssh -T git@github.com manually and inspect host/key output.'
+			}
 		}
 	}
 
