@@ -1,0 +1,164 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://dotfiles.local/agents/cerimonias/ceremony.schema.json",
+  "title": "AI Ceremony Definition",
+  "type": "object",
+  "required": [
+    "version",
+    "id",
+    "title",
+    "owner_role",
+    "periodicity",
+    "purpose",
+    "context_fields",
+    "participants",
+    "agenda",
+    "artifacts_generated",
+    "issue_policy",
+    "log",
+    "confluence"
+  ],
+  "properties": {
+    "version": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9-]+$"
+    },
+    "title": {
+      "type": "string",
+      "minLength": 3
+    },
+    "owner_role": {
+      "type": "string",
+      "minLength": 3
+    },
+    "periodicity": {
+      "type": "object",
+      "required": ["mode"],
+      "properties": {
+        "mode": {
+          "type": "string",
+          "minLength": 3
+        },
+        "fallback_trigger": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": true
+    },
+    "purpose": {
+      "type": "string",
+      "minLength": 10
+    },
+    "context_fields": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "minLength": 2
+      }
+    },
+    "participants": {
+      "type": "object",
+      "required": ["required"],
+      "properties": {
+        "required": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 2
+          }
+        }
+      },
+      "additionalProperties": true
+    },
+    "agenda": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "minLength": 5
+      }
+    },
+    "artifacts_generated": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "minLength": 3
+      }
+    },
+    "issue_policy": {
+      "type": "object",
+      "required": ["create_when_problem_untracked", "labels"],
+      "properties": {
+        "create_when_problem_untracked": {
+          "type": "boolean"
+        },
+        "preferred_issue_type": {
+          "type": "string"
+        },
+        "labels": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 2
+          }
+        }
+      },
+      "additionalProperties": true
+    },
+    "log": {
+      "type": "object",
+      "required": ["template", "directory", "required_fields"],
+      "properties": {
+        "template": {
+          "type": "string",
+          "minLength": 5
+        },
+        "directory": {
+          "type": "string",
+          "minLength": 5
+        },
+        "required_fields": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 2
+          }
+        }
+      },
+      "additionalProperties": true
+    },
+    "confluence": {
+      "type": "object",
+      "required": ["root_page", "tree_path", "title_template"],
+      "properties": {
+        "root_page": {
+          "type": "string",
+          "minLength": 3
+        },
+        "tree_path": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 2
+          }
+        },
+        "title_template": {
+          "type": "string",
+          "minLength": 5
+        }
+      },
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": true
+}

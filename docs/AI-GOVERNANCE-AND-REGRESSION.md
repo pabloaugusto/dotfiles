@@ -40,6 +40,9 @@ task test:unit:python:windows
   [`docs/AI-SCRUM-MASTER-LEDGER.md`](AI-SCRUM-MASTER-LEDGER.md) e, se nao for
   resolvida na hora, precisa apontar para `Bug` ou `Task` de governanca no
   `Jira`.
+- a **Retrospectiva** e obrigatoria para cada branch finalizada na primeira
+  versao e precisa nascer da definicao versionada em
+  [`.agents/cerimonias/retrospectiva.yaml`](../.agents/cerimonias/retrospectiva.yaml).
 - `critical-integrations-guardian` protege toda mudanca sensivel a bootstrap, auth, secrets, CI, sync ou CLI critica.
 - `secrets-rotation-governor` protege toda mudanca de lifecycle de credenciais e exige ordem segura de substituicao.
 - `pascoalete` revisa ortografia tecnica e higiene do dicionario `cspell` em modo consultivo; quando reprova e a rodada nao corrige, a falha deve gerar pendencia rastreavel no backlog vigente.
