@@ -29,6 +29,22 @@ Manter este repo de dotfiles confiavel, testavel e reproduzivel em Windows host 
 6. [`docs/bootstrap-flow.md`](docs/bootstrap-flow.md) quando a tarefa tocar bootstrap
 7. [`Taskfile.yml`](Taskfile.yml)
 
+## Leitura integral obrigatoria ao retomar do zero
+
+- Sempre que a sessao de IA voltar do zero ou perder continuidade confiavel,
+  reler integralmente todos os arquivos resolvidos por
+  [`docs/AI-STARTUP-GOVERNANCE-MANIFEST.md`](docs/AI-STARTUP-GOVERNANCE-MANIFEST.md)
+  antes de qualquer operacao relevante.
+- Essa releitura integral e obrigatoria em queda de energia, travamento,
+  limpeza de cache, limpeza de sessoes, troca de worktree, troca de app, troca
+  de modelo ou qualquer retomada sem contexto comprovadamente fiel.
+- Nessas retomadas, e proibido operar por amostragem, memoria parcial,
+  presuncao, estimativa ou "parece que eu ja li isso".
+- Nessas retomadas, a IA deve consultar tambem
+  [`docs/AI-CHAT-CONTRACTS-REGISTER.md`](docs/AI-CHAT-CONTRACTS-REGISTER.md)
+  para avisar o usuario sobre contratos nascidos no chat e ainda nao
+  promovidos para a governanca oficial.
+
 ## Skills locais
 
 - [`.agents/skills/dotfiles-bootstrap`](.agents/skills/dotfiles-bootstrap)
@@ -54,6 +70,10 @@ Leia a skill mais proxima do escopo antes de editar arquivos relevantes.
 - Preservar paridade entre Windows e WSL sempre que a mudanca tocar bootstrap, links, auth ou Git.
 - Tratar caminhos canonicos absolutos como fonte de verdade.
 - Validar estado final e idempotencia, nao apenas `exit code`.
+- Em retomadas do zero, usar como base obrigatoria a leitura integral definida em
+  [`docs/AI-STARTUP-GOVERNANCE-MANIFEST.md`](docs/AI-STARTUP-GOVERNANCE-MANIFEST.md).
+- Em retomadas do zero, gerar ou atualizar o relatorio operacional da sessao
+  com `task ai:startup:session` antes de decidir trabalho por memoria residual.
 - Nunca operar por amostragem quando a tarefa envolver importar, adaptar, comparar ou consolidar contratos de outro repo.
 - Qualquer importacao ou adaptacao cross-repo exige auditoria estrutural exaustiva antes de editar:
   contratos globais, docs, tasks, scripts, workflows, hooks, validadores, testes,

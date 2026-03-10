@@ -32,11 +32,14 @@ REQUIRED_FILES = [
     "AGENTS.md",
     "LICOES-APRENDIDAS.md",
     "docs/AI-AGENTS-CATALOG.md",
+    "docs/AI-CHAT-CONTRACTS-REGISTER.md",
     "docs/AI-DELEGATION-FLOW.md",
     "docs/AI-GOVERNANCE-AND-REGRESSION.md",
     "docs/AI-ORTHOGRAPHY-LEDGER.md",
     "docs/AI-REVIEW-LEDGER.md",
     "docs/AI-SKILLS-CATALOG.md",
+    "docs/AI-STARTUP-AND-RESTART.md",
+    "docs/AI-STARTUP-GOVERNANCE-MANIFEST.md",
     "docs/AI-SOURCE-AUDIT.md",
     "docs/ai-operating-model.md",
     "docs/AI-WIP-TRACKER.md",
@@ -73,9 +76,12 @@ REQUIRED_FILES = [
     "scripts/ai-review.py",
     "scripts/ai_review_lib.py",
     "scripts/ai-control-plane.py",
+    "scripts/ai-session-startup.py",
     "scripts/ai_control_plane_lib.py",
+    "scripts/ai_session_startup_lib.py",
     "scripts/atlassian_platform_lib.py",
     "scripts/run-ai-atlassian-check.ps1",
+    "scripts/run-ai-startup-session.ps1",
     "scripts/cspell-governance.py",
     "scripts/cspell_governance_lib.py",
     "scripts/validate_workflow_task_sync.py",
@@ -89,6 +95,13 @@ TRACKER_MARKERS = [
     "<!-- ai-worklog:done:end -->",
     "<!-- ai-worklog:log:start -->",
     "<!-- ai-worklog:log:end -->",
+]
+
+CHAT_CONTRACTS_MARKERS = [
+    "<!-- ai-chat-contracts:pending:start -->",
+    "<!-- ai-chat-contracts:pending:end -->",
+    "<!-- ai-chat-contracts:promoted:start -->",
+    "<!-- ai-chat-contracts:promoted:end -->",
 ]
 
 DECISIONS_MARKERS = [
@@ -146,12 +159,16 @@ REQUIRED_SKILL_HEADINGS = [
 AGENTS_REQUIRED_SNIPPETS = [
     "Nunca operar por amostragem",
     "docs/AI-SOURCE-AUDIT.md",
+    "docs/AI-STARTUP-GOVERNANCE-MANIFEST.md",
+    "docs/AI-CHAT-CONTRACTS-REGISTER.md",
     "Manter o item ativo em `Doing` durante toda a execucao relevante",
     "Nenhum `done` e valido sem revisar `LICOES-APRENDIDAS.md`",
     "Acionar os gates paralelos obrigatorios de arquitetura/modernizacao",
 ]
 
 OPERATING_MODEL_REQUIRED_SNIPPETS = [
+    "### 1.1. Retomada do zero exige releitura integral de governanca",
+    "### 1.2. Contratos nascidos no chat precisam de registrador vivo",
     "### 5. Auditoria exaustiva antes de reuso cross-repo",
     "### Fronteira entre `.agents/` e adaptadores de assistente",
     "### Camada 2.1. Registry declarativo do repo",
@@ -225,6 +242,7 @@ CATALOG_REQUIRED_SNIPPETS = {
         "### `ai:review:record`",
         "### `ai:review:check`",
         "### `ai:control-plane:show`",
+        "### `ai:startup:session`",
         "### `ai:atlassian:check`",
         "### `spell:review:windows`",
         "### `spell:dictionary:audit:windows`",
@@ -569,6 +587,15 @@ def main(argv: list[str]) -> int:
             tracker_path.read_text(encoding="utf-8"),
             TRACKER_MARKERS,
             "docs/AI-WIP-TRACKER.md",
+            failures,
+        )
+
+    chat_contracts_path = repo_root / "docs" / "AI-CHAT-CONTRACTS-REGISTER.md"
+    if chat_contracts_path.is_file():
+        require_markers(
+            chat_contracts_path.read_text(encoding="utf-8"),
+            CHAT_CONTRACTS_MARKERS,
+            "docs/AI-CHAT-CONTRACTS-REGISTER.md",
             failures,
         )
 

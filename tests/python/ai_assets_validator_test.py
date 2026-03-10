@@ -27,8 +27,11 @@ class ValidateAiAssetsTests(unittest.TestCase):
         self.assertIn(".agents/config.toml", module.REQUIRED_FILES)
         self.assertIn(".codex/README.md", module.REQUIRED_FILES)
         self.assertIn("docs/AI-AGENTS-CATALOG.md", module.REQUIRED_FILES)
+        self.assertIn("docs/AI-CHAT-CONTRACTS-REGISTER.md", module.REQUIRED_FILES)
         self.assertIn("docs/AI-ORTHOGRAPHY-LEDGER.md", module.REQUIRED_FILES)
         self.assertIn("docs/AI-SOURCE-AUDIT.md", module.REQUIRED_FILES)
+        self.assertIn("docs/AI-STARTUP-AND-RESTART.md", module.REQUIRED_FILES)
+        self.assertIn("docs/AI-STARTUP-GOVERNANCE-MANIFEST.md", module.REQUIRED_FILES)
         self.assertIn("docs/TASKS.md", module.REQUIRED_FILES)
         self.assertIn("docs/WORKFLOWS.md", module.REQUIRED_FILES)
         self.assertIn("config/ai/platforms.yaml", module.REQUIRED_FILES)
@@ -37,17 +40,25 @@ class ValidateAiAssetsTests(unittest.TestCase):
         self.assertIn("config/ai/contracts.yaml", module.REQUIRED_FILES)
         self.assertIn("scripts/ai-route.py", module.REQUIRED_FILES)
         self.assertIn("scripts/ai-control-plane.py", module.REQUIRED_FILES)
+        self.assertIn("scripts/ai-session-startup.py", module.REQUIRED_FILES)
         self.assertIn("scripts/ai_control_plane_lib.py", module.REQUIRED_FILES)
+        self.assertIn("scripts/ai_session_startup_lib.py", module.REQUIRED_FILES)
         self.assertIn("scripts/atlassian_platform_lib.py", module.REQUIRED_FILES)
+        self.assertIn("scripts/run-ai-startup-session.ps1", module.REQUIRED_FILES)
         self.assertIn("scripts/cspell-governance.py", module.REQUIRED_FILES)
         self.assertIn("scripts/validate_workflow_task_sync.py", module.REQUIRED_FILES)
         self.assertIn("## Validacao recomendada", module.REQUIRED_AGENT_HEADINGS)
         self.assertIn("## Regras", module.REQUIRED_SKILL_HEADINGS)
         self.assertIn("## Entregas esperadas", module.REQUIRED_SKILL_HEADINGS)
         self.assertIn("Nunca operar por amostragem", module.AGENTS_REQUIRED_SNIPPETS)
+        self.assertIn("docs/AI-STARTUP-GOVERNANCE-MANIFEST.md", module.AGENTS_REQUIRED_SNIPPETS)
         self.assertIn(
             "Nenhum `done` e valido sem revisar `LICOES-APRENDIDAS.md`",
             module.AGENTS_REQUIRED_SNIPPETS,
+        )
+        self.assertIn(
+            "### 1.2. Contratos nascidos no chat precisam de registrador vivo",
+            module.OPERATING_MODEL_REQUIRED_SNIPPETS,
         )
         self.assertIn(
             "### Camada 2.2. Orquestracao, rules e evals",
@@ -75,6 +86,10 @@ class ValidateAiAssetsTests(unittest.TestCase):
         )
         self.assertIn(
             "### `ai:atlassian:check`",
+            module.CATALOG_REQUIRED_SNIPPETS["docs/TASKS.md"],
+        )
+        self.assertIn(
+            "### `ai:startup:session`",
             module.CATALOG_REQUIRED_SNIPPETS["docs/TASKS.md"],
         )
 
