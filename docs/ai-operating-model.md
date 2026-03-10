@@ -16,6 +16,35 @@ Criar uma camada local de IA que seja:
 
 As instrucoes base devem ser pequenas, diretas e estaveis. O papel de [`AGENTS.md`](AGENTS.md) e alinhar linguagem, guardrails e fontes de verdade; os detalhes operacionais ficam nas skills e referencias.
 
+### 1.1. Retomada do zero exige releitura integral de governanca
+
+Quando a sessao voltar sem continuidade confiavel, a IA nao pode depender de
+memoria residual nem de "contexto provavel".
+
+Nessas retomadas, a regra correta passa a ser:
+
+- reler integralmente todos os arquivos resolvidos por
+  [`AI-STARTUP-GOVERNANCE-MANIFEST.md`](AI-STARTUP-GOVERNANCE-MANIFEST.md)
+- tratar o manifest como fonte canonica do que precisa ser relido
+- nao operar por amostragem, presuncao ou lembranca parcial de sessao antiga
+- recalcular branches e worktrees abertas antes de tentar drenar uma worktree
+  suja ou redistribuir alteracoes entre trilhas Jira
+- consultar [`AI-CHAT-CONTRACTS-REGISTER.md`](AI-CHAT-CONTRACTS-REGISTER.md)
+  para listar contratos do chat ainda nao promovidos
+- gerar o relatorio operacional de retomada com `task ai:startup:session`
+
+### 1.2. Contratos nascidos no chat precisam de registrador vivo
+
+Nem toda definicao nasce primeiro em doc oficial. Quando isso acontecer:
+
+- o contrato nasce no chat, mas nao pode morrer so ali
+- enquanto ainda nao virar governanca oficial, ele deve entrar em
+  [`AI-CHAT-CONTRACTS-REGISTER.md`](AI-CHAT-CONTRACTS-REGISTER.md)
+- toda nova sessao precisa avisar o usuario se houver itens pendentes nesse
+  registrador
+- cada item pendente deve apontar para o **work item** dono quando ele ja
+  existir
+
 ### 2. Especializacao por escopo
 
 Cada skill cobre um dominio estreito do repo. Isso reduz ambiguidade, evita prompts gigantes e melhora a reusabilidade em tarefas futuras.

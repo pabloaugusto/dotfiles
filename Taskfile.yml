@@ -403,14 +403,14 @@ tasks:
     platforms: [windows]
     dir: '{{.TASKFILE_DIR}}'
     cmds:
-      - uv run --locked ty check scripts/release_tool.py scripts/validate_docs.py scripts/run_actionlint.py scripts/run_gitleaks.py scripts/run-cspell.py scripts/git-signing-mode.py scripts/git_signing_lib.py scripts/ai-control-plane.py scripts/ai_control_plane_lib.py scripts/atlassian_platform_lib.py scripts/ai-atlassian-openapi.py scripts/ai_atlassian_openapi_lib.py scripts/ai-jira-model.py scripts/ai_jira_model_lib.py scripts/ai-jira-apply.py scripts/ai_jira_apply_lib.py scripts/ai-atlassian-backfill.py scripts/ai_atlassian_backfill_lib.py scripts/ai-atlassian-migration-bundle.py scripts/ai_atlassian_migration_bundle_lib.py scripts/ai-atlassian-seed.py scripts/ai_atlassian_seed_lib.py scripts/ai-atlassian-docs-sync.py scripts/secrets-rotation.py scripts/secrets_rotation_lib.py tests/python/release_tool_test.py tests/python/validate_docs_test.py tests/python/git_signing_mode_test.py tests/python/ai_control_plane_test.py tests/python/atlassian_platform_test.py tests/python/ai_atlassian_openapi_test.py tests/python/ai_jira_model_test.py tests/python/ai_jira_apply_test.py tests/python/ai_atlassian_backfill_test.py tests/python/ai_atlassian_migration_bundle_test.py tests/python/ai_atlassian_seed_test.py tests/python/secrets_rotation_test.py
+      - uv run --locked ty check scripts/release_tool.py scripts/validate_docs.py scripts/run_actionlint.py scripts/run_gitleaks.py scripts/run-cspell.py scripts/git-signing-mode.py scripts/git_signing_lib.py scripts/ai-control-plane.py scripts/ai_control_plane_lib.py scripts/ai-session-startup.py scripts/ai_session_startup_lib.py scripts/atlassian_platform_lib.py scripts/ai-atlassian-openapi.py scripts/ai_atlassian_openapi_lib.py scripts/ai-jira-model.py scripts/ai_jira_model_lib.py scripts/ai-jira-apply.py scripts/ai_jira_apply_lib.py scripts/ai-atlassian-backfill.py scripts/ai_atlassian_backfill_lib.py scripts/ai-atlassian-migration-bundle.py scripts/ai_atlassian_migration_bundle_lib.py scripts/ai-atlassian-seed.py scripts/ai_atlassian_seed_lib.py scripts/ai-atlassian-docs-sync.py scripts/secrets-rotation.py scripts/secrets_rotation_lib.py tests/python/release_tool_test.py tests/python/validate_docs_test.py tests/python/git_signing_mode_test.py tests/python/ai_control_plane_test.py tests/python/ai_session_startup_test.py tests/python/atlassian_platform_test.py tests/python/ai_atlassian_openapi_test.py tests/python/ai_jira_model_test.py tests/python/ai_jira_apply_test.py tests/python/ai_atlassian_backfill_test.py tests/python/ai_atlassian_migration_bundle_test.py tests/python/ai_atlassian_seed_test.py tests/python/secrets_rotation_test.py
 
   type:check:linux:
     desc: Linux/WSL - executa ty em scripts e testes Python
     platforms: [linux]
     dir: '{{.TASKFILE_DIR}}'
     cmds:
-      - uv run --locked ty check scripts/release_tool.py scripts/validate_docs.py scripts/run_actionlint.py scripts/run_gitleaks.py scripts/run-cspell.py scripts/git-signing-mode.py scripts/git_signing_lib.py scripts/ai-control-plane.py scripts/ai_control_plane_lib.py scripts/atlassian_platform_lib.py scripts/ai-atlassian-openapi.py scripts/ai_atlassian_openapi_lib.py scripts/ai-jira-model.py scripts/ai_jira_model_lib.py scripts/ai-jira-apply.py scripts/ai_jira_apply_lib.py scripts/ai-atlassian-backfill.py scripts/ai_atlassian_backfill_lib.py scripts/ai-atlassian-migration-bundle.py scripts/ai_atlassian_migration_bundle_lib.py scripts/ai-atlassian-seed.py scripts/ai_atlassian_seed_lib.py scripts/ai-atlassian-docs-sync.py scripts/secrets-rotation.py scripts/secrets_rotation_lib.py tests/python/release_tool_test.py tests/python/validate_docs_test.py tests/python/git_signing_mode_test.py tests/python/ai_control_plane_test.py tests/python/atlassian_platform_test.py tests/python/ai_atlassian_openapi_test.py tests/python/ai_jira_model_test.py tests/python/ai_jira_apply_test.py tests/python/ai_atlassian_backfill_test.py tests/python/ai_atlassian_migration_bundle_test.py tests/python/ai_atlassian_seed_test.py tests/python/secrets_rotation_test.py
+      - uv run --locked ty check scripts/release_tool.py scripts/validate_docs.py scripts/run_actionlint.py scripts/run_gitleaks.py scripts/run-cspell.py scripts/git-signing-mode.py scripts/git_signing_lib.py scripts/ai-control-plane.py scripts/ai_control_plane_lib.py scripts/ai-session-startup.py scripts/ai_session_startup_lib.py scripts/atlassian_platform_lib.py scripts/ai-atlassian-openapi.py scripts/ai_atlassian_openapi_lib.py scripts/ai-jira-model.py scripts/ai_jira_model_lib.py scripts/ai-jira-apply.py scripts/ai_jira_apply_lib.py scripts/ai-atlassian-backfill.py scripts/ai_atlassian_backfill_lib.py scripts/ai-atlassian-migration-bundle.py scripts/ai_atlassian_migration_bundle_lib.py scripts/ai-atlassian-seed.py scripts/ai_atlassian_seed_lib.py scripts/ai-atlassian-docs-sync.py scripts/secrets-rotation.py scripts/secrets_rotation_lib.py tests/python/release_tool_test.py tests/python/validate_docs_test.py tests/python/git_signing_mode_test.py tests/python/ai_control_plane_test.py tests/python/ai_session_startup_test.py tests/python/atlassian_platform_test.py tests/python/ai_atlassian_openapi_test.py tests/python/ai_jira_model_test.py tests/python/ai_jira_apply_test.py tests/python/ai_atlassian_backfill_test.py tests/python/ai_atlassian_migration_bundle_test.py tests/python/ai_atlassian_seed_test.py tests/python/secrets_rotation_test.py
 
   test:python:
     desc: Executa a suite Python via pytest no ambiente atual
@@ -755,6 +755,27 @@ tasks:
     dir: '{{.TASKFILE_DIR}}'
     cmds:
       - "bash -lc 'bash ./scripts/run-python.sh ./scripts/ai-control-plane.py show'"
+
+  ai:startup:session:
+    desc: Gera o relatorio operacional de startup/restart da sessao de IA
+    cmds:
+      - task: ai:startup:session:{{if or (eq .OS "Windows_NT") (eq .OS "windows")}}windows{{else}}linux{{end}}
+        vars:
+          OUT: "{{.OUT}}"
+
+  ai:startup:session:windows:
+    desc: Windows - gera o relatorio operacional de startup/restart da sessao de IA
+    platforms: [windows]
+    dir: '{{.TASKFILE_DIR}}'
+    cmds:
+      - "pwsh -NoProfile -File ./scripts/run-ai-startup-session.ps1 -RepoRoot '{{.TASKFILE_DIR}}' -Out '{{default \".cache/ai/startup-session.md\" .OUT}}'"
+
+  ai:startup:session:linux:
+    desc: Linux/WSL - gera o relatorio operacional de startup/restart da sessao de IA
+    platforms: [linux]
+    dir: '{{.TASKFILE_DIR}}'
+    cmds:
+      - "bash -lc 'bash ./scripts/run-python.sh ./scripts/ai-session-startup.py report --repo-root \"{{.TASKFILE_DIR}}\" --out \"{{default \".cache/ai/startup-session.md\" .OUT}}\"'"
 
   ai:1password:ratelimit:
     desc: Exibe o rate limit atual da service account usada pelo 1Password CLI

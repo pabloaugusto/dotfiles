@@ -171,6 +171,18 @@ Referencia operacional das tasks canonicas mais importantes do repositorio.
 - Funcionalidade: exibe o resumo da control plane dev-time em [`config/ai/`](../config/ai/).
 - Uso manual: `task ai:control-plane:show`
 
+### `ai:startup:session`
+
+- Funcionalidade: gera o relatorio operacional de **startup** e **restart** da
+  sessao de IA, resolvendo os arquivos canonicos do manifest e listando os
+  contratos nascidos no chat que ainda aguardam promocao definitiva.
+- Uso manual: `task ai:startup:session`
+- Uso com caminho customizado: `task ai:startup:session OUT=".cache/ai/startup-session.md"`
+- Observacao: a task escreve por padrao o artefato local em
+  `.cache/ai/startup-session.md`, usando como fontes
+  [`docs/AI-STARTUP-GOVERNANCE-MANIFEST.md`](AI-STARTUP-GOVERNANCE-MANIFEST.md)
+  e [`docs/AI-CHAT-CONTRACTS-REGISTER.md`](AI-CHAT-CONTRACTS-REGISTER.md).
+
 ### `ai:1password:ratelimit`
 
 - Funcionalidade: exibe o consumo atual e o restante do rate limit da service

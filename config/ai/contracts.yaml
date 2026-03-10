@@ -1,5 +1,27 @@
 version: 1
 
+startup_governance:
+  zero_context_resume:
+    required: true
+    mandatory_manifest: docs/AI-STARTUP-GOVERNANCE-MANIFEST.md
+    session_runbook: docs/AI-STARTUP-AND-RESTART.md
+    chat_contracts_register: docs/AI-CHAT-CONTRACTS-REGISTER.md
+    mandatory_rules:
+      - read-every-text-file-resolved-by-the-startup-governance-manifest
+      - do-not-operate-by-sampling-memory-or-guessing-after-zero-context-resume
+      - recalculate-open-branches-and-worktrees-before-draining-dirty-tree
+      - cross-check-each-open-trail-with-its-real-jira-context-before-committing
+      - warn-user-when-chat-origin-contracts-still-lack-official-promotion
+      - keep-a-lived-register-of-chat-origin-contracts-not-yet-promoted
+    trigger_examples:
+      - power-outage
+      - codex-crash
+      - cache-clear
+      - session-clear
+      - app-restart
+      - model-restart
+      - worktree-switch-without-reliable-carry-over
+
 backlog:
   system_of_record: jira
   issue_creation_policy: product-owner-only
