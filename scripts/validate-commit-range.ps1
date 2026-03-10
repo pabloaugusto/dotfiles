@@ -18,5 +18,5 @@ if ($LASTEXITCODE -ne 0) {
 	exit $LASTEXITCODE
 }
 
-& (Join-Path $PSScriptRoot 'invoke-python.ps1') -ScriptPath (Join-Path $PSScriptRoot '..\.githooks\conventional_emoji.py') --validate-many-json $payload --require-emoji
+& (Join-Path $PSScriptRoot 'invoke-python.ps1') -ScriptPath (Join-Path $PSScriptRoot '..\.githooks\conventional_emoji.py') --validate-many-json $payload --require-emoji --require-issue-key
 exit $LASTEXITCODE

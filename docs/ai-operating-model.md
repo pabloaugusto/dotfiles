@@ -121,6 +121,22 @@ apenas inline code abre espaco para drift, quebra de navegacao e documentacao
 menos auditavel. Paths locais fora do repo podem permanecer em inline code
 somente quando nao houver destino clicavel razoavel no proprio repositorio.
 
+### 4.4. Higiene Git obrigatoria e rastreabilidade Jira
+
+No fluxo vivo deste repo:
+
+- `Jira` e a fonte primaria do estado operacional
+- [`AI-WIP-TRACKER.md`](AI-WIP-TRACKER.md) funciona como fallback contingencial do repo
+- cada branch, commit e PR precisa apontar para uma unica **issue** Jira real
+- commits devem ser atomicos, contextualizados e preferencialmente auto-testaveis
+- retomada de demanda antiga deve abrir branch nova a partir de `main`, salvo
+  evidencia objetiva de que a branch anterior ainda e a trilha correta
+- branches e worktrees ja absorvidas em `main` precisam ser podadas assim que
+  deixarem de ser necessarias
+
+Essa higiene precisa ter backend real: `task git:governance:check` passa a
+complementar os gates locais de governanca para impedir novo acumulo de arvore.
+
 ### 5. Auditoria exaustiva antes de reuso cross-repo
 
 Quando a tarefa envolver importar, adaptar, comparar ou consolidar contratos de outro repo, a IA nao pode trabalhar por amostragem.
@@ -148,7 +164,7 @@ Sem essa auditoria, o risco e alto de trazer governanca quebrada, testes incompl
 - [`CONTEXT.md`](CONTEXT.md)
 - [`docs/test-strategy.md`](docs/test-strategy.md)
 - [`docs/ai-operating-model.md`](docs/ai-operating-model.md)
-- [`AI-WIP-TRACKER.md`](AI-WIP-TRACKER.md)
+- [`AI-WIP-TRACKER.md`](AI-WIP-TRACKER.md) como fallback contingencial local
 - [`../ROADMAP.md`](../ROADMAP.md)
 - [`ROADMAP-DECISIONS.md`](ROADMAP-DECISIONS.md)
 
@@ -252,6 +268,7 @@ Para evitar ambiguidades e drift:
 - `task ai:review:check`
 - `task ai:eval:smoke`
 - `task ai:lessons:check`
+- `task git:governance:check`
 - `task ai:rules:check`
 - `task ai:install:codex`
 - `task ai:worklog:check`
@@ -259,9 +276,13 @@ Para evitar ambiguidades e drift:
 - `task ci:workflow:sync:check`
 - workflow `AI Governance`
 
-`task ai:worklog:check` tambem atua como guardrail de commit checkpoint entre
+`task ai:worklog:check` tambem atua como guardrail de commit de fechamento entre
 rodadas: se a worktree estiver suja e nao houver item ativo em `Doing`, a
 proxima rodada deve ser bloqueada ate existir commit do contexto anterior.
+
+`task git:governance:check` complementa esse preflight ao falhar quando ainda
+existirem branches ou worktrees locais ja absorvidas em `main` e sem utilidade
+operacional.
 
 Quando houver WIP ativo, o mesmo preflight precisa tratar `concluir_primeiro`
 como concluir ou puxar somente o **work item** minimo que destrava o que ja
@@ -335,7 +356,7 @@ camada visivel correspondente.
 - [`docs/AI-SCRUM-MASTER-LEDGER.md`](docs/AI-SCRUM-MASTER-LEDGER.md)
 - [`docs/atlassian-ia/README.md`](docs/atlassian-ia/README.md) e os arquivos
   desta trilha quando houver estudos, contextos ou planos da camada Atlassian + IA
-- [`AI-WIP-TRACKER.md`](AI-WIP-TRACKER.md)
+- [`AI-WIP-TRACKER.md`](AI-WIP-TRACKER.md) como fallback contingencial local
 - [`../ROADMAP.md`](../ROADMAP.md)
 - [`ROADMAP-DECISIONS.md`](ROADMAP-DECISIONS.md)
 - prompts e docs declarativos do repo
@@ -371,7 +392,7 @@ Como [`df/`](df/) guarda apenas o que sera utilizado na maquina apos o bootstrap
 - [`.agents/registry/`](.agents/registry/), [`.agents/orchestration/`](.agents/orchestration/), [`.agents/rules/`](.agents/rules/) e [`.agents/evals/`](.agents/evals/) guardam a camada declarativa
 - [`.agents/cerimonias/`](.agents/cerimonias/) guarda as definicoes e templates das **cerimonias** ageis
 - [`.codex/README.md`](.codex/README.md) deixa explicito que adaptadores de assistente nao sao fonte de verdade
-- [`AI-WIP-TRACKER.md`](AI-WIP-TRACKER.md) guarda o estado incremental do trabalho de IA
+- [`AI-WIP-TRACKER.md`](AI-WIP-TRACKER.md) guarda o fallback local do estado incremental da IA
 - [`docs/AI-REVIEW-LEDGER.md`](docs/AI-REVIEW-LEDGER.md) guarda os pareceres vivos de revisao especializada por worklog
 - [`config/ai/`](config/ai/) guarda a control plane dev-time de plataformas,
   contratos e optionalidade dos agentes, desacoplada de [`bootstrap/`](bootstrap/)

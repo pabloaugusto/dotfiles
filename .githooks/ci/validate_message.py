@@ -19,7 +19,11 @@ def main(argv: list[str]) -> int:
     parser.add_argument("--context", default="message", help="Contexto da validacao.")
     args = parser.parse_args(argv)
 
-    result = conventional_emoji.validate_message(args.message, require_emoji=True)
+    result = conventional_emoji.validate_message(
+        args.message,
+        require_emoji=True,
+        require_issue_key=True,
+    )
     if result.ok:
         print(f"OK ({args.context})")
         return 0

@@ -24,6 +24,7 @@ startup_governance:
 
 backlog:
   system_of_record: jira
+  fallback_tracker: docs/AI-WIP-TRACKER.md
   issue_creation_policy: product-owner-only
   require_issue_before_execution: true
   pull_model: true
@@ -35,6 +36,22 @@ backlog:
         - pull-unrelated-new-work-while-active-item-remains-blocked
     roadmap_pendente:
       meaning: manter a retomada rastreada no roadmap somente quando a rodada atual realmente nao vai continuar agora
+
+git_governance:
+  source_of_truth: jira
+  fallback_tracker: docs/AI-WIP-TRACKER.md
+  branch_pattern: <type>/<jira-key>-<slug>
+  commit_title_contract: emoji-plus-conventional-plus-single-jira-key
+  pr_title_contract: emoji-plus-conventional-plus-single-jira-key
+  mandatory_rules:
+    - jira-is-primary-system-of-record-for-live-flow
+    - ai-wip-tracker-is-fallback-only
+    - every-commit-must-map-to-one-real-jira-work-item
+    - every-pr-must-map-to-one-real-jira-work-item
+    - commits-must-be-atomic-contextualized-and-preferably-self-testable
+    - resume-old-work-on-a-new-branch-from-main-unless-evidence-keeps-the-existing-branch-valid
+    - prune-unneeded-local-branches-and-worktrees-after-merge
+    - fail-when-local-merged-branches-or-worktrees-remain-without-purpose
 
 documentation:
   system_of_record: confluence

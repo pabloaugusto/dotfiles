@@ -9,8 +9,8 @@ ROOT = pathlib.Path(__file__).resolve().parents[2]
 MODULE_PATH = ROOT / ".githooks" / "conventional_emoji.py"
 
 SPEC = importlib.util.spec_from_file_location("conventional_emoji", MODULE_PATH)
-MODULE = importlib.util.module_from_spec(SPEC)
 assert SPEC and SPEC.loader
+MODULE = importlib.util.module_from_spec(SPEC)
 sys.modules[SPEC.name] = MODULE
 SPEC.loader.exec_module(MODULE)
 
@@ -29,6 +29,24 @@ class ConventionalEmojiTests(unittest.TestCase):
         result = MODULE.validate_message("feat(test-harness): add validator", require_emoji=True)
         self.assertFalse(result.ok)
         self.assertIn("Emoji obrigatorio", result.error)
+
+    def test_rejects_missing_issue_key_when_required(self) -> None:
+        result = MODULE.validate_message(
+            "✨ feat(test-harness): add validator",
+            require_emoji=True,
+            require_issue_key=True,
+        )
+        self.assertFalse(result.ok)
+        self.assertIn("Chave Jira obrigatoria", result.error)
+
+    def test_rejects_multiple_issue_keys_when_required(self) -> None:
+        result = MODULE.validate_message(
+            "✨ feat(test-harness): DOT-130 DOT-131 add validator",
+            require_emoji=True,
+            require_issue_key=True,
+        )
+        self.assertFalse(result.ok)
+        self.assertIn("exatamente uma chave Jira", result.error)
 
     def test_rejects_messages_longer_than_limit(self) -> None:
         description = "a" * 80

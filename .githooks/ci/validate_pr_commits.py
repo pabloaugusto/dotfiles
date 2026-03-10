@@ -79,7 +79,11 @@ def main(argv: list[str]) -> int:
         sha = commit.get("sha", "")[:7]
         message = ((commit.get("commit") or {}).get("message") or "").strip()
         subject = message.splitlines()[0] if message else ""
-        result = conventional_emoji.validate_message(subject, require_emoji=True)
+        result = conventional_emoji.validate_message(
+            subject,
+            require_emoji=True,
+            require_issue_key=True,
+        )
         if not result.ok:
             errors.append(f"- {sha}: {subject}\n  ↳ {result.error}")
 

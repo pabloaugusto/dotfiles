@@ -128,7 +128,7 @@ class AiWorklogTests(unittest.TestCase):
             self.assertIn("concluir_primeiro", payload["resolution_options"])
             self.assertIn("destrava diretamente", payload["resolution_guidance"]["concluir_primeiro"])
 
-    def test_check_requires_checkpoint_commit_when_worktree_dirty_without_doing(self) -> None:
+    def test_check_requires_commit_de_fechamento_when_worktree_dirty_without_doing(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             repo = pathlib.Path(tmp)
             tracker = repo / "tracker.md"
@@ -168,7 +168,10 @@ class AiWorklogTests(unittest.TestCase):
                 check=False,
             )
             self.assertNotEqual(failed.returncode, 0)
-            self.assertIn("Checkpoint commit obrigatorio", f"{failed.stdout}\n{failed.stderr}")
+            self.assertIn(
+                "Commit de fechamento obrigatorio",
+                f"{failed.stdout}\n{failed.stderr}",
+            )
 
     def test_check_allows_dirty_worktree_when_round_is_still_in_doing(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:

@@ -17,7 +17,7 @@ Fonte de verdade tecnica:
 Formato obrigatorio:
 
 ```text
-<emoji> <type>(<scope opcional>): <descricao>
+<emoji> <type>(<scope opcional>): <jira-key> <descricao>
 ```
 
 Regras obrigatorias:
@@ -25,20 +25,23 @@ Regras obrigatorias:
 - emoji semantico obrigatorio
 - `type` precisa existir na biblioteca oficial do repo
 - `scope` e opcional, mas recomendado quando melhora clareza
+- o subject precisa carregar uma unica chave Jira real
 - titulo/subject com maximo recomendado de `72` caracteres
 - descricao curta, objetiva e sem ponto final
 - commit e PR title seguem exatamente o mesmo contrato
+- cada commit deve representar uma unica **issue** Jira real
+- quando possivel, cada commit deve ser auto-testavel
 
 Exemplos validos:
 
 ```text
-✨ feat(test-harness): add branch and commit validators
-🐛 fix(bootstrap): preserve canonical projects path
-📝 docs(git): document semantic emoji policy
-♻️ refactor(taskfile): split conventions checks by platform
-✅ test(python): cover conventional emoji validator
-💚 ci(github): validate pr title and commit range
-🔧 chore(hooks): install local git hooks path
+✨ feat(test-harness): DOT-81 add branch and commit validators
+🐛 fix(bootstrap): DOT-24 preserve canonical projects path
+📝 docs(git): DOT-130 document semantic Jira policy
+♻️ refactor(taskfile): DOT-130 split governance checks by platform
+✅ test(python): DOT-130 cover git governance validator
+💚 ci(github): DOT-117 validate PR title and commit range
+🔧 chore(hooks): DOT-130 install local git hooks path
 ```
 
 ## Biblioteca de tipos e emojis
@@ -72,7 +75,7 @@ Branches nao usam emoji.
 Formato obrigatorio:
 
 ```text
-<type>/<slug>
+<type>/<jira-key>-<slug>
 ```
 
 Tipos aceitos para branch:
@@ -97,24 +100,26 @@ Tipos aceitos para branch:
 Exemplos validos:
 
 ```text
-feat/test-harness-hybrid
-fix/windows-relink-regression
-docs/bootstrap-config-reference
-refactor/bootstrap-path-normalization
-release/governance-foundation
+feat/DOT-81-test-harness-hybrid
+fix/DOT-24-windows-relink-regression
+docs/DOT-130-bootstrap-config-reference
+refactor/DOT-130-bootstrap-path-normalization
+release/DOT-130-governance-foundation
 ```
 
 Excecoes aceitas:
 
 - `dependabot/*`
 - `renovate/*`
+- branches legadas pre-integracao com Jira so permanecem enquanto trilha historica; retomada nova deve nascer de `main` no padrao canonico
 
 ## Regra de contexto
 
 - cada branch deve carregar um unico contexto coerente
 - nao misturar temas independentes na mesma branch
-- commits devem ser pequenos e semanticamente coesos
-- se o contexto mudar de forma relevante, abra outra branch
+- commits devem ser pequenos, semanticamente coesos e ligados a uma unica **issue**
+- quando a demanda antiga precisar ser retomada, abrir branch nova a partir de `main`, salvo evidencia objetiva de que a branch anterior ainda e a trilha correta
+- apos merge ou absorcao em `main`, podar branches e worktrees desnecessarias o quanto antes
 
 ## Validacao local
 
@@ -130,7 +135,8 @@ Validacoes manuais:
 task conventions:check:branch
 task conventions:check:commit
 task conventions:check:commits
-task pr:title:check TITLE="✨ feat(git): add governance"
+task pr:title:check TITLE="✨ feat(git): DOT-130 add governance"
+task git:governance:check
 ```
 
 ## CI
@@ -140,6 +146,7 @@ O repo valida automaticamente:
 - PR title
 - branch name
 - commits do PR
+- chave Jira unica em commit e PR
 - subjects no range de push para `main`
 - testes unitarios Python da governanca
 - close gate de WIP de IA quando aplicavel

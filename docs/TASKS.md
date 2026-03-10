@@ -68,6 +68,14 @@ Referencia operacional das tasks canonicas mais importantes do repositorio.
   via `gh`.
 - Uso manual: `task git:signing:github:ensure`
 
+### `git:governance:check`
+
+- Funcionalidade: valida higiene Git local e falha quando ainda existirem
+  branches ou worktrees ja absorvidas em `main` e sem proposito operacional.
+- Uso manual: `task git:governance:check`
+- Observacao: o gate trata `main` e a branch atual como trilhas protegidas do
+  preflight e existe para evitar novo acumulo de arvore apos merge.
+
 ### `secrets:rotation:preflight`
 
 - Funcionalidade: executa preflight nao-destrutivo da trilha canonica de
@@ -157,11 +165,15 @@ Referencia operacional das tasks canonicas mais importantes do repositorio.
 
 - Funcionalidade: valida a camada declarativa de IA no Linux e no CI.
 - Uso manual: `task ai:validate:linux`
+- Observacao: a task inclui tambem `git:governance:check` para endurecer a
+  higiene de branches e worktrees locais.
 
 ### `ai:validate:windows`
 
 - Funcionalidade: valida a camada declarativa de IA no Windows.
 - Uso manual: `task ai:validate:windows`
+- Observacao: a task inclui tambem `git:governance:check` para endurecer a
+  higiene de branches e worktrees locais.
 
 ### `ai:eval:smoke`
 
@@ -288,6 +300,8 @@ Referencia operacional das tasks canonicas mais importantes do repositorio.
   worktree estiver suja sem item ativo em `Doing`.
 - Observacao: quando existir WIP ativo, `concluir_primeiro` significa concluir
   ou destravar primeiro, e nao puxar demanda nova sem relacao com esse WIP.
+- Observacao: a task executa tambem `git:governance:check`, para falhar cedo
+  quando ja existirem branches ou worktrees residuais absorvidas em `main`.
 - Uso manual: `task ai:worklog:check`
 
 ### `ai:worklog:done`
