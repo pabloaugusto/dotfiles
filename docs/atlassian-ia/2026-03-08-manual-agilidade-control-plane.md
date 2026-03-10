@@ -264,20 +264,23 @@ Um item so entra em `Done` quando tiver:
 - implementacao concluida
 - evidencias minimas registradas
 - validacao de QA ou n/a explicito
-- review tecnico ou n/a explicito
+- review tecnico ou n/a explicito, com aprovacao final do `ai-tech-lead`
+  quando houver PR ou origem equivalente
 - documentacao linkada ou n/a explicito
 - comentario final de handoff/encerramento
 
 ## Modelo de review
 
-Para manter alta qualidade sem transformar o `Tech Lead` em gargalo, o modelo
+Para manter alta qualidade com aprovacao tecnica oficial rastreavel, o modelo
 adotado passa a ser:
 
 - revisores especialistas por familia de arquivo fazem a revisao tecnica profunda
 - `ai-reviewer` atua como gate transversal, consolidando pareceres quando houver
   multiplas linguagens, risco sistemico ou necessidade de aprovacao cruzada
-- `ai-tech-lead` continua dono de coerencia tecnica, decomposicao e excecoes,
-  mas nao funciona como reviewer universal de toda mudanca
+- `ai-tech-lead` atua como reviewer obrigatorio e aprovador oficial de todo PR
+  ou origem equivalente, usando os pareceres especializados como base
+- a revisao obrigatoria do `ai-tech-lead` nao substitui a revisao profunda por
+  familia de arquivo
 
 Especializacoes minimas:
 

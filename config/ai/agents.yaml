@@ -44,6 +44,9 @@ roles:
       - decomposition
       - handoff
       - technical-direction
+      - mandatory-pr-review
+      - official-review-approval
+      - origin-review-equivalent
 
   ai-developer-python:
     enabled: true

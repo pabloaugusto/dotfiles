@@ -109,13 +109,14 @@ Essa hierarquia substitui o uso excessivo de `Relates` para agrupamento.
 
 ## Regra de revisao
 
-- `ai-tech-lead` nao deve virar gargalo como reviewer universal
-- revisao profunda de codigo e contratos deve ser feita por revisores especialistas
-  da familia afetada
+- `ai-tech-lead` e reviewer obrigatorio e aprovador oficial de todo PR ou
+  origem equivalente
+- revisao profunda de codigo e contratos continua sendo feita por revisores
+  especialistas da familia afetada
 - `ai-reviewer` fica como gate transversal para risco cross-cutting, multiplas
   linguagens ou consolidacao final de pareceres
 - quando o escopo tocar mais de uma familia relevante, as revisoes especializadas
-  podem acontecer em paralelo antes do fechamento final
+  podem acontecer em paralelo antes do fechamento final do `ai-tech-lead`
 
 Especializacoes minimas do piloto:
 

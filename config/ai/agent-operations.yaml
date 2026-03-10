@@ -243,22 +243,35 @@ roles:
 
   ai-tech-lead:
     profile: governance-common
+    decision_policy: tech-lead-review-policy
     jira:
       primary_issue_actions:
         - decompor trabalho em subtasks
         - coordenar handoffs entre dev, QA, review e docs
         - preparar insumos tecnicos para itens em Backlog e Refinement
+        - revisar todo PR e origem equivalente antes da aprovacao final
       transitions_owned:
         - Ready -> Doing
         - Doing -> Paused
         - Paused -> Doing
         - Changes Requested -> Doing
+        - Review -> Done
+        - Review -> Changes Requested
       required_comment_types:
         - progress-update
         - technical-decision
         - blocker
+        - review-feedback
+        - approval
       required_evidence:
         - plano tecnico, subtasks criadas, riscos e dependencias mapeadas
+        - links de PR, reviews, pareceres especializados ou origem equivalente
+    review_authority:
+      mandatory_for:
+        - pull-request
+        - equivalent-origin-review
+      final_decision: true
+      specialist_reviews_remain_required: true
     confluence:
       pages_owned:
         - implementation-playbooks
@@ -269,9 +282,15 @@ roles:
       - revisar issue pronta para execucao
       - quebrar o escopo em subtasks quando necessario
       - registrar plano tecnico e evidencias do handoff no Jira
+      - revisar toda mudanca em Review com base nos pareceres especializados e no artefato oficial de review
       - mover item interrompido de Doing para Paused quando a execucao parar
       - garantir links para playbooks e ADRs no Confluence
+      - aprovar ou reprovar o PR final conforme os criterios de qualidade do repo
       - definir o developer ou papel executor seguinte
+    operating_rules:
+      - tech lead revisa todo PR e origem equivalente antes de Done
+      - revisao obrigatoria do tech lead nao substitui revisores especialistas por familia
+      - aprovacao final precisa citar o artefato oficial de review e os pareceres aplicaveis
 
   ai-developer-python:
     profile: developer-common
