@@ -26,6 +26,8 @@ de runtime Windows/WSL, tipagem, testabilidade e regressao.
 - parecer de aprovacao ou reprovacao
 - lista objetiva de riscos e regresses
 - validacoes Python obrigatorias ou adicionais
+- payload estruturado aderente ao schema
+  [`config/ai/review-output.schema.json`](../../config/ai/review-output.schema.json)
 
 ## Fluxo
 
@@ -41,6 +43,12 @@ de runtime Windows/WSL, tipagem, testabilidade e regressao.
    comentario, docs, mensagens de erro, help de CLI ou identificadores legiveis.
 6. Registrar o parecer final em [`docs/AI-REVIEW-LEDGER.md`](../../docs/AI-REVIEW-LEDGER.md)
    via `task ai:review:record`.
+7. Sustentar a decisao com base no blueprint
+   [`docs/atlassian-ia/artifacts/python-quality-review-agent.md`](../../docs/atlassian-ia/artifacts/python-quality-review-agent.md),
+   no catalogo normativo
+   [`docs/atlassian-ia/artifacts/reviewer-standards-catalog.md`](../../docs/atlassian-ia/artifacts/reviewer-standards-catalog.md)
+   e na politica de decisao
+   [`docs/atlassian-ia/artifacts/reviewer-decision-model.md`](../../docs/atlassian-ia/artifacts/reviewer-decision-model.md).
 
 ## Guardrails
 
