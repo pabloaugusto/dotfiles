@@ -110,9 +110,23 @@ workflow:
     - do-not-pull-unrelated-new-work-while-blocked-active-item-exists
     - status-represents-flow-phase
     - current-agent-role-represents-active-ownership
+    - board-must-be-read-right-to-left
+    - finish-before-start-is-mandatory
+    - idle-agents-must-attack-rightmost-finishable-work
     - only-ready-can-be-pulled
     - only-one-active-doing-item-per-agent
     - scrum-master-must-monitor-board-wip-communication-and-ceremony-compliance
+  board_operation:
+    reading_order: right-to-left
+    pull_strategy: finish-before-start
+    dispatch_owner_role: ai-scrum-master
+    capacity_partner_role: ai-engineering-manager
+    priority_ladder:
+      - rightmost-unblocked-item-first
+      - advance-testing-review-done-before-ready
+      - delegate-idle-agents-to-finishable-work
+      - treat-stalled-doing-before-pulling-backlog
+      - pull-from-ready-only-when-no-rightward-advance-is-possible
 
 agent_activity:
   system_of_record:

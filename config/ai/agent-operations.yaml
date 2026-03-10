@@ -186,6 +186,7 @@ roles:
     jira:
       primary_issue_actions:
         - fiscalizar board, WIP, ownership, handoffs e comentarios
+        - ler o board da direita para a esquerda e priorizar itens mais proximos de Done
         - garantir aderencia ao processo agil, aos contratos e as cerimonias
         - abrir ou exigir bug de governanca quando a anomalia persistir
       transitions_owned:
@@ -208,6 +209,8 @@ roles:
         - registrar backlog de anomalias sistemicas e seu plano de acao
     operating_steps:
       - recalcular board, WIP, ownership, comentarios, branches e worktrees relevantes
+      - ler o board da direita para a esquerda antes de sugerir nova puxada
+      - priorizar agentes ociosos para o item mais a direita com avanco real possivel
       - recarregar os contratos e artefatos vivos antes de fiscalizar a rodada
       - carregar a definicao de cerimonia em .agents/cerimonias antes de executar o ritual correspondente
       - registrar no docs/AI-SCRUM-MASTER-LEDGER.md a inconformidade ou cerimonia com impacto, acao corretiva e resultado
@@ -253,6 +256,7 @@ roles:
       primary_issue_actions:
         - gerir capacidade, riscos, bloqueios e saude operacional do trabalho
         - replanejar throughput, dependencias e escalacoes quando necessario
+        - realocar agentes ociosos para itens mais a direita quando houver avanco real possivel
         - estimular e coordenar enriquecimento proativo do backlog e refinement
       transitions_owned:
         - Doing -> Paused
@@ -272,7 +276,8 @@ roles:
     operating_steps:
       - inspecionar backlog e refinement para acionar discovery tecnico antes de o item ser puxado
       - inspecionar fila, capacidade, dependencias e gargalos
-      - coordenar com o Scrum Master a leitura do board e a saude do fluxo
+      - coordenar com o Scrum Master a leitura do board da direita para a esquerda
+      - tentar fazer a equipe comecar a terminar antes de autorizar nova puxada
       - quando houver bloqueio entre issues, priorizar o work item desbloqueador antes de qualquer puxada sem relacao
       - registrar comentario operacional com risco, impacto e evidencia
       - pausar ou retomar item interrompido quando houver espera operacional real

@@ -20,6 +20,14 @@ Registro consultivo do agente Pascoalete para ortografia e higiene vocabular.
 <!-- ai-orthography:records:start -->
 | Data/Hora UTC | Worklog ID | Revisor | Status | Arquivo | Achados | Evidencia |
 | --- | --- | --- | --- | --- | --- | --- |
+| 2026-03-09 22:58 UTC | DOT-119 | pascoalete | reprovado | tests/python/ai_assets_validator_test.py | possivel, LICOES, atlassian, Validacao, LICOES, Orquestracao, evals, Integracoes (+4) | task spell:check |
+| 2026-03-09 22:58 UTC | DOT-119 | pascoalete | reprovado | scripts/validate-ai-assets.py | execucao, evals, LICOES, evals, evals, evals, evals, atlassian (+57) | task spell:check |
+| 2026-03-09 22:58 UTC | DOT-119 | pascoalete | reprovado | docs/ai-operating-model.md | reutilizavel, testavel, worktree, Principios, Instrucoes, instrucoes, estaveis, Especializacao (+138) | task spell:check |
+| 2026-03-09 22:58 UTC | DOT-119 | pascoalete | reprovado | config/ai/jira-model.yaml | atlassian, finishable, tecnica, governanca, regressao, decomposicao, canonico, autonomo (+5) | task spell:check |
+| 2026-03-09 22:58 UTC | DOT-119 | pascoalete | reprovado | config/ai/contracts.yaml | descricao, tecnico, criterios, aceitacao, documentacao, finishable, finishable, Acao (+1) | task spell:check |
+| 2026-03-09 22:58 UTC | DOT-119 | pascoalete | reprovado | config/ai/agent-operations.yaml | atlassian, decisao, documentacao, linkar, mudanca, atualizacao, necessario, linkar (+117) | task spell:check |
+| 2026-03-09 22:58 UTC | DOT-119 | pascoalete | reprovado | .agents/cards/ai-scrum-master.md | agil, aderencia, comunicacao, fiscalizacao, comunicacao, escalacao, governanca, worktrees (+51) | task spell:check |
+| 2026-03-09 22:58 UTC | DOT-119 | pascoalete | reprovado | .agents/cards/ai-engineering-manager.md | escalacoes, colaboracao, avanco, possivel, saturacao, escalacao, usuario, Saidas (+21) | task spell:check |
 | 2026-03-10 17:10 UTC | DOT-121 | pascoalete | reprovado | docs/AI-REVIEW-LEDGER.md | revisao, mudanca, codigo, automacao, LICOES, regressao, governanca, atlassian (+30) | task spell:check |
 | 2026-03-09 22:26 UTC | DOT-121 | pascoalete | reprovado | tests/python/ai_assets_validator_test.py | possivel, LICOES, atlassian, Validacao, LICOES, Orquestracao, evals, Integracoes (+4) | task spell:check |
 | 2026-03-09 22:26 UTC | DOT-121 | pascoalete | reprovado | scripts/validate-ai-assets.py | execucao, evals, LICOES, evals, evals, evals, evals, atlassian (+51) | task spell:check |

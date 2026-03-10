@@ -16,6 +16,12 @@ project:
     type: kanban
     project_key: DOT
     layout_confirmed: true
+    reading_order: right-to-left
+    operating_policy:
+      dispatch_owner_role: ai-scrum-master
+      capacity_partner_role: ai-engineering-manager
+      pull_precondition: no-rightward-advance-available
+      idle_agent_policy: assign-rightmost-finishable-item-first
     card_layout_fields:
       - Current Agent Role
       - Next Required Role

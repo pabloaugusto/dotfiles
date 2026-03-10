@@ -251,6 +251,23 @@ continuamente **board**, **WIP**, ownership, comunicacao e **cerimonias**.
 Sua efetividade minima fica rastreada no
 [`docs/AI-SCRUM-MASTER-LEDGER.md`](AI-SCRUM-MASTER-LEDGER.md).
 
+## Politica de leitura do board
+
+O **board** canonico e lido da direita para a esquerda:
+**Done** <- **Review** <- **Testing** <- **Doing** <- **Ready** <-
+**Refinement** <- **Backlog**.
+
+A regra operacional e **comecar a terminar**: antes de puxar algo novo de
+**Ready** ou **Backlog**, o time precisa tentar mover o item mais a direita com
+avanco real possivel.
+
+Quando houver agentes ociosos:
+
+- o **Scrum Master** identifica o item mais a direita destravavel
+- o **Engenheiro** coordena capacidade, ownership e redistribuicao
+- so sem possibilidade real de avancar para a direita e permitido puxar novo
+  trabalho
+
 ## Politica de versionamento
 
 ### Versionar
