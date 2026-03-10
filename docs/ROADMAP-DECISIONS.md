@@ -1,6 +1,6 @@
 # Decisoes do Roadmap
 
-Atualizado em: 2026-03-10 16:12 UTC
+Atualizado em: 2026-03-10 16:50 UTC
 Ciclo ativo: 2026-Q1
 
 Registro das decisoes humanas por ciclo e governanca de sugestoes.
@@ -12,6 +12,7 @@ Use status: `pendente`, `aceita`, `descartada`, `aplicar_depois`.
 <!-- roadmap:suggestions:start -->
 | ID | Tipo | Descricao | Status | RM | Captura | Atualizacao |
 | --- | --- | --- | --- | --- | --- | --- |
+| SG-ORTHO-DOT-124 | fix | Corrigir pendencias ortograficas remanescentes do worklog `DOT-124` em docs/AI-REVIEW-LEDGER.md | aceita |  | 2026-03-09 | 2026-03-10 |
 | SG-ORTHO-DOT-115 | fix | Corrigir pendencias ortograficas remanescentes do worklog `DOT-115` em .agents/orchestration/routing-policy.yaml, scripts/ai_dispatch_lib.py | aceita |  | 2026-03-09 | 2026-03-10 |
 | SG-ORTHO-DOT-128 | fix | Corrigir pendencias ortograficas remanescentes do worklog `DOT-128` em bootstrap/bootstrap-config.ps1, bootstrap/bootstrap-ubuntu-wsl.sh, bootstrap/user-config.yaml.tpl, config/... | aceita |  | 2026-03-10 | 2026-03-10 |
 | SG-ORTHO-DOT-127 | fix | Corrigir pendencias ortograficas remanescentes do worklog `DOT-127` em .agents/cards/governador-continuidade-wip.md, .agents/cards/orquestrador-delegacao.md, .agents/skills/task... | aceita |  | 2026-03-10 | 2026-03-10 |
@@ -64,6 +65,8 @@ Use status: `pendente`, `aceita`, `descartada`, `aplicar_depois`.
 ## Registro automatico
 
 <!-- roadmap:autolog:start -->
+- 2026-03-10 16:50 UTC | decisao=accepted | horizonte=next | tipo=fix | item=Corrigir pendencias ortograficas remanescentes do worklog `DOT-124` em docs/AI-REVIEW-LEDGER.md | notas=Pendencia automatica criada por Pascoalete apos review consultivo reprovado sem correcao automatica.
+- 2026-03-09 22:11 UTC | decisao=accepted | horizonte=next | tipo=fix | item=Corrigir pendencias ortograficas remanescentes do worklog `DOT-124` em .agents/cards/ai-scrum-master.md, .agents/registry/ai-scrum-master.toml, config/ai/agent-operations.yaml,... | notas=Pendencia automatica criada por Pascoalete apos review consultivo reprovado sem correcao automatica.
 - 2026-03-10 16:12 UTC | decisao=accepted | horizonte=next | tipo=fix | item=Corrigir pendencias ortograficas remanescentes do worklog `DOT-115` em .agents/orchestration/routing-policy.yaml, scripts/ai_dispatch_lib.py | notas=Pendencia automatica criada por Pascoalete apos review consultivo reprovado sem correcao automatica.
 - 2026-03-09 21:21 UTC | decisao=accepted | horizonte=next | tipo=fix | item=Corrigir pendencias ortograficas remanescentes do worklog `DOT-115` em .agents/cards/ai-engineering-manager.md, .agents/cards/ai-scrum-master.md, .agents/config.toml, .agents/ev... | notas=Pendencia automatica criada por Pascoalete apos review consultivo reprovado sem correcao automatica.
 - 2026-03-10 14:17 UTC | decisao=accepted | horizonte=next | tipo=fix | item=Corrigir pendencias ortograficas remanescentes do worklog `DOT-128` em bootstrap/bootstrap-config.ps1, bootstrap/bootstrap-ubuntu-wsl.sh, bootstrap/user-config.yaml.tpl, config/... | notas=Pendencia automatica criada por Pascoalete apos review consultivo reprovado sem correcao automatica.

@@ -7,7 +7,7 @@ Catalogo humano dos papeis permanentes de IA deste repo.
 - `repo-governance-authority`: sempre
 - `execution-worklog-governance-owner`: sempre
 - `ai-scrum-master`: sempre, como gate global de **board**, **WIP**,
-  comunicacao, ownership e **cerimonias**
+  comunicacao, ownership, ledger de enforcement e **cerimonias**
 - `architecture-modernization-authority`: sempre, em paralelo
 - `critical-integrations-guardian`: obrigatorio quando a mudanca tocar bootstrap, auth, secrets, CI, CLI, sync ou ambiente
 - `secrets-rotation-governor`: obrigatorio quando a mudanca tocar rotacao, backup, expiracao, revogacao ou inventario de credenciais/chaves
@@ -38,7 +38,7 @@ Catalogo humano dos papeis permanentes de IA deste repo.
 | Papel | Cartao | Agente declarativo | Skill principal | Quando entra |
 | --- | --- | --- | --- | --- |
 | AI Product Owner | [`.agents/cards/ai-product-owner.md`](../.agents/cards/ai-product-owner.md) | `ai-product-owner` | `$task-routing-and-decomposition` | intake, backlog, prioridade, refinement, ready e timeline |
-| Scrum Master | [`.agents/cards/ai-scrum-master.md`](../.agents/cards/ai-scrum-master.md) | `ai-scrum-master` | `$wip-continuity-governance` | gate global de **board**, **WIP**, ownership, comunicacao, conformidade de agentes e **cerimonias** |
+| Scrum Master | [`.agents/cards/ai-scrum-master.md`](../.agents/cards/ai-scrum-master.md) | `ai-scrum-master` | `$wip-continuity-governance` | gate global de **board**, **WIP**, ownership, comunicacao, conformidade de agentes, ledger de enforcement e **cerimonias** |
 | AI Engineering Architect | [`.agents/cards/ai-engineering-architect.md`](../.agents/cards/ai-engineering-architect.md) | `ai-engineering-architect` | `$dotfiles-architecture-modernization` | discovery tecnico, ADR, enriquecimento de backlog e refinement |
 | AI Engineering Manager | [`.agents/cards/ai-engineering-manager.md`](../.agents/cards/ai-engineering-manager.md) | `ai-engineering-manager` | `$wip-continuity-governance` | capacidade, gargalos, pausas, riscos, bloqueios e escalacoes |
 | AI Tech Lead | [`.agents/cards/ai-tech-lead.md`](../.agents/cards/ai-tech-lead.md) | `ai-tech-lead` | `$task-routing-and-decomposition` | decomposicao, handoff tecnico e coordenacao de execucao |

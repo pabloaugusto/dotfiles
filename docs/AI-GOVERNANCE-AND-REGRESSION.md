@@ -28,12 +28,18 @@ task test:unit:python:windows
 - falta dos gates obrigatorios de arquitetura, **Scrum Master** e integracoes criticas
 - datasets de roteamento ou governanca sem cobertura executavel
 - drift entre workflows, Taskfile e catalogos [`docs/TASKS.md`](docs/TASKS.md) e [`docs/WORKFLOWS.md`](docs/WORKFLOWS.md)
+- ausencia do [`docs/AI-SCRUM-MASTER-LEDGER.md`](AI-SCRUM-MASTER-LEDGER.md)
+  ou dos seus marcadores estruturais
 
 ## Regras perenes
 
 - `architecture-modernization-authority` revisa toda analise substantiva.
 - `ai-scrum-master` fiscaliza continuamente **board**, **WIP**, ownership,
   comunicacao, conformidade dos agentes e **cerimonias**.
+- toda inconformidade relevante do `ai-scrum-master` precisa entrar no
+  [`docs/AI-SCRUM-MASTER-LEDGER.md`](AI-SCRUM-MASTER-LEDGER.md) e, se nao for
+  resolvida na hora, precisa apontar para `Bug` ou `Task` de governanca no
+  `Jira`.
 - `critical-integrations-guardian` protege toda mudanca sensivel a bootstrap, auth, secrets, CI, sync ou CLI critica.
 - `secrets-rotation-governor` protege toda mudanca de lifecycle de credenciais e exige ordem segura de substituicao.
 - `pascoalete` revisa ortografia tecnica e higiene do dicionario `cspell` em modo consultivo; quando reprova e a rodada nao corrige, a falha deve gerar pendencia rastreavel no backlog vigente.

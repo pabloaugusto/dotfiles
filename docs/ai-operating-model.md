@@ -239,6 +239,8 @@ Esses documentos nao sao "marketing" do sistema; eles sao contratos de operacao 
 O gate global de **Scrum Master** faz parte dessa camada: ele precisa existir na
 orquestracao, nos catalogos, nas evals e nos contratos para fiscalizar
 continuamente **board**, **WIP**, ownership, comunicacao e **cerimonias**.
+Sua efetividade minima fica rastreada no
+[`docs/AI-SCRUM-MASTER-LEDGER.md`](AI-SCRUM-MASTER-LEDGER.md).
 
 ## Politica de versionamento
 
@@ -249,6 +251,7 @@ continuamente **board**, **WIP**, ownership, comunicacao e **cerimonias**.
 - [`.agents/`](.agents/) e sua arvore declarativa
 - [`docs/AI-SOURCE-AUDIT.md`](docs/AI-SOURCE-AUDIT.md)
 - [`docs/AI-REVIEW-LEDGER.md`](docs/AI-REVIEW-LEDGER.md)
+- [`docs/AI-SCRUM-MASTER-LEDGER.md`](docs/AI-SCRUM-MASTER-LEDGER.md)
 - [`docs/atlassian-ia/README.md`](docs/atlassian-ia/README.md) e os arquivos
   desta trilha quando houver estudos, contextos ou planos da camada Atlassian + IA
 - [`AI-WIP-TRACKER.md`](AI-WIP-TRACKER.md)

@@ -20,6 +20,20 @@ Registro consultivo do agente Pascoalete para ortografia e higiene vocabular.
 <!-- ai-orthography:records:start -->
 | Data/Hora UTC | Worklog ID | Revisor | Status | Arquivo | Achados | Evidencia |
 | --- | --- | --- | --- | --- | --- | --- |
+| 2026-03-10 16:50 UTC | DOT-124 | pascoalete | reprovado | docs/AI-REVIEW-LEDGER.md | revisao, mudanca, codigo, automacao, LICOES, regressao, atlassian, catalogos (+29) | task spell:check |
+| 2026-03-09 22:11 UTC | DOT-124 | pascoalete | reprovado | tests/python/ai_assets_validator_test.py | possivel, LICOES, atlassian, Validacao, LICOES, Orquestracao, evals, Integracoes (+4) | task spell:check |
+| 2026-03-09 22:11 UTC | DOT-124 | pascoalete | reprovado | scripts/validate-ai-assets.py | execucao, evals, LICOES, evals, evals, evals, evals, atlassian (+49) | task spell:check |
+| 2026-03-09 22:11 UTC | DOT-124 | pascoalete | reprovado | docs/atlassian-ia/artifacts/agent-operations.md | canonica, Sincronizacao, governanca, comentarios, tecnicos, atuacao, documentacao, tambem (+56) | task spell:check |
+| 2026-03-09 22:11 UTC | DOT-124 | pascoalete | reprovado | docs/ai-operating-model.md | reutilizavel, testavel, worktree, Principios, Instrucoes, instrucoes, estaveis, Especializacao (+126) | task spell:check |
+| 2026-03-09 22:11 UTC | DOT-124 | pascoalete | reprovado | docs/AI-SCRUM-MASTER-LEDGER.md | canonico, correcao, indice, especificos, governanca, atuacao, tambem, inconformities (+7) | task spell:check |
+| 2026-03-09 22:11 UTC | DOT-124 | pascoalete | reprovado | docs/README.md | documentacoes, Operacao, migracao, canonicas, automacao, tecnico, manutencao, Governanca (+19) | task spell:check |
+| 2026-03-09 22:11 UTC | DOT-124 | pascoalete | reprovado | docs/AI-GOVERNANCE-AND-REGRESSION.md | Principios, governanca, licoes, importacao, minimo, concluido, revisao, LICOES (+27) | task spell:check |
+| 2026-03-09 22:11 UTC | DOT-124 | pascoalete | reprovado | docs/AI-AGENTS-CATALOG.md | obrigatorios, comunicacao, obrigatorio, mudanca, obrigatorio, mudanca, rotacao, expiracao (+58) | task spell:check |
+| 2026-03-09 22:11 UTC | DOT-124 | pascoalete | reprovado | config/ai/contracts.yaml | descricao, tecnico, criterios, aceitacao, documentacao, Acao | task spell:check |
+| 2026-03-09 22:11 UTC | DOT-124 | pascoalete | reprovado | config/ai/agents.yaml | figma | task spell:check |
+| 2026-03-09 22:11 UTC | DOT-124 | pascoalete | reprovado | config/ai/agent-operations.yaml | atlassian, decisao, documentacao, linkar, mudanca, atualizacao, necessario, linkar (+111) | task spell:check |
+| 2026-03-09 22:11 UTC | DOT-124 | pascoalete | reprovado | .agents/registry/ai-scrum-master.toml | comunicacao | task spell:check |
+| 2026-03-09 22:11 UTC | DOT-124 | pascoalete | reprovado | .agents/cards/ai-scrum-master.md | agil, aderencia, comunicacao, fiscalizacao, comunicacao, escalacao, governanca, worktrees (+41) | task spell:check |
 | 2026-03-10 16:12 UTC | DOT-115 | pascoalete | reprovado | scripts/ai_dispatch_lib.py | execucao, minimo, Secao, condicoes, Acao, Semantica, acao | task spell:check |
 | 2026-03-10 16:12 UTC | DOT-115 | pascoalete | reprovado | .agents/orchestration/routing-policy.yaml | LICOES, pascoalete, governanca, pascoalete, agil, pascoalete, pascoalete, LICOES (+1) | task spell:check |
 | 2026-03-09 21:21 UTC | DOT-115 | pascoalete | reprovado | scripts/validate-ai-assets.py | execucao, evals, LICOES, evals, evals, evals, evals, atlassian (+47) | task spell:check |

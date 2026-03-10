@@ -118,6 +118,8 @@ Essa visibilidade em chat:
 
 - fiscaliza **board**, **WIP**, ownership, handoffs e comentarios no `Jira`
 - garante aderencia ao processo agil, aos contratos e as **cerimonias**
+- registra cada inconformidade relevante e cada **cerimonia** executada no
+  [`docs/AI-SCRUM-MASTER-LEDGER.md`](../../AI-SCRUM-MASTER-LEDGER.md)
 - abre ou exige bug de governanca quando a anomalia persistir
 - registra evidencia objetiva e o papel responsavel por cada desvio
 

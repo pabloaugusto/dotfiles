@@ -29,6 +29,7 @@ class ValidateAiAssetsTests(unittest.TestCase):
         self.assertIn("docs/AI-AGENTS-CATALOG.md", module.REQUIRED_FILES)
         self.assertIn("docs/AI-CHAT-CONTRACTS-REGISTER.md", module.REQUIRED_FILES)
         self.assertIn("docs/AI-ORTHOGRAPHY-LEDGER.md", module.REQUIRED_FILES)
+        self.assertIn("docs/AI-SCRUM-MASTER-LEDGER.md", module.REQUIRED_FILES)
         self.assertIn("docs/AI-SOURCE-AUDIT.md", module.REQUIRED_FILES)
         self.assertIn("docs/AI-STARTUP-AND-RESTART.md", module.REQUIRED_FILES)
         self.assertIn("docs/AI-STARTUP-GOVERNANCE-MANIFEST.md", module.REQUIRED_FILES)

@@ -37,6 +37,7 @@ REQUIRED_FILES = [
     "docs/AI-GOVERNANCE-AND-REGRESSION.md",
     "docs/AI-ORTHOGRAPHY-LEDGER.md",
     "docs/AI-REVIEW-LEDGER.md",
+    "docs/AI-SCRUM-MASTER-LEDGER.md",
     "docs/AI-SKILLS-CATALOG.md",
     "docs/AI-STARTUP-AND-RESTART.md",
     "docs/AI-STARTUP-GOVERNANCE-MANIFEST.md",
@@ -133,6 +134,13 @@ LESSONS_MARKERS = [
     "<!-- ai-lessons:catalog:end -->",
     "<!-- ai-lessons:reviews:start -->",
     "<!-- ai-lessons:reviews:end -->",
+]
+
+SCRUM_MASTER_MARKERS = [
+    "<!-- ai-scrum-master:inconformities:start -->",
+    "<!-- ai-scrum-master:inconformities:end -->",
+    "<!-- ai-scrum-master:ceremonies:start -->",
+    "<!-- ai-scrum-master:ceremonies:end -->",
 ]
 
 REQUIRED_AGENT_HEADINGS = [
@@ -616,6 +624,15 @@ def main(argv: list[str]) -> int:
             decisions_path.read_text(encoding="utf-8"),
             DECISIONS_MARKERS,
             "docs/ROADMAP-DECISIONS.md",
+            failures,
+        )
+
+    scrum_master_ledger_path = repo_root / "docs" / "AI-SCRUM-MASTER-LEDGER.md"
+    if scrum_master_ledger_path.is_file():
+        require_markers(
+            scrum_master_ledger_path.read_text(encoding="utf-8"),
+            SCRUM_MASTER_MARKERS,
+            "docs/AI-SCRUM-MASTER-LEDGER.md",
             failures,
         )
 
