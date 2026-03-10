@@ -29,7 +29,8 @@ perder continuidade confiavel.
 5. Consultar o `Jira` como fonte primaria do backlog, do **WIP** e da ordem de
    prioridade.
 6. Ler o **board** da direita para a esquerda, tentando primeiro destravar ou
-   concluir o que estiver mais perto de terminar.
+   concluir o que estiver mais perto de terminar, e puxando novo **work item**
+   apenas quando ele for o desbloqueador direto do WIP ativo.
 7. Cruzar cada trilha local aberta com seu **work item** dono antes de decidir
    commit, push, **PR** ou redistribuicao de alteracoes.
 8. Avisar o usuario se houver contratos nascidos no chat ainda nao perenizados,

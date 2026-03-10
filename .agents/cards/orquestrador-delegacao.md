@@ -35,13 +35,17 @@ Orquestrar intake, roteamento, decomposicao e delegacao de trabalho de IA com ba
 2. Ler capability matrix, routing policy e catalogos.
 3. Definir agentes primarios, suporte e gates obrigatorios.
 4. Conferir se a delegacao respeita backlog, roadmap e worklog vivos.
-5. Materializar `task card` e `delegation plan` de forma reproduzivel.
-6. Encaminhar gaps para o roadmap quando nao entrarem agora.
+5. Se houver WIP ativo bloqueado, priorizar o work item desbloqueador minimo
+   antes de sugerir nova puxada sem relacao.
+6. Materializar `task card` e `delegation plan` de forma reproduzivel.
+7. Encaminhar gaps para o roadmap quando nao entrarem agora.
 
 ## Guardrails
 
 - Nao rotear por amostragem.
 - Nao ignorar gates obrigatorios de arquitetura, continuidade e integracoes criticas.
+- Nao sugerir demanda nova sem relacao quando ja existir WIP ativo com
+  desbloqueio direto conhecido.
 - Nao gerar plano sem validar paridade entre workflow, task e docs.
 
 ## Validacao recomendada

@@ -28,6 +28,13 @@ backlog:
   require_issue_before_execution: true
   pull_model: true
   subtask_creation_policy: any-authorized-agent
+  pending_action_policy:
+    concluir_primeiro:
+      meaning: concluir o item em curso ou puxar apenas o work item minimo que o destrava diretamente
+      forbids:
+        - pull-unrelated-new-work-while-active-item-remains-blocked
+    roadmap_pendente:
+      meaning: manter a retomada rastreada no roadmap somente quando a rodada atual realmente nao vai continuar agora
 
 documentation:
   system_of_record: confluence
@@ -96,6 +103,11 @@ workflow:
     - approval
     - blocker
     - schema-artifact
+  operating_rules:
+    - board-read-order-is-right-to-left
+    - prioritize-finishing-or-directly-unblocking-active-work-before-pulling-new-work
+    - direct-unblocking-work-item-may-be-pulled-when-it-is-the-minimal-dependency-of-active-work
+    - do-not-pull-unrelated-new-work-while-blocked-active-item-exists
 
 agent_activity:
   system_of_record:

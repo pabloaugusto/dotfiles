@@ -7,9 +7,11 @@ Fonte de verdade operacional para continuidade de tarefas dos agentes de IA.
 ## Regras operacionais
 
 - Toda solicitacao acionavel deve passar por preflight de pendencias.
-- Se houver itens em `Doing`, perguntar ao usuario:
-  - concluir pendencias antes (`concluir_primeiro`), ou
-  - manter pendencias e registrar no roadmap (`roadmap_pendente`).
+- Se houver itens em `Doing`, `concluir_primeiro` significa:
+  - concluir o que ja esta em curso quando ele puder seguir direto, ou
+  - puxar apenas o **work item** minimo que o destrava diretamente quando o bloqueio estiver em outra issue.
+- `roadmap_pendente` so deve ser usado quando a rodada atual realmente nao vai
+  continuar agora e a retomada precisa virar backlog formal.
 - Durante execucao, registrar progresso incremental no ledger.
 - O item ativo deve permanecer em `Doing` enquanto a execucao estiver em curso.
 - Ultimo passo obrigatorio antes de encerrar demanda: mover item ativo de

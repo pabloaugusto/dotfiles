@@ -20,6 +20,26 @@ Registro consultivo do agente Pascoalete para ortografia e higiene vocabular.
 <!-- ai-orthography:records:start -->
 | Data/Hora UTC | Worklog ID | Revisor | Status | Arquivo | Achados | Evidencia |
 | --- | --- | --- | --- | --- | --- | --- |
+| 2026-03-10 12:40 UTC | DOT-127 | pascoalete | reprovado | tests/python/ai_worklog_test.py | gpgsign, worktree, LICOES, obrigatorio, worktree, LICOES, licao, licao (+11) | task spell:check |
+| 2026-03-10 12:40 UTC | DOT-127 | pascoalete | reprovado | tests/python/ai_dispatch_test.py | tecnico, governanca | task spell:check |
+| 2026-03-10 12:40 UTC | DOT-127 | pascoalete | reprovado | tests/python/ai_assets_validator_test.py | possivel, LICOES, atlassian, Validacao, minimo, LICOES, comecar, Orquestracao (+6) | task spell:check |
+| 2026-03-10 12:40 UTC | DOT-127 | pascoalete | reprovado | scripts/validate-ai-assets.py | execucao, evals, LICOES, evals, evals, evals, evals, atlassian (+50) | task spell:check |
+| 2026-03-10 12:40 UTC | DOT-127 | pascoalete | reprovado | scripts/ai_dispatch_lib.py | execucao, minimo, Secao, condicoes, Acao, Semantica, acao | task spell:check |
+| 2026-03-10 12:40 UTC | DOT-127 | pascoalete | reprovado | scripts/ai-worklog.py | execucao, Responsavel, atualizacao, Responsavel, Concluido, Descricao, Atualizacao, minimo (+42) | task spell:check |
+| 2026-03-10 12:40 UTC | DOT-127 | pascoalete | reprovado | .agents/skills/wip-continuity-governance/SKILL.md | obrigatorio, LICOES, execucao, decisao, minimo, execucao, LICOES, licao (+10) | task spell:check |
+| 2026-03-10 12:40 UTC | DOT-127 | pascoalete | reprovado | .agents/skills/task-routing-and-decomposition/SKILL.md | decomposicao, delegacao, delegacao, tecnico, distribuicao, verificacao, obrigatorios, implementacao (+14) | task spell:check |
+| 2026-03-10 12:40 UTC | DOT-127 | pascoalete | reprovado | .agents/cards/orquestrador-delegacao.md | Delegacao, decomposicao, delegacao, decomposicao, verificacao, obrigatorios, reconciliacao, execucao (+19) | task spell:check |
+| 2026-03-10 12:40 UTC | DOT-127 | pascoalete | reprovado | .agents/cards/governador-continuidade-wip.md | mudanca, implementacao, acionavel, usuario, LICOES, Saidas, decisao, minimo (+12) | task spell:check |
+| 2026-03-10 12:40 UTC | DOT-127 | pascoalete | reprovado | docs/ai-operating-model.md | reutilizavel, testavel, worktree, Principios, Instrucoes, instrucoes, estaveis, governanca (+144) | task spell:check |
+| 2026-03-10 12:40 UTC | DOT-127 | pascoalete | reprovado | docs/TASKS.md | canonicas, repositorio, operacao, diaria, governanca, Operacao, diaria, sincronizacao (+106) | task spell:check |
+| 2026-03-10 12:40 UTC | DOT-127 | pascoalete | reprovado | docs/AI-WIP-TRACKER.md | solicitacao, acionavel, minimo, execucao, execucao, obrigatorio, Responsavel, atualizacao (+253) | task spell:check |
+| 2026-03-10 12:40 UTC | DOT-127 | pascoalete | reprovado | docs/AI-STARTUP-AND-RESTART.md | sessao, confiavel, sessao, sessoes, worktree, worktree, alteracoes, sessao (+24) | task spell:check |
+| 2026-03-10 12:40 UTC | DOT-127 | pascoalete | reprovado | docs/AI-CHAT-CONTRACTS-REGISTER.md | definicoes, governanca, obrigatoria, sessao, usuario, promocao, promocao, governanca (+35) | task spell:check |
+| 2026-03-10 12:40 UTC | DOT-127 | pascoalete | reprovado | config/ai/jira-model.yaml | atlassian, tecnica, governanca, regressao, reducao, decomposicao, Recomendacao, Criterios (+19) | task spell:check |
+| 2026-03-10 12:40 UTC | DOT-127 | pascoalete | reprovado | config/ai/contracts.yaml | worktrees, worktree, minimo, descricao, tecnico, criterios, aceitacao, documentacao | task spell:check |
+| 2026-03-10 12:40 UTC | DOT-127 | pascoalete | reprovado | config/ai/agent-operations.yaml | atlassian, comentario, atuacao, comentario, decisao, comentario, transicao, decisao (+138) | task spell:check |
+| 2026-03-10 12:40 UTC | DOT-127 | pascoalete | reprovado | Taskfile.yml | PYTHONDONTWRITEBYTECODE, PYTHONPYCACHEPREFIX, venv, venv, disponiveis, worktree, alteracoes, alteracoes (+152) | task spell:check |
+| 2026-03-10 12:40 UTC | DOT-127 | pascoalete | reprovado | AGENTS.md | Missao, confiavel, testavel, reproduzivel, precedencia, LICOES, instrucoes, usuario (+116) | task spell:check |
 | 2026-03-10 03:33 UTC | DOT-117 | pascoalete | aprovado | tests/python/ai_tech_lead_review_contract_test.py | sem achados | task spell:check |
 | 2026-03-10 03:33 UTC | DOT-117 | pascoalete | reprovado | tests/python/ai_reviewer_policies_test.py | comentario, omissao, decisao | task spell:check |
 | 2026-03-10 03:33 UTC | DOT-117 | pascoalete | reprovado | docs/atlassian-ia/artifacts/jira-writing-standards.md | Decisao, padrao, medio, definicao, legivel, tecnico, governanca, regressao (+61) | task spell:check |

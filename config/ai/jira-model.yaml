@@ -334,6 +334,10 @@ workflow:
         - ai-devops
   execution_rules:
     - only_ready_can_be_pulled
+    - read-board-right-to-left
+    - prefer-finishing-or-directly-unblocking-active-work-before-pulling-new-work
+    - direct-unblocking-work-item-may-be-pulled-when-it-is-the-minimal-dependency-of-active-work
+    - do-not-pull-unrelated-new-work-while-blocked-active-item-exists
     - status-is-flow-phase-current-agent-role-is-active-ownership
     - every-relevant-operation-must-have-explicit-owner-agent
     - if-no-agent-fits-the-operation-create-or-formalize-one-through-backlog
