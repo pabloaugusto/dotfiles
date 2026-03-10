@@ -137,6 +137,9 @@ Essa visibilidade em chat:
 - referencia playbooks e runbooks no `Confluence`
 - governa `Ready -> Doing` e retornos `Changes Requested -> Doing`
 - governa tambem `Doing -> Paused` e `Paused -> Doing`
+- revisa todo PR ou origem equivalente antes da aprovacao final
+- aprova ou reprova em `Review` com base nos criterios de qualidade do repo e
+  nos pareceres especializados
 
 ### `ai-developer-python`
 

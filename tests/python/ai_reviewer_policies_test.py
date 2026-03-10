@@ -87,6 +87,15 @@ class AiReviewerPoliciesTests(unittest.TestCase):
         review_scope = python_policy.get("review_scope") or []
         self.assertIn("module", review_scope)
 
+    def test_tech_lead_policy_requires_pr_scope_and_specialist_inputs(self) -> None:
+        profiles = self.policies.get("profiles") or {}
+        tech_lead_policy = profiles.get("tech-lead-review-policy") or {}
+        validation_layers = tech_lead_policy.get("validation_layers") or []
+        self.assertIn("specialist-reviews", validation_layers)
+        review_scope = tech_lead_policy.get("review_scope") or []
+        self.assertIn("pull-request", review_scope)
+        self.assertIn("equivalent-origin-review", review_scope)
+
 
 if __name__ == "__main__":
     unittest.main()

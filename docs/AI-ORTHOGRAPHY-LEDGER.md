@@ -20,6 +20,16 @@ Registro consultivo do agente Pascoalete para ortografia e higiene vocabular.
 <!-- ai-orthography:records:start -->
 | Data/Hora UTC | Worklog ID | Revisor | Status | Arquivo | Achados | Evidencia |
 | --- | --- | --- | --- | --- | --- | --- |
+| 2026-03-10 03:33 UTC | DOT-117 | pascoalete | aprovado | tests/python/ai_tech_lead_review_contract_test.py | sem achados | task spell:check |
+| 2026-03-10 03:33 UTC | DOT-117 | pascoalete | reprovado | tests/python/ai_reviewer_policies_test.py | comentario, omissao, decisao | task spell:check |
+| 2026-03-10 03:33 UTC | DOT-117 | pascoalete | reprovado | docs/atlassian-ia/artifacts/jira-writing-standards.md | Decisao, padrao, medio, definicao, legivel, tecnico, governanca, regressao (+61) | task spell:check |
+| 2026-03-10 03:33 UTC | DOT-117 | pascoalete | reprovado | docs/atlassian-ia/artifacts/agent-operations.md | canonica, Sincronizacao, governanca, comentarios, tecnicos, atuacao, documentacao, tambem (+112) | task spell:check |
+| 2026-03-10 03:33 UTC | DOT-117 | pascoalete | reprovado | docs/atlassian-ia/2026-03-08-spike-cobertura-agentes-e-review-especializado.md | priorizacao, generico, unico, revisao, tecnica, revisao, codigo, autonomo (+78) | task spell:check |
+| 2026-03-10 03:33 UTC | DOT-117 | pascoalete | reprovado | docs/atlassian-ia/2026-03-08-manual-agilidade-control-plane.md | atlassian, agil, classicos, operacao, documentacao, codigo, operacao, Fundacao (+125) | task spell:check |
+| 2026-03-10 03:33 UTC | DOT-117 | pascoalete | reprovado | config/ai/jira-model.yaml | atlassian, tecnica, governanca, regressao, reducao, decomposicao, Recomendacao, Criterios (+19) | task spell:check |
+| 2026-03-10 03:33 UTC | DOT-117 | pascoalete | reprovado | config/ai/reviewer-policies.yaml | atlassian, decisao, tecnica, opiniao, decisao, corretude, seguranca, eficiencia (+61) | task spell:check |
+| 2026-03-10 03:33 UTC | DOT-117 | pascoalete | reprovado | config/ai/agent-operations.yaml | atlassian, comentario, atuacao, comentario, decisao, comentario, transicao, decisao (+136) | task spell:check |
+| 2026-03-10 03:33 UTC | DOT-117 | pascoalete | reprovado | config/ai/agents.yaml | figma | task spell:check |
 | 2026-03-09 23:54 UTC | DOT-114 | pascoalete | reprovado | tests/python/validate_docs_test.py | repoish | task spell:check |
 | 2026-03-09 23:54 UTC | DOT-114 | pascoalete | reprovado | tests/python/atlassian_platform_test.py | atlassian, atlassian, atlassian, atlassian, linkifies, linkify, regressao, interacao (+12) | task spell:check |
 | 2026-03-09 23:54 UTC | DOT-114 | pascoalete | reprovado | tests/python/ai_jira_apply_test.py | canonico, canonico, canonico, atlassian, atlassian | task spell:check |

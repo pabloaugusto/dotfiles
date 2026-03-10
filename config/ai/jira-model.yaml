@@ -73,7 +73,9 @@ project:
       - name: Ready for QA
         jql: 'status = Testing AND "Next Required Role" = "ai-qa"'
       - name: Ready for Review
-        jql: 'status = Review AND "Next Required Role" in ("ai-reviewer", "ai-reviewer-python", "ai-reviewer-powershell", "ai-reviewer-automation", "ai-reviewer-config-policy")'
+        jql: 'status = Review AND "Next Required Role" in ("ai-reviewer", "ai-reviewer-python", "ai-reviewer-powershell", "ai-reviewer-automation", "ai-reviewer-config-policy", "ai-tech-lead")'
+      - name: Ready for Tech Lead Review
+        jql: 'status = Review AND "Next Required Role" = "ai-tech-lead"'
       - name: Ready for Python Review
         jql: 'status = Review AND "Next Required Role" = "ai-reviewer-python"'
       - name: Ready for PowerShell Review
@@ -290,6 +292,7 @@ workflow:
     - from: Review
       to: Done
       roles:
+        - ai-tech-lead
         - ai-reviewer
         - ai-reviewer-python
         - ai-reviewer-powershell
@@ -314,6 +317,7 @@ workflow:
     - from: Review
       to: Changes Requested
       roles:
+        - ai-tech-lead
         - ai-reviewer
         - ai-reviewer-python
         - ai-reviewer-powershell
@@ -345,6 +349,7 @@ workflow:
     - no_execution_without_jira_issue
     - comments_must_register_evidence_and_decisions
     - specialist-review-required-for-relevant-file-families
+    - tech-lead-review-required-before-done
     - done_requires_docs_link_or_explicit_n_a
 
 fields:

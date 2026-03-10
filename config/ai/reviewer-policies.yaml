@@ -148,6 +148,53 @@ common:
       - side-effect-explicitamente-marcado
 
 profiles:
+  tech-lead-review-policy:
+    roles:
+      - ai-tech-lead
+    mandatory_dimensions:
+      - correctness
+      - security
+      - performance
+      - io-efficiency
+      - readability
+      - maintainability
+      - testability
+      - observability
+      - conventions
+      - robustness
+      - cross-cutting-risk
+      - architecture-coherence
+    validation_layers:
+      - specialist-reviews
+      - lint
+      - format-check
+      - typecheck
+      - tests
+      - repo-convention-check
+    expected_result:
+      - o-que-esta-correto
+      - o-que-falhou
+      - por-que-falhou
+      - qual-o-impacto
+      - qual-e-a-melhor-correcao
+      - quais-pareceres-especializados-sustentam-a-decisao
+      - se-o-pr-pode-ser-aprovado-ou-reprovado
+      - qual-comentario-publicar-no-jira
+      - para-qual-status-a-issue-deve-ser-movida
+    review_scope:
+      - pull-request
+      - equivalent-origin-review
+      - work-item
+    out_of_scope:
+      - substituir-revisores-especialistas-quando-a-familia-exigir-parecer-proprio
+      - aprovar-sem-artefato-oficial-de-review-ou-sem-evidencia-suficiente
+    workflow_steps:
+      - coleta-de-contexto
+      - consolidacao-dos-pareceres-especializados
+      - analise-tecnica
+      - decisao-formal
+      - comentario-e-transicao-no-jira
+
   python-review-policy:
     roles:
       - ai-reviewer-python

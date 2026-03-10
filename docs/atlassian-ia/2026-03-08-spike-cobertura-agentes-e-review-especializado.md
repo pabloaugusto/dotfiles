@@ -67,7 +67,7 @@ processo, mas tende a perder profundidade quando precisa revisar ao mesmo tempo:
 
 Para um sistema autonomo, isso vira gargalo e reduz a confianca da aprovacao.
 
-### 2. Tech lead nao deve virar reviewer universal
+### 2. Tech lead nao deve ser o unico reviewer detalhado
 
 O `Tech Lead` precisa preservar capacidade para:
 
@@ -76,8 +76,10 @@ O `Tech Lead` precisa preservar capacidade para:
 - coordenar handoffs
 - arbitrar trade-offs e excecoes
 
-Se ele absorver toda a revisao detalhada, o fluxo perde throughput e cria
-dependencia excessiva em um unico papel.
+Se ele absorver sozinho toda a revisao detalhada, o fluxo perde throughput e
+cria dependencia excessiva em um unico papel. O desenho mais robusto e manter o
+`ai-tech-lead` como reviewer obrigatorio e aprovador oficial de PR, apoiado por
+revisores especialistas por familia.
 
 ### 3. O desenho mais forte e especialista + gate transversal
 
@@ -86,7 +88,8 @@ O modelo mais robusto para este piloto e:
 - developers especialistas por familia de entrega executam o trabalho tecnico
 - revisores especialistas por familia de arquivo fazem a revisao profunda
 - `ai-reviewer` consolida ou atua em revisoes cross-cutting
-- `ai-tech-lead` entra quando houver duvida arquitetural, excecao ou conflito
+- `ai-tech-lead` revisa todo PR e origem equivalente, alem de arbitrar duvida
+  arquitetural, excecao ou conflito
 
 Isso aproxima o fluxo do uso de especialistas recomendado pela Atlassian e do
 modelo de ownership por areas de codigo formalizado pelo GitHub com reviewers e
@@ -219,7 +222,8 @@ O trabalho principal e alinhar as camadas declarativas e o tenant.
 - criar developers especialistas sem refletir isso em routing, cards e Jira gera
   ownership fantasma
 - manter reviewer generico como unico gate continua produzindo aprovacoes rasas
-- usar `tech lead` como reviewer universal cria gargalo e dependencia excessiva
+- usar `tech lead` como unico reviewer detalhado cria gargalo e dependencia
+  excessiva
 - deixar `ai-documentation-agent` fora da paridade dev/reviewer para Markdown e
   Confluence enfraquece rastreabilidade
 - manter spikes superficiais enfraquece refinamento e piora previsibilidade
@@ -230,7 +234,7 @@ O trabalho principal e alinhar as camadas declarativas e o tenant.
 
 Simples, mas fraca em profundidade tecnica.
 
-### Alternativa B - transferir tudo para `ai-tech-lead`
+### Alternativa B - transferir toda a profundidade para `ai-tech-lead`
 
 Melhora consistencia tecnica, mas cria gargalo forte.
 
@@ -288,7 +292,8 @@ Adotar imediatamente:
 2. developers especialistas por familia de entrega, em paridade com os reviewers
 3. `ai-documentation-agent` como dev especializado para Markdown e doc viva
 4. `ai-reviewer` como gate transversal, nao reviewer unico
-5. `ai-tech-lead` como coordenador tecnico e arbitro de excecao
+5. `ai-tech-lead` como reviewer obrigatorio de PR, aprovador oficial,
+   coordenador tecnico e arbitro de excecao
 6. `Spike` enriquecida com evidencia, viabilidade, ganhos, custo e pendencias
 7. `AI Product Owner` como responsavel continuo por prioridade e timeline dos
    itens acima de subtarefa
