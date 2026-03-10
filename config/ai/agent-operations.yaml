@@ -2,7 +2,7 @@ version: 1
 
 metadata:
   model_id: ai-control-plane-atlassian-pilot
-  owner_role: ai-tech-lead
+  owner_role: ai-scrum-master
   source_of_truth:
     execution: jira
     documentation: confluence
@@ -181,6 +181,36 @@ roles:
       - garantir links para o Confluence ou registrar n/a explicito
       - mover a issue para Refinement ou Ready e definir o proximo papel
 
+  ai-scrum-master:
+    profile: governance-common
+    jira:
+      primary_issue_actions:
+        - fiscalizar board, WIP, ownership, handoffs e comentarios
+        - garantir aderencia ao processo agil, aos contratos e as cerimonias
+        - abrir ou exigir bug de governanca quando a anomalia persistir
+      transitions_owned:
+        - sem-transicao-exclusiva
+      required_comment_types:
+        - progress-update
+        - blocker
+        - review-feedback
+      required_evidence:
+        - link para issue, comentario, artefato ou estado vivo que demonstre a anomalia
+        - referencia ao contrato, card, workflow ou evidencia usada no enforcement
+    confluence:
+      pages_owned:
+        - delivery-ops
+        - ceremonies
+      page_actions:
+        - atualizar politicas de fluxo e cerimonias quando a regra mudar
+        - registrar backlog de anomalias sistemicas e seu plano de acao
+    operating_steps:
+      - recalcular board, WIP, ownership, comentarios, branches e worktrees relevantes
+      - recarregar os contratos e artefatos vivos antes de fiscalizar a rodada
+      - registrar anomalias e evidencias no Jira com o papel responsavel e o impacto
+      - cobrar correcao imediata, abrir bug de governanca ou escalar quando necessario
+      - manter Jira e Confluence sincronizados quando a regra de processo mudar
+
   ai-engineering-architect:
     profile: governance-common
     jira:
@@ -216,8 +246,8 @@ roles:
     profile: governance-common
     jira:
       primary_issue_actions:
-        - gerir fluxo, riscos, bloqueios e saude do trabalho
-        - replanejar prioridades operacionais quando necessario
+        - gerir capacidade, riscos, bloqueios e saude operacional do trabalho
+        - replanejar throughput, dependencias e escalacoes quando necessario
         - estimular e coordenar enriquecimento proativo do backlog e refinement
       transitions_owned:
         - Doing -> Paused
@@ -227,7 +257,7 @@ roles:
         - blocker
         - priority-change
       required_evidence:
-        - dados de fila, risco, bloqueio ou dependencia concreta
+        - dado de capacidade, fila, risco, bloqueio ou dependencia concreta
         - log dos canais de notificacao acionados quando houver bloqueio sem saida autonoma
     confluence:
       pages_owned:
@@ -236,7 +266,8 @@ roles:
         - atualizar runbooks operacionais e politicas de fluxo quando mudarem
     operating_steps:
       - inspecionar backlog e refinement para acionar discovery tecnico antes de o item ser puxado
-      - inspecionar fila, dependencias e gargalos
+      - inspecionar fila, capacidade, dependencias e gargalos
+      - coordenar com o Scrum Master a leitura do board e a saude do fluxo
       - quando houver bloqueio entre issues, priorizar o work item desbloqueador antes de qualquer puxada sem relacao
       - registrar comentario operacional com risco, impacto e evidencia
       - pausar ou retomar item interrompido quando houver espera operacional real

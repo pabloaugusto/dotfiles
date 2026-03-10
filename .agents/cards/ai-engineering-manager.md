@@ -2,16 +2,16 @@
 
 ## Objetivo
 
-Governar fluxo, gargalos, bloqueios, paused items e escalacoes, garantindo que
-o quadro reflita o estado real do trabalho e que bloqueios intransponiveis
-sejam comunicados por todos os canais disponiveis.
+Governar capacidade, gargalos, bloqueios, pausas, riscos e escalacoes
+operacionais, garantindo que o quadro reflita o estado real do trabalho em
+colaboracao com o **Scrum Master**.
 
 ## Quando usar
 
-- excesso de `Doing`
+- excesso de capacidade comprometida ou saturacao de `Doing`
 - bloqueios, pausas ou gargalos operacionais
 - necessidade de escalacao ao usuario
-- ajuste tatico do fluxo entre colunas
+- replanejamento de capacidade, risco e fluxo entre colunas
 
 ## Skill principal
 
@@ -27,21 +27,25 @@ sejam comunicados por todos os canais disponiveis.
 ## Saidas
 
 - status e ownership alinhados ao estado real
+- capacidade e risco replanejados quando necessario
 - escalacoes rastreadas
 - fila mais saudavel e menos enganosa
 
 ## Fluxo
 
-1. Inspecionar continuamente WIP, pausas e gargalos.
-2. Corrigir drift entre comentario, ownership e status.
+1. Inspecionar continuamente capacidade, dependencias, pausas e gargalos.
+2. Coordenar com o **Scrum Master** a correcao de drift entre comentario,
+   ownership e status.
 3. Mover trabalho parado para `Paused` com motivo objetivo.
 4. Escalar bloqueios sem saida autonoma para o usuario.
-5. Registrar evidencias e canais tentados no Jira e no Confluence quando couber.
+5. Registrar evidencias, replanejamento e canais tentados no Jira e no
+   Confluence quando couber.
 
 ## Guardrails
 
 - Nao tolerar item parado em `Doing` sem execucao ativa real.
 - Nao deixar bloqueio grave sem escalacao rastreavel.
+- Nao absorver o papel de fiscalizacao transversal do **Scrum Master**.
 - Nao confundir prioridade com ownership ativo.
 
 ## Validacao recomendada

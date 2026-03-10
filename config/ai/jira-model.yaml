@@ -90,6 +90,8 @@ project:
         jql: 'status = Refinement AND issuetype in (Story, Task)'
       - name: Needs PO
         jql: '"Current Agent Role" = "ai-product-owner" OR "Next Required Role" = "ai-product-owner"'
+      - name: Needs Scrum Master
+        jql: '"Current Agent Role" = "ai-scrum-master" OR "Next Required Role" = "ai-scrum-master"'
 
 issue_types:
   standard:
@@ -347,6 +349,7 @@ workflow:
     - product-owner-must-maintain-start-and-due-dates-for-non-subtasks
     - doing-only-for-actively-executing-work
     - clear-current-agent-role-when-no-agent-is-actively-working
+    - scrum_master_audits_process_conformance
     - story-spike-required-before-ready
     - task-spike-is-conditional-but-preferred-when-uncertainty-exists
     - interrupted-work-must-move-to-paused

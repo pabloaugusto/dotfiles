@@ -61,6 +61,26 @@ AUTOMATION_REVIEW_PATHS = [
     "tests/bash/*",
     ".githooks/*",
 ]
+CONFIG_POLICY_REVIEW_PATHS = [
+    ".agents/**",
+    "config/*.yml",
+    "config/*.yaml",
+    "config/**/*.yml",
+    "config/**/*.yaml",
+    "config/*.json",
+    "config/**/*.json",
+    "config/*.toml",
+    "config/**/*.toml",
+    "docs/**",
+    "AGENTS.md",
+    ".codex/README.md",
+]
+DOCS_VALIDATION_PATHS = [
+    ".agents/**",
+    "docs/**",
+    "AGENTS.md",
+    ".codex/README.md",
+]
 
 
 def load_yaml(path: Path) -> dict:
@@ -333,6 +353,12 @@ def build_validation_plan(paths: list[str], intent: str) -> list[str]:
 
     if path_matches([".agents/**", ".codex/README.md", "docs/**", "scripts/**"], paths):
         validations.append("task test:unit:python")
+
+    if path_matches(DOCS_VALIDATION_PATHS, paths):
+        validations.append("task docs:check")
+
+    if path_matches(CONFIG_POLICY_REVIEW_PATHS, paths):
+        validations.append("task lint:yaml")
 
     if path_matches(PYTHON_REVIEW_PATHS, paths):
         validations.extend(

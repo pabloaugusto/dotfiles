@@ -7,22 +7,24 @@
 3. Se houver importacao cross-repo, concluir auditoria estrutural e registrar o delta em [`AI-SOURCE-AUDIT.md`](AI-SOURCE-AUDIT.md).
 4. Acionar `repo-governance-authority`.
 5. Acionar `execution-worklog-governance-owner`.
-6. Acionar `architecture-modernization-authority` em paralelo, sempre lendo e monitorando [`AI-WIP-TRACKER.md`](AI-WIP-TRACKER.md), [`../ROADMAP.md`](../ROADMAP.md), [`ROADMAP-DECISIONS.md`](ROADMAP-DECISIONS.md) e demais registradores vivos de backlog/pendencias.
-7. Se a tarefa pedir triagem, decomposicao ou plano de delegacao, acionar `orchestrator` com `$task-routing-and-decomposition`.
-8. Se o escopo tocar bootstrap, auth, secrets, CI, sync, CLI ou ambiente, acionar `critical-integrations-guardian`.
-9. Se o escopo tocar rotacao, backup, expiracao, revogacao ou inventario de credenciais, chaves SSH, `sops+age` ou notificacao de segredos, acionar `secrets-rotation-governor`.
-10. Se houver texto, comentario, documentacao, config textual ou identificadores legiveis alterados, acionar `pascoalete` em modo consultivo com `task spell:review`.
-11. Se houver mudanca em Python, PowerShell ou automacao, acionar o revisor especialista aplicavel antes do fechamento tecnico.
-12. Se o escopo tocar [`../LICOES-APRENDIDAS.md`](../LICOES-APRENDIDAS.md), fechamento de rodada ou retroativo, acionar `lessons-governance-curator`.
-13. Implementar e validar.
-14. Registrar pareceres especializados em [`AI-REVIEW-LEDGER.md`](AI-REVIEW-LEDGER.md) quando houver mudanca de codigo ou automacao e parecer ortografico em [`AI-ORTHOGRAPHY-LEDGER.md`](AI-ORTHOGRAPHY-LEDGER.md) quando houver review consultivo textual.
-15. Revisar licoes, fechar worklog e validar gates finais.
+6. Acionar `ai-scrum-master` como gate global de board, WIP, ownership, cerimonias e aderencia do fluxo.
+7. Acionar `architecture-modernization-authority` em paralelo, sempre lendo e monitorando [`AI-WIP-TRACKER.md`](AI-WIP-TRACKER.md), [`../ROADMAP.md`](../ROADMAP.md), [`ROADMAP-DECISIONS.md`](ROADMAP-DECISIONS.md) e demais registradores vivos de backlog/pendencias.
+8. Se a tarefa pedir triagem, decomposicao ou plano de delegacao, acionar `orchestrator` com `$task-routing-and-decomposition`.
+9. Se o escopo tocar bootstrap, auth, secrets, CI, sync, CLI ou ambiente, acionar `critical-integrations-guardian`.
+10. Se o escopo tocar rotacao, backup, expiracao, revogacao ou inventario de credenciais, chaves SSH, `sops+age` ou notificacao de segredos, acionar `secrets-rotation-governor`.
+11. Se houver texto, comentario, documentacao, config textual ou identificadores legiveis alterados, acionar `pascoalete` em modo consultivo com `task spell:review`.
+12. Se houver mudanca em Python, PowerShell ou automacao, acionar o revisor especialista aplicavel antes do fechamento tecnico.
+13. Se o escopo tocar [`../LICOES-APRENDIDAS.md`](../LICOES-APRENDIDAS.md), fechamento de rodada ou retroativo, acionar `lessons-governance-curator`.
+14. Implementar e validar.
+15. Registrar pareceres especializados em [`AI-REVIEW-LEDGER.md`](AI-REVIEW-LEDGER.md) quando houver mudanca de codigo ou automacao e parecer ortografico em [`AI-ORTHOGRAPHY-LEDGER.md`](AI-ORTHOGRAPHY-LEDGER.md) quando houver review consultivo textual.
+16. Revisar licoes, fechar worklog e validar gates finais.
 
 ## Roteamento por escopo
 
 - [`../bootstrap/`](../bootstrap/) e [`../df/`](../df/) -> `bootstrap-operator`
 - [`../AGENTS.md`](../AGENTS.md), [`../.agents/`](../.agents/), [`../.codex/README.md`](../.codex/README.md) e [`./`](./) -> `repo-governance-authority`
 - [`AI-WIP-TRACKER.md`](AI-WIP-TRACKER.md), [`../ROADMAP.md`](../ROADMAP.md), [`ROADMAP-DECISIONS.md`](ROADMAP-DECISIONS.md) e [`../scripts/ai-worklog.py`](../scripts/ai-worklog.py) -> `execution-worklog-governance-owner`
+- board, **WIP**, ownership, **cerimonias** e enforcement do processo agil -> `ai-scrum-master`
 - triagem, intake, decomposicao, delegacao -> `orchestrator`
 - qualquer analise substantiva -> `architecture-modernization-authority`
 - auth, secrets, `gh`, `op`, `sops`, `age`, `ssh-agent`, CI, sync, signing -> `critical-integrations-guardian`
@@ -36,6 +38,7 @@
 ## Gatilhos obrigatorios
 
 - `architecture-modernization-authority` e sempre obrigatorio como gate paralelo.
+- `ai-scrum-master` e sempre obrigatorio como gate global de **board**, **WIP**, ownership, comunicacao e **cerimonias**.
 - `architecture-modernization-authority` deve observar continuamente WIP, backlog, roadmap, decisions e outros artefatos vivos para nao sugerir trabalho fora de contexto.
 - `critical-integrations-guardian` e obrigatorio em mudancas de plataforma e integracoes criticas.
 - `secrets-rotation-governor` e obrigatorio em mudancas de lifecycle de credenciais.

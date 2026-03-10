@@ -18,6 +18,18 @@ roles:
       - queue-ordering
       - jira-issue-creation
 
+  ai-scrum-master:
+    enabled: true
+    required: true
+    category: governance
+    responsibilities:
+      - scrum-enforcement
+      - board-governance
+      - wip-compliance
+      - ceremony-governance
+      - agent-compliance
+      - communication-governance
+
   ai-engineering-architect:
     enabled: true
     required: true
@@ -32,9 +44,10 @@ roles:
     required: true
     category: governance
     responsibilities:
-      - flow-governance
+      - capacity-governance
       - risk
       - blockers
+      - escalation
 
   ai-tech-lead:
     enabled: true

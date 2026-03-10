@@ -83,6 +83,8 @@ Pontos criticos:
 
 - `enabled`: ativa ou desativa o papel no fluxo-base
 - `required`: indica se o papel faz parte do nucleo obrigatorio
+- `ai-scrum-master`: gate global de **board**, **WIP**, ownership,
+  comunicacao, conformidade de agentes e **cerimonias**
 - `ai-browser-validator`: capacidade opcional para evidencias via `Playwright`
 - papeis como design, UX/CRO e SEO permanecem opcionais por dominio
 - `ai-documentation-agent`: governa a linkagem bidirecional `Jira <-> Confluence`
@@ -130,6 +132,10 @@ Pontos criticos:
   em `.zip`, pronto para anexo na issue correspondente do `Jira`
 - `agent_activity`: endurece o contrato de comentarios estruturados com
   evidencia obrigatoria antes de handoff, transicao e `Done`
+- `workflow.operating_rules`: consolida regras de **board** e **WIP**,
+  incluindo a auditoria continua do `ai-scrum-master`
+- `operator_chat_visibility`: explicita a auditoria do contrato de chat pelo
+  `ai-scrum-master`
 - `workflow.always_enabled_columns`: fluxo-base obrigatorio
 - `workflow.optional_columns`: colunas condicionais por capacidade
 - `workflow.evidence_comment_types`: inclui `documentation-link` para registrar
@@ -150,6 +156,8 @@ Pontos criticos:
 - `project.target_board`: contrato alvo do board Kanban
 - `workflow.statuses`: statuses que precisam existir antes da semeadura retroativa
 - `fields.custom_fields`: campos minimos necessarios para a operacao multiagente
+- `fields.custom_fields` de papel devem incluir `ai-scrum-master` quando esse
+  gate fizer parte do fluxo vivo
 - `workflow.name` e `workflow.scheme_name`: identificadores declarativos do
   workflow e do workflow scheme que serao aplicados no tenant
 - `fields.custom_fields[].enabled_when_role`: permite que campos opcionais de

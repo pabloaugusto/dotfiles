@@ -29,6 +29,7 @@ required = [
   "lessons-governance-curator",
   "orchestrator",
   "ai-product-owner",
+  "ai-scrum-master",
   "ai-engineering-architect",
   "ai-engineering-manager",
   "ai-tech-lead",
@@ -52,6 +53,7 @@ required = [
 mandatory_global = [
   "repo-governance-authority",
   "execution-worklog-governance-owner",
+  "ai-scrum-master",
   "architecture-modernization-authority",
 ]
 mandatory_platform = ["critical-integrations-guardian"]
