@@ -403,14 +403,14 @@ tasks:
     platforms: [windows]
     dir: '{{.TASKFILE_DIR}}'
     cmds:
-      - uv run --locked ty check scripts/release_tool.py scripts/validate_docs.py scripts/run_actionlint.py scripts/run_gitleaks.py scripts/run-cspell.py scripts/git-signing-mode.py scripts/git_signing_lib.py tests/python/release_tool_test.py tests/python/validate_docs_test.py tests/python/git_signing_mode_test.py
+      - uv run --locked ty check scripts/release_tool.py scripts/validate_docs.py scripts/run_actionlint.py scripts/run_gitleaks.py scripts/run-cspell.py scripts/git-signing-mode.py scripts/git_signing_lib.py scripts/ai-control-plane.py scripts/ai_control_plane_lib.py scripts/atlassian_platform_lib.py scripts/ai-atlassian-openapi.py scripts/ai_atlassian_openapi_lib.py scripts/ai-jira-model.py scripts/ai_jira_model_lib.py scripts/ai-jira-apply.py scripts/ai_jira_apply_lib.py scripts/ai-atlassian-backfill.py scripts/ai_atlassian_backfill_lib.py scripts/ai-atlassian-migration-bundle.py scripts/ai_atlassian_migration_bundle_lib.py scripts/ai-atlassian-seed.py scripts/ai_atlassian_seed_lib.py scripts/ai-atlassian-docs-sync.py tests/python/release_tool_test.py tests/python/validate_docs_test.py tests/python/git_signing_mode_test.py tests/python/ai_control_plane_test.py tests/python/atlassian_platform_test.py tests/python/ai_atlassian_openapi_test.py tests/python/ai_jira_model_test.py tests/python/ai_jira_apply_test.py tests/python/ai_atlassian_backfill_test.py tests/python/ai_atlassian_migration_bundle_test.py tests/python/ai_atlassian_seed_test.py
 
   type:check:linux:
     desc: Linux/WSL - executa ty em scripts e testes Python
     platforms: [linux]
     dir: '{{.TASKFILE_DIR}}'
     cmds:
-      - uv run --locked ty check scripts/release_tool.py scripts/validate_docs.py scripts/run_actionlint.py scripts/run_gitleaks.py scripts/run-cspell.py scripts/git-signing-mode.py scripts/git_signing_lib.py tests/python/release_tool_test.py tests/python/validate_docs_test.py tests/python/git_signing_mode_test.py
+      - uv run --locked ty check scripts/release_tool.py scripts/validate_docs.py scripts/run_actionlint.py scripts/run_gitleaks.py scripts/run-cspell.py scripts/git-signing-mode.py scripts/git_signing_lib.py scripts/ai-control-plane.py scripts/ai_control_plane_lib.py scripts/atlassian_platform_lib.py scripts/ai-atlassian-openapi.py scripts/ai_atlassian_openapi_lib.py scripts/ai-jira-model.py scripts/ai_jira_model_lib.py scripts/ai-jira-apply.py scripts/ai_jira_apply_lib.py scripts/ai-atlassian-backfill.py scripts/ai_atlassian_backfill_lib.py scripts/ai-atlassian-migration-bundle.py scripts/ai_atlassian_migration_bundle_lib.py scripts/ai-atlassian-seed.py scripts/ai_atlassian_seed_lib.py scripts/ai-atlassian-docs-sync.py tests/python/release_tool_test.py tests/python/validate_docs_test.py tests/python/git_signing_mode_test.py tests/python/ai_control_plane_test.py tests/python/atlassian_platform_test.py tests/python/ai_atlassian_openapi_test.py tests/python/ai_jira_model_test.py tests/python/ai_jira_apply_test.py tests/python/ai_atlassian_backfill_test.py tests/python/ai_atlassian_migration_bundle_test.py tests/python/ai_atlassian_seed_test.py
 
   test:python:
     desc: Executa a suite Python via pytest no ambiente atual
@@ -736,6 +736,244 @@ tasks:
     dir: '{{.TASKFILE_DIR}}'
     cmds:
       - "bash -lc 'bash ./scripts/run-python.sh ./scripts/validate-ai-assets.py'"
+
+  ai:control-plane:show:
+    desc: Exibe o resumo da control plane de IA desacoplada do bootstrap
+    cmds:
+      - task: ai:control-plane:show:{{if or (eq .OS "Windows_NT") (eq .OS "windows")}}windows{{else}}linux{{end}}
+
+  ai:control-plane:show:windows:
+    desc: Windows - exibe o resumo da control plane de IA
+    platforms: [windows]
+    dir: '{{.TASKFILE_DIR}}'
+    cmds:
+      - "pwsh -NoProfile -File ./scripts/invoke-python.ps1 -ScriptPath ./scripts/ai-control-plane.py -Arguments show"
+
+  ai:control-plane:show:linux:
+    desc: Linux/WSL - exibe o resumo da control plane de IA
+    platforms: [linux]
+    dir: '{{.TASKFILE_DIR}}'
+    cmds:
+      - "bash -lc 'bash ./scripts/run-python.sh ./scripts/ai-control-plane.py show'"
+
+  ai:1password:ratelimit:
+    desc: Exibe o rate limit atual da service account usada pelo 1Password CLI
+    cmds:
+      - task: ai:1password:ratelimit:{{if or (eq .OS "Windows_NT") (eq .OS "windows")}}windows{{else}}linux{{end}}
+        vars:
+          REFRESH: "{{default \"0\" .REFRESH}}"
+
+  ai:1password:ratelimit:windows:
+    desc: Windows - exibe o rate limit atual da service account do 1Password
+    platforms: [windows]
+    dir: '{{.TASKFILE_DIR}}'
+    cmds:
+      - "pwsh -NoProfile -File ./scripts/invoke-python.ps1 -ScriptPath ./scripts/ai-control-plane.py op-ratelimit{{if eq .REFRESH \"1\"}} --refresh{{end}}"
+
+  ai:1password:ratelimit:linux:
+    desc: Linux/WSL - exibe o rate limit atual da service account do 1Password
+    platforms: [linux]
+    dir: '{{.TASKFILE_DIR}}'
+    cmds:
+      - "bash -lc 'bash ./scripts/run-python.sh ./scripts/ai-control-plane.py op-ratelimit{{if eq .REFRESH \"1\"}} --refresh{{end}}'"
+
+  ai:atlassian:check:
+    desc: Valida a control plane Atlassian e testa conectividade Jira/Confluence via API
+    cmds:
+      - task: ai:atlassian:check:{{if or (eq .OS "Windows_NT") (eq .OS "windows")}}windows{{else}}linux{{end}}
+        vars:
+          SITE_URL: "{{.SITE_URL}}"
+
+  ai:atlassian:check:windows:
+    desc: Windows - valida a control plane Atlassian e testa conectividade
+    platforms: [windows]
+    dir: '{{.TASKFILE_DIR}}'
+    cmds:
+      - "pwsh -NoProfile -File ./scripts/run-ai-atlassian-check.ps1 -SiteUrl '{{default \"\" .SITE_URL}}'"
+
+  ai:atlassian:check:linux:
+    desc: Linux/WSL - valida a control plane Atlassian e testa conectividade
+    platforms: [linux]
+    dir: '{{.TASKFILE_DIR}}'
+    cmds:
+      - "bash -lc 'bash ./scripts/run-python.sh ./scripts/ai-control-plane.py atlassian-check --site-url \"{{default \"\" .SITE_URL}}\"'"
+
+  ai:atlassian:openapi:show:
+    desc: Exibe o catalogo dos specs OpenAPI oficiais da Atlassian usados no repo
+    cmds:
+      - task: ai:atlassian:openapi:show:{{if or (eq .OS "Windows_NT") (eq .OS "windows")}}windows{{else}}linux{{end}}
+
+  ai:atlassian:openapi:show:windows:
+    desc: Windows - exibe o catalogo dos specs OpenAPI Atlassian
+    platforms: [windows]
+    dir: '{{.TASKFILE_DIR}}'
+    cmds:
+      - "pwsh -NoProfile -File ./scripts/invoke-python.ps1 -ScriptPath ./scripts/ai-atlassian-openapi.py -Arguments show"
+
+  ai:atlassian:openapi:show:linux:
+    desc: Linux/WSL - exibe o catalogo dos specs OpenAPI Atlassian
+    platforms: [linux]
+    dir: '{{.TASKFILE_DIR}}'
+    cmds:
+      - "bash -lc 'bash ./scripts/run-python.sh ./scripts/ai-atlassian-openapi.py show'"
+
+  ai:atlassian:openapi:vendor:
+    desc: Vendoriza os specs OpenAPI oficiais da Atlassian em vendor/atlassian
+    cmds:
+      - task: ai:atlassian:openapi:vendor:{{if or (eq .OS "Windows_NT") (eq .OS "windows")}}windows{{else}}linux{{end}}
+
+  ai:atlassian:openapi:vendor:windows:
+    desc: Windows - vendoriza os specs OpenAPI Atlassian
+    platforms: [windows]
+    dir: '{{.TASKFILE_DIR}}'
+    cmds:
+      - "pwsh -NoProfile -File ./scripts/invoke-python.ps1 -ScriptPath ./scripts/ai-atlassian-openapi.py -Arguments vendor"
+
+  ai:atlassian:openapi:vendor:linux:
+    desc: Linux/WSL - vendoriza os specs OpenAPI Atlassian
+    platforms: [linux]
+    dir: '{{.TASKFILE_DIR}}'
+    cmds:
+      - "bash -lc 'bash ./scripts/run-python.sh ./scripts/ai-atlassian-openapi.py vendor'"
+
+  ai:jira:model:show:
+    desc: Exibe o modelo declarativo alvo do Jira para a camada Atlassian
+    cmds:
+      - task: ai:jira:model:show:{{if or (eq .OS "Windows_NT") (eq .OS "windows")}}windows{{else}}linux{{end}}
+
+  ai:jira:model:show:windows:
+    desc: Windows - exibe o modelo declarativo alvo do Jira
+    platforms: [windows]
+    dir: '{{.TASKFILE_DIR}}'
+    cmds:
+      - "pwsh -NoProfile -File ./scripts/invoke-python.ps1 -ScriptPath ./scripts/ai-jira-model.py -Arguments show"
+
+  ai:jira:model:show:linux:
+    desc: Linux/WSL - exibe o modelo declarativo alvo do Jira
+    platforms: [linux]
+    dir: '{{.TASKFILE_DIR}}'
+    cmds:
+      - "bash -lc 'bash ./scripts/run-python.sh ./scripts/ai-jira-model.py show'"
+
+  ai:jira:model:delta:
+    desc: Compara o tenant Jira atual com o modelo declarativo alvo
+    cmds:
+      - task: ai:jira:model:delta:{{if or (eq .OS "Windows_NT") (eq .OS "windows")}}windows{{else}}linux{{end}}
+
+  ai:jira:model:delta:windows:
+    desc: Windows - compara o tenant Jira atual com o modelo declarativo alvo
+    platforms: [windows]
+    dir: '{{.TASKFILE_DIR}}'
+    cmds:
+      - "pwsh -NoProfile -File ./scripts/invoke-python.ps1 -ScriptPath ./scripts/ai-jira-model.py -Arguments live-delta"
+
+  ai:jira:model:delta:linux:
+    desc: Linux/WSL - compara o tenant Jira atual com o modelo declarativo alvo
+    platforms: [linux]
+    dir: '{{.TASKFILE_DIR}}'
+    cmds:
+      - "bash -lc 'bash ./scripts/run-python.sh ./scripts/ai-jira-model.py live-delta'"
+
+  ai:atlassian:backfill:plan:
+    desc: Gera o plano declarativo de backfill retroativo para Jira e Confluence
+    cmds:
+      - task: ai:atlassian:backfill:plan:{{if or (eq .OS "Windows_NT") (eq .OS "windows")}}windows{{else}}linux{{end}}
+
+  ai:atlassian:backfill:plan:windows:
+    desc: Windows - gera o plano declarativo de backfill Atlassian
+    platforms: [windows]
+    dir: '{{.TASKFILE_DIR}}'
+    cmds:
+      - "pwsh -NoProfile -File ./scripts/invoke-python.ps1 -ScriptPath ./scripts/ai-atlassian-backfill.py -Arguments plan"
+
+  ai:atlassian:backfill:plan:linux:
+    desc: Linux/WSL - gera o plano declarativo de backfill Atlassian
+    platforms: [linux]
+    dir: '{{.TASKFILE_DIR}}'
+    cmds:
+      - "bash -lc 'bash ./scripts/run-python.sh ./scripts/ai-atlassian-backfill.py plan'"
+
+  ai:atlassian:migration:bundle:
+    desc: Gera o bundle auditavel da migracao repo -> Jira/Confluence
+    cmds:
+      - task: ai:atlassian:migration:bundle:{{if or (eq .OS "Windows_NT") (eq .OS "windows")}}windows{{else}}linux{{end}}
+        vars:
+          OUTPUT_ROOT: "{{.OUTPUT_ROOT}}"
+
+  ai:atlassian:migration:bundle:windows:
+    desc: Windows - gera o bundle auditavel da migracao Atlassian
+    platforms: [windows]
+    dir: '{{.TASKFILE_DIR}}'
+    cmds:
+      - "pwsh -NoProfile -File ./scripts/run-ai-atlassian-migration-bundle.ps1 -OutputRoot '{{default \"\" .OUTPUT_ROOT}}'"
+
+  ai:atlassian:migration:bundle:linux:
+    desc: Linux/WSL - gera o bundle auditavel da migracao Atlassian
+    platforms: [linux]
+    dir: '{{.TASKFILE_DIR}}'
+    cmds:
+      - "bash -lc 'bash ./scripts/run-python.sh ./scripts/ai-atlassian-migration-bundle.py bundle --output-root \"{{default \"\" .OUTPUT_ROOT}}\"'"
+
+  ai:atlassian:seed:plan:
+    desc: Gera o plano declarativo de semeadura Jira + Confluence
+    cmds:
+      - task: ai:atlassian:seed:plan:{{if or (eq .OS "Windows_NT") (eq .OS "windows")}}windows{{else}}linux{{end}}
+
+  ai:atlassian:seed:plan:windows:
+    desc: Windows - gera o plano declarativo da semeadura Atlassian
+    platforms: [windows]
+    dir: '{{.TASKFILE_DIR}}'
+    cmds:
+      - "pwsh -NoProfile -File ./scripts/invoke-python.ps1 -ScriptPath ./scripts/ai-atlassian-seed.py -Arguments plan"
+
+  ai:atlassian:seed:plan:linux:
+    desc: Linux/WSL - gera o plano declarativo da semeadura Atlassian
+    platforms: [linux]
+    dir: '{{.TASKFILE_DIR}}'
+    cmds:
+      - "bash -lc 'bash ./scripts/run-python.sh ./scripts/ai-atlassian-seed.py plan'"
+
+  ai:atlassian:seed:apply:
+    desc: Executa a semeadura retroativa Jira + Confluence
+    cmds:
+      - task: ai:atlassian:seed:apply:{{if or (eq .OS "Windows_NT") (eq .OS "windows")}}windows{{else}}linux{{end}}
+        vars:
+          ALLOW_VISUAL_BOARD_GAP: "{{default \"0\" .ALLOW_VISUAL_BOARD_GAP}}"
+
+  ai:atlassian:seed:apply:windows:
+    desc: Windows - executa a semeadura retroativa Atlassian
+    platforms: [windows]
+    dir: '{{.TASKFILE_DIR}}'
+    cmds:
+      - "pwsh -NoProfile -File ./scripts/run-ai-atlassian-seed.ps1{{if eq .ALLOW_VISUAL_BOARD_GAP \"1\"}} -AllowVisualBoardGap{{end}}"
+
+  ai:atlassian:seed:apply:linux:
+    desc: Linux/WSL - executa a semeadura retroativa Atlassian
+    platforms: [linux]
+    dir: '{{.TASKFILE_DIR}}'
+    cmds:
+      - "bash -lc 'bash ./scripts/run-python.sh ./scripts/ai-atlassian-seed.py apply{{if eq .ALLOW_VISUAL_BOARD_GAP \"1\"}} --allow-visual-board-gap{{end}}'"
+
+  ai:atlassian:docs:sync:
+    desc: Sincroniza a documentacao oficial do control plane no Confluence
+    cmds:
+      - task: ai:atlassian:docs:sync:{{if or (eq .OS "Windows_NT") (eq .OS "windows")}}windows{{else}}linux{{end}}
+        vars:
+          ISSUE_KEYS: "{{default \"\" .ISSUE_KEYS}}"
+
+  ai:atlassian:docs:sync:windows:
+    desc: Windows - sincroniza a documentacao oficial no Confluence
+    platforms: [windows]
+    dir: '{{.TASKFILE_DIR}}'
+    cmds:
+      - "pwsh -NoProfile -File ./scripts/run-ai-atlassian-docs-sync.ps1 -IssueKeys \"{{default \"\" .ISSUE_KEYS}}\""
+
+  ai:atlassian:docs:sync:linux:
+    desc: Linux/WSL - sincroniza a documentacao oficial no Confluence
+    platforms: [linux]
+    dir: '{{.TASKFILE_DIR}}'
+    cmds:
+      - "bash -lc 'bash ./scripts/run-python.sh ./scripts/ai-atlassian-docs-sync.py --issue-keys \"{{default \"\" .ISSUE_KEYS}}\"'"
 
   ai:review:ensure:
     desc: Garante o ledger de revisao especializada do repo

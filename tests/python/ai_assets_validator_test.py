@@ -31,7 +31,14 @@ class ValidateAiAssetsTests(unittest.TestCase):
         self.assertIn("docs/AI-SOURCE-AUDIT.md", module.REQUIRED_FILES)
         self.assertIn("docs/TASKS.md", module.REQUIRED_FILES)
         self.assertIn("docs/WORKFLOWS.md", module.REQUIRED_FILES)
+        self.assertIn("config/ai/platforms.yaml", module.REQUIRED_FILES)
+        self.assertIn("config/ai/platforms.local.yaml.tpl", module.REQUIRED_FILES)
+        self.assertIn("config/ai/agents.yaml", module.REQUIRED_FILES)
+        self.assertIn("config/ai/contracts.yaml", module.REQUIRED_FILES)
         self.assertIn("scripts/ai-route.py", module.REQUIRED_FILES)
+        self.assertIn("scripts/ai-control-plane.py", module.REQUIRED_FILES)
+        self.assertIn("scripts/ai_control_plane_lib.py", module.REQUIRED_FILES)
+        self.assertIn("scripts/atlassian_platform_lib.py", module.REQUIRED_FILES)
         self.assertIn("scripts/cspell-governance.py", module.REQUIRED_FILES)
         self.assertIn("scripts/validate_workflow_task_sync.py", module.REQUIRED_FILES)
         self.assertIn("## Validacao recomendada", module.REQUIRED_AGENT_HEADINGS)
@@ -65,6 +72,10 @@ class ValidateAiAssetsTests(unittest.TestCase):
         self.assertIn(
             "pascoalete",
             module.CATALOG_REQUIRED_SNIPPETS["docs/AI-AGENTS-CATALOG.md"],
+        )
+        self.assertIn(
+            "### `ai:atlassian:check`",
+            module.CATALOG_REQUIRED_SNIPPETS["docs/TASKS.md"],
         )
 
     def test_validator_passes_on_current_repo(self) -> None:

@@ -148,6 +148,108 @@ Referencia operacional das tasks canonicas mais importantes do repositorio.
 - Funcionalidade: executa smoke eval de roteamento e governanca declarativa.
 - Uso manual: `task ai:eval:smoke`
 
+### `ai:control-plane:show`
+
+- Funcionalidade: exibe o resumo da control plane dev-time em [`config/ai/`](../config/ai/).
+- Uso manual: `task ai:control-plane:show`
+
+### `ai:1password:ratelimit`
+
+- Funcionalidade: exibe o consumo atual e o restante do rate limit da service
+  account usada pelo `1Password CLI`.
+- Uso manual: `task ai:1password:ratelimit`
+- Uso com refresh explicito: `task ai:1password:ratelimit REFRESH=1`
+- Observacao: a task falha com `exit 1` quando `account.read_write` estiver
+  esgotado, para permitir preflight automatizado antes de rodadas remotas.
+
+### `ai:atlassian:check`
+
+- Funcionalidade: resolve refs da control plane Atlassian e valida conectividade
+  com `Jira` e `Confluence` via API oficial.
+- Uso manual: `task ai:atlassian:check`
+- Uso com override pontual: `task ai:atlassian:check SITE_URL="https://sua-org.atlassian.net"`
+- Observacao: a task usa a control plane base em [`config/ai/platforms.yaml`](../config/ai/platforms.yaml)
+  e respeita o overlay local derivado de
+  [`config/ai/platforms.local.yaml.tpl`](../config/ai/platforms.local.yaml.tpl)
+  quando presente; `SITE_URL` segue disponivel para override pontual.
+
+### `ai:atlassian:openapi:show`
+
+- Funcionalidade: exibe o catalogo dos specs OpenAPI oficiais da Atlassian
+  usados como base para codegen e auditoria.
+- Uso manual: `task ai:atlassian:openapi:show`
+
+### `ai:atlassian:openapi:vendor`
+
+- Funcionalidade: baixa e vendoriza os specs oficiais da Atlassian em
+  [`vendor/atlassian/`](../vendor/atlassian/README.md).
+- Uso manual: `task ai:atlassian:openapi:vendor`
+- Observacao: o fluxo-base do repo nao deve gerar clients direto da URL; o
+  codegen deve usar os arquivos vendorizados.
+
+### `ai:jira:model:show`
+
+- Funcionalidade: exibe o modelo declarativo alvo do projeto `Jira` mantido em
+  [`config/ai/jira-model.yaml`](../config/ai/jira-model.yaml).
+- Uso manual: `task ai:jira:model:show`
+
+### `ai:jira:model:delta`
+
+- Funcionalidade: compara o tenant `Jira` atual com o modelo alvo e devolve o
+  delta de statuses, fields, components e acesso de board.
+- Uso manual: `task ai:jira:model:delta`
+- Observacao: o resultado operacional consolidado tambem fica documentado em
+  [`docs/atlassian-ia/2026-03-07-jira-configuration-export.md`](atlassian-ia/2026-03-07-jira-configuration-export.md).
+
+### `ai:atlassian:backfill:plan`
+
+- Funcionalidade: gera o plano declarativo de backfill retroativo a partir de
+  [`ROADMAP.md`](../ROADMAP.md), [`docs/ROADMAP-DECISIONS.md`](ROADMAP-DECISIONS.md),
+  [`docs/AI-WIP-TRACKER.md`](AI-WIP-TRACKER.md) e da trilha
+  [`docs/atlassian-ia/`](atlassian-ia/README.md).
+- Uso manual: `task ai:atlassian:backfill:plan`
+- Observacao: a task so monta os payloads e as contagens; a aplicacao no tenant
+  continua dependente de auth/permissoes e da customizacao estrutural do
+  projeto `Jira`.
+
+### `ai:atlassian:migration:bundle`
+
+- Funcionalidade: gera um bundle auditavel com manifest, schemas, endpoint
+  catalog, plano de backfill e copia dos artefatos fonte usados na migracao
+  para `Jira` e `Confluence`.
+- Uso manual: `task ai:atlassian:migration:bundle`
+- Observacao: o `.zip` gerado deve ser anexado na issue correspondente do
+  `Jira` assim que ela existir e linkado da pagina correspondente no
+  `Confluence`.
+
+### `ai:atlassian:seed:plan`
+
+- Funcionalidade: gera o plano declarativo da semeadura retroativa em `Jira` e
+  `Confluence`, incluindo precondicoes, contagem de issues e arvore de paginas
+  do modelo oficial.
+- Uso manual: `task ai:atlassian:seed:plan`
+- Observacao: o plano atual explicita o bloqueio do board enquanto o layout do
+  `DOT board` ainda estiver desalinhado com o workflow alvo, a menos que haja
+  override explicito aprovado pelo usuario para uma rodada especifica.
+
+### `ai:atlassian:seed:apply`
+
+- Funcionalidade: executa a semeadura retroativa, cria/atualiza a issue de
+  migracao, anexa o bundle auditavel e sincroniza paginas e comentarios
+  estruturados.
+- Uso manual: `task ai:atlassian:seed:apply`
+- Observacao: esta task so deve ser rodada apos o board refletir o workflow
+  oficial e o delta estrutural do projeto estar saneado.
+- Override excepcional desta rodada: `uv run --locked python scripts/ai-atlassian-seed.py apply --allow-visual-board-gap`
+
+### `ai:atlassian:docs:sync`
+
+- Funcionalidade: resincroniza a documentacao oficial do control plane no
+  `Confluence` sem depender da semeadura completa de `Jira`.
+- Uso manual: `task ai:atlassian:docs:sync ISSUE_KEYS="DOT-1,DOT-65,DOT-66"`
+- Observacao: esta task existe para manter o `Confluence` vivo mesmo quando o
+  board do `Jira Software` ainda estiver em drift ou bloqueado.
+
 ### `ai:worklog:check`
 
 - Funcionalidade: valida pendencias do tracker e bloqueia nova rodada quando a

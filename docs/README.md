@@ -38,6 +38,15 @@ Mapa das documentacoes versionadas do projeto e ordem recomendada de leitura.
 ## Governanca e IA
 
 - [`docs/ai-operating-model.md`](docs/ai-operating-model.md): contrato da camada de IA.
+- [`config/ai/platforms.yaml`](../config/ai/platforms.yaml): configuracao dev-time das plataformas externas da camada de IA.
+- [`config/ai/platforms.local.yaml.tpl`](../config/ai/platforms.local.yaml.tpl): template do overlay local ignorado no Git para refs reais de plataformas.
+- [`config/ai/agents.yaml`](../config/ai/agents.yaml): optionalidade e papeis operacionais do modelo multiagente.
+- [`config/ai/agent-operations.yaml`](../config/ai/agent-operations.yaml): contrato operacional por papel para `Jira` e `Confluence`, com passo a passo, handoffs e evidencia obrigatoria.
+- [`config/ai/contracts.yaml`](../config/ai/contracts.yaml): contratos Jira + Confluence do fluxo-alvo.
+- [`config/ai/confluence-model.yaml`](../config/ai/confluence-model.yaml): arquitetura de informacao alvo do space e contrato de sync `repo-first -> Confluence`.
+- [`vendor/atlassian/README.md`](../vendor/atlassian/README.md): specs OpenAPI vendorizados da Atlassian para codegen e auditoria.
+- [`docs/atlassian-ia/README.md`](atlassian-ia/README.md): trilha versionada de contexto,
+  pareceres, planos e artefatos da migracao Jira + Confluence.
 - [`AI-WIP-TRACKER.md`](AI-WIP-TRACKER.md): continuidade operacional do trabalho em curso.
 - [`../ROADMAP.md`](../ROADMAP.md): backlog priorizado e sugestoes.
 - [`ROADMAP-DECISIONS.md`](ROADMAP-DECISIONS.md): historico das decisoes do roadmap.

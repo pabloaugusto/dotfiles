@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import subprocess
 import tempfile
 import unittest
 from pathlib import Path
@@ -81,6 +82,71 @@ class ValidateDocsTest(unittest.TestCase):
                 validate_docs._repo_root_entries.cache_clear()
 
         self.assertEqual(errors, [])
+
+    def test_accepts_valid_link_to_existing_untracked_file_inside_git_repo(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir)
+            subprocess.run(["git", "init"], cwd=root, check=True, capture_output=True)
+            markdown = root / "README.md"
+            markdown.write_text("[Guia](docs/guia.md)\n", encoding="utf-8")
+            target = root / "docs" / "guia.md"
+            target.parent.mkdir(parents=True, exist_ok=True)
+            target.write_text("# Guia\n", encoding="utf-8")
+            subprocess.run(["git", "add", "README.md"], cwd=root, check=True, capture_output=True)
+
+            original_root = validate_docs.ROOT
+            original_markdown_roots = validate_docs.MARKDOWN_ROOTS
+            try:
+                validate_docs.ROOT = root
+                validate_docs.MARKDOWN_ROOTS = [markdown]
+                validate_docs._tracked_repo_entries.cache_clear()
+                validate_docs._repo_root_entries.cache_clear()
+                validate_docs._is_git_ignored.cache_clear()
+                errors = validate_docs.validate_markdown_file(markdown)
+            finally:
+                validate_docs.ROOT = original_root
+                validate_docs.MARKDOWN_ROOTS = original_markdown_roots
+                validate_docs._tracked_repo_entries.cache_clear()
+                validate_docs._repo_root_entries.cache_clear()
+                validate_docs._is_git_ignored.cache_clear()
+
+        self.assertEqual(errors, [])
+
+    def test_rejects_link_to_existing_but_git_ignored_file(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir)
+            subprocess.run(["git", "init"], cwd=root, check=True, capture_output=True)
+            (root / ".gitignore").write_text("docs/*.local.md\n", encoding="utf-8")
+            markdown = root / "README.md"
+            markdown.write_text("[Local](docs/guia.local.md)\n", encoding="utf-8")
+            target = root / "docs" / "guia.local.md"
+            target.parent.mkdir(parents=True, exist_ok=True)
+            target.write_text("# Local\n", encoding="utf-8")
+            subprocess.run(
+                ["git", "add", "README.md", ".gitignore"],
+                cwd=root,
+                check=True,
+                capture_output=True,
+            )
+
+            original_root = validate_docs.ROOT
+            original_markdown_roots = validate_docs.MARKDOWN_ROOTS
+            try:
+                validate_docs.ROOT = root
+                validate_docs.MARKDOWN_ROOTS = [markdown]
+                validate_docs._tracked_repo_entries.cache_clear()
+                validate_docs._repo_root_entries.cache_clear()
+                validate_docs._is_git_ignored.cache_clear()
+                errors = validate_docs.validate_markdown_file(markdown)
+            finally:
+                validate_docs.ROOT = original_root
+                validate_docs.MARKDOWN_ROOTS = original_markdown_roots
+                validate_docs._tracked_repo_entries.cache_clear()
+                validate_docs._repo_root_entries.cache_clear()
+                validate_docs._is_git_ignored.cache_clear()
+
+        self.assertEqual(len(errors), 1)
+        self.assertIn("link local invalido", errors[0])
 
     def test_accepts_code_label_inside_markdown_link(self) -> None:
         with tempfile.TemporaryDirectory() as tmp_dir:

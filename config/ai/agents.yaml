@@ -1,0 +1,160 @@
+version: 1
+
+defaults:
+  execution_mode: human-in-the-loop
+  require_jira_for_work: true
+  require_confluence_for_docs: true
+  default_pull_model: true
+
+roles:
+  ai-product-owner:
+    enabled: true
+    required: true
+    category: governance
+    responsibilities:
+      - backlog
+      - prioritization
+      - continuous-prioritization
+      - queue-ordering
+      - jira-issue-creation
+
+  ai-engineering-architect:
+    enabled: true
+    required: true
+    category: governance
+    responsibilities:
+      - architecture
+      - adr
+      - confluence-architecture
+
+  ai-engineering-manager:
+    enabled: true
+    required: true
+    category: governance
+    responsibilities:
+      - flow-governance
+      - risk
+      - blockers
+
+  ai-tech-lead:
+    enabled: true
+    required: true
+    category: governance
+    responsibilities:
+      - decomposition
+      - handoff
+      - technical-direction
+
+  ai-developer-python:
+    enabled: true
+    required: false
+    category: delivery
+    specialization: python
+
+  ai-developer-powershell:
+    enabled: true
+    required: false
+    category: delivery
+    specialization: powershell
+
+  ai-developer-automation:
+    enabled: true
+    required: false
+    category: delivery
+    specialization: automation
+
+  ai-developer-config-policy:
+    enabled: true
+    required: false
+    category: delivery
+    specialization: config-policy
+
+  ai-qa:
+    enabled: true
+    required: true
+    category: quality
+    responsibilities:
+      - tests
+      - validation
+      - evidence
+
+  ai-reviewer-python:
+    enabled: true
+    required: false
+    category: quality
+    specialization: python-review
+
+  ai-reviewer-powershell:
+    enabled: true
+    required: false
+    category: quality
+    specialization: powershell-review
+
+  ai-reviewer-automation:
+    enabled: true
+    required: false
+    category: quality
+    specialization: automation-review
+
+  ai-reviewer-config-policy:
+    enabled: true
+    required: false
+    category: quality
+    specialization: config-policy-review
+
+  ai-reviewer:
+    enabled: true
+    required: true
+    category: quality
+    responsibilities:
+      - cross-cutting-review
+      - review-orchestration
+      - approval
+
+  ai-devops:
+    enabled: true
+    required: true
+    category: delivery
+    responsibilities:
+      - ci-cd
+      - infra
+      - automation
+
+  ai-documentation-agent:
+    enabled: true
+    required: true
+    category: knowledge
+    responsibilities:
+      - confluence
+      - mirrors
+      - adr-linking
+      - jira-confluence-bidirectional-linking
+      - traceability-enforcement
+      - artifact-first-documentation
+      - migration-bundle-curation
+      - schema-sync-governance
+
+  ai-browser-validator:
+    enabled: false
+    required: false
+    category: quality
+    tool: playwright
+    responsibilities:
+      - browser-evidence
+      - ui-smoke-validation
+
+  ai-designer:
+    enabled: false
+    required: false
+    category: optional-domain
+    tool: figma
+
+  ai-ux-cro-analyst:
+    enabled: false
+    required: false
+    category: optional-domain
+
+  ai-seo-specialist:
+    enabled: false
+    required: false
+    category: optional-domain
