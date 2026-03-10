@@ -20,6 +20,16 @@ Registro consultivo do agente Pascoalete para ortografia e higiene vocabular.
 <!-- ai-orthography:records:start -->
 | Data/Hora UTC | Worklog ID | Revisor | Status | Arquivo | Achados | Evidencia |
 | --- | --- | --- | --- | --- | --- | --- |
+| 2026-03-10 14:17 UTC | DOT-128 | pascoalete | reprovado | tests/powershell/BootstrapConfig.Tests.ps1 | pablo, pablo, pabloaugusto, AAAATESTLOCAL | task spell:check |
+| 2026-03-10 14:17 UTC | DOT-128 | pascoalete | reprovado | docs/secrets-and-auth.md | tecnico, migracao, comentarios, documentacao, canonica, permissoes, rotacao, atlassian (+25) | task spell:check |
+| 2026-03-10 14:17 UTC | DOT-128 | pascoalete | reprovado | docs/checkenv.md | gpgsign, signingkey, identityagent, identityfile, worktree, worktree, worktree, signingkey (+3) | task spell:check |
+| 2026-03-10 14:17 UTC | DOT-128 | pascoalete | reprovado | df/secrets/secrets-ref.yaml | repositorio | task spell:check |
+| 2026-03-10 14:17 UTC | DOT-128 | pascoalete | reprovado | df/powershell/_functions.ps1 | SFTA, winget, winget, winget, winget, Winget, winget, acceptlicense (+166) | task spell:check |
+| 2026-03-10 14:17 UTC | DOT-128 | pascoalete | reprovado | df/bash/.inc/check-env.sh | Disponivel, Disponivel, Disponivel, decriptografia, acessivel, acessivel, permissoes, toplevel (+64) | task spell:check |
+| 2026-03-10 14:17 UTC | DOT-128 | pascoalete | reprovado | config/secrets-rotation.yaml | onepassword, onepassword, gitlab, gitlab, glab, gitlab, gitlab, gitlab | task spell:check |
+| 2026-03-10 14:17 UTC | DOT-128 | pascoalete | reprovado | bootstrap/user-config.yaml.tpl | Configuracao, configuracao, canonicos, implicita, varios, variaveis, expansao, resolucao (+23) | task spell:check |
+| 2026-03-10 14:17 UTC | DOT-128 | pascoalete | reprovado | bootstrap/bootstrap-ubuntu-wsl.sh | gsub, gsub, gsub, gsub, gsub, sofware, procps, fontconfig (+37) | task spell:check |
+| 2026-03-10 14:17 UTC | DOT-128 | pascoalete | reprovado | bootstrap/bootstrap-config.ps1 | onepassword, variaveis, padrao, canonicos, implicita, varios, variaveis, expansao (+35) | task spell:check |
 | 2026-03-10 12:40 UTC | DOT-127 | pascoalete | reprovado | tests/python/ai_worklog_test.py | gpgsign, worktree, LICOES, obrigatorio, worktree, LICOES, licao, licao (+11) | task spell:check |
 | 2026-03-10 12:40 UTC | DOT-127 | pascoalete | reprovado | tests/python/ai_dispatch_test.py | tecnico, governanca | task spell:check |
 | 2026-03-10 12:40 UTC | DOT-127 | pascoalete | reprovado | tests/python/ai_assets_validator_test.py | possivel, LICOES, atlassian, Validacao, minimo, LICOES, comecar, Orquestracao (+6) | task spell:check |

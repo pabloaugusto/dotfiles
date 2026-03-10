@@ -18,7 +18,8 @@ Refs principais:
 
 - `op://secrets/dotfiles/1password/service-account`
 - `op://secrets/dotfiles/github/token` (preferencial)
-- `op://secrets/github/api/token` (fallback)
+- `op://secrets/github/api/token` (primeiro fallback)
+- `op://Personal/github/token-full-access` (contingencia final)
 - `op://secrets/dotfiles/age/age.key`
 - `git-signing.automation-public-key` em [`df/secrets/secrets-ref.yaml`](../df/secrets/secrets-ref.yaml) quando o signer tecnico estiver configurado
 
@@ -122,7 +123,8 @@ Estratégia:
    - `GH_TOKEN`
    - `GITHUB_TOKEN`
    - ref dedicado do projeto
-   - ref fallback
+   - primeiro fallback full-access
+   - contingencia final full-access
 3. `gh auth login --with-token` + `git_protocol=ssh`
 
 ## SSH Agent e Git signing
@@ -179,9 +181,10 @@ Não. É material público (chave pública SSH).
 ## Operação recomendada
 
 1. usar token dedicado do projeto como padrão
-2. manter token amplo só como contingência
-3. rodar `checkEnv` após mudanças em auth/SSH/Git
-4. rotacionar imediatamente qualquer credencial exposta
+2. usar `op://secrets/github/api/token` como primeiro fallback
+3. usar `op://Personal/github/token-full-access` como contingencia final
+4. rodar `checkEnv` após mudanças em auth/SSH/Git
+5. rotacionar imediatamente qualquer credencial exposta
 
 ## Rotacao canonica
 

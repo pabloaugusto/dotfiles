@@ -66,6 +66,7 @@ function Get-BootstrapConfigDefaults {
 	$defaults['secrets.onepassword_service_account_ref'] = 'op://secrets/dotfiles/1password/service-account'
 	$defaults['secrets.github_project_pat_ref'] = 'op://secrets/dotfiles/github/token'
 	$defaults['secrets.github_full_access_ref'] = 'op://secrets/github/api/token'
+	$defaults['secrets.github_full_access_fallback_ref'] = 'op://Personal/github/token-full-access'
 	$defaults['secrets.age_key_ref'] = 'op://secrets/dotfiles/age/age.key'
 	return $defaults
 }
@@ -567,6 +568,7 @@ function Write-BootstrapConfigYaml {
 		'@@SECRETS_ONEPASSWORD_SERVICE_ACCOUNT_REF@@' = Escape-YamlDoubleQuotedValue $Config['secrets.onepassword_service_account_ref']
 		'@@SECRETS_GITHUB_PROJECT_PAT_REF@@' = Escape-YamlDoubleQuotedValue $Config['secrets.github_project_pat_ref']
 		'@@SECRETS_GITHUB_FULL_ACCESS_REF@@' = Escape-YamlDoubleQuotedValue $Config['secrets.github_full_access_ref']
+		'@@SECRETS_GITHUB_FULL_ACCESS_FALLBACK_REF@@' = Escape-YamlDoubleQuotedValue $Config['secrets.github_full_access_fallback_ref']
 		'@@SECRETS_AGE_KEY_REF@@' = Escape-YamlDoubleQuotedValue $Config['secrets.age_key_ref']
 	}
 
@@ -592,6 +594,7 @@ function Test-BootstrapConfigFilled {
 		'secrets.onepassword_service_account_ref',
 		'secrets.github_project_pat_ref',
 		'secrets.github_full_access_ref',
+		'secrets.github_full_access_fallback_ref',
 		'secrets.age_key_ref'
 	)
 
@@ -720,6 +723,7 @@ function Invoke-BootstrapConfigWizard {
 	$Config['secrets.onepassword_service_account_ref'] = Read-ConfigPrompt -Label 'Ref 1Password service account (op://.../service-account)' -CurrentValue $Config['secrets.onepassword_service_account_ref']
 	$Config['secrets.github_project_pat_ref'] = Read-ConfigPrompt -Label 'Ref GitHub token dedicado (project-pat, op://secrets/dotfiles/github/token)' -CurrentValue $Config['secrets.github_project_pat_ref']
 	$Config['secrets.github_full_access_ref'] = Read-ConfigPrompt -Label 'Ref GitHub full-access (fallback, pode ficar vazio)' -CurrentValue $Config['secrets.github_full_access_ref']
+	$Config['secrets.github_full_access_fallback_ref'] = Read-ConfigPrompt -Label 'Ref GitHub contingencia final (fallback forte, pode ficar vazio)' -CurrentValue $Config['secrets.github_full_access_fallback_ref']
 	$Config['secrets.age_key_ref'] = Read-ConfigPrompt -Label 'Ref SOPS age key (op://.../age.key)' -CurrentValue $Config['secrets.age_key_ref']
 
 	return $Config
@@ -741,8 +745,9 @@ function Sync-BootstrapDerivedFiles {
 		'1password:'
 		("  service-account: ""{0}""" -f $Config['secrets.onepassword_service_account_ref'])
 		'github:'
-		("  full-access-token: ""{0}""" -f $Config['secrets.github_full_access_ref'])
 		("  project-pat: ""{0}""" -f $Config['secrets.github_project_pat_ref'])
+		("  full-access-token: ""{0}""" -f $Config['secrets.github_full_access_ref'])
+		("  full-access-token-fallback: ""{0}""" -f $Config['secrets.github_full_access_fallback_ref'])
 		'age:'
 		("  key: ""{0}""" -f $Config['secrets.age_key_ref'])
 	)

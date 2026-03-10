@@ -553,8 +553,8 @@ ensureGitHubAuth() {
 
 	local github_token="${GH_TOKEN:-${GITHUB_TOKEN:-}}"
 	if [[ -z "$github_token" ]]; then
-		# Prefer least-privilege project token, then fallback to full-access token.
-		for ref in "op://secrets/dotfiles/github/token" "op://secrets/github/api/token"; do
+		# Prefer least-privilege project token, then escalate through the full-access fallbacks.
+		for ref in "op://secrets/dotfiles/github/token" "op://secrets/github/api/token" "op://Personal/github/token-full-access"; do
 			github_token="$(op read "$ref" 2>/dev/null || true)"
 			if [[ -n "$github_token" ]]; then
 				break
@@ -569,7 +569,7 @@ ensureGitHubAuth() {
 	fi
 
 	if [[ -z "$github_token" ]]; then
-		echo "Token do GitHub nao encontrado (GITHUB_TOKEN/GH_TOKEN/op://secrets/dotfiles/github/token/op://secrets/github/api/token)."
+		echo "Token do GitHub nao encontrado (GITHUB_TOKEN/GH_TOKEN/op://secrets/dotfiles/github/token/op://secrets/github/api/token/op://Personal/github/token-full-access)."
 		return 1
 	fi
 	export GH_TOKEN="$github_token"

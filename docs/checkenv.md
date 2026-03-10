@@ -86,7 +86,7 @@ No final, o comando imprime resumo e ações sugeridas.
 As implementações tentam reautenticar uma vez quando possível:
 
 - `op` (via token já disponível no contexto)
-- `gh` (via `GH_TOKEN`/`GITHUB_TOKEN` ou refs de 1Password)
+- `gh` (via `GH_TOKEN`/`GITHUB_TOKEN` ou refs de 1Password na ordem: projeto, full-access, contingencia final)
 
 ## Comportamento no bootstrap
 

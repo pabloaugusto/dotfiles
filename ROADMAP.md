@@ -1,6 +1,6 @@
 # Roadmap do Repositorio
 
-Atualizado em: 2026-03-10 12:40 UTC
+Atualizado em: 2026-03-10 14:17 UTC
 Ciclo ativo: 2026-Q1
 
 Planejamento incremental para qualidade, testes, bootstrap e governanca do repo.
@@ -28,7 +28,7 @@ Edite apenas a tabela entre os marcadores abaixo.
 Atualizada por `task ai:roadmap:refresh`.
 
 <!-- roadmap:priority:start -->
-Atualizado em: 2026-03-10 12:40 UTC
+Atualizado em: 2026-03-10 14:17 UTC
 
 ### Ranking RICE
 
@@ -76,6 +76,7 @@ Sem sugestoes pendentes neste ciclo; itens aceitos ja estao rastreaveis.
 ### Next
 
 <!-- roadmap:next:start -->
+- [fix] Corrigir pendencias ortograficas remanescentes do worklog `DOT-128` em bootstrap/bootstrap-config.ps1, bootstrap/bootstrap-ubuntu-wsl.sh, bootstrap/user-config.yaml.tpl, config/... | notas=Pendencia automatica criada por Pascoalete apos review consultivo reprovado sem correcao automatica.
 - [fix] Corrigir pendencias ortograficas remanescentes do worklog `DOT-127` em .agents/cards/governador-continuidade-wip.md, .agents/cards/orquestrador-delegacao.md, .agents/skills/task... | notas=Pendencia automatica criada por Pascoalete apos review consultivo reprovado sem correcao automatica.
 - [fix] Corrigir pendencias ortograficas remanescentes do worklog `DOT-117` em config/ai/agent-operations.yaml, config/ai/agents.yaml, config/ai/jira-model.yaml, config/ai/reviewer-poli... | notas=Pendencia automatica criada por Pascoalete apos review consultivo reprovado sem correcao automatica.
 - [fix] Corrigir pendencias ortograficas remanescentes do worklog `DOT-114` em scripts/ai-atlassian-agent-comment-audit.py, scripts/ai-atlassian-backfill.py, scripts/ai_atlassian_agent_... | notas=Pendencia automatica criada por Pascoalete apos review consultivo reprovado sem correcao automatica.
