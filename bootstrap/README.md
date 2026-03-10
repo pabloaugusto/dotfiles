@@ -133,6 +133,9 @@ Comandos:
 - `checkEnv` falha em `gpg.ssh.program`: valide `op-ssh-sign` no `PATH`.
 - `gh` sem protocolo SSH: rode `gh config set git_protocol ssh --host github.com`.
 - `ssh -T git@github.com` falha: confirme chave publica e agent do 1Password.
+- em worktree de automacao, se o handshake cru continuar exigindo aprovacao do
+  1Password, valide `task env:check SIGN_MODE=automation` e confirme o
+  `core.sshCommand` tecnico da worktree.
 - `~/.env.local.sops` ausente: rerode bootstrap ou a etapa de auth/secrets.
 - links quebrados: rode `task bootstrap:relink`.
 - layout OneDrive inconsistente: valide a config e o resultado de

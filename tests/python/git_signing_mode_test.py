@@ -12,13 +12,17 @@ from scripts.git_signing_lib import (
     apply_automation_mode,
     apply_human_mode,
     build_default_title,
+    build_git_ssh_command,
     default_allowed_signers_path,
     default_local_automation_key_path,
+    ensure_github_auth_key,
     ensure_github_signing_key,
     ensure_local_automation_keypair,
+    load_local_automation_public_key,
     load_secrets_refs,
     normalize_public_key,
     public_key_identity,
+    resolve_local_ssh_sign_program,
     resolve_public_key_ref,
     status_payload,
 )
@@ -61,6 +65,37 @@ class GitSigningModeTests(unittest.TestCase):
             build_default_title("my-host.local"),
             "dotfiles-automation-signing-my-host.local",
         )
+
+    def test_build_git_ssh_command_is_agentless_and_key_scoped(self) -> None:
+        command = build_git_ssh_command(pathlib.Path("C:/tmp/id_ed25519"))
+        self.assertIn('-i "C:/tmp/id_ed25519"', command)
+        self.assertIn("-o IdentitiesOnly=yes", command)
+        self.assertIn("-o IdentityAgent=none", command)
+
+    def test_resolve_public_key_ref_falls_back_to_local_automation_key(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            repo = pathlib.Path(tmp)
+            subprocess.run(["git", "init", "-q"], cwd=repo, check=True)
+            automation_dir = repo / ".git" / "dotfiles" / "automation-signing"
+            automation_dir.mkdir(parents=True)
+            (automation_dir / "id_ed25519.pub").write_text(VALID_KEY + "\n", encoding="utf-8")
+
+            chosen_ref, resolved_key = resolve_public_key_ref(repo)
+
+            self.assertEqual(chosen_ref, "")
+            self.assertEqual(resolved_key, VALID_KEY)
+
+    def test_load_local_automation_public_key_reads_pub_file(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            repo = pathlib.Path(tmp)
+            subprocess.run(["git", "init", "-q"], cwd=repo, check=True)
+            automation_dir = repo / ".git" / "dotfiles" / "automation-signing"
+            automation_dir.mkdir(parents=True)
+            (automation_dir / "id_ed25519.pub").write_text(VALID_KEY + "\n", encoding="utf-8")
+
+            resolved = load_local_automation_public_key(repo)
+
+            self.assertEqual(resolved, VALID_KEY)
 
     def test_apply_automation_mode_writes_worktree_config(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
@@ -196,10 +231,53 @@ class GitSigningModeTests(unittest.TestCase):
                 ).stdout.strip(),
                 str(private_key_path),
             )
+            self.assertEqual(
+                subprocess.run(
+                    [
+                        "git",
+                        "-C",
+                        str(repo),
+                        "config",
+                        "--worktree",
+                        "--get",
+                        "dotfiles.github.authMode",
+                    ],
+                    text=True,
+                    capture_output=True,
+                    check=True,
+                ).stdout.strip(),
+                "automation",
+            )
+            self.assertEqual(
+                subprocess.run(
+                    [
+                        "git",
+                        "-C",
+                        str(repo),
+                        "config",
+                        "--worktree",
+                        "--get",
+                        "dotfiles.github.automationSshKeyPath",
+                    ],
+                    text=True,
+                    capture_output=True,
+                    check=True,
+                ).stdout.strip(),
+                str(private_key_path),
+            )
+            ssh_command = subprocess.run(
+                ["git", "-C", str(repo), "config", "--worktree", "--get", "core.sshCommand"],
+                text=True,
+                capture_output=True,
+                check=True,
+            ).stdout.strip()
+            self.assertIn("IdentityAgent=none", ssh_command)
+            self.assertIn("IdentitiesOnly=yes", ssh_command)
             self.assertTrue(
                 str(payload["effective_gpg_program"]).lower().endswith("ssh-keygen")
                 or str(payload["effective_gpg_program"]).lower().endswith("ssh-keygen.exe")
             )
+            self.assertEqual(payload["effective_gpg_program"], resolve_local_ssh_sign_program())
 
     def test_apply_automation_mode_supports_signed_commit_with_local_backend(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
@@ -261,6 +339,20 @@ class GitSigningModeTests(unittest.TestCase):
                 check=False,
             )
             self.assertNotEqual(worktree_mode.returncode, 0)
+            auth_mode = subprocess.run(
+                ["git", "-C", str(repo), "config", "--worktree", "--get", "dotfiles.github.authMode"],
+                text=True,
+                capture_output=True,
+                check=False,
+            )
+            self.assertNotEqual(auth_mode.returncode, 0)
+            ssh_command = subprocess.run(
+                ["git", "-C", str(repo), "config", "--worktree", "--get", "core.sshCommand"],
+                text=True,
+                capture_output=True,
+                check=False,
+            )
+            self.assertNotEqual(ssh_command.returncode, 0)
 
     def test_status_payload_reports_current_worktree_config(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
@@ -278,6 +370,27 @@ class GitSigningModeTests(unittest.TestCase):
             self.assertEqual(payload["worktree_automation_backend"], "agent-backed")
             self.assertEqual(payload["effective_signing_principal"], "test@example.com")
             self.assertTrue(str(payload["effective_allowed_signers_file"]).endswith("allowed_signers"))
+            self.assertEqual(payload["worktree_auth_mode"], "")
+            self.assertEqual(payload["worktree_auth_key_path"], "")
+            worktree_ssh_command = subprocess.run(
+                ["git", "-C", str(repo), "config", "--worktree", "--get", "core.sshCommand"],
+                text=True,
+                capture_output=True,
+                check=False,
+            )
+            self.assertNotEqual(worktree_ssh_command.returncode, 0)
+            self.assertNotIn("IdentityAgent=none", str(payload["effective_core_ssh_command"]))
+
+    def test_status_payload_reports_local_backend_auth_context(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            repo = pathlib.Path(tmp)
+            subprocess.run(["git", "init", "-q"], cwd=repo, check=True)
+            subprocess.run(["git", "-C", str(repo), "config", "user.email", "test@example.com"], check=True)
+            payload = apply_automation_mode(repo)
+
+            self.assertEqual(payload["worktree_auth_mode"], "automation")
+            self.assertEqual(payload["worktree_auth_key_path"], str(payload["private_key_path"]))
+            self.assertIn("IdentityAgent=none", str(payload["effective_core_ssh_command"]))
 
     def test_resolve_public_key_ref_falls_back_to_cached_key_when_op_read_fails(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
@@ -390,9 +503,9 @@ class GitSigningModeTests(unittest.TestCase):
             ]
 
             with patch(
-                "scripts.git_signing_lib.list_github_signing_keys",
+                "scripts.git_signing_lib.list_github_keys",
                 side_effect=responses,
-            ), patch("scripts.git_signing_lib.run_command"), patch(
+            ), patch("scripts.git_signing_lib.run_github_command"), patch(
                 "scripts.git_signing_lib.time.sleep"
             ):
                 payload = ensure_github_signing_key(
@@ -403,6 +516,31 @@ class GitSigningModeTests(unittest.TestCase):
 
             self.assertEqual(payload["status"], "created")
             self.assertEqual(payload["id"], 123)
+
+    def test_ensure_github_auth_key_retries_after_creation(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            repo = pathlib.Path(tmp)
+            subprocess.run(["git", "init", "-q"], cwd=repo, check=True)
+            responses = [
+                [],
+                [],
+                [{"id": 456, "title": "dotfiles-auth", "key": VALID_KEY}],
+            ]
+
+            with patch(
+                "scripts.git_signing_lib.list_github_keys",
+                side_effect=responses,
+            ), patch("scripts.git_signing_lib.run_github_command"), patch(
+                "scripts.git_signing_lib.time.sleep"
+            ):
+                payload = ensure_github_auth_key(
+                    repo,
+                    public_key=VALID_KEY,
+                    title="dotfiles-auth",
+                )
+
+            self.assertEqual(payload["status"], "created")
+            self.assertEqual(payload["id"], 456)
 
 
 if __name__ == "__main__":

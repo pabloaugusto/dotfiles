@@ -160,6 +160,15 @@ Fluxo recomendado para automação local:
 4. aplicar `task git:signing:mode:automation`
 5. validar com `task env:check SIGN_MODE=automation`
 
+No modo de automação, a worktree também pode materializar um `core.sshCommand`
+scoped para o próprio checkout, apontando para a chave técnica local derivada
+no diretório Git comum da worktree. Nesse mesmo modo, `user.signingkey` passa
+a referenciar a chave privada técnica local e `gpg.ssh.program` e sobrescrito
+para `ssh-keygen`, permitindo assinatura Git sem depender do prompt biométrico
+do 1Password fora do fluxo humano padrão. A resolução desses caminhos fica
+centralizada em [`scripts/git_signing_lib.py`](../scripts/git_signing_lib.py),
+evitando drift entre o contrato documental e a implementação real.
+
 Observações:
 
 - a chave pública técnica não é segredo; a rotação continua simples porque a
@@ -170,13 +179,14 @@ Observações:
 
 ## `user.signingkey` é segredo?
 
-Não. É material público (chave pública SSH).
+Em modo humano, não. É material público (chave pública SSH).
 
 - Pode ficar em `~/.config/git/.gitconfig.local`
-- A worktree de automação pode sobrescrevê-lo localmente sem tocar no perfil
-  humano
+- A worktree de automação pode sobrescrevê-lo localmente com o caminho da
+  chave privada técnica, sem tocar no perfil humano
 - Não precisa de `sops+age`
-- O segredo real é a chave privada, mantida no 1Password
+- O segredo real continua sendo a chave privada; no fluxo técnico ela fica fora
+  do versionamento e restrita ao diretório Git comum da worktree
 
 ## Operação recomendada
 

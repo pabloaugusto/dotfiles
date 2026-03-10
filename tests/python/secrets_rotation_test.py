@@ -6,6 +6,7 @@ import unittest
 from unittest import mock
 
 from scripts.secrets_rotation_lib import (
+    GitHubDriver,
     load_repo_context,
     plan_payload,
     preflight_payload,
@@ -64,13 +65,31 @@ def write_repo_fixture(repo: pathlib.Path) -> None:
 
 
 class SecretsRotationTests(unittest.TestCase):
+    @mock.patch("scripts.secrets_rotation_lib.run_command")
+    def test_github_handshake_uses_worktree_git_ssh_command_when_present(
+        self,
+        run_command_mock: mock.Mock,
+    ) -> None:
+        run_command_mock.return_value = mock.Mock(
+            stdout='ssh -i "C:/tmp/id_ed25519"', stderr="", returncode=0
+        )
+        driver = GitHubDriver(pathlib.Path.cwd())
+
+        ok, detail = driver.validate_ssh_handshake()
+
+        self.assertTrue(ok)
+        self.assertIn("core.sshCommand ativo", detail)
+        run_command_mock.assert_called_once()
+
     def test_load_repo_context_orders_targets(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             repo = pathlib.Path(tmp)
             write_repo_fixture(repo)
             context, _config, _refs, targets = load_repo_context(repo)
             self.assertEqual(context.repo_root, repo.resolve())
-            self.assertEqual([target.target_id for target in targets], ["github-ssh-auth", "age-runtime"])
+            self.assertEqual(
+                [target.target_id for target in targets], ["github-ssh-auth", "age-runtime"]
+            )
 
     @mock.patch("scripts.secrets_rotation_lib.command_exists")
     @mock.patch("scripts.secrets_rotation_lib.auth_probe_gitlab")
@@ -94,9 +113,13 @@ class SecretsRotationTests(unittest.TestCase):
             payload = preflight_payload(repo_root=repo)
 
             self.assertEqual(payload["status"], "fail")
-            github_target = next(item for item in payload["targets"] if item["target_id"] == "github-ssh-auth")
+            github_target = next(
+                item for item in payload["targets"] if item["target_id"] == "github-ssh-auth"
+            )
             self.assertIn("auth gh indisponivel: gh auth ausente", github_target["blockers"])
-            age_target = next(item for item in payload["targets"] if item["target_id"] == "age-runtime")
+            age_target = next(
+                item for item in payload["targets"] if item["target_id"] == "age-runtime"
+            )
             self.assertTrue(any("age-keygen" in blocker for blocker in age_target["blockers"]))
 
     def test_plan_payload_orders_steps_by_target_order(self) -> None:
@@ -106,7 +129,9 @@ class SecretsRotationTests(unittest.TestCase):
             payload = plan_payload(repo_root=repo)
             self.assertEqual(payload["targets"][0]["target_id"], "github-ssh-auth")
             self.assertEqual(payload["targets"][1]["target_id"], "age-runtime")
-            self.assertEqual(payload["targets"][0]["steps"][0]["step"], "Criar chave substituta no 1Password")
+            self.assertEqual(
+                payload["targets"][0]["steps"][0]["step"], "Criar chave substituta no 1Password"
+            )
 
     @mock.patch("scripts.secrets_rotation_lib.GitHubDriver.validate_git_remote")
     @mock.patch("scripts.secrets_rotation_lib.GitHubDriver.validate_ssh_handshake")
@@ -139,8 +164,14 @@ class SecretsRotationTests(unittest.TestCase):
             payload = validate_payload(repo_root=repo)
 
             self.assertEqual(payload["status"], "fail")
-            age_target = next(item for item in payload["targets"] if item["target_id"] == "age-runtime")
-            self.assertTrue(any(check["name"] == "sops_recipient_materialized" for check in age_target["checks"]))
+            age_target = next(
+                item for item in payload["targets"] if item["target_id"] == "age-runtime"
+            )
+            self.assertTrue(
+                any(
+                    check["name"] == "sops_recipient_materialized" for check in age_target["checks"]
+                )
+            )
             self.assertTrue(any("placeholder" in blocker for blocker in age_target["blockers"]))
 
     @mock.patch.dict("os.environ", {"SOPS_AGE_KEY": "AGE-SECRET-KEY-1EXAMPLEEXAMPLEEXAMPLEEXAMPLEEXAMPLEEXAMPLEEXAMPLE"})
