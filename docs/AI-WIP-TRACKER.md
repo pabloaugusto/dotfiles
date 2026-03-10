@@ -1,8 +1,9 @@
 # AI WIP Tracker
 
-Atualizado em: 2026-03-08 04:39 UTC
+Atualizado em: 2026-03-10 21:09 UTC
 
-Fonte de verdade operacional para continuidade de tarefas dos agentes de IA.
+Fallback local de continuidade. O Jira e a fonte primaria do fluxo vivo; este
+arquivo existe como contingencia local e preflight do repo.
 
 ## Regras operacionais
 
@@ -22,8 +23,6 @@ Fonte de verdade operacional para continuidade de tarefas dos agentes de IA.
 <!-- ai-worklog:doing:start -->
 | ID | Tarefa | Branch | Responsavel | Inicio UTC | Ultima atualizacao UTC | Proximo passo | Bloqueios |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| WIP-20260307-ATLASSIAN-ADAPTERS | Implementar a camada tecnica de adapters Jira/Confluence, aplicar o schema alvo e semear backlog/documentacao retroativa com bundle auditavel. | feat/atlassian-ia-context | ai-agent | 2026-03-07 18:56 UTC | 2026-03-08 04:39 UTC | Seguir a trilha Atlassian a partir do backlog oficial: tratar bootstrap de sessao autenticada para o browser validator em DOT-66 e continuar o endurecimento do control plane enquanto DOT-65 permanece aberto para o board. | Board API /rest/agile/1.0/board segue em 401 Unauthorized; scope does not match. Browser validator via Playwright ain... |
-| WIP-20260307-SECRETS-ROTATION | Projetar e implementar a governanca e o core de rotacionamento automatizado de secrets, chaves SSH e artefatos criptografados, com orquestracao segura por CLIs criticos e agente especializado. | main | ai-agent | 2026-03-07 14:20 UTC | 2026-03-07 17:28 UTC | Retomar em `main` as prioridades P0 da rodada atual antes de avancar no core do rotacionador. | - |
 <!-- ai-worklog:doing:end -->
 
 ## Done
@@ -31,6 +30,8 @@ Fonte de verdade operacional para continuidade de tarefas dos agentes de IA.
 <!-- ai-worklog:done:start -->
 | ID | Tarefa | Branch | Responsavel | Inicio UTC | Concluido UTC | Resultado |
 | --- | --- | --- | --- | --- | --- | --- |
+| WIP-20260307-ATLASSIAN-ADAPTERS | Implementar a camada tecnica de adapters Jira/Confluence, aplicar o schema alvo e semear backlog/documentacao retroativa com bundle auditavel. | feat/atlassian-ia-context | ai-agent | 2026-03-07 18:56 UTC | 2026-03-10 21:09 UTC | Contexto ativo removido do fallback local porque o fluxo vivo migrou para o Jira. A trilha segue rastreada por [DOT-1](https://pabloaugusto.atlassian.net/browse/DOT-1), [DOT-37](https://pabloaugusto.atlassian.net/browse/DOT-37), [DOT-114](https://pabloaugusto.atlassian.net/browse/DOT-114) e [DOT-126](https://pabloaugusto.atlassian.net/browse/DOT-126), todos em `PAUSED` em 2026-03-10. |
+| WIP-20260307-SECRETS-ROTATION | Projetar e implementar a governanca e o core de rotacionamento automatizado de secrets, chaves SSH e artefatos criptografados, com orquestracao segura por CLIs criticos e agente especializado. | main | ai-agent | 2026-03-07 14:20 UTC | 2026-03-10 21:09 UTC | Contexto ativo removido do fallback local porque o fluxo vivo migrou para o Jira. A trilha segue rastreada por [DOT-38](https://pabloaugusto.atlassian.net/browse/DOT-38), em `PAUSED` em 2026-03-10. |
 | WIP-20260307-ATLASSIAN-IA-CONTEXT | Documentar contextos, insights e plano inicial da migracao da camada de IA para Jira e Confluence em docs/atlassian-ia, com rastreabilidade versionada no repo. | feat/atlassian-ia-context | ai-agent | 2026-03-07 18:05 UTC | 2026-03-07 18:20 UTC | Trilha docs/atlassian-ia criada com indice, quatro snapshots de contexto do usuario e parecer/plano consolidado; docs/README e ai-operating-model atualizados para apontar a nova... / evidencias: task docs:check; task... |
 | WIP-20260307-JIRA-CONFLUENCE-IA | Analisar a viabilidade arquitetural de migrar a governanca da camada de IA para Jira e Confluence, revisando o blueprint proposto e definindo um plano inicial de implementacao. | main | ai-agent | 2026-03-07 17:52 UTC | 2026-03-07 18:03 UTC | Analise arquitetural da migracao da camada de IA para Jira e Confluence concluida, com leitura integral de .agents, docs, backend de governanca e validacao externa de capacidade... / evidencias: Leitura integral de .a... |
 | WIP-20260307-GIT-AUTOMATION-SIGNING | Implementar assinatura Git de automacao por worktree, orquestrada por op/gh/ssh-agent, com checkEnv, tasks e governanca humano vs automacao. | feat/test-harness-hybrid | ai-agent | 2026-03-07 14:06 UTC | 2026-03-07 14:18 UTC | Camada de assinatura Git de automacao por worktree foi implementada com orquestracao segura por op, gh e 1Password SSH Agent: novo CLI de modo humano x automacao, tasks git:sign... / evidencias: task docs:check:window... |
@@ -64,6 +65,8 @@ Fonte de verdade operacional para continuidade de tarefas dos agentes de IA.
 <!-- ai-worklog:log:start -->
 | Data/Hora UTC | ID | Status | Resumo | Proximo passo | Bloqueios | Contexto | Notas |
 | --- | --- | --- | --- | --- | --- | --- | --- |
+| 2026-03-10 21:09 UTC | WIP-20260307-ATLASSIAN-ADAPTERS | done | WIP local retirado de Doing porque o estado vivo da frente Atlassian migrou para o Jira. | Manter a continuidade desta frente apenas no Jira enquanto o fallback local fica sem Doing ativo. | - | alinhamento fallback-jira | board real em 2026-03-10: DOT-1, DOT-37, DOT-114 e DOT-126 em PAUSED |
+| 2026-03-10 21:09 UTC | WIP-20260307-SECRETS-ROTATION | done | WIP local retirado de Doing porque o estado vivo da frente de secrets migrou para o Jira. | Manter a continuidade desta frente apenas no Jira enquanto o fallback local fica sem Doing ativo. | - | alinhamento fallback-jira | board real em 2026-03-10: DOT-38 em PAUSED |
 | 2026-03-08 04:39 UTC | WIP-20260307-SECRETS-ROTATION | doing | Projetar e implementar a governanca e o core de rotacionamento automatizado de secrets, chaves SSH e artefatos criptografados, com orquestracao segura por CLIs criticos e agente especializado. | Auditar o que o repo ja possui para secrets/SSH/sops/email e cruzar com as capacidades oficiais das APIs/CLIs antes de definir a arquitetura. | - | - | inicio da tarefa |
 | 2026-03-08 04:39 UTC | WIP-20260307-SECRETS-ROTATION | doing | Ordem da rodada foi repriorizada pelo usuario para: revisores especialistas por familia de arquivo -> rotacao de secrets -> auditoria de [`.vscode/`](../.vscode/). | Registrar a nova ordem no roadmap e usar os revisores como gate antes de continuar a implementacao do rotacionador. | Dependencia deliberada de prioridade; rotacao nao foi descartada. | backlog e continuidade operacional | checkpoint de repriorizacao |
 | 2026-03-08 04:39 UTC | WIP-20260307-SECRETS-ROTATION | doing | Migracao do ROADMAP para a raiz saneada; docs:check, ai:validate e suite Python do roteador voltaram a passar apos corrigir linkagem e promover repo-governance-authority como primary em validadores de governanca. | Fechar a camada de revisores especialistas em contratos/catalogos/roadmap e entao retomar o core do rotacionador de secrets. | - | - | checkpoint incremental |
