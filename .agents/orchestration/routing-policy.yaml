@@ -130,7 +130,7 @@ routes:
           "docs/AI-GOVERNANCE-AND-REGRESSION.md",
         ]
     primary: [ai-scrum-master]
-    support: [repo-governance-authority, execution-worklog-governance-owner, architecture-modernization-authority, pascoalete]
+    support: [repo-governance-authority, execution-worklog-governance-owner, architecture-modernization-authority, ai-reviewer-config-policy, pascoalete]
   - id: route-secrets-rotation-scope
     match:
       keywords: ["rotate", "rotation", "token", "service-account", "ssh-key", "sops", "age", "secret"]

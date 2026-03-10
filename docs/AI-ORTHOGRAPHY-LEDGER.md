@@ -20,6 +20,8 @@ Registro consultivo do agente Pascoalete para ortografia e higiene vocabular.
 <!-- ai-orthography:records:start -->
 | Data/Hora UTC | Worklog ID | Revisor | Status | Arquivo | Achados | Evidencia |
 | --- | --- | --- | --- | --- | --- | --- |
+| 2026-03-10 16:12 UTC | DOT-115 | pascoalete | reprovado | scripts/ai_dispatch_lib.py | execucao, minimo, Secao, condicoes, Acao, Semantica, acao | task spell:check |
+| 2026-03-10 16:12 UTC | DOT-115 | pascoalete | reprovado | .agents/orchestration/routing-policy.yaml | LICOES, pascoalete, governanca, pascoalete, agil, pascoalete, pascoalete, LICOES (+1) | task spell:check |
 | 2026-03-09 21:21 UTC | DOT-115 | pascoalete | reprovado | scripts/validate-ai-assets.py | execucao, evals, LICOES, evals, evals, evals, evals, atlassian (+47) | task spell:check |
 | 2026-03-09 21:21 UTC | DOT-115 | pascoalete | reprovado | .agents/evals/datasets/routing.jsonl | governanca, tecnico, agil | task spell:check |
 | 2026-03-09 21:21 UTC | DOT-115 | pascoalete | reprovado | docs/atlassian-ia/artifacts/agent-operations.md | canonica, Sincronizacao, governanca, comentarios, tecnicos, atuacao, documentacao, tambem (+56) | task spell:check |
@@ -32,7 +34,6 @@ Registro consultivo do agente Pascoalete para ortografia e higiene vocabular.
 | 2026-03-09 21:21 UTC | DOT-115 | pascoalete | reprovado | config/ai/contracts.yaml | descricao, tecnico, criterios, aceitacao, documentacao | task spell:check |
 | 2026-03-09 21:21 UTC | DOT-115 | pascoalete | reprovado | config/ai/agent-operations.yaml | atlassian, decisao, documentacao, linkar, mudanca, atualizacao, necessario, linkar (+110) | task spell:check |
 | 2026-03-09 21:21 UTC | DOT-115 | pascoalete | reprovado | config/ai/agents.yaml | figma | task spell:check |
-| 2026-03-09 21:21 UTC | DOT-115 | pascoalete | reprovado | .agents/orchestration/routing-policy.yaml | LICOES, LICOES, pascoalete, mypy, pytest, governanca, pascoalete, pascoalete (+3) | task spell:check |
 | 2026-03-09 21:21 UTC | DOT-115 | pascoalete | reprovado | .agents/orchestration/capability-matrix.yaml | pascoalete | task spell:check |
 | 2026-03-09 21:21 UTC | DOT-115 | pascoalete | reprovado | .agents/config.toml | pascoalete, evals, evals, evals, evals, evals | task spell:check |
 | 2026-03-09 21:21 UTC | DOT-115 | pascoalete | reprovado | .agents/registry/ai-engineering-manager.toml | escalacoes | task spell:check |
