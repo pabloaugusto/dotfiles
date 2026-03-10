@@ -211,20 +211,12 @@ class AtlassianPlatformTests(unittest.TestCase):
     def test_field_entry_requires_adf_detects_textarea_field(self) -> None:
         self.assertTrue(
             field_entry_requires_adf(
-                {
-                    "schema": {
-                        "custom": "com.atlassian.jira.plugin.system.customfieldtypes:textarea"
-                    }
-                }
+                {"schema": {"custom": "com.atlassian.jira.plugin.system.customfieldtypes:textarea"}}
             )
         )
         self.assertFalse(
             field_entry_requires_adf(
-                {
-                    "schema": {
-                        "custom": "com.atlassian.jira.plugin.system.customfieldtypes:url"
-                    }
-                }
+                {"schema": {"custom": "com.atlassian.jira.plugin.system.customfieldtypes:url"}}
             )
         )
 

@@ -128,13 +128,13 @@ def _looks_like_repo_reference(target: str) -> bool:
         return False
     if cleaned.startswith(("http://", "https://", "mailto:", "#")):
         return False
-    if any(cleaned == prefix or cleaned.startswith(f"{prefix}/") for prefix in NON_REPO_REFERENCE_PREFIXES):
+    if any(
+        cleaned == prefix or cleaned.startswith(f"{prefix}/")
+        for prefix in NON_REPO_REFERENCE_PREFIXES
+    ):
         return False
     return (
-        "/" in cleaned
-        or "\\" in cleaned
-        or cleaned.startswith(".")
-        or Path(cleaned).suffix != ""
+        "/" in cleaned or "\\" in cleaned or cleaned.startswith(".") or Path(cleaned).suffix != ""
     )
 
 
@@ -248,7 +248,9 @@ def validate_markdown_file(path: Path) -> list[str]:
                 continue
             if not _looks_like_repo_reference(target):
                 continue
-            if _resolve_local_target(path, target) is None and not _looks_like_repoish_reference(target):
+            if _resolve_local_target(path, target) is None and not _looks_like_repoish_reference(
+                target
+            ):
                 continue
             errors.append(
                 f"{path.relative_to(ROOT)}:{line_number} referencia interna sem link: {target}"
@@ -263,7 +265,9 @@ def validate_markdown_file(path: Path) -> list[str]:
             )
 
         for target in _iter_bare_repo_references(masked_line):
-            if _resolve_local_target(path, target) is None and not _looks_like_repoish_reference(target):
+            if _resolve_local_target(path, target) is None and not _looks_like_repoish_reference(
+                target
+            ):
                 continue
             errors.append(
                 f"{path.relative_to(ROOT)}:{line_number} referencia interna sem link: {target}"

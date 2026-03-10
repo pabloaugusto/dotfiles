@@ -523,11 +523,7 @@ class JiraAdapter:
         fields = payload.get("fields")
         if not isinstance(fields, dict):
             raise AtlassianPlatformError("Jira editmeta retornou fields em formato inesperado.")
-        return {
-            str(field_id).strip()
-            for field_id in fields
-            if str(field_id).strip()
-        }
+        return {str(field_id).strip() for field_id in fields if str(field_id).strip()}
 
     def search_issues(
         self,
@@ -830,9 +826,7 @@ class JiraAdapter:
     def add_field_to_default_screen(self, field_id: str) -> dict[str, Any]:
         normalized_field_id = field_id.strip()
         if not normalized_field_id:
-            raise AtlassianPlatformError(
-                "add_field_to_default_screen exige um field_id nao vazio."
-            )
+            raise AtlassianPlatformError("add_field_to_default_screen exige um field_id nao vazio.")
         payload = self.client.request_json(
             "jira",
             f"/rest/api/3/screens/addToDefault/{quote(normalized_field_id, safe='')}",
@@ -860,9 +854,7 @@ class JiraAdapter:
         normalized_screen_id = screen_id.strip()
         normalized_tab_id = tab_id.strip()
         if not normalized_screen_id or not normalized_tab_id:
-            raise AtlassianPlatformError(
-                "list_screen_fields exige screen_id e tab_id nao vazios."
-            )
+            raise AtlassianPlatformError("list_screen_fields exige screen_id e tab_id nao vazios.")
         payload = self.client.request_json(
             "jira",
             f"/rest/api/3/screens/{quote(normalized_screen_id, safe='')}/tabs/{quote(normalized_tab_id, safe='')}/fields",
@@ -990,10 +982,9 @@ class JiraAdapter:
             field_id = self.field_id_by_name(normalized_name)
             normalized_value = value
             field_entry = catalog.get(normalized_name)
-            if (
-                field_id == "description"
-                or field_entry_requires_adf(field_entry)
-            ) and isinstance(normalized_value, str):
+            if (field_id == "description" or field_entry_requires_adf(field_entry)) and isinstance(
+                normalized_value, str
+            ):
                 normalized_value = adf_text_document(
                     normalized_value,
                     site_url=self.site_url(),
@@ -1011,7 +1002,8 @@ class JiraAdapter:
         }
         if non_editable:
             details = ", ".join(
-                f"{field_name} ({field_id})" for field_name, field_id in sorted(non_editable.items())
+                f"{field_name} ({field_id})"
+                for field_name, field_id in sorted(non_editable.items())
             )
             raise AtlassianPlatformError(
                 "Jira recusou campos fora do editmeta desta issue. "

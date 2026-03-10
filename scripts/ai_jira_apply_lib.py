@@ -54,7 +54,9 @@ def normalize_status_name(name: str) -> str:
 
 
 def workflow_status_reference(workflow_name: str, status_name: str) -> str:
-    seed = f"jira-workflow:{normalize_status_name(workflow_name)}:{normalize_status_name(status_name)}"
+    seed = (
+        f"jira-workflow:{normalize_status_name(workflow_name)}:{normalize_status_name(status_name)}"
+    )
     return str(uuid.uuid5(uuid.NAMESPACE_URL, seed))
 
 
@@ -64,9 +66,11 @@ def enabled_roles(repo_root: str | Path | None = None) -> set[str]:
 
 
 def active_custom_fields(model: dict[str, Any], *, role_ids: set[str]) -> list[dict[str, Any]]:
-    fields = ((model.get("fields") or {}).get("custom_fields") or [])
+    fields = (model.get("fields") or {}).get("custom_fields") or []
     if not isinstance(fields, list):
-        raise AiControlPlaneError("config/ai/jira-model.yaml fields.custom_fields precisa ser lista.")
+        raise AiControlPlaneError(
+            "config/ai/jira-model.yaml fields.custom_fields precisa ser lista."
+        )
     result: list[dict[str, Any]] = []
     for entry in fields:
         if not isinstance(entry, dict):
@@ -338,7 +342,9 @@ def current_workflow_detail_by_name(
     return None
 
 
-def workflow_requires_update(existing_workflow: dict[str, Any], desired_payload: dict[str, Any]) -> bool:
+def workflow_requires_update(
+    existing_workflow: dict[str, Any], desired_payload: dict[str, Any]
+) -> bool:
     workflows = desired_payload.get("workflows", [])
     if not isinstance(workflows, list) or not workflows:
         raise AiControlPlaneError("Payload de workflow invalido para comparacao de drift.")
@@ -417,7 +423,9 @@ def wait_for_workflow_convergence(
     return latest
 
 
-def current_project_statuses(client: AtlassianHttpClient, project_key: str) -> dict[str, dict[str, Any]]:
+def current_project_statuses(
+    client: AtlassianHttpClient, project_key: str
+) -> dict[str, dict[str, Any]]:
     payload = client.request_json("jira", f"/rest/api/3/project/{project_key}/statuses")
     result: dict[str, dict[str, Any]] = {}
     for issue_type in payload:
@@ -433,7 +441,9 @@ def current_project_statuses(client: AtlassianHttpClient, project_key: str) -> d
             result[normalized_name] = {
                 "id": str(status.get("id", "")).strip(),
                 "name": name,
-                "statusCategory": str(((status.get("statusCategory") or {}).get("name")) or "").strip(),
+                "statusCategory": str(
+                    ((status.get("statusCategory") or {}).get("name")) or ""
+                ).strip(),
                 "source": "project",
             }
     return result
@@ -460,7 +470,9 @@ def current_accessible_statuses(client: AtlassianHttpClient) -> dict[str, dict[s
     return result
 
 
-def current_status_catalog(client: AtlassianHttpClient, project_key: str) -> dict[str, dict[str, Any]]:
+def current_status_catalog(
+    client: AtlassianHttpClient, project_key: str
+) -> dict[str, dict[str, Any]]:
     statuses = current_accessible_statuses(client)
     statuses.update(current_project_statuses(client, project_key))
     return statuses
@@ -492,7 +504,9 @@ def current_fields_by_name(client: AtlassianHttpClient) -> dict[str, dict[str, A
 
 
 def current_dashboards_by_name(client: AtlassianHttpClient) -> dict[str, dict[str, Any]]:
-    payload = client.request_json("jira", "/rest/api/3/dashboard/search", params={"maxResults": "100"})
+    payload = client.request_json(
+        "jira", "/rest/api/3/dashboard/search", params={"maxResults": "100"}
+    )
     result: dict[str, dict[str, Any]] = {}
     for entry in payload.get("values", []):
         if not isinstance(entry, dict):
@@ -505,7 +519,9 @@ def current_dashboards_by_name(client: AtlassianHttpClient) -> dict[str, dict[st
 
 
 def current_workflows_by_name(client: AtlassianHttpClient) -> dict[str, dict[str, Any]]:
-    payload = client.request_json("jira", "/rest/api/3/workflow/search", params={"maxResults": "100"})
+    payload = client.request_json(
+        "jira", "/rest/api/3/workflow/search", params={"maxResults": "100"}
+    )
     result: dict[str, dict[str, Any]] = {}
     for entry in payload.get("values", []):
         if not isinstance(entry, dict):
@@ -523,7 +539,9 @@ def current_workflows_by_name(client: AtlassianHttpClient) -> dict[str, dict[str
 
 
 def current_workflow_schemes_by_name(client: AtlassianHttpClient) -> dict[str, dict[str, Any]]:
-    payload = client.request_json("jira", "/rest/api/3/workflowscheme", params={"maxResults": "100"})
+    payload = client.request_json(
+        "jira", "/rest/api/3/workflowscheme", params={"maxResults": "100"}
+    )
     result: dict[str, dict[str, Any]] = {}
     for entry in payload.get("values", []):
         if not isinstance(entry, dict):
@@ -542,7 +560,9 @@ def current_project_payload(client: AtlassianHttpClient, project_key: str) -> di
     return payload
 
 
-def current_workflow_scheme_association(client: AtlassianHttpClient, project_id: str) -> dict[str, Any] | None:
+def current_workflow_scheme_association(
+    client: AtlassianHttpClient, project_id: str
+) -> dict[str, Any] | None:
     payload = client.request_json(
         "jira",
         "/rest/api/3/workflowscheme/project",
@@ -569,7 +589,9 @@ def project_has_issues(client: AtlassianHttpClient, project_key: str) -> bool:
     return isinstance(issues, list) and len(issues) > 0
 
 
-def ensure_field_options(client: AtlassianHttpClient, field_id: str, options: list[str]) -> dict[str, Any]:
+def ensure_field_options(
+    client: AtlassianHttpClient, field_id: str, options: list[str]
+) -> dict[str, Any]:
     contexts_payload = client.request_json("jira", f"/rest/api/3/field/{field_id}/context")
     contexts = contexts_payload.get("values", [])
     if not isinstance(contexts, list) or not contexts:
@@ -577,7 +599,12 @@ def ensure_field_options(client: AtlassianHttpClient, field_id: str, options: li
             "jira",
             f"/rest/api/3/field/{field_id}/context",
             method="POST",
-            payload={"name": "DOT Default Context", "description": "", "projectIds": [], "issueTypeIds": []},
+            payload={
+                "name": "DOT Default Context",
+                "description": "",
+                "projectIds": [],
+                "issueTypeIds": [],
+            },
         )
         context_id = str(created.get("id", "")).strip()
     else:
@@ -699,7 +726,9 @@ def build_apply_plan(repo_root: str | Path | None = None) -> dict[str, Any]:
             ],
         },
         "board": {
-            "name": str(((model.get("project") or {}).get("target_board") or {}).get("name", "")).strip(),
+            "name": str(
+                ((model.get("project") or {}).get("target_board") or {}).get("name", "")
+            ).strip(),
             "status": "deferred-until-agile-api-is-green",
         },
     }
@@ -731,7 +760,11 @@ def apply_jira_model(repo_root: str | Path | None = None) -> dict[str, Any]:
     workflow_name = str(workflow.get("name", "")).strip()
     scheme_name = str(workflow.get("scheme_name", "")).strip()
     desired_workflow_payload = workflow_create_payload(model, current_statuses=statuses)
-    live_workflow = current_workflow_detail_by_name(client, workflow_name) if workflow_name in workflows else None
+    live_workflow = (
+        current_workflow_detail_by_name(client, workflow_name)
+        if workflow_name in workflows
+        else None
+    )
     results: dict[str, Any] = {
         "model_path": str(model_path),
         "project": {"id": project_id, "key": resolved.jira_project_key, "has_issues": has_issues},
@@ -775,7 +808,9 @@ def apply_jira_model(repo_root: str | Path | None = None) -> dict[str, Any]:
         desired_workflow_payload,
     )
     if live_workflow is None:
-        raise AtlassianPlatformError(f"Nao foi possivel carregar o workflow publicado {workflow_name!r}.")
+        raise AtlassianPlatformError(
+            f"Nao foi possivel carregar o workflow publicado {workflow_name!r}."
+        )
 
     if workflow_requires_update(live_workflow, desired_workflow_payload):
         update_payload = workflow_update_payload(
@@ -802,7 +837,9 @@ def apply_jira_model(repo_root: str | Path | None = None) -> dict[str, Any]:
             workflow_name,
             desired_workflow_payload,
         )
-        if live_workflow is None or workflow_requires_update(live_workflow, desired_workflow_payload):
+        if live_workflow is None or workflow_requires_update(
+            live_workflow, desired_workflow_payload
+        ):
             raise AtlassianPlatformError(
                 f"Workflow {workflow_name!r} permaneceu em drift apos o update."
             )
@@ -825,7 +862,9 @@ def apply_jira_model(repo_root: str | Path | None = None) -> dict[str, Any]:
     scheme = workflow_schemes.get(scheme_name) or scheme
     scheme_id = str((scheme or {}).get("id", "")).strip()
     if not scheme_id:
-        raise AtlassianPlatformError(f"Nao foi possivel resolver o workflow scheme {scheme_name!r}.")
+        raise AtlassianPlatformError(
+            f"Nao foi possivel resolver o workflow scheme {scheme_name!r}."
+        )
 
     association = current_workflow_scheme_association(client, project_id)
     workflow_scheme = (association or {}).get("workflowScheme") or {}

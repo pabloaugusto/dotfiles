@@ -20,6 +20,26 @@ Registro consultivo do agente Pascoalete para ortografia e higiene vocabular.
 <!-- ai-orthography:records:start -->
 | Data/Hora UTC | Worklog ID | Revisor | Status | Arquivo | Achados | Evidencia |
 | --- | --- | --- | --- | --- | --- | --- |
+| 2026-03-09 23:54 UTC | DOT-114 | pascoalete | reprovado | tests/python/validate_docs_test.py | repoish | task spell:check |
+| 2026-03-09 23:54 UTC | DOT-114 | pascoalete | reprovado | tests/python/atlassian_platform_test.py | atlassian, atlassian, atlassian, atlassian, linkifies, linkify, regressao, interacao (+12) | task spell:check |
+| 2026-03-09 23:54 UTC | DOT-114 | pascoalete | reprovado | tests/python/ai_jira_apply_test.py | canonico, canonico, canonico, atlassian, atlassian | task spell:check |
+| 2026-03-09 23:54 UTC | DOT-114 | pascoalete | reprovado | tests/python/ai_atlassian_seed_test.py | atlassian, atlassian, atlassian, atlassian, atlassian, linkify, Conteudo, Conteudo (+7) | task spell:check |
+| 2026-03-09 23:54 UTC | DOT-114 | pascoalete | reprovado | tests/python/ai_atlassian_openapi_test.py | atlassian, atlassian, atlassian, atlassian | task spell:check |
+| 2026-03-09 23:54 UTC | DOT-114 | pascoalete | reprovado | tests/python/ai_atlassian_board_ui_sync_test.py | atlassian | task spell:check |
+| 2026-03-09 23:54 UTC | DOT-114 | pascoalete | reprovado | tests/python/ai_atlassian_backfill_test.py | atlassian, Criterios, tecnico, Criterios, LICOES, LICOES, LICOES | task spell:check |
+| 2026-03-09 23:54 UTC | DOT-114 | pascoalete | reprovado | tests/python/ai_atlassian_agent_comment_audit_test.py | atlassian, atlassian, interacao, interacao, pascoalete | task spell:check |
+| 2026-03-09 23:54 UTC | DOT-114 | pascoalete | reprovado | scripts/validate_docs.py | LICOES, governanca, validacao, diretorios, disponivel, repoish, repoish, repoish (+3) | task spell:check |
+| 2026-03-09 23:54 UTC | DOT-114 | pascoalete | reprovado | scripts/validate-ai-assets.py | execucao, evals, LICOES, evals, evals, evals, evals, atlassian (+47) | task spell:check |
+| 2026-03-09 23:54 UTC | DOT-114 | pascoalete | reprovado | scripts/atlassian_platform_lib.py | atlassian, interacao, concluido, concluida, dedup, dedup, dedup, atlassian (+13) | task spell:check |
+| 2026-03-09 23:54 UTC | DOT-114 | pascoalete | reprovado | scripts/ai_jira_apply_lib.py | atlassian, atlassian, atlassian, customfieldtypes, atlassian, customfieldtypes, multiselectsearcher, atlassian (+19) | task spell:check |
+| 2026-03-09 23:54 UTC | DOT-114 | pascoalete | reprovado | scripts/ai_control_plane_lib.py | atlassian, atlassian, atlassian, atlassian, atlassian, repositorio, linkify, obrigatorio (+2) | task spell:check |
+| 2026-03-09 23:54 UTC | DOT-114 | pascoalete | reprovado | scripts/ai_atlassian_repair_lib.py | atlassian, atlassian, linkify, atlassian, atlassian, dedup, atlassian, interacao (+6) | task spell:check |
+| 2026-03-09 23:54 UTC | DOT-114 | pascoalete | reprovado | scripts/ai_atlassian_browser_validate_lib.py | atlassian, reauthentication, atlassian, atlassian, disponivel, domcontentloaded, networkidle, reauthentication (+4) | task spell:check |
+| 2026-03-09 23:54 UTC | DOT-114 | pascoalete | reprovado | scripts/ai_atlassian_browser_auth_lib.py | atlassian, atlassian, atlassian, timespec, atlassian, atlassian, reauthentication, reauthentication (+13) | task spell:check |
+| 2026-03-09 23:54 UTC | DOT-114 | pascoalete | reprovado | scripts/ai_atlassian_board_ui_sync_lib.py | atlassian, reauthentication, atlassian, testid, testid, testid, testid, testid (+16) | task spell:check |
+| 2026-03-09 23:54 UTC | DOT-114 | pascoalete | reprovado | scripts/ai_atlassian_agent_comment_audit_lib.py | atlassian, atlassian, interacao, pascoalete, comentarios, comentario, comentario, comentario (+11) | task spell:check |
+| 2026-03-09 23:54 UTC | DOT-114 | pascoalete | reprovado | scripts/ai-atlassian-backfill.py | execucao, atlassian | task spell:check |
+| 2026-03-09 23:54 UTC | DOT-114 | pascoalete | reprovado | scripts/ai-atlassian-agent-comment-audit.py | execucao, atlassian | task spell:check |
 | 2026-03-08 04:38 UTC | WIP-20260307-ATLASSIAN-ADAPTERS | pascoalete | reprovado | docs/atlassian-ia/2026-03-07-parecer-e-plano-inicial.md | operacao, direcao, documentacao, viavel, migracao, viavel, transicao, LICOES (+196) | task spell:check |
 | 2026-03-08 04:38 UTC | WIP-20260307-ATLASSIAN-ADAPTERS | pascoalete | reprovado | docs/atlassian-ia/2026-03-07-jira-configuration-export.md | Configuracao, atlassian, atlassian, Workstream, auditavel, substituidos, operacao, governanca (+14) | task spell:check |
 | 2026-03-08 04:38 UTC | WIP-20260307-ATLASSIAN-ADAPTERS | pascoalete | reprovado | docs/atlassian-ia/2026-03-07-diagnostico-auth-e-acesso-atlassian.md | concluido, atlassian, atlassian, estao, visivel, migracao, auditavel, comentarios (+32) | task spell:check |

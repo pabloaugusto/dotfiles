@@ -89,15 +89,19 @@ class AtlassianSeedPlanTests(unittest.TestCase):
             artifact = root / "docs" / "sample.md"
             artifact.parent.mkdir(parents=True, exist_ok=True)
             artifact.write_text("# Titulo\n\n- item", encoding="utf-8")
-            with patch(
-                "scripts.ai_atlassian_seed_lib.github_blob_url",
-                return_value="https://github.com/pabloaugusto/dotfiles/blob/main/docs/sample.md",
-            ), patch(
-                "scripts.ai_atlassian_seed_lib.resolve_tracked_repo_files",
-                return_value={"docs/sample.md"},
-            ), patch(
-                "scripts.ai_atlassian_seed_lib.linkify_repo_relative_paths",
-                side_effect=lambda text, repo_root: text,
+            with (
+                patch(
+                    "scripts.ai_atlassian_seed_lib.github_blob_url",
+                    return_value="https://github.com/pabloaugusto/dotfiles/blob/main/docs/sample.md",
+                ),
+                patch(
+                    "scripts.ai_atlassian_seed_lib.resolve_tracked_repo_files",
+                    return_value={"docs/sample.md"},
+                ),
+                patch(
+                    "scripts.ai_atlassian_seed_lib.linkify_repo_relative_paths",
+                    side_effect=lambda text, repo_root: text,
+                ),
             ):
                 payload = build_storage_snapshot(
                     title="Pagina",
@@ -134,15 +138,19 @@ class AtlassianSeedPlanTests(unittest.TestCase):
             def fake_blob_url(_repo_root: Path, repo_path: str) -> str:
                 return f"https://github.com/pabloaugusto/dotfiles/blob/main/{repo_path}"
 
-            with patch(
-                "scripts.ai_atlassian_seed_lib.github_blob_url",
-                side_effect=fake_blob_url,
-            ), patch(
-                "scripts.ai_atlassian_seed_lib.resolve_tracked_repo_files",
-                return_value={"docs/sample.md", "docs/ref.md"},
-            ), patch(
-                "scripts.ai_atlassian_seed_lib.linkify_repo_relative_paths",
-                side_effect=lambda text, repo_root: text,
+            with (
+                patch(
+                    "scripts.ai_atlassian_seed_lib.github_blob_url",
+                    side_effect=fake_blob_url,
+                ),
+                patch(
+                    "scripts.ai_atlassian_seed_lib.resolve_tracked_repo_files",
+                    return_value={"docs/sample.md", "docs/ref.md"},
+                ),
+                patch(
+                    "scripts.ai_atlassian_seed_lib.linkify_repo_relative_paths",
+                    side_effect=lambda text, repo_root: text,
+                ),
             ):
                 payload = build_storage_snapshot(
                     title="Pagina",
@@ -248,7 +256,9 @@ class AtlassianSeedPlanTests(unittest.TestCase):
                     "REVIEW": [{"id": "81", "to": {"name": "Done"}}],
                 }
 
-            def get_issue(self, issue_key: str, *, fields: list[str] | None = None) -> dict[str, Any]:
+            def get_issue(
+                self, issue_key: str, *, fields: list[str] | None = None
+            ) -> dict[str, Any]:
                 self.last_issue_key = issue_key
                 return {"fields": {"status": {"name": self.status}}}
 
@@ -260,7 +270,10 @@ class AtlassianSeedPlanTests(unittest.TestCase):
                 self.last_issue_key = issue_key
                 for transition in self.transitions_by_status.get(self.status, []):
                     if str(transition.get("id")) == str(transition_id):
-                        next_status = str(((transition.get("to") or {}).get("name")) or "").strip()
+                        to_payload = transition.get("to")
+                        next_status = str(
+                            to_payload.get("name") if isinstance(to_payload, dict) else ""
+                        ).strip()
                         self.status = next_status
                         self.transitioned_to.append(next_status)
                         return {}
@@ -285,7 +298,9 @@ class AtlassianSeedPlanTests(unittest.TestCase):
                     "TESTING": [{"id": "71", "to": {"name": "Review"}}],
                 }
 
-            def get_issue(self, issue_key: str, *, fields: list[str] | None = None) -> dict[str, Any]:
+            def get_issue(
+                self, issue_key: str, *, fields: list[str] | None = None
+            ) -> dict[str, Any]:
                 self.last_issue_key = issue_key
                 return {"fields": {"status": {"name": self.status}}}
 
@@ -297,7 +312,10 @@ class AtlassianSeedPlanTests(unittest.TestCase):
                 self.last_issue_key = issue_key
                 for transition in self.transitions_by_status.get(self.status, []):
                     if str(transition.get("id")) == str(transition_id):
-                        next_status = str(((transition.get("to") or {}).get("name")) or "").strip()
+                        to_payload = transition.get("to")
+                        next_status = str(
+                            to_payload.get("name") if isinstance(to_payload, dict) else ""
+                        ).strip()
                         self.status = next_status
                         self.transitioned_to.append(next_status)
                         return {}

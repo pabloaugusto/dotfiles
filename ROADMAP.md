@@ -1,6 +1,6 @@
 # Roadmap do Repositorio
 
-Atualizado em: 2026-03-08 04:38 UTC
+Atualizado em: 2026-03-09 23:54 UTC
 Ciclo ativo: 2026-Q1
 
 Planejamento incremental para qualidade, testes, bootstrap e governanca do repo.
@@ -28,7 +28,7 @@ Edite apenas a tabela entre os marcadores abaixo.
 Atualizada por `task ai:roadmap:refresh`.
 
 <!-- roadmap:priority:start -->
-Atualizado em: 2026-03-08 04:38 UTC
+Atualizado em: 2026-03-09 23:54 UTC
 
 ### Ranking RICE
 
@@ -76,6 +76,7 @@ Sem sugestoes pendentes neste ciclo; itens aceitos ja estao rastreaveis.
 ### Next
 
 <!-- roadmap:next:start -->
+- [fix] Corrigir pendencias ortograficas remanescentes do worklog `DOT-114` em scripts/ai-atlassian-agent-comment-audit.py, scripts/ai-atlassian-backfill.py, scripts/ai_atlassian_agent_... | notas=Pendencia automatica criada por Pascoalete apos review consultivo reprovado sem correcao automatica.
 - [fix] Corrigir pendencias ortograficas remanescentes do worklog `WIP-20260307-ATLASSIAN-ADAPTERS` em docs/TASKS.md, docs/atlassian-ia/2026-03-07-diagnostico-auth-e-acesso-atlassian.md... | notas=Pendencia automatica criada por Pascoalete apos review consultivo reprovado sem correcao automatica.
 - [fix] Corrigir pendencias ortograficas remanescentes do worklog `WIP-20260307-ATLASSIAN-ADAPTERS` em docs/AI-WIP-TRACKER.md, docs/atlassian-ia/2026-03-07-diagnostico-auth-e-acesso-atl... | notas=Pendencia automatica criada por Pascoalete apos review consultivo reprovado sem correcao automatica.
 - [fix] Corrigir pendencias ortograficas remanescentes do worklog `WIP-20260307-ATLASSIAN-ADAPTERS` em Taskfile.yml, config/ai/confluence-model.yaml, config/ai/jira-model.yaml, docs/TAS... | notas=Pendencia automatica criada por Pascoalete apos review consultivo reprovado sem correcao automatica.

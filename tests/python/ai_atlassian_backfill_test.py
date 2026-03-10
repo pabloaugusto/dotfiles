@@ -50,9 +50,7 @@ class AtlassianBackfillPlanTests(unittest.TestCase):
     def test_accepted_roadmap_suggestion_uses_canonical_backlog_status_in_comment(self) -> None:
         payload = build_backfill_plan()
         accepted = next(
-            entry
-            for entry in payload["jira"]["roadmap_suggestions"]
-            if "aceita" in entry["labels"]
+            entry for entry in payload["jira"]["roadmap_suggestions"] if "aceita" in entry["labels"]
         )
 
         self.assertEqual(accepted["state_hint"], "backlog")

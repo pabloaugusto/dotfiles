@@ -200,7 +200,11 @@ def bootstrap_browser_auth(
         try:
             context = browser.new_context()
             page = context.new_page()
-            page.goto(config.target_url, wait_until="domcontentloaded", timeout=config.timeout_seconds * 1000)
+            page.goto(
+                config.target_url,
+                wait_until="domcontentloaded",
+                timeout=config.timeout_seconds * 1000,
+            )
             initial_path = config.evidence_dir / "00-login-inicial.png"
             page.screenshot(path=str(initial_path), full_page=True)
             screenshots.append(str(initial_path))

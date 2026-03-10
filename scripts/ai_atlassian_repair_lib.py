@@ -48,9 +48,7 @@ STRUCTURED_COMMENT_ALIASES = {
     "proximo passo": "proximo_passo",
 }
 STRUCTURED_LIST_KEYS = {"contexto", "evidencias"}
-PLAYWRIGHT_STORAGE_STATE_RE = (
-    r"(?i)\.cache[/\\]playwright[/\\]atlassian[/\\]storage-state\.json\.?"
-)
+PLAYWRIGHT_STORAGE_STATE_RE = r"(?i)\.cache[/\\]playwright[/\\]atlassian[/\\]storage-state\.json\.?"
 
 
 def issue_is_ai_generated(issue: dict[str, Any], *, author_account_id: str) -> bool:

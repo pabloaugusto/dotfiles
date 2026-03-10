@@ -9,6 +9,5 @@ if __package__ in {None, ""}:  # pragma: no cover - execucao direta do script
 
 from scripts.ai_atlassian_agent_comment_audit_lib import main
 
-
 if __name__ == "__main__":
     main()

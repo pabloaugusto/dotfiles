@@ -146,7 +146,9 @@ def evaluate_issue_comment_contract(
     status_name = str(((fields.get("status") or {}).get("name")) or "").strip()
     status_normalized = normalize_status_name(status_name)
     issue_type = str(((fields.get("issuetype") or {}).get("name")) or "").strip()
-    current_agent = extract_option_value(fields.get(current_agent_field_id)) if current_agent_field_id else ""
+    current_agent = (
+        extract_option_value(fields.get(current_agent_field_id)) if current_agent_field_id else ""
+    )
     next_required_role = (
         extract_option_value(fields.get(next_required_field_id)) if next_required_field_id else ""
     )
@@ -169,11 +171,7 @@ def evaluate_issue_comment_contract(
         )
 
     agents_seen = sorted(
-        {
-            entry["agent"]
-            for entry in structured_comments
-            if str(entry.get("agent", "")).strip()
-        }
+        {entry["agent"] for entry in structured_comments if str(entry.get("agent", "")).strip()}
     )
     latest = structured_comments[-1] if structured_comments else {}
     latest_status = str(latest.get("status", "")).strip()
@@ -204,12 +202,17 @@ def evaluate_issue_comment_contract(
                 "message": f'O comentario estruturado mais recente informa status "{latest_status}", mas a issue esta em "{status_name}".',
             }
         )
-    if current_agent and latest_agent and latest_agent != current_agent and status_normalized in ACTIVE_STATUS_NAMES:
+    if (
+        current_agent
+        and latest_agent
+        and latest_agent != current_agent
+        and status_normalized in ACTIVE_STATUS_NAMES
+    ):
         findings.append(
             {
                 "code": "latest_comment_agent_mismatch",
                 "severity": "medium",
-                "message": f'O comentario estruturado mais recente e de {latest_agent}, mas o agente atual da issue e {current_agent}.',
+                "message": f"O comentario estruturado mais recente e de {latest_agent}, mas o agente atual da issue e {current_agent}.",
             }
         )
 
@@ -274,9 +277,9 @@ def render_markdown_report(report: dict[str, Any]) -> str:
     ]
     for item in report["issues"]:
         findings = item.get("findings") or []
-        findings_text = "<br>".join(
-            f"`{entry['code']}`: {entry['message']}" for entry in findings
-        ) or "-"
+        findings_text = (
+            "<br>".join(f"`{entry['code']}`: {entry['message']}" for entry in findings) or "-"
+        )
         lines.append(
             f"| {item['issue_key']} | {item['status']} | {item['current_agent_role'] or '-'} | "
             f"{item['structured_comment_count']} | {findings_text} |"
@@ -304,7 +307,9 @@ def audit_issue_comments(
     max_results: int = 100,
 ) -> dict[str, Any]:
     control = load_ai_control_plane(repo_root)
-    resolved = resolve_atlassian_platform(control.atlassian_definition(), repo_root=control.repo_root)
+    resolved = resolve_atlassian_platform(
+        control.atlassian_definition(), repo_root=control.repo_root
+    )
     client = AtlassianHttpClient(resolved)
     jira = JiraAdapter(client)
 
@@ -346,10 +351,14 @@ def audit_issue_comments(
     }
 
 
-def write_report_files(report: dict[str, Any], *, json_out: Path | None, markdown_out: Path | None) -> None:
+def write_report_files(
+    report: dict[str, Any], *, json_out: Path | None, markdown_out: Path | None
+) -> None:
     if json_out:
         json_out.parent.mkdir(parents=True, exist_ok=True)
-        json_out.write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+        json_out.write_text(
+            json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
+        )
     if markdown_out:
         markdown_out.parent.mkdir(parents=True, exist_ok=True)
         markdown_out.write_text(render_markdown_report(report), encoding="utf-8")

@@ -9,7 +9,9 @@ from scripts.ai_atlassian_agent_comment_audit_lib import (
 from scripts.atlassian_platform_lib import adf_text_document
 
 
-def structured_comment(*, agent: str, status: str, interaction_type: str = "progress-update") -> dict[str, object]:
+def structured_comment(
+    *, agent: str, status: str, interaction_type: str = "progress-update"
+) -> dict[str, object]:
     raw = "\n".join(
         [
             f"Agente: {agent}",

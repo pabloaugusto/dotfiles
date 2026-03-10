@@ -1,9 +1,9 @@
 from __future__ import annotations
 
 import json
-from time import monotonic
 from dataclasses import dataclass
 from pathlib import Path
+from time import monotonic
 from typing import Any
 
 from scripts.ai_atlassian_browser_auth_lib import (
@@ -66,7 +66,6 @@ def evaluate_expected_text_checks(
 
 def collect_body_text_with_scroll(page: Any) -> str:
     body = page.locator("body")
-    text = body.inner_text()
     total_height = int(
         page.evaluate(
             "() => Math.max(document.body.scrollHeight, document.documentElement.scrollHeight)"

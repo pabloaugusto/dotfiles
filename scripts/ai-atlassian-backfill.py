@@ -9,8 +9,8 @@ from pathlib import Path
 if __package__ in {None, ""}:  # pragma: no cover - execucao direta do script
     sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from scripts.ai_control_plane_lib import AiControlPlaneError
 from scripts.ai_atlassian_backfill_lib import build_backfill_plan
+from scripts.ai_control_plane_lib import AiControlPlaneError
 
 
 def run_plan(args: argparse.Namespace) -> None:

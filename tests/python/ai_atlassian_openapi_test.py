@@ -31,7 +31,7 @@ class AtlassianOpenApiCatalogTests(unittest.TestCase):
     def test_atlassian_scripts_stay_on_jira_v3_and_confluence_v2(self) -> None:
         forbidden_literals = [
             "/rest/api/2/",
-            "/rest/api/3/search\"",
+            '/rest/api/3/search"',
             "/wiki/rest/api/",
             "/wiki/api/v1/",
         ]
@@ -39,7 +39,9 @@ class AtlassianOpenApiCatalogTests(unittest.TestCase):
         for path in ATLASSIAN_SCRIPT_PATHS:
             raw = path.read_text(encoding="utf-8")
             for literal in forbidden_literals:
-                self.assertNotIn(literal, raw, msg=f"endpoint legado detectado em {path}: {literal}")
+                self.assertNotIn(
+                    literal, raw, msg=f"endpoint legado detectado em {path}: {literal}"
+                )
 
         jira_apply = (ROOT / "scripts" / "ai_jira_apply_lib.py").read_text(encoding="utf-8")
         platform = (ROOT / "scripts" / "atlassian_platform_lib.py").read_text(encoding="utf-8")

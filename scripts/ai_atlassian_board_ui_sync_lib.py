@@ -68,11 +68,15 @@ def parse_rename_columns(raw_values: list[str] | None) -> tuple[ColumnRename, ..
 
 
 def parse_add_columns(raw_values: list[str] | None) -> tuple[str, ...]:
-    return tuple(str(raw_value).strip() for raw_value in (raw_values or []) if str(raw_value).strip())
+    return tuple(
+        str(raw_value).strip() for raw_value in (raw_values or []) if str(raw_value).strip()
+    )
 
 
 def parse_card_fields(raw_values: list[str] | None) -> tuple[str, ...]:
-    return tuple(str(raw_value).strip() for raw_value in (raw_values or []) if str(raw_value).strip())
+    return tuple(
+        str(raw_value).strip() for raw_value in (raw_values or []) if str(raw_value).strip()
+    )
 
 
 def parse_map_statuses(raw_values: list[str] | None) -> tuple[StatusColumnMapping, ...]:
@@ -145,9 +149,7 @@ def write_board_ui_sync_result(path: Path, payload: dict[str, Any]) -> None:
 def _rename_column(page: Any, current_name: str, desired_name: str) -> bool:
     if current_name == desired_name:
         return False
-    title_locator = page.locator(
-        'span[data-testid="column.header.title.data.test.id"]'
-    )
+    title_locator = page.locator('span[data-testid="column.header.title.data.test.id"]')
     title_match = title_locator.filter(has_text=current_name)
     if title_match.count() < 1:
         return False
@@ -202,7 +204,9 @@ def _remove_status_from_board(page: Any, status_name: str) -> bool:
 
 def _column_exists(page: Any, column_name: str) -> bool:
     expected = column_name.strip().casefold()
-    for text in page.locator('span[data-testid="column.header.title.data.test.id"]').all_inner_texts():
+    for text in page.locator(
+        'span[data-testid="column.header.title.data.test.id"]'
+    ).all_inner_texts():
         if " ".join(text.split()).casefold() == expected:
             return True
     return False
@@ -233,9 +237,7 @@ def _column_dropzone(page: Any, column_name: str) -> Any | None:
 
 
 def _map_status_to_column(page: Any, status_name: str, column_name: str) -> bool:
-    selector = (
-        f'[aria-label="Card {status_name} can be moved. Press the space bar to grab it."]'
-    )
+    selector = f'[aria-label="Card {status_name} can be moved. Press the space bar to grab it."]'
     card = page.locator(selector)
     if card.count() < 1:
         return False
@@ -266,7 +268,9 @@ def _map_status_to_column(page: Any, status_name: str, column_name: str) -> bool
 def _collect_board_snapshot(page: Any) -> dict[str, Any]:
     column_titles = [
         " ".join(text.split())
-        for text in page.locator('span[data-testid="column.header.title.data.test.id"]').all_inner_texts()
+        for text in page.locator(
+            'span[data-testid="column.header.title.data.test.id"]'
+        ).all_inner_texts()
         if text and text.strip()
     ]
     warning_count = page.locator(
@@ -325,8 +329,7 @@ def _ensure_card_field(page: Any, field_name: str) -> bool:
         return False
     if len(existing_names) >= 3:
         raise AtlassianBoardUiSyncError(
-            "Card layout do board ja usa tres campos e nao tem vaga para adicionar "
-            f"{field_name!r}."
+            f"Card layout do board ja usa tres campos e nao tem vaga para adicionar {field_name!r}."
         )
     page.get_by_test_id(
         "software-board-settings-card-layout.ui.card-layout-settings-page.card-layout-table.add-field.button"

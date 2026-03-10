@@ -5,6 +5,7 @@ import json
 import re
 import sys
 from pathlib import Path
+from typing import cast
 
 if __package__ in {None, ""}:  # pragma: no cover - execucao direta do script
     sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
@@ -380,13 +381,13 @@ def validate_ai_config(repo_root: Path, failures: list[str]) -> None:
                 failures.append(f"Referencia ausente em .agents/config.toml: {value}")
     skills_section = payload.get("skills", {})
     if isinstance(skills_section, dict):
-        for skill_name in skills_section.get("required", []):
+        for skill_name in string_list_setting(skills_section, "required"):
             if (
                 isinstance(skill_name, str)
                 and not (skills_root(repo_root) / skill_name / "SKILL.md").exists()
             ):
                 failures.append(f"Skill requerida ausente em .agents/config.toml: {skill_name}")
-        for skill_name in skills_section.get("mandatory_parallel", []):
+        for skill_name in string_list_setting(skills_section, "mandatory_parallel"):
             if (
                 isinstance(skill_name, str)
                 and not (skills_root(repo_root) / skill_name / "SKILL.md").exists()
@@ -396,13 +397,13 @@ def validate_ai_config(repo_root: Path, failures: list[str]) -> None:
                 )
     agents_section = payload.get("agents", {})
     if isinstance(agents_section, dict):
-        for agent_name in agents_section.get("required", []):
+        for agent_name in string_list_setting(agents_section, "required"):
             if (
                 isinstance(agent_name, str)
                 and not (registry_root(repo_root) / f"{agent_name}.toml").exists()
             ):
                 failures.append(f"Agente requerido ausente em .agents/config.toml: {agent_name}")
-        for agent_name in agents_section.get("mandatory_global", []):
+        for agent_name in string_list_setting(agents_section, "mandatory_global"):
             if (
                 isinstance(agent_name, str)
                 and not (registry_root(repo_root) / f"{agent_name}.toml").exists()
@@ -410,7 +411,7 @@ def validate_ai_config(repo_root: Path, failures: list[str]) -> None:
                 failures.append(
                     f"Agente mandatory_global ausente em .agents/config.toml: {agent_name}"
                 )
-        for agent_name in agents_section.get("mandatory_platform", []):
+        for agent_name in string_list_setting(agents_section, "mandatory_platform"):
             if (
                 isinstance(agent_name, str)
                 and not (registry_root(repo_root) / f"{agent_name}.toml").exists()
@@ -500,7 +501,7 @@ def parse_basic_toml(text: str) -> dict[str, object]:
             section = data.setdefault(section_name, {})
             if not isinstance(section, dict):
                 raise ValueError(f"Secao duplicada com tipo invalido: {section_name}")
-            current = section
+            current = cast(dict[str, object], section)
             continue
         if "=" not in line:
             raise ValueError(f"Linha TOML invalida: {raw_line}")
@@ -524,6 +525,16 @@ def parse_toml_text(text: str) -> dict[str, object]:
         except Exception as exc:  # pragma: no cover - delegated to stdlib parser
             raise ValueError(str(exc)) from exc
     return parse_basic_toml(text)
+
+
+def string_list_setting(section: object, key: str) -> list[str]:
+    if not isinstance(section, dict):
+        return []
+    mapping = cast(dict[str, object], section)
+    raw_value = mapping.get(key)
+    if not isinstance(raw_value, list):
+        return []
+    return [item for item in raw_value if isinstance(item, str)]
 
 
 def validate_agent_card(card: Path, skill_names: set[str], failures: list[str]) -> None:

@@ -74,7 +74,11 @@ class AiJiraApplyTests(unittest.TestCase):
             "fields": {
                 "custom_fields": [
                     {"name": "Work Kind", "type": "single_select"},
-                    {"name": "Needs SEO Review", "type": "checkbox", "enabled_when_role": "ai-seo-specialist"},
+                    {
+                        "name": "Needs SEO Review",
+                        "type": "checkbox",
+                        "enabled_when_role": "ai-seo-specialist",
+                    },
                 ]
             }
         }
@@ -122,7 +126,10 @@ class AiJiraApplyTests(unittest.TestCase):
         changed = ensure_field_on_default_screen(cast(Any, client), "customfield_10001")
 
         self.assertTrue(changed)
-        self.assertEqual(client.request_json.call_args_list[0].args, ("jira", "/rest/api/3/field/customfield_10001/screens"))
+        self.assertEqual(
+            client.request_json.call_args_list[0].args,
+            ("jira", "/rest/api/3/field/customfield_10001/screens"),
+        )
         self.assertEqual(
             client.request_json.call_args_list[1].args,
             ("jira", "/rest/api/3/screens/addToDefault/customfield_10001"),
@@ -222,10 +229,20 @@ class AiJiraApplyTests(unittest.TestCase):
             "workflows": [
                 {
                     "statuses": [
-                        {"statusReference": "10000", "layout": {"x": 0.0, "y": 0.0}, "properties": {}}
+                        {
+                            "statusReference": "10000",
+                            "layout": {"x": 0.0, "y": 0.0},
+                            "properties": {},
+                        }
                     ],
                     "transitions": [
-                        {"id": "1", "name": "Create", "type": "INITIAL", "toStatusReference": "10000", "links": []}
+                        {
+                            "id": "1",
+                            "name": "Create",
+                            "type": "INITIAL",
+                            "toStatusReference": "10000",
+                            "links": [],
+                        }
                     ],
                 }
             ]
@@ -239,7 +256,13 @@ class AiJiraApplyTests(unittest.TestCase):
                 {"statusReference": "10000", "layout": {"x": 0.0, "y": 0.0}, "properties": {}}
             ],
             "transitions": [
-                {"id": "1", "name": "Create", "type": "INITIAL", "toStatusReference": "10000", "links": []}
+                {
+                    "id": "1",
+                    "name": "Create",
+                    "type": "INITIAL",
+                    "toStatusReference": "10000",
+                    "links": [],
+                }
             ],
         }
 
@@ -433,7 +456,13 @@ class AiJiraApplyTests(unittest.TestCase):
                 {"statusReference": "10002", "layout": {"x": 1540.0, "y": 0.0}, "properties": {}},
             ],
             "transitions": [
-                {"id": "1", "name": "Create", "type": "INITIAL", "toStatusReference": "10000", "links": []},
+                {
+                    "id": "1",
+                    "name": "Create",
+                    "type": "INITIAL",
+                    "toStatusReference": "10000",
+                    "links": [],
+                },
                 {
                     "id": "11",
                     "name": "Move to Refinement",
@@ -508,13 +537,19 @@ class AiJiraApplyTests(unittest.TestCase):
         )
 
         self.assertEqual(payload["workflows"][0]["id"], "workflow-id")
-        self.assertEqual(payload["workflows"][0]["version"], {"id": "version-id", "versionNumber": 7})
+        self.assertEqual(
+            payload["workflows"][0]["version"], {"id": "version-id", "versionNumber": 7}
+        )
         self.assertEqual(payload["statuses"][4]["id"], "10011")
 
     def test_apply_jira_model_reconciles_options_for_existing_select_field(self) -> None:
         control_plane = mock.Mock()
         control_plane.repo_root = "."
-        control_plane.enabled_roles.return_value = {"ai-product-owner", "ai-reviewer", "ai-reviewer-python"}
+        control_plane.enabled_roles.return_value = {
+            "ai-product-owner",
+            "ai-reviewer",
+            "ai-reviewer-python",
+        }
         control_plane.atlassian_definition.return_value = {}
         resolved = mock.Mock(jira_project_key="DOT")
         model = {
@@ -546,11 +581,20 @@ class AiJiraApplyTests(unittest.TestCase):
         }
 
         with (
-            mock.patch("scripts.ai_jira_apply_lib.load_ai_control_plane", return_value=control_plane),
-            mock.patch("scripts.ai_jira_apply_lib.resolve_atlassian_platform", return_value=resolved),
-            mock.patch("scripts.ai_jira_apply_lib.load_jira_model", return_value=("config/ai/jira-model.yaml", model)),
+            mock.patch(
+                "scripts.ai_jira_apply_lib.load_ai_control_plane", return_value=control_plane
+            ),
+            mock.patch(
+                "scripts.ai_jira_apply_lib.resolve_atlassian_platform", return_value=resolved
+            ),
+            mock.patch(
+                "scripts.ai_jira_apply_lib.load_jira_model",
+                return_value=("config/ai/jira-model.yaml", model),
+            ),
             mock.patch("scripts.ai_jira_apply_lib.AtlassianHttpClient", return_value=mock.Mock()),
-            mock.patch("scripts.ai_jira_apply_lib.current_project_payload", return_value={"id": "10005"}),
+            mock.patch(
+                "scripts.ai_jira_apply_lib.current_project_payload", return_value={"id": "10005"}
+            ),
             mock.patch("scripts.ai_jira_apply_lib.project_has_issues", return_value=True),
             mock.patch(
                 "scripts.ai_jira_apply_lib.current_status_catalog",
@@ -568,9 +612,16 @@ class AiJiraApplyTests(unittest.TestCase):
             ),
             mock.patch(
                 "scripts.ai_jira_apply_lib.current_workflows_by_name",
-                return_value={"DOT - Autonomous Delivery Workflow": {"name": "DOT - Autonomous Delivery Workflow"}},
+                return_value={
+                    "DOT - Autonomous Delivery Workflow": {
+                        "name": "DOT - Autonomous Delivery Workflow"
+                    }
+                },
             ),
-            mock.patch("scripts.ai_jira_apply_lib.current_workflow_detail_by_name", return_value={"statuses": [], "transitions": []}),
+            mock.patch(
+                "scripts.ai_jira_apply_lib.current_workflow_detail_by_name",
+                return_value={"statuses": [], "transitions": []},
+            ),
             mock.patch("scripts.ai_jira_apply_lib.workflow_requires_update", return_value=False),
             mock.patch(
                 "scripts.ai_jira_apply_lib.current_workflow_schemes_by_name",
@@ -589,7 +640,9 @@ class AiJiraApplyTests(unittest.TestCase):
                 "scripts.ai_jira_apply_lib.ensure_field_options",
                 return_value={"context_id": "10333", "created_options": ["ai-reviewer-python"]},
             ) as ensure_options,
-            mock.patch("scripts.ai_jira_apply_lib.ensure_field_on_default_screen", return_value=False),
+            mock.patch(
+                "scripts.ai_jira_apply_lib.ensure_field_on_default_screen", return_value=False
+            ),
         ):
             result = apply_jira_model(".")
 

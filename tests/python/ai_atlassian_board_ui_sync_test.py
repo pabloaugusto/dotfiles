@@ -6,11 +6,11 @@ from scripts.ai_atlassian_board_ui_sync_lib import (
     AtlassianBoardUiSyncError,
     ColumnRename,
     StatusColumnMapping,
+    board_card_layout_url,
     parse_add_columns,
     parse_card_fields,
     parse_map_statuses,
     parse_rename_columns,
-    board_card_layout_url,
 )
 
 
@@ -61,7 +61,9 @@ class ParseRenameColumnsTest(unittest.TestCase):
 
     def test_board_card_layout_url_rejects_invalid_url(self) -> None:
         with self.assertRaises(AtlassianBoardUiSyncError):
-            board_card_layout_url("https://example.atlassian.net/jira/software/c/projects/DOT/boards/6")
+            board_card_layout_url(
+                "https://example.atlassian.net/jira/software/c/projects/DOT/boards/6"
+            )
 
 
 if __name__ == "__main__":

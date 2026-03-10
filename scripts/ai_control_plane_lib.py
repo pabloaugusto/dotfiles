@@ -323,9 +323,7 @@ def resolve_tracked_repo_files(repo_root: str | Path | None = None) -> set[str]:
         cwd=resolved_repo_root,
     )
     tracked = {
-        entry.replace("\\", "/").strip()
-        for entry in completed.stdout.split("\0")
-        if entry.strip()
+        entry.replace("\\", "/").strip() for entry in completed.stdout.split("\0") if entry.strip()
     }
     _TRACKED_REPO_FILES_CACHE[cache_key] = tracked
     return tracked

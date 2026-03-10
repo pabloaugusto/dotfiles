@@ -1,9 +1,9 @@
 from __future__ import annotations
 
+import subprocess
 import tempfile
 import unittest
 from pathlib import Path
-import subprocess
 
 from scripts import validate_docs
 
