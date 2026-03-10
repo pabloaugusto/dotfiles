@@ -69,6 +69,21 @@ Isso nao abre permissao para puxar demanda nova desconectada. A semantica de
 
 A automacao deve morar em scripts, tasks e workflows reutilizaveis. Isso reduz duplicacao e facilita evoluir CI/CD sem espalhar logica em varios pontos.
 
+### 4.1. Toda execucao local relevante precisa ter agente e issue explicitos
+
+Quando uma rodada local estiver realmente em execucao, o repo precisa manter um
+contexto ativo canonico em `.cache/ai/active-execution.json`
+com:
+
+- issue Jira ativa
+- agente responsavel pela execucao atual
+- status real da rodada
+- branch e worktree usadas
+
+Esse contexto local nao substitui o Jira; ele existe para impedir operacao
+anonima entre o que acontece no repo, o que fica comentado no Jira e o que
+chega ao chat. Em handoff, pausa ou `Done`, o contexto local deve ser limpo.
+
 ### 4.2. Assinatura Git humana e tecnica devem ser separadas
 
 Quando a automacao local precisar gerar commits, a worktree deve usar signer

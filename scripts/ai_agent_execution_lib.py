@@ -1,0 +1,445 @@
+from __future__ import annotations
+
+import json
+import subprocess
+from dataclasses import asdict, dataclass
+from datetime import datetime
+from pathlib import Path
+from typing import Any
+from urllib.parse import quote
+
+from scripts.ai_control_plane_lib import load_ai_control_plane, resolve_atlassian_platform
+from scripts.atlassian_platform_lib import AtlassianHttpClient, JiraAdapter
+
+WORKFLOW_ORDER = [
+    ("backlog", {"backlog"}),
+    ("refinement", {"refinement"}),
+    ("ready", {"ready", "selected for development", "selected for dev"}),
+    ("doing", {"doing", "in progress", "in_progress", "executando"}),
+    ("paused", {"paused", "on hold", "pausado"}),
+    ("testing", {"testing"}),
+    ("review", {"review"}),
+    ("changes requested", {"changes requested", "changes_requested"}),
+    ("done", {"done", "completed", "complete", "closed", "concluido", "concluida"}),
+    ("cancelled", {"cancelled", "canceled"}),
+]
+MAINLINE_ORDER = ["backlog", "refinement", "ready", "doing", "testing", "review", "done"]
+MAINLINE_INDEX = {name: idx for idx, name in enumerate(MAINLINE_ORDER)}
+WORKFLOW_INDEX = {name: idx for idx, (name, _) in enumerate(WORKFLOW_ORDER)}
+WORKFLOW_STATUS_ALIASES = {
+    "backlog": "backlog",
+    "triage": "backlog",
+    "refinement": "refinement",
+    "ready": "ready",
+    "selected for development": "ready",
+    "selected for dev": "ready",
+    "doing": "doing",
+    "in progress": "doing",
+    "in_progress": "doing",
+    "executando": "doing",
+    "paused": "paused",
+    "on hold": "paused",
+    "pausado": "paused",
+    "testing": "testing",
+    "review": "review",
+    "changes requested": "changes requested",
+    "changes_requested": "changes requested",
+    "done": "done",
+    "completed": "done",
+    "complete": "done",
+    "closed": "done",
+    "concluido": "done",
+    "concluida": "done",
+    "cancelled": "cancelled",
+    "canceled": "cancelled",
+}
+
+
+class AgentExecutionError(RuntimeError):
+    """Raised when the local agent execution contract cannot be applied safely."""
+
+
+@dataclass(frozen=True)
+class AgentExecutionContext:
+    issue_key: str
+    issue_summary: str
+    issue_url: str
+    agent: str
+    status: str
+    current_agent_role: str
+    next_required_role: str
+    branch: str
+    worktree_root: str
+    started_at: str
+    updated_at: str
+
+
+def now_iso() -> str:
+    return datetime.now().astimezone().isoformat(timespec="seconds")
+
+
+def default_context_path(repo_root: str | Path | None = None) -> Path:
+    root = Path(repo_root).resolve() if repo_root else Path.cwd().resolve()
+    return root / ".cache" / "ai" / "active-execution.json"
+
+
+def normalize_status(value: str) -> str:
+    normalized = str(value or "").strip().casefold()
+    return WORKFLOW_STATUS_ALIASES.get(normalized, normalized)
+
+
+def current_branch(repo_root: Path) -> str:
+    completed = subprocess.run(
+        ["git", "-C", str(repo_root), "rev-parse", "--abbrev-ref", "HEAD"],
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+    branch = (completed.stdout or "").strip()
+    return branch or "unknown"
+
+
+def resolve_jira(repo_root: Path) -> JiraAdapter:
+    control_plane = load_ai_control_plane(repo_root)
+    resolved = resolve_atlassian_platform(
+        control_plane.atlassian_definition(),
+        repo_root=control_plane.repo_root,
+    )
+    return JiraAdapter(AtlassianHttpClient(resolved))
+
+
+def issue_url(jira: JiraAdapter, issue_key: str) -> str:
+    resolved = getattr(jira.client, "resolved", None)
+    site_url = str(getattr(resolved, "site_url", "")).strip().rstrip("/")
+    if not site_url:
+        return issue_key
+    return f"{site_url}/browse/{issue_key}"
+
+
+def load_context(repo_root: str | Path | None = None) -> AgentExecutionContext | None:
+    context_path = default_context_path(repo_root)
+    if not context_path.exists():
+        return None
+    payload = json.loads(context_path.read_text(encoding="utf-8"))
+    if not isinstance(payload, dict):
+        raise AgentExecutionError("Contexto ativo em formato invalido.")
+    return AgentExecutionContext(
+        issue_key=str(payload.get("issue_key", "")).strip(),
+        issue_summary=str(payload.get("issue_summary", "")).strip(),
+        issue_url=str(payload.get("issue_url", "")).strip(),
+        agent=str(payload.get("agent", "")).strip(),
+        status=normalize_status(str(payload.get("status", "")).strip()),
+        current_agent_role=str(payload.get("current_agent_role", "")).strip(),
+        next_required_role=str(payload.get("next_required_role", "")).strip(),
+        branch=str(payload.get("branch", "")).strip(),
+        worktree_root=str(payload.get("worktree_root", "")).strip(),
+        started_at=str(payload.get("started_at", "")).strip(),
+        updated_at=str(payload.get("updated_at", "")).strip(),
+    )
+
+
+def save_context(context: AgentExecutionContext, repo_root: str | Path | None = None) -> Path:
+    context_path = default_context_path(repo_root)
+    context_path.parent.mkdir(parents=True, exist_ok=True)
+    context_path.write_text(
+        json.dumps(asdict(context), ensure_ascii=False, indent=2) + "\n",
+        encoding="utf-8",
+    )
+    return context_path
+
+
+def clear_context(repo_root: str | Path | None = None) -> None:
+    context_path = default_context_path(repo_root)
+    if context_path.exists():
+        context_path.unlink()
+
+
+def issue_summary(jira: JiraAdapter, issue_key: str) -> str:
+    issue = jira.get_issue(issue_key, fields=["summary"])
+    fields = issue.get("fields") or {}
+    summary = str(fields.get("summary", "")).strip()
+    if not summary:
+        raise AgentExecutionError(f"Issue sem summary legivel: {issue_key}")
+    return summary
+
+
+def adf_to_text(node: Any) -> str:
+    if isinstance(node, dict):
+        if str(node.get("type", "")).strip() == "text":
+            return str(node.get("text", ""))
+        content = node.get("content")
+        if isinstance(content, list):
+            return "".join(adf_to_text(item) for item in content)
+        return ""
+    if isinstance(node, list):
+        return "".join(adf_to_text(item) for item in node)
+    return ""
+
+
+def normalize_text_for_dedup(value: str) -> str:
+    return " ".join(str(value or "").split()).strip().casefold()
+
+
+def render_structured_comment(
+    *,
+    agent: str,
+    interaction_type: str,
+    status: str,
+    contexto: list[str],
+    evidencias: list[str],
+    proximo_passo: str,
+) -> str:
+    lines = [
+        f"Agent: {agent}",
+        f"Interaction Type: {interaction_type}",
+        f"Status: {status}",
+    ]
+    if contexto:
+        lines.extend(["", "Contexto:"])
+        lines.extend(f"- {item}" for item in contexto)
+    if evidencias:
+        lines.extend(["", "Evidencias:"])
+        lines.extend(f"- {item}" for item in evidencias)
+    if proximo_passo.strip():
+        lines.extend(["", f"Proximo passo: {proximo_passo.strip()}"])
+    return "\n".join(lines).strip()
+
+
+def list_comments(jira: JiraAdapter, issue_key: str, *, max_results: int = 200) -> list[dict[str, Any]]:
+    payload = jira.client.request_json(
+        "jira",
+        f"/rest/api/3/issue/{quote(issue_key, safe='')}/comment",
+        params={"maxResults": str(max_results)},
+    )
+    if not isinstance(payload, dict):
+        raise AgentExecutionError("Jira list_comments retornou payload inesperado.")
+    comments = payload.get("comments")
+    if not isinstance(comments, list):
+        raise AgentExecutionError("Jira list_comments retornou comments em formato inesperado.")
+    return [entry for entry in comments if isinstance(entry, dict)]
+
+
+def ensure_comment(jira: JiraAdapter, issue_key: str, body_text: str) -> dict[str, Any]:
+    desired = normalize_text_for_dedup(body_text)
+    for comment in list_comments(jira, issue_key):
+        current = normalize_text_for_dedup(adf_to_text(comment.get("body")))
+        if current == desired:
+            return comment
+    return jira.add_comment(issue_key, body_text)
+
+
+def field_catalog_by_name(jira: JiraAdapter) -> dict[str, str]:
+    start_at = 0
+    catalog: dict[str, str] = {}
+    while True:
+        payload = jira.client.request_json(
+            "jira",
+            "/rest/api/3/field/search",
+            params={"startAt": str(start_at), "maxResults": "100"},
+        )
+        if not isinstance(payload, dict):
+            raise AgentExecutionError("Jira field search retornou payload inesperado.")
+        values = payload.get("values")
+        if not isinstance(values, list):
+            raise AgentExecutionError("Jira field search retornou values em formato inesperado.")
+        for item in values:
+            if not isinstance(item, dict):
+                continue
+            name = str(item.get("name", "")).strip()
+            field_id = str(item.get("id", "")).strip()
+            if name and field_id:
+                catalog[name] = field_id
+        if payload.get("isLast") is True or not values:
+            break
+        start_at += len(values)
+    return catalog
+
+
+def sync_agent_roles(
+    jira: JiraAdapter,
+    issue_key: str,
+    *,
+    current_agent_role: str,
+    next_required_role: str,
+) -> dict[str, Any]:
+    fields_catalog = field_catalog_by_name(jira)
+    payload_fields: dict[str, Any] = {}
+    current_field_id = fields_catalog.get("Current Agent Role", "")
+    next_field_id = fields_catalog.get("Next Required Role", "")
+    if current_field_id:
+        payload_fields[current_field_id] = (
+            {"value": current_agent_role.strip()} if current_agent_role.strip() else None
+        )
+    if next_field_id:
+        payload_fields[next_field_id] = (
+            {"value": next_required_role.strip()} if next_required_role.strip() else None
+        )
+    if not payload_fields:
+        return {}
+    return jira.update_issue_fields(issue_key, payload_fields)
+
+
+def _choose_transition(jira: JiraAdapter, issue_key: str, target_status: str) -> dict[str, Any]:
+    transitions = jira.get_transitions(issue_key)
+    target = normalize_status(target_status)
+    for transition in transitions:
+        to_name = normalize_status(str(((transition.get("to") or {}).get("name")) or "").strip())
+        if to_name == target:
+            return transition
+    raise AgentExecutionError(
+        f"Nao foi encontrada transicao para {target_status!r} na issue {issue_key}."
+    )
+
+
+def ensure_issue_status(jira: JiraAdapter, issue_key: str, target_status: str) -> None:
+    target = normalize_status(target_status)
+    issue = jira.get_issue(issue_key, fields=["status"])
+    current = normalize_status(str(((issue.get("fields") or {}).get("status") or {}).get("name") or ""))
+    if current == target:
+        return
+    while current != target:
+        transition = None
+        try:
+            transition = _choose_transition(jira, issue_key, target)
+        except AgentExecutionError:
+            if current in {"paused", "changes requested"} and target != current:
+                transition = _choose_transition(jira, issue_key, "doing")
+            else:
+                current_index = MAINLINE_INDEX.get(current, -1)
+                target_index = MAINLINE_INDEX.get(target, -1)
+                if current_index < 0 or target_index < 0:
+                    raise AgentExecutionError(
+                        f"Nao foi possivel mapear a transicao logica de {current!r} para {target!r}."
+                    )
+                direction = 1 if target_index > current_index else -1
+                next_index = current_index + direction
+                next_status = MAINLINE_ORDER[next_index]
+                transition = _choose_transition(jira, issue_key, next_status)
+        jira.transition_issue(issue_key, str(transition.get("id", "")).strip())
+        issue = jira.get_issue(issue_key, fields=["status"])
+        updated = normalize_status(
+            str(((issue.get("fields") or {}).get("status") or {}).get("name") or "")
+        )
+        if updated == current:
+            raise AgentExecutionError(
+                "Jira nao refletiu a transicao esperada para a issue "
+                f"{issue_key}: status permaneceu em {current!r}."
+            )
+        current = updated
+
+
+def read_issue_status(jira: JiraAdapter, issue_key: str) -> str:
+    issue = jira.get_issue(issue_key, fields=["status"])
+    return normalize_status(
+        str(((issue.get("fields") or {}).get("status") or {}).get("name") or "")
+    )
+
+
+def build_context(
+    *,
+    repo_root: Path,
+    jira: JiraAdapter,
+    issue_key: str,
+    agent: str,
+    status: str,
+    current_agent_role: str,
+    next_required_role: str,
+    previous: AgentExecutionContext | None = None,
+) -> AgentExecutionContext:
+    timestamp = now_iso()
+    summary = issue_summary(jira, issue_key)
+    started_at = previous.started_at if previous else timestamp
+    return AgentExecutionContext(
+        issue_key=issue_key.strip().upper(),
+        issue_summary=summary,
+        issue_url=issue_url(jira, issue_key.strip().upper()),
+        agent=agent.strip(),
+        status=normalize_status(status),
+        current_agent_role=current_agent_role.strip(),
+        next_required_role=next_required_role.strip(),
+        branch=current_branch(repo_root),
+        worktree_root=str(repo_root),
+        started_at=started_at,
+        updated_at=timestamp,
+    )
+
+
+def record_activity(
+    *,
+    repo_root: str | Path | None = None,
+    issue_key: str = "",
+    agent: str = "",
+    interaction_type: str,
+    status: str,
+    contexto: list[str] | None = None,
+    evidencias: list[str] | None = None,
+    proximo_passo: str = "",
+    current_agent_role: str = "",
+    next_required_role: str = "",
+    transition_issue: bool = True,
+    clear_after: bool = False,
+    sync_roles: bool = True,
+) -> dict[str, Any]:
+    repo = Path(repo_root).resolve() if repo_root else Path.cwd().resolve()
+    jira = resolve_jira(repo)
+    existing = load_context(repo)
+    resolved_issue_key = issue_key.strip().upper() or (existing.issue_key if existing else "")
+    resolved_agent = agent.strip() or (existing.agent if existing else "")
+    if not resolved_issue_key or not resolved_agent:
+        raise AgentExecutionError("Issue e agente sao obrigatorios para registrar a atividade.")
+    normalized_status = normalize_status(status)
+    if transition_issue:
+        ensure_issue_status(jira, resolved_issue_key, normalized_status)
+        actual_status = read_issue_status(jira, resolved_issue_key)
+        if actual_status != normalized_status:
+            raise AgentExecutionError(
+                "Jira ficou em status divergente apos a transicao: "
+                f"{resolved_issue_key} esperado={normalized_status!r} atual={actual_status!r}."
+            )
+    rendered_comment = render_structured_comment(
+        agent=resolved_agent,
+        interaction_type=interaction_type,
+        status=normalized_status,
+        contexto=contexto or [],
+        evidencias=evidencias or [],
+        proximo_passo=proximo_passo,
+    )
+    comment = ensure_comment(jira, resolved_issue_key, rendered_comment)
+    role_payload: dict[str, Any] = {}
+    if sync_roles:
+        role_payload = sync_agent_roles(
+            jira,
+            resolved_issue_key,
+            current_agent_role=current_agent_role.strip(),
+            next_required_role=next_required_role.strip(),
+        )
+    payload = {
+        "comment": comment,
+        "current_agent_role": current_agent_role.strip(),
+        "next_required_role": next_required_role.strip(),
+        "role_sync": role_payload,
+        "status": normalized_status,
+    }
+    if clear_after:
+        clear_context(repo)
+        return {
+            "context": None,
+            "jira": payload,
+            "context_path": str(default_context_path(repo)),
+        }
+    context = build_context(
+        repo_root=repo,
+        jira=jira,
+        issue_key=resolved_issue_key,
+        agent=resolved_agent,
+        status=normalized_status,
+        current_agent_role=current_agent_role.strip(),
+        next_required_role=next_required_role.strip(),
+        previous=existing if existing and existing.issue_key == resolved_issue_key else None,
+    )
+    context_path = save_context(context, repo)
+    return {
+        "context": asdict(context),
+        "jira": payload,
+        "context_path": str(context_path),
+    }

@@ -36,6 +36,8 @@ global_contract:
       - jira-key-in-git-metadata-must-belong-to-real-work-performed
       - doing-must-reflect-active-execution-only
       - interrupted-work-must-move-to-paused-with-reason
+      - every-active-local-operation-must-write-active-execution-context
+      - handoff-pause-and-done-must-clear-active-execution-context
       - documentation-changes-must-be-mentioned-in-related-issue
       - comments-without-proof-do-not-count-as-complete-work
       - consultive-reviewers-must-log-findings-in-jira-when-scope-is-tracked
