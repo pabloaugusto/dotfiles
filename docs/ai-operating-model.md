@@ -65,6 +65,26 @@ diretamente esse WIP ativo.
 Isso nao abre permissao para puxar demanda nova desconectada. A semantica de
 `concluir_primeiro` passa a ser concluir ou destravar primeiro.
 
+### 3.2. Priorizacao continua e timeline sao responsabilidade perene do **Product Owner**
+
+No modelo deste repo, o backlog oficial vive no `Jira`. Isso significa que o
+`AI Product Owner` nao atua apenas em intake e refinamento pontual; ele precisa
+manter continuamente:
+
+- `Backlog`, `Refinement` e `Ready` ordenados por prioridade real
+- cada demanda nova posicionada no ponto correto da fila
+- `Start date` e `Due date` atualizados para itens acima de `Sub-task`
+
+Essa manutencao sustenta:
+
+- timeline coerente
+- roadmap confiavel
+- planejamento de entregas
+- leitura honesta da capacidade atual do fluxo
+
+Sem essa rotina, a fila deixa de representar prioridade real e o **board**
+perde valor como instrumento de gestao.
+
 ### 4. Automacao reutilizavel
 
 A automacao deve morar em scripts, tasks e workflows reutilizaveis. Isso reduz duplicacao e facilita evoluir CI/CD sem espalhar logica em varios pontos.
@@ -92,7 +112,7 @@ SSH Agent e chave publica sincronizada por `op`/`gh`. O signer humano continua
 como padrao fora da worktree tecnica e nao deve ser desativado por "bypass"
 global de assinatura.
 
-### 4.1. Referencias documentais sempre linkadas quando o formato permitir
+### 4.3. Referencias documentais sempre linkadas quando o formato permitir
 
 Em Markdown e comentarios com suporte a links clicaveis, referencias internas a
 arquivos, pastas, tasks, workflows e scripts do repo, bem como referencias
