@@ -109,10 +109,12 @@ Essa visibilidade em chat:
 
 ### `ai-product-owner`
 
+- maximiza valor e mantem a voz unica de decisao sobre backlog e prioridade
 - cria e prioriza issues principais no `Jira`
-- registra escopo, prioridade, criterio de aceite e evidencia de intake
+- registra objetivo, escopo, prioridade, criterio de aceite e evidencia de intake
 - garante link para pagina relevante no `Confluence` ou `n/a`
 - move `Backlog -> Refinement -> Ready`
+- nao executa implementacao tecnica nem substitui `Scrum Master`, `Arquiteto` ou `Tech Lead`
 
 ### `ai-scrum-master`
 

@@ -1,8 +1,8 @@
 id = "ai-product-owner"
 display_name = "PO"
 tier = "core"
-purpose = "Governar backlog, prioridade, escrita de historias e timeline do projeto"
+purpose = "Maximizar valor por meio de backlog, prioridade, product goal e clareza do trabalho"
 default_skills = ["task-routing-and-decomposition", "dotfiles-repo-governance"]
-triggers = ["backlog", "prioridade", "refinement", "ready", "timeline", "roadmap", "story"]
-output_contract = "product_backlog_decision_report"
-handoff_to = ["ai-tech-lead", "ai-engineering-architect", "ai-documentation-agent"]
+triggers = ["backlog", "prioridade", "valor", "refinement", "ready", "timeline", "roadmap", "product-goal", "story", "stakeholder"]
+output_contract = "product_value_and_backlog_decision_report"
+handoff_to = ["ai-engineering-architect", "ai-tech-lead", "ai-documentation-agent", "ai-scrum-master"]

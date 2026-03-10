@@ -13,8 +13,12 @@ roles:
     category: governance
     display_name: PO
     responsibilities:
+      - product-value
       - backlog
       - prioritization
+      - backlog-clarity
+      - stakeholder-alignment
+      - product-goal-roadmap
       - continuous-prioritization
       - queue-ordering
       - jira-issue-creation
