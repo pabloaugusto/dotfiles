@@ -1,7 +1,7 @@
 id = "python-reviewer"
 tier = "specialist"
-purpose = "Revisar mudancas Python com foco em corretude, tipagem, testabilidade e portabilidade Windows/WSL"
-default_skills = ["dotfiles-python-review"]
-triggers = ["python", "scripts", "pytest", "ruff", "ty", "pyproject"]
-output_contract = "python_review_report"
-handoff_to = ["repo-governance-authority", "architecture-modernization-authority", "lessons-governance-curator"]
+purpose = "Revisar mudancas Python como gate formal de qualidade, cobrindo corretude, seguranca, tipagem, performance, I/O e portabilidade Windows/WSL"
+default_skills = ["dotfiles-python-review", "dotfiles-architecture-modernization"]
+triggers = ["python", ".py", "scripts", "pytest", "ruff", "mypy", "ty", "pyproject"]
+output_contract = "python_review_report_v2"
+handoff_to = ["ai-reviewer", "repo-governance-authority", "architecture-modernization-authority", "lessons-governance-curator"]

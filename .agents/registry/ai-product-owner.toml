@@ -1,0 +1,7 @@
+id = "ai-product-owner"
+tier = "core"
+purpose = "Governar backlog, prioridade, escrita de historias e timeline do projeto"
+default_skills = ["task-routing-and-decomposition", "dotfiles-repo-governance"]
+triggers = ["backlog", "prioridade", "refinement", "ready", "timeline", "roadmap", "story"]
+output_contract = "product_backlog_decision_report"
+handoff_to = ["ai-tech-lead", "ai-engineering-architect", "ai-documentation-agent"]

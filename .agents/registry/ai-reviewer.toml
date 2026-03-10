@@ -1,0 +1,7 @@
+id = "ai-reviewer"
+tier = "core"
+purpose = "Consolidar reviews especializados e atuar como gate transversal de qualidade"
+default_skills = ["task-routing-and-decomposition", "dotfiles-repo-governance", "dotfiles-architecture-modernization"]
+triggers = ["review", "approval", "cross-cutting", "paridade jira", "governance"]
+output_contract = "cross_review_report"
+handoff_to = ["ai-documentation-agent", "ai-product-owner", "ai-engineering-manager"]

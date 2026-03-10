@@ -1,7 +1,7 @@
 id = "powershell-reviewer"
 tier = "specialist"
-purpose = "Revisar mudancas PowerShell com foco em bootstrap, host Windows, sintaxe, quoting e idempotencia"
-default_skills = ["dotfiles-powershell-review"]
-triggers = ["powershell", "pwsh", "bootstrap", "ps1", "aliases", "checkEnv"]
-output_contract = "powershell_review_report"
-handoff_to = ["bootstrap-operator", "critical-integrations-guardian", "repo-governance-authority"]
+purpose = "Revisar mudancas PowerShell como gate formal de qualidade, cobrindo sintaxe, host Windows, quoting, idempotencia, seguranca operacional e compatibilidade pwsh/Windows PowerShell"
+default_skills = ["dotfiles-powershell-review", "dotfiles-critical-integrations"]
+triggers = ["powershell", "pwsh", "bootstrap", "ps1", "aliases", "checkEnv", "psscriptanalyzer"]
+output_contract = "powershell_review_report_v2"
+handoff_to = ["ai-reviewer", "bootstrap-operator", "critical-integrations-guardian", "repo-governance-authority"]

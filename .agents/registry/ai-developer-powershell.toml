@@ -1,0 +1,7 @@
+id = "ai-developer-powershell"
+tier = "specialist"
+purpose = "Implementar mudancas PowerShell com foco em idempotencia e compatibilidade"
+default_skills = ["dotfiles-powershell-review", "dotfiles-critical-integrations"]
+triggers = ["powershell", ".ps1", "bootstrap", "pwsh", "pester"]
+output_contract = "powershell_delivery_report"
+handoff_to = ["ai-qa", "ai-reviewer-powershell", "ai-documentation-agent"]

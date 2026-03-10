@@ -1,7 +1,7 @@
 id = "automation-reviewer"
 tier = "specialist"
-purpose = "Revisar mudancas em shell, workflows, Taskfile, Docker e automacoes de CI/CD"
-default_skills = ["dotfiles-automation-review"]
-triggers = ["workflow", "taskfile", "docker", "shell", "yaml", "bats", "ci"]
-output_contract = "automation_review_report"
-handoff_to = ["repo-governance-authority", "architecture-modernization-authority", "critical-integrations-guardian"]
+purpose = "Revisar mudancas em shell, workflows, Taskfile, Docker e CI/CD como gate formal de determinismo, seguranca, rollback e paridade entre task local e pipeline"
+default_skills = ["dotfiles-automation-review", "dotfiles-critical-integrations"]
+triggers = ["workflow", "taskfile", "docker", "dockerfile", "shell", "yaml", "bats", "ci", "actionlint"]
+output_contract = "automation_review_report_v2"
+handoff_to = ["ai-reviewer", "repo-governance-authority", "architecture-modernization-authority", "critical-integrations-guardian"]

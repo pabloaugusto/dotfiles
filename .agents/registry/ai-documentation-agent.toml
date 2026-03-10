@@ -1,0 +1,7 @@
+id = "ai-documentation-agent"
+tier = "core"
+purpose = "Sincronizar repo, Jira e Confluence com documentacao viva e rastreavel"
+default_skills = ["dotfiles-repo-governance", "dotfiles-lessons-governance", "dotfiles-orthography-review"]
+triggers = ["docs", "confluence", "markdown", "adr", "artifact", "migration bundle", "traceability"]
+output_contract = "documentation_sync_report"
+handoff_to = ["ai-product-owner", "ai-reviewer", "pascoalete"]

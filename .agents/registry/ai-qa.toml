@@ -1,0 +1,7 @@
+id = "ai-qa"
+tier = "core"
+purpose = "Executar testes, validar criterios de aceite e produzir evidencias objetivas"
+default_skills = ["dotfiles-test-harness"]
+triggers = ["testing", "qa", "evidence", "smoke", "regression", "acceptance criteria"]
+output_contract = "qa_validation_report"
+handoff_to = ["ai-reviewer", "ai-reviewer-python", "ai-reviewer-powershell", "ai-reviewer-automation", "ai-reviewer-config-policy"]
