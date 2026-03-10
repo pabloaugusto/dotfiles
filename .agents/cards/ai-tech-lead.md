@@ -1,4 +1,4 @@
-# AI Tech Lead
+# Tech Lead
 
 ## Objetivo
 
