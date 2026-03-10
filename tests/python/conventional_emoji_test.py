@@ -46,6 +46,10 @@ class ConventionalEmojiTests(unittest.TestCase):
         result = MODULE.validate_branch_name("release/test-harness-governance")
         self.assertTrue(result.ok)
 
+    def test_branch_validation_accepts_canonical_jira_branch(self) -> None:
+        result = MODULE.validate_branch_name("feat/DOT-81-git-traceability")
+        self.assertTrue(result.ok)
+
     def test_branch_validation_allows_dependabot(self) -> None:
         result = MODULE.validate_branch_name("dependabot/npm_and_yarn/foo-1.2.3")
         self.assertTrue(result.ok)
@@ -53,7 +57,7 @@ class ConventionalEmojiTests(unittest.TestCase):
     def test_branch_validation_rejects_uppercase(self) -> None:
         result = MODULE.validate_branch_name("Feat/test-harness")
         self.assertFalse(result.ok)
-        self.assertIn("<type>/<slug>", result.error)
+        self.assertIn("<type>/<jira-key>-<slug>", result.error)
 
     def test_extended_type_mapping_is_available(self) -> None:
         self.assertEqual(MODULE.COMMIT_TYPE_EMOJI["security"], "🔒")

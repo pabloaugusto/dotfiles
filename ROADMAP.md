@@ -1,6 +1,6 @@
 # Roadmap do Repositorio
 
-Atualizado em: 2026-03-07 17:03 UTC
+Atualizado em: 2026-03-09 23:54 UTC
 Ciclo ativo: 2026-Q1
 
 Planejamento incremental para qualidade, testes, bootstrap e governanca do repo.
@@ -28,7 +28,7 @@ Edite apenas a tabela entre os marcadores abaixo.
 Atualizada por `task ai:roadmap:refresh`.
 
 <!-- roadmap:priority:start -->
-Atualizado em: `2026-03-07 17:03 UTC`
+Atualizado em: 2026-03-09 23:54 UTC
 
 ### Ranking RICE
 
@@ -76,7 +76,23 @@ Sem sugestoes pendentes neste ciclo; itens aceitos ja estao rastreaveis.
 ### Next
 
 <!-- roadmap:next:start -->
+- [fix] Corrigir pendencias ortograficas remanescentes do worklog `DOT-114` em scripts/ai-atlassian-agent-comment-audit.py, scripts/ai-atlassian-backfill.py, scripts/ai_atlassian_agent_... | notas=Pendencia automatica criada por Pascoalete apos review consultivo reprovado sem correcao automatica.
+- [fix] Corrigir pendencias ortograficas remanescentes do worklog `WIP-20260307-ATLASSIAN-ADAPTERS` em docs/TASKS.md, docs/atlassian-ia/2026-03-07-diagnostico-auth-e-acesso-atlassian.md... | notas=Pendencia automatica criada por Pascoalete apos review consultivo reprovado sem correcao automatica.
+- [fix] Corrigir pendencias ortograficas remanescentes do worklog `WIP-20260307-ATLASSIAN-ADAPTERS` em docs/AI-WIP-TRACKER.md, docs/atlassian-ia/2026-03-07-diagnostico-auth-e-acesso-atl... | notas=Pendencia automatica criada por Pascoalete apos review consultivo reprovado sem correcao automatica.
+- [fix] Corrigir pendencias ortograficas remanescentes do worklog `WIP-20260307-ATLASSIAN-ADAPTERS` em Taskfile.yml, config/ai/confluence-model.yaml, config/ai/jira-model.yaml, docs/TAS... | notas=Pendencia automatica criada por Pascoalete apos review consultivo reprovado sem correcao automatica.
+- [improvement] Redesenhar a estrategia de cache de secrets 1Password do runtime dos dotfiles para resolver secrets na borda da sessao e evitar leituras repetidas a cada abertura de terminal. | notas=Conclusao estrutural derivada do incidente de rate limit da service account do 1Password na trilha Atlassian; a camada de runtime do repo...
+- [fix] Corrigir pendencias ortograficas remanescentes do worklog `WIP-20260307-ATLASSIAN-ADAPTERS` em config/ai/confluence-model.yaml, docs/atlassian-ia/2026-03-07-atlassian-auth-scope... | notas=Pendencia automatica criada por Pascoalete apos review consultivo reprovado sem correcao automatica.
+- [fix] Corrigir pendencias ortograficas remanescentes do worklog `WIP-20260307-ATLASSIAN-ADAPTERS` em config/ai/confluence-model.yaml, docs/atlassian-ia/artifacts/atlassian-endpoints.m... | notas=Pendencia automatica criada por Pascoalete apos review consultivo reprovado sem correcao automatica.
+- [fix] Corrigir pendencias ortograficas remanescentes do worklog `WIP-20260307-ATLASSIAN-ADAPTERS` em ROADMAP.md, docs/ROADMAP-DECISIONS.md, docs/atlassian-ia/2026-03-07-parecer-e-plan... | notas=Pendencia automatica criada por Pascoalete apos review consultivo reprovado sem correcao automatica.
+- [fix] Corrigir pendencias ortograficas remanescentes do worklog `WIP-20260307-ATLASSIAN-ADAPTERS` em config/ai/agent-operations.yaml, config/ai/contracts.yaml, config/ai/jira-model.ya... | notas=Pendencia automatica criada por Pascoalete apos review consultivo reprovado sem correcao automatica.
+- [governance] Endurecer a governanca perene de comentarios explicativos em arquivos de configuracao e contratos, exigindo documentacao inline ou referencia explicita para campos nao obvios; r... | notas=Gap observado pelo usuario em config/secrets-rotation.yaml; o contrato atual ainda nao esta rigido o suficiente para impedir YAMLs e conf...
+- [fix] Corrigir pendencias ortograficas remanescentes do worklog `WIP-20260307-ATLASSIAN-ADAPTERS` em Taskfile.yml, config/ai/agents.yaml, config/ai/contracts.yaml, config/ai/jira-mode... | notas=Pendencia automatica criada por Pascoalete apos review consultivo reprovado sem correcao automatica.
+- [fix] Corrigir pendencias ortograficas remanescentes do worklog `WIP-20260307-ATLASSIAN-ADAPTERS` em ROADMAP.md, docs/ROADMAP-DECISIONS.md, docs/atlassian-ia/2026-03-07-atlassian-prod... | notas=Pendencia automatica criada por Pascoalete apos review consultivo reprovado sem correcao automatica.
+- [fix] Corrigir pendencias ortograficas remanescentes do worklog `WIP-20260307-ATLASSIAN-IA-CONTEXT` em docs/atlassian-ia/2026-03-07-modelo-operacional-completo-figma-seo.md, docs/atla... | notas=Pendencia automatica criada por Pascoalete apos review consultivo reprovado sem correcao automatica.
+- [fix] Corrigir pendencias ortograficas remanescentes do worklog `WIP-20260307-ATLASSIAN-IA-CONTEXT` em .agents/cards/guardiao-rotacao-secrets.md, LICOES-APRENDIDAS.md, docs/README.md,... | notas=Pendencia automatica criada por Pascoalete apos review consultivo reprovado sem correcao automatica.
+- [fix] Corrigir pendencias ortograficas remanescentes do worklog `WIP-20260307-ATLASSIAN-IA-CONTEXT` em docs/README.md, docs/ai-operating-model.md, docs/atlassian-ia/2026-03-07-bluepri... | notas=Pendencia automatica criada por Pascoalete apos review consultivo reprovado sem correcao automatica.
 - [governance] Criar historico versionado de planos sugeridos, aprovados e implementados em docs/plans/, com arquivo por plano contendo data-hora, resumo do plano e status atual no nome e no c... | notas=Demanda aprovada pelo usuario. Manter por enquanto em docs/, com naming canonico orientado a historico e rastreabilidade; quando o item d...
+- [feat] Integrar `Atlassian Product Discovery` como camada opcional de intake e discovery upstream do `Jira`, permitindo que ideias do `AI Product Owner` e de outros agentes nascam ali antes da promocao oficial para issue executavel. | notas=Contrato alvo: `Product Discovery` como backlog de oportunidade/hipotese; `Jira` segue fonte canonica do backlog executavel e o `AI Product Owner` continua como promotor exclusivo das issues principais.
 - [fix] Padronizar datas, horas, locale e idioma de docs, scripts, agentes, workflows e logs para respeitar a configuracao canonica do repo e eliminar timestamps hardcoded em UTC quando o contrato exigir locale configurado. | notas=Proxima prioridade imediata apos concluir as prioridades 0 da rodada atual: signer tecnico em modo automacao e ajustes remanescentes do Pascoalete.
 - [improvement] Executar a auditoria e o endurecimento de .vscode para parear extensoes, settings, suporte a tipos de arquivo e UX do workspace com os fluxos canonicos de qualidade, CI/CD, testes, secrets e automacao do repo. | notas=Prioridade 3 aprovada pelo usuario; manter abaixo das prioridades 0, da normalizacao de locale/timezone e da retomada tecnica do rotacionador de secrets.
 - [governance] Tornar obrigatorio que todo revisor especializado use toda a stack de qualidade, lint, tipagem, testes e validacoes disponivel para sua familia de arquivo; quando faltar cobertu... | notas=Diretriz perene do usuario. Relaciona-se a expansao da malha de revisores e a auditoria de .vscode, mas merece rastreabilidade propria: c...
@@ -98,6 +114,8 @@ Sem sugestoes pendentes neste ciclo; itens aceitos ja estao rastreaveis.
 ### Later
 
 <!-- roadmap:later:start -->
+- [improvement] Adicionar telemetria de esforco por agente e por etapa da demanda, cobrindo pesquisa, analise, arquitetura, desenvolvimento, revisao, testes e documentacao, para medir eficienci... | notas=Demanda aprovada pelo usuario para v2. Implementar como telemetria canonica do control plane, independente de dotfiles runtime, com possi...
+- [refactor] Evoluir o piloto para um monolito modular em Python com pacotes importaveis por dominio, mantendo scripts como wrappers finos e deixando extracao seletiva para microservicos com... | notas=Baseado em pesquisa registrada em docs/atlassian-ia/2026-03-07-python-modular-architecture-research.md e na premissa de que este repo ser...
 - [feat] Criar uma camada de conhecimento global portavel para IA, separada do contexto especifico do repo, para materializacao controlada no HOME. | notas=Inspirado em atxtechbro/dotfiles e no modelo de memory/imports do Claude Code; util para padroes cross-repo sem misturar memoria global c...
 <!-- roadmap:later:end -->
 

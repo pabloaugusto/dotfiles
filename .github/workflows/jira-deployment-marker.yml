@@ -1,0 +1,104 @@
+name: Jira Deployment Marker
+
+on:
+  workflow_dispatch:
+    inputs:
+      jira_key:
+        description: Chave Jira que ja precisa existir no commit ou branch da rodada
+        required: true
+        type: string
+      environment:
+        description: Ambiente mapeado em .jira/config.yml
+        required: true
+        type: choice
+        options:
+          - control-plane-development
+          - control-plane-testing
+          - control-plane-staging
+          - control-plane-production
+      description:
+        description: Descricao curta da rodada de deployment marker
+        required: false
+        type: string
+
+run-name: ${{ inputs.jira_key }} deploy -> ${{ inputs.environment }}
+
+permissions:
+  contents: read
+  deployments: write
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  deployment-marker:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 20
+
+      - name: Validar formato da chave Jira
+        env:
+          JIRA_KEY: ${{ inputs.jira_key }}
+        run: |
+          set -euo pipefail
+
+          if [[ ! "${JIRA_KEY}" =~ ^[A-Z][A-Z0-9]+-[0-9]+$ ]]; then
+            echo "Chave Jira invalida: ${JIRA_KEY}" >&2
+            exit 1
+          fi
+
+      - name: Validar commit HEAD contra a chave Jira
+        env:
+          JIRA_KEY: ${{ inputs.jira_key }}
+        run: |
+          set -euo pipefail
+
+          SUBJECT="$(git log -1 --pretty=%s)"
+          BODY="$(git log -1 --pretty=%B)"
+
+          if [[ "${SUBJECT}" != *"${JIRA_KEY}"* && "${BODY}" != *"${JIRA_KEY}"* ]]; then
+            echo "O commit HEAD nao referencia ${JIRA_KEY} no subject nem no corpo." >&2
+            echo "Subject atual: ${SUBJECT}" >&2
+            exit 1
+          fi
+
+      - name: Criar deployment marker
+        id: deployment
+        uses: chrnorm/deployment-action@v2
+        with:
+          token: ${{ github.token }}
+          environment: ${{ inputs.environment }}
+          environment-url: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          log-url: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          description: ${{ inputs.description || format('Pilot deployment marker for {0}', inputs.jira_key) }}
+          ref: ${{ github.sha }}
+
+      - name: Marcar deployment como sucesso
+        if: success()
+        uses: chrnorm/deployment-status@v2
+        with:
+          token: ${{ github.token }}
+          deployment-id: ${{ steps.deployment.outputs.deployment_id }}
+          state: success
+          environment: ${{ inputs.environment }}
+          environment-url: ${{ steps.deployment.outputs.environment_url }}
+          log-url: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          description: ${{ format('Deployment marker concluido para {0}', inputs.jira_key) }}
+
+      - name: Marcar deployment como falha
+        if: failure() && steps.deployment.outputs.deployment_id != ''
+        uses: chrnorm/deployment-status@v2
+        with:
+          token: ${{ github.token }}
+          deployment-id: ${{ steps.deployment.outputs.deployment_id }}
+          state: failure
+          environment: ${{ inputs.environment }}
+          environment-url: ${{ steps.deployment.outputs.environment_url }}
+          log-url: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          description: ${{ format('Deployment marker falhou para {0}', inputs.jira_key) }}

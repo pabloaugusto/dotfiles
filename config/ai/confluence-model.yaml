@@ -1,0 +1,155 @@
+version: 1
+
+metadata:
+  model_id: ai-control-plane-atlassian-pilot
+  owner_role: ai-documentation-agent
+  source_of_truth:
+    documentation: confluence
+    artifact_seed: repo
+
+space:
+  requested_key: DOT
+  accepted_keys:
+    - DOT
+  home_page:
+    title: DOT - AI Control Plane Hub
+    owner_role: ai-documentation-agent
+    purpose: concentrar a navegacao oficial da camada Jira + Confluence + repo
+
+page_tree:
+  - title: DOT - AI Control Plane Hub
+    kind: hub
+    sections:
+      - title: Schema e Artefatos
+        kind: schema-hub
+        children:
+          - title: DOT - Jira Schema
+            kind: jira-schema
+            repo_artifact: docs/atlassian-ia/artifacts/jira-schema.md
+          - title: DOT - Jira Writing Standards
+            kind: jira-writing-standards
+            repo_artifact: docs/atlassian-ia/artifacts/jira-writing-standards.md
+          - title: DOT - Jira Board Layout
+            kind: jira-board-layout
+            repo_artifact: docs/atlassian-ia/artifacts/jira-board-layout.md
+          - title: DOT - Confluence Schema
+            kind: confluence-schema
+            repo_artifact: docs/atlassian-ia/artifacts/confluence-schema.md
+          - title: DOT - Endpoint Catalog
+            kind: endpoint-catalog
+            repo_artifact: docs/atlassian-ia/artifacts/atlassian-endpoints.md
+          - title: DOT - Agent Operations Contract
+            kind: agent-operations
+            repo_artifact: docs/atlassian-ia/artifacts/agent-operations.md
+          - title: DOT - Migration Bundle Contract
+            kind: migration-bundle
+            repo_artifact: docs/atlassian-ia/artifacts/migration-bundle.md
+          - title: DOT - Reviewer Standards Catalog
+            kind: reviewer-standards-catalog
+            repo_artifact: docs/atlassian-ia/artifacts/reviewer-standards-catalog.md
+          - title: DOT - Reviewer Decision Model
+            kind: reviewer-decision-model
+            repo_artifact: docs/atlassian-ia/artifacts/reviewer-decision-model.md
+          - title: DOT - Reviewer Severity Policy
+            kind: reviewer-severity-policy
+            repo_artifact: docs/atlassian-ia/artifacts/reviewer-severity-policy.md
+          - title: DOT - Reviewer Jira Workflow Policy
+            kind: reviewer-jira-workflow-policy
+            repo_artifact: docs/atlassian-ia/artifacts/reviewer-jira-workflow-policy.md
+          - title: DOT - Python Quality Review Agent
+            kind: python-quality-review-agent
+            repo_artifact: docs/atlassian-ia/artifacts/python-quality-review-agent.md
+          - title: DOT - Universal Engineering Standards Stack
+            kind: engineering-standards-stack
+            repo_artifact: docs/atlassian-ia/artifacts/universal-engineering-standards-stack.md
+          - title: DOT - 1Password Runtime Inventory
+            kind: onepassword-runtime-inventory
+            repo_artifact: docs/atlassian-ia/artifacts/onepassword-runtime-read-inventory.md
+          - title: DOT - 1Password Runtime Cache Contract
+            kind: onepassword-runtime-cache-contract
+            repo_artifact: docs/atlassian-ia/artifacts/onepassword-runtime-cache-contract.md
+      - title: Delivery e Backfill
+        kind: delivery-hub
+        children:
+          - title: DOT - Jira Backfill Ledger
+            kind: jira-backfill
+            repo_artifact: docs/atlassian-ia/2026-03-07-jira-configuration-export.md
+          - title: DOT - Migration Plan
+            kind: migration-plan
+            repo_artifact: docs/atlassian-ia/2026-03-07-parecer-e-plano-inicial.md
+          - title: DOT - AI Product Owner Blueprint
+            kind: blueprint
+            repo_artifact: docs/atlassian-ia/2026-03-07-blueprint-ai-product-owner-system.md
+          - title: DOT - Agent Operation Playbook
+            kind: agent-playbook
+            repo_artifact: docs/atlassian-ia/2026-03-07-operacao-agentes-jira-confluence.md
+          - title: DOT - Agile Operating Manual
+            kind: agile-operating-manual
+            repo_artifact: docs/atlassian-ia/2026-03-08-manual-agilidade-control-plane.md
+      - title: Operacao e Governanca
+        kind: operations-hub
+        children:
+          - title: DOT - GitHub Atlassian Runbook
+            kind: github-atlassian-runbook
+            repo_artifact: docs/atlassian-ia/2026-03-08-github-for-atlassian-runbook.md
+          - title: DOT - Auth and Permissions
+            kind: auth-governance
+            repo_artifact: docs/atlassian-ia/2026-03-07-atlassian-auth-scopes-and-permissions.md
+          - title: DOT - Tenant Diagnostics
+            kind: diagnostics
+            repo_artifact: docs/atlassian-ia/2026-03-07-diagnostico-auth-e-acesso-atlassian.md
+          - title: DOT - 1Password Batch Resolution
+            kind: onepassword-batch
+            repo_artifact: docs/atlassian-ia/2026-03-07-onepassword-batch-resolution.md
+          - title: DOT - Browser Validator Auth Bootstrap
+            kind: browser-validator-auth
+            repo_artifact: docs/atlassian-ia/2026-03-08-playwright-atlassian-auth-bootstrap.md
+          - title: DOT - Blocker Escalation Policy
+            kind: blocker-escalation-policy
+            repo_artifact: docs/atlassian-ia/2026-03-08-blocker-escalation-and-notifications.md
+          - title: DOT - Dev-Time Foundation
+            kind: dev-time-foundation
+            repo_artifact: docs/atlassian-ia/2026-03-07-fundacao-dev-time-desacoplada.md
+      - title: Estrategia e Evolucao
+        kind: strategy-hub
+        children:
+          - title: DOT - Atlassian Agile Hub Inventory
+            kind: agile-hub-inventory
+            repo_artifact: docs/atlassian-ia/2026-03-08-atlassian-agile-hub-inventory.md
+          - title: DOT - GitHub Jira Confluence Traceability
+            kind: github-traceability
+            repo_artifact: docs/atlassian-ia/2026-03-08-github-jira-confluence-traceability.md
+          - title: DOT - Atlassian OpenAPI Strategy
+            kind: openapi-strategy
+            repo_artifact: docs/atlassian-ia/2026-03-07-atlassian-openapi-generation-strategy.md
+          - title: DOT - Python Modular Architecture Research
+            kind: modular-architecture
+            repo_artifact: docs/atlassian-ia/2026-03-07-python-modular-architecture-research.md
+          - title: DOT - App Runtime Frontier Analysis
+            kind: app-runtime-frontier
+            repo_artifact: docs/atlassian-ia/2026-03-08-analise-fronteira-app-runtime.md
+          - title: DOT - Atlassian Product Discovery
+            kind: product-discovery
+            repo_artifact: docs/atlassian-ia/2026-03-07-atlassian-product-discovery.md
+          - title: DOT - Market Best Practices
+            kind: market-best-practices
+            repo_artifact: docs/atlassian-ia/2026-03-07-melhores-praticas-mercado.md
+          - title: DOT - Optional Capabilities Figma UX SEO
+            kind: optional-capabilities
+            repo_artifact: docs/atlassian-ia/2026-03-07-modelo-operacional-completo-figma-seo.md
+
+sync_contract:
+  mode: repo-first-then-sync
+  required_for_seed:
+    - jira-schema
+    - confluence-schema
+    - endpoint-catalog
+    - agent-operations
+    - migration-bundle
+  required_cross_links:
+    - confluence-page-to-jira-issue
+    - jira-issue-to-confluence-page
+  mirror_policy:
+    keep_repo_artifact: true
+    sync_to_confluence: true
+    sync_jira_comment_or_attachment: true

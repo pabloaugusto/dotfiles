@@ -185,7 +185,7 @@ No WSL, por padrao:
 
 Ou seja:
 
-- `C:\Users\pablo\dotfiles` <-> `/mnt/c/Users/pablo/dotfiles`
+- [`C:\Users\pablo\dotfiles`](../) <-> `/mnt/c/Users/pablo/dotfiles`
 - `D:\OneDrive` <-> `/mnt/d/OneDrive`
 
 ### 3.3 Exemplo visual de interoperabilidade

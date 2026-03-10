@@ -109,19 +109,32 @@ def _repo_root_entries() -> set[str]:
     return {entry.name for entry in ROOT.iterdir()}
 
 
+@lru_cache(maxsize=2048)
+def _is_git_ignored(relative_path: str) -> bool:
+    try:
+        result = subprocess.run(
+            ["git", "-C", str(ROOT), "check-ignore", "-q", "--", relative_path],
+            check=False,
+            capture_output=True,
+        )
+    except FileNotFoundError:
+        return False
+    return result.returncode == 0
+
+
 def _looks_like_repo_reference(target: str) -> bool:
     cleaned = target.strip()
     if not cleaned:
         return False
     if cleaned.startswith(("http://", "https://", "mailto:", "#")):
         return False
-    if any(cleaned == prefix or cleaned.startswith(f"{prefix}/") for prefix in NON_REPO_REFERENCE_PREFIXES):
+    if any(
+        cleaned == prefix or cleaned.startswith(f"{prefix}/")
+        for prefix in NON_REPO_REFERENCE_PREFIXES
+    ):
         return False
     return (
-        "/" in cleaned
-        or "\\" in cleaned
-        or cleaned.startswith(".")
-        or Path(cleaned).suffix != ""
+        "/" in cleaned or "\\" in cleaned or cleaned.startswith(".") or Path(cleaned).suffix != ""
     )
 
 
@@ -158,6 +171,8 @@ def _resolve_local_target(source: Path, target: str) -> Path | None:
         normalized = relative.rstrip("/")
         if tracked_entries:
             if normalized in tracked_entries:
+                return candidate
+            if candidate.exists() and not _is_git_ignored(normalized):
                 return candidate
             continue
         if candidate.exists():
@@ -233,7 +248,9 @@ def validate_markdown_file(path: Path) -> list[str]:
                 continue
             if not _looks_like_repo_reference(target):
                 continue
-            if _resolve_local_target(path, target) is None and not _looks_like_repoish_reference(target):
+            if _resolve_local_target(path, target) is None and not _looks_like_repoish_reference(
+                target
+            ):
                 continue
             errors.append(
                 f"{path.relative_to(ROOT)}:{line_number} referencia interna sem link: {target}"
@@ -248,7 +265,9 @@ def validate_markdown_file(path: Path) -> list[str]:
             )
 
         for target in _iter_bare_repo_references(masked_line):
-            if _resolve_local_target(path, target) is None and not _looks_like_repoish_reference(target):
+            if _resolve_local_target(path, target) is None and not _looks_like_repoish_reference(
+                target
+            ):
                 continue
             errors.append(
                 f"{path.relative_to(ROOT)}:{line_number} referencia interna sem link: {target}"
