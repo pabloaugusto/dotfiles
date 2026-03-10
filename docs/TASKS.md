@@ -68,6 +68,24 @@ Referencia operacional das tasks canonicas mais importantes do repositorio.
   via `gh`.
 - Uso manual: `task git:signing:github:ensure`
 
+### `secrets:rotation:preflight`
+
+- Funcionalidade: executa preflight nao-destrutivo da trilha canonica de
+  rotacao de secrets.
+- Uso manual: `task secrets:rotation:preflight`
+
+### `secrets:rotation:plan`
+
+- Funcionalidade: gera plano ordenado e auditavel da trilha canonica de
+  rotacao de secrets.
+- Uso manual: `task secrets:rotation:plan`
+
+### `secrets:rotation:validate`
+
+- Funcionalidade: executa validacao nao-destrutiva dos alvos declarados de
+  rotacao de secrets.
+- Uso manual: `task secrets:rotation:validate`
+
 ## Bootstrap e links canonicos
 
 ### `bootstrap`

@@ -4,24 +4,21 @@ import json
 import os
 import re
 import shlex
-import smtplib
 import socket
-import ssl
 import subprocess
 import tempfile
 from dataclasses import dataclass
 from datetime import datetime, timezone
-from email.message import EmailMessage
 from pathlib import Path
 from typing import Any
 
 import yaml
 
-
 DEFAULT_CONFIG_PATH = Path("config/secrets-rotation.yaml")
 OP_REF_RE = re.compile(r"^op://(?P<body>.+)$")
 SSH_PUBLIC_KEY_RE = re.compile(r"^ssh-[A-Za-z0-9@._+-]+\s+[A-Za-z0-9+/=]+(?:\s+.+)?$")
 AGE_RECIPIENT_LINE_RE = re.compile(r"(?m)^(\s*-\s+)age[0-9a-z]+(?:\s*)$")
+AGE_RECIPIENT_RE = re.compile(r"(?m)^\s*-\s+(age[0-9a-z]+)\s*$")
 
 
 class SecretsRotationError(RuntimeError):
@@ -130,6 +127,45 @@ def expand_path(repo_root: Path, raw_path: str) -> Path:
     if expanded.is_absolute():
         return expanded
     return (repo_root / expanded).resolve()
+
+
+def local_age_secret_key(repo_root: Path) -> str:
+    env_secret = os.environ.get("SOPS_AGE_KEY", "").strip()
+    if env_secret.startswith("AGE-SECRET-KEY-"):
+        return env_secret
+
+    candidate_paths = [
+        repo_root / "df" / "secrets" / "dotfiles.age.local.key",
+        Path.home() / ".config" / "sops" / "age" / "keys.txt",
+    ]
+    for candidate in candidate_paths:
+        if not candidate.exists():
+            continue
+        try:
+            for line in candidate.read_text(encoding="utf-8").splitlines():
+                secret = line.strip()
+                if secret.startswith("AGE-SECRET-KEY-"):
+                    return secret
+        except OSError:
+            continue
+    return ""
+
+
+def local_age_recipient(repo_root: Path) -> str:
+    secret = local_age_secret_key(repo_root)
+    if not secret:
+        return ""
+    return SopsAgeDriver(repo_root).recipient_from_secret(secret)
+
+
+def configured_age_recipients(config_path: Path) -> list[str]:
+    if not config_path.exists():
+        return []
+    try:
+        content = config_path.read_text(encoding="utf-8")
+    except OSError:
+        return []
+    return [match.group(1).strip() for match in AGE_RECIPIENT_RE.finditer(content)]
 
 
 def parse_op_ref(op_ref: str) -> OpReference:
@@ -419,9 +455,10 @@ class GitHubDriver:
     def __init__(self, repo_root: Path) -> None:
         self.repo_root = repo_root
 
-    def auth_status(self) -> str:
+    def auth_status(self) -> tuple[bool, str]:
         completed = run_command(["gh", "auth", "status"], cwd=self.repo_root, check=False)
-        return (completed.stdout or completed.stderr or "").strip()
+        text = (completed.stdout or completed.stderr or "").strip()
+        return completed.returncode == 0, text
 
     def api(self, endpoint: str, *, method: str = "GET") -> subprocess.CompletedProcess[str]:
         args = ["gh", "api", endpoint]
@@ -627,3 +664,499 @@ def current_branch(repo_root: Path) -> str:
 def origin_remote(repo_root: Path) -> str:
     completed = run_command(["git", "remote", "get-url", "origin"], cwd=repo_root, check=False)
     return (completed.stdout or "").strip() or "origin"
+
+
+def target_required_commands(target: RotationTarget, *, repo_root: Path | None = None) -> list[str]:
+    commands: set[str] = set()
+    if target.source_of_truth.strip().lower() == "1password":
+        use_local_age_material = (
+            target.kind == "age_runtime_key"
+            and repo_root is not None
+            and bool(local_age_secret_key(repo_root))
+        )
+        if not use_local_age_material:
+            commands.add("op")
+    if target.kind in {"github_ssh_identity", "github_pat"}:
+        commands.add("gh")
+    if target.kind == "github_ssh_identity":
+        commands.update({"git", "ssh", "ssh-keygen"})
+    if target.kind == "age_runtime_key":
+        commands.update({"age", "age-keygen", "sops"})
+    if target.kind in {"gitlab_pat", "gitlab_ssh_identity"}:
+        commands.add("glab")
+    if target.kind == "gitlab_ssh_identity":
+        commands.update({"git", "ssh", "ssh-keygen"})
+    return sorted(commands)
+
+
+def target_reference_keys(target: RotationTarget) -> list[str]:
+    refs: list[str] = []
+    ref_key = str(target.config.get("ref_key", "")).strip()
+    if ref_key:
+        refs.append(ref_key)
+    if target.kind == "age_runtime_key":
+        refs.append("age.key")
+    if target.kind == "onepassword_service_account":
+        refs.append("1password.service-account")
+    return sorted(dict.fromkeys(refs))
+
+
+def resolve_target_references(
+    target: RotationTarget,
+    secrets_refs: dict[str, Any],
+) -> list[dict[str, Any]]:
+    payload: list[dict[str, Any]] = []
+    for ref_key in target_reference_keys(target):
+        try:
+            resolved = resolve_secret_ref(secrets_refs, ref_key)
+            payload.append({"ref_key": ref_key, "resolved": resolved, "ok": True, "detail": "ok"})
+        except SecretsRotationError as exc:
+            payload.append(
+                {"ref_key": ref_key, "resolved": "", "ok": False, "detail": str(exc)}
+            )
+    return payload
+
+
+def target_artifact_checks(context: RepoContext, target: RotationTarget) -> list[dict[str, Any]]:
+    payload: list[dict[str, Any]] = []
+    if target.kind == "age_runtime_key":
+        sops_config_path = expand_path(
+            context.repo_root,
+            str(target.config.get("sops_config_path", "df/secrets/dotfiles.sops.yaml")),
+        )
+        payload.append(
+            {
+                "label": "sops_config_path",
+                "path": str(sops_config_path),
+                "required": True,
+                "exists": sops_config_path.exists(),
+            }
+        )
+        encrypted_artifacts = target.config.get("encrypted_artifacts") or []
+        if isinstance(encrypted_artifacts, list):
+            for entry in encrypted_artifacts:
+                if not isinstance(entry, dict):
+                    continue
+                artifact_path = expand_path(context.repo_root, str(entry.get("path", "")))
+                payload.append(
+                    {
+                        "label": "encrypted_artifact",
+                        "path": str(artifact_path),
+                        "required": False,
+                        "exists": artifact_path.exists(),
+                        "input_type": str(entry.get("input_type", "")).strip(),
+                    }
+                )
+    return payload
+
+
+def summarize_checks(checks: list[dict[str, Any]]) -> str:
+    if any(not bool(check.get("ok", True)) for check in checks):
+        return "fail"
+    if any(not bool(check.get("exists", True)) and not bool(check.get("required", True)) for check in checks):
+        return "warn"
+    return "pass"
+
+
+def auth_probe_op(repo_root: Path, *, required: bool) -> dict[str, Any]:
+    if not required:
+        return {"required": False, "ok": True, "detail": "op nao requerido"}
+    if not command_exists("op"):
+        return {"required": True, "ok": False, "detail": "binario op nao encontrado"}
+    try:
+        return OnePasswordDriver(repo_root).whoami() | {"required": True}
+    except SecretsRotationError as exc:
+        return {"required": True, "ok": False, "detail": str(exc)}
+
+
+def auth_probe_github(repo_root: Path, *, required: bool) -> dict[str, Any]:
+    if not required:
+        return {"required": False, "ok": True, "detail": "gh nao requerido"}
+    if not command_exists("gh"):
+        return {"required": True, "ok": False, "detail": "binario gh nao encontrado"}
+    ok, detail = GitHubDriver(repo_root).auth_status()
+    return {"required": True, "ok": ok, "detail": detail}
+
+
+def auth_probe_gitlab(repo_root: Path, *, required: bool) -> dict[str, Any]:
+    if not required:
+        return {"required": False, "ok": True, "detail": "glab nao requerido"}
+    if not command_exists("glab"):
+        return {"required": True, "ok": False, "detail": "binario glab nao encontrado"}
+    ok, detail = GitLabDriver(repo_root).auth_status()
+    return {"required": True, "ok": ok, "detail": detail}
+
+
+def build_target_preflight(
+    context: RepoContext,
+    target: RotationTarget,
+    *,
+    command_status: dict[str, bool],
+    op_auth: dict[str, Any],
+    github_auth: dict[str, Any],
+    gitlab_auth: dict[str, Any],
+    secrets_refs: dict[str, Any],
+) -> dict[str, Any]:
+    required_commands = target_required_commands(target, repo_root=context.repo_root)
+    command_checks = [
+        {"command": command, "ok": bool(command_status.get(command, False))}
+        for command in required_commands
+    ]
+    references = resolve_target_references(target, secrets_refs)
+    artifacts = target_artifact_checks(context, target)
+    blockers: list[str] = []
+    warnings: list[str] = []
+
+    for check in command_checks:
+        if not check["ok"]:
+            blockers.append(f"binario obrigatorio indisponivel: {check['command']}")
+    for check in references:
+        if not check["ok"]:
+            blockers.append(check["detail"])
+    for check in artifacts:
+        if check["required"] and not check["exists"]:
+            blockers.append(f"artefato obrigatorio ausente: {check['path']}")
+        elif not check["required"] and not check["exists"]:
+            warnings.append(f"artefato opcional ausente: {check['path']}")
+
+    if "op" in required_commands and not op_auth["ok"]:
+        blockers.append(f"auth op indisponivel: {op_auth['detail']}")
+    if "gh" in required_commands and not github_auth["ok"]:
+        blockers.append(f"auth gh indisponivel: {github_auth['detail']}")
+    if "glab" in required_commands and not gitlab_auth["ok"]:
+        blockers.append(f"auth glab indisponivel: {gitlab_auth['detail']}")
+
+    status = "fail" if blockers else ("warn" if warnings else "pass")
+    return {
+        "target_id": target.target_id,
+        "kind": target.kind,
+        "automation": target.automation,
+        "order": target.order,
+        "status": status,
+        "required_commands": command_checks,
+        "references": references,
+        "artifacts": artifacts,
+        "warnings": warnings,
+        "blockers": blockers,
+    }
+
+
+def steps_for_target(target: RotationTarget) -> list[dict[str, Any]]:
+    steps: list[dict[str, Any]] = []
+    if target.kind == "github_ssh_identity":
+        publication_kind = str(target.config.get("publication_kind", "authentication"))
+        steps = [
+            {
+                "step": "Criar chave substituta no 1Password",
+                "detail": "Gerar SSH Key dedicada sem revogar a chave anterior.",
+            },
+            {
+                "step": "Derivar chave publica e fingerprint",
+                "detail": "Extrair material publico para publicacao e auditoria.",
+            },
+            {
+                "step": "Publicar chave no GitHub",
+                "detail": f"Registrar como chave de {publication_kind}.",
+            },
+            {
+                "step": "Validar GitHub/SSH",
+                "detail": "Executar handshake SSH e validar o remote configurado.",
+            },
+        ]
+        if bool(target.config.get("prune_previous", False)):
+            steps.append(
+                {
+                    "step": "Prunar chaves anteriores",
+                    "detail": "Remover chaves antigas somente depois da nova validacao.",
+                }
+            )
+    elif target.kind == "age_runtime_key":
+        steps = [
+            {
+                "step": "Gerar nova age key",
+                "detail": "Criar material substituto mantendo a chave anterior como fallback.",
+            },
+            {
+                "step": "Atualizar ref age.key no 1Password",
+                "detail": "Persistir a nova chave como fonte de verdade do runtime.",
+            },
+            {
+                "step": "Atualizar recipient do sops",
+                "detail": "Trocar o recipient canonico no arquivo de politica do repo.",
+            },
+            {
+                "step": "Re-cifrar artefatos sensiveis",
+                "detail": "Re-embalar arquivos cifrados com o recipient novo.",
+            },
+            {
+                "step": "Gravar backup cifrado de auditoria",
+                "detail": "Persistir trilha minima para rollback e compliance.",
+            },
+        ]
+    elif target.kind == "onepassword_service_account":
+        steps = [
+            {
+                "step": "Abrir rotacao assistida no 1Password",
+                "detail": "Gerar nova service account preservando as permissoes aprovadas.",
+            },
+            {
+                "step": "Atualizar ref canonicamente",
+                "detail": "Substituir o ref ativo sem apagar o token anterior antes da validacao.",
+            },
+            {
+                "step": "Validar bootstrap e checkEnv",
+                "detail": "Confirmar operacao do repo com a credencial nova.",
+            },
+            {
+                "step": "Registrar backup e revogar a credencial antiga",
+                "detail": "Finalizar a troca somente depois da validacao operacional.",
+            },
+        ]
+    elif target.kind == "github_pat":
+        steps = [
+            {
+                "step": "Gerar novo PAT no GitHub",
+                "detail": "Criar token substituto seguindo o modelo fine-grained aprovado.",
+            },
+            {
+                "step": "Atualizar ref do projeto",
+                "detail": "Persistir o token novo no 1Password como fonte de verdade.",
+            },
+            {
+                "step": "Validar endpoint do GitHub",
+                "detail": "Executar a chamada de validacao configurada antes da revogacao.",
+            },
+            {
+                "step": "Revogar token anterior",
+                "detail": "Encerrar o token anterior somente apos a validacao da substituta.",
+            },
+        ]
+    else:
+        steps = [
+            {
+                "step": "Inventariar operador e suporte oficial",
+                "detail": "Confirmar se o alvo permanece automatizavel ou assistido.",
+            },
+            {
+                "step": "Executar substituicao com rollback explicito",
+                "detail": "Nunca revogar o material anterior sem validacao da credencial nova.",
+            },
+        ]
+    return steps
+
+
+def plan_payload(
+    repo_root: str | Path | None = None,
+    config_path: str | Path | None = None,
+) -> dict[str, Any]:
+    context, config_payload, _secrets_refs, targets = load_repo_context(repo_root, config_path)
+    enabled_targets = [target for target in targets if target.enabled]
+    plan = []
+    for target in enabled_targets:
+        plan.append(
+            {
+                "target_id": target.target_id,
+                "kind": target.kind,
+                "automation": target.automation,
+                "order": target.order,
+                "source_of_truth": target.source_of_truth,
+                "steps": steps_for_target(target),
+                "validators": ["task env:check", "task secrets:rotation:validate"],
+            }
+        )
+    payload = {
+        "status": "ok",
+        "command": "plan",
+        "updated_at_utc": utc_now(),
+        "repo_root": str(context.repo_root),
+        "config_path": str(context.config_path),
+        "report_path": str(context.report_path),
+        "rotation_strategy": dotted_get(config_payload, "policy.rotation_strategy"),
+        "bootstrap_recovery_refs": config_payload.get("policy", {}).get("bootstrap_recovery_refs", []),
+        "targets": plan,
+    }
+    write_json_file(context.report_path, payload)
+    return payload
+
+
+def preflight_payload(
+    repo_root: str | Path | None = None,
+    config_path: str | Path | None = None,
+) -> dict[str, Any]:
+    context, config_payload, secrets_refs, targets = load_repo_context(repo_root, config_path)
+    enabled_targets = [target for target in targets if target.enabled]
+    required_commands = sorted(
+        {
+            command
+            for target in enabled_targets
+            for command in target_required_commands(target, repo_root=context.repo_root)
+        }
+    )
+    command_status = {command: command_exists(command) for command in required_commands}
+    op_required = any(
+        "op" in target_required_commands(target, repo_root=context.repo_root)
+        for target in enabled_targets
+    )
+    gh_required = any(
+        "gh" in target_required_commands(target, repo_root=context.repo_root)
+        for target in enabled_targets
+    )
+    glab_required = any(
+        "glab" in target_required_commands(target, repo_root=context.repo_root)
+        for target in enabled_targets
+    )
+    op_auth = auth_probe_op(context.repo_root, required=op_required)
+    github_auth = auth_probe_github(context.repo_root, required=gh_required)
+    gitlab_auth = auth_probe_gitlab(context.repo_root, required=glab_required)
+    target_payload = [
+        build_target_preflight(
+            context,
+            target,
+            command_status=command_status,
+            op_auth=op_auth,
+            github_auth=github_auth,
+            gitlab_auth=gitlab_auth,
+            secrets_refs=secrets_refs,
+        )
+        for target in enabled_targets
+    ]
+    status = "fail" if any(item["status"] == "fail" for item in target_payload) else (
+        "warn" if any(item["status"] == "warn" for item in target_payload) else "pass"
+    )
+    payload = {
+        "status": status,
+        "command": "preflight",
+        "updated_at_utc": utc_now(),
+        "repo_root": str(context.repo_root),
+        "config_path": str(context.config_path),
+        "report_path": str(context.report_path),
+        "state_path": str(context.state_path),
+        "rotation_strategy": dotted_get(config_payload, "policy.rotation_strategy"),
+        "command_status": command_status,
+        "auth": {"op": op_auth, "github": github_auth, "gitlab": gitlab_auth},
+        "targets": target_payload,
+    }
+    write_json_file(context.report_path, payload)
+    return payload
+
+
+def validate_target(
+    context: RepoContext,
+    target: RotationTarget,
+    *,
+    preflight_item: dict[str, Any],
+    github_driver: GitHubDriver,
+) -> dict[str, Any]:
+    checks: list[dict[str, Any]] = []
+    warnings = list(preflight_item.get("warnings", []))
+    blockers = list(preflight_item.get("blockers", []))
+
+    if target.kind == "github_ssh_identity" and not blockers:
+        ssh_ok, ssh_detail = github_driver.validate_ssh_handshake()
+        checks.append({"name": "ssh_handshake", "ok": ssh_ok, "detail": ssh_detail})
+        remote_name = str(target.config.get("validate_remote", "origin")).strip() or "origin"
+        remote_ok, remote_detail = github_driver.validate_git_remote(remote_name)
+        checks.append(
+            {"name": "git_remote", "ok": remote_ok, "detail": remote_detail, "remote": remote_name}
+        )
+    elif target.kind == "github_pat" and not blockers:
+        endpoint = str(target.config.get("validate_endpoint", "user")).strip() or "user"
+        completed = github_driver.api(endpoint)
+        ok = completed.returncode == 0
+        detail = (completed.stdout or completed.stderr or "").strip()
+        checks.append({"name": "gh_api", "ok": ok, "detail": detail, "endpoint": endpoint})
+    elif target.kind == "age_runtime_key":
+        sops_config_path = expand_path(
+            context.repo_root,
+            str(target.config.get("sops_config_path", "df/secrets/dotfiles.sops.yaml")),
+        )
+        configured_recipients = configured_age_recipients(sops_config_path)
+        expected_recipient = local_age_recipient(context.repo_root)
+        has_placeholder = False
+        if sops_config_path.exists():
+            has_placeholder = "age1REPLACE_WITH_YOUR_PUBLIC_AGE_KEY" in sops_config_path.read_text(
+                encoding="utf-8"
+            )
+        checks.append(
+            {
+                "name": "sops_recipient_materialized",
+                "ok": (
+                    sops_config_path.exists()
+                    and not has_placeholder
+                    and (
+                        not expected_recipient
+                        or expected_recipient in configured_recipients
+                    )
+                ),
+                "detail": (
+                    "recipient real encontrado e alinhado ao runtime local"
+                    if (
+                        sops_config_path.exists()
+                        and not has_placeholder
+                        and (
+                            not expected_recipient
+                            or expected_recipient in configured_recipients
+                        )
+                    )
+                    else (
+                        "arquivo ausente ou ainda com placeholder de recipient"
+                        if not sops_config_path.exists() or has_placeholder
+                        else "recipient materializado, mas divergente do runtime age local"
+                    )
+                ),
+                "path": str(sops_config_path),
+                "expected_recipient": expected_recipient,
+                "configured_recipients": configured_recipients,
+            }
+        )
+
+    for check in checks:
+        if not check["ok"]:
+            blockers.append(f"{check['name']}: {check['detail']}")
+
+    status = "fail" if blockers else ("warn" if warnings else "pass")
+    return {
+        "target_id": target.target_id,
+        "kind": target.kind,
+        "automation": target.automation,
+        "status": status,
+        "checks": checks,
+        "warnings": warnings,
+        "blockers": blockers,
+    }
+
+
+def validate_payload(
+    repo_root: str | Path | None = None,
+    config_path: str | Path | None = None,
+) -> dict[str, Any]:
+    context, _config_payload, _secrets_refs, targets = load_repo_context(repo_root, config_path)
+    preflight = preflight_payload(repo_root=repo_root, config_path=config_path)
+    enabled_targets = [target for target in targets if target.enabled]
+    preflight_by_target = {
+        item["target_id"]: item for item in preflight.get("targets", []) if isinstance(item, dict)
+    }
+    github_driver = GitHubDriver(context.repo_root)
+    target_payload = [
+        validate_target(
+            context,
+            target,
+            preflight_item=preflight_by_target.get(target.target_id, {}),
+            github_driver=github_driver,
+        )
+        for target in enabled_targets
+    ]
+    status = "fail" if any(item["status"] == "fail" for item in target_payload) else (
+        "warn" if any(item["status"] == "warn" for item in target_payload) else "pass"
+    )
+    payload = {
+        "status": status,
+        "command": "validate",
+        "updated_at_utc": utc_now(),
+        "repo_root": str(context.repo_root),
+        "config_path": str(context.config_path),
+        "report_path": str(context.report_path),
+        "targets": target_payload,
+    }
+    write_json_file(context.report_path, payload)
+    return payload
