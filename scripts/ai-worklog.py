@@ -70,6 +70,16 @@ LOG_HEADERS = [
 ]
 SUGGESTION_HEADERS = ["ID", "Tipo", "Descricao", "Status", "RM", "Captura", "Atualizacao"]
 ALLOWED_PENDING_ACTIONS = {"", "concluir_primeiro", "roadmap_pendente"}
+PENDING_ACTION_GUIDANCE = {
+    "concluir_primeiro": (
+        "concluir o item em curso ou puxar apenas o work item minimo que o destrava "
+        "diretamente"
+    ),
+    "roadmap_pendente": (
+        "registrar a retomada no roadmap somente quando a rodada atual realmente nao "
+        "vai continuar agora"
+    ),
+}
 
 
 def now_human_utc() -> str:
@@ -251,9 +261,11 @@ Fonte de verdade operacional para continuidade de tarefas dos agentes de IA.
 ## Regras operacionais
 
 - Toda solicitacao acionavel deve passar por preflight de pendencias.
-- Se houver itens em `Doing`, perguntar ao usuario:
-  - concluir pendencias antes (`concluir_primeiro`), ou
-  - manter pendencias e registrar no roadmap (`roadmap_pendente`).
+- Se houver itens em `Doing`, `concluir_primeiro` significa:
+  - concluir o que ja esta em curso quando ele puder seguir direto, ou
+  - puxar apenas o work item minimo que o destrava diretamente quando o bloqueio estiver em outra issue.
+- `roadmap_pendente` so deve ser usado quando a rodada atual realmente nao vai
+  continuar agora e a retomada precisa virar backlog formal.
 - Durante execucao, registrar progresso incremental no ledger.
 - O item ativo deve permanecer em `Doing` enquanto a execucao estiver em curso.
 - Ultimo passo obrigatorio antes de encerrar demanda: mover item ativo de
@@ -496,6 +508,7 @@ def run_preflight(args: argparse.Namespace) -> None:
                 "pending_ids": [row["ID"] for row in doing],
                 "must_ask_user": bool(doing and (args.message or "").strip()),
                 "resolution_options": ["concluir_primeiro", "roadmap_pendente"] if doing else [],
+                "resolution_guidance": PENDING_ACTION_GUIDANCE if doing else {},
             },
             ensure_ascii=False,
         )
@@ -519,7 +532,10 @@ def run_check(args: argparse.Namespace) -> None:
         )
     if args.strict == 1 and doing and not pending_action:
         raise SystemExit(
-            "Existem tarefas em Doing. Defina uma decisao humana explicita: concluir_primeiro ou roadmap_pendente."
+            "Existem tarefas em Doing. Defina uma decisao humana explicita: "
+            "concluir_primeiro (concluir o item ativo ou puxar apenas o work item que o "
+            "destrava diretamente) ou roadmap_pendente (registrar a retomada no roadmap "
+            "quando a rodada nao vai continuar agora)."
         )
     print(
         json.dumps(
@@ -528,6 +544,7 @@ def run_check(args: argparse.Namespace) -> None:
                 "pending_count": len(doing),
                 "pending_ids": [row["ID"] for row in doing],
                 "pending_action": pending_action or "(none)",
+                "resolution_guidance": PENDING_ACTION_GUIDANCE if doing else {},
                 "ok": True,
             },
             ensure_ascii=False,

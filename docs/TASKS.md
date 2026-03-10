@@ -124,6 +124,8 @@ Referencia operacional das tasks canonicas mais importantes do repositorio.
 
 - Funcionalidade: registra intake com preflight de pendencias, worklog e
   roteamento opcional.
+- Observacao: `PENDING_ACTION=concluir_primeiro` cobre concluir o WIP atual ou
+  puxar apenas o **work item** que o destrava diretamente.
 - Uso manual: `task ai:chat:intake MESSAGE="auditar gaps restantes" ROUTE=1 PENDING_ACTION=concluir_primeiro`
 
 ### `ai:route`
@@ -284,6 +286,8 @@ Referencia operacional das tasks canonicas mais importantes do repositorio.
 
 - Funcionalidade: valida pendencias do tracker e bloqueia nova rodada quando a
   worktree estiver suja sem item ativo em `Doing`.
+- Observacao: quando existir WIP ativo, `concluir_primeiro` significa concluir
+  ou destravar primeiro, e nao puxar demanda nova sem relacao com esse WIP.
 - Uso manual: `task ai:worklog:check`
 
 ### `ai:worklog:done`

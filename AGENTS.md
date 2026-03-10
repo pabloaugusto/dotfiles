@@ -108,6 +108,11 @@ Leia a skill mais proxima do escopo antes de editar arquivos relevantes.
   aplicado via `task git:signing:mode:automation`; signer humano continua como
   padrao fora da worktree tecnica e nao deve ser "bypassado" por variavel que
   silencie a aprovacao da identidade humana.
+- Ao ler o board e decidir a proxima puxada, priorizar da direita para a
+  esquerda o que estiver mais perto de terminar; quando um item ativo estiver
+  bloqueado por outra issue, `concluir_primeiro` passa a significar concluir ou
+  puxar apenas o work item minimo que o destrava diretamente, nunca demanda
+  nova sem relacao com esse WIP.
 - Manter o item ativo em `Doing` durante toda a execucao relevante e so move-lo para `Done`
   imediatamente antes da resposta final ao usuario.
 - Ao concluir uma rodada e permanecerem mudancas locais coerentes, criar commit checkpoint
@@ -135,7 +140,8 @@ Leia a skill mais proxima do escopo antes de editar arquivos relevantes.
 ## Fluxo operacional minimo
 
 1. Ler o contexto minimo.
-2. Rodar `task ai:worklog:check` antes de execucao relevante.
+2. Rodar `task ai:worklog:check` antes de execucao relevante e, se houver WIP
+   ativo, tratar `concluir_primeiro` como concluir ou destravar primeiro.
 3. Se houver reuso ou adaptacao de outro repo, concluir a auditoria exaustiva e registrar o gap analysis.
 4. Escolher a skill local adequada.
 5. Acionar os gates paralelos obrigatorios de arquitetura/modernizacao e, quando aplicavel, integracoes criticas.

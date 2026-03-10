@@ -161,6 +161,7 @@ AGENTS_REQUIRED_SNIPPETS = [
     "docs/AI-SOURCE-AUDIT.md",
     "docs/AI-STARTUP-GOVERNANCE-MANIFEST.md",
     "docs/AI-CHAT-CONTRACTS-REGISTER.md",
+    "concluir_primeiro passa a significar concluir ou puxar apenas o work item minimo que o destrava diretamente",
     "Manter o item ativo em `Doing` durante toda a execucao relevante",
     "Nenhum `done` e valido sem revisar `LICOES-APRENDIDAS.md`",
     "Acionar os gates paralelos obrigatorios de arquitetura/modernizacao",
@@ -169,6 +170,7 @@ AGENTS_REQUIRED_SNIPPETS = [
 OPERATING_MODEL_REQUIRED_SNIPPETS = [
     "### 1.1. Retomada do zero exige releitura integral de governanca",
     "### 1.2. Contratos nascidos no chat precisam de registrador vivo",
+    "### 3.1. Terminar antes de comecar inclui destravar o WIP ativo",
     "### 5. Auditoria exaustiva antes de reuso cross-repo",
     "### Fronteira entre `.agents/` e adaptadores de assistente",
     "### Camada 2.1. Registry declarativo do repo",

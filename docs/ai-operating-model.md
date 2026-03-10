@@ -53,6 +53,18 @@ Cada skill cobre um dominio estreito do repo. Isso reduz ambiguidade, evita prom
 
 Prompts, skills e fluxos de agentes devem ser tratados como codigo: versao, review e validacao automatica. Mudanca sem avaliacao de saida aumenta regressao silenciosa.
 
+### 3.1. Terminar antes de comecar inclui destravar o WIP ativo
+
+No fluxo agil deste repo, a leitura do **board** continua da direita para a
+esquerda e a regra central continua sendo terminar antes de comecar.
+
+Quando um item ja iniciado estiver bloqueado por outra issue, a IA pode puxar o
+**work item** desbloqueador, mas apenas se ele for a menor unidade que destrava
+diretamente esse WIP ativo.
+
+Isso nao abre permissao para puxar demanda nova desconectada. A semantica de
+`concluir_primeiro` passa a ser concluir ou destravar primeiro.
+
 ### 4. Automacao reutilizavel
 
 A automacao deve morar em scripts, tasks e workflows reutilizaveis. Isso reduz duplicacao e facilita evoluir CI/CD sem espalhar logica em varios pontos.
@@ -206,6 +218,10 @@ Para evitar ambiguidades e drift:
 `task ai:worklog:check` tambem atua como guardrail de commit checkpoint entre
 rodadas: se a worktree estiver suja e nao houver item ativo em `Doing`, a
 proxima rodada deve ser bloqueada ate existir commit do contexto anterior.
+
+Quando houver WIP ativo, o mesmo preflight precisa tratar `concluir_primeiro`
+como concluir ou puxar somente o **work item** minimo que destrava o que ja
+esta em curso.
 
 ### Camada 6. Catalogos e fluxo
 

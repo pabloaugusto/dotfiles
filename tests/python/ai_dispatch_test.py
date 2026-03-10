@@ -100,6 +100,10 @@ class AiDispatchTests(unittest.TestCase):
             routed = json.loads(route_out.read_text(encoding="utf-8"))
             self.assertTrue(payload["worklog_id"].startswith("WIP-"))
             self.assertTrue(payload["route_enabled"])
+            self.assertIn(
+                "destrava diretamente",
+                payload["pending_action_guidance"]["concluir_primeiro"],
+            )
             self.assertIn("repo-governance-authority", routed["task_card"]["required_agents"])
 
 

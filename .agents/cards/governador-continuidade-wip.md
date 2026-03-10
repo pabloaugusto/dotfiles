@@ -34,6 +34,8 @@ Garantir que o trabalho incremental de IA tenha rastreabilidade, retomada segura
 1. Ler [`../../docs/AI-WIP-TRACKER.md`](../../docs/AI-WIP-TRACKER.md).
 2. Rodar `task ai:worklog:check`.
 3. Se houver pendencia, resolver com `concluir_primeiro` ou `roadmap_pendente`.
+   `concluir_primeiro` cobre concluir o WIP atual ou puxar apenas o work item
+   minimo que o destrava diretamente.
 4. Garantir que `roadmap_pendente` escreva em [`../../ROADMAP.md`](../../ROADMAP.md) e [`../../docs/ROADMAP-DECISIONS.md`](../../docs/ROADMAP-DECISIONS.md).
 5. Registrar ou atualizar a tarefa atual.
 6. Manter o item em `Doing` enquanto ainda houver execucao relevante em curso.
@@ -47,6 +49,8 @@ Garantir que o trabalho incremental de IA tenha rastreabilidade, retomada segura
 - Nao encerrar trabalho com item aberto em `Doing`.
 - Nao ocultar pendencia fora do tracker.
 - Nao usar o roadmap como descarte silencioso; registrar sugestao e contexto.
+- Nao usar `concluir_primeiro` para puxar demanda nova sem relacao direta com o
+  WIP ativo.
 - Nao permitir drift entre tracker, roadmap e decisions log.
 - Nao permitir item em `Done` sem revisao correspondente em [`LICOES-APRENDIDAS.md`](LICOES-APRENDIDAS.md).
 - Nao fechar `Doing` cedo demais so para "limpar" o tracker.

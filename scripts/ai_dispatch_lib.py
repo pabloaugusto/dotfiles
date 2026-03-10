@@ -27,6 +27,16 @@ DEFAULT_ROUTE_OUT = ROOT / ".cache" / "ai" / "route-output.json"
 DEFAULT_INTAKE_OUT = ROOT / ".cache" / "ai" / "chat-intake.json"
 DEFAULT_DELEGATION_OUT = ROOT / ".cache" / "ai" / "delegation-plan.md"
 RISK_LEVELS = {"low", "medium", "high"}
+PENDING_ACTION_GUIDANCE = {
+    "concluir_primeiro": (
+        "concluir o item em curso ou puxar apenas o work item minimo que o destrava "
+        "diretamente"
+    ),
+    "roadmap_pendente": (
+        "registrar a retomada no roadmap somente quando a rodada atual realmente nao "
+        "vai continuar agora"
+    ),
+}
 PYTHON_REVIEW_PATHS = ["scripts/*.py", "tests/python/*", ".githooks/ci/*.py", "pyproject.toml"]
 POWERSHELL_REVIEW_PATHS = [
     "bootstrap/*.ps1",
@@ -583,6 +593,7 @@ def build_intake_payload(
         "risk": inferred_risk,
         "risk_source": risk_source,
         "pending_action": pending_action or "-",
+        "pending_action_guidance": PENDING_ACTION_GUIDANCE if pending_action else {},
         "preflight": preflight,
         "worklog_id": current_worklog_id,
         "tracker_file": str(tracker_file),
@@ -609,6 +620,10 @@ def render_delegation_markdown(payload: dict) -> str:
         f"- Worklog: `{payload['worklog_id']}`",
         f"- Risco: `{payload['risk']}`",
         f"- Acao de pendencia: `{payload['pending_action']}`",
+        (
+            "- Semantica da acao: "
+            + payload.get("pending_action_guidance", {}).get(payload.get("pending_action"), "-")
+        ),
         "",
         "## Task Card",
         "",

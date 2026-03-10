@@ -1121,7 +1121,7 @@ tasks:
       - task: ai:validate
 
   ai:chat:intake:
-    desc: Registra intake de IA com preflight de pendencias e roteamento opcional
+    desc: Registra intake de IA com preflight de pendencias; concluir_primeiro cobre concluir ou destravar o WIP ativo
     requires:
       vars: [MESSAGE]
     cmds:
@@ -1496,7 +1496,7 @@ tasks:
       - "bash -lc 'bash ./scripts/run-python.sh ./scripts/ai-worklog.py preflight --message \"{{default \"\" .MESSAGE}}\"'"
 
   ai:worklog:check:
-    desc: Valida pendencias do tracker de WIP de IA
+    desc: Valida pendencias do tracker de WIP de IA com semantica de concluir ou destravar primeiro
     cmds:
       - task: ai:worklog:check:{{if or (eq .OS "Windows_NT") (eq .OS "windows")}}windows{{else}}linux{{end}}
         vars:

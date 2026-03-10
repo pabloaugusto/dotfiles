@@ -150,6 +150,8 @@ roles:
         - criar issues principais do backlog
         - consolidar escopo, descricao, prioridade e criterios de aceitacao
         - manter backlog, refinement e ready ordenados por prioridade real
+        - ler o board da direita para a esquerda antes de puxar novo trabalho
+        - permitir nova puxada apenas quando ela destravar diretamente um item ja iniciado
         - manter timeline, start date e due date atualizados para itens acima de subtarefa
         - promover item de Backlog para Refinement e de Refinement para Ready
       transitions_owned:
@@ -235,6 +237,7 @@ roles:
     operating_steps:
       - inspecionar backlog e refinement para acionar discovery tecnico antes de o item ser puxado
       - inspecionar fila, dependencias e gargalos
+      - quando houver bloqueio entre issues, priorizar o work item desbloqueador antes de qualquer puxada sem relacao
       - registrar comentario operacional com risco, impacto e evidencia
       - pausar ou retomar item interrompido quando houver espera operacional real
       - escalar bloqueio para o usuario por todos os canais disponiveis quando nenhum agente conseguir destravar a demanda
@@ -281,6 +284,7 @@ roles:
       - inspecionar proativamente backlog e refinement para decompor e amadurecer demandas antes da execucao
       - revisar issue pronta para execucao
       - quebrar o escopo em subtasks quando necessario
+      - se a execucao estiver bloqueada por outra issue, preparar ou acionar primeiro o work item desbloqueador minimo
       - registrar plano tecnico e evidencias do handoff no Jira
       - revisar toda mudanca em Review com base nos pareceres especializados e no artefato oficial de review
       - mover item interrompido de Doing para Paused quando a execucao parar

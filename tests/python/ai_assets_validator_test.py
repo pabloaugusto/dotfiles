@@ -53,11 +53,19 @@ class ValidateAiAssetsTests(unittest.TestCase):
         self.assertIn("Nunca operar por amostragem", module.AGENTS_REQUIRED_SNIPPETS)
         self.assertIn("docs/AI-STARTUP-GOVERNANCE-MANIFEST.md", module.AGENTS_REQUIRED_SNIPPETS)
         self.assertIn(
+            "concluir_primeiro passa a significar concluir ou puxar apenas o work item minimo que o destrava diretamente",
+            module.AGENTS_REQUIRED_SNIPPETS,
+        )
+        self.assertIn(
             "Nenhum `done` e valido sem revisar `LICOES-APRENDIDAS.md`",
             module.AGENTS_REQUIRED_SNIPPETS,
         )
         self.assertIn(
             "### 1.2. Contratos nascidos no chat precisam de registrador vivo",
+            module.OPERATING_MODEL_REQUIRED_SNIPPETS,
+        )
+        self.assertIn(
+            "### 3.1. Terminar antes de comecar inclui destravar o WIP ativo",
             module.OPERATING_MODEL_REQUIRED_SNIPPETS,
         )
         self.assertIn(

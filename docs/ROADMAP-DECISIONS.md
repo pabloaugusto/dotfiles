@@ -1,6 +1,6 @@
 # Decisoes do Roadmap
 
-Atualizado em: 2026-03-10 03:33 UTC
+Atualizado em: 2026-03-10 12:40 UTC
 Ciclo ativo: 2026-Q1
 
 Registro das decisoes humanas por ciclo e governanca de sugestoes.
@@ -12,6 +12,7 @@ Use status: `pendente`, `aceita`, `descartada`, `aplicar_depois`.
 <!-- roadmap:suggestions:start -->
 | ID | Tipo | Descricao | Status | RM | Captura | Atualizacao |
 | --- | --- | --- | --- | --- | --- | --- |
+| SG-ORTHO-DOT-127 | fix | Corrigir pendencias ortograficas remanescentes do worklog `DOT-127` em .agents/cards/governador-continuidade-wip.md, .agents/cards/orquestrador-delegacao.md, .agents/skills/task... | aceita |  | 2026-03-10 | 2026-03-10 |
 | SG-ORTHO-DOT-117 | fix | Corrigir pendencias ortograficas remanescentes do worklog `DOT-117` em config/ai/agent-operations.yaml, config/ai/agents.yaml, config/ai/jira-model.yaml, config/ai/reviewer-poli... | aceita |  | 2026-03-10 | 2026-03-10 |
 | SG-ORTHO-DOT-114 | fix | Corrigir pendencias ortograficas remanescentes do worklog `DOT-114` em scripts/ai-atlassian-agent-comment-audit.py, scripts/ai-atlassian-backfill.py, scripts/ai_atlassian_agent_... | aceita |  | 2026-03-09 | 2026-03-09 |
 | SG-20260308-024832 | improvement | Redesenhar a estrategia de cache de secrets 1Password do runtime dos dotfiles para resolver secrets na borda da sessao e evitar leituras repetidas a cada abertura de terminal. | aceita |  | 2026-03-08 | 2026-03-08 |
@@ -61,6 +62,7 @@ Use status: `pendente`, `aceita`, `descartada`, `aplicar_depois`.
 ## Registro automatico
 
 <!-- roadmap:autolog:start -->
+- 2026-03-10 12:40 UTC | decisao=accepted | horizonte=next | tipo=fix | item=Corrigir pendencias ortograficas remanescentes do worklog `DOT-127` em .agents/cards/governador-continuidade-wip.md, .agents/cards/orquestrador-delegacao.md, .agents/skills/task... | notas=Pendencia automatica criada por Pascoalete apos review consultivo reprovado sem correcao automatica.
 - 2026-03-10 03:33 UTC | decisao=accepted | horizonte=next | tipo=fix | item=Corrigir pendencias ortograficas remanescentes do worklog `DOT-117` em config/ai/agent-operations.yaml, config/ai/agents.yaml, config/ai/jira-model.yaml, config/ai/reviewer-poli... | notas=Pendencia automatica criada por Pascoalete apos review consultivo reprovado sem correcao automatica.
 - 2026-03-09 23:54 UTC | decisao=accepted | horizonte=next | tipo=fix | item=Corrigir pendencias ortograficas remanescentes do worklog `DOT-114` em scripts/ai-atlassian-agent-comment-audit.py, scripts/ai-atlassian-backfill.py, scripts/ai_atlassian_agent_... | notas=Pendencia automatica criada por Pascoalete apos review consultivo reprovado sem correcao automatica.
 - 2026-03-08 04:38 UTC | decisao=accepted | horizonte=next | tipo=fix | item=Corrigir pendencias ortograficas remanescentes do worklog `WIP-20260307-ATLASSIAN-ADAPTERS` em docs/TASKS.md, docs/atlassian-ia/2026-03-07-diagnostico-auth-e-acesso-atlassian.md... | notas=Pendencia automatica criada por Pascoalete apos review consultivo reprovado sem correcao automatica.

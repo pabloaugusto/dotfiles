@@ -126,6 +126,7 @@ class AiWorklogTests(unittest.TestCase):
             self.assertEqual(payload["pending_count"], 1)
             self.assertTrue(payload["must_ask_user"])
             self.assertIn("concluir_primeiro", payload["resolution_options"])
+            self.assertIn("destrava diretamente", payload["resolution_guidance"]["concluir_primeiro"])
 
     def test_check_requires_checkpoint_commit_when_worktree_dirty_without_doing(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
@@ -220,6 +221,7 @@ class AiWorklogTests(unittest.TestCase):
             payload = json.loads(result.stdout)
             self.assertEqual(payload["pending_count"], 1)
             self.assertTrue(payload["ok"])
+            self.assertIn("destrava diretamente", payload["resolution_guidance"]["concluir_primeiro"])
 
     def test_done_keeps_only_active_task_logs(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
