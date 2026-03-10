@@ -49,6 +49,8 @@ Mapa das documentacoes versionadas do projeto e ordem recomendada de leitura.
 - [`docs/atlassian-ia/README.md`](atlassian-ia/README.md): trilha versionada de contexto,
   pareceres, planos e artefatos da migracao Jira + Confluence.
 - [`AI-WIP-TRACKER.md`](AI-WIP-TRACKER.md): continuidade operacional do trabalho em curso.
+- [`AI-SCRUM-MASTER-LEDGER.md`](AI-SCRUM-MASTER-LEDGER.md): inconformidades e
+  **cerimonias** rastreadas pelo **Scrum Master**.
 - [`../ROADMAP.md`](../ROADMAP.md): backlog priorizado e sugestoes.
 - [`ROADMAP-DECISIONS.md`](ROADMAP-DECISIONS.md): historico das decisoes do roadmap.
 - [`docs/AI-AGENTS-CATALOG.md`](docs/AI-AGENTS-CATALOG.md): catalogo dos agentes do repo.

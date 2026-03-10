@@ -160,7 +160,33 @@ operator_chat_visibility:
   mandatory_rules:
     - every-meaningful-agent-milestone-must-be-mirrored-to-chat
     - scrum-master-must-audit-chat-contract-compliance
+    - scrum-master-must-report-dysfunctions-and-ceremonies-to-chat
     - chat-summary-does-not-replace-jira-or-confluence-logging
+
+scrum_master_enforcement:
+  canonical_ledger: docs/AI-SCRUM-MASTER-LEDGER.md
+  mandatory_rules:
+    - every-dysfunction-must-hit-ledger
+    - every-ceremony-must-hit-ledger
+    - unresolved-dysfunction-must-open-governance-bug
+    - scrum-master-must-link-ledger-and-jira-when-escalating
+  inconformity_fields:
+    - Data/Hora UTC
+    - Tipo
+    - Inconformidade
+    - Agente/Papel
+    - Impacto
+    - Acao corretiva
+    - Resultado
+    - Jira
+  ceremony_fields:
+    - Data/Hora UTC
+    - Cerimonia
+    - Contexto
+    - Participantes
+    - Artefato
+    - Resultado
+    - Jira/Confluence
 
 testing:
   required_layers:

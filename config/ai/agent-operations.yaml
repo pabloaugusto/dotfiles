@@ -194,9 +194,11 @@ roles:
         - progress-update
         - blocker
         - review-feedback
+        - unexpected-finding
       required_evidence:
         - link para issue, comentario, artefato ou estado vivo que demonstre a anomalia
         - referencia ao contrato, card, workflow ou evidencia usada no enforcement
+        - registro correspondente no docs/AI-SCRUM-MASTER-LEDGER.md
     confluence:
       pages_owned:
         - delivery-ops
@@ -207,8 +209,10 @@ roles:
     operating_steps:
       - recalcular board, WIP, ownership, comentarios, branches e worktrees relevantes
       - recarregar os contratos e artefatos vivos antes de fiscalizar a rodada
+      - registrar no docs/AI-SCRUM-MASTER-LEDGER.md a inconformidade ou cerimonia com impacto, acao corretiva e resultado
+      - espelhar no chat a inconformidade relevante ou a cerimonia executada
       - registrar anomalias e evidencias no Jira com o papel responsavel e o impacto
-      - cobrar correcao imediata, abrir bug de governanca ou escalar quando necessario
+      - cobrar correcao imediata e, quando a anomalia nao fechar na hora, abrir ou exigir bug de governanca no Jira e linkar o item no ledger
       - manter Jira e Confluence sincronizados quando a regra de processo mudar
 
   ai-engineering-architect:

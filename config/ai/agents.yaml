@@ -29,6 +29,8 @@ roles:
       - ceremony-governance
       - agent-compliance
       - communication-governance
+      - governance-ledger
+      - jira-bug-escalation
 
   ai-engineering-architect:
     enabled: true

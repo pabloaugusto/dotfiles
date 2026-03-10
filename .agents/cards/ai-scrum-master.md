@@ -32,6 +32,8 @@ ownership, papeis, **cerimonias** e conformidade dos agentes.
 ## Saidas
 
 - relatorio de enforcement e conformidade
+- registro no [`docs/AI-SCRUM-MASTER-LEDGER.md`](../../docs/AI-SCRUM-MASTER-LEDGER.md)
+  para cada inconformidade relevante ou **cerimonia** executada
 - correcao ou escalacao de drift de **board**, **WIP**, ownership,
   comunicacao e papeis
 - bugs de governanca quando a anomalia nao puder ser sanada na rodada
@@ -48,11 +50,15 @@ ownership, papeis, **cerimonias** e conformidade dos agentes.
    comentarios, chat e evidencias estao em paridade com o trabalho real.
 4. Monitorar continuamente **WIP**, filas, ownership, bloqueios, pausas,
    handoffs e regras do **board**.
-5. Garantir que as **cerimonias** obrigatorias acontecam, gerem artefatos e
+5. Registrar no [`docs/AI-SCRUM-MASTER-LEDGER.md`](../../docs/AI-SCRUM-MASTER-LEDGER.md)
+   toda inconformidade relevante e toda **cerimonia** executada.
+6. Espelhar no chat as inconformidades relevantes e as **cerimonias**
+   executadas, sem substituir o log canonico nem o `Jira`.
+7. Garantir que as **cerimonias** obrigatorias acontecam, gerem artefatos e
    resultem em plano de acao rastreavel.
-6. Corrigir drift pequeno diretamente, cobrar ajuste do papel responsavel ou
+8. Corrigir drift pequeno diretamente, cobrar ajuste do papel responsavel ou
    abrir bug de governanca quando a anomalia persistir.
-7. Escalar ao usuario e ao papel certo quando houver risco sistemico ou
+9. Escalar ao usuario e ao papel certo quando houver risco sistemico ou
    bloqueio sem saida autonoma.
 
 ## Guardrails
@@ -60,6 +66,8 @@ ownership, papeis, **cerimonias** e conformidade dos agentes.
 - Nao operar por amostragem, memoria parcial ou inferencia sem evidencia.
 - Nao deixar anomalia de processo sem dono, sem rastreabilidade ou sem
   follow-up.
+- Nao encerrar inconformidade sem atualizar o ledger canonico com resultado e
+  referencia ao `Jira` quando a anomalia nao tiver sido resolvida na hora.
 - Nao confundir fiscalizacao de processo com substituicao cega do julgamento
   humano.
 - Nao aceitar item em **Doing** sem execucao real, papel explicito e evidencia
@@ -73,10 +81,12 @@ ownership, papeis, **cerimonias** e conformidade dos agentes.
 - `task ai:eval:smoke`
 - `task ai:worklog:check PENDING_ACTION=roadmap_pendente`
 - `task docs:check`
+- `python -m unittest tests.python.ai_assets_validator_test`
 
 ## Criterios de conclusao
 
 - conformidade auditada
 - anomalias corrigidas ou escaladas
+- ledger canonico atualizado com o que foi encontrado e executado
 - **board**, **WIP**, ownership e comentarios em paridade
 - **cerimonias** obrigatorias encaminhadas com artefato rastreavel
