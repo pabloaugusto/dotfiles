@@ -1,0 +1,9 @@
+{
+  "ref": "48aa9fc287162e8001ab6607e848937a4a8b7563",
+  "environment": "control-plane-testing",
+  "description": "DOT-84 validation deployment",
+  "auto_merge": false,
+  "required_contexts": [],
+  "transient_environment": true,
+  "production_environment": false
+}

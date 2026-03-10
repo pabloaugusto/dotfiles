@@ -1,0 +1,18 @@
+version: 1
+platforms:
+  atlassian:
+    enabled: true
+    provider: atlassian-cloud
+    auth:
+      mode: service-account-api-token
+      site_url: https://pabloaugusto.atlassian.net
+      email: pablo@pabloaugusto.com
+      token: ATSTT3xFfGF0MkfuXWagPO_E059cHeoBPmz5nGCSxFLR3rmWHJ519OezkEZPIdoVC4O-DIcHi5q3uJSVXKzwb-J_RJF19Dfeuht2-itYYiNebYnSFoZqjrCKA-rKWcT0d4JyGKfsfcmgdi6rbimI4TeEIK6JMh1qhLJiQMVKRo4FVUhn2DsvqkE=F9B17B29
+      service_account: dotfiles-ai-atlassian
+      cloud_id: 06fb26d7-284b-4ba7-b0c1-d3f0d6860d04
+    jira:
+      enabled: true
+      project_key: DOT
+    confluence:
+      enabled: true
+      space_key: DOT

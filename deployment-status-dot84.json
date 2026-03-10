@@ -1,0 +1,8 @@
+{
+  "state": "success",
+  "environment": "control-plane-testing",
+  "description": "DOT-84 validation deployment success",
+  "log_url": "https://github.com/pabloaugusto/dotfiles/pull/3",
+  "environment_url": "https://github.com/pabloaugusto/dotfiles/pull/3",
+  "auto_inactive": false
+}

@@ -1,0 +1,18 @@
+version: 1
+platforms:
+  atlassian:
+    enabled: true
+    provider: atlassian-cloud
+    auth:
+      mode: service-account-api-token
+      site_url: env://ATLASSIAN_SITE_URL
+      email: env://ATLASSIAN_EMAIL
+      token: env://ATLASSIAN_API_TOKEN
+      service_account: env://ATLASSIAN_SERVICE_ACCOUNT
+      cloud_id: env://ATLASSIAN_CLOUD_ID
+    jira:
+      enabled: true
+      project_key: env://ATLASSIAN_PROJECT_KEY
+    confluence:
+      enabled: true
+      space_key: env://ATLASSIAN_SPACE_KEY
