@@ -18,6 +18,7 @@ DEFAULT_CONFIG_PATH = Path("config/secrets-rotation.yaml")
 OP_REF_RE = re.compile(r"^op://(?P<body>.+)$")
 SSH_PUBLIC_KEY_RE = re.compile(r"^ssh-[A-Za-z0-9@._+-]+\s+[A-Za-z0-9+/=]+(?:\s+.+)?$")
 AGE_RECIPIENT_LINE_RE = re.compile(r"(?m)^(\s*-\s+)age[0-9a-z]+(?:\s*)$")
+AGE_RECIPIENT_RE = re.compile(r"(?m)^\s*-\s+(age[0-9a-z]+)\s*$")
 
 
 class SecretsRotationError(RuntimeError):
@@ -126,6 +127,45 @@ def expand_path(repo_root: Path, raw_path: str) -> Path:
     if expanded.is_absolute():
         return expanded
     return (repo_root / expanded).resolve()
+
+
+def local_age_secret_key(repo_root: Path) -> str:
+    env_secret = os.environ.get("SOPS_AGE_KEY", "").strip()
+    if env_secret.startswith("AGE-SECRET-KEY-"):
+        return env_secret
+
+    candidate_paths = [
+        repo_root / "df" / "secrets" / "dotfiles.age.local.key",
+        Path.home() / ".config" / "sops" / "age" / "keys.txt",
+    ]
+    for candidate in candidate_paths:
+        if not candidate.exists():
+            continue
+        try:
+            for line in candidate.read_text(encoding="utf-8").splitlines():
+                secret = line.strip()
+                if secret.startswith("AGE-SECRET-KEY-"):
+                    return secret
+        except OSError:
+            continue
+    return ""
+
+
+def local_age_recipient(repo_root: Path) -> str:
+    secret = local_age_secret_key(repo_root)
+    if not secret:
+        return ""
+    return SopsAgeDriver(repo_root).recipient_from_secret(secret)
+
+
+def configured_age_recipients(config_path: Path) -> list[str]:
+    if not config_path.exists():
+        return []
+    try:
+        content = config_path.read_text(encoding="utf-8")
+    except OSError:
+        return []
+    return [match.group(1).strip() for match in AGE_RECIPIENT_RE.finditer(content)]
 
 
 def parse_op_ref(op_ref: str) -> OpReference:
@@ -626,8 +666,16 @@ def origin_remote(repo_root: Path) -> str:
     return (completed.stdout or "").strip() or "origin"
 
 
-def target_required_commands(target: RotationTarget) -> list[str]:
-    commands = {"op"}
+def target_required_commands(target: RotationTarget, *, repo_root: Path | None = None) -> list[str]:
+    commands: set[str] = set()
+    if target.source_of_truth.strip().lower() == "1password":
+        use_local_age_material = (
+            target.kind == "age_runtime_key"
+            and repo_root is not None
+            and bool(local_age_secret_key(repo_root))
+        )
+        if not use_local_age_material:
+            commands.add("op")
     if target.kind in {"github_ssh_identity", "github_pat"}:
         commands.add("gh")
     if target.kind == "github_ssh_identity":
@@ -749,7 +797,7 @@ def build_target_preflight(
     gitlab_auth: dict[str, Any],
     secrets_refs: dict[str, Any],
 ) -> dict[str, Any]:
-    required_commands = target_required_commands(target)
+    required_commands = target_required_commands(target, repo_root=context.repo_root)
     command_checks = [
         {"command": command, "ok": bool(command_status.get(command, False))}
         for command in required_commands
@@ -938,12 +986,25 @@ def preflight_payload(
     context, config_payload, secrets_refs, targets = load_repo_context(repo_root, config_path)
     enabled_targets = [target for target in targets if target.enabled]
     required_commands = sorted(
-        {command for target in enabled_targets for command in target_required_commands(target)}
+        {
+            command
+            for target in enabled_targets
+            for command in target_required_commands(target, repo_root=context.repo_root)
+        }
     )
     command_status = {command: command_exists(command) for command in required_commands}
-    op_required = any("op" in target_required_commands(target) for target in enabled_targets)
-    gh_required = any("gh" in target_required_commands(target) for target in enabled_targets)
-    glab_required = any("glab" in target_required_commands(target) for target in enabled_targets)
+    op_required = any(
+        "op" in target_required_commands(target, repo_root=context.repo_root)
+        for target in enabled_targets
+    )
+    gh_required = any(
+        "gh" in target_required_commands(target, repo_root=context.repo_root)
+        for target in enabled_targets
+    )
+    glab_required = any(
+        "glab" in target_required_commands(target, repo_root=context.repo_root)
+        for target in enabled_targets
+    )
     op_auth = auth_probe_op(context.repo_root, required=op_required)
     github_auth = auth_probe_github(context.repo_root, required=gh_required)
     gitlab_auth = auth_probe_gitlab(context.repo_root, required=glab_required)
@@ -1009,6 +1070,8 @@ def validate_target(
             context.repo_root,
             str(target.config.get("sops_config_path", "df/secrets/dotfiles.sops.yaml")),
         )
+        configured_recipients = configured_age_recipients(sops_config_path)
+        expected_recipient = local_age_recipient(context.repo_root)
         has_placeholder = False
         if sops_config_path.exists():
             has_placeholder = "age1REPLACE_WITH_YOUR_PUBLIC_AGE_KEY" in sops_config_path.read_text(
@@ -1017,13 +1080,33 @@ def validate_target(
         checks.append(
             {
                 "name": "sops_recipient_materialized",
-                "ok": sops_config_path.exists() and not has_placeholder,
+                "ok": (
+                    sops_config_path.exists()
+                    and not has_placeholder
+                    and (
+                        not expected_recipient
+                        or expected_recipient in configured_recipients
+                    )
+                ),
                 "detail": (
-                    "recipient real encontrado"
-                    if sops_config_path.exists() and not has_placeholder
-                    else "arquivo ausente ou ainda com placeholder de recipient"
+                    "recipient real encontrado e alinhado ao runtime local"
+                    if (
+                        sops_config_path.exists()
+                        and not has_placeholder
+                        and (
+                            not expected_recipient
+                            or expected_recipient in configured_recipients
+                        )
+                    )
+                    else (
+                        "arquivo ausente ou ainda com placeholder de recipient"
+                        if not sops_config_path.exists() or has_placeholder
+                        else "recipient materializado, mas divergente do runtime age local"
+                    )
                 ),
                 "path": str(sops_config_path),
+                "expected_recipient": expected_recipient,
+                "configured_recipients": configured_recipients,
             }
         )
 

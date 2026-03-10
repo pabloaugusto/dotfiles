@@ -111,6 +111,7 @@ class SecretsRotationTests(unittest.TestCase):
     @mock.patch("scripts.secrets_rotation_lib.GitHubDriver.validate_git_remote")
     @mock.patch("scripts.secrets_rotation_lib.GitHubDriver.validate_ssh_handshake")
     @mock.patch("scripts.secrets_rotation_lib.command_exists")
+    @mock.patch("scripts.secrets_rotation_lib.SopsAgeDriver.recipient_from_secret")
     @mock.patch("scripts.secrets_rotation_lib.auth_probe_gitlab")
     @mock.patch("scripts.secrets_rotation_lib.auth_probe_github")
     @mock.patch("scripts.secrets_rotation_lib.auth_probe_op")
@@ -119,6 +120,7 @@ class SecretsRotationTests(unittest.TestCase):
         op_probe: mock.Mock,
         github_probe: mock.Mock,
         gitlab_probe: mock.Mock,
+        recipient_from_secret: mock.Mock,
         command_exists: mock.Mock,
         validate_ssh_handshake: mock.Mock,
         validate_git_remote: mock.Mock,
@@ -127,6 +129,7 @@ class SecretsRotationTests(unittest.TestCase):
             repo = pathlib.Path(tmp)
             write_repo_fixture(repo)
             command_exists.return_value = True
+            recipient_from_secret.return_value = "age1fixture"
             op_probe.return_value = {"required": True, "ok": True, "detail": "ok"}
             github_probe.return_value = {"required": True, "ok": True, "detail": "ok"}
             gitlab_probe.return_value = {"required": False, "ok": True, "detail": "nao requerido"}
@@ -139,6 +142,48 @@ class SecretsRotationTests(unittest.TestCase):
             age_target = next(item for item in payload["targets"] if item["target_id"] == "age-runtime")
             self.assertTrue(any(check["name"] == "sops_recipient_materialized" for check in age_target["checks"]))
             self.assertTrue(any("placeholder" in blocker for blocker in age_target["blockers"]))
+
+    @mock.patch.dict("os.environ", {"SOPS_AGE_KEY": "AGE-SECRET-KEY-1EXAMPLEEXAMPLEEXAMPLEEXAMPLEEXAMPLEEXAMPLEEXAMPLE"})
+    @mock.patch("scripts.secrets_rotation_lib.command_exists")
+    @mock.patch("scripts.secrets_rotation_lib.SopsAgeDriver.recipient_from_secret")
+    @mock.patch("scripts.secrets_rotation_lib.auth_probe_gitlab")
+    @mock.patch("scripts.secrets_rotation_lib.auth_probe_github")
+    @mock.patch("scripts.secrets_rotation_lib.auth_probe_op")
+    def test_age_runtime_uses_local_age_material_without_op_auth(
+        self,
+        op_probe: mock.Mock,
+        github_probe: mock.Mock,
+        gitlab_probe: mock.Mock,
+        recipient_from_secret: mock.Mock,
+        command_exists: mock.Mock,
+    ) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            repo = pathlib.Path(tmp)
+            write_repo_fixture(repo)
+            config_path = repo / "config" / "secrets-rotation.yaml"
+            config_path.write_text(
+                config_path.read_text(encoding="utf-8").replace("    enabled: true\n    kind: \"github_ssh_identity\"\n", "    enabled: false\n    kind: \"github_ssh_identity\"\n", 1),
+                encoding="utf-8",
+            )
+            (repo / "df" / "secrets" / "dotfiles.sops.yaml").write_text(
+                "creation_rules:\n"
+                "  - path_regex: ^df/secrets/.*$\n"
+                "    age:\n"
+                "      - age1fixture\n",
+                encoding="utf-8",
+            )
+            command_exists.return_value = True
+            recipient_from_secret.return_value = "age1fixture"
+            op_probe.return_value = {"required": False, "ok": False, "detail": "op indisponivel"}
+            github_probe.return_value = {"required": False, "ok": True, "detail": "nao requerido"}
+            gitlab_probe.return_value = {"required": False, "ok": True, "detail": "nao requerido"}
+
+            payload = validate_payload(repo_root=repo)
+
+            age_target = next(item for item in payload["targets"] if item["target_id"] == "age-runtime")
+            self.assertNotIn("auth op indisponivel: op indisponivel", age_target["blockers"])
+            self.assertTrue(age_target["checks"][0]["ok"])
+            self.assertEqual(age_target["status"], "warn")
 
 
 if __name__ == "__main__":
