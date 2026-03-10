@@ -1376,10 +1376,11 @@ function Ensure-GitHubCliAuthFrom1Password {
 	}
 
 	if ([string]::IsNullOrWhiteSpace($token) -and (Test-CommandExists op)) {
-		# Prefer least-privilege project token, then fallback to full-access token.
+		# Prefer least-privilege project token, then escalate through the full-access fallbacks.
 		$tokenRefs = @(
 			'op://secrets/dotfiles/github/token',
-			'op://secrets/github/api/token'
+			'op://secrets/github/api/token',
+			'op://Personal/github/token-full-access'
 		)
 		foreach ($ref in $tokenRefs) {
 			$candidate = (& op read $ref 2>$null | Out-String).Trim()
@@ -1391,7 +1392,7 @@ function Ensure-GitHubCliAuthFrom1Password {
 	}
 
 	if ([string]::IsNullOrWhiteSpace($token)) {
-		Write-Warning "GitHub token not found in GH_TOKEN/GITHUB_TOKEN/op://secrets/dotfiles/github/token/op://secrets/github/api/token."
+		Write-Warning "GitHub token not found in GH_TOKEN/GITHUB_TOKEN/op://secrets/dotfiles/github/token/op://secrets/github/api/token/op://Personal/github/token-full-access."
 		return $false
 	}
 	$Env:GH_TOKEN = $token
@@ -1754,7 +1755,7 @@ function checkEnv {
 			Add-CheckResult -Item 'GitHub CLI auth' -Status 'success' -Detail 'gh authenticated for github.com.' -Solution ''
 		}
 		else {
-			Add-CheckResult -Item 'GitHub CLI auth' -Status 'fail' -Detail (($statusOutput | Out-String).Trim()) -Solution 'Authenticate with gh using a token from 1Password (prefer op://secrets/dotfiles/github/token).'
+			Add-CheckResult -Item 'GitHub CLI auth' -Status 'fail' -Detail (($statusOutput | Out-String).Trim()) -Solution 'Authenticate with gh using a token from 1Password (prefer op://secrets/dotfiles/github/token; contingencia final: op://Personal/github/token-full-access).'
 		}
 
 		& gh config set git_protocol ssh --host github.com *> $null
@@ -2620,7 +2621,7 @@ function Sync-DotfilesWindowsToWsl {
 
 			$pushRecovered = $false
 			if (-not [string]::IsNullOrWhiteSpace($repoPath) -and (Test-CommandExists op)) {
-				foreach ($ref in @('op://secrets/dotfiles/github/token', 'op://secrets/github/api/token')) {
+				foreach ($ref in @('op://secrets/dotfiles/github/token', 'op://secrets/github/api/token', 'op://Personal/github/token-full-access')) {
 					$token = (& op read $ref 2>$null | Out-String).Trim()
 					if ([string]::IsNullOrWhiteSpace($token)) { continue }
 

@@ -212,8 +212,11 @@ secrets:
   # Token GitHub preferencial para este projeto.
   github_project_pat_ref: "@@SECRETS_GITHUB_PROJECT_PAT_REF@@"
 
-  # Fallback caso o token acima nao esteja disponivel.
+  # Primeiro fallback quando o token dedicado do projeto nao resolver o bloqueio.
   github_full_access_ref: "@@SECRETS_GITHUB_FULL_ACCESS_REF@@"
+
+  # Contingencia final para bloqueios que persistirem apos o fallback anterior.
+  github_full_access_fallback_ref: "@@SECRETS_GITHUB_FULL_ACCESS_FALLBACK_REF@@"
 
   # Chave age usada pelo sops.
   age_key_ref: "@@SECRETS_AGE_KEY_REF@@"

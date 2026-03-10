@@ -162,7 +162,7 @@ checkEnv() {
     if ! _run_with_timeout 8 "$gh_bin" auth status --hostname github.com >"$_tmp_out" 2>&1; then
       local github_token="${GH_TOKEN:-${GITHUB_TOKEN:-}}"
       if [ -z "$github_token" ] && command -v op >/dev/null 2>&1; then
-        for ref in "op://secrets/dotfiles/github/token" "op://secrets/github/api/token"; do
+        for ref in "op://secrets/dotfiles/github/token" "op://secrets/github/api/token" "op://Personal/github/token-full-access"; do
           github_token="$(op read "$ref" 2>/dev/null || true)"
           [ -n "$github_token" ] && break
         done
@@ -177,7 +177,7 @@ checkEnv() {
     if grep -q "Logged in to github.com" "$_tmp_out" || _run_with_timeout 8 "$gh_bin" auth status --hostname github.com >/dev/null 2>&1; then
       _add_result "success" "GitHub CLI auth" "gh autenticado no host github.com." ""
     else
-      _add_result "fail" "GitHub CLI auth" "gh nao autenticado no host github.com." "Rode 'gh auth login --hostname github.com --git-protocol ssh --with-token' com token do 1Password (preferencial: op://secrets/dotfiles/github/token)."
+      _add_result "fail" "GitHub CLI auth" "gh nao autenticado no host github.com." "Rode 'gh auth login --hostname github.com --git-protocol ssh --with-token' com token do 1Password (preferencial: op://secrets/dotfiles/github/token; contingencia final: op://Personal/github/token-full-access)."
     fi
 
     "$gh_bin" config set git_protocol ssh --host github.com >/dev/null 2>&1 || true

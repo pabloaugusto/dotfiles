@@ -61,5 +61,6 @@ Describe 'bootstrap-config path helpers' {
 		$secretsRef = Get-Content -Raw -Path (Join-Path $repo 'df\secrets\secrets-ref.yaml')
 		$secretsRef | Should Match 'git-signing:'
 		$secretsRef | Should Match 'automation-public-key: "op://secrets/dotfiles/git-automation/public key"'
+		$secretsRef | Should Match 'full-access-token-fallback: "op://Personal/github/token-full-access"'
 	}
 }
