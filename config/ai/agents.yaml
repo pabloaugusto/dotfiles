@@ -11,6 +11,7 @@ roles:
     enabled: true
     required: true
     category: governance
+    display_name: PO
     responsibilities:
       - backlog
       - prioritization
@@ -22,6 +23,7 @@ roles:
     enabled: true
     required: true
     category: governance
+    display_name: Scrum Master
     responsibilities:
       - scrum-enforcement
       - board-governance
@@ -36,6 +38,7 @@ roles:
     enabled: true
     required: true
     category: governance
+    display_name: Arquiteto
     responsibilities:
       - architecture
       - adr
@@ -45,6 +48,7 @@ roles:
     enabled: true
     required: true
     category: governance
+    display_name: Engenheiro
     responsibilities:
       - capacity-governance
       - risk
@@ -55,6 +59,7 @@ roles:
     enabled: true
     required: true
     category: governance
+    display_name: Tech Lead
     responsibilities:
       - decomposition
       - handoff
@@ -67,30 +72,35 @@ roles:
     enabled: true
     required: false
     category: delivery
+    display_name: Dev Python
     specialization: python
 
   ai-developer-powershell:
     enabled: true
     required: false
     category: delivery
+    display_name: PowerShell Dev
     specialization: powershell
 
   ai-developer-automation:
     enabled: true
     required: false
     category: delivery
+    display_name: Automation Dev
     specialization: automation
 
   ai-developer-config-policy:
     enabled: true
     required: false
     category: delivery
+    display_name: Engenheiro Agentes IA
     specialization: config-policy
 
   ai-qa:
     enabled: true
     required: true
     category: quality
+    display_name: Testador (QA)
     responsibilities:
       - tests
       - validation
@@ -124,6 +134,7 @@ roles:
     enabled: true
     required: true
     category: quality
+    display_name: Revisor
     responsibilities:
       - cross-cutting-review
       - review-orchestration
@@ -133,6 +144,7 @@ roles:
     enabled: true
     required: true
     category: delivery
+    display_name: Devops
     responsibilities:
       - ci-cd
       - infra
@@ -142,6 +154,7 @@ roles:
     enabled: true
     required: true
     category: knowledge
+    display_name: Escrivão
     responsibilities:
       - confluence
       - mirrors

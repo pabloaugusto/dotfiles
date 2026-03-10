@@ -268,6 +268,26 @@ Quando houver agentes ociosos:
 - so sem possibilidade real de avancar para a direita e permitido puxar novo
   trabalho
 
+## Camada de identidade humana dos agentes
+
+A identidade humana oficial de um agente nasce em
+[`.agents/registry/`](.agents/registry/), no campo `display_name`.
+
+O titulo `# ...` do card funciona como espelho humano obrigatorio desse nome de
+exibicao quando ele existir.
+
+Sem `display_name`, o fallback de exibicao continua sendo o id tecnico do
+agente.
+
+Toda rotina de startup e restart precisa carregar essa camada antes de iniciar
+comunicacao com o usuario, espelhar marcos no chat ou decidir como exibir um
+papel em logs e artefatos.
+
+Quando a superficie do `Jira` permitir exibicao humana sem perder
+rastreabilidade tecnica, o fluxo deve preferir `display_name`; quando nao
+permitir, o id tecnico permanece como chave interna e o nome humano fica na
+camada visivel correspondente.
+
 ## Politica de versionamento
 
 ### Versionar

@@ -1,4 +1,5 @@
 id = "ai-tech-lead"
+display_name = "Tech Lead"
 tier = "core"
 purpose = "Decompor trabalho, coordenar handoffs e preparar a execucao tecnica"
 default_skills = ["task-routing-and-decomposition", "dotfiles-architecture-modernization"]

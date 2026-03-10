@@ -12,6 +12,7 @@ Use status: `pendente`, `aceita`, `descartada`, `aplicar_depois`.
 <!-- roadmap:suggestions:start -->
 | ID | Tipo | Descricao | Status | RM | Captura | Atualizacao |
 | --- | --- | --- | --- | --- | --- | --- |
+| SG-ORTHO-DOT-118 | fix | Corrigir pendencias ortograficas remanescentes do worklog `DOT-118` em .agents/cards/ai-developer-config-policy.md, .agents/config.toml, .agents/registry/ai-developer-automation... | aceita |  | 2026-03-09 | 2026-03-09 |
 | SG-ORTHO-DOT-119 | fix | Corrigir pendencias ortograficas remanescentes do worklog `DOT-119` em .agents/cards/ai-engineering-manager.md, .agents/cards/ai-scrum-master.md, config/ai/agent-operations.yaml... | aceita |  | 2026-03-09 | 2026-03-09 |
 | SG-ORTHO-DOT-120 | fix | Corrigir pendencias ortograficas remanescentes do worklog `DOT-120` em .agents/cards/ai-developer-automation.md, .agents/cards/ai-developer-powershell.md, .agents/cards/ai-devel... | aceita |  | 2026-03-09 | 2026-03-09 |
 | SG-ORTHO-DOT-121 | fix | Corrigir pendencias ortograficas remanescentes do worklog `DOT-121` em docs/AI-REVIEW-LEDGER.md | aceita |  | 2026-03-09 | 2026-03-10 |
@@ -68,6 +69,7 @@ Use status: `pendente`, `aceita`, `descartada`, `aplicar_depois`.
 ## Registro automatico
 
 <!-- roadmap:autolog:start -->
+- 2026-03-09 23:24 UTC | decisao=accepted | horizonte=next | tipo=fix | item=Corrigir pendencias ortograficas remanescentes do worklog `DOT-118` em .agents/cards/ai-developer-config-policy.md, .agents/config.toml, .agents/registry/ai-developer-automation... | notas=Pendencia automatica criada por Pascoalete apos review consultivo reprovado sem correcao automatica.
 - 2026-03-09 22:58 UTC | decisao=accepted | horizonte=next | tipo=fix | item=Corrigir pendencias ortograficas remanescentes do worklog `DOT-119` em .agents/cards/ai-engineering-manager.md, .agents/cards/ai-scrum-master.md, config/ai/agent-operations.yaml... | notas=Pendencia automatica criada por Pascoalete apos review consultivo reprovado sem correcao automatica.
 - 2026-03-09 20:47 UTC | decisao=accepted | horizonte=next | tipo=fix | item=Corrigir pendencias ortograficas remanescentes do worklog `DOT-120` em .agents/cards/ai-developer-automation.md, .agents/cards/ai-developer-powershell.md, .agents/cards/ai-devel... | notas=Pendencia automatica criada por Pascoalete apos review consultivo reprovado sem correcao automatica.
 - 2026-03-10 17:10 UTC | decisao=accepted | horizonte=next | tipo=fix | item=Corrigir pendencias ortograficas remanescentes do worklog `DOT-121` em docs/AI-REVIEW-LEDGER.md | notas=Pendencia automatica criada por Pascoalete apos review consultivo reprovado sem correcao automatica.

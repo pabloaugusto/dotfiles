@@ -81,8 +81,17 @@ class ValidateAiAssetsTests(unittest.TestCase):
             module.OPERATING_MODEL_REQUIRED_SNIPPETS,
         )
         self.assertIn(
+            "## Camada de identidade humana dos agentes",
+            module.OPERATING_MODEL_REQUIRED_SNIPPETS,
+        )
+        self.assertIn(
             "### Fronteira entre `.agents/` e adaptadores de assistente",
             module.OPERATING_MODEL_REQUIRED_SNIPPETS,
+        )
+        self.assertIn(".agents/config.toml", module.AGENT_IDENTITY_REQUIRED_SNIPPETS)
+        self.assertIn(
+            'display_name = "PO"',
+            module.AGENT_IDENTITY_REQUIRED_SNIPPETS[".agents/registry/ai-product-owner.toml"],
         )
         self.assertIn("config/ai/contracts.yaml", module.BOARD_OPERATION_REQUIRED_SNIPPETS)
         self.assertIn(

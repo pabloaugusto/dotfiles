@@ -1,4 +1,5 @@
 id = "ai-devops"
+display_name = "Devops"
 tier = "core"
 purpose = "Operar pipelines, integracoes, releases e infraestrutura de suporte ao fluxo"
 default_skills = ["dotfiles-critical-integrations", "dotfiles-automation-review", "dotfiles-test-harness"]

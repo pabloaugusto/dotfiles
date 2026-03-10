@@ -1,4 +1,5 @@
 id = "ai-engineering-architect"
+display_name = "Arquiteto"
 tier = "core"
 purpose = "Enriquecer backlog e refinement com arquitetura, ADRs, riscos e referencias tecnicas"
 default_skills = ["dotfiles-architecture-modernization"]
