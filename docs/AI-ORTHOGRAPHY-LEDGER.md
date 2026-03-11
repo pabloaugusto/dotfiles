@@ -20,6 +20,16 @@ Registro consultivo do agente Pascoalete para ortografia e higiene vocabular.
 <!-- ai-orthography:records:start -->
 | Data/Hora UTC | Worklog ID | Revisor | Status | Arquivo | Achados | Evidencia |
 | --- | --- | --- | --- | --- | --- | --- |
+| 2026-03-11 12:32 UTC | WIP-DOT-175 | pascoalete | reprovado | tests/python/ai_assets_validator_test.py | possivel, LICOES, Validacao, LICOES, comecar, Orquestracao, evals, criacao (+4) | task spell:check |
+| 2026-03-11 12:32 UTC | WIP-DOT-175 | pascoalete | reprovado | scripts/validate-ai-assets.py | evals, LICOES, evals, evals, evals, evals, autolog, autolog (+56) | task spell:check |
+| 2026-03-11 12:32 UTC | WIP-DOT-175 | pascoalete | reprovado | docs/AI-CHAT-CONTRACTS-REGISTER.md | definicoes, sessao, usuario, promocao, promocao, promocoes, ausencia, agil (+21) | task spell:check |
+| 2026-03-11 12:32 UTC | WIP-DOT-175 | pascoalete | reprovado | .agents/cards/ai-scrum-master.md | agil, aderencia, comunicacao, fiscalizacao, comunicacao, escalacao, worktrees, definicoes (+43) | task spell:check |
+| 2026-03-11 12:32 UTC | WIP-DOT-175 | pascoalete | reprovado | .agents/cards/ai-product-owner.md | repositorio, agil, repriorizacao, epicos, usuario, decisao, orientacoes, urgencia (+23) | task spell:check |
+| 2026-03-11 12:32 UTC | WIP-DOT-175 | pascoalete | reprovado | config/ai/agent-operations.yaml | atuacao, decisao, decisao, linkar, implementacao, mudanca, atualizacao, necessario (+125) | task spell:check |
+| 2026-03-11 12:32 UTC | WIP-DOT-175 | pascoalete | reprovado | config/ai/jira-model.yaml | finishable, tecnica, reducao, decomposicao, Recomendacao, Criterios, Criterios, Criterios (+11) | task spell:check |
+| 2026-03-11 12:32 UTC | WIP-DOT-175 | pascoalete | reprovado | config/ai/contracts.yaml | worktrees, worktree, worktrees, worktrees, criterios, aceitacao, finishable, finishable | task spell:check |
+| 2026-03-11 12:32 UTC | WIP-DOT-175 | pascoalete | reprovado | docs/ai-operating-model.md | reutilizavel, testavel, worktree, Principios, Instrucoes, instrucoes, estaveis, sessao (+161) | task spell:check |
+| 2026-03-11 12:32 UTC | WIP-DOT-175 | pascoalete | reprovado | AGENTS.md | Missao, confiavel, testavel, reproduzivel, precedencia, LICOES, instrucoes, usuario (+102) | task spell:check |
 | 2026-03-11 12:03 UTC | WIP-DOT-37 | pascoalete | aprovado | docs/AI-PAUSED-ISSUES-AUDIT.md | sem achados | task spell:check |
 | 2026-03-11 09:15 UTC | WIP-DOT-106 | pascoalete | reprovado | tests/python/ai_fallback_governance_test.py | indisponivel, temporaria, Sincronizacao, concluida | task spell:check |
 | 2026-03-11 09:15 UTC | WIP-DOT-106 | pascoalete | reprovado | tests/python/ai_assets_validator_test.py | possivel, LICOES, Validacao, LICOES, comecar, Orquestracao, evals, Integracoes (+2) | task spell:check |

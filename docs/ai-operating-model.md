@@ -85,6 +85,34 @@ Essa manutencao sustenta:
 Sem essa rotina, a fila deixa de representar prioridade real e o **board**
 perde valor como instrumento de gestao.
 
+### 3.3. Intake nao pode duplicar issue nem Epic
+
+No intake deste repo, criar um item novo sem verificar o que ja esta aberto no
+`Jira` e drift de governanca.
+
+O preflight obrigatorio passa a ser:
+
+- antes de criar qualquer `issue`, verificar se o item ja nao existe
+- antes de criar qualquer demanda que nao seja `Epic`, verificar se ja existe
+  `Epic` aberto aderente ao macro tema e reutiliza-lo
+- antes de criar novo `Epic`, assegurar que nao existe outro `Epic` aberto
+  capaz de tratar o mesmo tema
+
+O papel executor desse preflight e o **Product Owner**. O papel fiscalizador e
+o **Scrum Master**.
+
+So ha tres bypasses validos:
+
+- ordem direta do humano para abrir mesmo assim
+- consulta previa ao humano quando a IA entender que um novo `Epic` ainda e a
+  melhor opcao apesar de haver `Epic` aberto aderente
+- ausencia de resposta humana por mais de 3 minutos, caso em que a IA pode
+  decidir de forma autonoma
+
+Em qualquer bypass, a decisao precisa ficar rastreada em comentario
+estruturado no `Jira`, incluindo busca feita, item existente avaliado, motivo
+de nao reutilizacao e impacto esperado da excecao.
+
 ### 4. Automacao reutilizavel
 
 A automacao deve morar em scripts, tasks e workflows reutilizaveis. Isso reduz duplicacao e facilita evoluir CI/CD sem espalhar logica em varios pontos.

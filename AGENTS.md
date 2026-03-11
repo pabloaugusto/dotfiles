@@ -117,6 +117,18 @@ Leia a skill mais proxima do escopo antes de editar arquivos relevantes.
   imediatamente antes da resposta final ao usuario.
 - `Jira` e a fonte primaria do fluxo vivo; [`docs/AI-WIP-TRACKER.md`](docs/AI-WIP-TRACKER.md)
   funciona como fallback contingencial do repo.
+- Antes de criar qualquer `issue`, verificar primeiro no `Jira` se o item ja
+  nao existe e reutilizar o work item existente quando ele ja cobrir o escopo
+  real.
+- Antes de criar qualquer demanda que nao seja `Epic`, verificar se ja existe
+  `Epic` aberto aderente ao macro tema e anexar a demanda a ele.
+- Antes de criar novo `Epic`, assegurar que nao existe `Epic` aberto capaz de
+  tratar o tema.
+- Bypass dessa verificacao so e valido com ordem direta do humano ou, quando a
+  IA ainda julgar melhor abrir novo `Epic` apesar de um `Epic` aberto aderente,
+  apos consulta previa ao humano; sem resposta por mais de 3 minutos, a IA pode
+  decidir de forma autonoma, mas deve registrar a justificativa nos comentarios
+  do `Jira`.
 - Quando a contingencia local realmente precisar assumir rastreabilidade
   temporaria, registrar o evento em
   [`docs/AI-FALLBACK-LEDGER.md`](docs/AI-FALLBACK-LEDGER.md) e voltar ao modo
@@ -156,12 +168,15 @@ Leia a skill mais proxima do escopo antes de editar arquivos relevantes.
 1. Ler o contexto minimo.
 2. Rodar `task ai:worklog:check` antes de execucao relevante e, se houver WIP
    ativo, tratar `concluir_primeiro` como concluir ou destravar primeiro.
-3. Se houver reuso ou adaptacao de outro repo, concluir a auditoria exaustiva e registrar o gap analysis.
-4. Escolher a skill local adequada.
-5. Acionar os gates paralelos obrigatorios de arquitetura/modernizacao e, quando aplicavel, integracoes criticas.
-6. Fazer a menor mudanca coerente com a arquitetura do repo.
-7. Validar localmente com tasks, lints e testes cabiveis.
-8. Manter o item em `Doing` enquanto a execucao estiver em curso.
-9. So no ultimo passo tecnico, revisar licoes, mover o item para `Done` e validar `task ai:worklog:close:gate`.
-10. Se a rodada terminou e a worktree ainda estiver dirty, criar commit de fechamento antes de aceitar novo escopo.
-11. Manter commit e PR no padrao `emoji + conventional commits`.
+3. Antes de criar `issue` ou `Epic` no `Jira`, executar preflight de
+   duplicidade e de reuse de `Epic`, assegurando que nao existe item aberto
+   equivalente nem `Epic` aberto aderente ao mesmo tema.
+4. Se houver reuso ou adaptacao de outro repo, concluir a auditoria exaustiva e registrar o gap analysis.
+5. Escolher a skill local adequada.
+6. Acionar os gates paralelos obrigatorios de arquitetura/modernizacao e, quando aplicavel, integracoes criticas.
+7. Fazer a menor mudanca coerente com a arquitetura do repo.
+8. Validar localmente com tasks, lints e testes cabiveis.
+9. Manter o item em `Doing` enquanto a execucao estiver em curso.
+10. So no ultimo passo tecnico, revisar licoes, mover o item para `Done` e validar `task ai:worklog:close:gate`.
+11. Se a rodada terminou e a worktree ainda estiver dirty, criar commit de fechamento antes de aceitar novo escopo.
+12. Manter commit e PR no padrao `emoji + conventional commits`.

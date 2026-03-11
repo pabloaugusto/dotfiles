@@ -64,6 +64,10 @@ class ValidateAiAssetsTests(unittest.TestCase):
         self.assertIn("docs/AI-FALLBACK-LEDGER.md", module.AGENTS_REQUIRED_SNIPPETS)
         self.assertIn("`Jira` e a fonte primaria do fluxo vivo", module.AGENTS_REQUIRED_SNIPPETS)
         self.assertIn(
+            "Antes de criar qualquer demanda que nao seja `Epic`, verificar se ja existe `Epic` aberto aderente ao macro tema",
+            module.AGENTS_REQUIRED_SNIPPETS,
+        )
+        self.assertIn(
             "concluir_primeiro passa a significar concluir ou puxar apenas o work item minimo que o destrava diretamente",
             module.AGENTS_REQUIRED_SNIPPETS,
         )
@@ -77,6 +81,10 @@ class ValidateAiAssetsTests(unittest.TestCase):
         )
         self.assertIn(
             "### 3.1. Terminar antes de comecar inclui destravar o WIP ativo",
+            module.OPERATING_MODEL_REQUIRED_SNIPPETS,
+        )
+        self.assertIn(
+            "### 3.3. Intake nao pode duplicar issue nem Epic",
             module.OPERATING_MODEL_REQUIRED_SNIPPETS,
         )
         self.assertIn(
@@ -124,6 +132,62 @@ class ValidateAiAssetsTests(unittest.TestCase):
         self.assertIn(
             "reading_order: right-to-left",
             module.BOARD_OPERATION_REQUIRED_SNIPPETS["config/ai/contracts.yaml"],
+        )
+        self.assertIn(
+            "verify-existing-open-issue-before-any-new-issue",
+            module.BOARD_OPERATION_REQUIRED_SNIPPETS["config/ai/contracts.yaml"],
+        )
+        self.assertIn(
+            "verify-existing-open-epic-before-any-non-epic-demand",
+            module.BOARD_OPERATION_REQUIRED_SNIPPETS["config/ai/contracts.yaml"],
+        )
+        self.assertIn(
+            "verify-existing-open-epic-before-any-new-epic-for-the-same-theme",
+            module.BOARD_OPERATION_REQUIRED_SNIPPETS["config/ai/contracts.yaml"],
+        )
+        self.assertIn(
+            "verify-existing-open-issue-before-creating-any-new-issue",
+            module.BOARD_OPERATION_REQUIRED_SNIPPETS["config/ai/jira-model.yaml"],
+        )
+        self.assertIn(
+            "verify-existing-open-epic-before-creating-any-non-epic-demand",
+            module.BOARD_OPERATION_REQUIRED_SNIPPETS["config/ai/jira-model.yaml"],
+        )
+        self.assertIn(
+            "new-epic-creation-requires-proof-of-no-open-epic-match",
+            module.BOARD_OPERATION_REQUIRED_SNIPPETS["config/ai/jira-model.yaml"],
+        )
+        self.assertIn(
+            "verificar se a demanda ja nao existe antes de criar issue",
+            module.BOARD_OPERATION_REQUIRED_SNIPPETS["config/ai/agent-operations.yaml"],
+        )
+        self.assertIn(
+            "assegurar que nao existe epic aberto cobrindo o tema antes de criar novo epic",
+            module.BOARD_OPERATION_REQUIRED_SNIPPETS["config/ai/agent-operations.yaml"],
+        )
+        self.assertIn(
+            "auditar se toda criacao de issue ou epic passou pelo preflight de deduplicacao e reuse de epic",
+            module.BOARD_OPERATION_REQUIRED_SNIPPETS["config/ai/agent-operations.yaml"],
+        )
+        self.assertIn(
+            "verificar se a issue ja existe",
+            module.BOARD_OPERATION_REQUIRED_SNIPPETS[".agents/cards/ai-product-owner.md"],
+        )
+        self.assertIn(
+            "Reusar o `Epic` aberto correto",
+            module.BOARD_OPERATION_REQUIRED_SNIPPETS[".agents/cards/ai-product-owner.md"],
+        )
+        self.assertIn(
+            "sem resposta por 3 minutos",
+            module.BOARD_OPERATION_REQUIRED_SNIPPETS[".agents/cards/ai-product-owner.md"],
+        )
+        self.assertIn(
+            "preflight de deduplicacao",
+            module.BOARD_OPERATION_REQUIRED_SNIPPETS[".agents/cards/ai-scrum-master.md"],
+        )
+        self.assertIn(
+            "issue ou `Epic` criado sem preflight",
+            module.BOARD_OPERATION_REQUIRED_SNIPPETS[".agents/cards/ai-scrum-master.md"],
         )
         self.assertIn("docs/git-conventions.md", module.GIT_GOVERNANCE_REQUIRED_SNIPPETS)
         self.assertIn(
