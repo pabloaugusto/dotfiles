@@ -3,21 +3,25 @@
 ## Pipeline canonico
 
 1. Ler [`../AGENTS.md`](../AGENTS.md), [`../LICOES-APRENDIDAS.md`](../LICOES-APRENDIDAS.md) e contexto minimo do repo.
-2. Rodar preflight de pendencias em [`AI-WIP-TRACKER.md`](AI-WIP-TRACKER.md).
-3. Se houver importacao cross-repo, concluir auditoria estrutural e registrar o delta em [`AI-SOURCE-AUDIT.md`](AI-SOURCE-AUDIT.md).
-4. Acionar `repo-governance-authority`.
-5. Acionar `execution-worklog-governance-owner`.
-6. Acionar `ai-scrum-master` como gate global de board, WIP, ownership, cerimonias e aderencia do fluxo.
-7. Acionar `architecture-modernization-authority` em paralelo, sempre lendo e monitorando [`AI-WIP-TRACKER.md`](AI-WIP-TRACKER.md), [`../ROADMAP.md`](../ROADMAP.md), [`ROADMAP-DECISIONS.md`](ROADMAP-DECISIONS.md) e demais registradores vivos de backlog/pendencias.
-8. Se a tarefa pedir triagem, decomposicao ou plano de delegacao, acionar `orchestrator` com `$task-routing-and-decomposition`.
-9. Se o escopo tocar bootstrap, auth, secrets, CI, sync, CLI ou ambiente, acionar `critical-integrations-guardian`.
-10. Se o escopo tocar rotacao, backup, expiracao, revogacao ou inventario de credenciais, chaves SSH, `sops+age` ou notificacao de segredos, acionar `secrets-rotation-governor`.
-11. Se houver texto, comentario, documentacao, config textual ou identificadores legiveis alterados, acionar `pascoalete` em modo consultivo com `task spell:review`.
-12. Se houver mudanca em Python, PowerShell ou automacao, acionar o revisor especialista aplicavel antes do fechamento tecnico.
-13. Se o escopo tocar [`../LICOES-APRENDIDAS.md`](../LICOES-APRENDIDAS.md), fechamento de rodada ou retroativo, acionar `lessons-governance-curator`.
-14. Implementar e validar.
-15. Registrar pareceres especializados em [`AI-REVIEW-LEDGER.md`](AI-REVIEW-LEDGER.md) quando houver mudanca de codigo ou automacao e parecer ortografico em [`AI-ORTHOGRAPHY-LEDGER.md`](AI-ORTHOGRAPHY-LEDGER.md) quando houver review consultivo textual.
-16. Revisar licoes, fechar worklog e validar gates finais.
+2. Se a sessao veio sem continuidade confiavel, executar o startup oficial e
+   usar [`AI-STARTUP-AND-RESTART.md`](AI-STARTUP-AND-RESTART.md) e o relatorio
+   gerado por `task ai:startup:session` como base obrigatoria da rodada.
+3. Rodar preflight de pendencias em [`AI-WIP-TRACKER.md`](AI-WIP-TRACKER.md).
+4. Se houver importacao cross-repo, concluir auditoria estrutural e registrar o delta em [`AI-SOURCE-AUDIT.md`](AI-SOURCE-AUDIT.md).
+5. Acionar `repo-governance-authority`.
+6. Acionar `execution-worklog-governance-owner`.
+7. Acionar `ai-scrum-master` como gate global de board, WIP, ownership, cerimonias e aderencia do fluxo.
+8. Acionar `architecture-modernization-authority` em paralelo, sempre lendo e monitorando [`AI-WIP-TRACKER.md`](AI-WIP-TRACKER.md), [`../ROADMAP.md`](../ROADMAP.md), [`ROADMAP-DECISIONS.md`](ROADMAP-DECISIONS.md) e demais registradores vivos de backlog/pendencias.
+9. Se a tarefa pedir triagem, decomposicao ou plano de delegacao, acionar `orchestrator` com `$task-routing-and-decomposition`.
+10. Antes de qualquer subagente, preparar o pacote minimo de contexto: issue dona, branch atual, startup report, regras aplicaveis ao papel, arquivos normativos relevantes e proximo passo objetivo.
+11. Se o escopo tocar bootstrap, auth, secrets, CI, sync, CLI ou ambiente, acionar `critical-integrations-guardian`.
+12. Se o escopo tocar rotacao, backup, expiracao, revogacao ou inventario de credenciais, chaves SSH, `sops+age` ou notificacao de segredos, acionar `secrets-rotation-governor`.
+13. Se houver texto, comentario, documentacao, config textual ou identificadores legiveis alterados, acionar `pascoalete` em modo consultivo com `task spell:review`.
+14. Se houver mudanca em Python, PowerShell ou automacao, acionar o revisor especialista aplicavel antes do fechamento tecnico.
+15. Se o escopo tocar [`../LICOES-APRENDIDAS.md`](../LICOES-APRENDIDAS.md), fechamento de rodada ou retroativo, acionar `lessons-governance-curator`.
+16. Implementar e validar.
+17. Registrar pareceres especializados em [`AI-REVIEW-LEDGER.md`](AI-REVIEW-LEDGER.md) quando houver mudanca de codigo ou automacao e parecer ortografico em [`AI-ORTHOGRAPHY-LEDGER.md`](AI-ORTHOGRAPHY-LEDGER.md) quando houver review consultivo textual.
+18. Revisar licoes, fechar worklog e validar gates finais.
 
 ## Roteamento por escopo
 
@@ -40,6 +44,11 @@
 - `architecture-modernization-authority` e sempre obrigatorio como gate paralelo.
 - `ai-scrum-master` e sempre obrigatorio como gate global de **board**, **WIP**, ownership, comunicacao e **cerimonias**.
 - `architecture-modernization-authority` deve observar continuamente WIP, backlog, roadmap, decisions e outros artefatos vivos para nao sugerir trabalho fora de contexto.
+- nenhuma delegacao para subagente e valida sem startup carregado ou
+  explicitamente linkado na rodada atual.
+- todo subagente deve receber contexto suficiente para operar de imediato no seu
+  papel, sem depender de adivinhacao, memoria parcial ou releitura informal do
+  chat.
 - `critical-integrations-guardian` e obrigatorio em mudancas de plataforma e integracoes criticas.
 - `secrets-rotation-governor` e obrigatorio em mudancas de lifecycle de credenciais.
 - `pascoalete` e obrigatorio em modo consultivo para alteracoes textuais e deve abrir pendencia no backlog se reprovar algo que permanecer sem correcao.

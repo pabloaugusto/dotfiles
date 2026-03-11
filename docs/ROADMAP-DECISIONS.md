@@ -1,6 +1,6 @@
 # Decisoes do Roadmap
 
-Atualizado em: 2026-03-11 12:32 UTC
+Atualizado em: 2026-03-11 14:31 UTC
 Ciclo ativo: 2026-Q1
 
 Registro das decisoes humanas por ciclo e governanca de sugestoes.
@@ -12,6 +12,7 @@ Use status: `pendente`, `aceita`, `descartada`, `aplicar_depois`.
 <!-- roadmap:suggestions:start -->
 | ID | Tipo | Descricao | Status | RM | Captura | Atualizacao |
 | --- | --- | --- | --- | --- | --- | --- |
+| SG-ORTHO-WIP-DOT-177 | fix | Corrigir pendencias ortograficas remanescentes do worklog `WIP-DOT-177` em AGENTS.md, config/ai/contracts.yaml, docs/AI-STARTUP-AND-RESTART.md, docs/TASKS.md, docs/ai-operating-... | aceita |  | 2026-03-11 | 2026-03-11 |
 | SG-ORTHO-WIP-DOT-175 | fix | Corrigir pendencias ortograficas remanescentes do worklog `WIP-DOT-175` em .agents/cards/ai-product-owner.md, .agents/cards/ai-scrum-master.md, AGENTS.md, config/ai/agent-operat... | aceita |  | 2026-03-11 | 2026-03-11 |
 | SG-ORTHO-WIP-DOT-37 | fix | Corrigir pendencias ortograficas remanescentes do worklog `WIP-DOT-37` | descartada |  | 2026-03-11 | 2026-03-11 |
 | SG-ORTHO-WIP-DOT-106 | fix | Corrigir pendencias ortograficas remanescentes do worklog `WIP-DOT-106` em AGENTS.md, Taskfile.yml, config/ai/contracts.yaml, docs/AI-FALLBACK-LEDGER.md, docs/AI-FALLBACK-OPERAT... | aceita |  | 2026-03-11 | 2026-03-11 |
@@ -81,6 +82,8 @@ Use status: `pendente`, `aceita`, `descartada`, `aplicar_depois`.
 ## Registro automatico
 
 <!-- roadmap:autolog:start -->
+- 2026-03-11 14:31 UTC | decisao=accepted | horizonte=next | tipo=fix | item=Corrigir pendencias ortograficas remanescentes do worklog `WIP-DOT-177` em AGENTS.md, config/ai/contracts.yaml, docs/AI-STARTUP-AND-RESTART.md, docs/TASKS.md, docs/ai-operating-... | notas=Pendencia automatica criada por Pascoalete apos review consultivo reprovado sem correcao automatica.
+- 2026-03-11 14:08 UTC | decisao=accepted | horizonte=next | tipo=fix | item=Corrigir pendencias ortograficas remanescentes do worklog `WIP-DOT-177` em AGENTS.md, LICOES-APRENDIDAS.md, config/ai/agent-operations.yaml, config/ai/contracts.yaml, docs/AI-CH... | notas=Pendencia automatica criada por Pascoalete apos review consultivo reprovado sem correcao automatica.
 - 2026-03-11 12:32 UTC | decisao=accepted | horizonte=next | tipo=fix | item=Corrigir pendencias ortograficas remanescentes do worklog `WIP-DOT-175` em .agents/cards/ai-product-owner.md, .agents/cards/ai-scrum-master.md, AGENTS.md, config/ai/agent-operat... | notas=Pendencia automatica criada por Pascoalete apos review consultivo reprovado sem correcao automatica.
 - 2026-03-11 12:03 UTC | decisao=discarded | horizonte=next | tipo=fix | item=Corrigir pendencias ortograficas remanescentes do worklog `WIP-DOT-37` | notas=Pendencia ortografica descartada automaticamente porque o escopo atual ficou limpo.
 - 2026-03-11 11:59 UTC | decisao=accepted | horizonte=next | tipo=fix | item=Corrigir pendencias ortograficas remanescentes do worklog `WIP-DOT-37` em docs/AI-PAUSED-ISSUES-AUDIT.md | notas=Pendencia automatica criada por Pascoalete apos review consultivo reprovado sem correcao automatica.

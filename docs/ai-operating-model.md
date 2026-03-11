@@ -27,11 +27,36 @@ Nessas retomadas, a regra correta passa a ser:
   [`AI-STARTUP-GOVERNANCE-MANIFEST.md`](AI-STARTUP-GOVERNANCE-MANIFEST.md)
 - tratar o manifest como fonte canonica do que precisa ser relido
 - nao operar por amostragem, presuncao ou lembranca parcial de sessao antiga
+- carregar o contrato de comunicacao com o usuario antes da primeira mensagem
+  operacional no chat
+- carregar a camada de `display_name` antes de exibir agente, papel ou owner em
+  chat, `Jira` ou artefato visivel
+- carregar explicitamente a governanca Git canonica da sessao, lembrando que o
+  enforcement de commit atomico, higiene de branch/worktree e fechamento de
+  worklog continua nos hooks, tasks e gates oficiais do repo
 - recalcular branches e worktrees abertas antes de tentar drenar uma worktree
   suja ou redistribuir alteracoes entre trilhas Jira
+- capturar o ciclo de vida da branch atual, incluindo upstream, ahead/behind,
+  absorcao em `origin/main` e `PR` aberto
+- detectar drift entre branch atual, worklog local, contexto ativo e dirty tree
+- validar `gh auth status` e, quando a rodada puder tocar `PR` ou merge via
+  `gh`, fazer probe GraphQL cedo
+- lembrar e reaplicar a cadeia documentada de fallback GitHub/PAT antes de
+  concluir que o fluxo do `gh` esta estruturalmente bloqueado
+- registrar branch atual, worktrees abertas e `PRs` ja existentes como parte do
+  preflight operacional da sessao
+- checar a saude minima de `Jira` e `Confluence` antes de assumir que o fluxo
+  primario esta operacional
+- lembrar `auth_mode`, `cloud_id` e a trilha de recuperacao Atlassian antes de
+  concluir que `Jira` ou `Confluence` estao estruturalmente bloqueados
 - consultar [`AI-CHAT-CONTRACTS-REGISTER.md`](AI-CHAT-CONTRACTS-REGISTER.md)
   para listar contratos do chat ainda nao promovidos
+- relembrar a regra de dedupe de `issue` e reuse de `Epic` antes de qualquer
+  criacao nova
+- preparar o pacote minimo de contexto antes de delegar para subagentes
 - gerar o relatorio operacional de retomada com `task ai:startup:session`
+- tratar trabalho iniciado sem esse startup integral como materialmente
+  rejeitavel ate a remediacao do contexto
 
 ### 1.2. Contratos nascidos no chat precisam de registrador vivo
 

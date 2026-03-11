@@ -52,6 +52,7 @@ global_contract:
       - required-ceremony-chain-must-produce-log-ledger-confluence-and-jira-when-applicable
       - unresolved-ceremony-findings-must-open-or-link-governance-bug
       - every-meaningful-agent-milestone-must-also-be-summarized-in-chat
+      - zero-context-startup-must-load-chat-contract-before-first-user-message
       - chat-summaries-must-stay-human-short-and-non-robotic
       - chat-summaries-must-start-with-bracketed-dd-mm-hh-mm-timestamp-and-bold-agent-name-prefix
       - chat-summary-timestamp-must-use-real-local-system-clock-at-send-time
@@ -61,6 +62,9 @@ global_contract:
       - repo-file-chat-links-must-not-use-vscode-resource-or-custom-uri
       - jira-and-confluence-work-items-in-chat-must-use-canonical-web-links
       - chat-summaries-do-not-replace-jira-or-confluence-traceability
+      - no-subagent-delegation-before-startup-context-is-loaded-or-linked
+      - subagent-handoff-must-carry-owner-issue-startup-context-and-applicable-rules
+      - work-executed-without-required-startup-context-is-rejectable
       - closed-issues-must-trigger-commit-checkpoint-evaluation
       - commit-must-happen-immediately-after-issue-close-when-scope-is-already-valid
       - deferred-commit-after-issue-close-must-be-justified-by-parent-scope

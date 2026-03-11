@@ -188,14 +188,29 @@ Referencia operacional das tasks canonicas mais importantes do repositorio.
 ### `ai:startup:session`
 
 - Funcionalidade: gera o relatorio operacional de **startup** e **restart** da
-  sessao de IA, resolvendo os arquivos canonicos do manifest e listando os
-  contratos nascidos no chat que ainda aguardam promocao definitiva.
+  sessao de IA, resolvendo os arquivos canonicos do manifest, listando os
+  contratos nascidos no chat que ainda aguardam promocao definitiva e
+  resumindo o preflight operacional minimo da rodada.
 - Uso manual: `task ai:startup:session`
 - Uso com caminho customizado: `task ai:startup:session OUT=".cache/ai/startup-session.md"`
 - Observacao: a task escreve por padrao o artefato local em
   `.cache/ai/startup-session.md`, usando como fontes
   [`docs/AI-STARTUP-GOVERNANCE-MANIFEST.md`](AI-STARTUP-GOVERNANCE-MANIFEST.md)
   e [`docs/AI-CHAT-CONTRACTS-REGISTER.md`](AI-CHAT-CONTRACTS-REGISTER.md).
+- Observacao: o relatorio tambem deve expor branch/worktree atuais, status de
+  `gh auth`, probe GraphQL, `PRs` abertos para a branch atual, cadeia
+  documentada de fallback GitHub/PAT e resumo minimo de saude do Atlassian.
+- Observacao: o relatorio tambem deve lembrar o contrato de comunicacao com o
+  usuario, a camada de `display_name`, o drift operacional entre branch/worklog
+  e contexto local ativo, o ciclo de vida da branch atual e o pacote minimo de
+  contexto para subagentes.
+- Observacao: o startup deve explicitar tambem que a governanca Git canonica
+  foi carregada de [`AGENTS.md`](../AGENTS.md),
+  [`docs/git-conventions.md`](git-conventions.md), [`Taskfile.yml`](../Taskfile.yml)
+  , [`.githooks/`](../.githooks/) e
+  [`.github/pull_request_template.md`](../.github/pull_request_template.md), mas
+  o enforcement de commit atomico, higiene de branch/worktree e fechamento de
+  worklog continua nos gates oficiais.
 
 ### `ai:1password:ratelimit`
 

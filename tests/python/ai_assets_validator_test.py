@@ -40,10 +40,13 @@ class ValidateAiAssetsTests(unittest.TestCase):
         self.assertIn("docs/AI-STARTUP-GOVERNANCE-MANIFEST.md", module.REQUIRED_FILES)
         self.assertIn("docs/TASKS.md", module.REQUIRED_FILES)
         self.assertIn("docs/WORKFLOWS.md", module.REQUIRED_FILES)
+        self.assertIn("docs/secrets-and-auth.md", module.REQUIRED_FILES)
         self.assertIn("config/ai/platforms.yaml", module.REQUIRED_FILES)
         self.assertIn("config/ai/platforms.local.yaml.tpl", module.REQUIRED_FILES)
         self.assertIn("config/ai/agents.yaml", module.REQUIRED_FILES)
+        self.assertIn("config/ai/agent-operations.yaml", module.REQUIRED_FILES)
         self.assertIn("config/ai/contracts.yaml", module.REQUIRED_FILES)
+        self.assertIn("df/secrets/secrets-ref.yaml", module.REQUIRED_FILES)
         self.assertIn("scripts/ai-route.py", module.REQUIRED_FILES)
         self.assertIn("scripts/ai-control-plane.py", module.REQUIRED_FILES)
         self.assertIn("scripts/ai-fallback.py", module.REQUIRED_FILES)
@@ -69,6 +72,18 @@ class ValidateAiAssetsTests(unittest.TestCase):
         )
         self.assertIn(
             "concluir_primeiro passa a significar concluir ou puxar apenas o work item minimo que o destrava diretamente",
+            module.AGENTS_REQUIRED_SNIPPETS,
+        )
+        self.assertIn(
+            "carregar o contrato de comunicacao no chat e",
+            module.AGENTS_REQUIRED_SNIPPETS,
+        )
+        self.assertIn(
+            "governanca Git canonica do",
+            module.AGENTS_REQUIRED_SNIPPETS,
+        )
+        self.assertIn(
+            "nenhuma delegacao para subagente e valida sem issue dona",
             module.AGENTS_REQUIRED_SNIPPETS,
         )
         self.assertIn(
@@ -101,6 +116,10 @@ class ValidateAiAssetsTests(unittest.TestCase):
         )
         self.assertIn(
             "task ai:fallback:resolve",
+            module.STARTUP_AND_RESTART_REQUIRED_SNIPPETS,
+        )
+        self.assertIn(
+            "docs/git-conventions.md",
             module.STARTUP_AND_RESTART_REQUIRED_SNIPPETS,
         )
         self.assertIn(
@@ -250,6 +269,46 @@ class ValidateAiAssetsTests(unittest.TestCase):
         self.assertIn(
             "### `ai:startup:session`",
             module.CATALOG_REQUIRED_SNIPPETS["docs/TASKS.md"],
+        )
+        self.assertIn(
+            "gh auth status",
+            module.STARTUP_AND_RESTART_REQUIRED_SNIPPETS,
+        )
+        self.assertIn(
+            "probe GraphQL",
+            module.STARTUP_AND_RESTART_REQUIRED_SNIPPETS,
+        )
+        self.assertIn(
+            "display_name",
+            module.STARTUP_AND_RESTART_REQUIRED_SNIPPETS,
+        )
+        self.assertIn(
+            "subagentes",
+            module.STARTUP_AND_RESTART_REQUIRED_SNIPPETS,
+        )
+        self.assertIn(
+            "validate-gh-auth-and-graphql-before-github-pr-or-merge-operations",
+            module.STARTUP_GOVERNANCE_REQUIRED_SNIPPETS["config/ai/contracts.yaml"],
+        )
+        self.assertIn(
+            "load-chat-communication-contract-before-first-user-facing-message",
+            module.STARTUP_GOVERNANCE_REQUIRED_SNIPPETS["config/ai/contracts.yaml"],
+        )
+        self.assertIn(
+            "capture-current-branch-lifecycle-upstream-and-main-absorption-state",
+            module.STARTUP_GOVERNANCE_REQUIRED_SNIPPETS["config/ai/contracts.yaml"],
+        )
+        self.assertIn(
+            "fallback GitHub/PAT",
+            module.STARTUP_GOVERNANCE_REQUIRED_SNIPPETS["docs/TASKS.md"],
+        )
+        self.assertIn(
+            "zero-context-startup-must-load-chat-contract-before-first-user-message",
+            module.STARTUP_GOVERNANCE_REQUIRED_SNIPPETS["config/ai/agent-operations.yaml"],
+        )
+        self.assertIn(
+            "df/secrets/secrets-ref.yaml",
+            module.STARTUP_GOVERNANCE_REQUIRED_SNIPPETS["docs/AI-STARTUP-GOVERNANCE-MANIFEST.md"],
         )
 
     def test_validator_passes_on_current_repo(self) -> None:

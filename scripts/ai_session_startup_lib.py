@@ -2,14 +2,48 @@ from __future__ import annotations
 
 import json
 import re
+import subprocess
 from dataclasses import asdict, dataclass
 from datetime import datetime
 from pathlib import Path
 from typing import Any
 
+try:
+    import tomllib
+except ModuleNotFoundError:  # pragma: no cover - fallback for Python < 3.11
+    tomllib = None  # type: ignore[assignment]
+
+from scripts.ai_agent_execution_lib import load_context
+from scripts.ai_control_plane_lib import load_ai_control_plane, resolve_atlassian_platform
+from scripts.ai_fallback_governance_lib import fallback_status_payload
+from scripts.atlassian_platform_lib import connectivity_payload
+from scripts.github_auth_probe_lib import GitHubAuthProbeError, probe_github_auth
+
 MANIFEST_PATH = Path("docs/AI-STARTUP-GOVERNANCE-MANIFEST.md")
 CHAT_CONTRACTS_REGISTER_PATH = Path("docs/AI-CHAT-CONTRACTS-REGISTER.md")
+TRACKER_PATH = Path("docs/AI-WIP-TRACKER.md")
+REGISTRY_ROOT = Path(".agents/registry")
 DEFAULT_REPORT_PATH = Path(".cache/ai/startup-session.md")
+WORKLOG_DOING_START = "<!-- ai-worklog:doing:start -->"
+WORKLOG_DOING_END = "<!-- ai-worklog:doing:end -->"
+WORKLOG_HEADERS = [
+    "ID",
+    "Tarefa",
+    "Branch",
+    "Responsavel",
+    "Inicio UTC",
+    "Ultima atualizacao UTC",
+    "Proximo passo",
+    "Bloqueios",
+]
+GITHUB_FALLBACK_CHAIN = [
+    "reaproveitar sessao existente do gh",
+    "GH_TOKEN",
+    "GITHUB_TOKEN",
+    "op://secrets/dotfiles/github/token",
+    "op://secrets/github/api/token",
+    "op://Personal/github/token-full-access",
+]
 
 PENDING_MARKERS = (
     "<!-- ai-chat-contracts:pending:start -->",
@@ -17,6 +51,43 @@ PENDING_MARKERS = (
 )
 
 MARKDOWN_LINK_RE = re.compile(r"\[[^\]]+\]\(([^)]+)\)")
+ISSUE_KEY_RE = re.compile(r"([A-Z][A-Z0-9]+-\d+)")
+
+CHAT_COMMUNICATION_RULES = [
+    "usar portugues nas respostas operacionais do repo",
+    "preferir display_name oficial quando ele existir",
+    "usar links absolutos em Markdown para arquivos do repo no chat",
+    "usar links web canonicos para Jira e Confluence",
+    "manter resumos curtos, humanos e sem substituir a rastreabilidade oficial",
+]
+
+SUBAGENT_CONTEXT_RULES = [
+    "nao delegar antes de carregar ou referenciar o startup oficial da rodada",
+    "entregar a issue dona, a branch atual e o proximo passo objetivo ao subagente",
+    "entregar tambem os arquivos normativos e as regras aplicaveis ao papel delegado",
+    "tratar trabalho sem contexto minimo de subagente como rejeitavel",
+]
+
+GIT_GOVERNANCE_STARTUP_SOURCES = [
+    "AGENTS.md",
+    "docs/git-conventions.md",
+    "Taskfile.yml",
+    ".githooks/",
+    ".github/pull_request_template.md",
+]
+
+GIT_GOVERNANCE_STARTUP_RULES = [
+    "commits devem ser atomicos, ligados a uma unica issue e preferencialmente auto-testaveis",
+    "cada branch deve carregar um unico contexto coerente e ser podada apos merge seguro",
+    "task ai:worklog:check e git-governance-check seguem como gates canonicos antes de empilhar escopo",
+]
+
+ATLASSIAN_RECOVERY_RULES = [
+    "rodar task ai:atlassian:check antes de assumir bloqueio estrutural",
+    "preferir op run para resolver refs Atlassian em lote na borda do processo",
+    "usar op item get --format json como fallback por item quando o batch falhar",
+    "lembrar que service-account-api-token usa api.atlassian.com com cloud_id",
+]
 
 
 @dataclass(frozen=True)
@@ -43,6 +114,38 @@ def _is_textual_file(path: Path) -> bool:
     return True
 
 
+def _run_command(
+    command: list[str],
+    *,
+    repo_root: Path,
+    check: bool = True,
+) -> subprocess.CompletedProcess[str]:
+    completed = subprocess.run(
+        command,
+        cwd=repo_root,
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+    if check and completed.returncode != 0:
+        message = (completed.stderr or completed.stdout).strip()
+        raise RuntimeError(message or "comando falhou sem stderr legivel")
+    return completed
+
+
+def _load_toml(path: Path) -> dict[str, Any]:
+    if tomllib is None or not path.is_file():
+        return {}
+    with path.open("rb") as handle:
+        payload = tomllib.load(handle)
+    return payload if isinstance(payload, dict) else {}
+
+
+def _extract_issue_key(text: str) -> str:
+    match = ISSUE_KEY_RE.search(str(text or ""))
+    return match.group(1) if match else ""
+
+
 def _resolve_recursive_directory(repo_root: Path, relative_dir: str) -> list[str]:
     directory = (repo_root / relative_dir).resolve()
     if not directory.is_dir():
@@ -63,6 +166,222 @@ def _resolve_ai_docs(repo_root: Path, relative_dir: str) -> list[str]:
         if _is_textual_file(candidate):
             resolved.append(candidate.relative_to(repo_root).as_posix())
     return resolved
+
+
+def _table_rows_between(content: str, start_marker: str, end_marker: str) -> list[list[str]]:
+    if start_marker not in content or end_marker not in content:
+        return []
+    section = content.split(start_marker, 1)[1].split(end_marker, 1)[0]
+    rows: list[list[str]] = []
+    for raw_line in section.splitlines():
+        line = raw_line.strip()
+        if not line.startswith("|"):
+            continue
+        if set(line.replace("|", "").strip()) <= {"-", " "}:
+            continue
+        values = [item.strip() for item in line.strip("|").split("|")]
+        if values and values[0] in {"ID", "(sem itens)"}:
+            continue
+        rows.append(values)
+    return rows
+
+
+def _parse_worktree_porcelain(raw_text: str) -> list[dict[str, str]]:
+    entries: list[dict[str, str]] = []
+    current: dict[str, str] = {}
+    for raw_line in raw_text.splitlines():
+        line = raw_line.strip()
+        if not line:
+            if current:
+                entries.append(current)
+                current = {}
+            continue
+        key, _, value = line.partition(" ")
+        if key == "worktree":
+            current["path"] = value.strip()
+        elif key == "branch":
+            branch_ref = value.strip()
+            prefix = "refs/heads/"
+            if branch_ref.startswith(prefix):
+                branch_ref = branch_ref[len(prefix) :]
+            current["branch"] = branch_ref
+        elif key == "HEAD":
+            current["head"] = value.strip()
+        elif key == "detached":
+            current["detached"] = "true"
+    if current:
+        entries.append(current)
+    return entries
+
+
+def load_agent_display_names(repo_root: Path) -> dict[str, str]:
+    registry_dir = (repo_root / REGISTRY_ROOT).resolve()
+    if not registry_dir.is_dir():
+        return {}
+    display_names: dict[str, str] = {}
+    for candidate in sorted(registry_dir.glob("*.toml")):
+        payload = _load_toml(candidate)
+        agent_id = str(payload.get("id", "")).strip() or candidate.stem
+        display_name = str(payload.get("display_name", "")).strip()
+        if agent_id and display_name:
+            display_names[agent_id] = display_name
+    return display_names
+
+
+def agent_identity_payload(repo_root: Path, active_execution: dict[str, Any]) -> dict[str, Any]:
+    display_names = load_agent_display_names(repo_root)
+    active_agent = str(active_execution.get("agent", "")).strip()
+    return {
+        "status": "ok" if display_names else "missing",
+        "registry_count": len(display_names),
+        "active_agent": active_agent,
+        "active_display_name": display_names.get(active_agent, active_agent or "desconhecido"),
+        "fallback_display": "technical-id",
+    }
+
+
+def chat_communication_payload() -> dict[str, Any]:
+    return {
+        "status": "ok",
+        "rules": list(CHAT_COMMUNICATION_RULES),
+    }
+
+
+def git_governance_payload() -> dict[str, Any]:
+    return {
+        "status": "ok",
+        "sources": list(GIT_GOVERNANCE_STARTUP_SOURCES),
+        "rules": list(GIT_GOVERNANCE_STARTUP_RULES),
+        "enforcement_note": (
+            "o startup relembra a governanca Git, mas o enforcement real continua nos hooks, "
+            "tasks e gates oficiais do repo"
+        ),
+    }
+
+
+def branch_lifecycle_payload(repo_root: Path, current_branch: str) -> dict[str, Any]:
+    normalized_branch = str(current_branch).strip()
+    lifecycle: dict[str, Any] = {
+        "branch": normalized_branch,
+        "upstream": "",
+        "ahead_count": 0,
+        "behind_count": 0,
+        "has_upstream": False,
+        "absorbed_in_origin_main": False,
+        "origin_main_probe": "skipped",
+        "prune_candidate": False,
+    }
+    if not normalized_branch or normalized_branch.startswith("("):
+        return lifecycle
+
+    upstream_probe = _run_command(
+        ["git", "rev-parse", "--abbrev-ref", "--symbolic-full-name", "@{upstream}"],
+        repo_root=repo_root,
+        check=False,
+    )
+    upstream = upstream_probe.stdout.strip() if upstream_probe.returncode == 0 else ""
+    lifecycle["upstream"] = upstream
+    lifecycle["has_upstream"] = bool(upstream)
+
+    if upstream:
+        counts_probe = _run_command(
+            ["git", "rev-list", "--left-right", "--count", f"{upstream}...HEAD"],
+            repo_root=repo_root,
+            check=False,
+        )
+        counts = counts_probe.stdout.strip().split()
+        if counts_probe.returncode == 0 and len(counts) >= 2:
+            lifecycle["behind_count"] = int(counts[0])
+            lifecycle["ahead_count"] = int(counts[1])
+
+    origin_main_probe = _run_command(
+        ["git", "merge-base", "--is-ancestor", "HEAD", "origin/main"],
+        repo_root=repo_root,
+        check=False,
+    )
+    if origin_main_probe.returncode in {0, 1}:
+        lifecycle["origin_main_probe"] = "ok"
+        lifecycle["absorbed_in_origin_main"] = origin_main_probe.returncode == 0
+    else:
+        lifecycle["origin_main_probe"] = "error"
+    lifecycle["prune_candidate"] = bool(
+        normalized_branch != "main" and lifecycle["absorbed_in_origin_main"]
+    )
+    return lifecycle
+
+
+def startup_drift_payload(
+    active_execution: dict[str, Any],
+    active_worklog_items: list[dict[str, str]],
+    git_inventory: dict[str, Any],
+) -> dict[str, Any]:
+    findings: list[str] = []
+    current_branch = str(git_inventory.get("current_branch", "")).strip()
+    branch_issue = _extract_issue_key(current_branch)
+    active_issue = str(active_execution.get("issue_key", "")).strip()
+
+    if active_execution.get("status") == "ok":
+        context_branch = str(active_execution.get("branch", "")).strip()
+        if context_branch and current_branch and context_branch != current_branch:
+            findings.append(
+                f"contexto ativo aponta para `{context_branch}`, mas a branch atual e `{current_branch}`"
+            )
+        if branch_issue and active_issue and branch_issue != active_issue:
+            findings.append(
+                f"branch atual sugere `{branch_issue}`, mas o contexto ativo esta em `{active_issue}`"
+            )
+
+    if active_worklog_items:
+        worklog = active_worklog_items[0]
+        worklog_branch = str(worklog.get("Branch", "")).strip()
+        worklog_issue = _extract_issue_key(str(worklog.get("ID", ""))) or _extract_issue_key(
+            str(worklog.get("Tarefa", ""))
+        )
+        if worklog_branch and current_branch and worklog_branch != current_branch:
+            findings.append(
+                f"worklog ativo aponta para `{worklog_branch}`, mas a branch atual e `{current_branch}`"
+            )
+        if branch_issue and worklog_issue and branch_issue != worklog_issue:
+            findings.append(
+                f"branch atual sugere `{branch_issue}`, mas o worklog ativo aponta para `{worklog_issue}`"
+            )
+        if active_issue and worklog_issue and active_issue != worklog_issue:
+            findings.append(
+                f"contexto ativo aponta para `{active_issue}`, mas o worklog ativo aponta para `{worklog_issue}`"
+            )
+
+    if git_inventory.get("dirty_entries") and active_execution.get("status") != "ok" and not active_worklog_items:
+        findings.append("arvore dirty sem contexto ativo nem worklog Doing correspondente")
+
+    lifecycle = git_inventory.get("branch_lifecycle", {})
+    if lifecycle.get("prune_candidate") and (active_execution.get("status") == "ok" or active_worklog_items):
+        findings.append("branch atual ja foi absorvida em origin/main, mas ainda aparece como trilha ativa")
+
+    return {
+        "status": "clean" if not findings else "drift",
+        "findings": findings,
+    }
+
+
+def delegation_context_payload(
+    prioritized_work_item: dict[str, str],
+    git_inventory: dict[str, Any],
+) -> dict[str, Any]:
+    current_branch = str(git_inventory.get("current_branch", "")).strip()
+    return {
+        "status": "ok",
+        "owner_issue": prioritized_work_item.get("identifier", ""),
+        "current_branch": current_branch,
+        "required_paths": [
+            "AGENTS.md",
+            "docs/AI-STARTUP-AND-RESTART.md",
+            "docs/AI-DELEGATION-FLOW.md",
+            "docs/ai-operating-model.md",
+            "docs/AI-WIP-TRACKER.md",
+            "docs/AI-CHAT-CONTRACTS-REGISTER.md",
+        ],
+        "rules": list(SUBAGENT_CONTEXT_RULES),
+    }
 
 
 def resolve_startup_manifest_paths(repo_root: Path) -> list[str]:
@@ -90,22 +409,258 @@ def resolve_startup_manifest_paths(repo_root: Path) -> list[str]:
     return sorted(resolved)
 
 
-def _table_rows_between(content: str, start_marker: str, end_marker: str) -> list[list[str]]:
-    if start_marker not in content or end_marker not in content:
+def _merged_local_branches(repo_root: Path, base_ref: str) -> list[str]:
+    merged = _run_command(
+        ["git", "branch", "--format=%(refname:short)", "--merged", base_ref],
+        repo_root=repo_root,
+    )
+    local = _run_command(
+        ["git", "for-each-ref", "--format=%(refname:short)", "refs/heads"],
+        repo_root=repo_root,
+    )
+    current_branch = _run_command(
+        ["git", "branch", "--show-current"],
+        repo_root=repo_root,
+    ).stdout.strip()
+    protected = {"main"}
+    if current_branch:
+        protected.add(current_branch)
+    merged_names = {line.strip() for line in merged.stdout.splitlines() if line.strip()}
+    return sorted(
+        branch.strip()
+        for branch in local.stdout.splitlines()
+        if branch.strip() in merged_names and branch.strip() not in protected
+    )
+
+
+def git_inventory_payload(repo_root: Path) -> dict[str, Any]:
+    try:
+        current_branch = _run_command(
+            ["git", "branch", "--show-current"],
+            repo_root=repo_root,
+        ).stdout.strip()
+        status_lines = _run_command(
+            ["git", "status", "--short", "--branch"],
+            repo_root=repo_root,
+        ).stdout.splitlines()
+        dirty_entries = [line for line in status_lines[1:] if line.strip()]
+        local_branches = [
+            line.strip()
+            for line in _run_command(
+                ["git", "for-each-ref", "--format=%(refname:short)", "refs/heads"],
+                repo_root=repo_root,
+            ).stdout.splitlines()
+            if line.strip()
+        ]
+        worktrees = _parse_worktree_porcelain(
+            _run_command(
+                ["git", "worktree", "list", "--porcelain"],
+                repo_root=repo_root,
+            ).stdout
+        )
+        branch_lifecycle = branch_lifecycle_payload(repo_root, current_branch)
+        branch_lifecycle["prune_candidate"] = bool(
+            branch_lifecycle.get("prune_candidate", False) and not dirty_entries
+        )
+        open_prs: list[dict[str, Any]] = []
+        pr_probe_note = ""
+        pr_probe_status = "skipped" if not current_branch else "ok"
+        if current_branch:
+            pr_probe = _run_command(
+                [
+                    "gh",
+                    "pr",
+                    "list",
+                    "--head",
+                    current_branch,
+                    "--json",
+                    "number,state,title,url",
+                ],
+                repo_root=repo_root,
+                check=False,
+            )
+            pr_probe_status = "ok" if pr_probe.returncode == 0 else "error"
+            pr_probe_note = (
+                ""
+                if pr_probe.returncode == 0
+                else (pr_probe.stderr or pr_probe.stdout).strip()
+            )
+            try:
+                parsed = json.loads(pr_probe.stdout or "[]")
+                if isinstance(parsed, list):
+                    open_prs = parsed
+            except json.JSONDecodeError:
+                pr_probe_status = "error"
+                pr_probe_note = (pr_probe.stdout or pr_probe.stderr).strip()
+        return {
+            "status": "ok",
+            "current_branch": current_branch or "(detached-or-unknown)",
+            "dirty_entries": dirty_entries,
+            "local_branch_count": len(local_branches),
+            "merged_local_branches": _merged_local_branches(repo_root, "origin/main"),
+            "worktrees": worktrees,
+            "branch_lifecycle": branch_lifecycle,
+            "open_prs_for_current_branch": open_prs,
+            "pr_probe_status": pr_probe_status,
+            "pr_probe_note": pr_probe_note,
+        }
+    except Exception as exc:
+        return {
+            "status": "error",
+            "error": str(exc),
+            "current_branch": "",
+            "dirty_entries": [],
+            "local_branch_count": 0,
+            "merged_local_branches": [],
+            "worktrees": [],
+            "open_prs_for_current_branch": [],
+            "pr_probe_status": "error",
+            "pr_probe_note": str(exc),
+        }
+
+
+def load_active_worklog_items(repo_root: Path) -> list[dict[str, str]]:
+    tracker_path = (repo_root / TRACKER_PATH).resolve()
+    if not tracker_path.is_file():
         return []
-    section = content.split(start_marker, 1)[1].split(end_marker, 1)[0]
-    rows: list[list[str]] = []
-    for raw_line in section.splitlines():
-        line = raw_line.strip()
-        if not line.startswith("|"):
+    content = _read_utf8(tracker_path)
+    items: list[dict[str, str]] = []
+    for row in _table_rows_between(content, WORKLOG_DOING_START, WORKLOG_DOING_END):
+        if len(row) != len(WORKLOG_HEADERS):
             continue
-        if set(line.replace("|", "").strip()) <= {"-", " "}:
-            continue
-        values = [item.strip() for item in line.strip("|").split("|")]
-        if values and values[0] == "ID":
-            continue
-        rows.append(values)
-    return rows
+        items.append({WORKLOG_HEADERS[idx]: row[idx] for idx in range(len(WORKLOG_HEADERS))})
+    return items
+
+
+def active_execution_payload(repo_root: Path) -> dict[str, Any]:
+    try:
+        context = load_context(repo_root)
+    except Exception as exc:
+        return {"status": "error", "error": str(exc)}
+    if context is None:
+        return {"status": "missing"}
+    return {
+        "status": "ok",
+        "issue_key": context.issue_key,
+        "issue_summary": context.issue_summary,
+        "issue_url": context.issue_url,
+        "agent": context.agent,
+        "agent_display_name": context.agent,
+        "workflow_status": context.status,
+        "branch": context.branch,
+        "worktree_root": context.worktree_root,
+        "started_at": context.started_at,
+        "updated_at": context.updated_at,
+    }
+
+
+def github_auth_summary(repo_root: Path) -> dict[str, Any]:
+    try:
+        payload = probe_github_auth(repo_root)
+        graphql_probe = _run_command(
+            [
+                "gh",
+                "api",
+                "graphql",
+                "-f",
+                "query=query { viewer { login } }",
+            ],
+            repo_root=repo_root,
+            check=False,
+        )
+        graphql_output = (graphql_probe.stdout or graphql_probe.stderr).strip()
+        graphql_status = "ok" if graphql_probe.returncode == 0 else "error"
+        if "Resource not accessible by personal access token" in graphql_output:
+            graphql_status = "resource_not_accessible_by_pat"
+        return {
+            "status": "ok"
+            if payload["auth_status"]["current_shell"]["exit_code"] == 0
+            else "error",
+            "fallback_chain": GITHUB_FALLBACK_CHAIN,
+            "active_sources_current_shell": payload["auth_status"]["current_shell"][
+                "active_sources"
+            ],
+            "active_sources_without_env_tokens": payload["auth_status"]["without_env_tokens"][
+                "active_sources"
+            ],
+            "ssh_signing_keys_probe": payload["endpoint_probes"]["user/ssh_signing_keys"][
+                "status"
+            ],
+            "user_installations_probe": payload["endpoint_probes"]["user/installations"][
+                "status"
+            ],
+            "graphql_probe": {
+                "status": graphql_status,
+                "note": graphql_output,
+            },
+            "recommendations": payload["recommendations"],
+        }
+    except (GitHubAuthProbeError, RuntimeError) as exc:
+        return {
+            "status": "error",
+            "error": str(exc),
+            "fallback_chain": GITHUB_FALLBACK_CHAIN,
+            "active_sources_current_shell": [],
+            "active_sources_without_env_tokens": [],
+            "ssh_signing_keys_probe": "error",
+            "user_installations_probe": "error",
+            "graphql_probe": {"status": "error", "note": str(exc)},
+            "recommendations": [],
+        }
+
+
+def atlassian_connectivity_summary(repo_root: Path) -> dict[str, Any]:
+    try:
+        control_plane = load_ai_control_plane(repo_root)
+        resolved = resolve_atlassian_platform(
+            control_plane.atlassian_definition(),
+            repo_root=control_plane.repo_root,
+        )
+        payload = connectivity_payload(repo_root)
+    except Exception as exc:
+        return {"status": "error", "error": str(exc)}
+    atlassian = payload.get("atlassian", {})
+    jira_payload = payload.get("jira", {})
+    confluence_payload = payload.get("confluence", {})
+    if not atlassian.get("enabled", False):
+        return {"status": "disabled", "overall_ok": True, "recovery_hints": []}
+    return {
+        "status": "ok" if payload.get("overall_ok", False) else "error",
+        "overall_ok": bool(payload.get("overall_ok", False)),
+        "auth_mode": str(atlassian.get("auth_mode", "")).strip(),
+        "site_url": str(atlassian.get("site_url", "")).strip(),
+        "cloud_id": getattr(resolved, "cloud_id", ""),
+        "jira_project_key": getattr(resolved, "jira_project_key", ""),
+        "confluence_space_key": getattr(resolved, "confluence_space_key", ""),
+        "jira_status": str(jira_payload.get("status", "")).strip(),
+        "jira_project": jira_payload.get("project", {}),
+        "confluence_status": str(confluence_payload.get("status", "")).strip(),
+        "confluence_space": confluence_payload.get("space", {}),
+        "recovery_hints": list(ATLASSIAN_RECOVERY_RULES),
+    }
+
+
+def prioritized_work_item_payload(
+    active_execution: dict[str, Any], active_worklog_items: list[dict[str, str]]
+) -> dict[str, str]:
+    if active_execution.get("status") == "ok" and active_execution.get("issue_key"):
+        return {
+            "source": "active-execution",
+            "identifier": str(active_execution["issue_key"]),
+            "summary": str(active_execution.get("issue_summary", "")).strip(),
+        }
+    if active_worklog_items:
+        first = active_worklog_items[0]
+        return {
+            "source": "worklog-doing",
+            "identifier": str(first.get("ID", "")).strip(),
+            "summary": str(first.get("Tarefa", "")).strip(),
+        }
+    return {
+        "source": "jira-board-required",
+        "identifier": "",
+        "summary": "Ler o Jira board para definir o proximo work item da rodada.",
+    }
 
 
 def load_pending_chat_contracts(repo_root: Path) -> list[ChatContractEntry]:
@@ -128,9 +683,55 @@ def load_pending_chat_contracts(repo_root: Path) -> list[ChatContractEntry]:
     return entries
 
 
-def startup_session_payload(repo_root: Path) -> dict[str, Any]:
+def startup_session_payload(repo_root: Path, *, include_runtime_probes: bool = True) -> dict[str, Any]:
     resolved_paths = resolve_startup_manifest_paths(repo_root)
     pending_contracts = load_pending_chat_contracts(repo_root)
+    git_inventory = git_inventory_payload(repo_root)
+    active_worklog_items = load_active_worklog_items(repo_root)
+    active_execution = active_execution_payload(repo_root)
+    agent_identity = agent_identity_payload(repo_root, active_execution)
+    if active_execution.get("status") == "ok":
+        active_execution["agent_display_name"] = agent_identity["active_display_name"]
+    prioritized_work_item = prioritized_work_item_payload(active_execution, active_worklog_items)
+    startup_drift = startup_drift_payload(active_execution, active_worklog_items, git_inventory)
+    chat_communication = chat_communication_payload()
+    git_governance = git_governance_payload()
+    delegation_context = delegation_context_payload(prioritized_work_item, git_inventory)
+    fallback_status = (
+        fallback_status_payload(repo_root)
+        if include_runtime_probes
+        else {
+            "mode": "skipped",
+            "jira_available": False,
+            "jira_reason": "runtime-probes-disabled",
+            "active_fallback_count": 0,
+            "resolved_fallback_count": 0,
+            "tracker_doing_count": len(active_worklog_items),
+            "active_records": [],
+            "guidance": "Runtime probes desabilitados para este payload.",
+            "ledger_path": "docs/AI-FALLBACK-LEDGER.md",
+            "tracker_path": "docs/AI-WIP-TRACKER.md",
+        }
+    )
+    github_auth = (
+        github_auth_summary(repo_root)
+        if include_runtime_probes
+        else {
+            "status": "skipped",
+            "fallback_chain": GITHUB_FALLBACK_CHAIN,
+            "active_sources_current_shell": [],
+            "active_sources_without_env_tokens": [],
+            "ssh_signing_keys_probe": "skipped",
+            "user_installations_probe": "skipped",
+            "graphql_probe": {"status": "skipped", "note": "runtime-probes-disabled"},
+            "recommendations": [],
+        }
+    )
+    atlassian_connectivity = (
+        atlassian_connectivity_summary(repo_root)
+        if include_runtime_probes
+        else {"status": "skipped", "overall_ok": False, "recovery_hints": []}
+    )
     return {
         "generated_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
         "manifest_path": MANIFEST_PATH.as_posix(),
@@ -140,6 +741,19 @@ def startup_session_payload(repo_root: Path) -> dict[str, Any]:
         "pending_chat_contracts": [asdict(entry) for entry in pending_contracts],
         "pending_chat_contract_count": len(pending_contracts),
         "default_report_path": DEFAULT_REPORT_PATH.as_posix(),
+        "git_inventory": git_inventory,
+        "active_worklog_items": active_worklog_items,
+        "active_worklog_count": len(active_worklog_items),
+        "active_execution": active_execution,
+        "agent_identity": agent_identity,
+        "chat_communication": chat_communication,
+        "git_governance": git_governance,
+        "delegation_context": delegation_context,
+        "startup_drift": startup_drift,
+        "fallback_status": fallback_status,
+        "github_auth": github_auth,
+        "atlassian_connectivity": atlassian_connectivity,
+        "prioritized_work_item": prioritized_work_item,
     }
 
 
@@ -152,6 +766,7 @@ def render_startup_session_markdown(payload: dict[str, Any]) -> str:
         f"- Registro de contratos do chat: `{payload['chat_contracts_register_path']}`",
         f"- Total de arquivos textuais resolvidos: `{payload['resolved_count']}`",
         f"- Total de contratos do chat ainda pendentes: `{payload['pending_chat_contract_count']}`",
+        f"- Worklogs ativos no fallback local: `{payload['active_worklog_count']}`",
         "",
         "## Arquivos canonicos resolvidos",
         "",
@@ -173,6 +788,171 @@ def render_startup_session_markdown(payload: dict[str, Any]) -> str:
             lines.append(
                 f"| {entry['contract_id']} | {entry['summary']} | {entry['owner']} | {entry['destination']} |"
             )
+
+    chat_communication = payload["chat_communication"]
+    agent_identity = payload["agent_identity"]
+    lines.extend(["", "## Comunicacao no chat e identidade", ""])
+    lines.append(
+        f"- agente ativo visivel: `{agent_identity.get('active_display_name', 'desconhecido')}`"
+    )
+    lines.append(
+        f"- fallback de exibicao quando faltar display_name: `{agent_identity.get('fallback_display', 'technical-id')}`"
+    )
+    for rule in chat_communication.get("rules", []):
+        lines.append(f"- regra de comunicacao: {rule}")
+
+    git_governance = payload["git_governance"]
+    lines.extend(["", "## Governanca Git carregada no startup", ""])
+    for source in git_governance.get("sources", []):
+        lines.append(f"- fonte carregada: `{source}`")
+    for rule in git_governance.get("rules", []):
+        lines.append(f"- contrato Git lembrado: {rule}")
+    lines.append(f"- enforcement: {git_governance.get('enforcement_note', '')}")
+
+    git_inventory = payload["git_inventory"]
+    lines.extend(["", "## Inventario Git e worktree", ""])
+    if git_inventory.get("status") != "ok":
+        lines.append(f"- inventario indisponivel: `{git_inventory.get('error', 'erro nao detalhado')}`")
+    else:
+        lines.append(f"- branch atual: `{git_inventory['current_branch']}`")
+        lines.append(f"- branches locais abertas: `{git_inventory['local_branch_count']}`")
+        lines.append(
+            "- branches locais ja absorvidas e ainda abertas: "
+            f"`{len(git_inventory['merged_local_branches'])}`"
+        )
+        lifecycle = git_inventory.get("branch_lifecycle", {})
+        lines.append(f"- upstream da branch atual: `{lifecycle.get('upstream', '') or 'nenhum'}`")
+        lines.append(
+            f"- ahead/behind da branch atual: `+{lifecycle.get('ahead_count', 0)} / -{lifecycle.get('behind_count', 0)}`"
+        )
+        lines.append(
+            f"- branch atual absorvida em origin/main: `{lifecycle.get('absorbed_in_origin_main', False)}`"
+        )
+        lines.append(f"- branch atual candidata a poda: `{lifecycle.get('prune_candidate', False)}`")
+        lines.append(f"- worktrees abertas: `{len(git_inventory['worktrees'])}`")
+        lines.append(f"- dirty entries: `{len(git_inventory['dirty_entries'])}`")
+        for branch in git_inventory["merged_local_branches"]:
+            lines.append(f"- branch residual absorvida: `{branch}`")
+        for worktree in git_inventory["worktrees"]:
+            lines.append(
+                f"- worktree: `{worktree.get('path', '')}` | branch=`{worktree.get('branch', '') or '(detached)'}`"
+            )
+        if git_inventory["open_prs_for_current_branch"]:
+            for pr in git_inventory["open_prs_for_current_branch"]:
+                lines.append(
+                    f"- PR aberto da branch atual: [#{pr.get('number')} - {pr.get('title')}]({pr.get('url')})"
+                )
+        else:
+            lines.append("- PRs abertos da branch atual: nenhum detectado")
+        if git_inventory.get("pr_probe_status") != "ok":
+            lines.append(f"- probe de PRs do gh: `{git_inventory.get('pr_probe_note', '')}`")
+
+    lines.extend(["", "## Execucao ativa e worklog", ""])
+    active_execution = payload["active_execution"]
+    if active_execution.get("status") == "ok":
+        lines.append(
+            f"- contexto ativo: `{active_execution['issue_key']}` - {active_execution['issue_summary']}"
+        )
+        lines.append(f"- agente ativo: `{active_execution['agent_display_name']}`")
+        lines.append(f"- id tecnico do agente ativo: `{active_execution['agent']}`")
+        lines.append(f"- status do fluxo: `{active_execution['workflow_status']}`")
+        lines.append(f"- branch do contexto ativo: `{active_execution['branch']}`")
+    else:
+        lines.append("- contexto ativo: nenhum contexto local valido encontrado")
+    if payload["active_worklog_items"]:
+        lines.extend(
+            [
+                "",
+                "| ID | Tarefa | Branch | Proximo passo |",
+                "| --- | --- | --- | --- |",
+            ]
+        )
+        for item in payload["active_worklog_items"]:
+            lines.append(
+                f"| {item['ID']} | {item['Tarefa']} | {item['Branch']} | {item['Proximo passo']} |"
+            )
+    else:
+        lines.append("- worklogs ativos no tracker local: nenhum")
+
+    startup_drift = payload["startup_drift"]
+    lines.extend(["", "## Drift operacional detectado", ""])
+    if startup_drift.get("status") == "clean":
+        lines.append("- nenhum drift objetivo detectado entre branch, worklog e contexto ativo")
+    else:
+        for finding in startup_drift.get("findings", []):
+            lines.append(f"- drift: {finding}")
+
+    fallback_status = payload["fallback_status"]
+    lines.extend(["", "## Fallback local", ""])
+    lines.append(f"- modo: `{fallback_status.get('mode', 'desconhecido')}`")
+    lines.append(f"- Jira disponivel: `{fallback_status.get('jira_available', False)}`")
+    lines.append(f"- motivo/probe: `{fallback_status.get('jira_reason', '')}`")
+    lines.append(f"- guidance: {fallback_status.get('guidance', '')}")
+
+    github_auth = payload["github_auth"]
+    lines.extend(["", "## GitHub auth e fallback", ""])
+    lines.append(f"- status do probe GitHub: `{github_auth.get('status', 'unknown')}`")
+    lines.append(
+        "- fontes ativas no shell atual: "
+        f"`{', '.join(github_auth.get('active_sources_current_shell', [])) or 'nenhuma'}`"
+    )
+    lines.append(
+        "- fontes ativas sem env tokens: "
+        f"`{', '.join(github_auth.get('active_sources_without_env_tokens', [])) or 'nenhuma'}`"
+    )
+    lines.append(
+        f"- probe user/ssh_signing_keys: `{github_auth.get('ssh_signing_keys_probe', 'unknown')}`"
+    )
+    lines.append(
+        f"- probe user/installations: `{github_auth.get('user_installations_probe', 'unknown')}`"
+    )
+    graphql_probe = github_auth.get("graphql_probe", {})
+    lines.append(f"- probe GraphQL: `{graphql_probe.get('status', 'unknown')}`")
+    if graphql_probe.get("note"):
+        lines.append(f"- detalhe GraphQL: `{graphql_probe.get('note')}`")
+    lines.append("- cadeia documentada de fallback GitHub/PAT:")
+    for entry in github_auth.get("fallback_chain", []):
+        lines.append(f"  - `{entry}`")
+    for recommendation in github_auth.get("recommendations", []):
+        lines.append(f"- recomendacao: {recommendation}")
+
+    atlassian = payload["atlassian_connectivity"]
+    lines.extend(["", "## Atlassian", ""])
+    lines.append(f"- status do probe Atlassian: `{atlassian.get('status', 'unknown')}`")
+    if atlassian.get("site_url"):
+        lines.append(f"- site: `{atlassian['site_url']}`")
+    if atlassian.get("auth_mode"):
+        lines.append(f"- auth mode: `{atlassian['auth_mode']}`")
+    if atlassian.get("cloud_id"):
+        lines.append(f"- cloud_id: `{atlassian['cloud_id']}`")
+    if atlassian.get("jira_project_key"):
+        lines.append(f"- projeto Jira: `{atlassian['jira_project_key']}`")
+    if atlassian.get("confluence_space_key"):
+        lines.append(f"- space Confluence: `{atlassian['confluence_space_key']}`")
+    if atlassian.get("jira_status"):
+        lines.append(f"- Jira: `{atlassian['jira_status']}`")
+    if atlassian.get("confluence_status"):
+        lines.append(f"- Confluence: `{atlassian['confluence_status']}`")
+    for hint in atlassian.get("recovery_hints", []):
+        lines.append(f"- recovery Atlassian: {hint}")
+
+    prioritized = payload["prioritized_work_item"]
+    lines.extend(["", "## Work item priorizado", ""])
+    lines.append(f"- fonte: `{prioritized['source']}`")
+    if prioritized.get("identifier"):
+        lines.append(f"- identificador: `{prioritized['identifier']}`")
+    lines.append(f"- resumo: {prioritized['summary']}")
+
+    delegation = payload["delegation_context"]
+    lines.extend(["", "## Delegacao e subagentes", ""])
+    if delegation.get("owner_issue"):
+        lines.append(f"- issue dona para delegacao: `{delegation['owner_issue']}`")
+    lines.append(f"- branch base para delegacao: `{delegation.get('current_branch', '')}`")
+    for path in delegation.get("required_paths", []):
+        lines.append(f"- arquivo obrigatorio para contexto de subagente: `{path}`")
+    for rule in delegation.get("rules", []):
+        lines.append(f"- regra de subagente: {rule}")
+
     lines.extend(
         [
             "",
@@ -180,14 +960,23 @@ def render_startup_session_markdown(payload: dict[str, Any]) -> str:
             "",
             "- reler integralmente todos os arquivos resolvidos antes de operar",
             "- avisar o usuario se a tabela de contratos pendentes nao estiver vazia",
+            "- carregar o contrato de comunicacao e a camada de display_name antes da primeira resposta operacional ao usuario",
+            "- validar `gh auth status` e, se o fluxo de GitHub ou GraphQL falhar, consultar a cadeia de fallback documentada em `docs/secrets-and-auth.md` antes de concluir que o `gh` esta bloqueado",
+            "- quando a rodada depender de Jira ou Confluence, confirmar tambem o probe resumido dessas plataformas antes de operar por memoria",
+            "- nao delegar para subagentes sem pacote minimo de contexto, owner issue e regras aplicaveis",
             "- cruzar branch, worktree e work item antes de decidir commit, PR ou redistribuicao",
         ]
     )
     return "\n".join(lines) + "\n"
 
 
-def write_startup_session_report(repo_root: Path, *, out_path: Path | None = None) -> dict[str, Any]:
-    payload = startup_session_payload(repo_root)
+def write_startup_session_report(
+    repo_root: Path,
+    *,
+    out_path: Path | None = None,
+    include_runtime_probes: bool = True,
+) -> dict[str, Any]:
+    payload = startup_session_payload(repo_root, include_runtime_probes=include_runtime_probes)
     report_path = (repo_root / (out_path or DEFAULT_REPORT_PATH)).resolve()
     report_path.parent.mkdir(parents=True, exist_ok=True)
     report_text = render_startup_session_markdown(payload)

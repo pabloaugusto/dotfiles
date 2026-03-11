@@ -54,6 +54,10 @@ precise retomar o trabalho sem continuidade confiavel de contexto.
 - [`docs/config-reference.md`](./config-reference.md)
 - [`docs/ai-operating-model.md`](./ai-operating-model.md)
 
+### Secrets, auth e runtime operacional
+
+- [`df/secrets/secrets-ref.yaml`](../df/secrets/secrets-ref.yaml)
+
 ### Jira, Confluence, agilidade e artifacts normativos
 
 - todos os arquivos em [`docs/atlassian-ia/`](./atlassian-ia/)
