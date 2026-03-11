@@ -26,16 +26,22 @@ perder continuidade confiavel.
    qualquer arvore dirty.
 4. Rodar `task ai:worklog:check` e tratar o resultado como fallback local,
    nunca como substituto do quadro vivo do `Jira`.
-5. Consultar o `Jira` como fonte primaria do backlog, do **WIP** e da ordem de
+5. Rodar `task ai:fallback:status` quando houver suspeita de degradacao do
+   `Jira` ou quando existirem rastros locais ainda nao drenados.
+6. Se o status vier como `degraded`, registrar a contingencia com
+   `task ai:fallback:capture` antes de operar pelos trackers locais.
+7. Se o status vier como `recovery`, drenar ou reconciliar os registros ativos
+   com `task ai:fallback:resolve` antes de considerar o fallback vazio.
+8. Consultar o `Jira` como fonte primaria do backlog, do **WIP** e da ordem de
    prioridade.
-6. Ler o **board** da direita para a esquerda, tentando primeiro destravar ou
+9. Ler o **board** da direita para a esquerda, tentando primeiro destravar ou
    concluir o que estiver mais perto de terminar, e puxando novo **work item**
    apenas quando ele for o desbloqueador direto do WIP ativo.
-7. Cruzar cada trilha local aberta com seu **work item** dono antes de decidir
+10. Cruzar cada trilha local aberta com seu **work item** dono antes de decidir
    commit, push, **PR** ou redistribuicao de alteracoes.
-8. Avisar o usuario se houver contratos nascidos no chat ainda nao perenizados,
+11. Avisar o usuario se houver contratos nascidos no chat ainda nao perenizados,
    listando quais estao pendentes e quais ja tem **work item** dono.
-9. So depois desse preflight completo escolher a proxima
+12. So depois desse preflight completo escolher a proxima
    **fatia de incremento testavel**.
 
 ## Restart com continuidade comprovada

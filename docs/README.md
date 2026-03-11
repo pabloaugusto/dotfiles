@@ -48,6 +48,10 @@ Mapa das documentacoes versionadas do projeto e ordem recomendada de leitura.
 - [`vendor/atlassian/README.md`](../vendor/atlassian/README.md): specs OpenAPI vendorizados da Atlassian para codegen e auditoria.
 - [`docs/atlassian-ia/README.md`](atlassian-ia/README.md): trilha versionada de contexto,
   pareceres, planos e artefatos da migracao Jira + Confluence.
+- [`AI-FALLBACK-OPERATIONS.md`](AI-FALLBACK-OPERATIONS.md): protocolo canonico dos modos
+  `primary`, `degraded` e `recovery` entre `Jira` e trackers locais.
+- [`AI-FALLBACK-LEDGER.md`](AI-FALLBACK-LEDGER.md): ledger canonico dos
+  registros ativos e resolvidos de fallback contingencial.
 - [`AI-WIP-TRACKER.md`](AI-WIP-TRACKER.md): fallback contingencial local; o `Jira` e a fonte primaria do fluxo vivo.
 - [`AI-SCRUM-MASTER-LEDGER.md`](AI-SCRUM-MASTER-LEDGER.md): inconformidades e
   **cerimonias** rastreadas pelo **Scrum Master**.

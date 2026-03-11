@@ -137,6 +137,30 @@ No fluxo vivo deste repo:
 Essa higiene precisa ter backend real: `task git:governance:check` passa a
 complementar os gates locais de governanca para impedir novo acumulo de arvore.
 
+### 4.5. Fallback local exige modo explicito e reconciliacao dirigida
+
+Os trackers locais continuam existindo para continuidade e memoria versionada,
+mas eles nao podem voltar a competir com o `Jira` como fonte primaria por
+inercia.
+
+Para impedir esse drift, o repo passa a tratar o fallback local em tres modos
+explicitos:
+
+- `primary`: `Jira` saudavel e sem registro ativo em
+  [`AI-FALLBACK-LEDGER.md`](AI-FALLBACK-LEDGER.md)
+- `degraded`: falha objetiva do fluxo primario e captura formal do fallback
+- `recovery`: `Jira` voltou, mas ainda ha registro ativo a drenar ou
+  reconciliar
+
+Toda degradacao real precisa ser registrada em
+[`AI-FALLBACK-LEDGER.md`](AI-FALLBACK-LEDGER.md), e o retorno ao modo
+`primary` so e valido depois de classificar cada registro como `drained`,
+`reconciled` ou `obsolete`.
+
+O protocolo operacional correspondente fica em
+[`AI-FALLBACK-OPERATIONS.md`](AI-FALLBACK-OPERATIONS.md), com tasks canonicas
+para status, captura e resolucao dirigida.
+
 ### 5. Auditoria exaustiva antes de reuso cross-repo
 
 Quando a tarefa envolver importar, adaptar, comparar ou consolidar contratos de outro repo, a IA nao pode trabalhar por amostragem.

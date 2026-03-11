@@ -1,6 +1,6 @@
 # Decisoes do Roadmap
 
-Atualizado em: 2026-03-11 07:53 UTC
+Atualizado em: 2026-03-11 09:15 UTC
 Ciclo ativo: 2026-Q1
 
 Registro das decisoes humanas por ciclo e governanca de sugestoes.
@@ -12,6 +12,7 @@ Use status: `pendente`, `aceita`, `descartada`, `aplicar_depois`.
 <!-- roadmap:suggestions:start -->
 | ID | Tipo | Descricao | Status | RM | Captura | Atualizacao |
 | --- | --- | --- | --- | --- | --- | --- |
+| SG-ORTHO-WIP-DOT-106 | fix | Corrigir pendencias ortograficas remanescentes do worklog `WIP-DOT-106` em AGENTS.md, Taskfile.yml, config/ai/contracts.yaml, docs/AI-FALLBACK-LEDGER.md, docs/AI-FALLBACK-OPERAT... | aceita |  | 2026-03-11 | 2026-03-11 |
 | SG-ORTHO-WIP-DOT-109-RETRO | fix | Corrigir pendencias ortograficas remanescentes do worklog `WIP-DOT-109-RETRO` em .agents/cerimonias/logs/retrospectiva/2026-03-11-0445-feat-DOT-109-jira-role-sync.md, docs/AI-SC... | aceita |  | 2026-03-11 | 2026-03-11 |
 | SG-ORTHO-WIP-DOT-109 | fix | Corrigir pendencias ortograficas remanescentes do worklog `WIP-DOT-109` em scripts/ai_jira_apply_lib.py, scripts/ai_jira_model_lib.py, tests/python/ai_jira_apply_test.py, tests/... | aceita |  | 2026-03-11 | 2026-03-11 |
 | SG-ORTHO-WIP-DOT-134 | fix | Corrigir pendencias ortograficas remanescentes do worklog `WIP-DOT-134` em LICOES-APRENDIDAS.md, docs/AI-DONE-ISSUES-AUDIT.md, docs/README.md | aceita |  | 2026-03-11 | 2026-03-11 |
@@ -78,6 +79,8 @@ Use status: `pendente`, `aceita`, `descartada`, `aplicar_depois`.
 ## Registro automatico
 
 <!-- roadmap:autolog:start -->
+- 2026-03-11 09:15 UTC | decisao=accepted | horizonte=next | tipo=fix | item=Corrigir pendencias ortograficas remanescentes do worklog `WIP-DOT-106` em AGENTS.md, Taskfile.yml, config/ai/contracts.yaml, docs/AI-FALLBACK-LEDGER.md, docs/AI-FALLBACK-OPERAT... | notas=Pendencia automatica criada por Pascoalete apos review consultivo reprovado sem correcao automatica.
+- 2026-03-11 08:47 UTC | decisao=accepted | horizonte=next | tipo=fix | item=Corrigir pendencias ortograficas remanescentes do worklog `WIP-DOT-106` em docs/AI-FALLBACK-LEDGER.md, docs/AI-FALLBACK-OPERATIONS.md, scripts/ai-fallback.py, scripts/ai-worklog... | notas=Pendencia automatica criada por Pascoalete apos review consultivo reprovado sem correcao automatica.
 - 2026-03-11 07:53 UTC | decisao=accepted | horizonte=next | tipo=fix | item=Corrigir pendencias ortograficas remanescentes do worklog `WIP-DOT-109-RETRO` em .agents/cerimonias/logs/retrospectiva/2026-03-11-0445-feat-DOT-109-jira-role-sync.md, docs/AI-SC... | notas=Pendencia automatica criada por Pascoalete apos review consultivo reprovado sem correcao automatica.
 - 2026-03-11 07:25 UTC | decisao=accepted | horizonte=next | tipo=fix | item=Corrigir pendencias ortograficas remanescentes do worklog `WIP-DOT-109` em scripts/ai_jira_apply_lib.py, scripts/ai_jira_model_lib.py, tests/python/ai_jira_apply_test.py, tests/... | notas=Pendencia automatica criada por Pascoalete apos review consultivo reprovado sem correcao automatica.
 - 2026-03-11 06:06 UTC | decisao=accepted | horizonte=next | tipo=fix | item=Corrigir pendencias ortograficas remanescentes do worklog `WIP-DOT-134` em LICOES-APRENDIDAS.md, docs/AI-DONE-ISSUES-AUDIT.md, docs/README.md | notas=Pendencia automatica criada por Pascoalete apos review consultivo reprovado sem correcao automatica.

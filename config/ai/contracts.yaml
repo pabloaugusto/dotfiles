@@ -37,6 +37,27 @@ backlog:
     roadmap_pendente:
       meaning: manter a retomada rastreada no roadmap somente quando a rodada atual realmente nao vai continuar agora
 
+fallback_operation:
+  source_of_truth: jira
+  local_trackers:
+    - docs/AI-WIP-TRACKER.md
+    - docs/ROADMAP-DECISIONS.md
+  recovery_ledger: docs/AI-FALLBACK-LEDGER.md
+  explicit_modes:
+    - primary
+    - degraded
+    - recovery
+  resolution_states:
+    - drained
+    - reconciled
+    - obsolete
+  mandatory_rules:
+    - local-fallback-only-allowed-when-primary-jira-flow-is-objectively-degraded
+    - every-real-fallback-usage-must-hit-the-recovery-ledger
+    - jira-return-must-trigger-directed-reconciliation
+    - every-active-fallback-record-must-end-as-drained-reconciled-or-obsolete
+    - primary-mode-requires-zero-active-fallback-records
+
 git_governance:
   source_of_truth: jira
   fallback_tracker: docs/AI-WIP-TRACKER.md

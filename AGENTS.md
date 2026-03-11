@@ -117,6 +117,11 @@ Leia a skill mais proxima do escopo antes de editar arquivos relevantes.
   imediatamente antes da resposta final ao usuario.
 - `Jira` e a fonte primaria do fluxo vivo; [`docs/AI-WIP-TRACKER.md`](docs/AI-WIP-TRACKER.md)
   funciona como fallback contingencial do repo.
+- Quando a contingencia local realmente precisar assumir rastreabilidade
+  temporaria, registrar o evento em
+  [`docs/AI-FALLBACK-LEDGER.md`](docs/AI-FALLBACK-LEDGER.md) e voltar ao modo
+  primario so depois de classificar cada registro como `drained`,
+  `reconciled` ou `obsolete`.
 - Ao concluir uma rodada e permanecerem mudancas locais coerentes, criar commit de fechamento
   antes de iniciar novo escopo; `task ai:worklog:check` deve bloquear worktree suja sem `Doing` ativo.
 - Nenhum `done` e valido sem revisar [`LICOES-APRENDIDAS.md`](LICOES-APRENDIDAS.md) e registrar explicitamente

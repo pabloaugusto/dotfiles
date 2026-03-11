@@ -261,6 +261,11 @@ Fallback local de continuidade. O Jira e a fonte primaria do fluxo vivo.
 ## Regras operacionais
 
 - Toda solicitacao acionavel deve passar por preflight de pendencias.
+- Se `Jira` ficar indisponivel e estes trackers precisarem assumir
+  contingencia real, registrar a degradacao em
+  [`docs/AI-FALLBACK-LEDGER.md`](AI-FALLBACK-LEDGER.md) antes de seguir e
+  drenar cada registro com `task ai:fallback:resolve` quando o fluxo primario
+  voltar.
 - Se houver itens em `Doing`, `concluir_primeiro` significa:
   - concluir o que ja esta em curso quando ele puder seguir direto, ou
   - puxar apenas o work item minimo que o destrava diretamente quando o bloqueio estiver em outra issue.
