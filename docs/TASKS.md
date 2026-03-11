@@ -235,6 +235,23 @@ Referencia operacional das tasks canonicas mais importantes do repositorio.
   [`config/ai/platforms.local.yaml.tpl`](../config/ai/platforms.local.yaml.tpl)
   quando presente; `SITE_URL` segue disponivel para override pontual.
 
+### `ai:prompts:jira:check`
+
+- Funcionalidade: valida se cada prompt pack formal com `owner_issue` esta com
+  a issue Jira dona no contrato `PROMPT: ...` + label `prompt`.
+- Uso manual: `task ai:prompts:jira:check`
+- Observacao: a task usa o `meta.yaml` de cada pack formal como fonte
+  declarativa do prefixo e das labels exigidas.
+
+### `ai:prompts:jira:sync`
+
+- Funcionalidade: aplica no Jira o contrato declarativo dos prompt packs
+  formais, corrigindo prefixo `PROMPT:` no summary e adicionando a label
+  `prompt` quando necessario.
+- Uso manual: `task ai:prompts:jira:sync`
+- Observacao: a task so atualiza a issue dona declarada em `owner_issue` e nao
+  remove labels extras existentes.
+
 ### `ai:atlassian:openapi:show`
 
 - Funcionalidade: exibe o catalogo dos specs OpenAPI oficiais da Atlassian

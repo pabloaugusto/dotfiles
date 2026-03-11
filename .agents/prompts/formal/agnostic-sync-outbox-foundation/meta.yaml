@@ -1,0 +1,27 @@
+# cspell:words agnostico duravel
+id: agnostic-sync-outbox-foundation
+task_id: prompt/agnostic-sync-outbox-foundation
+title: Prompt pack de sync agnostico, outbox duravel e fonte perene
+status: active
+owner_epic: DOT-71
+owner_issue: DOT-179
+jira:
+  summary_prefix: "PROMPT:"
+  required_labels:
+    - prompt
+entrypoints:
+  prompt: prompt.md
+  context: context.md
+fragments:
+  - fragments/identity-model.md
+  - fragments/sync-contract.md
+  - fragments/artifact-classification.md
+portability:
+  repo_name_agnostic: true
+  reusable_across_repositories: true
+runtime:
+  state_root: ~/.ai-control-plane
+  separates_workspace_and_runtime_identity: true
+implementation:
+  requires_repo_discovery: true
+  source_of_truth_manifest: config/ai/sync-targets.yaml

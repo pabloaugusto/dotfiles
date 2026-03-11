@@ -17,12 +17,29 @@ def main(argv: list[str]) -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("message", help="Mensagem a validar.")
     parser.add_argument("--context", default="message", help="Contexto da validacao.")
+    parser.add_argument("--branch", default="", help="Branch contextual para enforcement.")
+    parser.add_argument(
+        "--paths-json",
+        default="",
+        help="Lista JSON de paths para enforcement contextual.",
+    )
     args = parser.parse_args(argv)
 
+    try:
+        paths = conventional_emoji.parse_paths_json(args.paths_json)
+    except ValueError as exc:
+        print(f"INVALID ({args.context})", file=sys.stderr)
+        print(str(exc), file=sys.stderr)
+        return 2
+
+    required_scope = conventional_emoji.required_scope_for_paths_and_branch(
+        paths, args.branch
+    )
     result = conventional_emoji.validate_message(
         args.message,
         require_emoji=True,
         require_issue_key=True,
+        required_scope=required_scope,
     )
     if result.ok:
         print(f"OK ({args.context})")

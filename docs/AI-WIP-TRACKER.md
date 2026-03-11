@@ -1,6 +1,6 @@
 # AI WIP Tracker
 
-Atualizado em: 2026-03-11 15:56 UTC
+Atualizado em: 2026-03-11 19:26 UTC
 
 Fallback local de continuidade. O Jira e a fonte primaria do fluxo vivo.
 
@@ -27,7 +27,7 @@ Fallback local de continuidade. O Jira e a fonte primaria do fluxo vivo.
 <!-- ai-worklog:doing:start -->
 | ID | Tarefa | Branch | Responsavel | Inicio UTC | Ultima atualizacao UTC | Proximo passo | Bloqueios |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| (sem itens) | - | - | - | - | - | - | - |
+| WIP-20260311-183919 | DOT-179 - consolidar prefixo prompt para prompts versionados | prompt/DOT-179-agnostic-sync-outbox-foundation | ai-tech-lead | 2026-03-11 18:39 UTC | 2026-03-11 19:26 UTC | Rodar validacoes, sincronizar DOT-178/DOT-179 no Jira e fechar commit/PR com scope prompt. | - |
 <!-- ai-worklog:doing:end -->
 
 ## Done
@@ -84,5 +84,8 @@ Fallback local de continuidade. O Jira e a fonte primaria do fluxo vivo.
 <!-- ai-worklog:log:start -->
 | Data/Hora UTC | ID | Status | Resumo | Proximo passo | Bloqueios | Contexto | Notas |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| (sem itens) | - | - | - | - | - | - | - |
+| 2026-03-11 19:26 UTC | WIP-20260311-183919 | doing | DOT-179 - consolidar prefixo prompt para prompts versionados | Aplicar regra prompt em contratos, hooks, validadores e metadata dos packs formais. | - | - | inicio da tarefa |
+| 2026-03-11 19:26 UTC | WIP-20260311-183919 | doing | Branch alinhada ao namespace prompt e enforcement em implementacao. | Validar hooks, tasks, metadata e contratos com a branch canonica codex/prompt/DOT-179-agnostic-sync-outbox-foundation. | - | - | checkpoint incremental |
+| 2026-03-11 19:26 UTC | WIP-20260311-183919 | doing | Branch normalizada para prompt/DOT-179-agnostic-sync-outbox-foundation conforme contrato canonico. | Executar validacoes locais e fechar commit/PR com scope prompt e task_id prompt/<slug>. | - | - | checkpoint incremental |
+| 2026-03-11 19:26 UTC | WIP-20260311-183919 | doing | Contrato prompt endurecido com regra Jira PROMPT:/label prompt e task canonica de check/sync adicionada. | Rodar validacoes, sincronizar DOT-178/DOT-179 no Jira e fechar commit/PR com scope prompt. | - | .agents/prompts, governanca git, Jira prompt contract | checkpoint incremental |
 <!-- ai-worklog:log:end -->

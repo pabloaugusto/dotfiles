@@ -5,7 +5,7 @@ import subprocess
 import tempfile
 import unittest
 
-from scripts.git_commit_subjects_lib import collect_commit_subjects
+from scripts.git_commit_subjects_lib import collect_commit_metadata, collect_commit_subjects
 
 
 class GitCommitSubjectsTests(unittest.TestCase):
@@ -31,6 +31,7 @@ class GitCommitSubjectsTests(unittest.TestCase):
 
     def _commit(self, repo_root: pathlib.Path, message: str, file_name: str) -> str:
         target = repo_root / file_name
+        target.parent.mkdir(parents=True, exist_ok=True)
         target.write_text(message, encoding="utf-8")
         self._git(repo_root, "add", file_name)
         self._git(repo_root, "-c", "commit.gpgsign=false", "commit", "-m", message)
@@ -85,6 +86,32 @@ class GitCommitSubjectsTests(unittest.TestCase):
             subjects = collect_commit_subjects(repo_root, range_spec="origin/main..HEAD")
 
             self.assertEqual(subjects, [second_subject])
+
+    def test_collects_commit_metadata_with_paths(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            temp_root = pathlib.Path(temp_dir)
+            remote_root = temp_root / "remote.git"
+            repo_root = temp_root / "repo"
+
+            self._git(temp_root, "init", "--bare", str(remote_root))
+            self._git(temp_root, "init", "-b", "main", str(repo_root))
+            self._git(repo_root, "config", "user.name", "Codex")
+            self._git(repo_root, "config", "user.email", "codex@example.com")
+            self._git(repo_root, "remote", "add", "origin", str(remote_root))
+
+            self._commit(repo_root, "🔧 chore(repo): DOT-1 base", "base.txt")
+            self._git(repo_root, "push", "-u", "origin", "main")
+            self._commit(
+                repo_root,
+                "📝 docs(prompt): DOT-179 add prompt namespace",
+                ".agents/prompts/example.md",
+            )
+
+            metadata = collect_commit_metadata(repo_root, range_spec="origin/main..HEAD")
+
+            self.assertEqual(len(metadata), 1)
+            self.assertEqual(metadata[0]["subject"], "📝 docs(prompt): DOT-179 add prompt namespace")
+            self.assertIn(".agents/prompts/example.md", metadata[0]["paths"])
 
 
 if __name__ == "__main__":

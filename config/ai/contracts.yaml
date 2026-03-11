@@ -114,11 +114,27 @@ git_governance:
   branch_pattern: <type>/<jira-key>-<slug>
   commit_title_contract: emoji-plus-conventional-plus-single-jira-key
   pr_title_contract: emoji-plus-conventional-plus-single-jira-key
+  prompt_namespace:
+    prompts_root: .agents/prompts
+    task_id_pattern: prompt/<slug>
+    branch_pattern: prompt/<jira-key>-<slug>
+    branch_type: prompt
+    commit_scope: prompt
+    pr_scope: prompt
+    jira_summary_prefix: "PROMPT:"
+    jira_required_labels:
+      - prompt
   mandatory_rules:
     - jira-is-primary-system-of-record-for-live-flow
     - ai-wip-tracker-is-fallback-only
     - every-commit-must-map-to-one-real-jira-work-item
     - every-pr-must-map-to-one-real-jira-work-item
+    - versioned-prompt-packs-must-declare-task-id-as-prompt-slug
+    - changes-touching-agents-prompts-must-use-prompt-branch-type
+    - changes-touching-agents-prompts-must-use-prompt-scope-in-commit-title
+    - changes-touching-agents-prompts-must-use-prompt-scope-in-pr-title
+    - prompt-related-jira-issues-must-use-summary-prefix-prompt
+    - prompt-related-jira-issues-must-carry-prompt-label
     - commits-must-be-atomic-contextualized-and-preferably-self-testable
     - resume-old-work-on-a-new-branch-from-main-unless-evidence-keeps-the-existing-branch-valid
     - prune-unneeded-local-branches-and-worktrees-after-merge

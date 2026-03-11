@@ -155,6 +155,13 @@ Leia a skill mais proxima do escopo antes de editar arquivos relevantes.
   e preferencialmente auto-testaveis.
 - Branches novas devem seguir `<type>/<jira-key>-<slug>` e nao usar emoji;
   branches legadas pre-integracao com Jira so podem permanecer como excecao historica.
+- Quando a rodada tocar [`.agents/prompts/`](.agents/prompts/), o namespace
+  operacional obrigatorio passa a ser `prompt`: `task_id` no formato
+  `prompt/<slug>`, branch `prompt/<jira-key>-<slug>`, e `scope` `prompt` em
+  commit e `PR title`; a issue Jira dona tambem deve usar titulo com prefixo
+  `PROMPT:` e label `prompt`, conforme
+  [`docs/git-conventions.md`](docs/git-conventions.md) e
+  [`.agents/prompts/README.md`](.agents/prompts/README.md).
 - Commit e PR title devem seguir `emoji + conventional commit`, carregar uma unica
   chave Jira real no subject e respeitar o maximo recomendado de 72 caracteres.
 - Cada branch deve carregar um unico contexto coerente; separar assuntos independentes em branches diferentes.

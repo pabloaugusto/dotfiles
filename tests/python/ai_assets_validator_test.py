@@ -30,6 +30,10 @@ class ValidateAiAssetsTests(unittest.TestCase):
             ".agents/prompts/formal/pea-startup-governance/prompt.md",
             module.REQUIRED_FILES,
         )
+        self.assertIn(
+            ".agents/prompts/formal/agnostic-sync-outbox-foundation/prompt.md",
+            module.REQUIRED_FILES,
+        )
         self.assertIn(".agents/config.toml", module.REQUIRED_FILES)
         self.assertIn(".agents/cerimonias/README.md", module.REQUIRED_FILES)
         self.assertIn(".agents/cerimonias/ceremony.schema.json", module.REQUIRED_FILES)
@@ -53,6 +57,7 @@ class ValidateAiAssetsTests(unittest.TestCase):
         self.assertIn("config/ai/agent-operations.yaml", module.REQUIRED_FILES)
         self.assertIn("config/ai/contracts.yaml", module.REQUIRED_FILES)
         self.assertIn("df/secrets/secrets-ref.yaml", module.REQUIRED_FILES)
+        self.assertIn("scripts/ai-prompt-governance.py", module.REQUIRED_FILES)
         self.assertIn("scripts/ai-route.py", module.REQUIRED_FILES)
         self.assertIn("scripts/ai-control-plane.py", module.REQUIRED_FILES)
         self.assertIn("scripts/ai-fallback.py", module.REQUIRED_FILES)
@@ -96,6 +101,12 @@ class ValidateAiAssetsTests(unittest.TestCase):
             "Nenhum `done` e valido sem revisar `LICOES-APRENDIDAS.md`",
             module.AGENTS_REQUIRED_SNIPPETS,
         )
+        self.assertIn(
+            "Quando a rodada tocar [`.agents/prompts/`](.agents/prompts/), o namespace",
+            module.AGENTS_REQUIRED_SNIPPETS,
+        )
+        self.assertIn("titulo com prefixo", module.AGENTS_REQUIRED_SNIPPETS)
+        self.assertIn("label `prompt`", module.AGENTS_REQUIRED_SNIPPETS)
         self.assertIn(
             "### 1.2. Contratos nascidos no chat precisam de registrador vivo",
             module.OPERATING_MODEL_REQUIRED_SNIPPETS,
@@ -144,6 +155,12 @@ class ValidateAiAssetsTests(unittest.TestCase):
             "## Camada de identidade humana dos agentes",
             module.OPERATING_MODEL_REQUIRED_SNIPPETS,
         )
+        self.assertIn(
+            "task_id: prompt/<slug>",
+            module.OPERATING_MODEL_REQUIRED_SNIPPETS,
+        )
+        self.assertIn("PROMPT: ...", module.OPERATING_MODEL_REQUIRED_SNIPPETS)
+        self.assertIn("label `prompt`", module.OPERATING_MODEL_REQUIRED_SNIPPETS)
         self.assertIn(
             "### Fronteira entre `.agents/` e adaptadores de assistente",
             module.OPERATING_MODEL_REQUIRED_SNIPPETS,
@@ -218,6 +235,30 @@ class ValidateAiAssetsTests(unittest.TestCase):
         self.assertIn(
             "branch_pattern: <type>/<jira-key>-<slug>",
             module.GIT_GOVERNANCE_REQUIRED_SNIPPETS["config/ai/contracts.yaml"],
+        )
+        self.assertIn(
+            "branch_pattern: prompt/<jira-key>-<slug>",
+            module.GIT_GOVERNANCE_REQUIRED_SNIPPETS["config/ai/contracts.yaml"],
+        )
+        self.assertIn(
+            "changes-touching-agents-prompts-must-use-prompt-branch-type",
+            module.GIT_GOVERNANCE_REQUIRED_SNIPPETS["config/ai/contracts.yaml"],
+        )
+        self.assertIn(
+            'jira_summary_prefix: "PROMPT:"',
+            module.GIT_GOVERNANCE_REQUIRED_SNIPPETS["config/ai/contracts.yaml"],
+        )
+        self.assertIn(
+            "prompt-related-jira-issues-must-carry-prompt-label",
+            module.GIT_GOVERNANCE_REQUIRED_SNIPPETS["config/ai/contracts.yaml"],
+        )
+        self.assertIn(
+            "versioned-prompt-pack-work-must-use-prompt-branch-type",
+            module.GIT_GOVERNANCE_REQUIRED_SNIPPETS["config/ai/agent-operations.yaml"],
+        )
+        self.assertIn(
+            "versioned-prompt-pack-owner-issues-must-carry-prompt-label",
+            module.GIT_GOVERNANCE_REQUIRED_SNIPPETS["config/ai/agent-operations.yaml"],
         )
         self.assertIn(
             "recovery_ledger: docs/AI-FALLBACK-LEDGER.md",
@@ -333,8 +374,48 @@ class ValidateAiAssetsTests(unittest.TestCase):
             module.PROMPT_PACK_REQUIRED_SNIPPETS,
         )
         self.assertIn(
+            'summary_prefix: "PROMPT:"',
+            module.PROMPT_PACK_REQUIRED_SNIPPETS[".agents/prompts/README.md"],
+        )
+        self.assertIn(
+            "task_id: prompt/pea-startup-governance",
+            module.PROMPT_PACK_REQUIRED_SNIPPETS[
+                ".agents/prompts/formal/pea-startup-governance/meta.yaml"
+            ],
+        )
+        self.assertIn(
+            'summary_prefix: "PROMPT:"',
+            module.PROMPT_PACK_REQUIRED_SNIPPETS[
+                ".agents/prompts/formal/pea-startup-governance/meta.yaml"
+            ],
+        )
+        self.assertIn(
+            "task_id: prompt/agnostic-sync-outbox-foundation",
+            module.PROMPT_PACK_REQUIRED_SNIPPETS[
+                ".agents/prompts/formal/agnostic-sync-outbox-foundation/meta.yaml"
+            ],
+        )
+        self.assertIn(
+            'summary_prefix: "PROMPT:"',
+            module.PROMPT_PACK_REQUIRED_SNIPPETS[
+                ".agents/prompts/formal/agnostic-sync-outbox-foundation/meta.yaml"
+            ],
+        )
+        self.assertIn(
             "pea-startup-governance",
             module.PROMPT_PACK_REQUIRED_SNIPPETS[".agents/prompts/CATALOG.md"],
+        )
+        self.assertIn(
+            "prompt/agnostic-sync-outbox-foundation",
+            module.PROMPT_PACK_REQUIRED_SNIPPETS[".agents/prompts/CATALOG.md"],
+        )
+        self.assertIn(
+            "### `ai:prompts:jira:check`",
+            module.CATALOG_REQUIRED_SNIPPETS["docs/TASKS.md"],
+        )
+        self.assertIn(
+            "### `ai:prompts:jira:sync`",
+            module.CATALOG_REQUIRED_SNIPPETS["docs/TASKS.md"],
         )
         self.assertIn(
             "df/secrets/secrets-ref.yaml",
