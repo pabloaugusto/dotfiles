@@ -215,6 +215,7 @@ Toda finalizacao de worklog deve registrar se houve nova licao.
 <!-- ai-lessons:reviews:start -->
 | Data/Hora UTC | Worklog ID | Decisao | Resumo | Licoes | Evidencia |
 | --- | --- | --- | --- | --- | --- |
+| 2026-03-11 05:35 UTC | WIP-DOT-135 | sem_nova_licao | DOT-135 ampliou a cobertura historica de retrospectivas usando contratos e gates ja vigentes, sem criar regra perene nova alem das ja formalizadas em DOT-121, DOT-124 e DOT-131. | - | docs/AI-RETROSPECTIVE-BACKFILL-AUDIT.md; docs/AI-SCRUM-MASTER-LEDGER.md; task docs:check=ok; task ai:validate=ok |
 | 2026-03-11 04:27 UTC | WIP-DOT-132 | sem_nova_licao | DOT-132 consolidou uma auditoria factual de pausadas e correcao de fluxo no board, sem criar novo contrato perene alem dos ja vigentes. | - | [`docs/AI-PAUSED-ISSUES-AUDIT.md`](docs/AI-PAUSED-ISSUES-AUDIT.md); [`docs/README.md`](docs/README.md); task docs:check; Jira: DOT-1=Done, DOT-37=PAUSED, DOT-126=PAUSED |
 | 2026-03-11 01:46 UTC | WIP-DOT-133 | sem_nova_licao | sem_nova_licao | - | PR #29; commit 88c0f71; merge 9150608; [`docs/AI-BACKLOG-LIVE-AUDIT.md`](docs/AI-BACKLOG-LIVE-AUDIT.md); task docs:check; task ai:validate; task ai:review:check; git diff --check |
 | 2026-03-11 00:57 UTC | WIP-DOT-131 | sem_nova_licao | A rodada nao gerou nova licao perene alem das lacunas ja rastreadas em backlog e no ledger do Scrum Master. | - | PR #28; pagina de Confluence da Retrospectiva; DOT-135 criado; task docs:check=ok; task ai:validate=ok; task ai:eval:smoke=ok; task ai:review:check=ok |

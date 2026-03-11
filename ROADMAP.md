@@ -1,6 +1,6 @@
 # Roadmap do Repositorio
 
-Atualizado em: 2026-03-11 04:38 UTC
+Atualizado em: 2026-03-11 05:33 UTC
 Ciclo ativo: 2026-Q1
 
 Planejamento incremental para qualidade, testes, bootstrap e governanca do repo.
@@ -28,7 +28,7 @@ Edite apenas a tabela entre os marcadores abaixo.
 Atualizada por `task ai:roadmap:refresh`.
 
 <!-- roadmap:priority:start -->
-Atualizado em: 2026-03-11 04:38 UTC
+Atualizado em: 2026-03-11 05:33 UTC
 
 ### Ranking RICE
 
@@ -76,6 +76,8 @@ Sem sugestoes pendentes neste ciclo; itens aceitos ja estao rastreaveis.
 ### Next
 
 <!-- roadmap:next:start -->
+- [fix] Corrigir pendencias ortograficas remanescentes do worklog `WIP-DOT-135` em .agents/cerimonias/logs/retrospectiva/2026-03-10-1315-feat-DOT-127-concluir-primeiro-desbloqueio.md, .... | notas=Pendencia automatica criada por Pascoalete apos review consultivo reprovado sem correcao automatica.
+- [fix] Corrigir pendencias ortograficas remanescentes do worklog `WIP-DOT-135` em .agents/cerimonias/logs/retrospectiva/2026-03-10-2357-feat-DOT-130-git-governance-hygiene.md, .agents/... | notas=Pendencia automatica criada por Pascoalete apos review consultivo reprovado sem correcao automatica.
 - [fix] Corrigir pendencias ortograficas remanescentes do worklog `WIP-DOT-133` em LICOES-APRENDIDAS.md, docs/AI-WIP-TRACKER.md | notas=Pendencia automatica criada por Pascoalete apos review consultivo reprovado sem correcao automatica.
 - [fix] Corrigir pendencias ortograficas remanescentes do worklog `WIP-DOT-133` em .agents/cards/ai-tech-lead.md, .agents/registry/ai-tech-lead.toml, docs/AI-BACKLOG-LIVE-AUDIT.md, docs... | notas=Pendencia automatica criada por Pascoalete apos review consultivo reprovado sem correcao automatica.
 - [fix] Corrigir pendencias ortograficas remanescentes do worklog `WIP-DOT-131` em .agents/cerimonias/logs/retrospectiva/2026-03-11-0047-feat-DOT-131-scrum-master-enforcement.md, docs/A... | notas=Pendencia automatica criada por Pascoalete apos review consultivo reprovado sem correcao automatica.
