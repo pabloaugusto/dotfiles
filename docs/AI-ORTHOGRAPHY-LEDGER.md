@@ -20,6 +20,20 @@ Registro consultivo do agente Pascoalete para ortografia e higiene vocabular.
 <!-- ai-orthography:records:start -->
 | Data/Hora UTC | Worklog ID | Revisor | Status | Arquivo | Achados | Evidencia |
 | --- | --- | --- | --- | --- | --- | --- |
+| 2026-03-11 15:45 UTC | WIP-DOT-178 | pascoalete | reprovado | .agents/prompts/formal/pea-startup-governance/fragments/startup-extension.md | Extensao, sessao, aplicavel, relatorio, aplicavel | task spell:check |
+| 2026-03-11 15:45 UTC | WIP-DOT-178 | pascoalete | reprovado | .agents/prompts/formal/pea-startup-governance/fragments/bypass.md | previo, obrigatorio, primario, excecao, autonoma | task spell:check |
+| 2026-03-11 15:45 UTC | WIP-DOT-178 | pascoalete | reprovado | .agents/prompts/formal/pea-startup-governance/fragments/modes.md | reversivel, obrigatorio, mudanca, multiplas, interpretacoes, plausiveis, condicao, condicao | task spell:check |
+| 2026-03-11 15:45 UTC | WIP-DOT-178 | pascoalete | reprovado | .agents/prompts/formal/pea-startup-governance/context.md | canonico, promocao, substituidos, LICOES, aplicaveis, assuncoes | task spell:check |
+| 2026-03-11 15:45 UTC | WIP-DOT-178 | pascoalete | reprovado | .agents/prompts/formal/pea-startup-governance/prompt.md | Missao, Distincao, Responsavel, canonico, sessao, Responsavel, condicao, Responsavel (+30) | task spell:check |
+| 2026-03-11 15:45 UTC | WIP-DOT-178 | pascoalete | reprovado | .agents/prompts/CATALOG.md | integracao, historicos | task spell:check |
+| 2026-03-11 15:45 UTC | WIP-DOT-178 | pascoalete | reprovado | .agents/prompts/README.md | disponiveis, executaveis, reutilizaveis, LICOES, executavel, aplicaveis | task spell:check |
+| 2026-03-11 15:45 UTC | WIP-DOT-178 | pascoalete | reprovado | docs/ai-operating-model.md | reutilizavel, testavel, worktree, Principios, Instrucoes, instrucoes, estaveis, sessao (+179) | task spell:check |
+| 2026-03-11 15:45 UTC | WIP-DOT-178 | pascoalete | reprovado | docs/TASKS.md | repositorio, diaria, diaria, sincronizacao, worktree, alteracoes, canonico, Observacao (+90) | task spell:check |
+| 2026-03-11 15:45 UTC | WIP-DOT-178 | pascoalete | reprovado | docs/AI-DELEGATION-FLOW.md | canonico, LICOES, sessao, confiavel, relatorio, importacao, aderencia, decomposicao (+46) | task spell:check |
+| 2026-03-11 15:45 UTC | WIP-DOT-178 | pascoalete | reprovado | docs/AI-STARTUP-AND-RESTART.md | sessao, confiavel, sessao, sessoes, worktree, worktree, alteracoes, sessao (+45) | task spell:check |
+| 2026-03-11 15:45 UTC | WIP-DOT-178 | pascoalete | reprovado | docs/AI-STARTUP-GOVERNANCE-MANIFEST.md | sessao, confiavel, confiavel, sessoes, worktree, verificavel, suposicao, presuncao (+10) | task spell:check |
+| 2026-03-11 15:45 UTC | WIP-DOT-178 | pascoalete | reprovado | docs/README.md | canonico, canonico, remediacoes, excecoes | task spell:check |
+| 2026-03-11 15:45 UTC | WIP-DOT-178 | pascoalete | reprovado | .agents/README.md | cartoes, evals, cenarios, minimos, Dominios, canonicos, integracoes, revisao (+6) | task spell:check |
 | 2026-03-11 14:31 UTC | WIP-DOT-177 | pascoalete | reprovado | tests/python/ai_session_startup_test.py | worktrees, pablo, absorcao, worktree, pablo, primario, sessao, pabloaugusto (+16) | task spell:check |
 | 2026-03-11 14:31 UTC | WIP-DOT-177 | pascoalete | reprovado | tests/python/ai_assets_validator_test.py | possivel, LICOES, Validacao, comunicacao, LICOES, comecar, Orquestracao, evals (+6) | task spell:check |
 | 2026-03-11 14:31 UTC | WIP-DOT-177 | pascoalete | reprovado | scripts/validate-ai-assets.py | evals, LICOES, evals, evals, evals, evals, autolog, autolog (+68) | task spell:check |

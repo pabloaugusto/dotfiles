@@ -13,7 +13,7 @@
 7. Acionar `ai-scrum-master` como gate global de board, WIP, ownership, cerimonias e aderencia do fluxo.
 8. Acionar `architecture-modernization-authority` em paralelo, sempre lendo e monitorando [`AI-WIP-TRACKER.md`](AI-WIP-TRACKER.md), [`../ROADMAP.md`](../ROADMAP.md), [`ROADMAP-DECISIONS.md`](ROADMAP-DECISIONS.md) e demais registradores vivos de backlog/pendencias.
 9. Se a tarefa pedir triagem, decomposicao ou plano de delegacao, acionar `orchestrator` com `$task-routing-and-decomposition`.
-10. Antes de qualquer subagente, preparar o pacote minimo de contexto: issue dona, branch atual, startup report, regras aplicaveis ao papel, arquivos normativos relevantes e proximo passo objetivo.
+10. Antes de qualquer subagente, preparar o pacote minimo de contexto: issue dona, branch atual, startup report, classificacao do `PEA` quando aplicavel, assuncoes e ambiguidades relevantes, regras aplicaveis ao papel, arquivos normativos relevantes e proximo passo objetivo.
 11. Se o escopo tocar bootstrap, auth, secrets, CI, sync, CLI ou ambiente, acionar `critical-integrations-guardian`.
 12. Se o escopo tocar rotacao, backup, expiracao, revogacao ou inventario de credenciais, chaves SSH, `sops+age` ou notificacao de segredos, acionar `secrets-rotation-governor`.
 13. Se houver texto, comentario, documentacao, config textual ou identificadores legiveis alterados, acionar `pascoalete` em modo consultivo com `task spell:review`.
@@ -49,6 +49,8 @@
 - todo subagente deve receber contexto suficiente para operar de imediato no seu
   papel, sem depender de adivinhacao, memoria parcial ou releitura informal do
   chat.
+- quando houver `PEA`, o subagente deve receber tambem o modo de execucao, as
+  assuncoes relevantes e as ambiguidades ainda abertas para aquele subescopo.
 - `critical-integrations-guardian` e obrigatorio em mudancas de plataforma e integracoes criticas.
 - `secrets-rotation-governor` e obrigatorio em mudancas de lifecycle de credenciais.
 - `pascoalete` e obrigatorio em modo consultivo para alteracoes textuais e deve abrir pendencia no backlog se reprovar algo que permanecer sem correcao.

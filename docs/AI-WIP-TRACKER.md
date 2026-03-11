@@ -1,6 +1,6 @@
 # AI WIP Tracker
 
-Atualizado em: 2026-03-11 14:40 UTC
+Atualizado em: 2026-03-11 15:21 UTC
 
 Fallback local de continuidade. O Jira e a fonte primaria do fluxo vivo.
 
@@ -27,7 +27,7 @@ Fallback local de continuidade. O Jira e a fonte primaria do fluxo vivo.
 <!-- ai-worklog:doing:start -->
 | ID | Tarefa | Branch | Responsavel | Inicio UTC | Ultima atualizacao UTC | Proximo passo | Bloqueios |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| (sem itens) | - | - | - | - | - | - | - |
+| WIP-DOT-178 | Formalizar prompt pack canonico de PEA/startup na arvore .agents/prompts | feat/DOT-178-formal-pea-prompt-pack | ai-developer-config-policy | 2026-03-11 15:21 UTC | 2026-03-11 15:21 UTC | Implementar a nova estrutura .agents/prompts e catalogar o pack formal antes de ajustar startup e validadores | - |
 <!-- ai-worklog:doing:end -->
 
 ## Done
@@ -83,5 +83,5 @@ Fallback local de continuidade. O Jira e a fonte primaria do fluxo vivo.
 <!-- ai-worklog:log:start -->
 | Data/Hora UTC | ID | Status | Resumo | Proximo passo | Bloqueios | Contexto | Notas |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| (sem itens) | - | - | - | - | - | - | - |
+| 2026-03-11 15:21 UTC | WIP-DOT-178 | doing | Formalizar prompt pack canonico de PEA/startup na arvore .agents/prompts | Implementar a nova estrutura .agents/prompts e catalogar o pack formal antes de ajustar startup e validadores | - | Criar estrutura formal de prompt packs, materializar o PEA/startup e alinhar startup/docs/validadores | inicio da tarefa |
 <!-- ai-worklog:log:end -->

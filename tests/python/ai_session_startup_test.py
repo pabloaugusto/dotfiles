@@ -130,6 +130,27 @@ class AiSessionStartupTests(unittest.TestCase):
             ],
         }
 
+    @staticmethod
+    def _fake_pea_status() -> dict[str, object]:
+        return {
+            "status": "ok",
+            "catalog_path": ".agents/prompts/CATALOG.md",
+            "pack_root": ".agents/prompts/formal/pea-startup-governance",
+            "required_paths": [
+                ".agents/prompts/CATALOG.md",
+                ".agents/prompts/formal/pea-startup-governance/prompt.md",
+            ],
+            "missing_paths": [],
+            "startup_loads_pack": True,
+            "execution_modes": [
+                "fast_lane",
+                "alinhamento_resumido_e_execucao",
+                "aguardando_confirmacao_humana",
+                "bloqueado_por_pre_condicao",
+            ],
+            "separation_note": "startup rele a camada e expoe pea_status; PEA alinha entendimento; enforcement real permanece nos gates oficiais",
+        }
+
     def test_resolve_startup_manifest_paths_collects_explicit_and_recursive_targets(self) -> None:
         with tempfile.TemporaryDirectory() as tmp_dir:
             repo_root = Path(tmp_dir)
@@ -350,6 +371,10 @@ class AiSessionStartupTests(unittest.TestCase):
                     "scripts.ai_session_startup_lib.atlassian_connectivity_summary",
                     return_value=self._fake_atlassian(),
                 ),
+                patch(
+                    "scripts.ai_session_startup_lib.pea_status_payload",
+                    return_value=self._fake_pea_status(),
+                ),
             ):
                 payload = write_startup_session_report(repo_root)
 
@@ -362,6 +387,7 @@ class AiSessionStartupTests(unittest.TestCase):
         self.assertIn("## Comunicacao no chat e identidade", report_text)
         self.assertIn("Engenheiro Agentes IA", report_text)
         self.assertIn("## Drift operacional detectado", report_text)
+        self.assertIn("## PEA carregado no startup", report_text)
         self.assertIn("## Delegacao e subagentes", report_text)
         self.assertIn("cloud_id", report_text)
 
@@ -411,6 +437,7 @@ class AiSessionStartupTests(unittest.TestCase):
                 "rules": ["commits devem ser atomicos, ligados a uma unica issue"],
                 "enforcement_note": "o startup relembra a governanca Git, mas o enforcement real continua nos hooks, tasks e gates oficiais do repo",
             },
+            "pea_status": self._fake_pea_status(),
             "delegation_context": {
                 "status": "ok",
                 "owner_issue": "DOT-177",
@@ -436,7 +463,9 @@ class AiSessionStartupTests(unittest.TestCase):
 
         self.assertIn("## Comunicacao no chat e identidade", markdown)
         self.assertIn("## Governanca Git carregada no startup", markdown)
+        self.assertIn("## PEA carregado no startup", markdown)
         self.assertIn("docs/git-conventions.md", markdown)
+        self.assertIn("pea-startup-governance", markdown)
         self.assertIn("enforcement", markdown)
         self.assertIn("## Inventario Git e worktree", markdown)
         self.assertIn("## Drift operacional detectado", markdown)
@@ -525,11 +554,16 @@ class AiSessionStartupTests(unittest.TestCase):
                     "scripts.ai_session_startup_lib.atlassian_connectivity_summary",
                     return_value=self._fake_atlassian(),
                 ),
+                patch(
+                    "scripts.ai_session_startup_lib.pea_status_payload",
+                    return_value=self._fake_pea_status(),
+                ),
             ):
                 payload = startup_session_payload(repo_root)
 
         self.assertEqual(payload["pending_chat_contract_count"], 2)
         self.assertEqual(payload["agent_identity"]["active_display_name"], "Engenheiro Agentes IA")
+        self.assertEqual(payload["pea_status"]["status"], "ok")
         self.assertEqual(payload["prioritized_work_item"]["identifier"], "DOT-177")
         self.assertEqual(payload["startup_drift"]["status"], "clean")
 

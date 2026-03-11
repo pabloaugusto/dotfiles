@@ -23,6 +23,9 @@ startup_governance:
       - remember-atlassian-auth-mode-cloud-id-and-recovery-path
       - no-subagent-delegation-before-startup-context-is-loaded-and-scoped
       - subagent-context-pack-must-carry-owner-issue-startup-artifacts-and-applicable-rules
+      - startup-must-load-prompts-catalog-and-applicable-formal-pea-pack
+      - startup-report-must-expose-pea-status
+      - subagent-context-pack-must-carry-pea-classification-when-applicable
       - work-started-without-full-startup-context-is-rejectable
       - warn-user-when-chat-origin-contracts-still-lack-official-promotion
       - keep-a-lived-register-of-chat-origin-contracts-not-yet-promoted
@@ -34,6 +37,25 @@ startup_governance:
       - app-restart
       - model-restart
       - worktree-switch-without-reliable-carry-over
+
+pre_execution_alignment:
+  source_of_truth:
+    catalog: .agents/prompts/CATALOG.md
+    formal_packs_root: .agents/prompts/formal
+    canonical_pack: .agents/prompts/formal/pea-startup-governance/prompt.md
+  execution_modes:
+    - fast_lane
+    - alinhamento_resumido_e_execucao
+    - aguardando_confirmacao_humana
+    - bloqueado_por_pre_condicao
+  mandatory_rules:
+    - distinguish-startup-pre-execution-alignment-and-enforcement
+    - structural-or-persistent-work-must-run-pre-execution-alignment-before-execution
+    - missing-owner-issue-or-dedupe-preflight-must-block-execution
+    - startup-must-load-prompts-catalog-and-applicable-formal-pea-pack
+    - startup-report-must-expose-pea-status
+    - subagent-context-pack-must-carry-pea-classification-when-applicable
+    - human-bypass-may-skip-conversational-confirmation-but-not-operational-guardrails
 
 backlog:
   system_of_record: jira

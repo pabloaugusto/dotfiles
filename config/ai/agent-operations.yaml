@@ -64,6 +64,8 @@ global_contract:
       - chat-summaries-do-not-replace-jira-or-confluence-traceability
       - no-subagent-delegation-before-startup-context-is-loaded-or-linked
       - subagent-handoff-must-carry-owner-issue-startup-context-and-applicable-rules
+      - subagent-handoff-must-carry-pea-classification-when-applicable
+      - ambiguous-or-structural-work-must-run-pre-execution-alignment-before-execution
       - work-executed-without-required-startup-context-is-rejectable
       - closed-issues-must-trigger-commit-checkpoint-evaluation
       - commit-must-happen-immediately-after-issue-close-when-scope-is-already-valid
