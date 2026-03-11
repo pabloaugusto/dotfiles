@@ -1,6 +1,6 @@
 # AI WIP Tracker
 
-Atualizado em: 2026-03-11 06:08 UTC
+Atualizado em: 2026-03-11 07:29 UTC
 
 Fallback local de continuidade. O Jira e a fonte primaria do fluxo vivo.
 
@@ -30,6 +30,7 @@ Fallback local de continuidade. O Jira e a fonte primaria do fluxo vivo.
 <!-- ai-worklog:done:start -->
 | ID | Tarefa | Branch | Responsavel | Inicio UTC | Concluido UTC | Resultado |
 | --- | --- | --- | --- | --- | --- | --- |
+| WIP-DOT-109 | Sincronizar roles especializados no Jira. | feat/DOT-109-jira-role-sync | Engenheiro Agentes IA | 2026-03-11 06:21 UTC | 2026-03-11 07:29 UTC | Sincronizacao dos roles especializados do Jira concluida com apply reproduzivel, diagnostico exato de drift e remediacao do workflow para nomes canonicos de status, incluindo fe... / evidencias: DOT-109 em Done no Jir... |
 | WIP-DOT-134 | Auditar integralmente as issues em Done e abrir bugs ou fixes para lacunas reais. | feat/DOT-134-done-audit | PO | 2026-03-11 05:40 UTC | 2026-03-11 06:08 UTC | Matriz versionada de auditoria integral das issues Done concluida em docs/AI-DONE-ISSUES-AUDIT.md, com 84 issues auditadas, 17 drifts terminais saneados no Jira e 0 gaps reais r... / evidencias: docs/AI-DONE-ISSUES-AU... |
 | WIP-DOT-135 | Backfill retrospectivas e evidencias de cerimonias das branches ja encerradas. | feat/DOT-135-retrospectiva-backfill | PO | 2026-03-11 04:50 UTC | 2026-03-11 05:35 UTC | Backfill historico de retrospectivas concluido com 13 branches classificadas, 11 backfills fieis publicados, 2 retrospectivas ja existentes preservadas e residual sem evidencia... / evidencias: docs/AI-RETROSPECTIVE-B... |
 | WIP-DOT-132 | Reconciliar demandas Paused e definir retomada ou encerramento correto. | feat/DOT-132-reconcile-paused | PO | 2026-03-11 02:14 UTC | 2026-03-11 04:27 UTC | Auditoria das issues Paused concluida com DOT-1 reconciliada para Done, DOT-37 mantida como parcialmente entregue em Paused e DOT-126 mantida como pausa legitima com ownership a... / evidencias: docs/AI-PAUSED-ISSUES-... |

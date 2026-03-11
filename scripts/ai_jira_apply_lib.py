@@ -10,7 +10,14 @@ from scripts.ai_control_plane_lib import (
     load_ai_control_plane,
     resolve_atlassian_platform,
 )
-from scripts.ai_jira_model_lib import load_jira_model
+from scripts.ai_jira_model_lib import (
+    applicable_field_contexts,
+    current_custom_field_option_gaps,
+    field_context_entries,
+    field_option_values,
+    load_jira_model,
+    resolve_named_fields,
+)
 from scripts.atlassian_platform_lib import AtlassianHttpClient, AtlassianPlatformError
 
 FIELD_TYPE_MAP = {
@@ -120,13 +127,12 @@ def workflow_status_entries(
         normalized_name = normalize_status_name(name)
         category_key = STATUS_CATEGORY_MAP[str(entry.get("category", "")).strip().lower()]
         existing = current_statuses.get(name) or current_statuses.get(normalized_name)
-        status_name = str((existing or {}).get("name") or name).strip()
         status_reference = str((existing or {}).get("id", "")).strip() or workflow_status_reference(
             workflow_name,
-            status_name,
+            name,
         )
         status_payload = {
-            "name": status_name,
+            "name": name,
             "statusCategory": category_key,
             "statusReference": status_reference,
             "description": str(entry.get("description", "")).strip(),
@@ -136,6 +142,46 @@ def workflow_status_entries(
         payload.append(status_payload)
         status_references[normalized_name] = status_reference
     return payload, status_references
+
+
+def workflow_status_metadata_gaps(
+    model: dict[str, Any],
+    current_statuses: dict[str, dict[str, Any]],
+) -> list[dict[str, Any]]:
+    workflow = model.get("workflow") or {}
+    raw_statuses = workflow.get("statuses") or []
+    if not isinstance(raw_statuses, list):
+        raise AiControlPlaneError("workflow.statuses precisa ser lista.")
+    gaps: list[dict[str, Any]] = []
+    for entry in raw_statuses:
+        if not isinstance(entry, dict):
+            raise AiControlPlaneError("workflow.statuses aceita apenas mapas.")
+        desired_name = str(entry.get("name", "")).strip()
+        desired_category = str(entry.get("category", "")).strip()
+        if not desired_name:
+            continue
+        current = current_statuses.get(desired_name) or current_statuses.get(
+            normalize_status_name(desired_name)
+        )
+        if not current:
+            continue
+        current_name = str(current.get("name", "")).strip()
+        current_category = str(current.get("statusCategory", "")).strip()
+        if (
+            current_name == desired_name
+            and normalize_status_name(current_category) == normalize_status_name(desired_category)
+        ):
+            continue
+        gaps.append(
+            {
+                "desired_name": desired_name,
+                "current_name": current_name,
+                "desired_category": desired_category,
+                "current_category": current_category,
+                "status_id": str(current.get("id", "")).strip(),
+            }
+        )
+    return gaps
 
 
 def workflow_layout_entries(status_entries: list[dict[str, Any]]) -> list[dict[str, Any]]:
@@ -423,6 +469,24 @@ def wait_for_workflow_convergence(
     return latest
 
 
+def wait_for_workflow_status_metadata_convergence(
+    client: AtlassianHttpClient,
+    project_key: str,
+    model: dict[str, Any],
+    *,
+    attempts: int = 5,
+    sleep_seconds: float = 1.0,
+) -> dict[str, dict[str, Any]]:
+    latest: dict[str, dict[str, Any]] = {}
+    for index in range(attempts):
+        latest = current_status_catalog(client, project_key)
+        if not workflow_status_metadata_gaps(model, latest):
+            return latest
+        if index < attempts - 1:
+            time.sleep(sleep_seconds)
+    return latest
+
+
 def current_project_statuses(
     client: AtlassianHttpClient, project_key: str
 ) -> dict[str, dict[str, Any]]:
@@ -590,11 +654,25 @@ def project_has_issues(client: AtlassianHttpClient, project_key: str) -> bool:
 
 
 def ensure_field_options(
-    client: AtlassianHttpClient, field_id: str, options: list[str]
+    client: AtlassianHttpClient,
+    field_id: str,
+    options: list[str],
+    *,
+    project_id: str = "",
 ) -> dict[str, Any]:
-    contexts_payload = client.request_json("jira", f"/rest/api/3/field/{field_id}/context")
-    contexts = contexts_payload.get("values", [])
-    if not isinstance(contexts, list) or not contexts:
+    contexts = field_context_entries(client, field_id)
+    applicable_context_entries = applicable_field_contexts(
+        client,
+        field_id,
+        project_id=project_id,
+    )
+    created_context = False
+    normalized_project_id = project_id.strip()
+    if not applicable_context_entries:
+        if contexts:
+            raise AtlassianPlatformError(
+                f"O field {field_id} nao possui contexto aplicavel ao projeto {normalized_project_id or '?'}."
+            )
         created = client.request_json(
             "jira",
             f"/rest/api/3/field/{field_id}/context",
@@ -602,35 +680,53 @@ def ensure_field_options(
             payload={
                 "name": "DOT Default Context",
                 "description": "",
-                "projectIds": [],
+                "projectIds": [normalized_project_id] if normalized_project_id else [],
                 "issueTypeIds": [],
             },
         )
-        context_id = str(created.get("id", "")).strip()
-    else:
-        context_id = str((contexts[0] or {}).get("id", "")).strip()
-    if not context_id:
-        raise AtlassianPlatformError(f"Nao foi possivel resolver contexto para o field {field_id}.")
+        created_context_id = str(created.get("id", "")).strip()
+        if not created_context_id:
+            raise AtlassianPlatformError(
+                f"Nao foi possivel criar contexto aplicavel para o field {field_id}."
+            )
+        applicable_context_entries = [
+            {
+                "id": created_context_id,
+                "name": "DOT Default Context",
+                "isGlobalContext": not normalized_project_id,
+            }
+        ]
+        created_context = True
 
-    existing_payload = client.request_json(
-        "jira",
-        f"/rest/api/3/field/{field_id}/context/{context_id}/option",
-        params={"onlyOptions": "true", "maxResults": "200"},
-    )
-    existing_values = {
-        str(entry.get("value", "")).strip()
-        for entry in existing_payload.get("values", [])
-        if isinstance(entry, dict)
-    }
-    missing = [option for option in options if option not in existing_values]
-    if missing:
-        client.request_json(
-            "jira",
-            f"/rest/api/3/field/{field_id}/context/{context_id}/option",
-            method="POST",
-            payload={"options": [{"value": option, "disabled": False} for option in missing]},
+    context_results: list[dict[str, Any]] = []
+    for context in applicable_context_entries:
+        context_id = str(context.get("id", "")).strip()
+        if not context_id:
+            continue
+        existing_values = set(field_option_values(client, field_id, context_id=context_id))
+        missing = [option for option in options if option not in existing_values]
+        if missing:
+            client.request_json(
+                "jira",
+                f"/rest/api/3/field/{field_id}/context/{context_id}/option",
+                method="POST",
+                payload={"options": [{"value": option, "disabled": False} for option in missing]},
+            )
+        context_results.append(
+            {
+                "context_id": context_id,
+                "context_name": str(context.get("name", "")).strip(),
+                "is_global_context": bool(context.get("isGlobalContext", False)),
+                "created_options": missing,
+            }
         )
-    return {"context_id": context_id, "created_options": missing}
+    first_result = context_results[0] if context_results else {"context_id": "", "created_options": []}
+    return {
+        "context_id": first_result["context_id"],
+        "created_options": first_result["created_options"],
+        "created_context": created_context,
+        "updated_contexts": context_results,
+    }
 
 
 def field_screens(client: AtlassianHttpClient, field_id: str) -> list[dict[str, Any]]:
@@ -672,6 +768,7 @@ def build_apply_plan(repo_root: str | Path | None = None) -> dict[str, Any]:
     active_fields = active_custom_fields(model, role_ids=role_ids)
     desired_workflow_payload = workflow_create_payload(model, current_statuses=statuses)
     live_workflow = current_workflow_detail_by_name(client, workflow_name)
+    status_metadata_gaps = workflow_status_metadata_gaps(model, statuses)
 
     return {
         "model_path": str(model_path),
@@ -689,8 +786,12 @@ def build_apply_plan(repo_root: str | Path | None = None) -> dict[str, Any]:
             "requires_update": (
                 workflow_name in workflows
                 and live_workflow is not None
-                and workflow_requires_update(live_workflow, desired_workflow_payload)
+                and (
+                    workflow_requires_update(live_workflow, desired_workflow_payload)
+                    or bool(status_metadata_gaps)
+                )
             ),
+            "status_metadata_gaps": status_metadata_gaps,
             "payload": desired_workflow_payload,
         },
         "custom_fields": {
@@ -700,6 +801,12 @@ def build_apply_plan(repo_root: str | Path | None = None) -> dict[str, Any]:
                 for entry in active_fields
                 if str(entry.get("name", "")).strip() not in fields
             ],
+            "option_gaps": current_custom_field_option_gaps(
+                client,
+                model,
+                role_ids=role_ids,
+                project_id=project_id,
+            ),
             "detached_from_screens": [
                 str(entry.get("name", "")).strip()
                 for entry in active_fields
@@ -765,6 +872,7 @@ def apply_jira_model(repo_root: str | Path | None = None) -> dict[str, Any]:
         if workflow_name in workflows
         else None
     )
+    status_metadata_gaps = workflow_status_metadata_gaps(model, statuses)
     results: dict[str, Any] = {
         "model_path": str(model_path),
         "project": {"id": project_id, "key": resolved.jira_project_key, "has_issues": has_issues},
@@ -774,6 +882,7 @@ def apply_jira_model(repo_root: str | Path | None = None) -> dict[str, Any]:
             "validated": False,
             "updated": False,
             "update_validated": False,
+            "status_metadata_gaps": status_metadata_gaps,
         },
         "workflow_scheme": {"name": scheme_name, "created": False, "assigned": False},
         "custom_fields": {"created": [], "options_updated": [], "added_to_default_screen": []},
@@ -812,7 +921,7 @@ def apply_jira_model(repo_root: str | Path | None = None) -> dict[str, Any]:
             f"Nao foi possivel carregar o workflow publicado {workflow_name!r}."
         )
 
-    if workflow_requires_update(live_workflow, desired_workflow_payload):
+    if workflow_requires_update(live_workflow, desired_workflow_payload) or status_metadata_gaps:
         update_payload = workflow_update_payload(
             model,
             current_statuses=statuses,
@@ -842,6 +951,17 @@ def apply_jira_model(repo_root: str | Path | None = None) -> dict[str, Any]:
         ):
             raise AtlassianPlatformError(
                 f"Workflow {workflow_name!r} permaneceu em drift apos o update."
+            )
+        statuses = wait_for_workflow_status_metadata_convergence(
+            client,
+            resolved.jira_project_key,
+            model,
+        )
+        status_metadata_gaps = workflow_status_metadata_gaps(model, statuses)
+        results["workflow"]["status_metadata_gaps"] = status_metadata_gaps
+        if status_metadata_gaps:
+            raise AtlassianPlatformError(
+                f"Workflow {workflow_name!r} permaneceu com drift de nomes/categorias apos o update."
             )
 
     scheme = workflow_schemes.get(scheme_name)
@@ -900,6 +1020,16 @@ def apply_jira_model(repo_root: str | Path | None = None) -> dict[str, Any]:
         client.request_json("jira", "/rest/api/3/field", method="POST", payload=payload)
         results["custom_fields"]["created"].append(field_name)
         fields = current_fields_by_name(client)
+    fields.update(
+        resolve_named_fields(
+            client,
+            [
+                str(field.get("name", "")).strip()
+                for field in active_fields
+                if str(field.get("name", "")).strip()
+            ],
+        )
+    )
     for field in active_fields:
         field_name = str(field.get("name", "")).strip()
         field_kind = str(field.get("type", "")).strip()
@@ -919,7 +1049,25 @@ def apply_jira_model(repo_root: str | Path | None = None) -> dict[str, Any]:
             client,
             field_id,
             configured_options,
+            project_id=project_id,
         )
+        updated_contexts = ensure_result.get("updated_contexts") or []
+        if isinstance(updated_contexts, list) and updated_contexts:
+            for context_update in updated_contexts:
+                if not isinstance(context_update, dict):
+                    continue
+                results["custom_fields"]["options_updated"].append(
+                    {
+                        "field": field_name,
+                        "context_id": str(context_update.get("context_id", "")).strip(),
+                        "context_name": str(context_update.get("context_name", "")).strip(),
+                        "is_global_context": bool(
+                            context_update.get("is_global_context", False)
+                        ),
+                        "created_options": list(context_update.get("created_options", [])),
+                    }
+                )
+            continue
         results["custom_fields"]["options_updated"].append(
             {
                 "field": field_name,

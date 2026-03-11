@@ -13,12 +13,21 @@ from scripts.ai_control_plane_lib import AiControlPlaneError
 from scripts.ai_jira_apply_lib import apply_jira_model, build_apply_plan
 
 
+def emit_json(payload: object) -> None:
+    rendered = json.dumps(payload, ensure_ascii=False)
+    try:
+        print(rendered)
+    except UnicodeEncodeError:
+        sys.stdout.buffer.write(rendered.encode("utf-8", errors="replace"))
+        sys.stdout.buffer.write(b"\n")
+
+
 def run_plan(args: argparse.Namespace) -> None:
-    print(json.dumps(build_apply_plan(args.repo_root), ensure_ascii=False))
+    emit_json(build_apply_plan(args.repo_root))
 
 
 def run_apply(args: argparse.Namespace) -> None:
-    print(json.dumps(apply_jira_model(args.repo_root), ensure_ascii=False))
+    emit_json(apply_jira_model(args.repo_root))
 
 
 def build_parser() -> argparse.ArgumentParser:
