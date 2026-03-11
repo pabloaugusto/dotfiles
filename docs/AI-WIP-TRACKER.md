@@ -1,6 +1,6 @@
 # AI WIP Tracker
 
-Atualizado em: 2026-03-11 12:38 UTC
+Atualizado em: 2026-03-11 13:10 UTC
 
 Fallback local de continuidade. O Jira e a fonte primaria do fluxo vivo.
 
@@ -27,7 +27,7 @@ Fallback local de continuidade. O Jira e a fonte primaria do fluxo vivo.
 <!-- ai-worklog:doing:start -->
 | ID | Tarefa | Branch | Responsavel | Inicio UTC | Ultima atualizacao UTC | Proximo passo | Bloqueios |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| (sem itens) | - | - | - | - | - | - | - |
+| WIP-DOT-175-CLOSEOUT | Fechar DOT-175 com PR, merge, Jira e saneamento da lacuna de startup/fallback GitHub | feat/DOT-175-intake-epic-issue-dedupe | ai-developer-config-policy | 2026-03-11 13:10 UTC | 2026-03-11 13:10 UTC | Revalidar gates, autenticar GitHub com fallback e abrir PR da branch atual | - |
 <!-- ai-worklog:doing:end -->
 
 ## Done
@@ -81,5 +81,5 @@ Fallback local de continuidade. O Jira e a fonte primaria do fluxo vivo.
 <!-- ai-worklog:log:start -->
 | Data/Hora UTC | ID | Status | Resumo | Proximo passo | Bloqueios | Contexto | Notas |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| (sem itens) | - | - | - | - | - | - | - |
+| 2026-03-11 13:10 UTC | WIP-DOT-175-CLOSEOUT | doing | Fechar DOT-175 com PR, merge, Jira e saneamento da lacuna de startup/fallback GitHub | Revalidar gates, autenticar GitHub com fallback e abrir PR da branch atual | - | DOT-175 + continuidade operacional do startup | inicio da tarefa |
 <!-- ai-worklog:log:end -->
