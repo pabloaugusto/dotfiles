@@ -16,7 +16,6 @@ import re
 import sys
 from dataclasses import dataclass
 
-
 COMMIT_TYPE_EMOJI = {
     "feat": "✨",
     "fix": "🐛",
@@ -219,14 +218,21 @@ def validate_message(
     if len(description) < 3:
         return ValidationResult(ok=False, error="Descricao muito curta.")
 
-    if require_issue_key and not JIRA_KEY_RE.search(first_line):
-        return ValidationResult(
-            ok=False,
-            error=(
-                "Chave Jira obrigatoria. Inclua um work item no subject, por "
-                "exemplo: '🔧 chore(git): DOT-81 endurecer convencoes'."
-            ),
-        )
+    if require_issue_key:
+        jira_keys = JIRA_KEY_RE.findall(first_line)
+        if not jira_keys:
+            return ValidationResult(
+                ok=False,
+                error=(
+                    "Chave Jira obrigatoria. Inclua um work item no subject, por "
+                    "exemplo: '🔧 chore(git): DOT-81 endurecer convencoes'."
+                ),
+            )
+        if len(jira_keys) != 1:
+            return ValidationResult(
+                ok=False,
+                error="O subject deve carregar exatamente uma chave Jira real.",
+            )
 
     return ValidationResult(ok=True)
 

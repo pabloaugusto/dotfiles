@@ -1,6 +1,6 @@
 # Roadmap do Repositorio
 
-Atualizado em: 2026-03-10 17:10 UTC
+Atualizado em: 2026-03-10 23:57 UTC
 Ciclo ativo: 2026-Q1
 
 Planejamento incremental para qualidade, testes, bootstrap e governanca do repo.
@@ -28,7 +28,7 @@ Edite apenas a tabela entre os marcadores abaixo.
 Atualizada por `task ai:roadmap:refresh`.
 
 <!-- roadmap:priority:start -->
-Atualizado em: 2026-03-10 17:10 UTC
+Atualizado em: 2026-03-10 23:57 UTC
 
 ### Ranking RICE
 
@@ -76,6 +76,8 @@ Sem sugestoes pendentes neste ciclo; itens aceitos ja estao rastreaveis.
 ### Next
 
 <!-- roadmap:next:start -->
+- [fix] Corrigir pendencias ortograficas remanescentes do worklog `WIP-DOT-130` em AGENTS.md, config/ai/contracts.yaml, docs/AI-WIP-TRACKER.md, docs/README.md, docs/TASKS.md e mais 9 ar... | notas=Pendencia automatica criada por Pascoalete apos review consultivo reprovado sem correcao automatica.
+- [fix] Corrigir pendencias ortograficas remanescentes do worklog `WIP-DOT-130` em AGENTS.md, config/ai/contracts.yaml, docs/README.md, docs/TASKS.md, docs/ai-operating-model.md e mais... | notas=Pendencia automatica criada por Pascoalete apos review consultivo reprovado sem correcao automatica.
 - [fix] Corrigir pendencias ortograficas remanescentes do worklog `DOT-122` em .agents/cards/ai-product-owner.md, config/ai/agent-operations.yaml, config/ai/agents.yaml, docs/AI-AGENTS-... | notas=Pendencia automatica criada por Pascoalete apos review consultivo reprovado sem correcao automatica.
 - [fix] Corrigir pendencias ortograficas remanescentes do worklog `DOT-118` em .agents/cards/ai-developer-config-policy.md, .agents/config.toml, .agents/registry/ai-developer-automation... | notas=Pendencia automatica criada por Pascoalete apos review consultivo reprovado sem correcao automatica.
 - [fix] Corrigir pendencias ortograficas remanescentes do worklog `DOT-119` em .agents/cards/ai-engineering-manager.md, .agents/cards/ai-scrum-master.md, config/ai/agent-operations.yaml... | notas=Pendencia automatica criada por Pascoalete apos review consultivo reprovado sem correcao automatica.

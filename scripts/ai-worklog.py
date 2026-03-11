@@ -256,7 +256,7 @@ def tracker_template() -> str:
 
 Atualizado em: {now_human_utc()}
 
-Fonte de verdade operacional para continuidade de tarefas dos agentes de IA.
+Fallback local de continuidade. O Jira e a fonte primaria do fluxo vivo.
 
 ## Regras operacionais
 
@@ -527,7 +527,7 @@ def run_check(args: argparse.Namespace) -> None:
         preview = ", ".join(dirty_paths[:8])
         suffix = " ..." if len(dirty_paths) > 8 else ""
         raise SystemExit(
-            "Checkpoint commit obrigatorio antes de nova rodada: worktree suja sem item em Doing. "
+            "Commit de fechamento obrigatorio antes de nova rodada: worktree suja sem item em Doing. "
             "Faca commit do contexto atual antes de seguir. Arquivos pendentes: " + preview + suffix
         )
     if args.strict == 1 and doing and not pending_action:

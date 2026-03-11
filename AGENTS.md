@@ -115,17 +115,26 @@ Leia a skill mais proxima do escopo antes de editar arquivos relevantes.
   nova sem relacao com esse WIP.
 - Manter o item ativo em `Doing` durante toda a execucao relevante e so move-lo para `Done`
   imediatamente antes da resposta final ao usuario.
-- Ao concluir uma rodada e permanecerem mudancas locais coerentes, criar commit checkpoint
+- `Jira` e a fonte primaria do fluxo vivo; [`docs/AI-WIP-TRACKER.md`](docs/AI-WIP-TRACKER.md)
+  funciona como fallback contingencial do repo.
+- Ao concluir uma rodada e permanecerem mudancas locais coerentes, criar commit de fechamento
   antes de iniciar novo escopo; `task ai:worklog:check` deve bloquear worktree suja sem `Doing` ativo.
 - Nenhum `done` e valido sem revisar [`LICOES-APRENDIDAS.md`](LICOES-APRENDIDAS.md) e registrar explicitamente
   `capturada` ou `sem_nova_licao`.
 - Reprovacao de `pascoalete` nao bloqueia `done`, PR ou commit, mas deve
   registrar log consultivo e abrir pendencia rastreavel se nao houver correcao
   na rodada atual.
-- Branches devem seguir `<type>/<slug>` e nao usar emoji.
-- Commit e PR title devem seguir `emoji + conventional commit` com maximo recomendado de 72 caracteres.
+- Commits devem ser atomicos, semanticamente coesos, ligados a uma unica issue Jira real
+  e preferencialmente auto-testaveis.
+- Branches novas devem seguir `<type>/<jira-key>-<slug>` e nao usar emoji;
+  branches legadas pre-integracao com Jira so podem permanecer como excecao historica.
+- Commit e PR title devem seguir `emoji + conventional commit`, carregar uma unica
+  chave Jira real no subject e respeitar o maximo recomendado de 72 caracteres.
 - Cada branch deve carregar um unico contexto coerente; separar assuntos independentes em branches diferentes.
-- [`docs/AI-WIP-TRACKER.md`](docs/AI-WIP-TRACKER.md) e a fonte de verdade do trabalho incremental de IA.
+- Ao retomar demanda antiga, abrir branch nova a partir de `main`, salvo evidencia objetiva de
+  que a branch anterior ainda e a trilha certa.
+- Apos merge ou absorcao em `main`, remover branches e worktrees desnecessarias assim que
+  a trilha estiver segura.
 - Em documentacao e comentarios que suportem links clicaveis, toda citacao
   viavel a arquivo, pasta, task, workflow, script do repo ou referencia
   externa deve usar link explicito para o alvo, nao apenas texto solto ou
@@ -149,5 +158,5 @@ Leia a skill mais proxima do escopo antes de editar arquivos relevantes.
 7. Validar localmente com tasks, lints e testes cabiveis.
 8. Manter o item em `Doing` enquanto a execucao estiver em curso.
 9. So no ultimo passo tecnico, revisar licoes, mover o item para `Done` e validar `task ai:worklog:close:gate`.
-10. Se a rodada terminou e a worktree ainda estiver dirty, criar commit checkpoint antes de aceitar novo escopo.
+10. Se a rodada terminou e a worktree ainda estiver dirty, criar commit de fechamento antes de aceitar novo escopo.
 11. Manter commit e PR no padrao `emoji + conventional commits`.

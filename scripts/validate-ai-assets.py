@@ -86,6 +86,7 @@ REQUIRED_FILES = [
     "scripts/ai_control_plane_lib.py",
     "scripts/ai_session_startup_lib.py",
     "scripts/atlassian_platform_lib.py",
+    "scripts/git-governance-check.py",
     "scripts/run-ai-atlassian-check.ps1",
     "scripts/run-ai-startup-session.ps1",
     "scripts/cspell-governance.py",
@@ -174,6 +175,7 @@ AGENTS_REQUIRED_SNIPPETS = [
     "docs/AI-SOURCE-AUDIT.md",
     "docs/AI-STARTUP-GOVERNANCE-MANIFEST.md",
     "docs/AI-CHAT-CONTRACTS-REGISTER.md",
+    "`Jira` e a fonte primaria do fluxo vivo",
     "concluir_primeiro passa a significar concluir ou puxar apenas o work item minimo que o destrava diretamente",
     "Manter o item ativo em `Doing` durante toda a execucao relevante",
     "Nenhum `done` e valido sem revisar `LICOES-APRENDIDAS.md`",
@@ -184,6 +186,7 @@ OPERATING_MODEL_REQUIRED_SNIPPETS = [
     "### 1.1. Retomada do zero exige releitura integral de governanca",
     "### 1.2. Contratos nascidos no chat precisam de registrador vivo",
     "### 3.1. Terminar antes de comecar inclui destravar o WIP ativo",
+    "### 4.4. Higiene Git obrigatoria e rastreabilidade Jira",
     "### 5. Auditoria exaustiva antes de reuso cross-repo",
     "### Fronteira entre `.agents/` e adaptadores de assistente",
     "### Camada 2.1. Registry declarativo do repo",
@@ -300,6 +303,32 @@ BOARD_OPERATION_REQUIRED_SNIPPETS = {
     ],
 }
 
+GIT_GOVERNANCE_REQUIRED_SNIPPETS = {
+    "docs/git-conventions.md": [
+        "<type>/<jira-key>-<slug>",
+        "cada commit deve representar uma unica **issue** Jira real",
+        "quando possivel, cada commit deve ser auto-testavel",
+        "retomada nova deve nascer de `main` no padrao canonico",
+        "`task git:governance:check`",
+    ],
+    "docs/README.md": [
+        "fallback contingencial local; o `Jira` e a fonte primaria do fluxo vivo.",
+    ],
+    "scripts/ai-worklog.py": [
+        "Fallback local de continuidade. O Jira e a fonte primaria do fluxo vivo.",
+        "Commit de fechamento obrigatorio antes de nova rodada",
+    ],
+    "config/ai/contracts.yaml": [
+        "git_governance:",
+        "source_of_truth: jira",
+        "branch_pattern: <type>/<jira-key>-<slug>",
+        "commits-must-be-atomic-contextualized-and-preferably-self-testable",
+        "resume-old-work-on-a-new-branch-from-main-unless-evidence-keeps-the-existing-branch-valid",
+        "prune-unneeded-local-branches-and-worktrees-after-merge",
+        "fail-when-local-merged-branches-or-worktrees-remain-without-purpose",
+    ],
+}
+
 CATALOG_REQUIRED_SNIPPETS = {
     "docs/AI-AGENTS-CATALOG.md": [
         "architecture-modernization-authority",
@@ -347,6 +376,7 @@ CATALOG_REQUIRED_SNIPPETS = {
         "automation-reviewer",
     ],
     "docs/TASKS.md": [
+        "### `git:governance:check`",
         "### `ai:chat:intake`",
         "### `ai:route`",
         "### `ai:delegate`",
@@ -780,6 +810,11 @@ def main(argv: list[str]) -> int:
             require_snippets(path.read_text(encoding="utf-8"), snippets, relative, failures)
 
     for relative, snippets in BOARD_OPERATION_REQUIRED_SNIPPETS.items():
+        path = repo_root / relative
+        if path.is_file():
+            require_snippets(path.read_text(encoding="utf-8"), snippets, relative, failures)
+
+    for relative, snippets in GIT_GOVERNANCE_REQUIRED_SNIPPETS.items():
         path = repo_root / relative
         if path.is_file():
             require_snippets(path.read_text(encoding="utf-8"), snippets, relative, failures)

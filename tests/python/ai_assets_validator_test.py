@@ -48,6 +48,7 @@ class ValidateAiAssetsTests(unittest.TestCase):
         self.assertIn("scripts/ai_control_plane_lib.py", module.REQUIRED_FILES)
         self.assertIn("scripts/ai_session_startup_lib.py", module.REQUIRED_FILES)
         self.assertIn("scripts/atlassian_platform_lib.py", module.REQUIRED_FILES)
+        self.assertIn("scripts/git-governance-check.py", module.REQUIRED_FILES)
         self.assertIn("scripts/run-ai-startup-session.ps1", module.REQUIRED_FILES)
         self.assertIn("scripts/cspell-governance.py", module.REQUIRED_FILES)
         self.assertIn("scripts/validate_workflow_task_sync.py", module.REQUIRED_FILES)
@@ -56,6 +57,7 @@ class ValidateAiAssetsTests(unittest.TestCase):
         self.assertIn("## Entregas esperadas", module.REQUIRED_SKILL_HEADINGS)
         self.assertIn("Nunca operar por amostragem", module.AGENTS_REQUIRED_SNIPPETS)
         self.assertIn("docs/AI-STARTUP-GOVERNANCE-MANIFEST.md", module.AGENTS_REQUIRED_SNIPPETS)
+        self.assertIn("`Jira` e a fonte primaria do fluxo vivo", module.AGENTS_REQUIRED_SNIPPETS)
         self.assertIn(
             "concluir_primeiro passa a significar concluir ou puxar apenas o work item minimo que o destrava diretamente",
             module.AGENTS_REQUIRED_SNIPPETS,
@@ -70,6 +72,10 @@ class ValidateAiAssetsTests(unittest.TestCase):
         )
         self.assertIn(
             "### 3.1. Terminar antes de comecar inclui destravar o WIP ativo",
+            module.OPERATING_MODEL_REQUIRED_SNIPPETS,
+        )
+        self.assertIn(
+            "### 4.4. Higiene Git obrigatoria e rastreabilidade Jira",
             module.OPERATING_MODEL_REQUIRED_SNIPPETS,
         )
         self.assertIn(
@@ -98,6 +104,11 @@ class ValidateAiAssetsTests(unittest.TestCase):
             "reading_order: right-to-left",
             module.BOARD_OPERATION_REQUIRED_SNIPPETS["config/ai/contracts.yaml"],
         )
+        self.assertIn("docs/git-conventions.md", module.GIT_GOVERNANCE_REQUIRED_SNIPPETS)
+        self.assertIn(
+            "branch_pattern: <type>/<jira-key>-<slug>",
+            module.GIT_GOVERNANCE_REQUIRED_SNIPPETS["config/ai/contracts.yaml"],
+        )
         self.assertIn("ceremonies", module.REQUIRED_AI_CONFIG_SECTIONS)
         self.assertIn(
             "## LA-007 - Integracoes criticas exigem guardiao proprio",
@@ -117,6 +128,10 @@ class ValidateAiAssetsTests(unittest.TestCase):
         )
         self.assertIn(
             "### `ai:atlassian:check`",
+            module.CATALOG_REQUIRED_SNIPPETS["docs/TASKS.md"],
+        )
+        self.assertIn(
+            "### `git:governance:check`",
             module.CATALOG_REQUIRED_SNIPPETS["docs/TASKS.md"],
         )
         self.assertIn(
