@@ -20,6 +20,13 @@ Registro consultivo do agente Pascoalete para ortografia e higiene vocabular.
 <!-- ai-orthography:records:start -->
 | Data/Hora UTC | Worklog ID | Revisor | Status | Arquivo | Achados | Evidencia |
 | --- | --- | --- | --- | --- | --- | --- |
+| 2026-03-11 16:49 UTC | DOT-178 | pascoalete | reprovado | .agents/prompts/formal/temporal-governance-enforcement/fragments/enforcement.md | verificacao, verificacao, verificacao, emissao | task spell:check |
+| 2026-03-11 16:49 UTC | DOT-178 | pascoalete | reprovado | .agents/prompts/formal/temporal-governance-enforcement/fragments/blocking-reviewer.md | regionalizacao, superficie, extensao, superficie | task spell:check |
+| 2026-03-11 16:49 UTC | DOT-178 | pascoalete | reprovado | .agents/prompts/formal/temporal-governance-enforcement/fragments/global-rule.md | regionalizacao, semantica, excecao, rastreavel, superficie, regionalized | task spell:check |
+| 2026-03-11 16:49 UTC | DOT-178 | pascoalete | reprovado | .agents/prompts/formal/temporal-governance-enforcement/meta.yaml | regionalizacao | task spell:check |
+| 2026-03-11 16:49 UTC | DOT-178 | pascoalete | reprovado | .agents/prompts/formal/temporal-governance-enforcement/context.md | implementacao, regionalizacao, repositorio, correcoes, implementacao, excecao, rastreavel, LICOES (+4) | task spell:check |
+| 2026-03-11 16:49 UTC | DOT-178 | pascoalete | reprovado | .agents/prompts/formal/temporal-governance-enforcement/prompt.md | Implementacao, Regionalizacao, Missao, regionalizacao, repositorio, docstrings, cosmetico, mudanca (+125) | task spell:check |
+| 2026-03-11 16:49 UTC | DOT-178 | pascoalete | reprovado | .agents/prompts/CATALOG.md | integracao, regionalizacao, agnostico, repositorio, historicos | task spell:check |
 | 2026-03-11 16:03 UTC | WIP-DOT-178-CLOSEOUT | pascoalete | reprovado | docs/AI-WIP-TRACKER.md | solicitacao, acionavel, indisponivel, degradacao, primario, obrigatorio, Responsavel, atualizacao (+99) | task spell:check |
 | 2026-03-11 16:03 UTC | WIP-DOT-178-CLOSEOUT | pascoalete | reprovado | LICOES-APRENDIDAS.md | Licoes, usuario, LICOES, licao, Criterio, licoes, eficiencia, resiliencia (+191) | task spell:check |
 | 2026-03-11 15:45 UTC | WIP-DOT-178 | pascoalete | reprovado | .agents/prompts/formal/pea-startup-governance/fragments/startup-extension.md | Extensao, sessao, aplicavel, relatorio, aplicavel | task spell:check |

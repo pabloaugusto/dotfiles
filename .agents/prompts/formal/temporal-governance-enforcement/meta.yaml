@@ -1,0 +1,25 @@
+id: temporal-governance-enforcement
+title: Prompt pack de governanca temporal e regionalizacao
+status: active
+owner_epic: DOT-71
+owner_issue: DOT-178
+entrypoints:
+  prompt: prompt.md
+  context: context.md
+fragments:
+  - fragments/global-rule.md
+  - fragments/blocking-reviewer.md
+  - fragments/enforcement.md
+startup:
+  mandatory_load: false
+  report_key: temporal_governance_status
+  requires_manifest_integration: false
+delegation:
+  propagate_pea_context: false
+  required_payload_fields:
+    - owner_issue
+    - current_branch
+    - startup_report
+    - project_time_policy
+    - temporal_exceptions
+    - blocking_review_requirements

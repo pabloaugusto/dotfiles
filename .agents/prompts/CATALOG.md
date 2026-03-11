@@ -5,6 +5,7 @@
 | Pack | Objetivo | Entrypoints | Dono |
 | --- | --- | --- | --- |
 | [`pea-startup-governance`](formal/pea-startup-governance/prompt.md) | Formalizar o `Pre-Execution Alignment` e sua integracao com `startup/restart`, delegacao e governanca operacional do repo | [`prompt.md`](formal/pea-startup-governance/prompt.md), [`context.md`](formal/pea-startup-governance/context.md), [`meta.yaml`](formal/pea-startup-governance/meta.yaml) | [`DOT-178`](https://pabloaugusto.atlassian.net/browse/DOT-178) |
+| [`temporal-governance-enforcement`](formal/temporal-governance-enforcement/prompt.md) | Formalizar a governanca temporal, locale e regionalizacao com enforcement bloqueante e prompt agnostico de nome de repositorio | [`prompt.md`](formal/temporal-governance-enforcement/prompt.md), [`context.md`](formal/temporal-governance-enforcement/context.md), [`meta.yaml`](formal/temporal-governance-enforcement/meta.yaml) | [`DOT-178`](https://pabloaugusto.atlassian.net/browse/DOT-178) |
 
 ## Legados
 
@@ -19,3 +20,4 @@
 - todo pack formal novo precisa entrar neste catalogo na mesma rodada
 - [`legacy/`](legacy/) nao substitui [`formal/`](formal/); quando um prompt
   voltar a ser vivo, ele deve ser promovido e catalogado
+
