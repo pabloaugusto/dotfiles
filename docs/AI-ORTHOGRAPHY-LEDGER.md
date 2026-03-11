@@ -20,13 +20,14 @@ Registro consultivo do agente Pascoalete para ortografia e higiene vocabular.
 <!-- ai-orthography:records:start -->
 | Data/Hora UTC | Worklog ID | Revisor | Status | Arquivo | Achados | Evidencia |
 | --- | --- | --- | --- | --- | --- | --- |
+| 2026-03-11 00:54 UTC | WIP-DOT-131 | pascoalete | reprovado | .agents/cerimonias/logs/retrospectiva/2026-03-11-0047-feat-DOT-131-scrum-master-enforcement.md | Pascoalete, testavel, auditavel, obrigatoria, proprio, historica, acao, rastreavel (+13) | task spell:check |
+| 2026-03-11 00:54 UTC | WIP-DOT-131 | pascoalete | reprovado | docs/AI-SCRUM-MASTER-LEDGER.md | canonico, correcao, indice, especificos, testavel, indice, historica, testavel (+22) | task spell:check |
+| 2026-03-11 00:54 UTC | WIP-DOT-131 | pascoalete | reprovado | docs/AI-CHAT-CONTRACTS-REGISTER.md | definicoes, governanca, obrigatoria, sessao, usuario, promocao, promocao, governanca (+34) | task spell:check |
 | 2026-03-11 00:31 UTC | WIP-DOT-131 | pascoalete | reprovado | LICOES-APRENDIDAS.md | Licoes, Historico, obrigatoria, usuario, LICOES, licao, Criterio, licoes (+239) | task spell:check |
 | 2026-03-11 00:31 UTC | WIP-DOT-131 | pascoalete | reprovado | tests/python/ai_assets_validator_test.py | possivel, LICOES, atlassian, Validacao, minimo, LICOES, comecar, obrigatoria (+9) | task spell:check |
 | 2026-03-11 00:31 UTC | WIP-DOT-131 | pascoalete | reprovado | scripts/validate-ai-assets.py | execucao, evals, LICOES, evals, evals, evals, evals, atlassian (+73) | task spell:check |
-| 2026-03-11 00:31 UTC | WIP-DOT-131 | pascoalete | reprovado | docs/AI-CHAT-CONTRACTS-REGISTER.md | definicoes, governanca, obrigatoria, sessao, usuario, promocao, promocao, governanca (+36) | task spell:check |
 | 2026-03-11 00:31 UTC | WIP-DOT-131 | pascoalete | reprovado | config/ai/agent-operations.yaml | atlassian, comentario, atuacao, comentario, decisao, comentario, transicao, decisao (+167) | task spell:check |
 | 2026-03-11 00:31 UTC | WIP-DOT-131 | pascoalete | reprovado | docs/ai-operating-model.md | reutilizavel, testavel, worktree, Principios, Instrucoes, instrucoes, estaveis, governanca (+191) | task spell:check |
-| 2026-03-11 00:31 UTC | WIP-DOT-131 | pascoalete | reprovado | docs/AI-SCRUM-MASTER-LEDGER.md | canonico, correcao, indice, especificos, testavel, indice, historica, testavel (+17) | task spell:check |
 | 2026-03-11 00:31 UTC | WIP-DOT-131 | pascoalete | reprovado | .agents/cerimonias/logs/retrospectiva-template.md | acao, acao, responsavel, acao, acao, Responsavel | task spell:check |
 | 2026-03-11 00:31 UTC | WIP-DOT-131 | pascoalete | reprovado | .agents/cerimonias/retrospectiva.yaml | acao, execucao, acao, responsavel, acao, responsavel, historico | task spell:check |
 | 2026-03-11 00:31 UTC | WIP-DOT-131 | pascoalete | reprovado | .agents/cerimonias/README.md | canonica, ageis, definicoes, definicao, execucao, localizacao, execucao, proprio (+5) | task spell:check |

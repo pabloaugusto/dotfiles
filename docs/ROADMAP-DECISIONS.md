@@ -1,6 +1,6 @@
 # Decisoes do Roadmap
 
-Atualizado em: 2026-03-11 00:31 UTC
+Atualizado em: 2026-03-11 00:54 UTC
 Ciclo ativo: 2026-Q1
 
 Registro das decisoes humanas por ciclo e governanca de sugestoes.
@@ -12,7 +12,7 @@ Use status: `pendente`, `aceita`, `descartada`, `aplicar_depois`.
 <!-- roadmap:suggestions:start -->
 | ID | Tipo | Descricao | Status | RM | Captura | Atualizacao |
 | --- | --- | --- | --- | --- | --- | --- |
-| SG-ORTHO-WIP-DOT-131 | fix | Corrigir pendencias ortograficas remanescentes do worklog `WIP-DOT-131` em .agents/cerimonias/README.md, .agents/cerimonias/logs/retrospectiva-template.md, .agents/cerimonias/re... | aceita |  | 2026-03-11 | 2026-03-11 |
+| SG-ORTHO-WIP-DOT-131 | fix | Corrigir pendencias ortograficas remanescentes do worklog `WIP-DOT-131` em .agents/cerimonias/logs/retrospectiva/2026-03-11-0047-feat-DOT-131-scrum-master-enforcement.md, docs/A... | aceita |  | 2026-03-11 | 2026-03-11 |
 | SG-ORTHO-WIP-DOT-130 | fix | Corrigir pendencias ortograficas remanescentes do worklog `WIP-DOT-130` em AGENTS.md, config/ai/contracts.yaml, docs/AI-WIP-TRACKER.md, docs/README.md, docs/TASKS.md e mais 9 ar... | aceita |  | 2026-03-10 | 2026-03-10 |
 | SG-ORTHO-DOT-122 | fix | Corrigir pendencias ortograficas remanescentes do worklog `DOT-122` em .agents/cards/ai-product-owner.md, config/ai/agent-operations.yaml, config/ai/agents.yaml, docs/AI-AGENTS-... | aceita |  | 2026-03-09 | 2026-03-09 |
 | SG-ORTHO-DOT-118 | fix | Corrigir pendencias ortograficas remanescentes do worklog `DOT-118` em .agents/cards/ai-developer-config-policy.md, .agents/config.toml, .agents/registry/ai-developer-automation... | aceita |  | 2026-03-09 | 2026-03-09 |
@@ -72,6 +72,7 @@ Use status: `pendente`, `aceita`, `descartada`, `aplicar_depois`.
 ## Registro automatico
 
 <!-- roadmap:autolog:start -->
+- 2026-03-11 00:54 UTC | decisao=accepted | horizonte=next | tipo=fix | item=Corrigir pendencias ortograficas remanescentes do worklog `WIP-DOT-131` em .agents/cerimonias/logs/retrospectiva/2026-03-11-0047-feat-DOT-131-scrum-master-enforcement.md, docs/A... | notas=Pendencia automatica criada por Pascoalete apos review consultivo reprovado sem correcao automatica.
 - 2026-03-11 00:31 UTC | decisao=accepted | horizonte=next | tipo=fix | item=Corrigir pendencias ortograficas remanescentes do worklog `WIP-DOT-131` em .agents/cerimonias/README.md, .agents/cerimonias/logs/retrospectiva-template.md, .agents/cerimonias/re... | notas=Pendencia automatica criada por Pascoalete apos review consultivo reprovado sem correcao automatica.
 - 2026-03-10 23:57 UTC | decisao=accepted | horizonte=next | tipo=fix | item=Corrigir pendencias ortograficas remanescentes do worklog `WIP-DOT-130` em AGENTS.md, config/ai/contracts.yaml, docs/AI-WIP-TRACKER.md, docs/README.md, docs/TASKS.md e mais 9 ar... | notas=Pendencia automatica criada por Pascoalete apos review consultivo reprovado sem correcao automatica.
 - 2026-03-10 23:56 UTC | decisao=accepted | horizonte=next | tipo=fix | item=Corrigir pendencias ortograficas remanescentes do worklog `WIP-DOT-130` em AGENTS.md, config/ai/contracts.yaml, docs/README.md, docs/TASKS.md, docs/ai-operating-model.md e mais... | notas=Pendencia automatica criada por Pascoalete apos review consultivo reprovado sem correcao automatica.
