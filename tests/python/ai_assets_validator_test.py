@@ -83,6 +83,10 @@ class ValidateAiAssetsTests(unittest.TestCase):
             module.OPERATING_MODEL_REQUIRED_SNIPPETS,
         )
         self.assertIn(
+            "cadeia minima de evidencia para cada execucao obrigatoria",
+            module.OPERATING_MODEL_REQUIRED_SNIPPETS,
+        )
+        self.assertIn(
             "## Politica de leitura do board",
             module.OPERATING_MODEL_REQUIRED_SNIPPETS,
         )
@@ -108,6 +112,14 @@ class ValidateAiAssetsTests(unittest.TestCase):
         self.assertIn(
             "branch_pattern: <type>/<jira-key>-<slug>",
             module.GIT_GOVERNANCE_REQUIRED_SNIPPETS["config/ai/contracts.yaml"],
+        )
+        self.assertIn(
+            "ledger_entry_required: true",
+            module.CEREMONY_REQUIRED_SNIPPETS[".agents/cerimonias/retrospectiva.yaml"],
+        )
+        self.assertIn(
+            "Entrada no ledger",
+            module.CEREMONY_REQUIRED_SNIPPETS[".agents/cerimonias/logs/retrospectiva-template.md"],
         )
         self.assertIn("ceremonies", module.REQUIRED_AI_CONFIG_SECTIONS)
         self.assertIn(

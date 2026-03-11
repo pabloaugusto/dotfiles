@@ -44,6 +44,9 @@ global_contract:
       - blockers-that-no-agent-can-unblock-must-escalate-to-the-user
       - blocker-escalation-must-use-all-available-channels
       - blocker-escalation-attempts-must-be-logged-in-jira-and-confluence
+      - branch-closure-must-trigger-required-ceremony-chain
+      - required-ceremony-chain-must-produce-log-ledger-confluence-and-jira-when-applicable
+      - unresolved-ceremony-findings-must-open-or-link-governance-bug
       - every-meaningful-agent-milestone-must-also-be-summarized-in-chat
       - chat-summaries-must-stay-human-short-and-non-robotic
       - chat-summaries-must-start-with-bracketed-dd-mm-hh-mm-timestamp-and-bold-agent-name-prefix
@@ -218,10 +221,13 @@ roles:
       - priorizar agentes ociosos para o item mais a direita com avanco real possivel
       - recarregar os contratos e artefatos vivos antes de fiscalizar a rodada
       - carregar a definicao de cerimonia em .agents/cerimonias antes de executar o ritual correspondente
+      - verificar a cada branch ou fatia finalizada se a cerimonia obrigatoria foi executada e registrar inconformidade quando faltar evidencia
       - registrar no docs/AI-SCRUM-MASTER-LEDGER.md a inconformidade ou cerimonia com impacto, acao corretiva e resultado
+      - exigir que o log da cerimonia carregue link do Confluence, link do Jira e entrada de ledger ou n/a explicito quando o contrato permitir
       - espelhar no chat a inconformidade relevante ou a cerimonia executada
       - registrar anomalias e evidencias no Jira com o papel responsavel e o impacto
       - cobrar correcao imediata e, quando a anomalia nao fechar na hora, abrir ou exigir bug de governanca no Jira e linkar o item no ledger
+      - quando houver fechamento historico sem cobertura proporcional de cerimonias, abrir ou linkar bug de governanca para o backfill e registrar a lacuna no ledger
       - manter Jira e Confluence sincronizados quando a regra de processo mudar
 
   ai-engineering-architect:

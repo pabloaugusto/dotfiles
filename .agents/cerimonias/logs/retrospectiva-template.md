@@ -12,6 +12,8 @@
 | Facilitador | {{facilitador}} |
 | Participantes | {{participantes}} |
 | Contexto | {{contexto}} |
+| Entrada no ledger | {{ledger_entry_ref}} |
+| Jira relacionado | {{jira_problemas_ou_n_a}} |
 | Confluence | {{confluence_url_ou_n_a}} |
 
 ## Finalidade
@@ -35,13 +37,16 @@ acao para o que ainda nao foi sanado.
 
 ## Artefatos gerados
 
-- log Markdown desta **cerimonia**
+- log Markdown desta **cerimonia**: {{log_path_ou_n_a}}
 - entrada correspondente no
-  [`docs/AI-SCRUM-MASTER-LEDGER.md`](../../../docs/AI-SCRUM-MASTER-LEDGER.md)
-- issue do `Jira` para problema novo quando aplicavel
-- pagina no `Confluence` conforme contrato da **cerimonia**
+  [`docs/AI-SCRUM-MASTER-LEDGER.md`](../../../docs/AI-SCRUM-MASTER-LEDGER.md):
+  {{ledger_entry_ref}}
+- issue(s) do `Jira` abertas ou vinculadas: {{jira_problemas_ou_n_a}}
+- pagina no `Confluence` conforme contrato da **cerimonia**:
+  {{confluence_url_ou_n_a}}
 
 ## Encaminhamento
 
+- Plano de acao: {{plano_de_acao}}
 - Proximo passo: {{proximo_passo}}
 - Responsavel: {{responsavel}}

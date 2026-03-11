@@ -1,6 +1,6 @@
 # AI Scrum Master Ledger
 
-Atualizado em: 2026-03-09 22:05 UTC
+Atualizado em: 2026-03-11 00:21 UTC
 
 Registro operacional canonico das inconformidades e **cerimonias**
 acompanhadas pelo **Scrum Master**.
@@ -10,8 +10,14 @@ acompanhadas pelo **Scrum Master**.
 - Toda inconformidade relevante encontrada pelo **Scrum Master** deve gerar
   registro neste ledger, mesmo quando a correcao acontecer na mesma rodada.
 - Toda **cerimonia** executada pelo **Scrum Master** deve gerar ao menos um
-  registro indice neste ledger; artefatos detalhados por tipo podem viver em
-  caminhos especificos quando essa camada existir.
+  registro indice neste ledger; artefatos detalhados por tipo devem viver nos
+  caminhos especificos definidos pela **cerimonia** correspondente.
+- Toda branch ou **fatia de incremento testavel** finalizada cuja
+  **cerimonia** exija **Retrospectiva** precisa gerar ao menos um registro
+  indice neste ledger.
+- Quando a cobertura historica de **cerimonias** estiver menor que a quantidade
+  de branches ou **fatias de incremento testavel** fechadas, a lacuna precisa
+  entrar primeiro como inconformidade formal neste ledger.
 - Inconformidade nao resolvida na hora deve apontar para um `Bug` ou `Task` de
   governanca no `Jira`.
 - Toda atuacao relevante tambem deve ser espelhada no chat; o chat nao
@@ -24,6 +30,7 @@ acompanhadas pelo **Scrum Master**.
 | Data/Hora UTC | Tipo | Inconformidade | Agente/Papel | Impacto | Acao corretiva | Resultado | Jira |
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | 2026-03-09 22:05 UTC | governance-gap | O **Scrum Master** existia de forma declarativa, mas ainda nao possuia ledger canonico, regra explicita de espelhamento em chat nem fluxo obrigatorio de bug no `Jira` quando a inconformidade persistia. | ai-scrum-master | Enforcement nao auditavel de ponta a ponta; desvios de papel e processo podiam passar sem rastreabilidade perene. | Formalizar ledger versionado, endurecer contratos, exigir log de inconformidade/**cerimonia** e ligar o fluxo de escalacao ao `Jira`. | Em andamento na issue ativa. | [DOT-124](https://pabloaugusto.atlassian.net/browse/DOT-124) |
+| 2026-03-11 00:21 UTC | ceremony-coverage-gap | A rodada recente fechou varias branches e **fatias de incremento testavel**, mas o ledger e o `Confluence` ainda mostram apenas uma **Retrospectiva** publicada. | ai-scrum-master | A cobertura de **cerimonias** fica desproporcional ao trabalho ja encerrado e o enforcement perde auditabilidade historica. | Endurecer o contrato da **Retrospectiva**, corrigir o registrador vivo e mapear o backfill obrigatorio das execucoes faltantes. | Em andamento na issue ativa. | [DOT-131](https://pabloaugusto.atlassian.net/browse/DOT-131) |
 <!-- ai-scrum-master:inconformities:end -->
 
 ## Registros de cerimonia

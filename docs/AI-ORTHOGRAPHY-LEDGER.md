@@ -20,6 +20,16 @@ Registro consultivo do agente Pascoalete para ortografia e higiene vocabular.
 <!-- ai-orthography:records:start -->
 | Data/Hora UTC | Worklog ID | Revisor | Status | Arquivo | Achados | Evidencia |
 | --- | --- | --- | --- | --- | --- | --- |
+| 2026-03-11 00:31 UTC | WIP-DOT-131 | pascoalete | reprovado | LICOES-APRENDIDAS.md | Licoes, Historico, obrigatoria, usuario, LICOES, licao, Criterio, licoes (+239) | task spell:check |
+| 2026-03-11 00:31 UTC | WIP-DOT-131 | pascoalete | reprovado | tests/python/ai_assets_validator_test.py | possivel, LICOES, atlassian, Validacao, minimo, LICOES, comecar, obrigatoria (+9) | task spell:check |
+| 2026-03-11 00:31 UTC | WIP-DOT-131 | pascoalete | reprovado | scripts/validate-ai-assets.py | execucao, evals, LICOES, evals, evals, evals, evals, atlassian (+73) | task spell:check |
+| 2026-03-11 00:31 UTC | WIP-DOT-131 | pascoalete | reprovado | docs/AI-CHAT-CONTRACTS-REGISTER.md | definicoes, governanca, obrigatoria, sessao, usuario, promocao, promocao, governanca (+36) | task spell:check |
+| 2026-03-11 00:31 UTC | WIP-DOT-131 | pascoalete | reprovado | config/ai/agent-operations.yaml | atlassian, comentario, atuacao, comentario, decisao, comentario, transicao, decisao (+167) | task spell:check |
+| 2026-03-11 00:31 UTC | WIP-DOT-131 | pascoalete | reprovado | docs/ai-operating-model.md | reutilizavel, testavel, worktree, Principios, Instrucoes, instrucoes, estaveis, governanca (+191) | task spell:check |
+| 2026-03-11 00:31 UTC | WIP-DOT-131 | pascoalete | reprovado | docs/AI-SCRUM-MASTER-LEDGER.md | canonico, correcao, indice, especificos, testavel, indice, historica, testavel (+17) | task spell:check |
+| 2026-03-11 00:31 UTC | WIP-DOT-131 | pascoalete | reprovado | .agents/cerimonias/logs/retrospectiva-template.md | acao, acao, responsavel, acao, acao, Responsavel | task spell:check |
+| 2026-03-11 00:31 UTC | WIP-DOT-131 | pascoalete | reprovado | .agents/cerimonias/retrospectiva.yaml | acao, execucao, acao, responsavel, acao, responsavel, historico | task spell:check |
+| 2026-03-11 00:31 UTC | WIP-DOT-131 | pascoalete | reprovado | .agents/cerimonias/README.md | canonica, ageis, definicoes, definicao, execucao, localizacao, execucao, proprio (+5) | task spell:check |
 | 2026-03-10 23:57 UTC | WIP-DOT-130 | pascoalete | reprovado | tests/python/git_governance_check_test.py | gpgsign, worktree, worktrees, worktree, worktree, worktrees, worktree, worktree (+3) | task spell:check |
 | 2026-03-10 23:57 UTC | WIP-DOT-130 | pascoalete | reprovado | tests/python/conventional_emoji_test.py | obrigatorio, obrigatoria, Maximo | task spell:check |
 | 2026-03-10 23:57 UTC | WIP-DOT-130 | pascoalete | reprovado | tests/python/ai_worklog_test.py | gpgsign, worktree, LICOES, obrigatorio, worktree, LICOES, licao, licao (+11) | task spell:check |
