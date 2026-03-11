@@ -1,6 +1,6 @@
 # AI WIP Tracker
 
-Atualizado em: 2026-03-11 04:27 UTC
+Atualizado em: 2026-03-11 04:42 UTC
 
 Fallback local de continuidade. O Jira e a fonte primaria do fluxo vivo.
 
@@ -22,7 +22,7 @@ Fallback local de continuidade. O Jira e a fonte primaria do fluxo vivo.
 <!-- ai-worklog:doing:start -->
 | ID | Tarefa | Branch | Responsavel | Inicio UTC | Ultima atualizacao UTC | Proximo passo | Bloqueios |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| (sem itens) | - | - | - | - | - | - | - |
+| WIP-DOT-106 | Migrar trackers locais para fallback contingencial. | feat/DOT-106-fallback-tracker-cutover | Arquiteto | 2026-03-11 04:42 UTC | 2026-03-11 04:42 UTC | Auditar contratos de fallback local, cutover e reconciliacao Jira-local antes de propor o refinamento tecnico. | - |
 <!-- ai-worklog:doing:end -->
 
 ## Done
@@ -69,5 +69,5 @@ Fallback local de continuidade. O Jira e a fonte primaria do fluxo vivo.
 <!-- ai-worklog:log:start -->
 | Data/Hora UTC | ID | Status | Resumo | Proximo passo | Bloqueios | Contexto | Notas |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| (sem itens) | - | - | - | - | - | - | - |
+| 2026-03-11 04:42 UTC | WIP-DOT-106 | doing | Migrar trackers locais para fallback contingencial. | Auditar contratos de fallback local, cutover e reconciliacao Jira-local antes de propor o refinamento tecnico. | - | DOT-106 | inicio da tarefa |
 <!-- ai-worklog:log:end -->
