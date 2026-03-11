@@ -123,8 +123,20 @@ issue_types:
   policies:
     top_level_creation: ai-product-owner-only
     subtask_creation: any-authorized-agent
+    creation_preflight:
+      mandatory_checks:
+        - verify-existing-open-issue-before-creating-any-new-issue
+        - verify-existing-open-epic-before-creating-any-non-epic-demand
+        - verify-existing-open-epic-before-creating-new-epic-for-the-same-theme
+      bypass_policy:
+        - direct-human-order
+        - human-consulted-before-opening-a-new-epic-despite-an-open-match
+        - ai-may-decide-after-three-minutes-without-human-response-if-rationale-is-commented
   hierarchy_rules:
     - use-epics-for-small-to-medium-contexts
+    - verify-existing-open-epic-before-creating-new-epic-for-the-same-theme
+    - non-epic-issues-must-reuse-an-existing-open-epic-when-one-already-covers-the-theme
+    - verify-existing-open-issue-before-creating-any-new-issue
     - prefer-parent-over-mass-relates-for-context-grouping
     - prefer-stories-for-business-rules-global-definitions-and-user-facing-value
     - prefer-tasks-for-technical-operational-and-governance-work
@@ -346,6 +358,10 @@ workflow:
     - prefer-finishing-or-directly-unblocking-active-work-before-pulling-new-work
     - direct-unblocking-work-item-may-be-pulled-when-it-is-the-minimal-dependency-of-active-work
     - do-not-pull-unrelated-new-work-while-blocked-active-item-exists
+    - creation-preflight-must-check-existing-open-issue-and-open-epic
+    - non-epic-creation-must-reuse-existing-open-epic-when-theme-matches
+    - new-epic-creation-requires-proof-of-no-open-epic-match
+    - bypass-of-epic-reuse-or-deduplication-must-be-commented-and-traceable
     - status-is-flow-phase-current-agent-role-is-active-ownership
     - every-relevant-operation-must-have-explicit-owner-agent
     - if-no-agent-fits-the-operation-create-or-formalize-one-through-backlog
@@ -493,6 +509,7 @@ comments:
     - every-acting-role-must-comment-when-work-starts
     - every-acting-role-must-comment-on-meaningful-progress-while-working
     - every-relevant-operation-must-have-explicit-owner-agent
+    - creation-bypass-comments-must-link-search-and-rationale
     - jira-status-must-reflect-real-time-state-of-work
     - jira-status-and-agent-comments-must-stay-in-parity
     - every-comment-must-include-evidence-or-explicit-na

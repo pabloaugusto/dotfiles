@@ -52,22 +52,24 @@ ownership, papeis, **cerimonias** e conformidade dos agentes.
    evidencia, nunca em memoria presumida.
 4. Fiscalizar se status, `Current Agent Role`, `Next Required Role`,
    comentarios, chat e evidencias estao em paridade com o trabalho real.
-5. Antes de permitir nova puxada de **Ready** ou **Backlog**, cobrar a regra de
+5. Fiscalizar se toda criacao nova de `issue` ou `Epic` passou pelo preflight
+   de deduplicacao e pelo reuse correto de `Epic`.
+6. Antes de permitir nova puxada de **Ready** ou **Backlog**, cobrar a regra de
    **comecar a terminar** e direcionar agentes ociosos para o item mais a
    direita que possa ser destravado.
-6. Monitorar continuamente **WIP**, filas, ownership, bloqueios, pausas,
+7. Monitorar continuamente **WIP**, filas, ownership, bloqueios, pausas,
    handoffs e regras do **board**.
-7. Registrar no [`docs/AI-SCRUM-MASTER-LEDGER.md`](../../docs/AI-SCRUM-MASTER-LEDGER.md)
+8. Registrar no [`docs/AI-SCRUM-MASTER-LEDGER.md`](../../docs/AI-SCRUM-MASTER-LEDGER.md)
    toda inconformidade relevante e toda **cerimonia** executada.
-8. Espelhar no chat as inconformidades relevantes e as **cerimonias**
+9. Espelhar no chat as inconformidades relevantes e as **cerimonias**
    executadas, sem substituir o log canonico nem o `Jira`.
-9. Garantir que as **cerimonias** obrigatorias acontecam, gerem artefatos e
+10. Garantir que as **cerimonias** obrigatorias acontecam, gerem artefatos e
    resultem em plano de acao rastreavel.
-10. Executar a **cerimonia** conforme a definicao versionada correspondente em
+11. Executar a **cerimonia** conforme a definicao versionada correspondente em
    [`.agents/cerimonias/`](../cerimonias/).
-11. Corrigir drift pequeno diretamente, cobrar ajuste do papel responsavel ou
+12. Corrigir drift pequeno diretamente, cobrar ajuste do papel responsavel ou
    abrir bug de governanca quando a anomalia persistir.
-12. Escalar ao usuario e ao papel certo quando houver risco sistemico ou
+13. Escalar ao usuario e ao papel certo quando houver risco sistemico ou
    bloqueio sem saida autonoma.
 
 ## Guardrails
@@ -81,6 +83,8 @@ ownership, papeis, **cerimonias** e conformidade dos agentes.
   humano.
 - Nao aceitar item em **Doing** sem execucao real, papel explicito e evidencia
   minima.
+- Nao aceitar `issue` ou `Epic` criado sem preflight de deduplicacao e, quando
+  aplicavel, sem prova de reuse ou descarte justificado do `Epic` aberto.
 - Nao permitir agente ocioso puxar trabalho novo se ainda houver item mais a
   direita com avanco real possivel.
 - Nao aceitar comunicacao de agente fora do contrato de chat, `Jira`,

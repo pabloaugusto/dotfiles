@@ -1,6 +1,6 @@
 # AI WIP Tracker
 
-Atualizado em: 2026-03-11 12:06 UTC
+Atualizado em: 2026-03-11 12:38 UTC
 
 Fallback local de continuidade. O Jira e a fonte primaria do fluxo vivo.
 
@@ -35,6 +35,7 @@ Fallback local de continuidade. O Jira e a fonte primaria do fluxo vivo.
 <!-- ai-worklog:done:start -->
 | ID | Tarefa | Branch | Responsavel | Inicio UTC | Concluido UTC | Resultado |
 | --- | --- | --- | --- | --- | --- | --- |
+| WIP-DOT-175 | DOT-175: formalizar preflight obrigatorio de reuse de Epic e dedupe de issue no intake | feat/DOT-175-intake-epic-issue-dedupe | ai-developer-config-policy | 2026-03-11 12:23 UTC | 2026-03-11 12:38 UTC | Regra perene de intake formalizada para deduplicacao de issue, reuse obrigatorio de Epic aberto e controle de bypass humano/autonomo rastreado no Jira. / evidencias: task ai:validate=ok; task docs:check=ok; task ai:ev... |
 | WIP-DOT-37 | Fechar formalmente DOT-37 com evidencia versionada do checkpoint apos repair remoto + docs sync. | codex/feat/DOT-37-checkpoint-closure | PO | 2026-03-11 11:45 UTC | 2026-03-11 12:06 UTC | DOT-37 foi concluida como checkpoint formal da trilha Atlassian adapters, com adendo versionado em docs/AI-PAUSED-ISSUES-AUDIT.md e fechamento terminal rastreavel no Jira. / evidencias: docs/AI-PAUSED-ISSUES-AUDIT.md;... |
 | WIP-DOT-106 | Migrar trackers locais para fallback contingencial. | feat/DOT-106-fallback-tracker-cutover | Arquiteto | 2026-03-11 08:22 UTC | 2026-03-11 09:17 UTC | DOT-106 passou a tratar trackers locais como fallback contingencial explicito do Jira, com ledger canonico, CLI de captura/resolve, checklist de startup/restart, validador de pa... / evidencias: task ai:fallback:statu... |
 | WIP-DOT-109-RETRO | Executar retrospectiva obrigatoria da branch feat/DOT-109-jira-role-sync apos merge e materializar log, ledger, Confluence e rastreabilidade Jira. | docs/DOT-109-retrospectiva-fechamento | Scrum Master | 2026-03-11 07:44 UTC | 2026-03-11 07:54 UTC | Retrospectiva obrigatoria da branch feat/DOT-109-jira-role-sync executada com log local, indice no ledger do Scrum Master, pagina oficial no Confluence e rastreabilidade Jira co... / evidencias: Confluence: https://pa... |

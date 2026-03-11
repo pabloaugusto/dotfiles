@@ -29,6 +29,21 @@ backlog:
   require_issue_before_execution: true
   pull_model: true
   subtask_creation_policy: any-authorized-agent
+  intake_creation_preflight:
+    mandatory_checks:
+      - verify-existing-open-issue-before-any-new-issue
+      - verify-existing-open-epic-before-any-non-epic-demand
+      - verify-existing-open-epic-before-any-new-epic-for-the-same-theme
+      - reuse-existing-open-epic-when-the-theme-is-already-covered
+    bypass_policy:
+      allowed_when:
+        - direct-human-order
+        - human-consulted-before-opening-a-new-epic-despite-an-open-match
+        - ai-autonomous-decision-after-three-minutes-without-human-response
+      mandatory_evidence:
+        - record-jql-or-equivalent-search-used-for-issue-and-epic-preflight
+        - record-why-existing-issue-or-open-epic-did-not-cover-the-demand
+        - record-bypass-rationale-in-jira-comment
   pending_action_policy:
     concluir_primeiro:
       meaning: concluir o item em curso ou puxar apenas o work item minimo que o destrava diretamente
@@ -146,6 +161,10 @@ workflow:
     - prioritize-finishing-or-directly-unblocking-active-work-before-pulling-new-work
     - direct-unblocking-work-item-may-be-pulled-when-it-is-the-minimal-dependency-of-active-work
     - do-not-pull-unrelated-new-work-while-blocked-active-item-exists
+    - creation-preflight-must-check-existing-open-issue-and-open-epic
+    - non-epic-demand-must-reuse-existing-open-epic-when-theme-already-has-one
+    - new-epic-requires-proof-that-no-open-epic-already-covers-the-theme
+    - bypass-of-epic-reuse-or-deduplication-must-be-commented-and-traceable
     - status-represents-flow-phase
     - current-agent-role-represents-active-ownership
     - board-must-be-read-right-to-left

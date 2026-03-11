@@ -32,6 +32,10 @@ global_contract:
       - every-commit-must-map-to-a-single-jira-scope
       - every-branch-must-map-to-a-single-jira-scope
       - every-pr-must-map-to-a-single-jira-scope
+      - every-new-issue-must-run-deduplication-preflight-against-open-work
+      - every-non-epic-demand-must-check-for-an-open-matching-epic-before-creation
+      - every-new-epic-must-prove-that-no-open-epic-already-covers-the-theme
+      - epic-or-issue-creation-bypass-must-be-justified-in-a-jira-comment
       - tags-and-releases-must-stay-jira-traceable
       - jira-key-in-git-metadata-must-belong-to-real-work-performed
       - doing-must-reflect-active-execution-only
@@ -154,6 +158,9 @@ roles:
       primary_issue_actions:
         - maximizar valor e manter uma voz unica de decisao sobre backlog e prioridade
         - criar issues principais do backlog
+        - verificar se a demanda ja nao existe antes de criar issue
+        - reutilizar epic aberto aderente para toda demanda nao-epic
+        - assegurar que nao existe epic aberto cobrindo o tema antes de criar novo epic
         - consolidar objetivo, escopo, descricao, prioridade e criterios de aceitacao
         - manter backlog, refinement e ready ordenados por prioridade real
         - ler o board da direita para a esquerda antes de puxar novo trabalho
@@ -169,8 +176,10 @@ roles:
         - progress-update
       required_evidence:
         - link para issue pai, diretriz do usuario, Product Discovery ou artefato oficial de intake
+        - busca Jira ou referencia objetiva provando ausencia de issue duplicada e, quando aplicavel, o epic aberto reutilizado ou descartado
         - link para pagina do Confluence quando houver contexto formal
         - justificativa de prioridade e impacto no roadmap quando houver reordenacao relevante
+        - justificativa rastreavel quando houver bypass do reuse de epic ou da deduplicacao
     confluence:
       pages_owned:
         - migration-plan
@@ -182,6 +191,10 @@ roles:
       - revisar intake, backlog bruto ou idea promovida
       - explicitar valor, objetivo e prioridade antes de mover a issue no fluxo
       - posicionar o item novo no ponto correto da prioridade do backlog e das filas ordenadas do board
+      - executar preflight de deduplicacao no Jira para verificar issue equivalente e epic aberto aderente
+      - reaproveitar o epic aberto correto para a demanda nao-epic ou provar em comentario por que ele nao serve
+      - antes de criar novo epic, assegurar que nao existe outro epic aberto para o mesmo macro tema
+      - se a IA ainda julgar melhor abrir novo epic apesar de haver aderencia aparente, consultar o humano e aguardar ate 3 minutos; sem resposta, decidir com comentario estruturado justificando o bypass
       - criar ou atualizar a issue principal no Jira
       - revisar se Start date e Due date precisam ser estimados ou recalculados
       - registrar comentario estruturado com escopo, prioridade e evidencias
@@ -196,6 +209,7 @@ roles:
         - fiscalizar board, WIP, ownership, handoffs e comentarios
         - ler o board da direita para a esquerda e priorizar itens mais proximos de Done
         - garantir aderencia ao processo agil, aos contratos e as cerimonias
+        - auditar se toda criacao de issue ou epic passou pelo preflight de deduplicacao e reuse de epic
         - abrir ou exigir bug de governanca quando a anomalia persistir
       transitions_owned:
         - sem-transicao-exclusiva
@@ -207,6 +221,7 @@ roles:
       required_evidence:
         - link para issue, comentario, artefato ou estado vivo que demonstre a anomalia
         - referencia ao contrato, card, workflow ou evidencia usada no enforcement
+        - link para busca, epic reutilizado ou comentario de bypass quando a anomalia envolver intake
         - registro correspondente no docs/AI-SCRUM-MASTER-LEDGER.md
     confluence:
       pages_owned:
@@ -220,6 +235,8 @@ roles:
       - ler o board da direita para a esquerda antes de sugerir nova puxada
       - priorizar agentes ociosos para o item mais a direita com avanco real possivel
       - recarregar os contratos e artefatos vivos antes de fiscalizar a rodada
+      - verificar continuamente se novas issues nao-epic foram anexadas ao epic aberto correto e se novos epics nasceram sem duplicacao tematica
+      - cobrar comentario estruturado quando houver bypass de reuse de epic ou deduplicacao
       - carregar a definicao de cerimonia em .agents/cerimonias antes de executar o ritual correspondente
       - verificar a cada branch ou fatia finalizada se a cerimonia obrigatoria foi executada e registrar inconformidade quando faltar evidencia
       - registrar no docs/AI-SCRUM-MASTER-LEDGER.md a inconformidade ou cerimonia com impacto, acao corretiva e resultado
