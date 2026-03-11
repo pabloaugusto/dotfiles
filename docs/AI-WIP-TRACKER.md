@@ -1,6 +1,6 @@
 # AI WIP Tracker
 
-Atualizado em: 2026-03-11 15:21 UTC
+Atualizado em: 2026-03-11 15:56 UTC
 
 Fallback local de continuidade. O Jira e a fonte primaria do fluxo vivo.
 
@@ -27,7 +27,7 @@ Fallback local de continuidade. O Jira e a fonte primaria do fluxo vivo.
 <!-- ai-worklog:doing:start -->
 | ID | Tarefa | Branch | Responsavel | Inicio UTC | Ultima atualizacao UTC | Proximo passo | Bloqueios |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| WIP-DOT-178 | Formalizar prompt pack canonico de PEA/startup na arvore .agents/prompts | feat/DOT-178-formal-pea-prompt-pack | ai-developer-config-policy | 2026-03-11 15:21 UTC | 2026-03-11 15:21 UTC | Implementar a nova estrutura .agents/prompts e catalogar o pack formal antes de ajustar startup e validadores | - |
+| (sem itens) | - | - | - | - | - | - | - |
 <!-- ai-worklog:doing:end -->
 
 ## Done
@@ -35,6 +35,7 @@ Fallback local de continuidade. O Jira e a fonte primaria do fluxo vivo.
 <!-- ai-worklog:done:start -->
 | ID | Tarefa | Branch | Responsavel | Inicio UTC | Concluido UTC | Resultado |
 | --- | --- | --- | --- | --- | --- | --- |
+| WIP-DOT-178 | Formalizar prompt pack canonico de PEA/startup na arvore .agents/prompts | feat/DOT-178-formal-pea-prompt-pack | ai-developer-config-policy | 2026-03-11 15:21 UTC | 2026-03-11 15:56 UTC | Pack formal de PEA/startup promovido em .agents/prompts e absorvido na main pelo PR #41 / evidencias: merge=4760349; pr=#41; commit=0c5ac9e; startup pea_status=ok; review python-reviewer=aprovado |
 | WIP-DOT-177 | Backend, docs e validator do startup integral prontos para versionamento. | feat/DOT-177-startup-preflight-memory | ai-developer-config-policy | 2026-03-11 13:23 UTC | 2026-03-11 14:40 UTC | DOT-177 concluida com PR #39 mergeado em main, startup integral endurecido e recarga explicita da governanca Git canonica sem deslocar o enforcement dos hooks, tasks e gates ofi... |
 | WIP-DOT-175-CLOSEOUT | Fechar DOT-175 com PR, merge, Jira e saneamento da lacuna de startup/fallback GitHub | feat/DOT-175-intake-epic-issue-dedupe | ai-developer-config-policy | 2026-03-11 13:10 UTC | 2026-03-11 13:18 UTC | DOT-175 ficou pronta para integracao com PR #38 aberta, validacoes locais verdes e branch preparada para merge em main. / evidencias: PR=https://github.com/pabloaugusto/dotfiles/pull/38; commit=3bef3e0; python -m unit... |
 | WIP-DOT-175 | DOT-175: formalizar preflight obrigatorio de reuse de Epic e dedupe de issue no intake | feat/DOT-175-intake-epic-issue-dedupe | ai-developer-config-policy | 2026-03-11 12:23 UTC | 2026-03-11 12:38 UTC | Regra perene de intake formalizada para deduplicacao de issue, reuse obrigatorio de Epic aberto e controle de bypass humano/autonomo rastreado no Jira. / evidencias: task ai:validate=ok; task docs:check=ok; task ai:ev... |
@@ -83,5 +84,5 @@ Fallback local de continuidade. O Jira e a fonte primaria do fluxo vivo.
 <!-- ai-worklog:log:start -->
 | Data/Hora UTC | ID | Status | Resumo | Proximo passo | Bloqueios | Contexto | Notas |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| 2026-03-11 15:21 UTC | WIP-DOT-178 | doing | Formalizar prompt pack canonico de PEA/startup na arvore .agents/prompts | Implementar a nova estrutura .agents/prompts e catalogar o pack formal antes de ajustar startup e validadores | - | Criar estrutura formal de prompt packs, materializar o PEA/startup e alinhar startup/docs/validadores | inicio da tarefa |
+| (sem itens) | - | - | - | - | - | - | - |
 <!-- ai-worklog:log:end -->

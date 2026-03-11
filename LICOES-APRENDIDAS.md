@@ -215,6 +215,7 @@ Toda finalizacao de worklog deve registrar se houve nova licao.
 <!-- ai-lessons:reviews:start -->
 | Data/Hora UTC | Worklog ID | Decisao | Resumo | Licoes | Evidencia |
 | --- | --- | --- | --- | --- | --- |
+| 2026-03-11 15:56 UTC | WIP-DOT-178 | sem_nova_licao | A rodada promoveu os contratos diretamente para docs, startup e validadores; nao houve licao adicional alem do proprio artefato entregue. | - | PR #41 mergeado em main; task ai:startup:session com pea_status=ok |
 | 2026-03-11 14:40 UTC | WIP-DOT-177 | sem_nova_licao | Sem nova licao perene nesta fatia; a distincao startup-versus-enforcement ficou absorvida nos contratos entregues pela propria DOT-177. | - | - |
 | 2026-03-11 13:18 UTC | WIP-DOT-175-CLOSEOUT | sem_nova_licao | Sem nova licao nesta fatia; o gap de memoria operacional do fallback GitHub sera tratado em work item proprio sob DOT-71. | - | PR=[#38](https://github.com/pabloaugusto/dotfiles/pull/38); commit=3bef3e0; python -m unittest tests.python.ai_assets_validator_test=ok; task ai:validate=ok; task docs:check=ok; task ai:eval:smoke=ok; task type:check=ok; tas... |
 | 2026-03-11 12:38 UTC | WIP-DOT-175 | sem_nova_licao | Sem nova licao; a rodada formalizou um contrato novo e deixou a pendencia ortografica consultiva rastreada. | - | task ai:validate=ok; task docs:check=ok; task ai:eval:smoke=ok; task type:check=ok; python -m unittest tests.python.ai_assets_validator_test=ok; task spell:review=reprovado_consultivo_com_backlog_SG-ORTHO-WIP-DOT-175 |
