@@ -1,8 +1,8 @@
 id = "ai-tech-lead"
 display_name = "Tech Lead"
 tier = "core"
-purpose = "Decompor trabalho, coordenar handoffs e preparar a execucao tecnica"
+purpose = "Decompor trabalho, coordenar handoffs, revisar PRs e preparar a execucao tecnica"
 default_skills = ["task-routing-and-decomposition", "dotfiles-architecture-modernization"]
-triggers = ["decompor", "handoff", "subtask", "ready", "doing", "plano tecnico"]
+triggers = ["decompor", "handoff", "subtask", "ready", "doing", "plano tecnico", "review", "pr", "pull-request"]
 output_contract = "technical_handoff_report"
 handoff_to = ["ai-developer-python", "ai-developer-powershell", "ai-developer-automation", "ai-developer-config-policy", "ai-qa"]

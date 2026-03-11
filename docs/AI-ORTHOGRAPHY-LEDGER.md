@@ -20,6 +20,12 @@ Registro consultivo do agente Pascoalete para ortografia e higiene vocabular.
 <!-- ai-orthography:records:start -->
 | Data/Hora UTC | Worklog ID | Revisor | Status | Arquivo | Achados | Evidencia |
 | --- | --- | --- | --- | --- | --- | --- |
+| 2026-03-11 01:38 UTC | WIP-DOT-133 | pascoalete | reprovado | docs/AI-WIP-TRACKER.md | solicitacao, acionavel, minimo, execucao, execucao, obrigatorio, Responsavel, atualizacao (+126) | task spell:check |
+| 2026-03-11 01:38 UTC | WIP-DOT-133 | pascoalete | reprovado | docs/README.md | documentacoes, Operacao, migracao, canonica, rotacao, canonicas, automacao, tecnico (+22) | task spell:check |
+| 2026-03-11 01:38 UTC | WIP-DOT-133 | pascoalete | reprovado | docs/AI-CHAT-CONTRACTS-REGISTER.md | definicoes, governanca, obrigatoria, sessao, usuario, promocao, promocao, governanca (+30) | task spell:check |
+| 2026-03-11 01:38 UTC | WIP-DOT-133 | pascoalete | reprovado | docs/AI-BACKLOG-LIVE-AUDIT.md | sugestoes, sugestoes, sugestoes, sugestoes, proprio, sugestoes, historico, obrigatorio (+81) | task spell:check |
+| 2026-03-11 01:38 UTC | WIP-DOT-133 | pascoalete | reprovado | .agents/registry/ai-tech-lead.toml | execucao, tecnica, tecnico | task spell:check |
+| 2026-03-11 01:38 UTC | WIP-DOT-133 | pascoalete | reprovado | .agents/cards/ai-tech-lead.md | tecnico, decomposicao, devs, tecnico, revisao, dependencias, Saidas, tecnico (+19) | task spell:check |
 | 2026-03-11 00:54 UTC | WIP-DOT-131 | pascoalete | reprovado | .agents/cerimonias/logs/retrospectiva/2026-03-11-0047-feat-DOT-131-scrum-master-enforcement.md | Pascoalete, testavel, auditavel, obrigatoria, proprio, historica, acao, rastreavel (+13) | task spell:check |
 | 2026-03-11 00:54 UTC | WIP-DOT-131 | pascoalete | reprovado | docs/AI-SCRUM-MASTER-LEDGER.md | canonico, correcao, indice, especificos, testavel, indice, historica, testavel (+22) | task spell:check |
 | 2026-03-11 00:54 UTC | WIP-DOT-131 | pascoalete | reprovado | docs/AI-CHAT-CONTRACTS-REGISTER.md | definicoes, governanca, obrigatoria, sessao, usuario, promocao, promocao, governanca (+34) | task spell:check |

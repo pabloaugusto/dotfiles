@@ -1,6 +1,6 @@
 # AI WIP Tracker
 
-Atualizado em: 2026-03-11 00:57 UTC
+Atualizado em: 2026-03-11 01:09 UTC
 
 Fallback local de continuidade. O Jira e a fonte primaria do fluxo vivo.
 
@@ -22,7 +22,7 @@ Fallback local de continuidade. O Jira e a fonte primaria do fluxo vivo.
 <!-- ai-worklog:doing:start -->
 | ID | Tarefa | Branch | Responsavel | Inicio UTC | Ultima atualizacao UTC | Proximo passo | Bloqueios |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| (sem itens) | - | - | - | - | - | - | - |
+| WIP-DOT-133 | Cruzar backlog vivo e pendencias documentais com o Jira. | feat/DOT-133-backlog-vivo-jira-crosscheck | PO | 2026-03-11 01:09 UTC | 2026-03-11 01:09 UTC | Atualizar os registradores vivos com o novo owner de CHAT-005 e abrir a matriz auditavel dos itens pendentes sem par comprovado. | - |
 <!-- ai-worklog:doing:end -->
 
 ## Done
@@ -67,5 +67,5 @@ Fallback local de continuidade. O Jira e a fonte primaria do fluxo vivo.
 <!-- ai-worklog:log:start -->
 | Data/Hora UTC | ID | Status | Resumo | Proximo passo | Bloqueios | Contexto | Notas |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| (sem itens) | - | - | - | - | - | - | - |
+| 2026-03-11 01:09 UTC | WIP-DOT-133 | doing | Cruzar backlog vivo e pendencias documentais com o Jira. | Atualizar os registradores vivos com o novo owner de CHAT-005 e abrir a matriz auditavel dos itens pendentes sem par comprovado. | - | DOT-133 | inicio da tarefa |
 <!-- ai-worklog:log:end -->

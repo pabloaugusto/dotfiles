@@ -57,6 +57,7 @@ Mapa das documentacoes versionadas do projeto e ordem recomendada de leitura.
 - [`docs/AI-SKILLS-CATALOG.md`](docs/AI-SKILLS-CATALOG.md): catalogo das skills.
 - [`docs/AI-DELEGATION-FLOW.md`](docs/AI-DELEGATION-FLOW.md): fluxo de intake, roteamento e delegacao.
 - [`docs/AI-GOVERNANCE-AND-REGRESSION.md`](docs/AI-GOVERNANCE-AND-REGRESSION.md): regressao e governanca da camada de IA.
+- [`docs/AI-BACKLOG-LIVE-AUDIT.md`](docs/AI-BACKLOG-LIVE-AUDIT.md): matriz auditavel do backlog vivo versus `Jira`, incluindo backfill de owners oficiais.
 - [`docs/AI-SOURCE-AUDIT.md`](docs/AI-SOURCE-AUDIT.md): auditoria estrutural das fontes cross-repo.
 - [`docs/git-conventions.md`](docs/git-conventions.md): convencoes de branch, commit e PR.
 
