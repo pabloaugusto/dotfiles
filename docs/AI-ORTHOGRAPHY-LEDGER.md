@@ -20,6 +20,10 @@ Registro consultivo do agente Pascoalete para ortografia e higiene vocabular.
 <!-- ai-orthography:records:start -->
 | Data/Hora UTC | Worklog ID | Revisor | Status | Arquivo | Achados | Evidencia |
 | --- | --- | --- | --- | --- | --- | --- |
+| 2026-03-11 04:38 UTC | WIP-DOT-132 | pascoalete | aprovado | .cspell/project-words.txt | sem achados | task spell:check |
+| 2026-03-11 04:38 UTC | WIP-DOT-132 | pascoalete | aprovado | docs/README.md | sem achados | task spell:check |
+| 2026-03-11 04:38 UTC | WIP-DOT-132 | pascoalete | aprovado | docs/AI-PAUSED-ISSUES-AUDIT.md | sem achados | task spell:check |
+| 2026-03-11 04:36 UTC | WIP-DOT-132 | pascoalete | reprovado | LICOES-APRENDIDAS.md | Licoes, usuario, LICOES, licao, Criterio, licoes, eficiencia, resiliencia (+183) | task spell:check |
 | 2026-03-11 01:55 UTC | WIP-DOT-133 | pascoalete | reprovado | docs/AI-WIP-TRACKER.md | solicitacao, acionavel, minimo, execucao, execucao, obrigatorio, Responsavel, atualizacao (+124) | task spell:check |
 | 2026-03-11 01:55 UTC | WIP-DOT-133 | pascoalete | reprovado | LICOES-APRENDIDAS.md | Licoes, Historico, obrigatoria, usuario, LICOES, licao, Criterio, licoes (+239) | task spell:check |
 | 2026-03-11 01:38 UTC | WIP-DOT-133 | pascoalete | reprovado | docs/README.md | documentacoes, Operacao, migracao, canonica, rotacao, canonicas, automacao, tecnico (+22) | task spell:check |
