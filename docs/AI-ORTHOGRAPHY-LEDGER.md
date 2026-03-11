@@ -20,6 +20,9 @@ Registro consultivo do agente Pascoalete para ortografia e higiene vocabular.
 <!-- ai-orthography:records:start -->
 | Data/Hora UTC | Worklog ID | Revisor | Status | Arquivo | Achados | Evidencia |
 | --- | --- | --- | --- | --- | --- | --- |
+| 2026-03-11 06:06 UTC | WIP-DOT-134 | pascoalete | reprovado | LICOES-APRENDIDAS.md | Licoes, usuario, LICOES, licao, Criterio, licoes, eficiencia, resiliencia (+184) | task spell:check |
+| 2026-03-11 06:06 UTC | WIP-DOT-134 | pascoalete | reprovado | docs/README.md | remediacoes, excecoes | task spell:check |
+| 2026-03-11 06:06 UTC | WIP-DOT-134 | pascoalete | reprovado | docs/AI-DONE-ISSUES-AUDIT.md | criterios, absorcao, aplicavel, rastreavel, saida, leitu, obrigatorio, revisao (+132) | task spell:check |
 | 2026-03-11 05:33 UTC | WIP-DOT-135 | pascoalete | reprovado | .agents/cerimonias/logs/retrospectiva/2026-03-11-0427-feat-DOT-132-reconcile-paused.md | Pascoalete, testavel, decisao, rastreavel, concluido, responsavel, unica, decisao (+5) | task spell:check |
 | 2026-03-11 05:33 UTC | WIP-DOT-135 | pascoalete | reprovado | .agents/cerimonias/logs/retrospectiva/2026-03-11-0146-feat-DOT-133-backlog-vivo-jira-crosscheck.md | Pascoalete, testavel, rastreavel, concluido, responsavel, acionaveis, obrigatorio, promocao (+3) | task spell:check |
 | 2026-03-11 05:33 UTC | WIP-DOT-135 | pascoalete | reprovado | .agents/cerimonias/logs/retrospectiva/2026-03-10-2357-feat-DOT-130-git-governance-hygiene.md | Pascoalete, testavel, worktrees, rastreavel, concluido, responsavel, worktrees, worktree (+6) | task spell:check |

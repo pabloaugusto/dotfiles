@@ -58,6 +58,7 @@ Mapa das documentacoes versionadas do projeto e ordem recomendada de leitura.
 - [`docs/AI-DELEGATION-FLOW.md`](docs/AI-DELEGATION-FLOW.md): fluxo de intake, roteamento e delegacao.
 - [`docs/AI-GOVERNANCE-AND-REGRESSION.md`](docs/AI-GOVERNANCE-AND-REGRESSION.md): regressao e governanca da camada de IA.
 - [`docs/AI-BACKLOG-LIVE-AUDIT.md`](docs/AI-BACKLOG-LIVE-AUDIT.md): matriz auditavel do backlog vivo versus `Jira`, incluindo backfill de owners oficiais.
+- [`docs/AI-DONE-ISSUES-AUDIT.md`](docs/AI-DONE-ISSUES-AUDIT.md): baseline versionada da auditoria integral das issues em **Done**, com checklist por onda, veredicto formal e remediacoes de paridade terminal.
 - [`docs/AI-PAUSED-ISSUES-AUDIT.md`](docs/AI-PAUSED-ISSUES-AUDIT.md): classificacao factual das issues em **Paused**, com evidencias, veredicto e acao recomendada por item.
 - [`docs/AI-RETROSPECTIVE-BACKFILL-AUDIT.md`](docs/AI-RETROSPECTIVE-BACKFILL-AUDIT.md): inventario versionado das branches encerradas, com cobertura existente, backfill fiel e excecoes documentadas de retrospectiva.
 - [`docs/AI-SOURCE-AUDIT.md`](docs/AI-SOURCE-AUDIT.md): auditoria estrutural das fontes cross-repo.
