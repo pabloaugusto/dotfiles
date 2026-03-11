@@ -59,6 +59,7 @@ Mapa das documentacoes versionadas do projeto e ordem recomendada de leitura.
 - [`docs/AI-GOVERNANCE-AND-REGRESSION.md`](docs/AI-GOVERNANCE-AND-REGRESSION.md): regressao e governanca da camada de IA.
 - [`docs/AI-BACKLOG-LIVE-AUDIT.md`](docs/AI-BACKLOG-LIVE-AUDIT.md): matriz auditavel do backlog vivo versus `Jira`, incluindo backfill de owners oficiais.
 - [`docs/AI-PAUSED-ISSUES-AUDIT.md`](docs/AI-PAUSED-ISSUES-AUDIT.md): classificacao factual das issues em **Paused**, com evidencias, veredicto e acao recomendada por item.
+- [`docs/AI-RETROSPECTIVE-BACKFILL-AUDIT.md`](docs/AI-RETROSPECTIVE-BACKFILL-AUDIT.md): inventario versionado das branches encerradas, com cobertura existente, backfill fiel e excecoes documentadas de retrospectiva.
 - [`docs/AI-SOURCE-AUDIT.md`](docs/AI-SOURCE-AUDIT.md): auditoria estrutural das fontes cross-repo.
 - [`docs/git-conventions.md`](docs/git-conventions.md): convencoes de branch, commit e PR.
 

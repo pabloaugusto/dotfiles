@@ -20,6 +20,21 @@ Registro consultivo do agente Pascoalete para ortografia e higiene vocabular.
 <!-- ai-orthography:records:start -->
 | Data/Hora UTC | Worklog ID | Revisor | Status | Arquivo | Achados | Evidencia |
 | --- | --- | --- | --- | --- | --- | --- |
+| 2026-03-11 05:33 UTC | WIP-DOT-135 | pascoalete | reprovado | .agents/cerimonias/logs/retrospectiva/2026-03-11-0427-feat-DOT-132-reconcile-paused.md | Pascoalete, testavel, decisao, rastreavel, concluido, responsavel, unica, decisao (+5) | task spell:check |
+| 2026-03-11 05:33 UTC | WIP-DOT-135 | pascoalete | reprovado | .agents/cerimonias/logs/retrospectiva/2026-03-11-0146-feat-DOT-133-backlog-vivo-jira-crosscheck.md | Pascoalete, testavel, rastreavel, concluido, responsavel, acionaveis, obrigatorio, promocao (+3) | task spell:check |
+| 2026-03-11 05:33 UTC | WIP-DOT-135 | pascoalete | reprovado | .agents/cerimonias/logs/retrospectiva/2026-03-10-2357-feat-DOT-130-git-governance-hygiene.md | Pascoalete, testavel, worktrees, rastreavel, concluido, responsavel, worktrees, worktree (+6) | task spell:check |
+| 2026-03-11 05:33 UTC | WIP-DOT-135 | pascoalete | reprovado | .agents/cerimonias/logs/retrospectiva/2026-03-10-1812-feat-DOT-122-product-owner-contract.md | Pascoalete, testavel, priorizacao, rastreavel, concluido, responsavel, agil, maximizacao (+5) | task spell:check |
+| 2026-03-11 05:33 UTC | WIP-DOT-135 | pascoalete | reprovado | .agents/cerimonias/logs/retrospectiva/2026-03-10-1801-feat-DOT-118-agent-aliases.md | Escrivao, Pascoalete, testavel, rastreavel, concluido, responsavel, comunicacao, usuario (+5) | task spell:check |
+| 2026-03-11 05:33 UTC | WIP-DOT-135 | pascoalete | reprovado | .agents/cerimonias/logs/retrospectiva/2026-03-10-1756-feat-DOT-119-kanban-right-to-left.md | Escrivao, Pascoalete, testavel, comecar, automatica, rastreavel, concluido, responsavel (+11) | task spell:check |
+| 2026-03-11 05:33 UTC | WIP-DOT-135 | pascoalete | reprovado | .agents/cerimonias/logs/retrospectiva/2026-03-10-1741-feat-DOT-120-card-aliases.md | Pascoalete, usuario, possivel, rastreavel, concluido, responsavel, usuario, titulos (+5) | task spell:check |
+| 2026-03-11 05:33 UTC | WIP-DOT-135 | pascoalete | reprovado | .agents/cerimonias/logs/retrospectiva/2026-03-10-1712-feat-DOT-121-agile-ceremonies.md | Escrivao, Pascoalete, testavel, rastreavel, concluido, responsavel, ageis, definicao (+5) | task spell:check |
+| 2026-03-11 05:33 UTC | WIP-DOT-135 | pascoalete | reprovado | .agents/cerimonias/logs/retrospectiva/2026-03-10-1623-feat-DOT-115-ai-scrum-master.md | Pascoalete, testavel, escalacao, rastreavel, concluido, responsavel, varios, unico (+5) | task spell:check |
+| 2026-03-11 05:33 UTC | WIP-DOT-135 | pascoalete | reprovado | .agents/cerimonias/logs/retrospectiva/2026-03-10-1435-feat-DOT-128-github-token-full-access-fallback.md | Pascoalete, testavel, rastreavel, concluido, responsavel, operacoes, criacao, disponivel (+6) | task spell:check |
+| 2026-03-11 05:33 UTC | WIP-DOT-135 | pascoalete | reprovado | .agents/cerimonias/logs/retrospectiva/2026-03-10-1315-feat-DOT-127-concluir-primeiro-desbloqueio.md | Pascoalete, testavel, rastreavel, concluido, responsavel, relacao, semantica, Responsavel | task spell:check |
+| 2026-03-11 05:33 UTC | WIP-DOT-135 | pascoalete | reprovado | docs/AI-WIP-TRACKER.md | solicitacao, acionavel, obrigatorio, Responsavel, atualizacao, rastreavel, excecao, Responsavel (+82) | task spell:check |
+| 2026-03-11 05:33 UTC | WIP-DOT-135 | pascoalete | reprovado | docs/README.md | excecoes | task spell:check |
+| 2026-03-11 05:33 UTC | WIP-DOT-135 | pascoalete | reprovado | docs/AI-SCRUM-MASTER-LEDGER.md | canonico, indice, especificos, testavel, indice, historica, testavel, atuacao (+37) | task spell:check |
+| 2026-03-11 05:33 UTC | WIP-DOT-135 | pascoalete | reprovado | docs/AI-RETROSPECTIVE-BACKFILL-AUDIT.md | historicas, rastreavel, excecao, especulacao, decisao, indice, excecao, rastreavel (+16) | task spell:check |
 | 2026-03-11 04:38 UTC | WIP-DOT-132 | pascoalete | aprovado | .cspell/project-words.txt | sem achados | task spell:check |
 | 2026-03-11 04:38 UTC | WIP-DOT-132 | pascoalete | aprovado | docs/README.md | sem achados | task spell:check |
 | 2026-03-11 04:38 UTC | WIP-DOT-132 | pascoalete | aprovado | docs/AI-PAUSED-ISSUES-AUDIT.md | sem achados | task spell:check |
