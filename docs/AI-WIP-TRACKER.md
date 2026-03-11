@@ -1,6 +1,6 @@
 # AI WIP Tracker
 
-Atualizado em: 2026-03-11 19:26 UTC
+Atualizado em: 2026-03-11 19:45 UTC
 
 Fallback local de continuidade. O Jira e a fonte primaria do fluxo vivo.
 
@@ -27,7 +27,7 @@ Fallback local de continuidade. O Jira e a fonte primaria do fluxo vivo.
 <!-- ai-worklog:doing:start -->
 | ID | Tarefa | Branch | Responsavel | Inicio UTC | Ultima atualizacao UTC | Proximo passo | Bloqueios |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| WIP-20260311-183919 | DOT-179 - consolidar prefixo prompt para prompts versionados | prompt/DOT-179-agnostic-sync-outbox-foundation | ai-tech-lead | 2026-03-11 18:39 UTC | 2026-03-11 19:26 UTC | Rodar validacoes, sincronizar DOT-178/DOT-179 no Jira e fechar commit/PR com scope prompt. | - |
+| (sem itens) | - | - | - | - | - | - | - |
 <!-- ai-worklog:doing:end -->
 
 ## Done
@@ -35,6 +35,7 @@ Fallback local de continuidade. O Jira e a fonte primaria do fluxo vivo.
 <!-- ai-worklog:done:start -->
 | ID | Tarefa | Branch | Responsavel | Inicio UTC | Concluido UTC | Resultado |
 | --- | --- | --- | --- | --- | --- | --- |
+| WIP-20260311-183919 | DOT-179 - consolidar prefixo prompt para prompts versionados | prompt/DOT-179-agnostic-sync-outbox-foundation | ai-tech-lead | 2026-03-11 18:39 UTC | 2026-03-11 19:45 UTC | Namespace prompt endurecido com task_id prompt/<slug>, branch prompt/<jira-key>-<slug>, scope prompt, contrato Jira PROMPT:/label prompt, task canonica de sync com Jira e pack f... / evidencias: commit=ab59d7f; commit... |
 | WIP-DOT-178 | Formalizar prompt pack canonico de PEA/startup na arvore .agents/prompts | feat/DOT-178-formal-pea-prompt-pack | ai-developer-config-policy | 2026-03-11 15:21 UTC | 2026-03-11 15:56 UTC | Pack formal de PEA/startup promovido em .agents/prompts e absorvido na main pelo PR #41 / evidencias: merge=4760349; pr=#41; commit=0c5ac9e; startup pea_status=ok; review python-reviewer=aprovado |
 | WIP-DOT-177 | Backend, docs e validator do startup integral prontos para versionamento. | feat/DOT-177-startup-preflight-memory | ai-developer-config-policy | 2026-03-11 13:23 UTC | 2026-03-11 14:40 UTC | DOT-177 concluida com PR #39 mergeado em main, startup integral endurecido e recarga explicita da governanca Git canonica sem deslocar o enforcement dos hooks, tasks e gates ofi... |
 | WIP-DOT-175-CLOSEOUT | Fechar DOT-175 com PR, merge, Jira e saneamento da lacuna de startup/fallback GitHub | feat/DOT-175-intake-epic-issue-dedupe | ai-developer-config-policy | 2026-03-11 13:10 UTC | 2026-03-11 13:18 UTC | DOT-175 ficou pronta para integracao com PR #38 aberta, validacoes locais verdes e branch preparada para merge em main. / evidencias: PR=https://github.com/pabloaugusto/dotfiles/pull/38; commit=3bef3e0; python -m unit... |
@@ -84,8 +85,5 @@ Fallback local de continuidade. O Jira e a fonte primaria do fluxo vivo.
 <!-- ai-worklog:log:start -->
 | Data/Hora UTC | ID | Status | Resumo | Proximo passo | Bloqueios | Contexto | Notas |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| 2026-03-11 19:26 UTC | WIP-20260311-183919 | doing | DOT-179 - consolidar prefixo prompt para prompts versionados | Aplicar regra prompt em contratos, hooks, validadores e metadata dos packs formais. | - | - | inicio da tarefa |
-| 2026-03-11 19:26 UTC | WIP-20260311-183919 | doing | Branch alinhada ao namespace prompt e enforcement em implementacao. | Validar hooks, tasks, metadata e contratos com a branch canonica codex/prompt/DOT-179-agnostic-sync-outbox-foundation. | - | - | checkpoint incremental |
-| 2026-03-11 19:26 UTC | WIP-20260311-183919 | doing | Branch normalizada para prompt/DOT-179-agnostic-sync-outbox-foundation conforme contrato canonico. | Executar validacoes locais e fechar commit/PR com scope prompt e task_id prompt/<slug>. | - | - | checkpoint incremental |
-| 2026-03-11 19:26 UTC | WIP-20260311-183919 | doing | Contrato prompt endurecido com regra Jira PROMPT:/label prompt e task canonica de check/sync adicionada. | Rodar validacoes, sincronizar DOT-178/DOT-179 no Jira e fechar commit/PR com scope prompt. | - | .agents/prompts, governanca git, Jira prompt contract | checkpoint incremental |
+| (sem itens) | - | - | - | - | - | - | - |
 <!-- ai-worklog:log:end -->
