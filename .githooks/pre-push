@@ -54,8 +54,7 @@ CHANGED_PATHS_JSON="$(
   printf '%s' "${COMMIT_PAYLOAD_JSON}" \
     | bash "${ROOT_DIR}/scripts/run-python.sh" -c \
       "import json,sys; payload=json.load(sys.stdin); seen=[]; \
-for entry in payload: \
-  [seen.append(path) for path in entry.get('paths', []) if path not in seen]; \
+[seen.append(path) for entry in payload for path in entry.get('paths', []) if path not in seen]; \
 print(json.dumps(seen))"
 )"
 
