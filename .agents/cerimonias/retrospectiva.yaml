@@ -33,6 +33,7 @@ artifacts_generated:
   - scrum-master-ledger-entry
   - confluence-page
   - jira-issues-for-new-problems
+  - jira-bug-for-unresolved-problem
 
 issue_policy:
   create_when_problem_untracked: true
@@ -50,8 +51,20 @@ log:
     - branch
     - participantes
     - contexto
+    - confluence_url_ou_n_a
+    - jira_problemas_ou_n_a
+    - ledger_entry_ref
     - problemas_catalogados
     - artefatos_gerados
+    - plano_de_acao
+    - responsavel
+    - proximo_passo
+
+enforcement:
+  ledger_entry_required: true
+  confluence_page_required: true
+  jira_bug_required_when_unresolved: true
+  backfill_missing_executions_as_inconformity: true
 
 confluence:
   root_page: Cerimonias

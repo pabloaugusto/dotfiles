@@ -205,6 +205,9 @@ com:
 - schema declarativo da **cerimonia**
 - definicoes por ritual, como a **Retrospectiva**
 - templates e contratos dos logs de execucao
+- cadeia minima de evidencia para cada execucao obrigatoria: log Markdown,
+  entrada indice no ledger, pagina no `Confluence` quando exigida e
+  `Bug`/`Task` no `Jira` para problema nao resolvido
 
 ### Camada 3. Cartoes de agentes
 
@@ -306,6 +309,9 @@ orquestracao, nos catalogos, nas evals e nos contratos para fiscalizar
 continuamente **board**, **WIP**, ownership, comunicacao e **cerimonias**.
 Sua efetividade minima fica rastreada no
 [`docs/AI-SCRUM-MASTER-LEDGER.md`](AI-SCRUM-MASTER-LEDGER.md).
+Fechamento de branch ou **fatia de incremento testavel** com **Retrospectiva**
+obrigatoria so conta como aderente quando a cadeia `log -> ledger ->
+Confluence -> Jira quando houver pendencia` estiver materializada.
 
 ## Politica de leitura do board
 

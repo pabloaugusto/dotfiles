@@ -191,6 +191,7 @@ OPERATING_MODEL_REQUIRED_SNIPPETS = [
     "### Fronteira entre `.agents/` e adaptadores de assistente",
     "### Camada 2.1. Registry declarativo do repo",
     "### Camada 2.2. Orquestracao, rules e evals",
+    "cadeia minima de evidencia para cada execucao obrigatoria",
     "## Politica de leitura do board",
     "## Camada de identidade humana dos agentes",
 ]
@@ -217,11 +218,18 @@ CEREMONY_REQUIRED_SNIPPETS = {
         "ceremony.schema.json",
         "retrospectiva.yaml",
         "Toda execucao real de **cerimonia** deve gerar log Markdown proprio.",
+        "Toda branch finalizada que exigir **Retrospectiva** precisa gerar log",
     ],
     ".agents/cerimonias/retrospectiva.yaml": [
         "id: retrospectiva",
         "title: Retrospectiva",
         "mode: every-branch-finished",
+        "- plano_de_acao",
+        "- responsavel",
+        "- proximo_passo",
+        "ledger_entry_required: true",
+        "confluence_page_required: true",
+        "jira_bug_required_when_unresolved: true",
         "- cerimonia",
         "- retrospectiva",
         "title_template: Retrospectiva - {yyyy-MM-dd HH:mm}",
@@ -229,6 +237,8 @@ CEREMONY_REQUIRED_SNIPPETS = {
     ".agents/cerimonias/logs/retrospectiva-template.md": [
         "# Retrospectiva - {{data_hora_utc}} - {{branch}}",
         "## Problemas catalogados",
+        "Entrada no ledger",
+        "Plano de acao: {{plano_de_acao}}",
         "## Encaminhamento",
     ],
 }
@@ -290,6 +300,8 @@ BOARD_OPERATION_REQUIRED_SNIPPETS = {
         "ler o board da direita para a esquerda",
         "priorizar agentes ociosos para o item mais a direita com avanco real possivel",
         "tentar fazer a equipe comecar a terminar antes de autorizar nova puxada",
+        "branch-closure-must-trigger-required-ceremony-chain",
+        "required-ceremony-chain-must-produce-log-ledger-confluence-and-jira-when-applicable",
     ],
     ".agents/cards/ai-scrum-master.md": [
         "Ler o **board** da direita para a esquerda",
