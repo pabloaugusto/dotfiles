@@ -1,0 +1,121 @@
+version: 1
+
+workspace:
+  id: workstation-governance
+  state_root: ~/.ai-control-plane
+  workspace_dir: workspaces/{workspace_id}
+
+runtime_identity:
+  strategy: derived
+  fields:
+    - host_name
+    - os_family
+    - runtime_kind
+    - distro
+  runtime_kinds:
+    - host
+    - wsl
+    - container
+    - ci
+
+artifacts:
+  retrospective_logs:
+    artifact_type: runtime_ledger
+    definition_source: repo
+    sync_eligibility: candidate
+    source_of_truth: confluence
+    remote_target:
+      kind: confluence
+      strategy: append-page-ledger
+      page_title: DOT - Retrospectiva Runtime Ledger
+      page_scope: retrospective
+    local_outbox:
+      path: outbox/confluence/retrospective-logs.jsonl
+    retention_policy:
+      on_remote_ack: compact
+      keep_last_synced_days: 14
+      max_attempts_before_dead_letter: 5
+
+  prompt_runs:
+    artifact_type: runtime_ledger
+    definition_source: repo
+    sync_eligibility: seed-foundation
+    source_of_truth: confluence
+    remote_target:
+      kind: confluence
+      strategy: append-page-ledger
+      page_title: DOT - Prompt Runtime Ledger
+      page_scope: prompts
+    local_outbox:
+      path: outbox/confluence/prompt-runs.jsonl
+    retention_policy:
+      on_remote_ack: compact
+      keep_last_synced_days: 14
+      max_attempts_before_dead_letter: 5
+
+artifact_inventory:
+  repo_canonical:
+    - path: config/ai/
+      reason: contratos, manifests e control plane precisam permanecer versionados no Git
+    - path: config/runtime-secrets-cache.yaml
+      reason: contrato versionado de cache/runtime local
+    - path: df/secrets/secrets-ref.yaml
+      reason: inventario declarativo de refs de secrets
+    - path: bootstrap/user-config.yaml.tpl
+      reason: template declarativo do bootstrap
+    - path: config/ai/platforms.local.yaml.tpl
+      reason: template declarativo do overlay local
+    - path: docs/AI-WIP-TRACKER.md
+      reason: fallback contingencial versionado do fluxo vivo; nao deve perder papel local
+    - path: docs/AI-FALLBACK-LEDGER.md
+      reason: ledger versionado do modo degraded/recovery
+    - path: docs/AI-REVIEW-LEDGER.md
+      reason: ledger versionado de pareceres especializados
+    - path: docs/AI-SCRUM-MASTER-LEDGER.md
+      reason: ledger versionado de inconformidades e cerimonias
+    - path: docs/AI-ORTHOGRAPHY-LEDGER.md
+      reason: ledger versionado do parecer consultivo do Pascoalete
+    - path: df/vscode/settings.json
+      reason: configuracao declarativa do editor
+    - path: df/vscode/keybindings.json
+      reason: configuracao declarativa do editor
+    - path: df/vscode/mcp.json
+      reason: configuracao declarativa de integracao
+    - path: df/vscode/chatLanguageModels.json
+      reason: configuracao declarativa de modelos
+
+  runtime_ledger_candidates:
+    - path: .agents/cerimonias/logs/retrospectiva/
+      artifact_key: retrospective_logs
+      reason: o historico detalhado ja participa da cadeia log -> ledger -> Confluence -> Jira
+    - path: prompt-runs
+      artifact_key: prompt_runs
+      reason: eventos de execucao de prompt devem nascer no outbox local e ganhar historico remoto perene
+
+  remote_ineligible:
+    - path: .cache/
+      reason: runtime tecnico local e efemero; o contrato do repo proibe `.cache` como estado duravel
+    - path: .cache/ai/startup-session.md
+      reason: relatorio local de sessao, sem valor perene remoto por default
+    - path: .cache/ai/active-execution.json
+      reason: contexto operacional local e transitario
+    - path: .cache/playwright/
+      reason: traces e storage state de validacao visual sao efemeros
+    - path: .cache/worktree-backups/
+      reason: backup tecnico local
+    - path: config/ai/platforms.local.yaml
+      reason: overlay local com refs reais e sensiveis
+    - path: bootstrap/user-config.yaml
+      reason: configuracao local materializada do bootstrap
+    - path: df/vscode/globalStorage/
+      reason: runtime local de ferramenta
+    - path: df/vscode/workspaceStorage/
+      reason: runtime local de ferramenta
+    - path: df/vscode/History/
+      reason: historico local efemero
+    - path: df/vscode/sync/
+      reason: runtime transitorio do editor
+    - path: .gemini/
+      reason: runtime local de ferramenta, nao versionavel nem historico perene oficial
+    - path: .codex/
+      reason: apenas ponte de compatibilidade; sem runtime persistente versionavel

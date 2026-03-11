@@ -182,8 +182,26 @@ Referencia operacional das tasks canonicas mais importantes do repositorio.
 
 ### `ai:control-plane:show`
 
-- Funcionalidade: exibe o resumo da control plane dev-time em [`config/ai/`](../config/ai/).
+- Funcionalidade: exibe o resumo da control plane dev-time em [`config/ai/`](../config/ai/) e inclui o check resumido da fundacao de sync.
 - Uso manual: `task ai:control-plane:show`
+
+### `ai:control-plane:sync:check`
+
+- Funcionalidade: valida o manifest [`config/ai/sync-targets.yaml`](../config/ai/sync-targets.yaml), a identidade de runtime e a estrutura esperada do state local duravel, sem drenar o outbox.
+- Uso manual: `task ai:control-plane:sync:check`
+
+### `ai:control-plane:sync:status`
+
+- Funcionalidade: exibe o estado atual do outbox local duravel, dos artefatos elegiveis ao sync e das filas de `dead-letter`.
+- Uso manual: `task ai:control-plane:sync:status`
+
+### `ai:control-plane:sync:drain`
+
+- Funcionalidade: planeja ou executa a drenagem do outbox local duravel para os destinos remotos oficiais, respeitando `ack`, retry, `dead-letter` e classificacao de artefatos.
+- Uso manual em dry-run: `task ai:control-plane:sync:drain`
+- Uso manual com apply: `task ai:control-plane:sync:drain APPLY=1`
+- Uso manual com filtro: `task ai:control-plane:sync:drain APPLY=1 ARTIFACT_KEY="retrospective_logs" MAX_EVENTS=20`
+- Observacao: o fluxo grava primeiro no outbox local, so compacta apos `ack` remoto e segue a arquitetura-base definida em [`docs/ai-sync-foundation.md`](ai-sync-foundation.md).
 
 ### `ai:startup:session`
 
