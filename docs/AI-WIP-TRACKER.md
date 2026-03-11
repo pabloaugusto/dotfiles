@@ -1,6 +1,6 @@
 # AI WIP Tracker
 
-Atualizado em: 2026-03-11 13:10 UTC
+Atualizado em: 2026-03-11 13:18 UTC
 
 Fallback local de continuidade. O Jira e a fonte primaria do fluxo vivo.
 
@@ -27,7 +27,7 @@ Fallback local de continuidade. O Jira e a fonte primaria do fluxo vivo.
 <!-- ai-worklog:doing:start -->
 | ID | Tarefa | Branch | Responsavel | Inicio UTC | Ultima atualizacao UTC | Proximo passo | Bloqueios |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| WIP-DOT-175-CLOSEOUT | Fechar DOT-175 com PR, merge, Jira e saneamento da lacuna de startup/fallback GitHub | feat/DOT-175-intake-epic-issue-dedupe | ai-developer-config-policy | 2026-03-11 13:10 UTC | 2026-03-11 13:10 UTC | Revalidar gates, autenticar GitHub com fallback e abrir PR da branch atual | - |
+| (sem itens) | - | - | - | - | - | - | - |
 <!-- ai-worklog:doing:end -->
 
 ## Done
@@ -35,6 +35,7 @@ Fallback local de continuidade. O Jira e a fonte primaria do fluxo vivo.
 <!-- ai-worklog:done:start -->
 | ID | Tarefa | Branch | Responsavel | Inicio UTC | Concluido UTC | Resultado |
 | --- | --- | --- | --- | --- | --- | --- |
+| WIP-DOT-175-CLOSEOUT | Fechar DOT-175 com PR, merge, Jira e saneamento da lacuna de startup/fallback GitHub | feat/DOT-175-intake-epic-issue-dedupe | ai-developer-config-policy | 2026-03-11 13:10 UTC | 2026-03-11 13:18 UTC | DOT-175 ficou pronta para integracao com PR #38 aberta, validacoes locais verdes e branch preparada para merge em main. / evidencias: PR=https://github.com/pabloaugusto/dotfiles/pull/38; commit=3bef3e0; python -m unit... |
 | WIP-DOT-175 | DOT-175: formalizar preflight obrigatorio de reuse de Epic e dedupe de issue no intake | feat/DOT-175-intake-epic-issue-dedupe | ai-developer-config-policy | 2026-03-11 12:23 UTC | 2026-03-11 12:38 UTC | Regra perene de intake formalizada para deduplicacao de issue, reuse obrigatorio de Epic aberto e controle de bypass humano/autonomo rastreado no Jira. / evidencias: task ai:validate=ok; task docs:check=ok; task ai:ev... |
 | WIP-DOT-37 | Fechar formalmente DOT-37 com evidencia versionada do checkpoint apos repair remoto + docs sync. | codex/feat/DOT-37-checkpoint-closure | PO | 2026-03-11 11:45 UTC | 2026-03-11 12:06 UTC | DOT-37 foi concluida como checkpoint formal da trilha Atlassian adapters, com adendo versionado em docs/AI-PAUSED-ISSUES-AUDIT.md e fechamento terminal rastreavel no Jira. / evidencias: docs/AI-PAUSED-ISSUES-AUDIT.md;... |
 | WIP-DOT-106 | Migrar trackers locais para fallback contingencial. | feat/DOT-106-fallback-tracker-cutover | Arquiteto | 2026-03-11 08:22 UTC | 2026-03-11 09:17 UTC | DOT-106 passou a tratar trackers locais como fallback contingencial explicito do Jira, com ledger canonico, CLI de captura/resolve, checklist de startup/restart, validador de pa... / evidencias: task ai:fallback:statu... |
@@ -81,5 +82,5 @@ Fallback local de continuidade. O Jira e a fonte primaria do fluxo vivo.
 <!-- ai-worklog:log:start -->
 | Data/Hora UTC | ID | Status | Resumo | Proximo passo | Bloqueios | Contexto | Notas |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| 2026-03-11 13:10 UTC | WIP-DOT-175-CLOSEOUT | doing | Fechar DOT-175 com PR, merge, Jira e saneamento da lacuna de startup/fallback GitHub | Revalidar gates, autenticar GitHub com fallback e abrir PR da branch atual | - | DOT-175 + continuidade operacional do startup | inicio da tarefa |
+| (sem itens) | - | - | - | - | - | - | - |
 <!-- ai-worklog:log:end -->
