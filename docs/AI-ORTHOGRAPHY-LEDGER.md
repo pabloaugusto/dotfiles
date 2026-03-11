@@ -20,6 +20,8 @@ Registro consultivo do agente Pascoalete para ortografia e higiene vocabular.
 <!-- ai-orthography:records:start -->
 | Data/Hora UTC | Worklog ID | Revisor | Status | Arquivo | Achados | Evidencia |
 | --- | --- | --- | --- | --- | --- | --- |
+| 2026-03-11 07:53 UTC | WIP-DOT-109-RETRO | pascoalete | reprovado | docs/AI-SCRUM-MASTER-LEDGER.md | canonico, indice, especificos, testavel, indice, historica, testavel, atuacao (+38) | task spell:check |
+| 2026-03-11 07:53 UTC | WIP-DOT-109-RETRO | pascoalete | reprovado | .agents/cerimonias/logs/retrospectiva/2026-03-11-0445-feat-DOT-109-jira-role-sync.md | Pascoalete, testavel, publicacao, rastreavel, concluido, responsavel, canonico, desnecessario (+5) | task spell:check |
 | 2026-03-11 07:25 UTC | WIP-DOT-109 | pascoalete | reprovado | tests/python/ai_jira_apply_test.py | canonico, canonico, canonico | task spell:check |
 | 2026-03-11 07:25 UTC | WIP-DOT-109 | pascoalete | reprovado | tests/python/ai_jira_model_test.py | canonicos, subtarefa | task spell:check |
 | 2026-03-11 07:25 UTC | WIP-DOT-109 | pascoalete | reprovado | scripts/ai_jira_apply_lib.py | customfieldtypes, customfieldtypes, multiselectsearcher, customfieldtypes, customfieldtypes, multiselectsearcher, customfieldtypes, exacttextsearcher (+15) | task spell:check |
