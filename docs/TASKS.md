@@ -294,6 +294,28 @@ Referencia operacional das tasks canonicas mais importantes do repositorio.
 - Observacao: esta task existe para manter o `Confluence` vivo mesmo quando o
   board do `Jira Software` ainda estiver em drift ou bloqueado.
 
+### `ai:fallback:status`
+
+- Funcionalidade: informa se a sessao esta em `primary`, `degraded` ou
+  `recovery`, cruzando a saude do `Jira` com o ledger de fallback local.
+- Uso manual: `task ai:fallback:status`
+
+### `ai:fallback:capture`
+
+- Funcionalidade: registra que um tracker local precisou assumir contingencia
+  real enquanto o fluxo primario no `Jira` estava degradado.
+- Uso manual: `task ai:fallback:capture TRACKER="docs/AI-WIP-TRACKER.md" LOCAL_REFERENCE="WIP-..." SUMMARY="..." NEXT_STEP="..."`
+- Observacao: por padrao a task bloqueia a captura quando o `Jira` esta
+  saudavel; o override `ALLOW_WHILE_JIRA_UP=1` so existe para falha primaria
+  objetiva que nao apareca como indisponibilidade total.
+
+### `ai:fallback:resolve`
+
+- Funcionalidade: resolve um registro ativo do fallback como `drained`,
+  `reconciled` ou `obsolete`, sincronizando comentario estruturado no `Jira`
+  quando o caso exigir.
+- Uso manual: `task ai:fallback:resolve TRACKER="docs/AI-WIP-TRACKER.md" LOCAL_REFERENCE="WIP-..." OUTCOME="drained" JIRA_ISSUE="DOT-106"`
+
 ### `ai:worklog:check`
 
 - Funcionalidade: valida pendencias do tracker e bloqueia nova rodada quando a

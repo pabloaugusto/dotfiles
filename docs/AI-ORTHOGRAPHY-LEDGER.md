@@ -20,6 +20,21 @@ Registro consultivo do agente Pascoalete para ortografia e higiene vocabular.
 <!-- ai-orthography:records:start -->
 | Data/Hora UTC | Worklog ID | Revisor | Status | Arquivo | Achados | Evidencia |
 | --- | --- | --- | --- | --- | --- | --- |
+| 2026-03-11 09:15 UTC | WIP-DOT-106 | pascoalete | reprovado | tests/python/ai_fallback_governance_test.py | indisponivel, temporaria, Sincronizacao, concluida | task spell:check |
+| 2026-03-11 09:15 UTC | WIP-DOT-106 | pascoalete | reprovado | tests/python/ai_assets_validator_test.py | possivel, LICOES, Validacao, LICOES, comecar, Orquestracao, evals, Integracoes (+2) | task spell:check |
+| 2026-03-11 09:15 UTC | WIP-DOT-106 | pascoalete | reprovado | scripts/ai_fallback_governance_lib.py | Responsavel, atualizacao, Cabecalho, canonico, primario, sincronizacao, degradacao, sessao (+5) | task spell:check |
+| 2026-03-11 09:15 UTC | WIP-DOT-106 | pascoalete | reprovado | scripts/ai-fallback.py | primario | task spell:check |
+| 2026-03-11 09:15 UTC | WIP-DOT-106 | pascoalete | reprovado | scripts/validate-ai-assets.py | evals, LICOES, evals, evals, evals, evals, autolog, autolog (+53) | task spell:check |
+| 2026-03-11 09:15 UTC | WIP-DOT-106 | pascoalete | reprovado | scripts/ai-worklog.py | Responsavel, atualizacao, Responsavel, Concluido, Atualizacao, Cabecalho, solicitacao, acionavel (+30) | task spell:check |
+| 2026-03-11 09:15 UTC | WIP-DOT-106 | pascoalete | reprovado | docs/AI-FALLBACK-OPERATIONS.md | sessao, primario, primario, sincronizacao, sessao, degradacao, sessao, Comeca (+10) | task spell:check |
+| 2026-03-11 09:15 UTC | WIP-DOT-106 | pascoalete | reprovado | docs/AI-FALLBACK-LEDGER.md | canonico, primario, sincronizacao, degradacao, sessao, sincronizacao | task spell:check |
+| 2026-03-11 09:15 UTC | WIP-DOT-106 | pascoalete | reprovado | docs/ai-operating-model.md | reutilizavel, testavel, worktree, Principios, Instrucoes, instrucoes, estaveis, sessao (+154) | task spell:check |
+| 2026-03-11 09:15 UTC | WIP-DOT-106 | pascoalete | reprovado | docs/TASKS.md | repositorio, diaria, diaria, sincronizacao, worktree, alteracoes, canonico, Observacao (+81) | task spell:check |
+| 2026-03-11 09:15 UTC | WIP-DOT-106 | pascoalete | reprovado | docs/README.md | canonico, canonico, remediacoes, excecoes | task spell:check |
+| 2026-03-11 09:15 UTC | WIP-DOT-106 | pascoalete | reprovado | docs/AI-STARTUP-AND-RESTART.md | sessao, confiavel, sessao, sessoes, worktree, worktree, alteracoes, sessao (+19) | task spell:check |
+| 2026-03-11 09:15 UTC | WIP-DOT-106 | pascoalete | reprovado | config/ai/contracts.yaml | worktrees, worktree, worktrees, worktrees, criterios, aceitacao, finishable, finishable | task spell:check |
+| 2026-03-11 09:15 UTC | WIP-DOT-106 | pascoalete | reprovado | Taskfile.yml | PYTHONDONTWRITEBYTECODE, PYTHONPYCACHEPREFIX, venv, venv, disponiveis, worktree, alteracoes, alteracoes (+114) | task spell:check |
+| 2026-03-11 09:15 UTC | WIP-DOT-106 | pascoalete | reprovado | AGENTS.md | Missao, confiavel, testavel, reproduzivel, precedencia, LICOES, instrucoes, usuario (+100) | task spell:check |
 | 2026-03-11 07:53 UTC | WIP-DOT-109-RETRO | pascoalete | reprovado | docs/AI-SCRUM-MASTER-LEDGER.md | canonico, indice, especificos, testavel, indice, historica, testavel, atuacao (+38) | task spell:check |
 | 2026-03-11 07:53 UTC | WIP-DOT-109-RETRO | pascoalete | reprovado | .agents/cerimonias/logs/retrospectiva/2026-03-11-0445-feat-DOT-109-jira-role-sync.md | Pascoalete, testavel, publicacao, rastreavel, concluido, responsavel, canonico, desnecessario (+5) | task spell:check |
 | 2026-03-11 07:25 UTC | WIP-DOT-109 | pascoalete | reprovado | tests/python/ai_jira_apply_test.py | canonico, canonico, canonico | task spell:check |

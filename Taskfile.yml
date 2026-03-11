@@ -424,14 +424,14 @@ tasks:
     platforms: [windows]
     dir: '{{.TASKFILE_DIR}}'
     cmds:
-      - uv run --locked ty check scripts/release_tool.py scripts/validate_docs.py scripts/run_actionlint.py scripts/run_gitleaks.py scripts/run-cspell.py scripts/git-signing-mode.py scripts/git_signing_lib.py scripts/git-governance-check.py scripts/ai-control-plane.py scripts/ai_control_plane_lib.py scripts/ai-session-startup.py scripts/ai_session_startup_lib.py scripts/atlassian_platform_lib.py scripts/ai-atlassian-openapi.py scripts/ai_atlassian_openapi_lib.py scripts/ai-jira-model.py scripts/ai_jira_model_lib.py scripts/ai-jira-apply.py scripts/ai_jira_apply_lib.py scripts/ai-atlassian-backfill.py scripts/ai_atlassian_backfill_lib.py scripts/ai-atlassian-migration-bundle.py scripts/ai_atlassian_migration_bundle_lib.py scripts/ai-atlassian-seed.py scripts/ai_atlassian_seed_lib.py scripts/ai-atlassian-docs-sync.py scripts/ai-agent-execution.py scripts/ai_agent_execution_lib.py scripts/secrets-rotation.py scripts/secrets_rotation_lib.py tests/python/release_tool_test.py tests/python/validate_docs_test.py tests/python/git_signing_mode_test.py tests/python/git_governance_check_test.py tests/python/ai_control_plane_test.py tests/python/ai_session_startup_test.py tests/python/atlassian_platform_test.py tests/python/ai_atlassian_openapi_test.py tests/python/ai_jira_model_test.py tests/python/ai_jira_apply_test.py tests/python/ai_atlassian_backfill_test.py tests/python/ai_atlassian_migration_bundle_test.py tests/python/ai_atlassian_seed_test.py tests/python/ai_agent_execution_test.py tests/python/secrets_rotation_test.py
+      - uv run --locked ty check scripts/release_tool.py scripts/validate_docs.py scripts/run_actionlint.py scripts/run_gitleaks.py scripts/run-cspell.py scripts/git-signing-mode.py scripts/git_signing_lib.py scripts/git-governance-check.py scripts/ai-control-plane.py scripts/ai_control_plane_lib.py scripts/ai-session-startup.py scripts/ai_session_startup_lib.py scripts/ai-fallback.py scripts/ai_fallback_governance_lib.py scripts/validate-ai-assets.py scripts/atlassian_platform_lib.py scripts/ai-atlassian-openapi.py scripts/ai_atlassian_openapi_lib.py scripts/ai-jira-model.py scripts/ai_jira_model_lib.py scripts/ai-jira-apply.py scripts/ai_jira_apply_lib.py scripts/ai-atlassian-backfill.py scripts/ai_atlassian_backfill_lib.py scripts/ai-atlassian-migration-bundle.py scripts/ai_atlassian_migration_bundle_lib.py scripts/ai-atlassian-seed.py scripts/ai_atlassian_seed_lib.py scripts/ai-atlassian-docs-sync.py scripts/ai-agent-execution.py scripts/ai_agent_execution_lib.py scripts/secrets-rotation.py scripts/secrets_rotation_lib.py tests/python/release_tool_test.py tests/python/validate_docs_test.py tests/python/git_signing_mode_test.py tests/python/git_governance_check_test.py tests/python/ai_control_plane_test.py tests/python/ai_session_startup_test.py tests/python/ai_fallback_governance_test.py tests/python/ai_assets_validator_test.py tests/python/atlassian_platform_test.py tests/python/ai_atlassian_openapi_test.py tests/python/ai_jira_model_test.py tests/python/ai_jira_apply_test.py tests/python/ai_atlassian_backfill_test.py tests/python/ai_atlassian_migration_bundle_test.py tests/python/ai_atlassian_seed_test.py tests/python/ai_agent_execution_test.py tests/python/secrets_rotation_test.py
 
   type:check:linux:
     desc: Linux/WSL - executa ty em scripts e testes Python
     platforms: [linux]
     dir: '{{.TASKFILE_DIR}}'
     cmds:
-      - uv run --locked ty check scripts/release_tool.py scripts/validate_docs.py scripts/run_actionlint.py scripts/run_gitleaks.py scripts/run-cspell.py scripts/git-signing-mode.py scripts/git_signing_lib.py scripts/git-governance-check.py scripts/ai-control-plane.py scripts/ai_control_plane_lib.py scripts/ai-session-startup.py scripts/ai_session_startup_lib.py scripts/atlassian_platform_lib.py scripts/ai-atlassian-openapi.py scripts/ai_atlassian_openapi_lib.py scripts/ai-jira-model.py scripts/ai_jira_model_lib.py scripts/ai-jira-apply.py scripts/ai_jira_apply_lib.py scripts/ai-atlassian-backfill.py scripts/ai_atlassian_backfill_lib.py scripts/ai-atlassian-migration-bundle.py scripts/ai_atlassian_migration_bundle_lib.py scripts/ai-atlassian-seed.py scripts/ai_atlassian_seed_lib.py scripts/ai-atlassian-docs-sync.py scripts/ai-agent-execution.py scripts/ai_agent_execution_lib.py scripts/secrets-rotation.py scripts/secrets_rotation_lib.py tests/python/release_tool_test.py tests/python/validate_docs_test.py tests/python/git_signing_mode_test.py tests/python/git_governance_check_test.py tests/python/ai_control_plane_test.py tests/python/ai_session_startup_test.py tests/python/atlassian_platform_test.py tests/python/ai_atlassian_openapi_test.py tests/python/ai_jira_model_test.py tests/python/ai_jira_apply_test.py tests/python/ai_atlassian_backfill_test.py tests/python/ai_atlassian_migration_bundle_test.py tests/python/ai_atlassian_seed_test.py tests/python/ai_agent_execution_test.py tests/python/secrets_rotation_test.py
+      - uv run --locked ty check scripts/release_tool.py scripts/validate_docs.py scripts/run_actionlint.py scripts/run_gitleaks.py scripts/run-cspell.py scripts/git-signing-mode.py scripts/git_signing_lib.py scripts/git-governance-check.py scripts/ai-control-plane.py scripts/ai_control_plane_lib.py scripts/ai-session-startup.py scripts/ai_session_startup_lib.py scripts/ai-fallback.py scripts/ai_fallback_governance_lib.py scripts/validate-ai-assets.py scripts/atlassian_platform_lib.py scripts/ai-atlassian-openapi.py scripts/ai_atlassian_openapi_lib.py scripts/ai-jira-model.py scripts/ai_jira_model_lib.py scripts/ai-jira-apply.py scripts/ai_jira_apply_lib.py scripts/ai-atlassian-backfill.py scripts/ai_atlassian_backfill_lib.py scripts/ai-atlassian-migration-bundle.py scripts/ai_atlassian_migration_bundle_lib.py scripts/ai-atlassian-seed.py scripts/ai_atlassian_seed_lib.py scripts/ai-atlassian-docs-sync.py scripts/ai-agent-execution.py scripts/ai_agent_execution_lib.py scripts/secrets-rotation.py scripts/secrets_rotation_lib.py tests/python/release_tool_test.py tests/python/validate_docs_test.py tests/python/git_signing_mode_test.py tests/python/git_governance_check_test.py tests/python/ai_control_plane_test.py tests/python/ai_session_startup_test.py tests/python/ai_fallback_governance_test.py tests/python/ai_assets_validator_test.py tests/python/atlassian_platform_test.py tests/python/ai_atlassian_openapi_test.py tests/python/ai_jira_model_test.py tests/python/ai_jira_apply_test.py tests/python/ai_atlassian_backfill_test.py tests/python/ai_atlassian_migration_bundle_test.py tests/python/ai_atlassian_seed_test.py tests/python/ai_agent_execution_test.py tests/python/secrets_rotation_test.py
 
   test:python:
     desc: Executa a suite Python via pytest no ambiente atual
@@ -1124,6 +1124,93 @@ tasks:
       vars: [WORKLOG_ID]
     cmds:
       - "bash -lc 'bash ./scripts/run-python.sh ./scripts/ai-review.py check --review-file \"{{default \"docs/AI-REVIEW-LEDGER.md\" .REVIEW_FILE}}\" --worklog-id \"{{.WORKLOG_ID}}\" --repo-root \"{{.TASKFILE_DIR}}\" --paths \"{{default \"\" .PATHS}}\" --intent \"{{default \"Revisao especializada obrigatoria\" .INTENT}}\" --risk \"{{default \"medium\" .RISK}}\"'"
+
+  ai:fallback:status:
+    desc: Exibe o modo operacional do fallback local entre Jira primario e trackers contingenciais
+    cmds:
+      - task: ai:fallback:status:{{if or (eq .OS "Windows_NT") (eq .OS "windows")}}windows{{else}}linux{{end}}
+
+  ai:fallback:status:windows:
+    desc: Windows - exibe o modo operacional do fallback local
+    platforms: [windows]
+    dir: '{{.TASKFILE_DIR}}'
+    cmds:
+      - "pwsh -NoProfile -File ./scripts/invoke-python.ps1 -ScriptPath ./scripts/ai-fallback.py status --repo-root \"{{.TASKFILE_DIR}}\" --ledger-file \"{{default \"docs/AI-FALLBACK-LEDGER.md\" .LEDGER_FILE}}\" --tracker-file \"{{default \"docs/AI-WIP-TRACKER.md\" .TRACKER_FILE}}\""
+
+  ai:fallback:status:linux:
+    desc: Linux/WSL - exibe o modo operacional do fallback local
+    platforms: [linux]
+    dir: '{{.TASKFILE_DIR}}'
+    cmds:
+      - "bash -lc 'bash ./scripts/run-python.sh ./scripts/ai-fallback.py status --repo-root \"{{.TASKFILE_DIR}}\" --ledger-file \"{{default \"docs/AI-FALLBACK-LEDGER.md\" .LEDGER_FILE}}\" --tracker-file \"{{default \"docs/AI-WIP-TRACKER.md\" .TRACKER_FILE}}\"'"
+
+  ai:fallback:capture:
+    desc: Registra um uso excepcional do fallback local enquanto o Jira nao sustenta o fluxo primario
+    requires:
+      vars: [TRACKER, LOCAL_REFERENCE, SUMMARY, NEXT_STEP]
+    cmds:
+      - task: ai:fallback:capture:{{if or (eq .OS "Windows_NT") (eq .OS "windows")}}windows{{else}}linux{{end}}
+        vars:
+          TRACKER: "{{.TRACKER}}"
+          LOCAL_REFERENCE: "{{.LOCAL_REFERENCE}}"
+          SUMMARY: "{{.SUMMARY}}"
+          NEXT_STEP: "{{.NEXT_STEP}}"
+          JIRA_ISSUE: "{{default \"\" .JIRA_ISSUE}}"
+          ALLOW_WHILE_JIRA_UP: "{{default \"0\" .ALLOW_WHILE_JIRA_UP}}"
+          LEDGER_FILE: "{{default \"docs/AI-FALLBACK-LEDGER.md\" .LEDGER_FILE}}"
+
+  ai:fallback:capture:windows:
+    desc: Windows - registra uso excepcional do fallback local
+    platforms: [windows]
+    dir: '{{.TASKFILE_DIR}}'
+    requires:
+      vars: [TRACKER, LOCAL_REFERENCE, SUMMARY, NEXT_STEP]
+    cmds:
+      - "pwsh -NoProfile -Command \"& './scripts/invoke-python.ps1' -ScriptPath './scripts/ai-fallback.py' -Arguments @('capture','--repo-root','{{.TASKFILE_DIR}}','--ledger-file','{{default \"docs/AI-FALLBACK-LEDGER.md\" .LEDGER_FILE}}','--tracker','{{.TRACKER}}','--local-reference','{{.LOCAL_REFERENCE}}','--summary','{{.SUMMARY}}','--next-step','{{.NEXT_STEP}}','--jira-issue','{{default \"\" .JIRA_ISSUE}}','--allow-while-jira-up','{{default \"0\" .ALLOW_WHILE_JIRA_UP}}')\""
+
+  ai:fallback:capture:linux:
+    desc: Linux/WSL - registra uso excepcional do fallback local
+    platforms: [linux]
+    dir: '{{.TASKFILE_DIR}}'
+    requires:
+      vars: [TRACKER, LOCAL_REFERENCE, SUMMARY, NEXT_STEP]
+    cmds:
+      - "bash -lc 'bash ./scripts/run-python.sh ./scripts/ai-fallback.py capture --repo-root \"{{.TASKFILE_DIR}}\" --ledger-file \"{{default \"docs/AI-FALLBACK-LEDGER.md\" .LEDGER_FILE}}\" --tracker \"{{.TRACKER}}\" --local-reference \"{{.LOCAL_REFERENCE}}\" --summary \"{{.SUMMARY}}\" --next-step \"{{.NEXT_STEP}}\" --jira-issue \"{{default \"\" .JIRA_ISSUE}}\" --allow-while-jira-up \"{{default \"0\" .ALLOW_WHILE_JIRA_UP}}\"'"
+
+  ai:fallback:resolve:
+    desc: Drena, reconcilia ou marca obsoleto um registro ativo do fallback local
+    requires:
+      vars: [TRACKER, LOCAL_REFERENCE, OUTCOME]
+    cmds:
+      - task: ai:fallback:resolve:{{if or (eq .OS "Windows_NT") (eq .OS "windows")}}windows{{else}}linux{{end}}
+        vars:
+          TRACKER: "{{.TRACKER}}"
+          LOCAL_REFERENCE: "{{.LOCAL_REFERENCE}}"
+          OUTCOME: "{{.OUTCOME}}"
+          RESULT: "{{default \"\" .RESULT}}"
+          SUMMARY: "{{default \"\" .SUMMARY}}"
+          JIRA_ISSUE: "{{default \"\" .JIRA_ISSUE}}"
+          AGENT: "{{default \"ai-product-owner\" .AGENT}}"
+          SYNC_JIRA: "{{default \"1\" .SYNC_JIRA}}"
+          LEDGER_FILE: "{{default \"docs/AI-FALLBACK-LEDGER.md\" .LEDGER_FILE}}"
+
+  ai:fallback:resolve:windows:
+    desc: Windows - resolve um registro ativo do fallback local
+    platforms: [windows]
+    dir: '{{.TASKFILE_DIR}}'
+    requires:
+      vars: [TRACKER, LOCAL_REFERENCE, OUTCOME]
+    cmds:
+      - "pwsh -NoProfile -Command \"& './scripts/invoke-python.ps1' -ScriptPath './scripts/ai-fallback.py' -Arguments @('resolve','--repo-root','{{.TASKFILE_DIR}}','--ledger-file','{{default \"docs/AI-FALLBACK-LEDGER.md\" .LEDGER_FILE}}','--tracker','{{.TRACKER}}','--local-reference','{{.LOCAL_REFERENCE}}','--outcome','{{.OUTCOME}}','--result','{{default \"\" .RESULT}}','--summary','{{default \"\" .SUMMARY}}','--jira-issue','{{default \"\" .JIRA_ISSUE}}','--agent','{{default \"ai-product-owner\" .AGENT}}','--sync-jira','{{default \"1\" .SYNC_JIRA}}')\""
+
+  ai:fallback:resolve:linux:
+    desc: Linux/WSL - resolve um registro ativo do fallback local
+    platforms: [linux]
+    dir: '{{.TASKFILE_DIR}}'
+    requires:
+      vars: [TRACKER, LOCAL_REFERENCE, OUTCOME]
+    cmds:
+      - "bash -lc 'bash ./scripts/run-python.sh ./scripts/ai-fallback.py resolve --repo-root \"{{.TASKFILE_DIR}}\" --ledger-file \"{{default \"docs/AI-FALLBACK-LEDGER.md\" .LEDGER_FILE}}\" --tracker \"{{.TRACKER}}\" --local-reference \"{{.LOCAL_REFERENCE}}\" --outcome \"{{.OUTCOME}}\" --result \"{{default \"\" .RESULT}}\" --summary \"{{default \"\" .SUMMARY}}\" --jira-issue \"{{default \"\" .JIRA_ISSUE}}\" --agent \"{{default \"ai-product-owner\" .AGENT}}\" --sync-jira \"{{default \"1\" .SYNC_JIRA}}\"'"
 
   ai:agent:execution:status:
     desc: Exibe o contexto local ativo por agente/issue

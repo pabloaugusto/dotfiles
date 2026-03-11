@@ -34,6 +34,8 @@ REQUIRED_FILES = [
     "docs/AI-AGENTS-CATALOG.md",
     "docs/AI-CHAT-CONTRACTS-REGISTER.md",
     "docs/AI-DELEGATION-FLOW.md",
+    "docs/AI-FALLBACK-LEDGER.md",
+    "docs/AI-FALLBACK-OPERATIONS.md",
     "docs/AI-GOVERNANCE-AND-REGRESSION.md",
     "docs/AI-ORTHOGRAPHY-LEDGER.md",
     "docs/AI-REVIEW-LEDGER.md",
@@ -82,8 +84,10 @@ REQUIRED_FILES = [
     "scripts/ai-review.py",
     "scripts/ai_review_lib.py",
     "scripts/ai-control-plane.py",
+    "scripts/ai-fallback.py",
     "scripts/ai-session-startup.py",
     "scripts/ai_control_plane_lib.py",
+    "scripts/ai_fallback_governance_lib.py",
     "scripts/ai_session_startup_lib.py",
     "scripts/atlassian_platform_lib.py",
     "scripts/git-governance-check.py",
@@ -149,6 +153,13 @@ SCRUM_MASTER_MARKERS = [
     "<!-- ai-scrum-master:ceremonies:end -->",
 ]
 
+FALLBACK_LEDGER_MARKERS = [
+    "<!-- ai-fallback:active:start -->",
+    "<!-- ai-fallback:active:end -->",
+    "<!-- ai-fallback:resolved:start -->",
+    "<!-- ai-fallback:resolved:end -->",
+]
+
 REQUIRED_AGENT_HEADINGS = [
     "## Objetivo",
     "## Quando usar",
@@ -175,6 +186,7 @@ AGENTS_REQUIRED_SNIPPETS = [
     "docs/AI-SOURCE-AUDIT.md",
     "docs/AI-STARTUP-GOVERNANCE-MANIFEST.md",
     "docs/AI-CHAT-CONTRACTS-REGISTER.md",
+    "docs/AI-FALLBACK-LEDGER.md",
     "`Jira` e a fonte primaria do fluxo vivo",
     "concluir_primeiro passa a significar concluir ou puxar apenas o work item minimo que o destrava diretamente",
     "Manter o item ativo em `Doing` durante toda a execucao relevante",
@@ -187,6 +199,7 @@ OPERATING_MODEL_REQUIRED_SNIPPETS = [
     "### 1.2. Contratos nascidos no chat precisam de registrador vivo",
     "### 3.1. Terminar antes de comecar inclui destravar o WIP ativo",
     "### 4.4. Higiene Git obrigatoria e rastreabilidade Jira",
+    "### 4.5. Fallback local exige modo explicito e reconciliacao dirigida",
     "### 5. Auditoria exaustiva antes de reuso cross-repo",
     "### Fronteira entre `.agents/` e adaptadores de assistente",
     "### Camada 2.1. Registry declarativo do repo",
@@ -211,6 +224,15 @@ SOURCE_AUDIT_REQUIRED_SNIPPETS = [
     "## Decisoes de importacao",
     "## Fronteira entre",
     "## Regra operacional permanente",
+]
+
+STARTUP_AND_RESTART_REQUIRED_SNIPPETS = [
+    "task ai:worklog:check",
+    "fallback local, nunca como substituto do quadro vivo do Jira",
+    "task ai:fallback:status",
+    "task ai:fallback:capture",
+    "task ai:fallback:resolve",
+    "Jira como fonte primaria do backlog",
 ]
 
 CEREMONY_REQUIRED_SNIPPETS = {
@@ -325,14 +347,19 @@ GIT_GOVERNANCE_REQUIRED_SNIPPETS = {
     ],
     "docs/README.md": [
         "fallback contingencial local; o `Jira` e a fonte primaria do fluxo vivo.",
+        "AI-FALLBACK-OPERATIONS.md",
+        "AI-FALLBACK-LEDGER.md",
     ],
     "scripts/ai-worklog.py": [
         "Fallback local de continuidade. O Jira e a fonte primaria do fluxo vivo.",
+        "docs/AI-FALLBACK-LEDGER.md",
         "Commit de fechamento obrigatorio antes de nova rodada",
     ],
     "config/ai/contracts.yaml": [
         "git_governance:",
         "source_of_truth: jira",
+        "fallback_operation:",
+        "recovery_ledger: docs/AI-FALLBACK-LEDGER.md",
         "branch_pattern: <type>/<jira-key>-<slug>",
         "commits-must-be-atomic-contextualized-and-preferably-self-testable",
         "resume-old-work-on-a-new-branch-from-main-unless-evidence-keeps-the-existing-branch-valid",
@@ -388,6 +415,9 @@ CATALOG_REQUIRED_SNIPPETS = {
         "automation-reviewer",
     ],
     "docs/TASKS.md": [
+        "### `ai:fallback:status`",
+        "### `ai:fallback:capture`",
+        "### `ai:fallback:resolve`",
         "### `git:governance:check`",
         "### `ai:chat:intake`",
         "### `ai:route`",
@@ -419,7 +449,15 @@ REQUIRED_REGISTRY_AGENT_KEYS = [
     "handoff_to",
 ]
 
-REQUIRED_AI_CONFIG_SECTIONS = ["skills", "agents", "orchestration", "rules", "evals", "ceremonies", "identity"]
+REQUIRED_AI_CONFIG_SECTIONS = [
+    "skills",
+    "agents",
+    "orchestration",
+    "rules",
+    "evals",
+    "ceremonies",
+    "identity",
+]
 
 
 def frontmatter_value(frontmatter: str, key: str) -> str | None:
@@ -743,6 +781,15 @@ def main(argv: list[str]) -> int:
             failures,
         )
 
+    fallback_ledger_path = repo_root / "docs" / "AI-FALLBACK-LEDGER.md"
+    if fallback_ledger_path.is_file():
+        require_markers(
+            fallback_ledger_path.read_text(encoding="utf-8"),
+            FALLBACK_LEDGER_MARKERS,
+            "docs/AI-FALLBACK-LEDGER.md",
+            failures,
+        )
+
     chat_contracts_path = repo_root / "docs" / "AI-CHAT-CONTRACTS-REGISTER.md"
     if chat_contracts_path.is_file():
         require_markers(
@@ -808,6 +855,15 @@ def main(argv: list[str]) -> int:
             source_audit_path.read_text(encoding="utf-8"),
             SOURCE_AUDIT_REQUIRED_SNIPPETS,
             "docs/AI-SOURCE-AUDIT.md",
+            failures,
+        )
+
+    startup_path = repo_root / "docs" / "AI-STARTUP-AND-RESTART.md"
+    if startup_path.is_file():
+        require_snippets(
+            startup_path.read_text(encoding="utf-8"),
+            STARTUP_AND_RESTART_REQUIRED_SNIPPETS,
+            "docs/AI-STARTUP-AND-RESTART.md",
             failures,
         )
 

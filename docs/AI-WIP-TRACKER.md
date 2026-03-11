@@ -1,12 +1,17 @@
 # AI WIP Tracker
 
-Atualizado em: 2026-03-11 07:54 UTC
+Atualizado em: 2026-03-11 09:17 UTC
 
 Fallback local de continuidade. O Jira e a fonte primaria do fluxo vivo.
 
 ## Regras operacionais
 
 - Toda solicitacao acionavel deve passar por preflight de pendencias.
+- Se `Jira` ficar indisponivel e estes trackers precisarem assumir
+  contingencia real, registrar a degradacao em
+  [`docs/AI-FALLBACK-LEDGER.md`](AI-FALLBACK-LEDGER.md) antes de seguir e
+  drenar cada registro com `task ai:fallback:resolve` quando o fluxo primario
+  voltar.
 - Se houver itens em `Doing`, `concluir_primeiro` significa:
   - concluir o que ja esta em curso quando ele puder seguir direto, ou
   - puxar apenas o work item minimo que o destrava diretamente quando o bloqueio estiver em outra issue.
@@ -30,6 +35,7 @@ Fallback local de continuidade. O Jira e a fonte primaria do fluxo vivo.
 <!-- ai-worklog:done:start -->
 | ID | Tarefa | Branch | Responsavel | Inicio UTC | Concluido UTC | Resultado |
 | --- | --- | --- | --- | --- | --- | --- |
+| WIP-DOT-106 | Migrar trackers locais para fallback contingencial. | feat/DOT-106-fallback-tracker-cutover | Arquiteto | 2026-03-11 08:22 UTC | 2026-03-11 09:17 UTC | DOT-106 passou a tratar trackers locais como fallback contingencial explicito do Jira, com ledger canonico, CLI de captura/resolve, checklist de startup/restart, validador de pa... / evidencias: task ai:fallback:statu... |
 | WIP-DOT-109-RETRO | Executar retrospectiva obrigatoria da branch feat/DOT-109-jira-role-sync apos merge e materializar log, ledger, Confluence e rastreabilidade Jira. | docs/DOT-109-retrospectiva-fechamento | Scrum Master | 2026-03-11 07:44 UTC | 2026-03-11 07:54 UTC | Retrospectiva obrigatoria da branch feat/DOT-109-jira-role-sync executada com log local, indice no ledger do Scrum Master, pagina oficial no Confluence e rastreabilidade Jira co... / evidencias: Confluence: https://pa... |
 | WIP-DOT-109 | Sincronizar roles especializados no Jira. | feat/DOT-109-jira-role-sync | Engenheiro Agentes IA | 2026-03-11 06:21 UTC | 2026-03-11 07:29 UTC | Sincronizacao dos roles especializados do Jira concluida com apply reproduzivel, diagnostico exato de drift e remediacao do workflow para nomes canonicos de status, incluindo fe... / evidencias: DOT-109 em Done no Jir... |
 | WIP-DOT-134 | Auditar integralmente as issues em Done e abrir bugs ou fixes para lacunas reais. | feat/DOT-134-done-audit | PO | 2026-03-11 05:40 UTC | 2026-03-11 06:08 UTC | Matriz versionada de auditoria integral das issues Done concluida em docs/AI-DONE-ISSUES-AUDIT.md, com 84 issues auditadas, 17 drifts terminais saneados no Jira e 0 gaps reais r... / evidencias: docs/AI-DONE-ISSUES-AU... |

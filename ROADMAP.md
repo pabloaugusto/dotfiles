@@ -1,6 +1,6 @@
 # Roadmap do Repositorio
 
-Atualizado em: 2026-03-11 07:53 UTC
+Atualizado em: 2026-03-11 09:15 UTC
 Ciclo ativo: 2026-Q1
 
 Planejamento incremental para qualidade, testes, bootstrap e governanca do repo.
@@ -28,7 +28,7 @@ Edite apenas a tabela entre os marcadores abaixo.
 Atualizada por `task ai:roadmap:refresh`.
 
 <!-- roadmap:priority:start -->
-Atualizado em: 2026-03-11 07:53 UTC
+Atualizado em: 2026-03-11 09:15 UTC
 
 ### Ranking RICE
 
@@ -76,6 +76,8 @@ Sem sugestoes pendentes neste ciclo; itens aceitos ja estao rastreaveis.
 ### Next
 
 <!-- roadmap:next:start -->
+- [fix] Corrigir pendencias ortograficas remanescentes do worklog `WIP-DOT-106` em AGENTS.md, Taskfile.yml, config/ai/contracts.yaml, docs/AI-FALLBACK-LEDGER.md, docs/AI-FALLBACK-OPERAT... | notas=Pendencia automatica criada por Pascoalete apos review consultivo reprovado sem correcao automatica.
+- [fix] Corrigir pendencias ortograficas remanescentes do worklog `WIP-DOT-106` em docs/AI-FALLBACK-LEDGER.md, docs/AI-FALLBACK-OPERATIONS.md, scripts/ai-fallback.py, scripts/ai-worklog... | notas=Pendencia automatica criada por Pascoalete apos review consultivo reprovado sem correcao automatica.
 - [fix] Corrigir pendencias ortograficas remanescentes do worklog `WIP-DOT-109-RETRO` em .agents/cerimonias/logs/retrospectiva/2026-03-11-0445-feat-DOT-109-jira-role-sync.md, docs/AI-SC... | notas=Pendencia automatica criada por Pascoalete apos review consultivo reprovado sem correcao automatica.
 - [fix] Corrigir pendencias ortograficas remanescentes do worklog `WIP-DOT-109` em scripts/ai_jira_apply_lib.py, scripts/ai_jira_model_lib.py, tests/python/ai_jira_apply_test.py, tests/... | notas=Pendencia automatica criada por Pascoalete apos review consultivo reprovado sem correcao automatica.
 - [fix] Corrigir pendencias ortograficas remanescentes do worklog `WIP-DOT-134` em LICOES-APRENDIDAS.md, docs/AI-DONE-ISSUES-AUDIT.md, docs/README.md | notas=Pendencia automatica criada por Pascoalete apos review consultivo reprovado sem correcao automatica.

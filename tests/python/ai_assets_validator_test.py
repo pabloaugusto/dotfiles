@@ -31,6 +31,8 @@ class ValidateAiAssetsTests(unittest.TestCase):
         self.assertIn(".codex/README.md", module.REQUIRED_FILES)
         self.assertIn("docs/AI-AGENTS-CATALOG.md", module.REQUIRED_FILES)
         self.assertIn("docs/AI-CHAT-CONTRACTS-REGISTER.md", module.REQUIRED_FILES)
+        self.assertIn("docs/AI-FALLBACK-LEDGER.md", module.REQUIRED_FILES)
+        self.assertIn("docs/AI-FALLBACK-OPERATIONS.md", module.REQUIRED_FILES)
         self.assertIn("docs/AI-ORTHOGRAPHY-LEDGER.md", module.REQUIRED_FILES)
         self.assertIn("docs/AI-SCRUM-MASTER-LEDGER.md", module.REQUIRED_FILES)
         self.assertIn("docs/AI-SOURCE-AUDIT.md", module.REQUIRED_FILES)
@@ -44,8 +46,10 @@ class ValidateAiAssetsTests(unittest.TestCase):
         self.assertIn("config/ai/contracts.yaml", module.REQUIRED_FILES)
         self.assertIn("scripts/ai-route.py", module.REQUIRED_FILES)
         self.assertIn("scripts/ai-control-plane.py", module.REQUIRED_FILES)
+        self.assertIn("scripts/ai-fallback.py", module.REQUIRED_FILES)
         self.assertIn("scripts/ai-session-startup.py", module.REQUIRED_FILES)
         self.assertIn("scripts/ai_control_plane_lib.py", module.REQUIRED_FILES)
+        self.assertIn("scripts/ai_fallback_governance_lib.py", module.REQUIRED_FILES)
         self.assertIn("scripts/ai_session_startup_lib.py", module.REQUIRED_FILES)
         self.assertIn("scripts/atlassian_platform_lib.py", module.REQUIRED_FILES)
         self.assertIn("scripts/git-governance-check.py", module.REQUIRED_FILES)
@@ -57,6 +61,7 @@ class ValidateAiAssetsTests(unittest.TestCase):
         self.assertIn("## Entregas esperadas", module.REQUIRED_SKILL_HEADINGS)
         self.assertIn("Nunca operar por amostragem", module.AGENTS_REQUIRED_SNIPPETS)
         self.assertIn("docs/AI-STARTUP-GOVERNANCE-MANIFEST.md", module.AGENTS_REQUIRED_SNIPPETS)
+        self.assertIn("docs/AI-FALLBACK-LEDGER.md", module.AGENTS_REQUIRED_SNIPPETS)
         self.assertIn("`Jira` e a fonte primaria do fluxo vivo", module.AGENTS_REQUIRED_SNIPPETS)
         self.assertIn(
             "concluir_primeiro passa a significar concluir ou puxar apenas o work item minimo que o destrava diretamente",
@@ -77,6 +82,18 @@ class ValidateAiAssetsTests(unittest.TestCase):
         self.assertIn(
             "### 4.4. Higiene Git obrigatoria e rastreabilidade Jira",
             module.OPERATING_MODEL_REQUIRED_SNIPPETS,
+        )
+        self.assertIn(
+            "### 4.5. Fallback local exige modo explicito e reconciliacao dirigida",
+            module.OPERATING_MODEL_REQUIRED_SNIPPETS,
+        )
+        self.assertIn(
+            "task ai:fallback:capture",
+            module.STARTUP_AND_RESTART_REQUIRED_SNIPPETS,
+        )
+        self.assertIn(
+            "task ai:fallback:resolve",
+            module.STARTUP_AND_RESTART_REQUIRED_SNIPPETS,
         )
         self.assertIn(
             "### Camada 2.2. Orquestracao, rules e evals",
@@ -114,6 +131,10 @@ class ValidateAiAssetsTests(unittest.TestCase):
             module.GIT_GOVERNANCE_REQUIRED_SNIPPETS["config/ai/contracts.yaml"],
         )
         self.assertIn(
+            "recovery_ledger: docs/AI-FALLBACK-LEDGER.md",
+            module.GIT_GOVERNANCE_REQUIRED_SNIPPETS["config/ai/contracts.yaml"],
+        )
+        self.assertIn(
             "ledger_entry_required: true",
             module.CEREMONY_REQUIRED_SNIPPETS[".agents/cerimonias/retrospectiva.yaml"],
         )
@@ -137,6 +158,22 @@ class ValidateAiAssetsTests(unittest.TestCase):
         self.assertIn(
             "pascoalete",
             module.CATALOG_REQUIRED_SNIPPETS["docs/AI-AGENTS-CATALOG.md"],
+        )
+        self.assertIn(
+            "### `ai:fallback:status`",
+            module.CATALOG_REQUIRED_SNIPPETS["docs/TASKS.md"],
+        )
+        self.assertIn(
+            "### `ai:fallback:capture`",
+            module.CATALOG_REQUIRED_SNIPPETS["docs/TASKS.md"],
+        )
+        self.assertIn(
+            "### `ai:fallback:resolve`",
+            module.CATALOG_REQUIRED_SNIPPETS["docs/TASKS.md"],
+        )
+        self.assertIn(
+            "AI-FALLBACK-LEDGER.md",
+            module.GIT_GOVERNANCE_REQUIRED_SNIPPETS["docs/README.md"],
         )
         self.assertIn(
             "### `ai:atlassian:check`",
