@@ -45,6 +45,7 @@ REQUIRED_FILES = [
     "docs/AI-STARTUP-GOVERNANCE-MANIFEST.md",
     "docs/AI-SOURCE-AUDIT.md",
     "docs/ai-operating-model.md",
+    "docs/secrets-and-auth.md",
     "docs/AI-WIP-TRACKER.md",
     "ROADMAP.md",
     "docs/ROADMAP-DECISIONS.md",
@@ -53,7 +54,9 @@ REQUIRED_FILES = [
     "config/ai/platforms.yaml",
     "config/ai/platforms.local.yaml.tpl",
     "config/ai/agents.yaml",
+    "config/ai/agent-operations.yaml",
     "config/ai/contracts.yaml",
+    "df/secrets/secrets-ref.yaml",
     ".agents/README.md",
     ".agents/config.toml",
     ".agents/cerimonias/README.md",
@@ -190,6 +193,9 @@ AGENTS_REQUIRED_SNIPPETS = [
     "`Jira` e a fonte primaria do fluxo vivo",
     "Antes de criar qualquer demanda que nao seja `Epic`, verificar se ja existe `Epic` aberto aderente ao macro tema",
     "concluir_primeiro passa a significar concluir ou puxar apenas o work item minimo que o destrava diretamente",
+    "carregar o contrato de comunicacao no chat e",
+    "nenhuma delegacao para subagente e valida sem issue dona",
+    "**REJEITADO**",
     "Manter o item ativo em `Doing` durante toda a execucao relevante",
     "Nenhum `done` e valido sem revisar `LICOES-APRENDIDAS.md`",
     "Acionar os gates paralelos obrigatorios de arquitetura/modernizacao",
@@ -235,7 +241,64 @@ STARTUP_AND_RESTART_REQUIRED_SNIPPETS = [
     "task ai:fallback:capture",
     "task ai:fallback:resolve",
     "Jira como fonte primaria do backlog",
+    "gh auth status",
+    "probe GraphQL",
+    "task ai:atlassian:check",
+    "Cadeia de fallback GitHub/PAT",
+    "display_name",
+    "subagentes",
+    "REJEITADO",
 ]
+
+STARTUP_GOVERNANCE_REQUIRED_SNIPPETS = {
+    "config/ai/contracts.yaml": [
+        "load-chat-communication-contract-before-first-user-facing-message",
+        "load-display-name-layer-before-chat-jira-or-confluence-visible-communication",
+        "validate-gh-auth-and-graphql-before-github-pr-or-merge-operations",
+        "remember-and-apply-the-documented-github-pat-fallback-chain",
+        "snapshot-current-branch-worktree-and-open-pr-state-at-startup",
+        "capture-current-branch-lifecycle-upstream-and-main-absorption-state",
+        "detect-drift-between-active-execution-worklog-branch-and-dirty-tree",
+        "capture-minimum-operational-health-of-jira-and-confluence-at-startup",
+        "remember-atlassian-auth-mode-cloud-id-and-recovery-path",
+        "no-subagent-delegation-before-startup-context-is-loaded-and-scoped",
+        "subagent-context-pack-must-carry-owner-issue-startup-artifacts-and-applicable-rules",
+        "work-started-without-full-startup-context-is-rejectable",
+    ],
+    "docs/TASKS.md": [
+        "contrato de comunicacao com o",
+        "`display_name`",
+        "probe GraphQL",
+        "fallback GitHub/PAT",
+        "PRs` abertos para a branch atual",
+        "subagentes",
+    ],
+    "docs/ai-operating-model.md": [
+        "carregar o contrato de comunicacao com o usuario",
+        "camada de `display_name`",
+        "validar `gh auth status`",
+        "probe GraphQL cedo",
+        "cadeia documentada de fallback GitHub/PAT",
+        "saude minima de `Jira` e `Confluence`",
+        "pacote minimo de contexto antes de delegar para subagentes",
+        "rejeitavel ate a remediacao do contexto",
+    ],
+    "config/ai/agent-operations.yaml": [
+        "zero-context-startup-must-load-chat-contract-before-first-user-message",
+        "no-subagent-delegation-before-startup-context-is-loaded-or-linked",
+        "subagent-handoff-must-carry-owner-issue-startup-context-and-applicable-rules",
+        "work-executed-without-required-startup-context-is-rejectable",
+    ],
+    "docs/AI-STARTUP-GOVERNANCE-MANIFEST.md": [
+        "### Secrets, auth e runtime operacional",
+        "df/secrets/secrets-ref.yaml",
+    ],
+    "docs/AI-DELEGATION-FLOW.md": [
+        "startup report",
+        "pacote minimo de contexto",
+        "subagente",
+    ],
+}
 
 CEREMONY_REQUIRED_SNIPPETS = {
     ".agents/cerimonias/README.md": [
@@ -906,6 +969,11 @@ def main(argv: list[str]) -> int:
             require_snippets(path.read_text(encoding="utf-8"), snippets, relative, failures)
 
     for relative, snippets in CATALOG_REQUIRED_SNIPPETS.items():
+        path = repo_root / relative
+        if path.is_file():
+            require_snippets(path.read_text(encoding="utf-8"), snippets, relative, failures)
+
+    for relative, snippets in STARTUP_GOVERNANCE_REQUIRED_SNIPPETS.items():
         path = repo_root / relative
         if path.is_file():
             require_snippets(path.read_text(encoding="utf-8"), snippets, relative, failures)

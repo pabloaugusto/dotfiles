@@ -44,6 +44,10 @@ Manter este repo de dotfiles confiavel, testavel e reproduzivel em Windows host 
   [`docs/AI-CHAT-CONTRACTS-REGISTER.md`](docs/AI-CHAT-CONTRACTS-REGISTER.md)
   para avisar o usuario sobre contratos nascidos no chat e ainda nao
   promovidos para a governanca oficial.
+- Nessas retomadas, e obrigatorio carregar o contrato de comunicacao no chat e
+  a camada de `display_name` antes da primeira resposta operacional ao usuario.
+- Nessas retomadas, nenhuma delegacao para subagente e valida sem issue dona,
+  startup report e regras aplicaveis ao papel delegado.
 
 ## Skills locais
 
@@ -74,6 +78,8 @@ Leia a skill mais proxima do escopo antes de editar arquivos relevantes.
   [`docs/AI-STARTUP-GOVERNANCE-MANIFEST.md`](docs/AI-STARTUP-GOVERNANCE-MANIFEST.md).
 - Em retomadas do zero, gerar ou atualizar o relatorio operacional da sessao
   com `task ai:startup:session` antes de decidir trabalho por memoria residual.
+- Trabalho iniciado sem esse startup integral pode ser sumariamente
+  **REJEITADO** neste repo.
 - Nunca operar por amostragem quando a tarefa envolver importar, adaptar, comparar ou consolidar contratos de outro repo.
 - Qualquer importacao ou adaptacao cross-repo exige auditoria estrutural exaustiva antes de editar:
   contratos globais, docs, tasks, scripts, workflows, hooks, validadores, testes,

@@ -20,6 +20,21 @@ Registro consultivo do agente Pascoalete para ortografia e higiene vocabular.
 <!-- ai-orthography:records:start -->
 | Data/Hora UTC | Worklog ID | Revisor | Status | Arquivo | Achados | Evidencia |
 | --- | --- | --- | --- | --- | --- | --- |
+| 2026-03-11 14:08 UTC | WIP-DOT-177 | pascoalete | reprovado | tests/python/ai_session_startup_test.py | worktrees, pablo, absorcao, worktree, pablo, primario, sessao, pabloaugusto (+13) | task spell:check |
+| 2026-03-11 14:08 UTC | WIP-DOT-177 | pascoalete | reprovado | tests/python/ai_assets_validator_test.py | possivel, LICOES, Validacao, comunicacao, LICOES, comecar, Orquestracao, evals (+6) | task spell:check |
+| 2026-03-11 14:08 UTC | WIP-DOT-177 | pascoalete | reprovado | scripts/validate-ai-assets.py | evals, LICOES, evals, evals, evals, evals, autolog, autolog (+64) | task spell:check |
+| 2026-03-11 14:08 UTC | WIP-DOT-177 | pascoalete | reprovado | scripts/ai_session_startup_lib.py | Responsavel, atualizacao, sessao, portugues, canonicos, tambem, aplicaveis, rejeitavel (+29) | task spell:check |
+| 2026-03-11 14:08 UTC | WIP-DOT-177 | pascoalete | reprovado | docs/ai-operating-model.md | reutilizavel, testavel, worktree, Principios, Instrucoes, instrucoes, estaveis, sessao (+173) | task spell:check |
+| 2026-03-11 14:08 UTC | WIP-DOT-177 | pascoalete | reprovado | docs/TASKS.md | repositorio, diaria, diaria, sincronizacao, worktree, alteracoes, canonico, Observacao (+87) | task spell:check |
+| 2026-03-11 14:08 UTC | WIP-DOT-177 | pascoalete | reprovado | docs/AI-WIP-TRACKER.md | solicitacao, acionavel, indisponivel, degradacao, primario, obrigatorio, Responsavel, atualizacao (+99) | task spell:check |
+| 2026-03-11 14:08 UTC | WIP-DOT-177 | pascoalete | reprovado | docs/AI-STARTUP-GOVERNANCE-MANIFEST.md | sessao, confiavel, confiavel, sessoes, worktree, verificavel, suposicao, presuncao (+9) | task spell:check |
+| 2026-03-11 14:08 UTC | WIP-DOT-177 | pascoalete | reprovado | docs/AI-STARTUP-AND-RESTART.md | sessao, confiavel, sessao, sessoes, worktree, worktree, alteracoes, sessao (+39) | task spell:check |
+| 2026-03-11 14:08 UTC | WIP-DOT-177 | pascoalete | reprovado | docs/AI-DELEGATION-FLOW.md | canonico, LICOES, sessao, confiavel, relatorio, importacao, aderencia, decomposicao (+41) | task spell:check |
+| 2026-03-11 14:08 UTC | WIP-DOT-177 | pascoalete | reprovado | docs/AI-CHAT-CONTRACTS-REGISTER.md | definicoes, sessao, usuario, promocao, promocao, promocoes, ausencia, agil (+23) | task spell:check |
+| 2026-03-11 14:08 UTC | WIP-DOT-177 | pascoalete | reprovado | config/ai/contracts.yaml | worktrees, worktree, worktree, worktrees, worktrees, criterios, aceitacao, finishable (+1) | task spell:check |
+| 2026-03-11 14:08 UTC | WIP-DOT-177 | pascoalete | reprovado | config/ai/agent-operations.yaml | atuacao, decisao, decisao, linkar, implementacao, mudanca, atualizacao, necessario (+125) | task spell:check |
+| 2026-03-11 14:08 UTC | WIP-DOT-177 | pascoalete | reprovado | LICOES-APRENDIDAS.md | Licoes, usuario, LICOES, licao, Criterio, licoes, eficiencia, resiliencia (+189) | task spell:check |
+| 2026-03-11 14:08 UTC | WIP-DOT-177 | pascoalete | reprovado | AGENTS.md | Missao, confiavel, testavel, reproduzivel, precedencia, LICOES, instrucoes, usuario (+106) | task spell:check |
 | 2026-03-11 12:32 UTC | WIP-DOT-175 | pascoalete | reprovado | tests/python/ai_assets_validator_test.py | possivel, LICOES, Validacao, LICOES, comecar, Orquestracao, evals, criacao (+4) | task spell:check |
 | 2026-03-11 12:32 UTC | WIP-DOT-175 | pascoalete | reprovado | scripts/validate-ai-assets.py | evals, LICOES, evals, evals, evals, evals, autolog, autolog (+56) | task spell:check |
 | 2026-03-11 12:32 UTC | WIP-DOT-175 | pascoalete | reprovado | docs/AI-CHAT-CONTRACTS-REGISTER.md | definicoes, sessao, usuario, promocao, promocao, promocoes, ausencia, agil (+21) | task spell:check |

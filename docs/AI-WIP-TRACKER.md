@@ -1,6 +1,6 @@
 # AI WIP Tracker
 
-Atualizado em: 2026-03-11 13:18 UTC
+Atualizado em: 2026-03-11 14:10 UTC
 
 Fallback local de continuidade. O Jira e a fonte primaria do fluxo vivo.
 
@@ -27,7 +27,7 @@ Fallback local de continuidade. O Jira e a fonte primaria do fluxo vivo.
 <!-- ai-worklog:doing:start -->
 | ID | Tarefa | Branch | Responsavel | Inicio UTC | Ultima atualizacao UTC | Proximo passo | Bloqueios |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| (sem itens) | - | - | - | - | - | - | - |
+| WIP-DOT-177 | Backend, docs e validator do startup integral prontos para versionamento. | feat/DOT-177-startup-preflight-memory | ai-developer-config-policy | 2026-03-11 13:23 UTC | 2026-03-11 14:10 UTC | Criar commit e PR da DOT-177 com o fechamento desta fatia | - |
 <!-- ai-worklog:doing:end -->
 
 ## Done
@@ -82,5 +82,7 @@ Fallback local de continuidade. O Jira e a fonte primaria do fluxo vivo.
 <!-- ai-worklog:log:start -->
 | Data/Hora UTC | ID | Status | Resumo | Proximo passo | Bloqueios | Contexto | Notas |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| (sem itens) | - | - | - | - | - | - | - |
+| 2026-03-11 14:10 UTC | WIP-DOT-177 | doing | Endurecer startup/restart com absorcao integral de contexto, fallback e delegacao segura | Endurecer startup, delegacao e validadores para contexto integral e subagentes | - | DOT-177 | inicio da tarefa |
+| 2026-03-11 14:10 UTC | WIP-DOT-177 | doing | Escopo oficial do DOT-177 ampliado e ownership Jira saneado para startup integral, fallback operacional e delegacao segura. | Executar gates do repo e fechar regressao do startup endurecido | - | DOT-177 | checkpoint incremental |
+| 2026-03-11 14:10 UTC | WIP-DOT-177 | doing | Validacoes principais do startup endurecido ficaram verdes; residual ortografico consultivo ficou rastreado em SG-ORTHO-WIP-DOT-177. | Criar commit e PR da DOT-177 com o fechamento desta fatia | - | DOT-177 | checkpoint incremental |
 <!-- ai-worklog:log:end -->

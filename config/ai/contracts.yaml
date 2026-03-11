@@ -11,6 +11,18 @@ startup_governance:
       - do-not-operate-by-sampling-memory-or-guessing-after-zero-context-resume
       - recalculate-open-branches-and-worktrees-before-draining-dirty-tree
       - cross-check-each-open-trail-with-its-real-jira-context-before-committing
+      - load-chat-communication-contract-before-first-user-facing-message
+      - load-display-name-layer-before-chat-jira-or-confluence-visible-communication
+      - validate-gh-auth-and-graphql-before-github-pr-or-merge-operations
+      - remember-and-apply-the-documented-github-pat-fallback-chain
+      - snapshot-current-branch-worktree-and-open-pr-state-at-startup
+      - capture-current-branch-lifecycle-upstream-and-main-absorption-state
+      - detect-drift-between-active-execution-worklog-branch-and-dirty-tree
+      - capture-minimum-operational-health-of-jira-and-confluence-at-startup
+      - remember-atlassian-auth-mode-cloud-id-and-recovery-path
+      - no-subagent-delegation-before-startup-context-is-loaded-and-scoped
+      - subagent-context-pack-must-carry-owner-issue-startup-artifacts-and-applicable-rules
+      - work-started-without-full-startup-context-is-rejectable
       - warn-user-when-chat-origin-contracts-still-lack-official-promotion
       - keep-a-lived-register-of-chat-origin-contracts-not-yet-promoted
     trigger_examples:
