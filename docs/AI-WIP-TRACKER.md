@@ -1,6 +1,6 @@
 # AI WIP Tracker
 
-Atualizado em: 2026-03-11 23:08 UTC
+Atualizado em: 2026-03-11 23:45 UTC
 
 Fallback local de continuidade. O Jira e a fonte primaria do fluxo vivo.
 
@@ -35,6 +35,7 @@ Fallback local de continuidade. O Jira e a fonte primaria do fluxo vivo.
 <!-- ai-worklog:done:start -->
 | ID | Tarefa | Branch | Responsavel | Inicio UTC | Concluido UTC | Resultado |
 | --- | --- | --- | --- | --- | --- | --- |
+| WIP-20260311-204022 | Finalizar publicacao via PR e sincronizar main apos a fundacao de sync | prompt/DOT-179-sync-foundation-runtime | ai-agent | 2026-03-11 23:40 UTC | 2026-03-11 23:45 UTC | DOT-71 foi separado e mergeado; DOT-179 foi reconstruido em branch correta com scope prompt e a sincronizacao final ficou pronta para publicacao e merge sem drift de governanca. / evidencias: PR #45 mergeado; branch D... |
 | WIP-20260311-220259 | Implementar fundacao de sync, outbox duravel e fonte perene | main | ai-agent | 2026-03-11 22:02 UTC | 2026-03-11 23:08 UTC | Fundacao de sync implementada com manifest, biblioteca, tarefas, documentacao canonica, validator e testes. / evidencias: python scripts/validate-ai-assets.py; python -m pytest --override-ini addopts='' tests/python/a... |
 | WIP-20260311-212032 | Reorganizar prompt packs formais e criar pack da camada documental | main | Engenheiro Agentes IA | 2026-03-11 21:20 UTC | 2026-03-11 22:00 UTC | Reorganizados os prompt packs formais com slugs mais amigaveis, dependencia explicita entre packs e novo pack documentation-layer-governance salvo na arvore canonica. |
 | WIP-20260311-183919 | DOT-179 - consolidar prefixo prompt para prompts versionados | prompt/DOT-179-agnostic-sync-outbox-foundation | ai-tech-lead | 2026-03-11 18:39 UTC | 2026-03-11 19:45 UTC | Namespace prompt endurecido com task_id prompt/<slug>, branch prompt/<jira-key>-<slug>, scope prompt, contrato Jira PROMPT:/label prompt, task canonica de sync com Jira e pack f... / evidencias: commit=ab59d7f; commit... |
