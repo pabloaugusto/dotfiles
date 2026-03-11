@@ -1,7 +1,7 @@
 # cspell:words agnostico duravel
-id: agnostic-sync-outbox-foundation
-task_id: prompt/agnostic-sync-outbox-foundation
-title: Prompt pack de sync agnostico, outbox duravel e fonte perene
+id: sync-outbox-foundation
+task_id: prompt/sync-outbox-foundation
+title: Prompt pack de fundacao de sync, outbox duravel e fonte perene
 status: active
 owner_epic: DOT-71
 owner_issue: DOT-179
@@ -16,6 +16,10 @@ fragments:
   - fragments/identity-model.md
   - fragments/sync-contract.md
   - fragments/artifact-classification.md
+dependencies:
+  prerequisite_packs: []
+  preflight_packs:
+    - startup-alignment
 portability:
   repo_name_agnostic: true
   reusable_across_repositories: true

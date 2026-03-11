@@ -135,10 +135,10 @@ class AiSessionStartupTests(unittest.TestCase):
         return {
             "status": "ok",
             "catalog_path": ".agents/prompts/CATALOG.md",
-            "pack_root": ".agents/prompts/formal/pea-startup-governance",
+            "pack_root": ".agents/prompts/formal/startup-alignment",
             "required_paths": [
                 ".agents/prompts/CATALOG.md",
-                ".agents/prompts/formal/pea-startup-governance/prompt.md",
+                ".agents/prompts/formal/startup-alignment/prompt.md",
             ],
             "missing_paths": [],
             "startup_loads_pack": True,
@@ -465,7 +465,7 @@ class AiSessionStartupTests(unittest.TestCase):
         self.assertIn("## Governanca Git carregada no startup", markdown)
         self.assertIn("## PEA carregado no startup", markdown)
         self.assertIn("docs/git-conventions.md", markdown)
-        self.assertIn("pea-startup-governance", markdown)
+        self.assertIn("startup-alignment", markdown)
         self.assertIn("enforcement", markdown)
         self.assertIn("## Inventario Git e worktree", markdown)
         self.assertIn("## Drift operacional detectado", markdown)

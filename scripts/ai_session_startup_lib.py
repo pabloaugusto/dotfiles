@@ -23,7 +23,7 @@ MANIFEST_PATH = Path("docs/AI-STARTUP-GOVERNANCE-MANIFEST.md")
 CHAT_CONTRACTS_REGISTER_PATH = Path("docs/AI-CHAT-CONTRACTS-REGISTER.md")
 TRACKER_PATH = Path("docs/AI-WIP-TRACKER.md")
 PROMPTS_CATALOG_PATH = Path(".agents/prompts/CATALOG.md")
-PEA_PROMPT_ROOT = Path(".agents/prompts/formal/pea-startup-governance")
+PEA_PROMPT_ROOT = Path(".agents/prompts/formal/startup-alignment")
 REGISTRY_ROOT = Path(".agents/registry")
 DEFAULT_REPORT_PATH = Path(".cache/ai/startup-session.md")
 WORKLOG_DOING_START = "<!-- ai-worklog:doing:start -->"
@@ -94,9 +94,9 @@ PEA_EXECUTION_MODES = [
 
 PEA_REQUIRED_PATHS = [
     ".agents/prompts/CATALOG.md",
-    ".agents/prompts/formal/pea-startup-governance/prompt.md",
-    ".agents/prompts/formal/pea-startup-governance/context.md",
-    ".agents/prompts/formal/pea-startup-governance/meta.yaml",
+    ".agents/prompts/formal/startup-alignment/prompt.md",
+    ".agents/prompts/formal/startup-alignment/context.md",
+    ".agents/prompts/formal/startup-alignment/meta.yaml",
 ]
 
 ATLASSIAN_RECOVERY_RULES = [
@@ -426,7 +426,7 @@ def delegation_context_payload(
             "docs/AI-WIP-TRACKER.md",
             "docs/AI-CHAT-CONTRACTS-REGISTER.md",
             ".agents/prompts/CATALOG.md",
-            ".agents/prompts/formal/pea-startup-governance/prompt.md",
+            ".agents/prompts/formal/startup-alignment/prompt.md",
         ],
         "rules": list(SUBAGENT_CONTEXT_RULES),
     }

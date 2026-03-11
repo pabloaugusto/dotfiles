@@ -27,11 +27,15 @@ class ValidateAiAssetsTests(unittest.TestCase):
         self.assertIn(".agents/prompts/README.md", module.REQUIRED_FILES)
         self.assertIn(".agents/prompts/CATALOG.md", module.REQUIRED_FILES)
         self.assertIn(
-            ".agents/prompts/formal/pea-startup-governance/prompt.md",
+            ".agents/prompts/formal/startup-alignment/prompt.md",
             module.REQUIRED_FILES,
         )
         self.assertIn(
-            ".agents/prompts/formal/agnostic-sync-outbox-foundation/prompt.md",
+            ".agents/prompts/formal/sync-outbox-foundation/prompt.md",
+            module.REQUIRED_FILES,
+        )
+        self.assertIn(
+            ".agents/prompts/formal/documentation-layer-governance/prompt.md",
             module.REQUIRED_FILES,
         )
         self.assertIn(".agents/config.toml", module.REQUIRED_FILES)
@@ -378,35 +382,47 @@ class ValidateAiAssetsTests(unittest.TestCase):
             module.PROMPT_PACK_REQUIRED_SNIPPETS[".agents/prompts/README.md"],
         )
         self.assertIn(
-            "task_id: prompt/pea-startup-governance",
+            "task_id: prompt/startup-alignment",
             module.PROMPT_PACK_REQUIRED_SNIPPETS[
-                ".agents/prompts/formal/pea-startup-governance/meta.yaml"
+                ".agents/prompts/formal/startup-alignment/meta.yaml"
             ],
         )
         self.assertIn(
             'summary_prefix: "PROMPT:"',
             module.PROMPT_PACK_REQUIRED_SNIPPETS[
-                ".agents/prompts/formal/pea-startup-governance/meta.yaml"
+                ".agents/prompts/formal/startup-alignment/meta.yaml"
             ],
         )
         self.assertIn(
-            "task_id: prompt/agnostic-sync-outbox-foundation",
+            "task_id: prompt/sync-outbox-foundation",
             module.PROMPT_PACK_REQUIRED_SNIPPETS[
-                ".agents/prompts/formal/agnostic-sync-outbox-foundation/meta.yaml"
+                ".agents/prompts/formal/sync-outbox-foundation/meta.yaml"
             ],
         )
         self.assertIn(
             'summary_prefix: "PROMPT:"',
             module.PROMPT_PACK_REQUIRED_SNIPPETS[
-                ".agents/prompts/formal/agnostic-sync-outbox-foundation/meta.yaml"
+                ".agents/prompts/formal/sync-outbox-foundation/meta.yaml"
             ],
         )
         self.assertIn(
-            "pea-startup-governance",
+            "task_id: prompt/documentation-layer-governance",
+            module.PROMPT_PACK_REQUIRED_SNIPPETS[
+                ".agents/prompts/formal/documentation-layer-governance/meta.yaml"
+            ],
+        )
+        self.assertIn(
+            "DEPENDENCIAS DE PACKS E ORDEM SEGURA DE EXECUCAO",
+            module.PROMPT_PACK_REQUIRED_SNIPPETS[
+                ".agents/prompts/formal/documentation-layer-governance/prompt.md"
+            ],
+        )
+        self.assertIn(
+            "prompt/documentation-layer-governance",
             module.PROMPT_PACK_REQUIRED_SNIPPETS[".agents/prompts/CATALOG.md"],
         )
         self.assertIn(
-            "prompt/agnostic-sync-outbox-foundation",
+            "prompt/sync-outbox-foundation",
             module.PROMPT_PACK_REQUIRED_SNIPPETS[".agents/prompts/CATALOG.md"],
         )
         self.assertIn(

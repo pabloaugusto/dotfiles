@@ -1,6 +1,6 @@
 # AI WIP Tracker
 
-Atualizado em: 2026-03-11 19:45 UTC
+Atualizado em: 2026-03-11 22:00 UTC
 
 Fallback local de continuidade. O Jira e a fonte primaria do fluxo vivo.
 
@@ -35,6 +35,7 @@ Fallback local de continuidade. O Jira e a fonte primaria do fluxo vivo.
 <!-- ai-worklog:done:start -->
 | ID | Tarefa | Branch | Responsavel | Inicio UTC | Concluido UTC | Resultado |
 | --- | --- | --- | --- | --- | --- | --- |
+| WIP-20260311-212032 | Reorganizar prompt packs formais e criar pack da camada documental | main | Engenheiro Agentes IA | 2026-03-11 21:20 UTC | 2026-03-11 22:00 UTC | Reorganizados os prompt packs formais com slugs mais amigaveis, dependencia explicita entre packs e novo pack documentation-layer-governance salvo na arvore canonica. |
 | WIP-20260311-183919 | DOT-179 - consolidar prefixo prompt para prompts versionados | prompt/DOT-179-agnostic-sync-outbox-foundation | ai-tech-lead | 2026-03-11 18:39 UTC | 2026-03-11 19:45 UTC | Namespace prompt endurecido com task_id prompt/<slug>, branch prompt/<jira-key>-<slug>, scope prompt, contrato Jira PROMPT:/label prompt, task canonica de sync com Jira e pack f... / evidencias: commit=ab59d7f; commit... |
 | WIP-DOT-178 | Formalizar prompt pack canonico de PEA/startup na arvore .agents/prompts | feat/DOT-178-formal-pea-prompt-pack | ai-developer-config-policy | 2026-03-11 15:21 UTC | 2026-03-11 15:56 UTC | Pack formal de PEA/startup promovido em .agents/prompts e absorvido na main pelo PR #41 / evidencias: merge=4760349; pr=#41; commit=0c5ac9e; startup pea_status=ok; review python-reviewer=aprovado |
 | WIP-DOT-177 | Backend, docs e validator do startup integral prontos para versionamento. | feat/DOT-177-startup-preflight-memory | ai-developer-config-policy | 2026-03-11 13:23 UTC | 2026-03-11 14:40 UTC | DOT-177 concluida com PR #39 mergeado em main, startup integral endurecido e recarga explicita da governanca Git canonica sem deslocar o enforcement dos hooks, tasks e gates ofi... |

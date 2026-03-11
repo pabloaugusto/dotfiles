@@ -1,0 +1,29 @@
+id: documentation-layer-governance
+task_id: prompt/documentation-layer-governance
+title: Prompt pack de governanca da camada documental por agentes de IA
+status: active
+owner_epic: DOT-71
+jira:
+  summary_prefix: "PROMPT:"
+  required_labels:
+    - prompt
+entrypoints:
+  prompt: prompt.md
+  context: context.md
+fragments:
+  - fragments/composition.md
+dependencies:
+  prerequisite_packs:
+    - sync-outbox-foundation
+  preflight_packs:
+    - startup-alignment
+composition:
+  execution_order:
+    - startup-alignment
+    - sync-outbox-foundation
+    - documentation-layer-governance
+  consumes_foundation:
+    - sync-outbox-foundation
+integration:
+  sync_manifest: config/ai/sync-targets.yaml
+  source_of_truth_dependency: true

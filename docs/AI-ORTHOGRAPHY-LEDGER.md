@@ -20,6 +20,27 @@ Registro consultivo do agente Pascoalete para ortografia e higiene vocabular.
 <!-- ai-orthography:records:start -->
 | Data/Hora UTC | Worklog ID | Revisor | Status | Arquivo | Achados | Evidencia |
 | --- | --- | --- | --- | --- | --- | --- |
+| 2026-03-11 21:58 UTC | WIP-20260311-212032 | pascoalete | reprovado | tests/python/conventional_emoji_test.py | obrigatorio, Maximo, obrigatorio | task spell:check |
+| 2026-03-11 21:58 UTC | WIP-20260311-212032 | pascoalete | reprovado | tests/python/ai_session_startup_test.py | worktrees, pablo, absorcao, worktree, pablo, primario, sessao, pabloaugusto (+18) | task spell:check |
+| 2026-03-11 21:58 UTC | WIP-20260311-212032 | pascoalete | reprovado | tests/python/ai_prompt_governance_test.py | possivel, agnostica, agnostica | task spell:check |
+| 2026-03-11 21:58 UTC | WIP-20260311-212032 | pascoalete | reprovado | tests/python/ai_assets_validator_test.py | possivel, LICOES, Validacao, comunicacao, LICOES, comecar, Orquestracao, evals (+7) | task spell:check |
+| 2026-03-11 21:58 UTC | WIP-20260311-212032 | pascoalete | reprovado | scripts/validate-ai-assets.py | evals, LICOES, evals, evals, evals, evals, autolog, autolog (+72) | task spell:check |
+| 2026-03-11 21:58 UTC | WIP-20260311-212032 | pascoalete | reprovado | scripts/ai_session_startup_lib.py | Responsavel, atualizacao, sessao, portugues, canonicos, tambem, aplicaveis, assuncoes (+39) | task spell:check |
+| 2026-03-11 21:58 UTC | WIP-20260311-212032 | pascoalete | reprovado | LICOES-APRENDIDAS.md | Licoes, usuario, LICOES, licao, Criterio, licoes, eficiencia, resiliencia (+191) | task spell:check |
+| 2026-03-11 21:58 UTC | WIP-20260311-212032 | pascoalete | reprovado | docs/git-conventions.md | titulos, validacoes, tecnica, obrigatorio, obrigatorias, semantico, obrigatorio, obrigatorio (+37) | task spell:check |
+| 2026-03-11 21:58 UTC | WIP-20260311-212032 | pascoalete | reprovado | config/ai/contracts.yaml | worktrees, worktree, worktree, worktree, condicao, worktrees, worktrees, criterios (+3) | task spell:check |
+| 2026-03-11 21:58 UTC | WIP-20260311-212032 | pascoalete | reprovado | .agents/prompts/formal/documentation-layer-governance/prompt.md | OBRIGATORIOS, padrao, canonico, DEPENDENCIAS, sessao, composicao, dominio, fundacao (+321) | task spell:check |
+| 2026-03-11 21:58 UTC | WIP-20260311-212032 | pascoalete | reprovado | .agents/prompts/formal/documentation-layer-governance/fragments/composition.md | Composicao, dominio, fundacao, persistencia, publicacao | task spell:check |
+| 2026-03-11 21:58 UTC | WIP-20260311-212032 | pascoalete | aprovado | .agents/prompts/formal/documentation-layer-governance/meta.yaml | sem achados | task spell:check |
+| 2026-03-11 21:58 UTC | WIP-20260311-212032 | pascoalete | reprovado | .agents/prompts/formal/documentation-layer-governance/context.md | fundacao, Dependencias, sessao, fundacao, tecnica, superficie, fundacao, Pascoalete (+3) | task spell:check |
+| 2026-03-11 21:58 UTC | WIP-20260311-212032 | pascoalete | aprovado | .agents/prompts/formal/sync-outbox-foundation/prompt.md | sem achados | task spell:check |
+| 2026-03-11 21:58 UTC | WIP-20260311-212032 | pascoalete | reprovado | .agents/prompts/formal/sync-outbox-foundation/meta.yaml | fundacao | task spell:check |
+| 2026-03-11 21:58 UTC | WIP-20260311-212032 | pascoalete | reprovado | .agents/prompts/formal/sync-outbox-foundation/context.md | Dependencias, sessao, dominio, fundacao | task spell:check |
+| 2026-03-11 21:58 UTC | WIP-20260311-212032 | pascoalete | reprovado | .agents/prompts/formal/startup-alignment/prompt.md | Missao, Distincao, Responsavel, canonico, sessao, Responsavel, condicao, Responsavel (+30) | task spell:check |
+| 2026-03-11 21:58 UTC | WIP-20260311-212032 | pascoalete | reprovado | .agents/prompts/formal/startup-alignment/meta.yaml | canonico | task spell:check |
+| 2026-03-11 21:58 UTC | WIP-20260311-212032 | pascoalete | reprovado | .agents/prompts/formal/startup-alignment/context.md | canonico, promocao, substituidos, LICOES, aplicaveis, Dependencias, sessao, confiavel (+2) | task spell:check |
+| 2026-03-11 21:58 UTC | WIP-20260311-212032 | pascoalete | reprovado | .agents/prompts/CATALOG.md | Dependencias, superficie, dependencia, fundacao, legiveis, dependencias, visivel | task spell:check |
+| 2026-03-11 21:58 UTC | WIP-20260311-212032 | pascoalete | reprovado | .agents/prompts/README.md | disponiveis, executaveis, legivel, reutilizaveis, estavel, obrigatorio, obrigatorio, legiveis (+9) | task spell:check |
 | 2026-03-11 16:03 UTC | WIP-DOT-178-CLOSEOUT | pascoalete | reprovado | docs/AI-WIP-TRACKER.md | solicitacao, acionavel, indisponivel, degradacao, primario, obrigatorio, Responsavel, atualizacao (+99) | task spell:check |
 | 2026-03-11 16:03 UTC | WIP-DOT-178-CLOSEOUT | pascoalete | reprovado | LICOES-APRENDIDAS.md | Licoes, usuario, LICOES, licao, Criterio, licoes, eficiencia, resiliencia (+191) | task spell:check |
 | 2026-03-11 15:45 UTC | WIP-DOT-178 | pascoalete | reprovado | .agents/prompts/formal/pea-startup-governance/fragments/startup-extension.md | Extensao, sessao, aplicavel, relatorio, aplicavel | task spell:check |

@@ -105,7 +105,7 @@ Exemplos validos:
 
 ```text
 feat/DOT-81-test-harness-hybrid
-prompt/DOT-179-agnostic-sync-outbox-foundation
+prompt/DOT-179-sync-outbox-foundation
 fix/DOT-24-windows-relink-regression
 docs/DOT-130-bootstrap-config-reference
 refactor/DOT-130-bootstrap-path-normalization

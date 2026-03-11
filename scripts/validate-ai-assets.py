@@ -62,18 +62,22 @@ REQUIRED_FILES = [
     ".agents/README.md",
     ".agents/prompts/README.md",
     ".agents/prompts/CATALOG.md",
-    ".agents/prompts/formal/pea-startup-governance/prompt.md",
-    ".agents/prompts/formal/pea-startup-governance/context.md",
-    ".agents/prompts/formal/pea-startup-governance/meta.yaml",
-    ".agents/prompts/formal/pea-startup-governance/fragments/modes.md",
-    ".agents/prompts/formal/pea-startup-governance/fragments/bypass.md",
-    ".agents/prompts/formal/pea-startup-governance/fragments/startup-extension.md",
-    ".agents/prompts/formal/agnostic-sync-outbox-foundation/prompt.md",
-    ".agents/prompts/formal/agnostic-sync-outbox-foundation/context.md",
-    ".agents/prompts/formal/agnostic-sync-outbox-foundation/meta.yaml",
-    ".agents/prompts/formal/agnostic-sync-outbox-foundation/fragments/identity-model.md",
-    ".agents/prompts/formal/agnostic-sync-outbox-foundation/fragments/sync-contract.md",
-    ".agents/prompts/formal/agnostic-sync-outbox-foundation/fragments/artifact-classification.md",
+    ".agents/prompts/formal/startup-alignment/prompt.md",
+    ".agents/prompts/formal/startup-alignment/context.md",
+    ".agents/prompts/formal/startup-alignment/meta.yaml",
+    ".agents/prompts/formal/startup-alignment/fragments/modes.md",
+    ".agents/prompts/formal/startup-alignment/fragments/bypass.md",
+    ".agents/prompts/formal/startup-alignment/fragments/startup-extension.md",
+    ".agents/prompts/formal/sync-outbox-foundation/prompt.md",
+    ".agents/prompts/formal/sync-outbox-foundation/context.md",
+    ".agents/prompts/formal/sync-outbox-foundation/meta.yaml",
+    ".agents/prompts/formal/sync-outbox-foundation/fragments/identity-model.md",
+    ".agents/prompts/formal/sync-outbox-foundation/fragments/sync-contract.md",
+    ".agents/prompts/formal/sync-outbox-foundation/fragments/artifact-classification.md",
+    ".agents/prompts/formal/documentation-layer-governance/prompt.md",
+    ".agents/prompts/formal/documentation-layer-governance/context.md",
+    ".agents/prompts/formal/documentation-layer-governance/meta.yaml",
+    ".agents/prompts/formal/documentation-layer-governance/fragments/composition.md",
     ".agents/config.toml",
     ".agents/cerimonias/README.md",
     ".agents/cerimonias/ceremony.schema.json",
@@ -352,19 +356,25 @@ PROMPT_PACK_REQUIRED_SNIPPETS = {
         "fragments/",
         "task_id",
         "prompt/<slug>",
+        "dependencies",
+        "prerequisite_packs",
+        "preflight_packs",
         'summary_prefix: "PROMPT:"',
         "required_labels",
         "`scope` obrigatorio `prompt`",
     ],
     ".agents/prompts/CATALOG.md": [
         "## Formais",
-        "prompt/agnostic-sync-outbox-foundation",
-        "pea-startup-governance",
+        "prompt/startup-alignment",
+        "prompt/sync-outbox-foundation",
+        "prompt/documentation-layer-governance",
+        "checar `startup-alignment`",
+        "validar `sync-outbox-foundation` antes",
         "## Legados",
         "DOT-178",
         "DOT-179",
     ],
-    ".agents/prompts/formal/pea-startup-governance/prompt.md": [
+    ".agents/prompts/formal/startup-alignment/prompt.md": [
         "Pre-Execution Alignment",
         "startup/restart",
         "enforcement",
@@ -372,27 +382,57 @@ PROMPT_PACK_REQUIRED_SNIPPETS = {
         "fast_lane",
         "aguardando_confirmacao_humana",
     ],
-    ".agents/prompts/formal/pea-startup-governance/context.md": [
+    ".agents/prompts/formal/startup-alignment/context.md": [
         "Jira",
         "DOT-71",
         "DOT-178",
         "pea_status",
+        "Dependencias e ordem segura",
     ],
-    ".agents/prompts/formal/pea-startup-governance/meta.yaml": [
-        "id: pea-startup-governance",
-        "task_id: prompt/pea-startup-governance",
+    ".agents/prompts/formal/startup-alignment/meta.yaml": [
+        "id: startup-alignment",
+        "task_id: prompt/startup-alignment",
         "owner_issue: DOT-178",
         'summary_prefix: "PROMPT:"',
         "required_labels:",
         "report_key: pea_status",
+        "dependencies:",
+        "prerequisite_packs: []",
+        "preflight_packs: []",
     ],
-    ".agents/prompts/formal/agnostic-sync-outbox-foundation/meta.yaml": [
-        "id: agnostic-sync-outbox-foundation",
-        "task_id: prompt/agnostic-sync-outbox-foundation",
+    ".agents/prompts/formal/sync-outbox-foundation/meta.yaml": [
+        "id: sync-outbox-foundation",
+        "task_id: prompt/sync-outbox-foundation",
         "owner_issue: DOT-179",
         'summary_prefix: "PROMPT:"',
         "required_labels:",
         "state_root: ~/.ai-control-plane",
+        "dependencies:",
+        "preflight_packs:",
+        "- startup-alignment",
+    ],
+    ".agents/prompts/formal/documentation-layer-governance/meta.yaml": [
+        "id: documentation-layer-governance",
+        "task_id: prompt/documentation-layer-governance",
+        'summary_prefix: "PROMPT:"',
+        "required_labels:",
+        "dependencies:",
+        "prerequisite_packs:",
+        "- sync-outbox-foundation",
+        "preflight_packs:",
+        "- startup-alignment",
+    ],
+    ".agents/prompts/formal/documentation-layer-governance/context.md": [
+        "Dependencias e ordem segura",
+        "startup-alignment",
+        "sync-outbox-foundation",
+        "nao redefine `workspace_id`",
+    ],
+    ".agents/prompts/formal/documentation-layer-governance/prompt.md": [
+        "DEPENDENCIAS DE PACKS E ORDEM SEGURA DE EXECUCAO",
+        "ai-documentation-sync",
+        "documentation-layer-governance",
+        "Curador Repo",
     ],
 }
 
@@ -845,6 +885,7 @@ def validate_prompt_packs(repo_root: Path, failures: list[str]) -> None:
         [item for item in formal_root.iterdir() if item.is_dir()],
         key=lambda item: item.name,
     )
+    formal_pack_names = {item.name for item in formal_packs}
     if not formal_packs:
         failures.append("Nenhum prompt pack formal encontrado em .agents/prompts/formal")
 
@@ -882,6 +923,35 @@ def validate_prompt_packs(repo_root: Path, failures: list[str]) -> None:
                 failures.append(f"task_id ausente ou invalido em {meta_path.as_posix()}")
             elif task_match.group("value") != expected_task_id:
                 failures.append(f"task_id em {meta_path.as_posix()} deve ser {expected_task_id}")
+            dependencies_payload = meta_payload.get("dependencies")
+            if not isinstance(dependencies_payload, dict):
+                failures.append(
+                    f"bloco dependencies obrigatorio ausente em {meta_path.as_posix()}"
+                )
+            else:
+                for field_name in ("prerequisite_packs", "preflight_packs"):
+                    field_value = dependencies_payload.get(field_name)
+                    if not isinstance(field_value, list):
+                        failures.append(
+                            f"dependencies.{field_name} em {meta_path.as_posix()} deve ser lista"
+                        )
+                        continue
+                    for pack_name in field_value:
+                        if not isinstance(pack_name, str) or not re.fullmatch(
+                            r"[a-z0-9-]+", pack_name
+                        ):
+                            failures.append(
+                                f"dependencies.{field_name} em {meta_path.as_posix()} deve conter apenas slugs validos"
+                            )
+                            break
+                        if pack_name == pack_root.name:
+                            failures.append(
+                                f"dependencies.{field_name} em {meta_path.as_posix()} nao pode apontar para o proprio pack"
+                            )
+                        elif pack_name not in formal_pack_names:
+                            failures.append(
+                                f"dependencies.{field_name} em {meta_path.as_posix()} referencia pack inexistente: {pack_name}"
+                            )
             owner_issue = str(meta_payload.get("owner_issue", "") or "").strip()
             if owner_issue:
                 jira_payload = meta_payload.get("jira")
