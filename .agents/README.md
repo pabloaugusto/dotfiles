@@ -6,7 +6,7 @@ Fonte de verdade da camada declarativa e operacional de IA deste repo.
 
 - [`cards/`](cards/): cartoes operacionais dos agentes do projeto
 - [`skills/`](skills/): skills versionadas do repo
-- [`prompts/`](prompts/): prompt packs e material historico relacionado a IA
+- [`prompts/`](prompts/): prompt packs versionados, catalogados e material historico relacionado a IA
 - [`registry/`](registry/): agentes declarativos tipados
 - [`orchestration/`](orchestration/): matriz de capacidade, policy e schemas
 - [`rules/`](rules/): regras declarativas de operacao e CI
@@ -26,4 +26,8 @@ Fonte de verdade da camada declarativa e operacional de IA deste repo.
 
 - Toda regra declarativa portavel deve nascer em [`.agents/`](.agents/).
 - Prompt packs versionados tambem devem ficar sob [`.agents/`](.agents/), nunca soltos na raiz do repo.
+- A arvore de prompt packs deve seguir o catalogo canonico em
+  [`.agents/prompts/README.md`](prompts/README.md) e
+  [`.agents/prompts/CATALOG.md`](prompts/CATALOG.md), preservando `legacy/`
+  para historico e `formal/` para pacotes executaveis vivos.
 - [`.codex/`](.codex/) existe apenas como ponte de compatibilidade e deve conter so [`README.md`](README.md).

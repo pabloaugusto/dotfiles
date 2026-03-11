@@ -24,6 +24,12 @@ class ValidateAiAssetsTests(unittest.TestCase):
         module = load_validator_module()
         self.assertIn("LICOES-APRENDIDAS.md", module.REQUIRED_FILES)
         self.assertIn(".agents/README.md", module.REQUIRED_FILES)
+        self.assertIn(".agents/prompts/README.md", module.REQUIRED_FILES)
+        self.assertIn(".agents/prompts/CATALOG.md", module.REQUIRED_FILES)
+        self.assertIn(
+            ".agents/prompts/formal/pea-startup-governance/prompt.md",
+            module.REQUIRED_FILES,
+        )
         self.assertIn(".agents/config.toml", module.REQUIRED_FILES)
         self.assertIn(".agents/cerimonias/README.md", module.REQUIRED_FILES)
         self.assertIn(".agents/cerimonias/ceremony.schema.json", module.REQUIRED_FILES)
@@ -283,6 +289,10 @@ class ValidateAiAssetsTests(unittest.TestCase):
             module.STARTUP_AND_RESTART_REQUIRED_SNIPPETS,
         )
         self.assertIn(
+            "pea_status",
+            module.STARTUP_AND_RESTART_REQUIRED_SNIPPETS,
+        )
+        self.assertIn(
             "subagentes",
             module.STARTUP_AND_RESTART_REQUIRED_SNIPPETS,
         )
@@ -299,12 +309,32 @@ class ValidateAiAssetsTests(unittest.TestCase):
             module.STARTUP_GOVERNANCE_REQUIRED_SNIPPETS["config/ai/contracts.yaml"],
         )
         self.assertIn(
+            "startup-report-must-expose-pea-status",
+            module.STARTUP_GOVERNANCE_REQUIRED_SNIPPETS["config/ai/contracts.yaml"],
+        )
+        self.assertIn(
             "fallback GitHub/PAT",
+            module.STARTUP_GOVERNANCE_REQUIRED_SNIPPETS["docs/TASKS.md"],
+        )
+        self.assertIn(
+            "pea_status",
             module.STARTUP_GOVERNANCE_REQUIRED_SNIPPETS["docs/TASKS.md"],
         )
         self.assertIn(
             "zero-context-startup-must-load-chat-contract-before-first-user-message",
             module.STARTUP_GOVERNANCE_REQUIRED_SNIPPETS["config/ai/agent-operations.yaml"],
+        )
+        self.assertIn(
+            ".agents/prompts/CATALOG.md",
+            module.STARTUP_GOVERNANCE_REQUIRED_SNIPPETS["docs/AI-STARTUP-GOVERNANCE-MANIFEST.md"],
+        )
+        self.assertIn(
+            ".agents/prompts/README.md",
+            module.PROMPT_PACK_REQUIRED_SNIPPETS,
+        )
+        self.assertIn(
+            "pea-startup-governance",
+            module.PROMPT_PACK_REQUIRED_SNIPPETS[".agents/prompts/CATALOG.md"],
         )
         self.assertIn(
             "df/secrets/secrets-ref.yaml",

@@ -58,6 +58,14 @@ REQUIRED_FILES = [
     "config/ai/contracts.yaml",
     "df/secrets/secrets-ref.yaml",
     ".agents/README.md",
+    ".agents/prompts/README.md",
+    ".agents/prompts/CATALOG.md",
+    ".agents/prompts/formal/pea-startup-governance/prompt.md",
+    ".agents/prompts/formal/pea-startup-governance/context.md",
+    ".agents/prompts/formal/pea-startup-governance/meta.yaml",
+    ".agents/prompts/formal/pea-startup-governance/fragments/modes.md",
+    ".agents/prompts/formal/pea-startup-governance/fragments/bypass.md",
+    ".agents/prompts/formal/pea-startup-governance/fragments/startup-extension.md",
     ".agents/config.toml",
     ".agents/cerimonias/README.md",
     ".agents/cerimonias/ceremony.schema.json",
@@ -247,6 +255,8 @@ STARTUP_AND_RESTART_REQUIRED_SNIPPETS = [
     "task ai:atlassian:check",
     "Cadeia de fallback GitHub/PAT",
     "display_name",
+    "pea_status",
+    ".agents/prompts/CATALOG.md",
     "docs/git-conventions.md",
     "subagentes",
     "REJEITADO",
@@ -266,6 +276,9 @@ STARTUP_GOVERNANCE_REQUIRED_SNIPPETS = {
         "remember-atlassian-auth-mode-cloud-id-and-recovery-path",
         "no-subagent-delegation-before-startup-context-is-loaded-and-scoped",
         "subagent-context-pack-must-carry-owner-issue-startup-artifacts-and-applicable-rules",
+        "startup-must-load-prompts-catalog-and-applicable-formal-pea-pack",
+        "startup-report-must-expose-pea-status",
+        "subagent-context-pack-must-carry-pea-classification-when-applicable",
         "work-started-without-full-startup-context-is-rejectable",
     ],
     "docs/TASKS.md": [
@@ -275,6 +288,7 @@ STARTUP_GOVERNANCE_REQUIRED_SNIPPETS = {
         "enforcement de commit atomico",
         "probe GraphQL",
         "fallback GitHub/PAT",
+        "pea_status",
         "PRs` abertos para a branch atual",
         "subagentes",
     ],
@@ -286,6 +300,7 @@ STARTUP_GOVERNANCE_REQUIRED_SNIPPETS = {
         "validar `gh auth status`",
         "probe GraphQL cedo",
         "cadeia documentada de fallback GitHub/PAT",
+        "Pre-Execution Alignment reduz drift antes da execucao",
         "saude minima de `Jira` e `Confluence`",
         "pacote minimo de contexto antes de delegar para subagentes",
         "rejeitavel ate a remediacao do contexto",
@@ -294,16 +309,57 @@ STARTUP_GOVERNANCE_REQUIRED_SNIPPETS = {
         "zero-context-startup-must-load-chat-contract-before-first-user-message",
         "no-subagent-delegation-before-startup-context-is-loaded-or-linked",
         "subagent-handoff-must-carry-owner-issue-startup-context-and-applicable-rules",
+        "subagent-handoff-must-carry-pea-classification-when-applicable",
         "work-executed-without-required-startup-context-is-rejectable",
     ],
     "docs/AI-STARTUP-GOVERNANCE-MANIFEST.md": [
         "### Secrets, auth e runtime operacional",
         "df/secrets/secrets-ref.yaml",
+        "### Prompt packs formais e contexto executavel",
+        ".agents/prompts/CATALOG.md",
     ],
     "docs/AI-DELEGATION-FLOW.md": [
         "startup report",
         "pacote minimo de contexto",
         "subagente",
+        "classificacao do `PEA`",
+    ],
+}
+
+PROMPT_PACK_REQUIRED_SNIPPETS = {
+    ".agents/prompts/README.md": [
+        "## Estrutura canonica",
+        "legacy/",
+        "formal/",
+        "prompt.md",
+        "context.md",
+        "meta.yaml",
+        "fragments/",
+    ],
+    ".agents/prompts/CATALOG.md": [
+        "## Formais",
+        "pea-startup-governance",
+        "## Legados",
+        "DOT-178",
+    ],
+    ".agents/prompts/formal/pea-startup-governance/prompt.md": [
+        "Pre-Execution Alignment",
+        "startup/restart",
+        "enforcement",
+        "pea_status",
+        "fast_lane",
+        "aguardando_confirmacao_humana",
+    ],
+    ".agents/prompts/formal/pea-startup-governance/context.md": [
+        "Jira",
+        "DOT-71",
+        "DOT-178",
+        "pea_status",
+    ],
+    ".agents/prompts/formal/pea-startup-governance/meta.yaml": [
+        "id: pea-startup-governance",
+        "owner_issue: DOT-178",
+        "report_key: pea_status",
     ],
 }
 
@@ -718,6 +774,35 @@ def validate_ai_config(repo_root: Path, failures: list[str]) -> None:
                 )
 
 
+def validate_prompt_packs(repo_root: Path, failures: list[str]) -> None:
+    prompts_root = repo_root / ".agents" / "prompts"
+    legacy_root = prompts_root / "legacy"
+    formal_root = prompts_root / "formal"
+    pea_root = formal_root / "pea-startup-governance"
+    fragments_root = pea_root / "fragments"
+
+    if not prompts_root.is_dir():
+        failures.append("Pasta obrigatoria ausente: .agents/prompts")
+        return
+    if not legacy_root.is_dir():
+        failures.append("Pasta obrigatoria ausente: .agents/prompts/legacy")
+    if not formal_root.is_dir():
+        failures.append("Pasta obrigatoria ausente: .agents/prompts/formal")
+    if not pea_root.is_dir():
+        failures.append(
+            "Pasta obrigatoria ausente: .agents/prompts/formal/pea-startup-governance"
+        )
+    if not fragments_root.is_dir():
+        failures.append(
+            "Pasta obrigatoria ausente: .agents/prompts/formal/pea-startup-governance/fragments"
+        )
+
+    for relative, snippets in PROMPT_PACK_REQUIRED_SNIPPETS.items():
+        path = repo_root / relative
+        if path.is_file():
+            require_snippets(path.read_text(encoding="utf-8"), snippets, relative, failures)
+
+
 def validate_legacy_codex_stub(repo_root: Path, failures: list[str]) -> None:
     legacy_root = legacy_codex_root(repo_root)
     readme_path = legacy_codex_readme(repo_root)
@@ -1010,6 +1095,7 @@ def main(argv: list[str]) -> int:
             validate_registry_agent(agent_file, skill_names, failures)
 
     validate_ai_config(repo_root, failures)
+    validate_prompt_packs(repo_root, failures)
     validate_legacy_codex_stub(repo_root, failures)
 
     for schema_path in (

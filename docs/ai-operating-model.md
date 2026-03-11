@@ -70,6 +70,27 @@ Nem toda definicao nasce primeiro em doc oficial. Quando isso acontecer:
 - cada item pendente deve apontar para o **work item** dono quando ele ja
   existir
 
+### 1.3. Pre-Execution Alignment reduz drift antes da execucao
+
+Neste repo, `startup`, `PEA` e `enforcement` sao camadas diferentes.
+
+- `startup` rele a governanca e recalcula o contexto operacional da sessao
+- `PEA` alinha entendimento antes da execucao quando houver ambiguidade,
+  impacto persistente, risco estrutural ou pre-condicao faltante
+- `enforcement` continua nos hooks, tasks, validadores, reviews, `Jira`,
+  worklog, lessons e closeout
+
+O `PEA` deve operar com quatro modos:
+
+- `fast_lane`
+- `alinhamento_resumido_e_execucao`
+- `aguardando_confirmacao_humana`
+- `bloqueado_por_pre_condicao`
+
+Quando houver delegacao, a classificacao do `PEA`, as assuncoes relevantes e as
+ambiguidades abertas precisam viajar junto do pacote minimo de contexto do
+subagente.
+
 ### 2. Especializacao por escopo
 
 Cada skill cobre um dominio estreito do repo. Isso reduz ambiguidade, evita prompts gigantes e melhora a reusabilidade em tarefas futuras.
@@ -255,6 +276,13 @@ As skills ficam em [`.agents/skills/`](.agents/skills/) e seguem o contrato:
 
 Prompt packs versionados tambem devem viver em [`.agents/prompts/`](.agents/prompts/), inclusive
 material historico, pesquisas e pacotes de contexto usados em auditorias.
+
+A estrutura canonica dessa arvore passa a ser:
+
+- [`.agents/prompts/README.md`](.agents/prompts/README.md)
+- [`.agents/prompts/CATALOG.md`](.agents/prompts/CATALOG.md)
+- [`.agents/prompts/legacy/`](.agents/prompts/legacy/) para historico
+- [`.agents/prompts/formal/`](.agents/prompts/formal/) para packs vivos e executaveis
 
 ### Camada 2.1. Registry declarativo do repo
 
@@ -471,7 +499,7 @@ Como [`df/`](df/) guarda apenas o que sera utilizado na maquina apos o bootstrap
 - [`AGENTS.md`](AGENTS.md) define o contrato global do projeto
 - [`.agents/cards/`](.agents/cards/) guarda cartoes versionados de agentes
 - [`.agents/skills/`](.agents/skills/) guarda skills versionadas do projeto
-- [`.agents/prompts/`](.agents/prompts/) guarda prompt packs versionados e historico de contexto
+- [`.agents/prompts/`](.agents/prompts/) guarda prompt packs versionados e historico de contexto, com [`.agents/prompts/README.md`](.agents/prompts/README.md), [`.agents/prompts/CATALOG.md`](.agents/prompts/CATALOG.md), [`.agents/prompts/legacy/`](.agents/prompts/legacy/) e [`.agents/prompts/formal/`](.agents/prompts/formal/)
 - [`.agents/registry/`](.agents/registry/), [`.agents/orchestration/`](.agents/orchestration/), [`.agents/rules/`](.agents/rules/) e [`.agents/evals/`](.agents/evals/) guardam a camada declarativa
 - [`.agents/cerimonias/`](.agents/cerimonias/) guarda as definicoes e templates das **cerimonias** ageis
 - [`.codex/README.md`](.codex/README.md) deixa explicito que adaptadores de assistente nao sao fonte de verdade

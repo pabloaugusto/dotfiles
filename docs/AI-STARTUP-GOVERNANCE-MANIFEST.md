@@ -40,6 +40,12 @@ precise retomar o trabalho sem continuidade confiavel de contexto.
 - todos os arquivos em [`.agents/registry/`](../.agents/registry/)
 - todos os arquivos em [`.agents/cards/`](../.agents/cards/)
 
+### Prompt packs formais e contexto executavel
+
+- [`.agents/prompts/README.md`](../.agents/prompts/README.md)
+- [`.agents/prompts/CATALOG.md`](../.agents/prompts/CATALOG.md)
+- todos os arquivos em [`.agents/prompts/formal/`](../.agents/prompts/formal/)
+
 ### Docs de governanca do repo
 
 - todos os arquivos `AI-*` em [`docs/`](./)

@@ -1,0 +1,25 @@
+id: pea-startup-governance
+title: Prompt pack canonico de PEA e startup
+status: active
+owner_epic: DOT-71
+owner_issue: DOT-178
+entrypoints:
+  prompt: prompt.md
+  context: context.md
+fragments:
+  - fragments/modes.md
+  - fragments/bypass.md
+  - fragments/startup-extension.md
+startup:
+  mandatory_load: true
+  report_key: pea_status
+  requires_manifest_integration: true
+delegation:
+  propagate_pea_context: true
+  required_payload_fields:
+    - owner_issue
+    - current_branch
+    - startup_report
+    - pea_mode
+    - assumptions
+    - ambiguities

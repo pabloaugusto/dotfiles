@@ -1,6 +1,6 @@
 # Roadmap do Repositorio
 
-Atualizado em: 2026-03-11 14:31 UTC
+Atualizado em: 2026-03-11 15:45 UTC
 Ciclo ativo: 2026-Q1
 
 Planejamento incremental para qualidade, testes, bootstrap e governanca do repo.
@@ -28,7 +28,7 @@ Edite apenas a tabela entre os marcadores abaixo.
 Atualizada por `task ai:roadmap:refresh`.
 
 <!-- roadmap:priority:start -->
-Atualizado em: 2026-03-11 14:31 UTC
+Atualizado em: 2026-03-11 15:45 UTC
 
 ### Ranking RICE
 
@@ -76,6 +76,7 @@ Sem sugestoes pendentes neste ciclo; itens aceitos ja estao rastreaveis.
 ### Next
 
 <!-- roadmap:next:start -->
+- [fix] Corrigir pendencias ortograficas remanescentes do worklog `WIP-DOT-178` em .agents/README.md, .agents/prompts/CATALOG.md, .agents/prompts/README.md, .agents/prompts/formal/pea-s... | notas=Pendencia automatica criada por Pascoalete apos review consultivo reprovado sem correcao automatica.
 - [fix] Corrigir pendencias ortograficas remanescentes do worklog `WIP-DOT-177` em AGENTS.md, config/ai/contracts.yaml, docs/AI-STARTUP-AND-RESTART.md, docs/TASKS.md, docs/ai-operating-... | notas=Pendencia automatica criada por Pascoalete apos review consultivo reprovado sem correcao automatica.
 - [fix] Corrigir pendencias ortograficas remanescentes do worklog `WIP-DOT-175` em .agents/cards/ai-product-owner.md, .agents/cards/ai-scrum-master.md, AGENTS.md, config/ai/agent-operat... | notas=Pendencia automatica criada por Pascoalete apos review consultivo reprovado sem correcao automatica.
 - [fix] Corrigir pendencias ortograficas remanescentes do worklog `WIP-DOT-106` em AGENTS.md, Taskfile.yml, config/ai/contracts.yaml, docs/AI-FALLBACK-LEDGER.md, docs/AI-FALLBACK-OPERAT... | notas=Pendencia automatica criada por Pascoalete apos review consultivo reprovado sem correcao automatica.

@@ -61,6 +61,8 @@ Mapa das documentacoes versionadas do projeto e ordem recomendada de leitura.
 - [`docs/AI-SKILLS-CATALOG.md`](docs/AI-SKILLS-CATALOG.md): catalogo das skills.
 - [`docs/AI-DELEGATION-FLOW.md`](docs/AI-DELEGATION-FLOW.md): fluxo de intake, roteamento e delegacao.
 - [`docs/AI-GOVERNANCE-AND-REGRESSION.md`](docs/AI-GOVERNANCE-AND-REGRESSION.md): regressao e governanca da camada de IA.
+- [`.agents/prompts/README.md`](../.agents/prompts/README.md): contrato estrutural dos prompt packs versionados.
+- [`.agents/prompts/CATALOG.md`](../.agents/prompts/CATALOG.md): catalogo dos packs formais e legados.
 - [`docs/AI-BACKLOG-LIVE-AUDIT.md`](docs/AI-BACKLOG-LIVE-AUDIT.md): matriz auditavel do backlog vivo versus `Jira`, incluindo backfill de owners oficiais.
 - [`docs/AI-DONE-ISSUES-AUDIT.md`](docs/AI-DONE-ISSUES-AUDIT.md): baseline versionada da auditoria integral das issues em **Done**, com checklist por onda, veredicto formal e remediacoes de paridade terminal.
 - [`docs/AI-PAUSED-ISSUES-AUDIT.md`](docs/AI-PAUSED-ISSUES-AUDIT.md): classificacao factual das issues em **Paused**, com evidencias, veredicto e acao recomendada por item.

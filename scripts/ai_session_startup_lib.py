@@ -22,6 +22,8 @@ from scripts.github_auth_probe_lib import GitHubAuthProbeError, probe_github_aut
 MANIFEST_PATH = Path("docs/AI-STARTUP-GOVERNANCE-MANIFEST.md")
 CHAT_CONTRACTS_REGISTER_PATH = Path("docs/AI-CHAT-CONTRACTS-REGISTER.md")
 TRACKER_PATH = Path("docs/AI-WIP-TRACKER.md")
+PROMPTS_CATALOG_PATH = Path(".agents/prompts/CATALOG.md")
+PEA_PROMPT_ROOT = Path(".agents/prompts/formal/pea-startup-governance")
 REGISTRY_ROOT = Path(".agents/registry")
 DEFAULT_REPORT_PATH = Path(".cache/ai/startup-session.md")
 WORKLOG_DOING_START = "<!-- ai-worklog:doing:start -->"
@@ -65,6 +67,7 @@ SUBAGENT_CONTEXT_RULES = [
     "nao delegar antes de carregar ou referenciar o startup oficial da rodada",
     "entregar a issue dona, a branch atual e o proximo passo objetivo ao subagente",
     "entregar tambem os arquivos normativos e as regras aplicaveis ao papel delegado",
+    "quando houver PEA, repassar classificacao, assuncoes relevantes e ambiguidades abertas ao subagente",
     "tratar trabalho sem contexto minimo de subagente como rejeitavel",
 ]
 
@@ -80,6 +83,20 @@ GIT_GOVERNANCE_STARTUP_RULES = [
     "commits devem ser atomicos, ligados a uma unica issue e preferencialmente auto-testaveis",
     "cada branch deve carregar um unico contexto coerente e ser podada apos merge seguro",
     "task ai:worklog:check e git-governance-check seguem como gates canonicos antes de empilhar escopo",
+]
+
+PEA_EXECUTION_MODES = [
+    "fast_lane",
+    "alinhamento_resumido_e_execucao",
+    "aguardando_confirmacao_humana",
+    "bloqueado_por_pre_condicao",
+]
+
+PEA_REQUIRED_PATHS = [
+    ".agents/prompts/CATALOG.md",
+    ".agents/prompts/formal/pea-startup-governance/prompt.md",
+    ".agents/prompts/formal/pea-startup-governance/context.md",
+    ".agents/prompts/formal/pea-startup-governance/meta.yaml",
 ]
 
 ATLASSIAN_RECOVERY_RULES = [
@@ -259,6 +276,35 @@ def git_governance_payload() -> dict[str, Any]:
     }
 
 
+def pea_status_payload(repo_root: Path, resolved_paths: list[str]) -> dict[str, Any]:
+    catalog_path = (repo_root / PROMPTS_CATALOG_PATH).resolve()
+    prompt_root = (repo_root / PEA_PROMPT_ROOT).resolve()
+    required_files = [
+        prompt_root / "prompt.md",
+        prompt_root / "context.md",
+        prompt_root / "meta.yaml",
+    ]
+    missing = [
+        path.relative_to(repo_root).as_posix()
+        for path in required_files
+        if not path.is_file()
+    ]
+    startup_loads_pack = all(relative in resolved_paths for relative in PEA_REQUIRED_PATHS)
+    return {
+        "status": "ok" if catalog_path.is_file() and not missing and startup_loads_pack else "missing",
+        "catalog_path": PROMPTS_CATALOG_PATH.as_posix(),
+        "pack_root": PEA_PROMPT_ROOT.as_posix(),
+        "required_paths": list(PEA_REQUIRED_PATHS),
+        "missing_paths": missing,
+        "startup_loads_pack": startup_loads_pack,
+        "execution_modes": list(PEA_EXECUTION_MODES),
+        "separation_note": (
+            "startup rele a camada e expoe pea_status; PEA alinha entendimento; enforcement real "
+            "permanece em hooks, tasks, validadores, reviews, Jira e closeout"
+        ),
+    }
+
+
 def branch_lifecycle_payload(repo_root: Path, current_branch: str) -> dict[str, Any]:
     normalized_branch = str(current_branch).strip()
     lifecycle: dict[str, Any] = {
@@ -379,6 +425,8 @@ def delegation_context_payload(
             "docs/ai-operating-model.md",
             "docs/AI-WIP-TRACKER.md",
             "docs/AI-CHAT-CONTRACTS-REGISTER.md",
+            ".agents/prompts/CATALOG.md",
+            ".agents/prompts/formal/pea-startup-governance/prompt.md",
         ],
         "rules": list(SUBAGENT_CONTEXT_RULES),
     }
@@ -696,6 +744,7 @@ def startup_session_payload(repo_root: Path, *, include_runtime_probes: bool = T
     startup_drift = startup_drift_payload(active_execution, active_worklog_items, git_inventory)
     chat_communication = chat_communication_payload()
     git_governance = git_governance_payload()
+    pea_status = pea_status_payload(repo_root, resolved_paths)
     delegation_context = delegation_context_payload(prioritized_work_item, git_inventory)
     fallback_status = (
         fallback_status_payload(repo_root)
@@ -748,6 +797,7 @@ def startup_session_payload(repo_root: Path, *, include_runtime_probes: bool = T
         "agent_identity": agent_identity,
         "chat_communication": chat_communication,
         "git_governance": git_governance,
+        "pea_status": pea_status,
         "delegation_context": delegation_context,
         "startup_drift": startup_drift,
         "fallback_status": fallback_status,
@@ -808,6 +858,21 @@ def render_startup_session_markdown(payload: dict[str, Any]) -> str:
     for rule in git_governance.get("rules", []):
         lines.append(f"- contrato Git lembrado: {rule}")
     lines.append(f"- enforcement: {git_governance.get('enforcement_note', '')}")
+
+    pea_status = payload["pea_status"]
+    lines.extend(["", "## PEA carregado no startup", ""])
+    lines.append(f"- status: `{pea_status.get('status', 'unknown')}`")
+    lines.append(f"- catalogo: `{pea_status.get('catalog_path', '')}`")
+    lines.append(f"- pack formal: `{pea_status.get('pack_root', '')}`")
+    lines.append(
+        f"- startup carrega o pack formal: `{pea_status.get('startup_loads_pack', False)}`"
+    )
+    if pea_status.get("missing_paths"):
+        for path in pea_status.get("missing_paths", []):
+            lines.append(f"- caminho ausente: `{path}`")
+    for mode in pea_status.get("execution_modes", []):
+        lines.append(f"- modo PEA suportado: `{mode}`")
+    lines.append(f"- separacao de camadas: {pea_status.get('separation_note', '')}")
 
     git_inventory = payload["git_inventory"]
     lines.extend(["", "## Inventario Git e worktree", ""])
@@ -952,6 +1017,7 @@ def render_startup_session_markdown(payload: dict[str, Any]) -> str:
         lines.append(f"- arquivo obrigatorio para contexto de subagente: `{path}`")
     for rule in delegation.get("rules", []):
         lines.append(f"- regra de subagente: {rule}")
+    lines.append("- regra de subagente: repassar classificacao do PEA quando aplicavel")
 
     lines.extend(
         [
@@ -961,6 +1027,7 @@ def render_startup_session_markdown(payload: dict[str, Any]) -> str:
             "- reler integralmente todos os arquivos resolvidos antes de operar",
             "- avisar o usuario se a tabela de contratos pendentes nao estiver vazia",
             "- carregar o contrato de comunicacao e a camada de display_name antes da primeira resposta operacional ao usuario",
+            "- carregar o catalogo de prompt packs e expor `pea_status` antes de operar por memoria residual",
             "- validar `gh auth status` e, se o fluxo de GitHub ou GraphQL falhar, consultar a cadeia de fallback documentada em `docs/secrets-and-auth.md` antes de concluir que o `gh` esta bloqueado",
             "- quando a rodada depender de Jira ou Confluence, confirmar tambem o probe resumido dessas plataformas antes de operar por memoria",
             "- nao delegar para subagentes sem pacote minimo de contexto, owner issue e regras aplicaveis",
