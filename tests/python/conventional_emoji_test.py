@@ -79,7 +79,7 @@ class ConventionalEmojiTests(unittest.TestCase):
         self.assertTrue(result.ok)
 
     def test_branch_validation_accepts_prompt_type(self) -> None:
-        result = MODULE.validate_branch_name("prompt/DOT-179-agnostic-sync-outbox-foundation")
+        result = MODULE.validate_branch_name("prompt/DOT-179-sync-outbox-foundation")
         self.assertTrue(result.ok)
 
     def test_branch_validation_allows_dependabot(self) -> None:
@@ -93,7 +93,7 @@ class ConventionalEmojiTests(unittest.TestCase):
 
     def test_branch_validation_requires_prompt_type_when_prompt_paths_are_present(self) -> None:
         result = MODULE.validate_branch_name(
-            "feat/DOT-179-agnostic-sync-outbox-foundation",
+            "feat/DOT-179-sync-outbox-foundation",
             require_prompt_type=True,
         )
         self.assertFalse(result.ok)
@@ -101,8 +101,8 @@ class ConventionalEmojiTests(unittest.TestCase):
 
     def test_required_scope_is_derived_from_prompt_paths(self) -> None:
         required_scope = MODULE.required_scope_for_paths_and_branch(
-            [".agents/prompts/formal/pea-startup-governance/prompt.md"],
-            "feat/DOT-178-pea-startup-governance",
+            [".agents/prompts/formal/startup-alignment/prompt.md"],
+            "feat/DOT-178-startup-alignment",
         )
         self.assertEqual(required_scope, "prompt")
 

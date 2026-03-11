@@ -1,6 +1,6 @@
-id: pea-startup-governance
-task_id: prompt/pea-startup-governance
-title: Prompt pack canonico de PEA e startup
+id: startup-alignment
+task_id: prompt/startup-alignment
+title: Prompt pack canonico de startup e alinhamento pre-execucao
 status: active
 owner_epic: DOT-71
 owner_issue: DOT-178
@@ -15,6 +15,9 @@ fragments:
   - fragments/modes.md
   - fragments/bypass.md
   - fragments/startup-extension.md
+dependencies:
+  prerequisite_packs: []
+  preflight_packs: []
 startup:
   mandatory_load: true
   report_key: pea_status

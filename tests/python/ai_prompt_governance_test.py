@@ -83,8 +83,8 @@ class PromptGovernanceTests(unittest.TestCase):
             }
         )
         contract = module.PromptIssueContract(
-            pack_id="agnostic-sync-outbox-foundation",
-            task_id="prompt/agnostic-sync-outbox-foundation",
+            pack_id="sync-outbox-foundation",
+            task_id="prompt/sync-outbox-foundation",
             owner_issue="DOT-179",
             summary_prefix="PROMPT:",
             required_labels=("prompt",),
@@ -120,8 +120,8 @@ class PromptGovernanceTests(unittest.TestCase):
             }
         )
         contract = module.PromptIssueContract(
-            pack_id="pea-startup-governance",
-            task_id="prompt/pea-startup-governance",
+            pack_id="startup-alignment",
+            task_id="prompt/startup-alignment",
             owner_issue="DOT-178",
             summary_prefix="PROMPT:",
             required_labels=("prompt",),

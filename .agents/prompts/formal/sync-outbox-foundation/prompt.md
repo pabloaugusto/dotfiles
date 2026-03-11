@@ -27,7 +27,7 @@ Estas decisoes ja foram tomadas e NAO devem ser reabertas nesta rodada:
 7. `Confluence` e o destino principal para os runtime ledgers elegiveis
 8. o estado local deve funcionar como outbox duravel ate confirmacao remota
 9. o repo deve versionar um manifest declarativo de sincronizacao em
-   [`config/ai/sync-targets.yaml`](../../../../config/ai/)
+   `sync-targets.yaml` dentro de [`config/ai/`](../../../../config/ai/)
 
 ## Objetivo tecnico
 
@@ -209,7 +209,7 @@ Exemplo minimo de referencia:
   "workspace_id": "core-governance",
   "runtime_environment_id": "workstation-wsl-ubuntu",
   "artifact_key": "prompt_runs",
-  "record_key": "pea-startup-governance",
+  "record_key": "startup-alignment",
   "occurred_at": "2026-03-11T18:40:00Z",
   "execution_status": "success",
   "effectiveness_status": "effective",
@@ -331,7 +331,7 @@ Descobrir no repo real e adaptar a implementacao ao backend existente.
 Ao final, entregar:
 
 1. codigo implementado
-2. `config/ai/sync-targets.yaml`
+2. `sync-targets.yaml` em [`config/ai/`](../../../../config/ai/)
 3. documentacao da arquitetura
 4. classificacao inicial dos artefatos vivos atuais
 5. testes e validacoes da nova camada

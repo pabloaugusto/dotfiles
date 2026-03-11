@@ -42,7 +42,7 @@ pre_execution_alignment:
   source_of_truth:
     catalog: .agents/prompts/CATALOG.md
     formal_packs_root: .agents/prompts/formal
-    canonical_pack: .agents/prompts/formal/pea-startup-governance/prompt.md
+    canonical_pack: .agents/prompts/formal/startup-alignment/prompt.md
   execution_modes:
     - fast_lane
     - alinhamento_resumido_e_execucao

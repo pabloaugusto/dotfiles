@@ -24,6 +24,15 @@ sem desconectar a execucao das regras reais do [`dotfiles`](../../../../README.m
 - quando houver delegacao, o resumo do PEA so e valido se viajar junto com a
   issue dona, a branch atual, o startup report e as regras aplicaveis
 
+## Dependencias e ordem segura
+
+- prerequisite packs: nenhum
+- preflight packs: nenhum
+- este pack funciona como camada de preflight para os demais packs formais
+  quando a sessao vier sem continuidade confiavel
+- se houver retomada do zero, queda de contexto, limpeza de cache, troca de
+  modelo, worktree ou app, este pack deve ser checado primeiro
+
 ## Arquivos vivos relacionados
 
 - [`AGENTS.md`](../../../../AGENTS.md)

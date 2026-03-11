@@ -28,6 +28,17 @@ solucao ao nome atual do repositorio.
 - este pack nao autoriza migracao cega de todos os `.md` vivos para destino
   remoto sem classificacao previa
 
+## Dependencias e ordem segura
+
+- prerequisite packs: nenhum
+- preflight packs:
+  - `startup-alignment`
+- ordem segura:
+  1. checar `startup-alignment` quando a continuidade da sessao nao estiver
+     comprovadamente integra
+  2. executar `sync-outbox-foundation`
+  3. so depois rodar packs de dominio que consumam a fundacao de sync
+
 ## Arquivos vivos relacionados
 
 - [`AGENTS.md`](../../../../AGENTS.md)

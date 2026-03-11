@@ -4,10 +4,11 @@
 
 ## Formais
 
-| Pack | Task ID | Objetivo | Entrypoints | Dono |
-| --- | --- | --- | --- | --- |
-| [`agnostic-sync-outbox-foundation`](formal/agnostic-sync-outbox-foundation/prompt.md) | `prompt/agnostic-sync-outbox-foundation` | Formalizar a arquitetura agnostica de sync, outbox duravel e fonte perene remota para artefatos vivos de IA | [`prompt.md`](formal/agnostic-sync-outbox-foundation/prompt.md), [`context.md`](formal/agnostic-sync-outbox-foundation/context.md), [`meta.yaml`](formal/agnostic-sync-outbox-foundation/meta.yaml) | [`DOT-179`](https://pabloaugusto.atlassian.net/browse/DOT-179) |
-| [`pea-startup-governance`](formal/pea-startup-governance/prompt.md) | `prompt/pea-startup-governance` | Formalizar o `Pre-Execution Alignment` e sua integracao com `startup/restart`, delegacao e governanca operacional do repo | [`prompt.md`](formal/pea-startup-governance/prompt.md), [`context.md`](formal/pea-startup-governance/context.md), [`meta.yaml`](formal/pea-startup-governance/meta.yaml) | [`DOT-178`](https://pabloaugusto.atlassian.net/browse/DOT-178) |
+| Pack | Task ID | Objetivo | Entrypoints | Dependencias | Dono |
+| --- | --- | --- | --- | --- | --- |
+| [`startup-alignment`](formal/startup-alignment/prompt.md) | `prompt/startup-alignment` | Formalizar o `Pre-Execution Alignment` e sua integracao com `startup/restart`, delegacao e governanca operacional do repo | [`prompt.md`](formal/startup-alignment/prompt.md), [`context.md`](formal/startup-alignment/context.md), [`meta.yaml`](formal/startup-alignment/meta.yaml) | nenhuma | [`DOT-178`](https://pabloaugusto.atlassian.net/browse/DOT-178) |
+| [`sync-outbox-foundation`](formal/sync-outbox-foundation/prompt.md) | `prompt/sync-outbox-foundation` | Formalizar a arquitetura-base de sync, outbox duravel e fonte perene remota para artefatos vivos de IA | [`prompt.md`](formal/sync-outbox-foundation/prompt.md), [`context.md`](formal/sync-outbox-foundation/context.md), [`meta.yaml`](formal/sync-outbox-foundation/meta.yaml) | checar `startup-alignment` antes da execucao segura da rodada | [`DOT-179`](https://pabloaugusto.atlassian.net/browse/DOT-179) |
+| [`documentation-layer-governance`](formal/documentation-layer-governance/prompt.md) | `prompt/documentation-layer-governance` | Formalizar a camada documental por agentes de IA, com ownership por superficie, governanca documental e dependencia explicita da fundacao de sync | [`prompt.md`](formal/documentation-layer-governance/prompt.md), [`context.md`](formal/documentation-layer-governance/context.md), [`meta.yaml`](formal/documentation-layer-governance/meta.yaml) | checar `startup-alignment`; executar ou validar `sync-outbox-foundation` antes | a definir |
 
 ## Legados
 
@@ -21,6 +22,9 @@
 
 - todo pack formal novo precisa entrar neste catalogo na mesma rodada
 - todo pack formal novo precisa expor `task_id: prompt/<slug>` em `meta.yaml`
+- nomes de packs formais devem permanecer curtos, legiveis e semanticamente claros
+- todo pack formal novo precisa declarar dependencias e preflight packs de forma
+  explicita e visivel no catalogo
 - quando a rodada tocar [`.agents/prompts/`](./), branch, commit e `PR title`
   precisam respeitar o namespace operacional `prompt`
 - [`legacy/`](legacy/) nao substitui [`formal/`](formal/); quando um prompt
