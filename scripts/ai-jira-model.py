@@ -13,12 +13,21 @@ from scripts.ai_control_plane_lib import AiControlPlaneError
 from scripts.ai_jira_model_lib import live_delta_payload, model_summary_payload
 
 
+def emit_json(payload: object) -> None:
+    rendered = json.dumps(payload, ensure_ascii=False)
+    try:
+        print(rendered)
+    except UnicodeEncodeError:
+        sys.stdout.buffer.write(rendered.encode("utf-8", errors="replace"))
+        sys.stdout.buffer.write(b"\n")
+
+
 def run_show(args: argparse.Namespace) -> None:
-    print(json.dumps(model_summary_payload(args.repo_root), ensure_ascii=False))
+    emit_json(model_summary_payload(args.repo_root))
 
 
 def run_live_delta(args: argparse.Namespace) -> None:
-    print(json.dumps(live_delta_payload(args.repo_root), ensure_ascii=False))
+    emit_json(live_delta_payload(args.repo_root))
 
 
 def build_parser() -> argparse.ArgumentParser:

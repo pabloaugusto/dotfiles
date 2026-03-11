@@ -11,11 +11,13 @@ from scripts.ai_jira_apply_lib import (
     current_workflow_detail_by_name,
     current_workflows_by_name,
     default_workflow_transition_specs,
+    ensure_field_options,
     ensure_field_on_default_screen,
     field_screens,
     normalize_status_name,
     project_has_issues,
     wait_for_workflow_convergence,
+    workflow_status_metadata_gaps,
     workflow_create_payload,
     workflow_requires_update,
     workflow_update_payload,
@@ -147,6 +149,82 @@ class AiJiraApplyTests(unittest.TestCase):
             "/rest/api/3/field/customfield_10001/screens",
         )
 
+    def test_ensure_field_options_updates_only_project_applicable_context(self) -> None:
+        client = mock.Mock()
+        client.request_json.side_effect = [
+            {
+                "values": [
+                    {
+                        "id": "20001",
+                        "name": "Outro projeto",
+                        "isGlobalContext": False,
+                        "projectIds": ["20000"],
+                    },
+                    {
+                        "id": "10333",
+                        "name": "DOT Roles",
+                        "isGlobalContext": False,
+                        "projectIds": ["10005"],
+                    },
+                ]
+            },
+            {
+                "values": [
+                    {
+                        "id": "20001",
+                        "name": "Outro projeto",
+                        "isGlobalContext": False,
+                        "projectIds": ["20000"],
+                    },
+                    {
+                        "id": "10333",
+                        "name": "DOT Roles",
+                        "isGlobalContext": False,
+                        "projectIds": ["10005"],
+                    },
+                ]
+            },
+            {
+                "values": [{"value": "ai-product-owner"}],
+                "isLast": True,
+                "maxResults": 100,
+            },
+            {"status": "CREATED"},
+        ]
+
+        result = ensure_field_options(
+            cast(Any, client),
+            "customfield_10223",
+            ["ai-product-owner", "ai-scrum-master"],
+            project_id="10005",
+        )
+
+        self.assertEqual(
+            result,
+            {
+                "context_id": "10333",
+                "created_options": ["ai-scrum-master"],
+                "created_context": False,
+                "updated_contexts": [
+                    {
+                        "context_id": "10333",
+                        "context_name": "DOT Roles",
+                        "is_global_context": False,
+                        "created_options": ["ai-scrum-master"],
+                    }
+                ],
+            },
+        )
+        self.assertEqual(
+            [call.args[1] for call in client.request_json.call_args_list],
+            [
+                "/rest/api/3/field/customfield_10223/context",
+                "/rest/api/3/field/customfield_10223/context",
+                "/rest/api/3/field/customfield_10223/context/10333/option",
+                "/rest/api/3/field/customfield_10223/context/10333/option",
+            ],
+        )
+
     def test_workflow_create_payload_reuses_existing_status_ids(self) -> None:
         model = {
             "workflow": {
@@ -178,10 +256,63 @@ class AiJiraApplyTests(unittest.TestCase):
         self.assertEqual(statuses[0]["id"], "10000")
         doing = next(entry for entry in statuses if entry["statusReference"] == "3")
         self.assertEqual(doing["id"], "3")
-        self.assertEqual(doing["name"], "DOING")
+        self.assertEqual(doing["name"], "Doing")
         self.assertEqual(doing["statusReference"], "3")
         self.assertEqual(statuses[-1]["id"], "10002")
         self.assertEqual(statuses[-1]["statusReference"], "10002")
+
+    def test_workflow_status_metadata_gaps_detects_alias_name_drift(self) -> None:
+        model = {
+            "workflow": {
+                "name": "DOT - Autonomous Delivery Workflow",
+                "statuses": [
+                    {"name": "Doing", "category": "In Progress"},
+                    {"name": "Paused", "category": "In Progress"},
+                    {"name": "Done", "category": "Done"},
+                ],
+            }
+        }
+
+        gaps = workflow_status_metadata_gaps(
+            model,
+            current_statuses={
+                normalize_status_name("Doing"): {
+                    "id": "3",
+                    "name": "DOING",
+                    "statusCategory": "In Progress",
+                },
+                normalize_status_name("Paused"): {
+                    "id": "10011",
+                    "name": "PAUSED",
+                    "statusCategory": "In Progress",
+                },
+                normalize_status_name("Done"): {
+                    "id": "10002",
+                    "name": "Done",
+                    "statusCategory": "Done",
+                },
+            },
+        )
+
+        self.assertEqual(
+            gaps,
+            [
+                {
+                    "desired_name": "Doing",
+                    "current_name": "DOING",
+                    "desired_category": "In Progress",
+                    "current_category": "In Progress",
+                    "status_id": "3",
+                },
+                {
+                    "desired_name": "Paused",
+                    "current_name": "PAUSED",
+                    "desired_category": "In Progress",
+                    "current_category": "In Progress",
+                    "status_id": "10011",
+                },
+            ],
+        )
 
     def test_workflow_create_payload_uses_configured_transitions(self) -> None:
         model = {
@@ -599,15 +730,35 @@ class AiJiraApplyTests(unittest.TestCase):
             mock.patch(
                 "scripts.ai_jira_apply_lib.current_status_catalog",
                 return_value={
-                    "backlog": {"id": "10000", "name": "Backlog"},
-                    "refinement": {"id": "10065", "name": "Refinement"},
-                    "ready": {"id": "10066", "name": "Ready"},
-                    "doing": {"id": "3", "name": "DOING"},
-                    "paused": {"id": "10011", "name": "PAUSED"},
-                    "testing": {"id": "10005", "name": "TESTING"},
-                    "review": {"id": "10067", "name": "Review"},
-                    "changes requested": {"id": "10068", "name": "Changes Requested"},
-                    "done": {"id": "10002", "name": "Done"},
+                    "backlog": {"id": "10000", "name": "Backlog", "statusCategory": "To Do"},
+                    "refinement": {
+                        "id": "10065",
+                        "name": "Refinement",
+                        "statusCategory": "To Do",
+                    },
+                    "ready": {"id": "10066", "name": "Ready", "statusCategory": "To Do"},
+                    "doing": {"id": "3", "name": "Doing", "statusCategory": "In Progress"},
+                    "paused": {
+                        "id": "10011",
+                        "name": "Paused",
+                        "statusCategory": "In Progress",
+                    },
+                    "testing": {
+                        "id": "10005",
+                        "name": "Testing",
+                        "statusCategory": "In Progress",
+                    },
+                    "review": {
+                        "id": "10067",
+                        "name": "Review",
+                        "statusCategory": "In Progress",
+                    },
+                    "changes requested": {
+                        "id": "10068",
+                        "name": "Changes Requested",
+                        "statusCategory": "In Progress",
+                    },
+                    "done": {"id": "10002", "name": "Done", "statusCategory": "Done"},
                 },
             ),
             mock.patch(
@@ -635,6 +786,10 @@ class AiJiraApplyTests(unittest.TestCase):
                 "scripts.ai_jira_apply_lib.current_fields_by_name",
                 return_value={"Current Agent Role": {"id": "customfield_10223"}},
             ),
+            mock.patch(
+                "scripts.ai_jira_apply_lib.resolve_named_fields",
+                return_value={"Current Agent Role": {"id": "customfield_10223"}},
+            ),
             mock.patch("scripts.ai_jira_apply_lib.current_dashboards_by_name", return_value={}),
             mock.patch(
                 "scripts.ai_jira_apply_lib.ensure_field_options",
@@ -650,6 +805,7 @@ class AiJiraApplyTests(unittest.TestCase):
             mock.ANY,
             "customfield_10223",
             ["ai-product-owner", "ai-reviewer", "ai-reviewer-python"],
+            project_id="10005",
         )
         self.assertEqual(
             result["custom_fields"]["options_updated"],

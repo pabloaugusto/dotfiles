@@ -1,6 +1,6 @@
 # Roadmap do Repositorio
 
-Atualizado em: 2026-03-11 06:06 UTC
+Atualizado em: 2026-03-11 07:25 UTC
 Ciclo ativo: 2026-Q1
 
 Planejamento incremental para qualidade, testes, bootstrap e governanca do repo.
@@ -28,7 +28,7 @@ Edite apenas a tabela entre os marcadores abaixo.
 Atualizada por `task ai:roadmap:refresh`.
 
 <!-- roadmap:priority:start -->
-Atualizado em: 2026-03-11 06:06 UTC
+Atualizado em: 2026-03-11 07:25 UTC
 
 ### Ranking RICE
 
@@ -76,6 +76,7 @@ Sem sugestoes pendentes neste ciclo; itens aceitos ja estao rastreaveis.
 ### Next
 
 <!-- roadmap:next:start -->
+- [fix] Corrigir pendencias ortograficas remanescentes do worklog `WIP-DOT-109` em scripts/ai_jira_apply_lib.py, scripts/ai_jira_model_lib.py, tests/python/ai_jira_apply_test.py, tests/... | notas=Pendencia automatica criada por Pascoalete apos review consultivo reprovado sem correcao automatica.
 - [fix] Corrigir pendencias ortograficas remanescentes do worklog `WIP-DOT-134` em LICOES-APRENDIDAS.md, docs/AI-DONE-ISSUES-AUDIT.md, docs/README.md | notas=Pendencia automatica criada por Pascoalete apos review consultivo reprovado sem correcao automatica.
 - [fix] Corrigir pendencias ortograficas remanescentes do worklog `WIP-DOT-135` em .agents/cerimonias/logs/retrospectiva/2026-03-10-1315-feat-DOT-127-concluir-primeiro-desbloqueio.md, .... | notas=Pendencia automatica criada por Pascoalete apos review consultivo reprovado sem correcao automatica.
 - [fix] Corrigir pendencias ortograficas remanescentes do worklog `WIP-DOT-135` em .agents/cerimonias/logs/retrospectiva/2026-03-10-2357-feat-DOT-130-git-governance-hygiene.md, .agents/... | notas=Pendencia automatica criada por Pascoalete apos review consultivo reprovado sem correcao automatica.

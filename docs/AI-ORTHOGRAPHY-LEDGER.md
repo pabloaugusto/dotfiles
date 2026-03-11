@@ -20,6 +20,12 @@ Registro consultivo do agente Pascoalete para ortografia e higiene vocabular.
 <!-- ai-orthography:records:start -->
 | Data/Hora UTC | Worklog ID | Revisor | Status | Arquivo | Achados | Evidencia |
 | --- | --- | --- | --- | --- | --- | --- |
+| 2026-03-11 07:25 UTC | WIP-DOT-109 | pascoalete | reprovado | tests/python/ai_jira_apply_test.py | canonico, canonico, canonico | task spell:check |
+| 2026-03-11 07:25 UTC | WIP-DOT-109 | pascoalete | reprovado | tests/python/ai_jira_model_test.py | canonicos, subtarefa | task spell:check |
+| 2026-03-11 07:25 UTC | WIP-DOT-109 | pascoalete | reprovado | scripts/ai_jira_apply_lib.py | customfieldtypes, customfieldtypes, multiselectsearcher, customfieldtypes, customfieldtypes, multiselectsearcher, customfieldtypes, exacttextsearcher (+15) | task spell:check |
+| 2026-03-11 07:25 UTC | WIP-DOT-109 | pascoalete | reprovado | scripts/ai_jira_model_lib.py | canonicos | task spell:check |
+| 2026-03-11 07:25 UTC | WIP-DOT-109 | pascoalete | aprovado | scripts/ai-jira-apply.py | sem achados | task spell:check |
+| 2026-03-11 07:25 UTC | WIP-DOT-109 | pascoalete | aprovado | scripts/ai-jira-model.py | sem achados | task spell:check |
 | 2026-03-11 06:06 UTC | WIP-DOT-134 | pascoalete | reprovado | LICOES-APRENDIDAS.md | Licoes, usuario, LICOES, licao, Criterio, licoes, eficiencia, resiliencia (+184) | task spell:check |
 | 2026-03-11 06:06 UTC | WIP-DOT-134 | pascoalete | reprovado | docs/README.md | remediacoes, excecoes | task spell:check |
 | 2026-03-11 06:06 UTC | WIP-DOT-134 | pascoalete | reprovado | docs/AI-DONE-ISSUES-AUDIT.md | criterios, absorcao, aplicavel, rastreavel, saida, leitu, obrigatorio, revisao (+132) | task spell:check |
