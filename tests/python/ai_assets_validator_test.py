@@ -50,6 +50,7 @@ class ValidateAiAssetsTests(unittest.TestCase):
         self.assertIn("docs/AI-ORTHOGRAPHY-LEDGER.md", module.REQUIRED_FILES)
         self.assertIn("docs/AI-SCRUM-MASTER-LEDGER.md", module.REQUIRED_FILES)
         self.assertIn("docs/AI-SOURCE-AUDIT.md", module.REQUIRED_FILES)
+        self.assertIn("docs/ai-sync-foundation.md", module.REQUIRED_FILES)
         self.assertIn("docs/AI-STARTUP-AND-RESTART.md", module.REQUIRED_FILES)
         self.assertIn("docs/AI-STARTUP-GOVERNANCE-MANIFEST.md", module.REQUIRED_FILES)
         self.assertIn("docs/TASKS.md", module.REQUIRED_FILES)
@@ -60,10 +61,12 @@ class ValidateAiAssetsTests(unittest.TestCase):
         self.assertIn("config/ai/agents.yaml", module.REQUIRED_FILES)
         self.assertIn("config/ai/agent-operations.yaml", module.REQUIRED_FILES)
         self.assertIn("config/ai/contracts.yaml", module.REQUIRED_FILES)
+        self.assertIn("config/ai/sync-targets.yaml", module.REQUIRED_FILES)
         self.assertIn("df/secrets/secrets-ref.yaml", module.REQUIRED_FILES)
         self.assertIn("scripts/ai-prompt-governance.py", module.REQUIRED_FILES)
         self.assertIn("scripts/ai-route.py", module.REQUIRED_FILES)
         self.assertIn("scripts/ai-control-plane.py", module.REQUIRED_FILES)
+        self.assertIn("scripts/ai_sync_foundation_lib.py", module.REQUIRED_FILES)
         self.assertIn("scripts/ai-fallback.py", module.REQUIRED_FILES)
         self.assertIn("scripts/ai-session-startup.py", module.REQUIRED_FILES)
         self.assertIn("scripts/ai_control_plane_lib.py", module.REQUIRED_FILES)
@@ -410,6 +413,23 @@ class ValidateAiAssetsTests(unittest.TestCase):
             module.PROMPT_PACK_REQUIRED_SNIPPETS[
                 ".agents/prompts/formal/documentation-layer-governance/meta.yaml"
             ],
+        )
+        self.assertIn("docs/ai-sync-foundation.md", module.SYNC_FOUNDATION_REQUIRED_SNIPPETS)
+        self.assertIn(
+            "workspace_id",
+            module.SYNC_FOUNDATION_REQUIRED_SNIPPETS["docs/ai-sync-foundation.md"],
+        )
+        self.assertIn(
+            "runtime_environment_id",
+            module.SYNC_FOUNDATION_REQUIRED_SNIPPETS["docs/ai-sync-foundation.md"],
+        )
+        self.assertIn(
+            "### `ai:control-plane:sync:check`",
+            module.SYNC_FOUNDATION_REQUIRED_SNIPPETS["docs/TASKS.md"],
+        )
+        self.assertIn(
+            "sync_foundation:",
+            module.SYNC_FOUNDATION_REQUIRED_SNIPPETS["config/ai/contracts.yaml"],
         )
         self.assertIn(
             "DEPENDENCIAS DE PACKS E ORDEM SEGURA DE EXECUCAO",

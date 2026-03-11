@@ -176,6 +176,26 @@ documentation:
       - no-doc-page-without-related-issue-when-work-driven
       - comments-must-capture-doc-links-when-created-or-updated
 
+sync_foundation:
+  manifest: config/ai/sync-targets.yaml
+  state_root_default: ~/.ai-control-plane
+  workspace_root_pattern: workspaces/<workspace-id>
+  architecture_model: repo-declarative-to-durable-local-to-remote
+  primary_remote_runtime_ledger: confluence
+  mandatory_rules:
+    - durable-runtime-state-must-live-outside-repo
+    - cache-must-not-be-used-as-durable-state
+    - sync-domains-must-consume-the-foundation-manifest
+    - no-domain-may-redefine-workspace-id-or-runtime-environment-id-semantics
+    - no-domain-may-create-a-parallel-outbox-contract
+    - remote-publication-must-require-explicit-ack-before-local-compaction
+    - retry-dead-letter-and-retention-must-follow-the-foundation-contract
+    - sync-targets-manifest-must-classify-artifacts-before-remote-publication
+  artifact_classes:
+    - repo-canonical
+    - runtime-ledger-candidate
+    - remote-ineligible
+
 workflow:
   always_enabled_columns:
     - Backlog

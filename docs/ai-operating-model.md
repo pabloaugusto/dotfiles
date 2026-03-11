@@ -346,6 +346,29 @@ Para evitar ambiguidades e drift:
 - adaptadores especificos de assistente devem ser gerados a partir de [`.agents/`](.agents/), nunca mantidos manualmente em paralelo
 - runtime local de IA continua fora do Git
 
+### 4.6. Sync foundation separa repo, outbox local duravel e fonte perene
+
+Quando um artefato vivo precisar historico remoto perene, o repo nao deve
+inventar um sincronismo ad hoc. A arquitetura-base obrigatoria passa a ser:
+
+- repo declarativo versionado
+- outbox local duravel fora do Git
+- fonte perene remota elegivel
+
+O contrato versionado da fundacao fica em
+[`config/ai/sync-targets.yaml`](../config/ai/sync-targets.yaml) e o state local
+duravel vive sob `~/.ai-control-plane/workspaces/<workspace_id>/`.
+
+Regras minimas:
+
+- `.cache` continua efemero e nao pode virar fonte de verdade duravel
+- nenhum prompt ou dominio deve criar outbox paralelo fora da fundacao oficial
+- `workspace_id` e `runtime_environment_id` sao identidades diferentes
+- sincronismo cross-surface precisa respeitar `ack`, retry, `dead-letter` e a
+  classificacao de artefatos definida no manifest
+- dominios especializados, como documentacao, consomem essa fundacao e nao a
+  reimplementam
+
 ### Camada 4. Validacao
 
 [`scripts/validate-ai-assets.ps1`](scripts/validate-ai-assets.ps1) valida:
@@ -384,6 +407,9 @@ Para evitar ambiguidades e drift:
 - `task ai:review:record`
 - `task ai:review:check`
 - `task ai:eval:smoke`
+- `task ai:control-plane:sync:check`
+- `task ai:control-plane:sync:status`
+- `task ai:control-plane:sync:drain`
 - `task ai:lessons:check`
 - `task git:governance:check`
 - `task ai:rules:check`

@@ -424,14 +424,14 @@ tasks:
     platforms: [windows]
     dir: '{{.TASKFILE_DIR}}'
     cmds:
-      - uv run --locked ty check scripts/release_tool.py scripts/validate_docs.py scripts/run_actionlint.py scripts/run_gitleaks.py scripts/run-cspell.py scripts/git-signing-mode.py scripts/git_signing_lib.py scripts/git-governance-check.py scripts/ai-control-plane.py scripts/ai_control_plane_lib.py scripts/ai-session-startup.py scripts/ai_session_startup_lib.py scripts/ai-fallback.py scripts/ai_fallback_governance_lib.py scripts/validate-ai-assets.py scripts/ai-prompt-governance.py scripts/atlassian_platform_lib.py scripts/ai-atlassian-openapi.py scripts/ai_atlassian_openapi_lib.py scripts/ai-jira-model.py scripts/ai_jira_model_lib.py scripts/ai-jira-apply.py scripts/ai_jira_apply_lib.py scripts/ai-atlassian-backfill.py scripts/ai_atlassian_backfill_lib.py scripts/ai-atlassian-migration-bundle.py scripts/ai_atlassian_migration_bundle_lib.py scripts/ai-atlassian-seed.py scripts/ai_atlassian_seed_lib.py scripts/ai-atlassian-docs-sync.py scripts/ai-agent-execution.py scripts/ai_agent_execution_lib.py scripts/secrets-rotation.py scripts/secrets_rotation_lib.py tests/python/release_tool_test.py tests/python/validate_docs_test.py tests/python/git_signing_mode_test.py tests/python/git_governance_check_test.py tests/python/ai_control_plane_test.py tests/python/ai_session_startup_test.py tests/python/ai_fallback_governance_test.py tests/python/ai_assets_validator_test.py tests/python/ai_prompt_governance_test.py tests/python/atlassian_platform_test.py tests/python/ai_atlassian_openapi_test.py tests/python/ai_jira_model_test.py tests/python/ai_jira_apply_test.py tests/python/ai_atlassian_backfill_test.py tests/python/ai_atlassian_migration_bundle_test.py tests/python/ai_atlassian_seed_test.py tests/python/ai_agent_execution_test.py tests/python/secrets_rotation_test.py
+      - uv run --locked ty check scripts/release_tool.py scripts/validate_docs.py scripts/run_actionlint.py scripts/run_gitleaks.py scripts/run-cspell.py scripts/git-signing-mode.py scripts/git_signing_lib.py scripts/git-governance-check.py scripts/ai-control-plane.py scripts/ai_control_plane_lib.py scripts/ai_sync_foundation_lib.py scripts/ai-session-startup.py scripts/ai_session_startup_lib.py scripts/ai-fallback.py scripts/ai_fallback_governance_lib.py scripts/validate-ai-assets.py scripts/ai-prompt-governance.py scripts/atlassian_platform_lib.py scripts/ai-atlassian-openapi.py scripts/ai_atlassian_openapi_lib.py scripts/ai-jira-model.py scripts/ai_jira_model_lib.py scripts/ai-jira-apply.py scripts/ai_jira_apply_lib.py scripts/ai-atlassian-backfill.py scripts/ai_atlassian_backfill_lib.py scripts/ai-atlassian-migration-bundle.py scripts/ai_atlassian_migration_bundle_lib.py scripts/ai-atlassian-seed.py scripts/ai_atlassian_seed_lib.py scripts/ai-atlassian-docs-sync.py scripts/ai-agent-execution.py scripts/ai_agent_execution_lib.py scripts/secrets-rotation.py scripts/secrets_rotation_lib.py tests/python/release_tool_test.py tests/python/validate_docs_test.py tests/python/git_signing_mode_test.py tests/python/git_governance_check_test.py tests/python/ai_control_plane_test.py tests/python/ai_sync_foundation_test.py tests/python/ai_session_startup_test.py tests/python/ai_fallback_governance_test.py tests/python/ai_assets_validator_test.py tests/python/ai_prompt_governance_test.py tests/python/atlassian_platform_test.py tests/python/ai_atlassian_openapi_test.py tests/python/ai_jira_model_test.py tests/python/ai_jira_apply_test.py tests/python/ai_atlassian_backfill_test.py tests/python/ai_atlassian_migration_bundle_test.py tests/python/ai_atlassian_seed_test.py tests/python/ai_agent_execution_test.py tests/python/secrets_rotation_test.py
 
   type:check:linux:
     desc: Linux/WSL - executa ty em scripts e testes Python
     platforms: [linux]
     dir: '{{.TASKFILE_DIR}}'
     cmds:
-      - uv run --locked ty check scripts/release_tool.py scripts/validate_docs.py scripts/run_actionlint.py scripts/run_gitleaks.py scripts/run-cspell.py scripts/git-signing-mode.py scripts/git_signing_lib.py scripts/git-governance-check.py scripts/ai-control-plane.py scripts/ai_control_plane_lib.py scripts/ai-session-startup.py scripts/ai_session_startup_lib.py scripts/ai-fallback.py scripts/ai_fallback_governance_lib.py scripts/validate-ai-assets.py scripts/ai-prompt-governance.py scripts/atlassian_platform_lib.py scripts/ai-atlassian-openapi.py scripts/ai_atlassian_openapi_lib.py scripts/ai-jira-model.py scripts/ai_jira_model_lib.py scripts/ai-jira-apply.py scripts/ai_jira_apply_lib.py scripts/ai-atlassian-backfill.py scripts/ai_atlassian_backfill_lib.py scripts/ai-atlassian-migration-bundle.py scripts/ai_atlassian_migration_bundle_lib.py scripts/ai-atlassian-seed.py scripts/ai_atlassian_seed_lib.py scripts/ai-atlassian-docs-sync.py scripts/ai-agent-execution.py scripts/ai_agent_execution_lib.py scripts/secrets-rotation.py scripts/secrets_rotation_lib.py tests/python/release_tool_test.py tests/python/validate_docs_test.py tests/python/git_signing_mode_test.py tests/python/git_governance_check_test.py tests/python/ai_control_plane_test.py tests/python/ai_session_startup_test.py tests/python/ai_fallback_governance_test.py tests/python/ai_assets_validator_test.py tests/python/ai_prompt_governance_test.py tests/python/atlassian_platform_test.py tests/python/ai_atlassian_openapi_test.py tests/python/ai_jira_model_test.py tests/python/ai_jira_apply_test.py tests/python/ai_atlassian_backfill_test.py tests/python/ai_atlassian_migration_bundle_test.py tests/python/ai_atlassian_seed_test.py tests/python/ai_agent_execution_test.py tests/python/secrets_rotation_test.py
+      - uv run --locked ty check scripts/release_tool.py scripts/validate_docs.py scripts/run_actionlint.py scripts/run_gitleaks.py scripts/run-cspell.py scripts/git-signing-mode.py scripts/git_signing_lib.py scripts/git-governance-check.py scripts/ai-control-plane.py scripts/ai_control_plane_lib.py scripts/ai_sync_foundation_lib.py scripts/ai-session-startup.py scripts/ai_session_startup_lib.py scripts/ai-fallback.py scripts/ai_fallback_governance_lib.py scripts/validate-ai-assets.py scripts/ai-prompt-governance.py scripts/atlassian_platform_lib.py scripts/ai-atlassian-openapi.py scripts/ai_atlassian_openapi_lib.py scripts/ai-jira-model.py scripts/ai_jira_model_lib.py scripts/ai-jira-apply.py scripts/ai_jira_apply_lib.py scripts/ai-atlassian-backfill.py scripts/ai_atlassian_backfill_lib.py scripts/ai-atlassian-migration-bundle.py scripts/ai_atlassian_migration_bundle_lib.py scripts/ai-atlassian-seed.py scripts/ai_atlassian_seed_lib.py scripts/ai-atlassian-docs-sync.py scripts/ai-agent-execution.py scripts/ai_agent_execution_lib.py scripts/secrets-rotation.py scripts/secrets_rotation_lib.py tests/python/release_tool_test.py tests/python/validate_docs_test.py tests/python/git_signing_mode_test.py tests/python/git_governance_check_test.py tests/python/ai_control_plane_test.py tests/python/ai_sync_foundation_test.py tests/python/ai_session_startup_test.py tests/python/ai_fallback_governance_test.py tests/python/ai_assets_validator_test.py tests/python/ai_prompt_governance_test.py tests/python/atlassian_platform_test.py tests/python/ai_atlassian_openapi_test.py tests/python/ai_jira_model_test.py tests/python/ai_jira_apply_test.py tests/python/ai_atlassian_backfill_test.py tests/python/ai_atlassian_migration_bundle_test.py tests/python/ai_atlassian_seed_test.py tests/python/ai_agent_execution_test.py tests/python/secrets_rotation_test.py
 
   test:python:
     desc: Executa a suite Python via pytest no ambiente atual
@@ -778,6 +778,67 @@ tasks:
     dir: '{{.TASKFILE_DIR}}'
     cmds:
       - "bash -lc 'bash ./scripts/run-python.sh ./scripts/ai-control-plane.py show'"
+
+  ai:control-plane:sync:check:
+    desc: Valida o manifest e a estrutura da fundacao de sync sem drenar o outbox
+    cmds:
+      - task: ai:control-plane:sync:check:{{if or (eq .OS "Windows_NT") (eq .OS "windows")}}windows{{else}}linux{{end}}
+
+  ai:control-plane:sync:check:windows:
+    desc: Windows - valida o manifest e a estrutura da fundacao de sync
+    platforms: [windows]
+    dir: '{{.TASKFILE_DIR}}'
+    cmds:
+      - "pwsh -NoProfile -File ./scripts/invoke-python.ps1 -ScriptPath ./scripts/ai-control-plane.py -Arguments @('sync-check')"
+
+  ai:control-plane:sync:check:linux:
+    desc: Linux/WSL - valida o manifest e a estrutura da fundacao de sync
+    platforms: [linux]
+    dir: '{{.TASKFILE_DIR}}'
+    cmds:
+      - "bash -lc 'bash ./scripts/run-python.sh ./scripts/ai-control-plane.py sync-check'"
+
+  ai:control-plane:sync:status:
+    desc: Exibe o estado do outbox local duravel e dos artefatos elegiveis ao sync
+    cmds:
+      - task: ai:control-plane:sync:status:{{if or (eq .OS "Windows_NT") (eq .OS "windows")}}windows{{else}}linux{{end}}
+
+  ai:control-plane:sync:status:windows:
+    desc: Windows - exibe o estado da fundacao de sync
+    platforms: [windows]
+    dir: '{{.TASKFILE_DIR}}'
+    cmds:
+      - "pwsh -NoProfile -File ./scripts/invoke-python.ps1 -ScriptPath ./scripts/ai-control-plane.py -Arguments @('sync-status')"
+
+  ai:control-plane:sync:status:linux:
+    desc: Linux/WSL - exibe o estado da fundacao de sync
+    platforms: [linux]
+    dir: '{{.TASKFILE_DIR}}'
+    cmds:
+      - "bash -lc 'bash ./scripts/run-python.sh ./scripts/ai-control-plane.py sync-status'"
+
+  ai:control-plane:sync:drain:
+    desc: Planeja ou executa a drenagem do outbox local duravel para os destinos remotos
+    cmds:
+      - task: ai:control-plane:sync:drain:{{if or (eq .OS "Windows_NT") (eq .OS "windows")}}windows{{else}}linux{{end}}
+        vars:
+          ARTIFACT_KEY: "{{default \"\" .ARTIFACT_KEY}}"
+          APPLY: "{{default \"0\" .APPLY}}"
+          MAX_EVENTS: "{{default \"0\" .MAX_EVENTS}}"
+
+  ai:control-plane:sync:drain:windows:
+    desc: Windows - planeja ou executa a drenagem do outbox local duravel
+    platforms: [windows]
+    dir: '{{.TASKFILE_DIR}}'
+    cmds:
+      - "pwsh -NoProfile -File ./scripts/invoke-python.ps1 -ScriptPath ./scripts/ai-control-plane.py -Arguments @('sync-drain'{{if .ARTIFACT_KEY}},'--artifact-key','{{.ARTIFACT_KEY}}'{{end}}{{if eq .APPLY \"1\"}},'--apply'{{end}}{{if ne .MAX_EVENTS \"0\"}},'--max-events','{{.MAX_EVENTS}}'{{end}})"
+
+  ai:control-plane:sync:drain:linux:
+    desc: Linux/WSL - planeja ou executa a drenagem do outbox local duravel
+    platforms: [linux]
+    dir: '{{.TASKFILE_DIR}}'
+    cmds:
+      - "bash -lc 'bash ./scripts/run-python.sh ./scripts/ai-control-plane.py sync-drain{{if .ARTIFACT_KEY}} --artifact-key \"{{.ARTIFACT_KEY}}\"{{end}}{{if eq .APPLY \"1\"}} --apply{{end}}{{if ne .MAX_EVENTS \"0\"}} --max-events {{.MAX_EVENTS}}{{end}}'"
 
   ai:startup:session:
     desc: Gera o relatorio operacional de startup/restart da sessao de IA

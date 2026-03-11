@@ -20,6 +20,19 @@ Registro consultivo do agente Pascoalete para ortografia e higiene vocabular.
 <!-- ai-orthography:records:start -->
 | Data/Hora UTC | Worklog ID | Revisor | Status | Arquivo | Achados | Evidencia |
 | --- | --- | --- | --- | --- | --- | --- |
+| 2026-03-11 23:03 UTC | WIP-20260311-220259 | pascoalete | reprovado | tests/python/ai_sync_foundation_test.py | efemero, acks, acked | task spell:check |
+| 2026-03-11 23:03 UTC | WIP-20260311-220259 | pascoalete | reprovado | tests/python/ai_control_plane_test.py | linkify, pabloaugusto, pabloaugusto, linkify, linkify, linkify, linkify | task spell:check |
+| 2026-03-11 23:03 UTC | WIP-20260311-220259 | pascoalete | reprovado | tests/python/ai_assets_validator_test.py | possivel, LICOES, Validacao, comunicacao, LICOES, comecar, Orquestracao, evals (+7) | task spell:check |
+| 2026-03-11 23:03 UTC | WIP-20260311-220259 | pascoalete | reprovado | scripts/validate-ai-assets.py | evals, LICOES, evals, evals, evals, evals, autolog, autolog (+73) | task spell:check |
+| 2026-03-11 23:03 UTC | WIP-20260311-220259 | pascoalete | reprovado | scripts/ai_sync_foundation_lib.py | estavel, obrigatorio, containerenv, acked, obrigatorio, duravel, thead, thead (+8) | task spell:check |
+| 2026-03-11 23:03 UTC | WIP-20260311-220259 | pascoalete | aprovado | scripts/ai-control-plane.py | sem achados | task spell:check |
+| 2026-03-11 23:03 UTC | WIP-20260311-220259 | pascoalete | reprovado | docs/ai-sync-foundation.md | duravel, elegivel, fundacao, dominio, duravel, publicacao, recuperavel, fundacao (+31) | task spell:check |
+| 2026-03-11 23:03 UTC | WIP-20260311-220259 | pascoalete | reprovado | docs/ai-operating-model.md | reutilizavel, testavel, worktree, Principios, Instrucoes, instrucoes, estaveis, sessao (+194) | task spell:check |
+| 2026-03-11 23:03 UTC | WIP-20260311-220259 | pascoalete | reprovado | docs/TASKS.md | repositorio, diaria, diaria, sincronizacao, worktree, alteracoes, canonico, Observacao (+96) | task spell:check |
+| 2026-03-11 23:03 UTC | WIP-20260311-220259 | pascoalete | reprovado | docs/README.md | fundacao, duravel, elegiveis, duravel, canonico, canonico, remediacoes, excecoes | task spell:check |
+| 2026-03-11 23:03 UTC | WIP-20260311-220259 | pascoalete | reprovado | config/ai/sync-targets.yaml | Pascoalete, integracao, efemero, proibe, duravel, relatorio, sessao, transitario (+9) | task spell:check |
+| 2026-03-11 23:03 UTC | WIP-20260311-220259 | pascoalete | reprovado | config/ai/contracts.yaml | worktrees, worktree, worktree, worktree, condicao, worktrees, worktrees, criterios (+3) | task spell:check |
+| 2026-03-11 23:03 UTC | WIP-20260311-220259 | pascoalete | reprovado | Taskfile.yml | PYTHONDONTWRITEBYTECODE, PYTHONPYCACHEPREFIX, venv, venv, disponiveis, worktree, alteracoes, alteracoes (+124) | task spell:check |
 | 2026-03-11 21:58 UTC | WIP-20260311-212032 | pascoalete | reprovado | tests/python/conventional_emoji_test.py | obrigatorio, Maximo, obrigatorio | task spell:check |
 | 2026-03-11 21:58 UTC | WIP-20260311-212032 | pascoalete | reprovado | tests/python/ai_session_startup_test.py | worktrees, pablo, absorcao, worktree, pablo, primario, sessao, pabloaugusto (+18) | task spell:check |
 | 2026-03-11 21:58 UTC | WIP-20260311-212032 | pascoalete | reprovado | tests/python/ai_prompt_governance_test.py | possivel, agnostica, agnostica | task spell:check |

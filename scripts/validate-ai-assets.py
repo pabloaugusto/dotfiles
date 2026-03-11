@@ -47,6 +47,7 @@ REQUIRED_FILES = [
     "docs/AI-STARTUP-GOVERNANCE-MANIFEST.md",
     "docs/AI-SOURCE-AUDIT.md",
     "docs/ai-operating-model.md",
+    "docs/ai-sync-foundation.md",
     "docs/secrets-and-auth.md",
     "docs/AI-WIP-TRACKER.md",
     "ROADMAP.md",
@@ -58,6 +59,7 @@ REQUIRED_FILES = [
     "config/ai/agents.yaml",
     "config/ai/agent-operations.yaml",
     "config/ai/contracts.yaml",
+    "config/ai/sync-targets.yaml",
     "df/secrets/secrets-ref.yaml",
     ".agents/README.md",
     ".agents/prompts/README.md",
@@ -110,6 +112,7 @@ REQUIRED_FILES = [
     "scripts/ai-fallback.py",
     "scripts/ai-session-startup.py",
     "scripts/ai_control_plane_lib.py",
+    "scripts/ai_sync_foundation_lib.py",
     "scripts/ai_fallback_governance_lib.py",
     "scripts/ai_session_startup_lib.py",
     "scripts/atlassian_platform_lib.py",
@@ -433,6 +436,36 @@ PROMPT_PACK_REQUIRED_SNIPPETS = {
         "ai-documentation-sync",
         "documentation-layer-governance",
         "Curador Repo",
+    ],
+}
+
+SYNC_FOUNDATION_REQUIRED_SNIPPETS = {
+    "docs/ai-sync-foundation.md": [
+        "# AI Sync Foundation",
+        "repo declarativo -> outbox local duravel -> fonte perene remota",
+        "workspace_id",
+        "runtime_environment_id",
+        "~/.ai-control-plane/workspaces/<workspace_id>/",
+        "config/ai/sync-targets.yaml",
+        "ack",
+        "dead-letter",
+        "runtime ledger candidate",
+        "documentation-layer-governance",
+    ],
+    "docs/TASKS.md": [
+        "### `ai:control-plane:sync:check`",
+        "### `ai:control-plane:sync:status`",
+        "### `ai:control-plane:sync:drain`",
+        "docs/ai-sync-foundation.md",
+    ],
+    "docs/README.md": [
+        "config/ai/sync-targets.yaml",
+        "docs/ai-sync-foundation.md",
+    ],
+    "config/ai/contracts.yaml": [
+        "sync_foundation:",
+        "manifest: config/ai/sync-targets.yaml",
+        "no-domain-may-create-a-parallel-outbox-contract",
     ],
 }
 
@@ -925,9 +958,7 @@ def validate_prompt_packs(repo_root: Path, failures: list[str]) -> None:
                 failures.append(f"task_id em {meta_path.as_posix()} deve ser {expected_task_id}")
             dependencies_payload = meta_payload.get("dependencies")
             if not isinstance(dependencies_payload, dict):
-                failures.append(
-                    f"bloco dependencies obrigatorio ausente em {meta_path.as_posix()}"
-                )
+                failures.append(f"bloco dependencies obrigatorio ausente em {meta_path.as_posix()}")
             else:
                 for field_name in ("prerequisite_packs", "preflight_packs"):
                     field_value = dependencies_payload.get(field_name)
@@ -975,6 +1006,11 @@ def validate_prompt_packs(repo_root: Path, failures: list[str]) -> None:
                         )
 
     for relative, snippets in PROMPT_PACK_REQUIRED_SNIPPETS.items():
+        path = repo_root / relative
+        if path.is_file():
+            require_snippets(path.read_text(encoding="utf-8"), snippets, relative, failures)
+
+    for relative, snippets in SYNC_FOUNDATION_REQUIRED_SNIPPETS.items():
         path = repo_root / relative
         if path.is_file():
             require_snippets(path.read_text(encoding="utf-8"), snippets, relative, failures)
