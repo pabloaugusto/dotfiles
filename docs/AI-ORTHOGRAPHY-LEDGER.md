@@ -20,6 +20,7 @@ Registro consultivo do agente Pascoalete para ortografia e higiene vocabular.
 <!-- ai-orthography:records:start -->
 | Data/Hora UTC | Worklog ID | Revisor | Status | Arquivo | Achados | Evidencia |
 | --- | --- | --- | --- | --- | --- | --- |
+| 2026-03-11 12:03 UTC | WIP-DOT-37 | pascoalete | aprovado | docs/AI-PAUSED-ISSUES-AUDIT.md | sem achados | task spell:check |
 | 2026-03-11 09:15 UTC | WIP-DOT-106 | pascoalete | reprovado | tests/python/ai_fallback_governance_test.py | indisponivel, temporaria, Sincronizacao, concluida | task spell:check |
 | 2026-03-11 09:15 UTC | WIP-DOT-106 | pascoalete | reprovado | tests/python/ai_assets_validator_test.py | possivel, LICOES, Validacao, LICOES, comecar, Orquestracao, evals, Integracoes (+2) | task spell:check |
 | 2026-03-11 09:15 UTC | WIP-DOT-106 | pascoalete | reprovado | scripts/ai_fallback_governance_lib.py | Responsavel, atualizacao, Cabecalho, canonico, primario, sincronizacao, degradacao, sessao (+5) | task spell:check |

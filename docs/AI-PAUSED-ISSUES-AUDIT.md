@@ -87,3 +87,38 @@ operacionais e o que ja esta absorvido na `main`.
   - decidir se [DOT-37](https://pabloaugusto.atlassian.net/browse/DOT-37)
     renasce como retomada minima em branch nova de `main` ou se o residual
     precisa de issue filha mais especifica.
+
+## Adendo - fechamento formal de DOT-37 em 2026-03-11
+
+- Este adendo preserva a matriz acima como fotografia fiel da rodada
+  [DOT-132](https://pabloaugusto.atlassian.net/browse/DOT-132) e registra apenas
+  o desfecho posterior da retomada controlada de
+  [DOT-37](https://pabloaugusto.atlassian.net/browse/DOT-37).
+- O residual minimo foi recortado como fechamento formal do checkpoint
+  operacional, nao como nova frente de execucao. A evidencia ja estava
+  espalhada entre a migracao retroativa
+  [DOT-1](https://pabloaugusto.atlassian.net/browse/DOT-1), a base publicada
+  em [DOT-114](https://pabloaugusto.atlassian.net/browse/DOT-114), os bloqueios
+  destravados em [DOT-12](https://pabloaugusto.atlassian.net/browse/DOT-12) e
+  [DOT-28](https://pabloaugusto.atlassian.net/browse/DOT-28), e os handoffs de
+  board/browser/workflow absorvidos por
+  [DOT-65](https://pabloaugusto.atlassian.net/browse/DOT-65),
+  [DOT-66](https://pabloaugusto.atlassian.net/browse/DOT-66),
+  [DOT-67](https://pabloaugusto.atlassian.net/browse/DOT-67) e
+  [DOT-77](https://pabloaugusto.atlassian.net/browse/DOT-77).
+- As evidencias versionadas que sustentam esse fechamento continuam em
+  [`docs/atlassian-ia/2026-03-07-diagnostico-auth-e-acesso-atlassian.md`](atlassian-ia/2026-03-07-diagnostico-auth-e-acesso-atlassian.md),
+  [`docs/atlassian-ia/2026-03-07-jira-configuration-export.md`](atlassian-ia/2026-03-07-jira-configuration-export.md),
+  [`docs/atlassian-ia/2026-03-07-parecer-e-plano-inicial.md`](atlassian-ia/2026-03-07-parecer-e-plano-inicial.md)
+  e nas aprovacoes registradas em
+  [`docs/AI-REVIEW-LEDGER.md`](AI-REVIEW-LEDGER.md) para o docs sync dedicado do
+  `Confluence`.
+- Com esse recorte, os requisitos de aceite de
+  [DOT-37](https://pabloaugusto.atlassian.net/browse/DOT-37) ficam satisfeitos:
+  o escopo passa a estar claro como checkpoint formal, a evidencia objetiva
+  existe e aponta para artefatos concretos, o status pode sair de **Paused**
+  sem inferencia cega e as referencias relevantes permanecem registradas no
+  `Jira`, no `Confluence` e no repo.
+- Veredicto final: [DOT-37](https://pabloaugusto.atlassian.net/browse/DOT-37)
+  fica `entregue_integralmente` como checkpoint formal da trilha Atlassian
+  adapters, sem residual tecnico proprio remanescente.
