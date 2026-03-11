@@ -194,6 +194,7 @@ AGENTS_REQUIRED_SNIPPETS = [
     "Antes de criar qualquer demanda que nao seja `Epic`, verificar se ja existe `Epic` aberto aderente ao macro tema",
     "concluir_primeiro passa a significar concluir ou puxar apenas o work item minimo que o destrava diretamente",
     "carregar o contrato de comunicacao no chat e",
+    "governanca Git canonica do",
     "nenhuma delegacao para subagente e valida sem issue dona",
     "**REJEITADO**",
     "Manter o item ativo em `Doing` durante toda a execucao relevante",
@@ -246,6 +247,7 @@ STARTUP_AND_RESTART_REQUIRED_SNIPPETS = [
     "task ai:atlassian:check",
     "Cadeia de fallback GitHub/PAT",
     "display_name",
+    "docs/git-conventions.md",
     "subagentes",
     "REJEITADO",
 ]
@@ -254,6 +256,7 @@ STARTUP_GOVERNANCE_REQUIRED_SNIPPETS = {
     "config/ai/contracts.yaml": [
         "load-chat-communication-contract-before-first-user-facing-message",
         "load-display-name-layer-before-chat-jira-or-confluence-visible-communication",
+        "load-git-governance-contracts-before-changing-worktree-state",
         "validate-gh-auth-and-graphql-before-github-pr-or-merge-operations",
         "remember-and-apply-the-documented-github-pat-fallback-chain",
         "snapshot-current-branch-worktree-and-open-pr-state-at-startup",
@@ -268,6 +271,8 @@ STARTUP_GOVERNANCE_REQUIRED_SNIPPETS = {
     "docs/TASKS.md": [
         "contrato de comunicacao com o",
         "`display_name`",
+        "governanca Git canonica",
+        "enforcement de commit atomico",
         "probe GraphQL",
         "fallback GitHub/PAT",
         "PRs` abertos para a branch atual",
@@ -276,6 +281,8 @@ STARTUP_GOVERNANCE_REQUIRED_SNIPPETS = {
     "docs/ai-operating-model.md": [
         "carregar o contrato de comunicacao com o usuario",
         "camada de `display_name`",
+        "governanca Git canonica da sessao",
+        "enforcement de commit atomico",
         "validar `gh auth status`",
         "probe GraphQL cedo",
         "cadeia documentada de fallback GitHub/PAT",

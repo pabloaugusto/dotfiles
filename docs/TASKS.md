@@ -204,6 +204,13 @@ Referencia operacional das tasks canonicas mais importantes do repositorio.
   usuario, a camada de `display_name`, o drift operacional entre branch/worklog
   e contexto local ativo, o ciclo de vida da branch atual e o pacote minimo de
   contexto para subagentes.
+- Observacao: o startup deve explicitar tambem que a governanca Git canonica
+  foi carregada de [`AGENTS.md`](../AGENTS.md),
+  [`docs/git-conventions.md`](git-conventions.md), [`Taskfile.yml`](../Taskfile.yml)
+  , [`.githooks/`](../.githooks/) e
+  [`.github/pull_request_template.md`](../.github/pull_request_template.md), mas
+  o enforcement de commit atomico, higiene de branch/worktree e fechamento de
+  worklog continua nos gates oficiais.
 
 ### `ai:1password:ratelimit`
 

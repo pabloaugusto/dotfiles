@@ -68,6 +68,20 @@ SUBAGENT_CONTEXT_RULES = [
     "tratar trabalho sem contexto minimo de subagente como rejeitavel",
 ]
 
+GIT_GOVERNANCE_STARTUP_SOURCES = [
+    "AGENTS.md",
+    "docs/git-conventions.md",
+    "Taskfile.yml",
+    ".githooks/",
+    ".github/pull_request_template.md",
+]
+
+GIT_GOVERNANCE_STARTUP_RULES = [
+    "commits devem ser atomicos, ligados a uma unica issue e preferencialmente auto-testaveis",
+    "cada branch deve carregar um unico contexto coerente e ser podada apos merge seguro",
+    "task ai:worklog:check e git-governance-check seguem como gates canonicos antes de empilhar escopo",
+]
+
 ATLASSIAN_RECOVERY_RULES = [
     "rodar task ai:atlassian:check antes de assumir bloqueio estrutural",
     "preferir op run para resolver refs Atlassian em lote na borda do processo",
@@ -230,6 +244,18 @@ def chat_communication_payload() -> dict[str, Any]:
     return {
         "status": "ok",
         "rules": list(CHAT_COMMUNICATION_RULES),
+    }
+
+
+def git_governance_payload() -> dict[str, Any]:
+    return {
+        "status": "ok",
+        "sources": list(GIT_GOVERNANCE_STARTUP_SOURCES),
+        "rules": list(GIT_GOVERNANCE_STARTUP_RULES),
+        "enforcement_note": (
+            "o startup relembra a governanca Git, mas o enforcement real continua nos hooks, "
+            "tasks e gates oficiais do repo"
+        ),
     }
 
 
@@ -669,6 +695,7 @@ def startup_session_payload(repo_root: Path, *, include_runtime_probes: bool = T
     prioritized_work_item = prioritized_work_item_payload(active_execution, active_worklog_items)
     startup_drift = startup_drift_payload(active_execution, active_worklog_items, git_inventory)
     chat_communication = chat_communication_payload()
+    git_governance = git_governance_payload()
     delegation_context = delegation_context_payload(prioritized_work_item, git_inventory)
     fallback_status = (
         fallback_status_payload(repo_root)
@@ -720,6 +747,7 @@ def startup_session_payload(repo_root: Path, *, include_runtime_probes: bool = T
         "active_execution": active_execution,
         "agent_identity": agent_identity,
         "chat_communication": chat_communication,
+        "git_governance": git_governance,
         "delegation_context": delegation_context,
         "startup_drift": startup_drift,
         "fallback_status": fallback_status,
@@ -772,6 +800,14 @@ def render_startup_session_markdown(payload: dict[str, Any]) -> str:
     )
     for rule in chat_communication.get("rules", []):
         lines.append(f"- regra de comunicacao: {rule}")
+
+    git_governance = payload["git_governance"]
+    lines.extend(["", "## Governanca Git carregada no startup", ""])
+    for source in git_governance.get("sources", []):
+        lines.append(f"- fonte carregada: `{source}`")
+    for rule in git_governance.get("rules", []):
+        lines.append(f"- contrato Git lembrado: {rule}")
+    lines.append(f"- enforcement: {git_governance.get('enforcement_note', '')}")
 
     git_inventory = payload["git_inventory"]
     lines.extend(["", "## Inventario Git e worktree", ""])

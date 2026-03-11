@@ -8,6 +8,7 @@ from unittest.mock import patch
 
 from scripts.ai_session_startup_lib import (
     agent_identity_payload,
+    git_governance_payload,
     load_active_worklog_items,
     load_pending_chat_contracts,
     render_startup_session_markdown,
@@ -242,6 +243,14 @@ class AiSessionStartupTests(unittest.TestCase):
         self.assertEqual(payload["active_display_name"], "Engenheiro Agentes IA")
         self.assertEqual(payload["fallback_display"], "technical-id")
 
+    def test_git_governance_payload_exposes_sources_without_claiming_enforcement(self) -> None:
+        payload = git_governance_payload()
+
+        self.assertEqual(payload["status"], "ok")
+        self.assertIn("docs/git-conventions.md", payload["sources"])
+        self.assertTrue(any("commits devem ser atomicos" in item for item in payload["rules"]))
+        self.assertIn("enforcement real", payload["enforcement_note"])
+
     def test_startup_drift_payload_detects_branch_mismatch(self) -> None:
         payload = startup_drift_payload(
             {
@@ -396,6 +405,12 @@ class AiSessionStartupTests(unittest.TestCase):
                 "status": "ok",
                 "rules": ["usar portugues", "preferir display_name oficial"],
             },
+            "git_governance": {
+                "status": "ok",
+                "sources": ["AGENTS.md", "docs/git-conventions.md"],
+                "rules": ["commits devem ser atomicos, ligados a uma unica issue"],
+                "enforcement_note": "o startup relembra a governanca Git, mas o enforcement real continua nos hooks, tasks e gates oficiais do repo",
+            },
             "delegation_context": {
                 "status": "ok",
                 "owner_issue": "DOT-177",
@@ -420,6 +435,9 @@ class AiSessionStartupTests(unittest.TestCase):
         markdown = render_startup_session_markdown(payload)
 
         self.assertIn("## Comunicacao no chat e identidade", markdown)
+        self.assertIn("## Governanca Git carregada no startup", markdown)
+        self.assertIn("docs/git-conventions.md", markdown)
+        self.assertIn("enforcement", markdown)
         self.assertIn("## Inventario Git e worktree", markdown)
         self.assertIn("## Drift operacional detectado", markdown)
         self.assertIn("## GitHub auth e fallback", markdown)

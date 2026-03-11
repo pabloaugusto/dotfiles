@@ -79,6 +79,10 @@ class ValidateAiAssetsTests(unittest.TestCase):
             module.AGENTS_REQUIRED_SNIPPETS,
         )
         self.assertIn(
+            "governanca Git canonica do",
+            module.AGENTS_REQUIRED_SNIPPETS,
+        )
+        self.assertIn(
             "nenhuma delegacao para subagente e valida sem issue dona",
             module.AGENTS_REQUIRED_SNIPPETS,
         )
@@ -112,6 +116,10 @@ class ValidateAiAssetsTests(unittest.TestCase):
         )
         self.assertIn(
             "task ai:fallback:resolve",
+            module.STARTUP_AND_RESTART_REQUIRED_SNIPPETS,
+        )
+        self.assertIn(
+            "docs/git-conventions.md",
             module.STARTUP_AND_RESTART_REQUIRED_SNIPPETS,
         )
         self.assertIn(

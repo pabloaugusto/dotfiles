@@ -31,6 +31,9 @@ Nessas retomadas, a regra correta passa a ser:
   operacional no chat
 - carregar a camada de `display_name` antes de exibir agente, papel ou owner em
   chat, `Jira` ou artefato visivel
+- carregar explicitamente a governanca Git canonica da sessao, lembrando que o
+  enforcement de commit atomico, higiene de branch/worktree e fechamento de
+  worklog continua nos hooks, tasks e gates oficiais do repo
 - recalcular branches e worktrees abertas antes de tentar drenar uma worktree
   suja ou redistribuir alteracoes entre trilhas Jira
 - capturar o ciclo de vida da branch atual, incluindo upstream, ahead/behind,

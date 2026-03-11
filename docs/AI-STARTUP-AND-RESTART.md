@@ -26,51 +26,57 @@ perder continuidade confiavel.
    comunicacao no chat e a identidade humana oficial dos agentes
    (`display_name`), lembrando idioma, tom, formato de links e demais regras
    vivas da sessao.
-4. Recalcular inventario de branches e worktrees abertas antes de tocar em
+4. Recarregar explicitamente a governanca Git canonica do repo, incluindo
+   [`AGENTS.md`](../AGENTS.md), [`docs/git-conventions.md`](git-conventions.md),
+   [`Taskfile.yml`](../Taskfile.yml), [`.githooks/`](../.githooks/) e o
+   template de `PR`, lembrando que o enforcement real de commit atomico,
+   higiene de branch/worktree e fechamento de worklog continua nos hooks, tasks
+   e gates oficiais, nao no startup.
+5. Recalcular inventario de branches e worktrees abertas antes de tocar em
    qualquer arvore dirty.
-5. Capturar tambem o ciclo de vida da branch atual: upstream, ahead/behind,
+6. Capturar tambem o ciclo de vida da branch atual: upstream, ahead/behind,
    absorcao em `origin/main`, `PR` aberto e candidatas objetivas a poda.
-6. Detectar e registrar drift entre branch atual, `active execution`, worklog
+7. Detectar e registrar drift entre branch atual, `active execution`, worklog
    local e dirty tree antes de decidir commit, `PR`, merge ou redistribuicao.
-7. Validar `gh auth status` antes de qualquer operacao que possa depender de
+8. Validar `gh auth status` antes de qualquer operacao que possa depender de
    `gh`, `GraphQL`, `PR`, merge, review ou sync com o GitHub.
-8. Se a rodada puder tocar `PR`, merge ou comentario de `PR` via `gh`, executar
+9. Se a rodada puder tocar `PR`, merge ou comentario de `PR` via `gh`, executar
    tambem um probe GraphQL cedo e, em caso de falha, reaplicar a Cadeia de
    fallback GitHub/PAT `GH_TOKEN -> GITHUB_TOKEN -> op://secrets/dotfiles/github/token ->
    op://secrets/github/api/token -> op://Personal/github/token-full-access`
    documentada em [`docs/secrets-and-auth.md`](secrets-and-auth.md).
-9. Rodar `task ai:worklog:check` e tratar o resultado como fallback local,
+10. Rodar `task ai:worklog:check` e tratar o resultado como fallback local,
    nunca como substituto do quadro vivo do `Jira`.
-10. Rodar `task ai:atlassian:check` ou conferir o resumo equivalente gerado por
+11. Rodar `task ai:atlassian:check` ou conferir o resumo equivalente gerado por
    `task ai:startup:session` antes de assumir que `Jira` e `Confluence` estao
    operacionais para a rodada.
-11. Se a rodada puder tocar o Atlassian, lembrar tambem `auth_mode`,
+12. Se a rodada puder tocar o Atlassian, lembrar tambem `auth_mode`,
     `cloud_id`, `project_key`, `space_key` e a trilha documentada de
     recuperacao em [`docs/secrets-and-auth.md`](secrets-and-auth.md) antes de
     concluir que houve bloqueio estrutural.
-12. Rodar `task ai:fallback:status` quando houver suspeita de degradacao do
+13. Rodar `task ai:fallback:status` quando houver suspeita de degradacao do
    `Jira` ou quando existirem rastros locais ainda nao drenados.
-13. Se o status vier como `degraded`, registrar a contingencia com
+14. Se o status vier como `degraded`, registrar a contingencia com
    `task ai:fallback:capture` antes de operar pelos trackers locais.
-14. Se o status vier como `recovery`, drenar ou reconciliar os registros ativos
+15. Se o status vier como `recovery`, drenar ou reconciliar os registros ativos
    com `task ai:fallback:resolve` antes de considerar o fallback vazio.
-15. Consultar o `Jira` como fonte primaria do backlog, do **WIP** e da ordem de
+16. Consultar o `Jira` como fonte primaria do backlog, do **WIP** e da ordem de
    prioridade.
-16. Ler o **board** da direita para a esquerda, tentando primeiro destravar ou
+17. Ler o **board** da direita para a esquerda, tentando primeiro destravar ou
    concluir o que estiver mais perto de terminar, e puxando novo **work item**
    apenas quando ele for o desbloqueador direto do WIP ativo.
-17. Relembrar antes de criar demanda nova as regras de dedupe de `issue` e
+18. Relembrar antes de criar demanda nova as regras de dedupe de `issue` e
     reuse obrigatorio de `Epic` aberto aderente.
-18. Cruzar cada trilha local aberta com seu **work item** dono antes de decidir
+19. Cruzar cada trilha local aberta com seu **work item** dono antes de decidir
    commit, push, **PR** ou redistribuicao de alteracoes.
-19. Verificar se a branch atual ja possui `PR` aberto e registrar esse estado
+20. Verificar se a branch atual ja possui `PR` aberto e registrar esse estado
    no startup antes de decidir se a rodada vai abrir, atualizar ou mergear `PR`.
-20. Avisar o usuario se houver contratos nascidos no chat ainda nao perenizados,
+21. Avisar o usuario se houver contratos nascidos no chat ainda nao perenizados,
    listando quais estao pendentes e quais ja tem **work item** dono.
-21. Antes de delegar para subagentes, preparar ou referenciar o pacote minimo
+22. Antes de delegar para subagentes, preparar ou referenciar o pacote minimo
     de contexto da rodada: issue dona, branch atual, startup report, regras
     aplicaveis e caminhos normativos relevantes para o papel delegado.
-22. So depois desse preflight completo escolher a proxima
+23. So depois desse preflight completo escolher a proxima
    **fatia de incremento testavel**.
 
 ## Restart com continuidade comprovada
@@ -91,6 +97,8 @@ automaticamente para o **startup do zero**.
 - lista resolvida dos arquivos canonicos lidos
 - contrato de comunicacao com o usuario e camada de `display_name` lembrados na
   propria sessao antes da primeira mensagem operacional
+- contratos Git canonicos carregados explicitamente, com nota de que o
+  enforcement real permanece em hooks, tasks e gates oficiais do repo
 - inventario atual de worktrees e branches abertas, com ciclo de vida da branch
   atual e sinais de poda
 - drift objetivo entre branch atual, worklog, contexto local ativo e dirty tree

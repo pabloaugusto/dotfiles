@@ -46,6 +46,10 @@ Manter este repo de dotfiles confiavel, testavel e reproduzivel em Windows host 
   promovidos para a governanca oficial.
 - Nessas retomadas, e obrigatorio carregar o contrato de comunicacao no chat e
   a camada de `display_name` antes da primeira resposta operacional ao usuario.
+- Nessas retomadas, e obrigatorio carregar tambem a governanca Git canonica do
+  repo, incluindo contratos de commit atomico, higiene de branch/worktree,
+  worklog e PR; o enforcement continua pertencendo aos hooks, tasks e gates
+  oficiais, nunca ao startup.
 - Nessas retomadas, nenhuma delegacao para subagente e valida sem issue dona,
   startup report e regras aplicaveis ao papel delegado.
 

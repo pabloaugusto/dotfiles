@@ -13,6 +13,7 @@ startup_governance:
       - cross-check-each-open-trail-with-its-real-jira-context-before-committing
       - load-chat-communication-contract-before-first-user-facing-message
       - load-display-name-layer-before-chat-jira-or-confluence-visible-communication
+      - load-git-governance-contracts-before-changing-worktree-state
       - validate-gh-auth-and-graphql-before-github-pr-or-merge-operations
       - remember-and-apply-the-documented-github-pat-fallback-chain
       - snapshot-current-branch-worktree-and-open-pr-state-at-startup
