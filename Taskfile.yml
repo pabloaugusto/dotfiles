@@ -424,14 +424,14 @@ tasks:
     platforms: [windows]
     dir: '{{.TASKFILE_DIR}}'
     cmds:
-      - uv run --locked ty check scripts/release_tool.py scripts/validate_docs.py scripts/run_actionlint.py scripts/run_gitleaks.py scripts/run-cspell.py scripts/git-signing-mode.py scripts/git_signing_lib.py scripts/git-governance-check.py scripts/ai-control-plane.py scripts/ai_control_plane_lib.py scripts/ai-session-startup.py scripts/ai_session_startup_lib.py scripts/ai-fallback.py scripts/ai_fallback_governance_lib.py scripts/validate-ai-assets.py scripts/atlassian_platform_lib.py scripts/ai-atlassian-openapi.py scripts/ai_atlassian_openapi_lib.py scripts/ai-jira-model.py scripts/ai_jira_model_lib.py scripts/ai-jira-apply.py scripts/ai_jira_apply_lib.py scripts/ai-atlassian-backfill.py scripts/ai_atlassian_backfill_lib.py scripts/ai-atlassian-migration-bundle.py scripts/ai_atlassian_migration_bundle_lib.py scripts/ai-atlassian-seed.py scripts/ai_atlassian_seed_lib.py scripts/ai-atlassian-docs-sync.py scripts/ai-agent-execution.py scripts/ai_agent_execution_lib.py scripts/secrets-rotation.py scripts/secrets_rotation_lib.py tests/python/release_tool_test.py tests/python/validate_docs_test.py tests/python/git_signing_mode_test.py tests/python/git_governance_check_test.py tests/python/ai_control_plane_test.py tests/python/ai_session_startup_test.py tests/python/ai_fallback_governance_test.py tests/python/ai_assets_validator_test.py tests/python/atlassian_platform_test.py tests/python/ai_atlassian_openapi_test.py tests/python/ai_jira_model_test.py tests/python/ai_jira_apply_test.py tests/python/ai_atlassian_backfill_test.py tests/python/ai_atlassian_migration_bundle_test.py tests/python/ai_atlassian_seed_test.py tests/python/ai_agent_execution_test.py tests/python/secrets_rotation_test.py
+      - uv run --locked ty check scripts/release_tool.py scripts/validate_docs.py scripts/run_actionlint.py scripts/run_gitleaks.py scripts/run-cspell.py scripts/git-signing-mode.py scripts/git_signing_lib.py scripts/git-governance-check.py scripts/ai-control-plane.py scripts/ai_control_plane_lib.py scripts/ai-session-startup.py scripts/ai_session_startup_lib.py scripts/ai-fallback.py scripts/ai_fallback_governance_lib.py scripts/validate-ai-assets.py scripts/ai-prompt-governance.py scripts/atlassian_platform_lib.py scripts/ai-atlassian-openapi.py scripts/ai_atlassian_openapi_lib.py scripts/ai-jira-model.py scripts/ai_jira_model_lib.py scripts/ai-jira-apply.py scripts/ai_jira_apply_lib.py scripts/ai-atlassian-backfill.py scripts/ai_atlassian_backfill_lib.py scripts/ai-atlassian-migration-bundle.py scripts/ai_atlassian_migration_bundle_lib.py scripts/ai-atlassian-seed.py scripts/ai_atlassian_seed_lib.py scripts/ai-atlassian-docs-sync.py scripts/ai-agent-execution.py scripts/ai_agent_execution_lib.py scripts/secrets-rotation.py scripts/secrets_rotation_lib.py tests/python/release_tool_test.py tests/python/validate_docs_test.py tests/python/git_signing_mode_test.py tests/python/git_governance_check_test.py tests/python/ai_control_plane_test.py tests/python/ai_session_startup_test.py tests/python/ai_fallback_governance_test.py tests/python/ai_assets_validator_test.py tests/python/ai_prompt_governance_test.py tests/python/atlassian_platform_test.py tests/python/ai_atlassian_openapi_test.py tests/python/ai_jira_model_test.py tests/python/ai_jira_apply_test.py tests/python/ai_atlassian_backfill_test.py tests/python/ai_atlassian_migration_bundle_test.py tests/python/ai_atlassian_seed_test.py tests/python/ai_agent_execution_test.py tests/python/secrets_rotation_test.py
 
   type:check:linux:
     desc: Linux/WSL - executa ty em scripts e testes Python
     platforms: [linux]
     dir: '{{.TASKFILE_DIR}}'
     cmds:
-      - uv run --locked ty check scripts/release_tool.py scripts/validate_docs.py scripts/run_actionlint.py scripts/run_gitleaks.py scripts/run-cspell.py scripts/git-signing-mode.py scripts/git_signing_lib.py scripts/git-governance-check.py scripts/ai-control-plane.py scripts/ai_control_plane_lib.py scripts/ai-session-startup.py scripts/ai_session_startup_lib.py scripts/ai-fallback.py scripts/ai_fallback_governance_lib.py scripts/validate-ai-assets.py scripts/atlassian_platform_lib.py scripts/ai-atlassian-openapi.py scripts/ai_atlassian_openapi_lib.py scripts/ai-jira-model.py scripts/ai_jira_model_lib.py scripts/ai-jira-apply.py scripts/ai_jira_apply_lib.py scripts/ai-atlassian-backfill.py scripts/ai_atlassian_backfill_lib.py scripts/ai-atlassian-migration-bundle.py scripts/ai_atlassian_migration_bundle_lib.py scripts/ai-atlassian-seed.py scripts/ai_atlassian_seed_lib.py scripts/ai-atlassian-docs-sync.py scripts/ai-agent-execution.py scripts/ai_agent_execution_lib.py scripts/secrets-rotation.py scripts/secrets_rotation_lib.py tests/python/release_tool_test.py tests/python/validate_docs_test.py tests/python/git_signing_mode_test.py tests/python/git_governance_check_test.py tests/python/ai_control_plane_test.py tests/python/ai_session_startup_test.py tests/python/ai_fallback_governance_test.py tests/python/ai_assets_validator_test.py tests/python/atlassian_platform_test.py tests/python/ai_atlassian_openapi_test.py tests/python/ai_jira_model_test.py tests/python/ai_jira_apply_test.py tests/python/ai_atlassian_backfill_test.py tests/python/ai_atlassian_migration_bundle_test.py tests/python/ai_atlassian_seed_test.py tests/python/ai_agent_execution_test.py tests/python/secrets_rotation_test.py
+      - uv run --locked ty check scripts/release_tool.py scripts/validate_docs.py scripts/run_actionlint.py scripts/run_gitleaks.py scripts/run-cspell.py scripts/git-signing-mode.py scripts/git_signing_lib.py scripts/git-governance-check.py scripts/ai-control-plane.py scripts/ai_control_plane_lib.py scripts/ai-session-startup.py scripts/ai_session_startup_lib.py scripts/ai-fallback.py scripts/ai_fallback_governance_lib.py scripts/validate-ai-assets.py scripts/ai-prompt-governance.py scripts/atlassian_platform_lib.py scripts/ai-atlassian-openapi.py scripts/ai_atlassian_openapi_lib.py scripts/ai-jira-model.py scripts/ai_jira_model_lib.py scripts/ai-jira-apply.py scripts/ai_jira_apply_lib.py scripts/ai-atlassian-backfill.py scripts/ai_atlassian_backfill_lib.py scripts/ai-atlassian-migration-bundle.py scripts/ai_atlassian_migration_bundle_lib.py scripts/ai-atlassian-seed.py scripts/ai_atlassian_seed_lib.py scripts/ai-atlassian-docs-sync.py scripts/ai-agent-execution.py scripts/ai_agent_execution_lib.py scripts/secrets-rotation.py scripts/secrets_rotation_lib.py tests/python/release_tool_test.py tests/python/validate_docs_test.py tests/python/git_signing_mode_test.py tests/python/git_governance_check_test.py tests/python/ai_control_plane_test.py tests/python/ai_session_startup_test.py tests/python/ai_fallback_governance_test.py tests/python/ai_assets_validator_test.py tests/python/ai_prompt_governance_test.py tests/python/atlassian_platform_test.py tests/python/ai_atlassian_openapi_test.py tests/python/ai_jira_model_test.py tests/python/ai_jira_apply_test.py tests/python/ai_atlassian_backfill_test.py tests/python/ai_atlassian_migration_bundle_test.py tests/python/ai_atlassian_seed_test.py tests/python/ai_agent_execution_test.py tests/python/secrets_rotation_test.py
 
   test:python:
     desc: Executa a suite Python via pytest no ambiente atual
@@ -841,6 +841,44 @@ tasks:
     dir: '{{.TASKFILE_DIR}}'
     cmds:
       - "bash -lc 'bash ./scripts/run-python.sh ./scripts/ai-control-plane.py atlassian-check --site-url \"{{default \"\" .SITE_URL}}\"'"
+
+  ai:prompts:jira:check:
+    desc: Valida o contrato Jira dos prompt packs formais com owner_issue
+    cmds:
+      - task: ai:prompts:jira:check:{{if or (eq .OS "Windows_NT") (eq .OS "windows")}}windows{{else}}linux{{end}}
+
+  ai:prompts:jira:check:windows:
+    desc: Windows - valida titulo e labels Jira dos prompt packs formais
+    platforms: [windows]
+    dir: '{{.TASKFILE_DIR}}'
+    cmds:
+      - "pwsh -NoProfile -Command \"& './scripts/invoke-python.ps1' -ScriptPath './scripts/ai-prompt-governance.py' -Arguments @('check','--repo-root','{{.TASKFILE_DIR}}')\""
+
+  ai:prompts:jira:check:linux:
+    desc: Linux/WSL - valida titulo e labels Jira dos prompt packs formais
+    platforms: [linux]
+    dir: '{{.TASKFILE_DIR}}'
+    cmds:
+      - "bash -lc 'bash ./scripts/run-python.sh ./scripts/ai-prompt-governance.py check --repo-root \"{{.TASKFILE_DIR}}\"'"
+
+  ai:prompts:jira:sync:
+    desc: Sincroniza titulo e labels Jira dos prompt packs formais com owner_issue
+    cmds:
+      - task: ai:prompts:jira:sync:{{if or (eq .OS "Windows_NT") (eq .OS "windows")}}windows{{else}}linux{{end}}
+
+  ai:prompts:jira:sync:windows:
+    desc: Windows - sincroniza titulo e labels Jira dos prompt packs formais
+    platforms: [windows]
+    dir: '{{.TASKFILE_DIR}}'
+    cmds:
+      - "pwsh -NoProfile -Command \"& './scripts/invoke-python.ps1' -ScriptPath './scripts/ai-prompt-governance.py' -Arguments @('sync','--repo-root','{{.TASKFILE_DIR}}')\""
+
+  ai:prompts:jira:sync:linux:
+    desc: Linux/WSL - sincroniza titulo e labels Jira dos prompt packs formais
+    platforms: [linux]
+    dir: '{{.TASKFILE_DIR}}'
+    cmds:
+      - "bash -lc 'bash ./scripts/run-python.sh ./scripts/ai-prompt-governance.py sync --repo-root \"{{.TASKFILE_DIR}}\"'"
 
   ai:atlassian:openapi:show:
     desc: Exibe o catalogo dos specs OpenAPI oficiais da Atlassian usados no repo
@@ -2081,6 +2119,8 @@ tasks:
     desc: Valida um titulo de PR no padrao emoji + conventional commits
     cmds:
       - task: conventions:check:pr-title:{{if or (eq .OS "Windows_NT") (eq .OS "windows")}}windows{{else}}linux{{end}}
+        vars:
+          BRANCH: "{{.BRANCH}}"
 
   conventions:check:pr-title:windows:
     desc: Windows - valida titulo de PR (emoji + conventional + max 72)
@@ -2089,7 +2129,7 @@ tasks:
     requires:
       vars: [TITLE]
     cmds:
-      - "pwsh -NoProfile -File ./scripts/validate-conventional-title.ps1 -Title \"{{.TITLE}}\""
+      - "pwsh -NoProfile -File ./scripts/validate-conventional-title.ps1 -Title \"{{.TITLE}}\" -Branch \"{{default \"\" .BRANCH}}\""
 
   conventions:check:pr-title:linux:
     desc: Linux/WSL - valida titulo de PR (emoji + conventional + max 72)
@@ -2098,7 +2138,7 @@ tasks:
     requires:
       vars: [TITLE]
     cmds:
-      - "bash -lc 'bash ./scripts/run-python.sh ./.githooks/ci/validate_message.py \"{{.TITLE}}\" --context \"PR title\"'"
+      - "bash -lc 'branch=\"{{default \"\" .BRANCH}}\"; if [ -z \"$branch\" ]; then branch=\"$(git rev-parse --abbrev-ref HEAD)\"; fi; bash ./scripts/run-python.sh ./.githooks/ci/validate_message.py \"{{.TITLE}}\" --context \"PR title\" --branch \"$branch\"'"
 
   conventions:check:branch:
     desc: Valida nome da branch atual ou da branch informada
@@ -2106,20 +2146,21 @@ tasks:
       - task: conventions:check:branch:{{if or (eq .OS "Windows_NT") (eq .OS "windows")}}windows{{else}}linux{{end}}
         vars:
           BRANCH: "{{.BRANCH}}"
+          RANGE: "{{.RANGE}}"
 
   conventions:check:branch:windows:
     desc: Windows - valida branch atual ou BRANCH
     platforms: [windows]
     dir: '{{.TASKFILE_DIR}}'
     cmds:
-      - "pwsh -NoProfile -File ./scripts/validate-branch-name.ps1 -Branch \"{{default \"\" .BRANCH}}\""
+      - "pwsh -NoProfile -File ./scripts/validate-branch-name.ps1 -Branch \"{{default \"\" .BRANCH}}\" -Range \"{{default \"\" .RANGE}}\""
 
   conventions:check:branch:linux:
     desc: Linux/WSL - valida branch atual ou BRANCH
     platforms: [linux]
     dir: '{{.TASKFILE_DIR}}'
     cmds:
-      - "bash -lc 'branch=\"{{default \"\" .BRANCH}}\"; if [ -z \"$branch\" ]; then branch=\"$(git rev-parse --abbrev-ref HEAD)\"; fi; bash ./scripts/run-python.sh ./.githooks/conventional_emoji.py --validate-branch \"$branch\"'"
+      - "bash -lc 'branch=\"{{default \"\" .BRANCH}}\"; range=\"{{default \"\" .RANGE}}\"; paths_json=\"[]\"; if [ -z \"$branch\" ]; then branch=\"$(git rev-parse --abbrev-ref HEAD)\"; fi; if [ -n \"$range\" ]; then payload=\"$(bash ./scripts/run-python.sh ./scripts/git-commit-subjects.py --repo-root \"{{.TASKFILE_DIR}}\" --range \"$range\" --include-files)\"; paths_json=\"$(printf '%s' \"$payload\" | bash ./scripts/run-python.sh -c \"import json,sys; payload=json.load(sys.stdin); seen=[]; [seen.append(path) for entry in payload for path in entry.get('paths', []) if path not in seen]; print(json.dumps(seen))\")\"; fi; bash ./scripts/run-python.sh ./.githooks/conventional_emoji.py --validate-branch \"$branch\" --paths-json \"$paths_json\"'"
 
   conventions:check:commit:
     desc: Valida o ultimo commit subject ou o SUBJECT informado
@@ -2127,20 +2168,21 @@ tasks:
       - task: conventions:check:commit:{{if or (eq .OS "Windows_NT") (eq .OS "windows")}}windows{{else}}linux{{end}}
         vars:
           SUBJECT: "{{.SUBJECT}}"
+          BRANCH: "{{.BRANCH}}"
 
   conventions:check:commit:windows:
     desc: Windows - valida commit subject atual ou SUBJECT
     platforms: [windows]
     dir: '{{.TASKFILE_DIR}}'
     cmds:
-      - "pwsh -NoProfile -File ./scripts/validate-commit-subject.ps1 -Subject \"{{default \"\" .SUBJECT}}\""
+      - "pwsh -NoProfile -File ./scripts/validate-commit-subject.ps1 -Subject \"{{default \"\" .SUBJECT}}\" -Branch \"{{default \"\" .BRANCH}}\""
 
   conventions:check:commit:linux:
     desc: Linux/WSL - valida commit subject atual ou SUBJECT
     platforms: [linux]
     dir: '{{.TASKFILE_DIR}}'
     cmds:
-      - "bash -lc 'subject=\"{{default \"\" .SUBJECT}}\"; if [ -z \"$subject\" ]; then subject=\"$(git log -1 --format=%s)\"; fi; bash ./scripts/run-python.sh ./.githooks/ci/validate_message.py \"$subject\" --context \"commit subject\"'"
+      - "bash -lc 'subject=\"{{default \"\" .SUBJECT}}\"; branch=\"{{default \"\" .BRANCH}}\"; if [ -z \"$subject\" ]; then subject=\"$(git log -1 --format=%s)\"; fi; if [ -z \"$branch\" ]; then branch=\"$(git rev-parse --abbrev-ref HEAD)\"; fi; bash ./scripts/run-python.sh ./.githooks/ci/validate_message.py \"$subject\" --context \"commit subject\" --branch \"$branch\"'"
 
   conventions:check:commits:
     desc: Valida subjects de commits no range informado ou origin/main..HEAD
@@ -2148,20 +2190,21 @@ tasks:
       - task: conventions:check:commits:{{if or (eq .OS "Windows_NT") (eq .OS "windows")}}windows{{else}}linux{{end}}
         vars:
           RANGE: "{{.RANGE}}"
+          BRANCH: "{{.BRANCH}}"
 
   conventions:check:commits:windows:
     desc: Windows - valida commits do range RANGE ou origin/main..HEAD
     platforms: [windows]
     dir: '{{.TASKFILE_DIR}}'
     cmds:
-      - "pwsh -NoProfile -File ./scripts/validate-commit-range.ps1 -Range \"{{default \"\" .RANGE}}\""
+      - "pwsh -NoProfile -File ./scripts/validate-commit-range.ps1 -Range \"{{default \"\" .RANGE}}\" -Branch \"{{default \"\" .BRANCH}}\""
 
   conventions:check:commits:linux:
     desc: Linux/WSL - valida commits do range RANGE ou origin/main..HEAD
     platforms: [linux]
     dir: '{{.TASKFILE_DIR}}'
     cmds:
-      - "bash -lc 'range=\"{{default \"\" .RANGE}}\"; if [ -z \"$range\" ]; then range=\"origin/main..HEAD\"; fi; subjects_json=\"$(git log --format=%s \"$range\" | bash ./scripts/run-python.sh -c \"import json,sys; print(json.dumps([l.strip() for l in sys.stdin if l.strip()]))\")\"; bash ./scripts/run-python.sh ./.githooks/conventional_emoji.py --validate-many-json \"$subjects_json\" --require-emoji --require-issue-key'"
+      - "bash -lc 'range=\"{{default \"\" .RANGE}}\"; branch=\"{{default \"\" .BRANCH}}\"; if [ -z \"$range\" ]; then range=\"origin/main..HEAD\"; fi; if [ -z \"$branch\" ]; then branch=\"$(git rev-parse --abbrev-ref HEAD)\"; fi; payload=\"$(bash ./scripts/run-python.sh ./scripts/git-commit-subjects.py --repo-root \"{{.TASKFILE_DIR}}\" --range \"$range\" --include-files)\"; bash ./scripts/run-python.sh ./.githooks/conventional_emoji.py --validate-many-json \"$payload\" --require-emoji --require-issue-key --branch \"$branch\"'"
 
   conventions:check:pr-commits:
     desc: Valida todos os commits de um PR no GitHub via API
@@ -2209,6 +2252,7 @@ tasks:
       - task: conventions:check:pr-title
         vars:
           TITLE: "{{.TITLE}}"
+          BRANCH: "{{.BRANCH}}"
 
   ci:pr:title:check:
     desc: Alias CI para conventions:check:pr-title
@@ -2218,6 +2262,7 @@ tasks:
       - task: conventions:check:pr-title
         vars:
           TITLE: "{{.PR_TITLE}}"
+          BRANCH: "{{.BRANCH}}"
 
   ci:branch:check:
     desc: Alias CI para conventions:check:branch
@@ -2225,6 +2270,7 @@ tasks:
       - task: conventions:check:branch
         vars:
           BRANCH: "{{.BRANCH}}"
+          RANGE: "{{.RANGE}}"
 
   ci:commits:check:
     desc: Alias CI para conventions:check:commits
@@ -2232,6 +2278,7 @@ tasks:
       - task: conventions:check:commits
         vars:
           RANGE: "{{.RANGE}}"
+          BRANCH: "{{.BRANCH}}"
 
   ci:workflow:sync:check:
     desc: Valida sincronismo entre workflows, tasks e catalogos do repo

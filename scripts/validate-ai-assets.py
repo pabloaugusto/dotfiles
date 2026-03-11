@@ -7,6 +7,8 @@ import sys
 from pathlib import Path
 from typing import cast
 
+import yaml
+
 if __package__ in {None, ""}:  # pragma: no cover - execucao direta do script
     sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
@@ -66,6 +68,12 @@ REQUIRED_FILES = [
     ".agents/prompts/formal/pea-startup-governance/fragments/modes.md",
     ".agents/prompts/formal/pea-startup-governance/fragments/bypass.md",
     ".agents/prompts/formal/pea-startup-governance/fragments/startup-extension.md",
+    ".agents/prompts/formal/agnostic-sync-outbox-foundation/prompt.md",
+    ".agents/prompts/formal/agnostic-sync-outbox-foundation/context.md",
+    ".agents/prompts/formal/agnostic-sync-outbox-foundation/meta.yaml",
+    ".agents/prompts/formal/agnostic-sync-outbox-foundation/fragments/identity-model.md",
+    ".agents/prompts/formal/agnostic-sync-outbox-foundation/fragments/sync-contract.md",
+    ".agents/prompts/formal/agnostic-sync-outbox-foundation/fragments/artifact-classification.md",
     ".agents/config.toml",
     ".agents/cerimonias/README.md",
     ".agents/cerimonias/ceremony.schema.json",
@@ -106,6 +114,7 @@ REQUIRED_FILES = [
     "scripts/run-ai-startup-session.ps1",
     "scripts/cspell-governance.py",
     "scripts/cspell_governance_lib.py",
+    "scripts/ai-prompt-governance.py",
     "scripts/validate_workflow_task_sync.py",
     "scripts/validate-ai-assets.ps1",
 ]
@@ -208,6 +217,9 @@ AGENTS_REQUIRED_SNIPPETS = [
     "Manter o item ativo em `Doing` durante toda a execucao relevante",
     "Nenhum `done` e valido sem revisar `LICOES-APRENDIDAS.md`",
     "Acionar os gates paralelos obrigatorios de arquitetura/modernizacao",
+    "Quando a rodada tocar [`.agents/prompts/`](.agents/prompts/), o namespace",
+    "titulo com prefixo",
+    "label `prompt`",
 ]
 
 OPERATING_MODEL_REQUIRED_SNIPPETS = [
@@ -222,6 +234,9 @@ OPERATING_MODEL_REQUIRED_SNIPPETS = [
     "### Camada 2.1. Registry declarativo do repo",
     "### Camada 2.2. Orquestracao, rules e evals",
     "cadeia minima de evidencia para cada execucao obrigatoria",
+    "task_id: prompt/<slug>",
+    "PROMPT: ...",
+    "label `prompt`",
     "## Politica de leitura do board",
     "## Camada de identidade humana dos agentes",
 ]
@@ -335,12 +350,19 @@ PROMPT_PACK_REQUIRED_SNIPPETS = {
         "context.md",
         "meta.yaml",
         "fragments/",
+        "task_id",
+        "prompt/<slug>",
+        'summary_prefix: "PROMPT:"',
+        "required_labels",
+        "`scope` obrigatorio `prompt`",
     ],
     ".agents/prompts/CATALOG.md": [
         "## Formais",
+        "prompt/agnostic-sync-outbox-foundation",
         "pea-startup-governance",
         "## Legados",
         "DOT-178",
+        "DOT-179",
     ],
     ".agents/prompts/formal/pea-startup-governance/prompt.md": [
         "Pre-Execution Alignment",
@@ -358,8 +380,19 @@ PROMPT_PACK_REQUIRED_SNIPPETS = {
     ],
     ".agents/prompts/formal/pea-startup-governance/meta.yaml": [
         "id: pea-startup-governance",
+        "task_id: prompt/pea-startup-governance",
         "owner_issue: DOT-178",
+        'summary_prefix: "PROMPT:"',
+        "required_labels:",
         "report_key: pea_status",
+    ],
+    ".agents/prompts/formal/agnostic-sync-outbox-foundation/meta.yaml": [
+        "id: agnostic-sync-outbox-foundation",
+        "task_id: prompt/agnostic-sync-outbox-foundation",
+        "owner_issue: DOT-179",
+        'summary_prefix: "PROMPT:"',
+        "required_labels:",
+        "state_root: ~/.ai-control-plane",
     ],
 }
 
@@ -484,6 +517,8 @@ BOARD_OPERATION_REQUIRED_SNIPPETS = {
 GIT_GOVERNANCE_REQUIRED_SNIPPETS = {
     "docs/git-conventions.md": [
         "<type>/<jira-key>-<slug>",
+        "scope` passa a ser obrigatorio e deve ser `prompt`",
+        "titulo `PROMPT: ...` com label `prompt`",
         "cada commit deve representar uma unica **issue** Jira real",
         "quando possivel, cada commit deve ser auto-testavel",
         "retomada nova deve nascer de `main` no padrao canonico",
@@ -499,12 +534,28 @@ GIT_GOVERNANCE_REQUIRED_SNIPPETS = {
         "docs/AI-FALLBACK-LEDGER.md",
         "Commit de fechamento obrigatorio antes de nova rodada",
     ],
+    "config/ai/agent-operations.yaml": [
+        "versioned-prompt-pack-work-must-declare-task-id-as-prompt-slug",
+        "versioned-prompt-pack-work-must-use-prompt-branch-type",
+        "versioned-prompt-pack-work-must-use-prompt-scope-in-commit-and-pr-title",
+        "versioned-prompt-pack-owner-issues-must-use-prompt-summary-prefix",
+        "versioned-prompt-pack-owner-issues-must-carry-prompt-label",
+    ],
     "config/ai/contracts.yaml": [
         "git_governance:",
         "source_of_truth: jira",
         "fallback_operation:",
         "recovery_ledger: docs/AI-FALLBACK-LEDGER.md",
         "branch_pattern: <type>/<jira-key>-<slug>",
+        "branch_pattern: prompt/<jira-key>-<slug>",
+        "task_id_pattern: prompt/<slug>",
+        'jira_summary_prefix: "PROMPT:"',
+        "jira_required_labels:",
+        "changes-touching-agents-prompts-must-use-prompt-branch-type",
+        "changes-touching-agents-prompts-must-use-prompt-scope-in-commit-title",
+        "changes-touching-agents-prompts-must-use-prompt-scope-in-pr-title",
+        "prompt-related-jira-issues-must-use-summary-prefix-prompt",
+        "prompt-related-jira-issues-must-carry-prompt-label",
         "commits-must-be-atomic-contextualized-and-preferably-self-testable",
         "resume-old-work-on-a-new-branch-from-main-unless-evidence-keeps-the-existing-branch-valid",
         "prune-unneeded-local-branches-and-worktrees-after-merge",
@@ -571,6 +622,8 @@ CATALOG_REQUIRED_SNIPPETS = {
         "### `ai:control-plane:show`",
         "### `ai:startup:session`",
         "### `ai:atlassian:check`",
+        "### `ai:prompts:jira:check`",
+        "### `ai:prompts:jira:sync`",
         "### `spell:review:windows`",
         "### `spell:dictionary:audit:windows`",
         "### `ci:workflow:sync:check`",
@@ -778,8 +831,6 @@ def validate_prompt_packs(repo_root: Path, failures: list[str]) -> None:
     prompts_root = repo_root / ".agents" / "prompts"
     legacy_root = prompts_root / "legacy"
     formal_root = prompts_root / "formal"
-    pea_root = formal_root / "pea-startup-governance"
-    fragments_root = pea_root / "fragments"
 
     if not prompts_root.is_dir():
         failures.append("Pasta obrigatoria ausente: .agents/prompts")
@@ -788,14 +839,70 @@ def validate_prompt_packs(repo_root: Path, failures: list[str]) -> None:
         failures.append("Pasta obrigatoria ausente: .agents/prompts/legacy")
     if not formal_root.is_dir():
         failures.append("Pasta obrigatoria ausente: .agents/prompts/formal")
-    if not pea_root.is_dir():
-        failures.append(
-            "Pasta obrigatoria ausente: .agents/prompts/formal/pea-startup-governance"
-        )
-    if not fragments_root.is_dir():
-        failures.append(
-            "Pasta obrigatoria ausente: .agents/prompts/formal/pea-startup-governance/fragments"
-        )
+        return
+
+    formal_packs = sorted(
+        [item for item in formal_root.iterdir() if item.is_dir()],
+        key=lambda item: item.name,
+    )
+    if not formal_packs:
+        failures.append("Nenhum prompt pack formal encontrado em .agents/prompts/formal")
+
+    for pack_root in formal_packs:
+        for file_name in ("prompt.md", "context.md", "meta.yaml"):
+            if not (pack_root / file_name).is_file():
+                failures.append(
+                    f"Arquivo obrigatorio ausente em .agents/prompts/formal/{pack_root.name}: {file_name}"
+                )
+        fragments_root = pack_root / "fragments"
+        if not fragments_root.is_dir():
+            failures.append(
+                f"Pasta obrigatoria ausente: .agents/prompts/formal/{pack_root.name}/fragments"
+            )
+
+        meta_path = pack_root / "meta.yaml"
+        if meta_path.is_file():
+            meta_content = meta_path.read_text(encoding="utf-8")
+            meta_payload = yaml.safe_load(meta_content) or {}
+            if not isinstance(meta_payload, dict):
+                failures.append(f"meta.yaml invalido em {meta_path.as_posix()}")
+                continue
+            id_match = re.search(r"(?m)^id:\s*(?P<value>[a-z0-9-]+)\s*$", meta_content)
+            if not id_match:
+                failures.append(f"id ausente ou invalido em {meta_path.as_posix()}")
+            elif id_match.group("value") != pack_root.name:
+                failures.append(
+                    f"id em {meta_path.as_posix()} deve ser igual ao slug da pasta ({pack_root.name})"
+                )
+            task_match = re.search(
+                r"(?m)^task_id:\s*(?P<value>prompt/[a-z0-9-]+)\s*$", meta_content
+            )
+            expected_task_id = f"prompt/{pack_root.name}"
+            if not task_match:
+                failures.append(f"task_id ausente ou invalido em {meta_path.as_posix()}")
+            elif task_match.group("value") != expected_task_id:
+                failures.append(f"task_id em {meta_path.as_posix()} deve ser {expected_task_id}")
+            owner_issue = str(meta_payload.get("owner_issue", "") or "").strip()
+            if owner_issue:
+                jira_payload = meta_payload.get("jira")
+                if not isinstance(jira_payload, dict):
+                    failures.append(
+                        f"bloco jira obrigatorio ausente em {meta_path.as_posix()} para owner_issue"
+                    )
+                else:
+                    summary_prefix = str(jira_payload.get("summary_prefix", "") or "").strip()
+                    if summary_prefix != "PROMPT:":
+                        failures.append(
+                            f"jira.summary_prefix em {meta_path.as_posix()} deve ser PROMPT:"
+                        )
+                    required_labels = jira_payload.get("required_labels") or []
+                    normalized_labels = {
+                        str(label).strip() for label in required_labels if str(label).strip()
+                    }
+                    if "prompt" not in normalized_labels:
+                        failures.append(
+                            f"jira.required_labels em {meta_path.as_posix()} deve conter prompt"
+                        )
 
     for relative, snippets in PROMPT_PACK_REQUIRED_SNIPPETS.items():
         path = repo_root / relative

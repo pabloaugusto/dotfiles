@@ -32,6 +32,11 @@ global_contract:
       - every-commit-must-map-to-a-single-jira-scope
       - every-branch-must-map-to-a-single-jira-scope
       - every-pr-must-map-to-a-single-jira-scope
+      - versioned-prompt-pack-work-must-declare-task-id-as-prompt-slug
+      - versioned-prompt-pack-work-must-use-prompt-branch-type
+      - versioned-prompt-pack-work-must-use-prompt-scope-in-commit-and-pr-title
+      - versioned-prompt-pack-owner-issues-must-use-prompt-summary-prefix
+      - versioned-prompt-pack-owner-issues-must-carry-prompt-label
       - every-new-issue-must-run-deduplication-preflight-against-open-work
       - every-non-epic-demand-must-check-for-an-open-matching-epic-before-creation
       - every-new-epic-must-prove-that-no-open-epic-already-covers-the-theme

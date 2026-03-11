@@ -56,6 +56,16 @@ class ConventionalEmojiTests(unittest.TestCase):
         self.assertFalse(result.ok)
         self.assertIn("Maximo recomendado", result.error)
 
+    def test_requires_prompt_scope_when_requested(self) -> None:
+        result = MODULE.validate_message(
+            "📝 docs(git): DOT-179 document prompt namespace",
+            require_emoji=True,
+            require_issue_key=True,
+            required_scope="prompt",
+        )
+        self.assertFalse(result.ok)
+        self.assertIn("Scope obrigatorio", result.error)
+
     def test_inject_emoji_normalizes_wrong_emoji(self) -> None:
         output = MODULE.inject_emoji("🐛 feat(test-harness): add validator\n")
         self.assertEqual(output, "✨ feat(test-harness): add validator\n")
@@ -68,6 +78,10 @@ class ConventionalEmojiTests(unittest.TestCase):
         result = MODULE.validate_branch_name("feat/DOT-81-git-traceability")
         self.assertTrue(result.ok)
 
+    def test_branch_validation_accepts_prompt_type(self) -> None:
+        result = MODULE.validate_branch_name("prompt/DOT-179-agnostic-sync-outbox-foundation")
+        self.assertTrue(result.ok)
+
     def test_branch_validation_allows_dependabot(self) -> None:
         result = MODULE.validate_branch_name("dependabot/npm_and_yarn/foo-1.2.3")
         self.assertTrue(result.ok)
@@ -76,6 +90,21 @@ class ConventionalEmojiTests(unittest.TestCase):
         result = MODULE.validate_branch_name("Feat/test-harness")
         self.assertFalse(result.ok)
         self.assertIn("<type>/<jira-key>-<slug>", result.error)
+
+    def test_branch_validation_requires_prompt_type_when_prompt_paths_are_present(self) -> None:
+        result = MODULE.validate_branch_name(
+            "feat/DOT-179-agnostic-sync-outbox-foundation",
+            require_prompt_type=True,
+        )
+        self.assertFalse(result.ok)
+        self.assertIn("prefixo 'prompt'", result.error)
+
+    def test_required_scope_is_derived_from_prompt_paths(self) -> None:
+        required_scope = MODULE.required_scope_for_paths_and_branch(
+            [".agents/prompts/formal/pea-startup-governance/prompt.md"],
+            "feat/DOT-178-pea-startup-governance",
+        )
+        self.assertEqual(required_scope, "prompt")
 
     def test_extended_type_mapping_is_available(self) -> None:
         self.assertEqual(MODULE.COMMIT_TYPE_EMOJI["security"], "🔒")

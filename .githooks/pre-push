@@ -29,26 +29,39 @@ if [[ "${pushes_protected_branch}" == "1" ]]; then
   exit 1
 fi
 
-if ! bash "${ROOT_DIR}/scripts/run-python.sh" "${ROOT_DIR}/.githooks/conventional_emoji.py" --validate-branch "${CURRENT_BRANCH}"; then
-  print_error "Nome de branch invalido: ${CURRENT_BRANCH}"
-  exit 1
-fi
-
 if command -v gh >/dev/null 2>&1 && gh auth status >/dev/null 2>&1; then
   PR_TITLE="$(gh pr list --head "${CURRENT_BRANCH}" --state open --limit 1 --json title --jq '.[0].title' 2>/dev/null || true)"
   if [[ -n "${PR_TITLE}" && "${PR_TITLE}" != "null" ]]; then
     print_info "Validando titulo do PR aberto da branch atual..."
-    bash "${ROOT_DIR}/scripts/run-python.sh" "${ROOT_DIR}/.githooks/ci/validate_message.py" "${PR_TITLE}" --context "PR title"
+    bash "${ROOT_DIR}/scripts/run-python.sh" "${ROOT_DIR}/.githooks/ci/validate_message.py" "${PR_TITLE}" --context "PR title" --branch "${CURRENT_BRANCH}"
   fi
 else
   print_warn "gh nao autenticado; validacao local de PR title ignorada."
 fi
 
-SUBJECTS_JSON="$(bash "${ROOT_DIR}/scripts/run-python.sh" "${ROOT_DIR}/scripts/git-commit-subjects.py" --repo-root "${ROOT_DIR}" --remote "${REMOTE}")"
-if [[ "${SUBJECTS_JSON}" == "[]" ]]; then
+COMMIT_PAYLOAD_JSON="$(
+  bash "${ROOT_DIR}/scripts/run-python.sh" "${ROOT_DIR}/scripts/git-commit-subjects.py" \
+    --repo-root "${ROOT_DIR}" \
+    --remote "${REMOTE}" \
+    --include-files
+)"
+if [[ "${COMMIT_PAYLOAD_JSON}" == "[]" ]]; then
   print_info "Nenhum commit exclusivo para validar no remoto ${REMOTE}."
   exit 0
 fi
 
+CHANGED_PATHS_JSON="$(
+  printf '%s' "${COMMIT_PAYLOAD_JSON}" \
+    | bash "${ROOT_DIR}/scripts/run-python.sh" -c \
+      "import json,sys; payload=json.load(sys.stdin); seen=[]; \
+[seen.append(path) for entry in payload for path in entry.get('paths', []) if path not in seen]; \
+print(json.dumps(seen))"
+)"
+
+if ! bash "${ROOT_DIR}/scripts/run-python.sh" "${ROOT_DIR}/.githooks/conventional_emoji.py" --validate-branch "${CURRENT_BRANCH}" --paths-json "${CHANGED_PATHS_JSON}"; then
+  print_error "Nome de branch invalido: ${CURRENT_BRANCH}"
+  exit 1
+fi
+
 print_info "Validando subjects dos commits exclusivos ainda nao presentes em ${REMOTE}..."
-bash "${ROOT_DIR}/scripts/run-python.sh" "${ROOT_DIR}/.githooks/conventional_emoji.py" --validate-many-json "${SUBJECTS_JSON}" --require-emoji --require-issue-key
+bash "${ROOT_DIR}/scripts/run-python.sh" "${ROOT_DIR}/.githooks/conventional_emoji.py" --validate-many-json "${COMMIT_PAYLOAD_JSON}" --require-emoji --require-issue-key --branch "${CURRENT_BRANCH}"

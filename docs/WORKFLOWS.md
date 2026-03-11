@@ -28,6 +28,15 @@ acionadas por cada um.
 - Plataforma: `ubuntu-latest`
 - Tasks: `ci:ai:check:linux`, `ci:pr:title:check`, `ci:commits:check`, `ci:branch:check`, `test:unit:python:linux`
 
+### `jira-deployment-marker.yml`
+
+- Objetivo: registrar um deployment marker rastreavel no GitHub para uma chave
+  Jira ja associada a commit ou branch da rodada.
+- Trigger: `workflow_dispatch`
+- Plataforma: `ubuntu-latest`
+- Tasks: nenhuma; o workflow usa validacoes inline e as actions
+  `chrnorm/deployment-action` e `chrnorm/deployment-status`
+
 ### `quality-foundation.yml`
 
 - Objetivo: manter o baseline canonico de qualidade do repo, cobrindo shell,

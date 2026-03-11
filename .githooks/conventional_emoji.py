@@ -43,6 +43,7 @@ VALID_BRANCH_TYPES = {
     "feat",
     "fix",
     "docs",
+    "prompt",
     "refactor",
     "perf",
     "test",
@@ -58,6 +59,10 @@ VALID_BRANCH_TYPES = {
     "release",
 }
 MAX_SUBJECT_LEN = 72
+PROMPT_SCOPE = "prompt"
+PROMPT_BRANCH_TYPE = "prompt"
+PROMPT_TASK_PREFIX = "prompt/"
+PROMPT_PATH_PREFIX = ".agents/prompts/"
 
 CONVENTIONAL_RE = re.compile(
     r"^(?P<emoji>[^\w\s:(\-]+\s+)?"
@@ -154,6 +159,7 @@ def validate_message(
     *,
     require_emoji: bool,
     require_issue_key: bool = False,
+    required_scope: str | None = None,
 ) -> ValidationResult:
     message = (text or "").strip()
     if not message or message.startswith("#"):
@@ -218,6 +224,16 @@ def validate_message(
     if len(description) < 3:
         return ValidationResult(ok=False, error="Descricao muito curta.")
 
+    scope = (match.group("scope") or "").strip()
+    if required_scope and scope != required_scope:
+        return ValidationResult(
+            ok=False,
+            error=(
+                f"Scope obrigatorio: '{required_scope}'. Exemplo: "
+                f"'📝 docs({required_scope}): DOT-179 documentar regra'."
+            ),
+        )
+
     if require_issue_key:
         jira_keys = JIRA_KEY_RE.findall(first_line)
         if not jira_keys:
@@ -237,12 +253,54 @@ def validate_message(
     return ValidationResult(ok=True)
 
 
-def validate_branch_name(branch: str) -> ValidationResult:
+def normalize_repo_path(path: str) -> str:
+    normalized = (path or "").strip().replace("\\", "/")
+    if normalized.startswith("./"):
+        return normalized[2:]
+    return normalized
+
+
+def requires_prompt_prefix(paths: list[str]) -> bool:
+    return any(normalize_repo_path(path).startswith(PROMPT_PATH_PREFIX) for path in paths)
+
+
+def branch_uses_prompt_prefix(branch: str) -> bool:
+    branch_name = (branch or "").strip()
+    return branch_name.startswith(f"{PROMPT_BRANCH_TYPE}/")
+
+
+def required_scope_for_paths_and_branch(paths: list[str], branch: str = "") -> str | None:
+    if requires_prompt_prefix(paths) or branch_uses_prompt_prefix(branch):
+        return PROMPT_SCOPE
+    return None
+
+
+def parse_paths_json(raw_json: str | None) -> list[str]:
+    if not raw_json:
+        return []
+    try:
+        payload = json.loads(raw_json)
+    except json.JSONDecodeError as exc:
+        raise ValueError(f"JSON invalido em --paths-json: {exc.msg}") from exc
+    if not isinstance(payload, list):
+        raise ValueError("--paths-json deve receber uma lista JSON de strings.")
+    paths: list[str] = []
+    for entry in payload:
+        if not isinstance(entry, str):
+            raise ValueError("--paths-json deve receber apenas strings.")
+        normalized = normalize_repo_path(entry)
+        if normalized:
+            paths.append(normalized)
+    return paths
+
+
+def validate_branch_name(branch: str, *, require_prompt_type: bool = False) -> ValidationResult:
     branch_name = (branch or "").strip()
     if not branch_name:
         return ValidationResult(ok=False, error="Branch vazia.")
     if branch_name.startswith(("dependabot/", "renovate/")):
         return ValidationResult(ok=True)
+    branch_label = "<type>/<jira-key>-<slug>"
 
     canonical_pattern = re.compile(
         r"^(?P<type>[a-z]+)(?:\([^\)]+\))?/"
@@ -258,7 +316,7 @@ def validate_branch_name(branch: str) -> ValidationResult:
             return ValidationResult(
                 ok=False,
                 error=(
-                    "Branch deve seguir '<type>/<jira-key>-<slug>' "
+                    f"Branch deve seguir '{branch_label}' "
                     "(ex: feat/DOT-81-git-traceability)."
                 ),
             )
@@ -272,12 +330,21 @@ def validate_branch_name(branch: str) -> ValidationResult:
             error=f"Tipo de branch invalido: '{branch_type}'. Tipos permitidos: {valid}.",
         )
 
+    if require_prompt_type and branch_type != PROMPT_BRANCH_TYPE:
+        return ValidationResult(
+            ok=False,
+            error=(
+                "Mudancas em .agents/prompts exigem branch com prefixo 'prompt'. "
+                f"Use '{PROMPT_BRANCH_TYPE}/DOT-179-slug'."
+            ),
+        )
+
     if legacy_match and not canonical_pattern.match(branch_name):
         return ValidationResult(
             ok=True,
             warning=(
                 "Branch legada aceita temporariamente sem chave Jira. Novo "
-                "padrao canonico: '<type>/<jira-key>-<slug>'."
+                f"padrao canonico: '{branch_label}'."
             ),
         )
     return ValidationResult(ok=True)
@@ -305,11 +372,22 @@ def main(argv: list[str]) -> int:
     parser.add_argument("--validate-many-json", default=None)
     parser.add_argument("--require-emoji", action="store_true")
     parser.add_argument("--require-issue-key", action="store_true")
+    parser.add_argument("--require-scope", default="")
+    parser.add_argument("--paths-json", default="")
+    parser.add_argument("--branch", default="")
     parser.add_argument("--validate-branch", default=None)
     args = parser.parse_args(argv)
 
     if args.validate_branch is not None:
-        result = validate_branch_name(args.validate_branch)
+        try:
+            changed_paths = parse_paths_json(args.paths_json)
+        except ValueError as exc:
+            _print_error_block("INPUT INVALIDO", f"│ {str(exc):<63} │")
+            return 2
+        result = validate_branch_name(
+            args.validate_branch,
+            require_prompt_type=requires_prompt_prefix(changed_paths),
+        )
         if result.ok:
             if result.warning:
                 print(result.warning, file=sys.stderr)
@@ -336,14 +414,37 @@ def main(argv: list[str]) -> int:
 
         failed = False
         for subject in subjects:
+            paths: list[str] = []
+            if isinstance(subject, dict):
+                entry_subject = subject.get("subject") or subject.get("message") or ""
+                entry_paths = subject.get("paths") or []
+                if not isinstance(entry_subject, str):
+                    failed = True
+                    print(f"❌ Item invalido (subject ausente): {subject!r}", file=sys.stderr)
+                    continue
+                if not isinstance(entry_paths, list) or any(
+                    not isinstance(path, str) for path in entry_paths
+                ):
+                    failed = True
+                    print(
+                        f"❌ Item invalido (paths ausentes ou invalidos): {subject!r}",
+                        file=sys.stderr,
+                    )
+                    continue
+                paths = [normalize_repo_path(path) for path in entry_paths if path.strip()]
+                subject = entry_subject
             if not isinstance(subject, str):
                 failed = True
                 print(f"❌ Item invalido (nao-string): {subject!r}", file=sys.stderr)
                 continue
+            required_scope = args.require_scope or required_scope_for_paths_and_branch(
+                paths, args.branch
+            )
             result = validate_message(
                 subject,
                 require_emoji=args.require_emoji,
                 require_issue_key=args.require_issue_key,
+                required_scope=required_scope or None,
             )
             if not result.ok:
                 failed = True
@@ -373,10 +474,19 @@ def main(argv: list[str]) -> int:
         return 0
 
     if mode_validate:
+        try:
+            changed_paths = parse_paths_json(args.paths_json)
+        except ValueError as exc:
+            _print_error_block("INPUT INVALIDO", f"│ {str(exc):<63} │")
+            return 2
+        required_scope = args.require_scope or required_scope_for_paths_and_branch(
+            changed_paths, args.branch
+        )
         result = validate_message(
             text,
             require_emoji=args.require_emoji,
             require_issue_key=args.require_issue_key,
+            required_scope=required_scope or None,
         )
         if result.ok:
             return 0

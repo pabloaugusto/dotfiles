@@ -18,6 +18,24 @@ Cada pack formal em [`formal/`](formal/) deve expor:
 - um arquivo de contexto, como [`context.md`](formal/pea-startup-governance/context.md)
 - metadados declarativos, como [`meta.yaml`](formal/pea-startup-governance/meta.yaml)
 - uma pasta de fragmentos reutilizaveis, como [`fragments/`](formal/pea-startup-governance/fragments/)
+- `task_id` estavel em [`meta.yaml`](formal/pea-startup-governance/meta.yaml),
+  sempre no formato `prompt/<slug>`
+- quando houver `owner_issue`, um bloco `jira` em
+  [`meta.yaml`](formal/pea-startup-governance/meta.yaml) com
+  `summary_prefix: "PROMPT:"` e `required_labels` contendo `prompt`
+
+## Naming operacional obrigatorio
+
+Quando a rodada tocar qualquer arquivo versionado em [`.agents/prompts/`](./):
+
+- o pack formal deve declarar `task_id: prompt/<slug>` em
+  [`meta.yaml`](formal/pea-startup-governance/meta.yaml)
+- a branch deve usar tipo `prompt`, no formato `prompt/<jira-key>-<slug>`
+- commit e `PR title` devem continuar no contrato `emoji + conventional`, mas
+  com `scope` obrigatorio `prompt`
+- a issue Jira dona da rodada deve usar titulo com prefixo `PROMPT:` e carregar
+  a label `prompt`
+- hooks locais, tasks e CI devem validar esse namespace de forma contextual
 
 ## Regras
 

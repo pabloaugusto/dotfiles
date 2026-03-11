@@ -202,6 +202,9 @@ No fluxo vivo deste repo:
 - `Jira` e a fonte primaria do estado operacional
 - [`AI-WIP-TRACKER.md`](AI-WIP-TRACKER.md) funciona como fallback contingencial do repo
 - cada branch, commit e PR precisa apontar para uma unica **issue** Jira real
+- mudancas em [`.agents/prompts/`](.agents/prompts/) exigem branch `prompt`,
+  `task_id` `prompt/<slug>`, `scope` `prompt` em commit e `PR title`, alem de
+  issue Jira dona com titulo `PROMPT: ...` e label `prompt`
 - commits devem ser atomicos, contextualizados e preferencialmente auto-testaveis
 - retomada de demanda antiga deve abrir branch nova a partir de `main`, salvo
   evidencia objetiva de que a branch anterior ainda e a trilha correta
@@ -283,6 +286,12 @@ A estrutura canonica dessa arvore passa a ser:
 - [`.agents/prompts/CATALOG.md`](.agents/prompts/CATALOG.md)
 - [`.agents/prompts/legacy/`](.agents/prompts/legacy/) para historico
 - [`.agents/prompts/formal/`](.agents/prompts/formal/) para packs vivos e executaveis
+
+Cada pack formal vivo deve declarar `task_id: prompt/<slug>` em
+[`meta.yaml`](.agents/prompts/README.md), e a rodada Git correspondente deve
+usar o namespace `prompt` em branch, commit e `PR title`; quando houver
+`owner_issue`, o `meta.yaml` tambem deve declarar `jira.summary_prefix:
+"PROMPT:"` e `jira.required_labels` contendo `prompt`.
 
 ### Camada 2.1. Registry declarativo do repo
 

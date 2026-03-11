@@ -47,7 +47,8 @@ jobs:
         if: github.event_name == 'pull_request'
         env:
           PR_TITLE: ${{ github.event.pull_request.title }}
-        run: task ci:pr:title:check PR_TITLE="${PR_TITLE}"
+          BRANCH: ${{ github.head_ref }}
+        run: task ci:pr:title:check PR_TITLE="${PR_TITLE}" BRANCH="${BRANCH}"
 
       - name: Collect commit range
         id: commit_range
@@ -79,13 +80,15 @@ jobs:
       - name: Validate commit subjects
         env:
           RANGE: ${{ steps.commit_range.outputs.range }}
-        run: task ci:commits:check RANGE="${RANGE}"
+          BRANCH: ${{ github.event_name == 'pull_request' && github.head_ref || github.ref_name }}
+        run: task ci:commits:check RANGE="${RANGE}" BRANCH="${BRANCH}"
 
       - name: Validate branch name
         if: github.event_name == 'pull_request'
         env:
           HEAD_REF: ${{ github.head_ref }}
-        run: task ci:branch:check BRANCH="${HEAD_REF}"
+          RANGE: ${{ steps.commit_range.outputs.range }}
+        run: task ci:branch:check BRANCH="${HEAD_REF}" RANGE="${RANGE}"
 
       - name: Run governance unit tests
         run: task test:unit:python:linux

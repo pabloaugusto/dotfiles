@@ -1,8 +1,13 @@
 id: pea-startup-governance
+task_id: prompt/pea-startup-governance
 title: Prompt pack canonico de PEA e startup
 status: active
 owner_epic: DOT-71
 owner_issue: DOT-178
+jira:
+  summary_prefix: "PROMPT:"
+  required_labels:
+    - prompt
 entrypoints:
   prompt: prompt.md
   context: context.md

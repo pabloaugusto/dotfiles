@@ -25,6 +25,8 @@ Regras obrigatorias:
 - emoji semantico obrigatorio
 - `type` precisa existir na biblioteca oficial do repo
 - `scope` e opcional, mas recomendado quando melhora clareza
+- quando o diff tocar [`.agents/prompts/`](../.agents/prompts/), `scope`
+  passa a ser obrigatorio e deve ser `prompt`
 - o subject precisa carregar uma unica chave Jira real
 - titulo/subject com maximo recomendado de `72` caracteres
 - descricao curta, objetiva e sem ponto final
@@ -36,6 +38,7 @@ Exemplos validos:
 
 ```text
 ✨ feat(test-harness): DOT-81 add branch and commit validators
+📝 docs(prompt): DOT-179 document prompt namespace governance
 🐛 fix(bootstrap): DOT-24 preserve canonical projects path
 📝 docs(git): DOT-130 document semantic Jira policy
 ♻️ refactor(taskfile): DOT-130 split governance checks by platform
@@ -83,6 +86,7 @@ Tipos aceitos para branch:
 - `feat`
 - `fix`
 - `docs`
+- `prompt`
 - `refactor`
 - `perf`
 - `test`
@@ -101,6 +105,7 @@ Exemplos validos:
 
 ```text
 feat/DOT-81-test-harness-hybrid
+prompt/DOT-179-agnostic-sync-outbox-foundation
 fix/DOT-24-windows-relink-regression
 docs/DOT-130-bootstrap-config-reference
 refactor/DOT-130-bootstrap-path-normalization
@@ -118,6 +123,9 @@ Excecoes aceitas:
 - cada branch deve carregar um unico contexto coerente
 - nao misturar temas independentes na mesma branch
 - commits devem ser pequenos, semanticamente coesos e ligados a uma unica **issue**
+- quando a rodada tocar [`.agents/prompts/`](../.agents/prompts/), a branch deve
+  usar tipo `prompt`, commit/`PR title` devem usar `scope` `prompt` e a issue
+  Jira dona deve usar titulo `PROMPT: ...` com label `prompt`
 - quando a demanda antiga precisar ser retomada, abrir branch nova a partir de `main`, salvo evidencia objetiva de que a branch anterior ainda e a trilha correta
 - apos merge ou absorcao em `main`, podar branches e worktrees desnecessarias o quanto antes
 

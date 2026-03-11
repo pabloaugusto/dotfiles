@@ -215,6 +215,7 @@ Toda finalizacao de worklog deve registrar se houve nova licao.
 <!-- ai-lessons:reviews:start -->
 | Data/Hora UTC | Worklog ID | Decisao | Resumo | Licoes | Evidencia |
 | --- | --- | --- | --- | --- | --- |
+| 2026-03-11 19:45 UTC | WIP-20260311-183919 | sem_nova_licao | A rodada endureceu e automatizou contratos permanentes do namespace prompt, sem revelar licao perene nova alem do proprio artefato entregue. | - | commit=ab59d7f; commit=24c5f44; pr=https://github.com/pabloaugusto/dotfiles/pull/44; task ai:validate=ok; task ci:workflow:sync:check=ok; task ai:prompts:jira:check=ok; targeted unittest=ok |
 | 2026-03-11 15:56 UTC | WIP-DOT-178 | sem_nova_licao | A rodada promoveu os contratos diretamente para docs, startup e validadores; nao houve licao adicional alem do proprio artefato entregue. | - | PR #41 mergeado em main; task ai:startup:session com pea_status=ok |
 | 2026-03-11 14:40 UTC | WIP-DOT-177 | sem_nova_licao | Sem nova licao perene nesta fatia; a distincao startup-versus-enforcement ficou absorvida nos contratos entregues pela propria DOT-177. | - | - |
 | 2026-03-11 13:18 UTC | WIP-DOT-175-CLOSEOUT | sem_nova_licao | Sem nova licao nesta fatia; o gap de memoria operacional do fallback GitHub sera tratado em work item proprio sob DOT-71. | - | PR=[#38](https://github.com/pabloaugusto/dotfiles/pull/38); commit=3bef3e0; python -m unittest tests.python.ai_assets_validator_test=ok; task ai:validate=ok; task docs:check=ok; task ai:eval:smoke=ok; task type:check=ok; tas... |
