@@ -5,7 +5,7 @@ param (
 
 $ErrorActionPreference = 'Stop'
 
-. (Join-Path $RepoRoot 'df\powershell\_functions.ps1')
+. (Join-Path $RepoRoot 'app\df\powershell\_functions.ps1')
 
 function Get-NormalizedPath {
 	param ([string]$PathValue)
@@ -104,17 +104,17 @@ try {
 	}
 
 	Set-ProcessOverrides -Items $overrides
-	. (Join-Path $RepoRoot 'bootstrap\bootstrap-windows.ps1') -RelinkOnly
+	. (Join-Path $RepoRoot 'app\bootstrap\bootstrap-windows.ps1') -RelinkOnly
 	Set-ProcessOverrides -Items $overrides
-	. (Join-Path $RepoRoot 'bootstrap\bootstrap-windows.ps1') -RelinkOnly
+	. (Join-Path $RepoRoot 'app\bootstrap\bootstrap-windows.ps1') -RelinkOnly
 
-	Assert-LinkTarget -Path (Join-Path $profileRoot '.ssh') -ExpectedTarget (Join-Path $RepoRoot 'df\ssh')
-	Assert-LinkTarget -Path (Join-Path $profileRoot '.assets') -ExpectedTarget (Join-Path $RepoRoot 'df\assets')
-	Assert-LinkTarget -Path (Join-Path $profileRoot '.config\git') -ExpectedTarget (Join-Path $RepoRoot 'df\git')
-	Assert-LinkTarget -Path (Join-Path $profileRoot '.oh-my-posh') -ExpectedTarget (Join-Path $RepoRoot 'df\oh-my-posh')
-	Assert-LinkTarget -Path (Join-Path $documentsPath 'Powershell\profile.ps1') -ExpectedTarget (Join-Path $RepoRoot 'df\powershell\profile.ps1')
-	Assert-LinkTarget -Path (Join-Path $documentsPath 'WindowsPowerShell\Microsoft.PowerShell_profile.ps1') -ExpectedTarget (Join-Path $RepoRoot 'df\powershell\Microsoft.PowerShell_profile.ps1')
-	Assert-LinkTarget -Path $codeUserPath -ExpectedTarget (Join-Path $RepoRoot 'df\vscode')
+	Assert-LinkTarget -Path (Join-Path $profileRoot '.ssh') -ExpectedTarget (Join-Path $RepoRoot 'app\df\ssh')
+	Assert-LinkTarget -Path (Join-Path $profileRoot '.assets') -ExpectedTarget (Join-Path $RepoRoot 'app\df\assets')
+	Assert-LinkTarget -Path (Join-Path $profileRoot '.config\git') -ExpectedTarget (Join-Path $RepoRoot 'app\df\git')
+	Assert-LinkTarget -Path (Join-Path $profileRoot '.oh-my-posh') -ExpectedTarget (Join-Path $RepoRoot 'app\df\oh-my-posh')
+	Assert-LinkTarget -Path (Join-Path $documentsPath 'Powershell\profile.ps1') -ExpectedTarget (Join-Path $RepoRoot 'app\df\powershell\profile.ps1')
+	Assert-LinkTarget -Path (Join-Path $documentsPath 'WindowsPowerShell\Microsoft.PowerShell_profile.ps1') -ExpectedTarget (Join-Path $RepoRoot 'app\df\powershell\Microsoft.PowerShell_profile.ps1')
+	Assert-LinkTarget -Path $codeUserPath -ExpectedTarget (Join-Path $RepoRoot 'app\df\vscode')
 
 	foreach ($localPath in @('bin', 'etc', 'clients', 'projects')) {
 		$fullPath = Join-Path $profileRoot $localPath

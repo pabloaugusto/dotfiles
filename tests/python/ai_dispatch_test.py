@@ -16,7 +16,7 @@ class AiDispatchTests(unittest.TestCase):
     def test_route_payload_includes_bootstrap_and_guardrails(self) -> None:
         payload = build_route_payload(
             intent="Recriar relink do bootstrap do Windows",
-            paths=["bootstrap/bootstrap-windows.ps1"],
+            paths=["app/bootstrap/bootstrap-windows.ps1"],
             risk="high",
         )
         self.assertIn("bootstrap-operator", payload["task_card"]["required_agents"])

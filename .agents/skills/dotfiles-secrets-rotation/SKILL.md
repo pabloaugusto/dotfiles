@@ -15,9 +15,9 @@ repos e secrets do ambiente.
 1. Ler [`AGENTS.md`](AGENTS.md), [`LICOES-APRENDIDAS.md`](LICOES-APRENDIDAS.md),
    [`docs/secrets-and-auth.md`](docs/secrets-and-auth.md) e
    [`docs/checkenv.md`](docs/checkenv.md).
-2. Inventariar as refs canonicas em [`df/secrets/secrets-ref.yaml`](df/secrets/secrets-ref.yaml),
-   os templates em [`bootstrap/secrets/.env.local.tpl`](bootstrap/secrets/.env.local.tpl)
-   e a politica `sops+age` em [`df/secrets/dotfiles.sops.yaml`](df/secrets/dotfiles.sops.yaml).
+2. Inventariar as refs canonicas em [`app/df/secrets/secrets-ref.yaml`](app/df/secrets/secrets-ref.yaml),
+   os templates em [`app/bootstrap/secrets/.env.local.tpl`](app/bootstrap/secrets/.env.local.tpl)
+   e a politica `sops+age` em [`app/df/secrets/dotfiles.sops.yaml`](app/df/secrets/dotfiles.sops.yaml).
 3. Classificar cada alvo como `fully_automated`, `assisted` ou `manual_blocked`
    com base em suporte oficial do provedor.
 4. Montar um plano ordenado que preserve a credencial antiga ate a nova estar

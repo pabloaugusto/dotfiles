@@ -39,10 +39,10 @@ PENDING_ACTION_GUIDANCE = {
 }
 PYTHON_REVIEW_PATHS = ["scripts/*.py", "tests/python/*", ".githooks/ci/*.py", "pyproject.toml"]
 POWERSHELL_REVIEW_PATHS = [
-    "bootstrap/*.ps1",
-    "bootstrap/**/*.ps1",
-    "df/powershell/*.ps1",
-    "df/powershell/**/*.ps1",
+    "app/bootstrap/*.ps1",
+    "app/bootstrap/**/*.ps1",
+    "app/df/powershell/*.ps1",
+    "app/df/powershell/**/*.ps1",
     "scripts/*.ps1",
     "scripts/**/*.ps1",
     "tests/powershell/*.ps1",
@@ -56,8 +56,8 @@ AUTOMATION_REVIEW_PATHS = [
     "docker/**",
     "scripts/*.sh",
     "scripts/**/*.sh",
-    "bootstrap/*.sh",
-    "bootstrap/**/*.sh",
+    "app/bootstrap/*.sh",
+    "app/bootstrap/**/*.sh",
     "tests/bash/*",
     ".githooks/*",
 ]
@@ -334,7 +334,7 @@ def build_validation_plan(paths: list[str], intent: str) -> list[str]:
         "task ai:eval:smoke",
     ]
 
-    if path_matches(["bootstrap/**", "df/**"], paths) or keyword_matches(
+    if path_matches(["app/bootstrap/**", "app/df/**"], paths) or keyword_matches(
         ["bootstrap", "relink", "refresh", "symlink", "checkEnv"], intent
     ):
         validations.extend(["task test:integration", "task ci:lint", "task env:check"])

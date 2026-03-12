@@ -11,7 +11,7 @@ Camada de testes atual do repositorio.
   workflow-task-doc e wrappers de tooling.
 - [`tests/bash/`](tests/bash/): testes Bats para harnesses Linux do bootstrap.
 - [`tests/fixtures/`](tests/fixtures/): fixtures auxiliares para cenarios de teste que nao devem
-  viver em [`df/`](df/).
+  viver em [`app/df/`](app/df/).
 
 ## Camadas em uso
 
@@ -38,10 +38,10 @@ Escopo atual:
 Harnesses atuais:
 
 - [`tests/bash/bootstrap_relink_integration.bats`](tests/bash/bootstrap_relink_integration.bats)
-  - valida o script [`bootstrap/bootstrap-ubuntu-wsl.sh`](../bootstrap/bootstrap-ubuntu-wsl.sh) com o argumento `relink`
+  - valida o script [`app/bootstrap/bootstrap-ubuntu-wsl.sh`](../app/bootstrap/bootstrap-ubuntu-wsl.sh) com o argumento `relink`
   - usa `HOME` temporario e repo injetado por `DOTFILES_REPO_ROOT_UNIX`
 - [`scripts/run-windows-bootstrap-integration.ps1`](scripts/run-windows-bootstrap-integration.ps1)
-  - valida o script [`bootstrap/bootstrap-windows.ps1`](../bootstrap/bootstrap-windows.ps1) com a flag `-RelinkOnly`
+  - valida o script [`app/bootstrap/bootstrap-windows.ps1`](../app/bootstrap/bootstrap-windows.ps1) com a flag `-RelinkOnly`
   - usa perfil temporario, `Documents` isolado e repo injetado no Windows real
 
 ### CI canonico
@@ -57,7 +57,7 @@ Harnesses atuais:
 - Primeiro testar funcao pura.
 - Depois validar harness de integracao.
 - E2E sensivel com segredos reais fica fora do PR CI.
-- [`df/`](df/) nao deve receber fixtures, scratch ou material de teste.
+- [`app/df/`](app/df/) nao deve receber fixtures, scratch ou material de teste.
 
 ## Comandos uteis
 

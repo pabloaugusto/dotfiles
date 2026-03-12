@@ -176,15 +176,15 @@ class ValidateDocsTest(unittest.TestCase):
     def test_detects_plain_repo_path_without_link(self) -> None:
         with tempfile.TemporaryDirectory() as tmp_dir:
             root = Path(tmp_dir)
-            target = root / "bootstrap" / "_start.ps1"
+            target = root / "app" / "bootstrap" / "_start.ps1"
             target.parent.mkdir(parents=True, exist_ok=True)
             target.write_text("# noop\n", encoding="utf-8")
             markdown = root / "README.md"
             markdown.write_text(
-                "Bootstrap Windows: bootstrap/_start.ps1 -> bootstrap/bootstrap-windows.ps1\n",
+                "Bootstrap Windows: app/bootstrap/_start.ps1 -> app/bootstrap/bootstrap-windows.ps1\n",
                 encoding="utf-8",
             )
-            second_target = root / "bootstrap" / "bootstrap-windows.ps1"
+            second_target = root / "app" / "bootstrap" / "bootstrap-windows.ps1"
             second_target.write_text("# noop\n", encoding="utf-8")
 
             original_root = validate_docs.ROOT
@@ -202,8 +202,8 @@ class ValidateDocsTest(unittest.TestCase):
                 validate_docs._repo_root_entries.cache_clear()
 
         self.assertEqual(len(errors), 2)
-        self.assertIn("bootstrap/_start.ps1", errors[0] + errors[1])
-        self.assertIn("bootstrap/bootstrap-windows.ps1", errors[0] + errors[1])
+        self.assertIn("app/bootstrap/_start.ps1", errors[0] + errors[1])
+        self.assertIn("app/bootstrap/bootstrap-windows.ps1", errors[0] + errors[1])
 
     def test_detects_external_url_without_link(self) -> None:
         with tempfile.TemporaryDirectory() as tmp_dir:
@@ -278,10 +278,10 @@ class ValidateDocsTest(unittest.TestCase):
     def test_detects_repoish_path_even_when_target_file_is_local_only(self) -> None:
         with tempfile.TemporaryDirectory() as tmp_dir:
             root = Path(tmp_dir)
-            (root / "bootstrap").mkdir(parents=True, exist_ok=True)
+            (root / "app" / "bootstrap").mkdir(parents=True, exist_ok=True)
             markdown = root / "README.md"
             markdown.write_text(
-                "Arquivo local ignorado: `bootstrap/user-config.yaml`\n",
+                "Arquivo local ignorado: `app/bootstrap/user-config.yaml`\n",
                 encoding="utf-8",
             )
 
@@ -300,7 +300,7 @@ class ValidateDocsTest(unittest.TestCase):
                 validate_docs._repo_root_entries.cache_clear()
 
         self.assertEqual(len(errors), 1)
-        self.assertIn("bootstrap/user-config.yaml", errors[0])
+        self.assertIn("app/bootstrap/user-config.yaml", errors[0])
 
 
 if __name__ == "__main__":

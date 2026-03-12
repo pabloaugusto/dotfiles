@@ -8,12 +8,12 @@ inline seguros (JSON/TOML/etc.) ou que devem permanecer enxutos.
 - documentar significado de chaves sem quebrar sintaxe de consumidores
 - reduzir custo de manutenção para humanos e agentes de IA
 
-## [`bootstrap/user-config.yaml`](../bootstrap/user-config.yaml.tpl)
+## [`app/bootstrap/user-config.yaml`](../app/bootstrap/user-config.yaml.tpl)
 
 Uso:
 
 - fonte única local de configuração do bootstrap (wizard + sincronização de derivados),
-  criada localmente a partir de [`bootstrap/user-config.yaml.tpl`](../bootstrap/user-config.yaml.tpl)
+  criada localmente a partir de [`app/bootstrap/user-config.yaml.tpl`](../app/bootstrap/user-config.yaml.tpl)
 
 Pontos críticos (OneDrive Windows):
 
@@ -27,7 +27,7 @@ Pontos críticos (OneDrive Windows):
 
 Observação:
 
-- mudanças nesses campos impactam diretamente [`bootstrap/bootstrap-windows.ps1`](../bootstrap/bootstrap-windows.ps1),
+- mudanças nesses campos impactam diretamente [`app/bootstrap/bootstrap-windows.ps1`](../app/bootstrap/bootstrap-windows.ps1),
   incluindo os gates de validação pós-bootstrap.
 
 Pontos críticos (Git/signing):
@@ -41,7 +41,7 @@ Pontos críticos (Git/signing):
 Uso:
 
 - fonte de verdade dev-time para plataformas externas da camada de IA
-- separada de [`bootstrap/`](../bootstrap/) e [`df/`](../df/) por nao ser
+- separada de [`app/bootstrap/`](../app/bootstrap/) e [`app/df/`](../app/df/) por nao ser
   runtime materializado na maquina
 - intencionalmente generica para que outros repos consumam o mesmo contrato
   sem herdar refs do `dotfiles`
@@ -209,7 +209,7 @@ Pontos criticos:
 - `Jira Product Discovery` segue tratado como extensao operacional do spec de
   `Jira Cloud` enquanto nao houver spec publico separado
 
-## [`df/windows-terminal/settings.json`](../df/windows-terminal/settings.json)
+## [`app/df/windows-terminal/settings.json`](../app/df/windows-terminal/settings.json)
 
 Uso:
 
@@ -222,7 +222,7 @@ Pontos críticos:
 - fonte Nerd Font compatível com prompt
 - actions/keybindings que impactam produtividade diária
 
-## [`df/vscode/settings.json`](../df/vscode/settings.json)
+## [`app/df/vscode/settings.json`](../app/df/vscode/settings.json)
 
 Uso:
 
@@ -234,7 +234,7 @@ Pontos críticos:
 - terminal default profile
 - opções que afetam desempenho de workspace grande
 
-## [`df/vscode/keybindings.json`](../df/vscode/keybindings.json)
+## [`app/df/vscode/keybindings.json`](../app/df/vscode/keybindings.json)
 
 Uso:
 
@@ -245,7 +245,7 @@ Pontos críticos:
 - atalhos que colidem com defaults do VS Code
 - atalhos críticos de navegação/build
 
-## [`df/vscode/mcp.json`](../df/vscode/mcp.json)
+## [`app/df/vscode/mcp.json`](../app/df/vscode/mcp.json)
 
 Uso:
 
@@ -257,7 +257,7 @@ Pontos críticos:
 - caminhos locais válidos
 - políticas de segurança para ferramentas externas
 
-## [`df/oh-my-posh/pablo.omp.json`](../df/oh-my-posh/pablo.omp.json)
+## [`app/df/oh-my-posh/pablo.omp.json`](../app/df/oh-my-posh/pablo.omp.json)
 
 Uso:
 
@@ -268,7 +268,7 @@ Pontos críticos:
 - performance do prompt (segmentos caros)
 - ícones/fonte compatível no terminal
 
-## [`df/config/atuin/config.toml`](../df/config/atuin/config.toml)
+## [`app/df/config/atuin/config.toml`](../app/df/config/atuin/config.toml)
 
 Uso:
 
@@ -279,7 +279,7 @@ Pontos críticos:
 - política de sync
 - retenção e privacidade do histórico
 
-## [`df/secrets/dotfiles.sops.yaml`](../df/secrets/dotfiles.sops.yaml)
+## [`app/df/secrets/dotfiles.sops.yaml`](../app/df/secrets/dotfiles.sops.yaml)
 
 Uso:
 

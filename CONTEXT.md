@@ -18,26 +18,26 @@ Com foco em:
 
 ## Estrutura principal
 
-- `bootstrap/`: entrypoints e fluxo de provisionamento.
-- `df/powershell/`: perfil e utilitários Windows.
-- `df/bash/`, `df/zsh/`, `df/.aliases`: shell Unix/WSL.
-- `df/git/`: config Git base + overlays por ambiente.
-- `df/ssh/`: política SSH global + variações por SO.
-- `df/secrets/`: refs e política `sops`.
+- `app/bootstrap/`: entrypoints e fluxo de provisionamento.
+- `app/df/powershell/`: perfil e utilitários Windows.
+- `app/df/bash/`, `app/df/zsh/`, `app/df/.aliases`: shell Unix/WSL.
+- `app/df/git/`: config Git base + overlays por ambiente.
+- `app/df/ssh/`: política SSH global + variações por SO.
+- `app/df/secrets/`: refs e política `sops`.
 - `docs/`: documentação detalhada por domínio.
 
 ## Fluxo Windows (canônico)
 
-1. `bootstrap/_start.ps1`
-2. valida config YAML (`bootstrap/bootstrap-config.ps1`)
-3. executa `bootstrap/bootstrap-windows.ps1`
+1. `app/bootstrap/_start.ps1`
+2. valida config YAML (`app/bootstrap/bootstrap-config.ps1`)
+3. executa `app/bootstrap/bootstrap-windows.ps1`
 4. gera runtime env cifrado (`~/.env.local.sops`)
 5. autentica `gh`
 6. roda `checkEnv`
 
 ## Fluxo WSL (canônico)
 
-1. `bootstrap/bootstrap-ubuntu-wsl.sh`
+1. `app/bootstrap/bootstrap-ubuntu-wsl.sh`
 2. instala base (`apt` + Homebrew)
 3. cria symlinks e prepara shell
 4. gera runtime env cifrado
@@ -48,14 +48,14 @@ Com foco em:
 
 Fonte única local:
 
-- `bootstrap/user-config.yaml` (ignorado)
-- template versionado: `bootstrap/user-config.yaml.tpl`
+- `app/bootstrap/user-config.yaml` (ignorado)
+- template versionado: `app/bootstrap/user-config.yaml.tpl`
 
 Derivados automáticos:
 
-- `df/secrets/secrets-ref.yaml`
-- `bootstrap/secrets/.env.local.tpl`
-- `df/git/.gitconfig.local`
+- `app/df/secrets/secrets-ref.yaml`
+- `app/bootstrap/secrets/.env.local.tpl`
+- `app/df/git/.gitconfig.local`
 
 ## Segurança operacional
 

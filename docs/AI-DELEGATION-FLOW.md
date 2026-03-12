@@ -28,7 +28,7 @@
 
 ## Roteamento por escopo
 
-- [`../bootstrap/`](../bootstrap/) e [`../df/`](../df/) -> `bootstrap-operator`
+- [`../app/bootstrap/`](../app/bootstrap/) e [`../app/df/`](../app/df/) -> `bootstrap-operator`
 - [`../AGENTS.md`](../AGENTS.md), [`../.agents/`](../.agents/), [`../.codex/README.md`](../.codex/README.md) e [`./`](./) -> `repo-governance-authority`
 - [`AI-WIP-TRACKER.md`](AI-WIP-TRACKER.md), [`../ROADMAP.md`](../ROADMAP.md), [`ROADMAP-DECISIONS.md`](ROADMAP-DECISIONS.md) e [`../scripts/ai-worklog.py`](../scripts/ai-worklog.py) -> `execution-worklog-governance-owner`
 - startup do zero, restart, `startup clearance` e first-response gate -> `ai-startup-governor`

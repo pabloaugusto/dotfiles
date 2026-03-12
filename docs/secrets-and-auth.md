@@ -12,7 +12,7 @@ Este guia descreve o modelo de segurança/autenticação usado pelos dotfiles.
 
 ## Refs de segredo
 
-Fonte canônica: [`df/secrets/secrets-ref.yaml`](../df/secrets/secrets-ref.yaml) (gerado do YAML central).
+Fonte canônica: [`app/df/secrets/secrets-ref.yaml`](../app/df/secrets/secrets-ref.yaml) (gerado do YAML central).
 
 Refs principais:
 
@@ -21,17 +21,17 @@ Refs principais:
 - `op://secrets/github/api/token` (primeiro fallback)
 - `op://Personal/github/token-full-access` (contingencia final)
 - `op://secrets/dotfiles/age/age.key`
-- `git-signing.automation-public-key` em [`df/secrets/secrets-ref.yaml`](../df/secrets/secrets-ref.yaml) quando o signer tecnico estiver configurado
+- `git-signing.automation-public-key` em [`app/df/secrets/secrets-ref.yaml`](../app/df/secrets/secrets-ref.yaml) quando o signer tecnico estiver configurado
 
 ## Fronteira runtime x dev-time
 
 Nem todo ref do repo pertence ao runtime do bootstrap.
 
-- [`df/secrets/secrets-ref.yaml`](../df/secrets/secrets-ref.yaml): runtime do
+- [`app/df/secrets/secrets-ref.yaml`](../app/df/secrets/secrets-ref.yaml): runtime do
   ambiente materializado na maquina
 - [`config/ai/platforms.yaml`](../config/ai/platforms.yaml): control plane
-  dev-time da camada de IA, desacoplada de [`bootstrap/`](../bootstrap/) e de
-  [`df/`](../df/)
+  dev-time da camada de IA, desacoplada de [`app/bootstrap/`](../app/bootstrap/) e de
+  [`app/df/`](../app/df/)
 - o overlay local derivado de
   [`config/ai/platforms.local.yaml.tpl`](../config/ai/platforms.local.yaml.tpl)
   fica ignorado no Git e guarda refs reais de `Jira`/`Confluence` sem acoplar
@@ -80,7 +80,7 @@ Regra perene:
 
 ## Runtime env cifrado
 
-Template: [`bootstrap/secrets/.env.local.tpl`](../bootstrap/secrets/.env.local.tpl)
+Template: [`app/bootstrap/secrets/.env.local.tpl`](../app/bootstrap/secrets/.env.local.tpl)
 
 Fluxo:
 
@@ -131,10 +131,10 @@ Estratégia:
 
 Arquivos:
 
-- [`df/ssh/config`](../df/ssh/config)
-- [`df/ssh/config.windows`](../df/ssh/config.windows)
-- [`df/ssh/config.unix`](../df/ssh/config.unix)
-- [diretorio `df/git/`](../df/git/)
+- [`app/df/ssh/config`](../app/df/ssh/config)
+- [`app/df/ssh/config.windows`](../app/df/ssh/config.windows)
+- [`app/df/ssh/config.unix`](../app/df/ssh/config.unix)
+- [diretorio `app/df/git/`](../app/df/git/)
 
 Políticas:
 

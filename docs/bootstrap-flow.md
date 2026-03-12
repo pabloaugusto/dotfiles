@@ -6,16 +6,16 @@ Documentacao visual e textual do fluxo atual de bootstrap, cobrindo etapas, deci
 
 Este documento cobre o processo end-to-end de:
 
-- [`bootstrap/_start.ps1`](bootstrap/_start.ps1) (entrypoint no Windows);
-- [`bootstrap/bootstrap-windows.ps1`](bootstrap/bootstrap-windows.ps1) (modos full e refresh);
-- [`bootstrap/bootstrap-ubuntu-wsl.sh`](bootstrap/bootstrap-ubuntu-wsl.sh) (fluxo WSL);
+- [`app/bootstrap/_start.ps1`](../app/bootstrap/_start.ps1) (entrypoint no Windows);
+- [`app/bootstrap/bootstrap-windows.ps1`](../app/bootstrap/bootstrap-windows.ps1) (modos full e refresh);
+- [`app/bootstrap/bootstrap-ubuntu-wsl.sh`](../app/bootstrap/bootstrap-ubuntu-wsl.sh) (fluxo WSL);
 - pre-requisito OneDrive (instalacao, setup inicial e migracao de root);
 - gates obrigatorios de conformidade (`checkEnv` e `Test-OneDriveLayoutHealth`).
 
 Limites atuais:
 
 - o menu mostra opcoes Linux/Mac no `_start.ps1`, mas o dispatch operacional real atual e focado em Windows;
-- no WSL o fluxo e executado pelo script dedicado [`bootstrap/bootstrap-ubuntu-wsl.sh`](bootstrap/bootstrap-ubuntu-wsl.sh).
+- no WSL o fluxo e executado pelo script dedicado [`app/bootstrap/bootstrap-ubuntu-wsl.sh`](../app/bootstrap/bootstrap-ubuntu-wsl.sh).
 
 ## 2) Legenda e convencoes
 
@@ -30,11 +30,11 @@ Convencoes de label:
 - `OneDrive prereq`: etapa de pre-requisito OneDrive antes das linkagens dependentes.
 - `Refresh vs Full`: desvio de comportamento por modo.
 
-## 3) Fluxo macro ([`bootstrap/_start.ps1`](bootstrap/_start.ps1))
+## 3) Fluxo macro ([`app/bootstrap/_start.ps1`](../app/bootstrap/_start.ps1))
 
 ```mermaid
 flowchart TD
-    A[Inicio: bootstrap/_start.ps1] --> B[Ensure-WinGet]
+    A[Inicio: app/bootstrap/_start.ps1] --> B[Ensure-WinGet]
     B --> C[Load bootstrap-config.ps1]
     C --> D{Ensure-BootstrapConfigReady OK?}
     D -- Nao --> D1[Aborta: config YAML incompleta ou invalida]
@@ -58,9 +58,9 @@ flowchart TD
 
 Nota importante do modo `1` (Windows full):
 
-- apos o retorno de [`bootstrap/bootstrap-windows.ps1`](bootstrap/bootstrap-windows.ps1), o `_start.ps1` ainda executa ajustes adicionais (`Set-ComputerName`, regionalizacao/explorer) e reinicia o Explorer.
+- apos o retorno de [`app/bootstrap/bootstrap-windows.ps1`](../app/bootstrap/bootstrap-windows.ps1), o `_start.ps1` ainda executa ajustes adicionais (`Set-ComputerName`, regionalizacao/explorer) e reinicia o Explorer.
 
-## 4) Subfluxo Windows ([`bootstrap/bootstrap-windows.ps1`](bootstrap/bootstrap-windows.ps1))
+## 4) Subfluxo Windows ([`app/bootstrap/bootstrap-windows.ps1`](../app/bootstrap/bootstrap-windows.ps1))
 
 ```mermaid
 flowchart TD
@@ -151,7 +151,7 @@ Regras importantes:
 - migracao automatica e best-effort, com fallback de junction para reduzir risco de quebra;
 - sem `onedrive_enabled`, o bootstrap usa layout local e nao tenta etapa OneDrive.
 
-## 6) Subfluxo WSL ([`bootstrap/bootstrap-ubuntu-wsl.sh`](bootstrap/bootstrap-ubuntu-wsl.sh))
+## 6) Subfluxo WSL ([`app/bootstrap/bootstrap-ubuntu-wsl.sh`](../app/bootstrap/bootstrap-ubuntu-wsl.sh))
 
 ```mermaid
 flowchart TD
@@ -193,18 +193,18 @@ flowchart LR
 
 | Bloco do fluxo | Arquivo | Funcoes/pontos-chave |
 |---|---|---|
-| Entry macro | [`bootstrap/_start.ps1`](bootstrap/_start.ps1) | `Ensure-WinGet`, `Ensure-BootstrapConfigReady`, `bootstrap` (menu/dispatch) |
-| Config YAML | [`bootstrap/bootstrap-config.ps1`](bootstrap/bootstrap-config.ps1) | `Ensure-BootstrapConfigReady`, `Invoke-BootstrapConfigWizard`, `Sync-BootstrapDerivedFiles` |
-| OneDrive prereq/migracao | [`bootstrap/bootstrap-windows.ps1`](bootstrap/bootstrap-windows.ps1) | `Resolve-WindowsOneDriveLayout`, `Install-OneDriveClient`, `Invoke-OneDriveJunctionMigration`, `Set-OneDriveConfiguredRoot` |
-| Linkagens Windows | [`bootstrap/bootstrap-windows.ps1`](bootstrap/bootstrap-windows.ps1) | `Resolve-WindowsLinkLayout`, `Ensure-OneDriveLayoutPaths`, `Invoke-ProfileFoldersToOneDriveLinking`, `Add-Symlink` |
-| Secrets/auth Windows | [`bootstrap/bootstrap-windows.ps1`](bootstrap/bootstrap-windows.ps1) | `Set-LocalEnvFrom1Password`, `Import-DotEnvFromSops`, `Ensure-GitHubCliAuthFrom1Password` |
-| Gate Windows | [`bootstrap/bootstrap-windows.ps1`](bootstrap/bootstrap-windows.ps1) + [`df/powershell/_functions.ps1`](df/powershell/_functions.ps1) | `checkEnv`, `Test-OneDriveLayoutHealth` |
-| Fluxo WSL | [`bootstrap/bootstrap-ubuntu-wsl.sh`](bootstrap/bootstrap-ubuntu-wsl.sh) | `setup_prompt`, `install_software`, `setProfileSymlinks`, `ensureOpToken`, `setLocalEnvFile`, `ensureGitHubAuth`, `checkEnv` |
+| Entry macro | [`app/bootstrap/_start.ps1`](../app/bootstrap/_start.ps1) | `Ensure-WinGet`, `Ensure-BootstrapConfigReady`, `bootstrap` (menu/dispatch) |
+| Config YAML | [`app/bootstrap/bootstrap-config.ps1`](../app/bootstrap/bootstrap-config.ps1) | `Ensure-BootstrapConfigReady`, `Invoke-BootstrapConfigWizard`, `Sync-BootstrapDerivedFiles` |
+| OneDrive prereq/migracao | [`app/bootstrap/bootstrap-windows.ps1`](../app/bootstrap/bootstrap-windows.ps1) | `Resolve-WindowsOneDriveLayout`, `Install-OneDriveClient`, `Invoke-OneDriveJunctionMigration`, `Set-OneDriveConfiguredRoot` |
+| Linkagens Windows | [`app/bootstrap/bootstrap-windows.ps1`](../app/bootstrap/bootstrap-windows.ps1) | `Resolve-WindowsLinkLayout`, `Ensure-OneDriveLayoutPaths`, `Invoke-ProfileFoldersToOneDriveLinking`, `Add-Symlink` |
+| Secrets/auth Windows | [`app/bootstrap/bootstrap-windows.ps1`](../app/bootstrap/bootstrap-windows.ps1) | `Set-LocalEnvFrom1Password`, `Import-DotEnvFromSops`, `Ensure-GitHubCliAuthFrom1Password` |
+| Gate Windows | [`app/bootstrap/bootstrap-windows.ps1`](../app/bootstrap/bootstrap-windows.ps1) + [`app/df/powershell/_functions.ps1`](../app/df/powershell/_functions.ps1) | `checkEnv`, `Test-OneDriveLayoutHealth` |
+| Fluxo WSL | [`app/bootstrap/bootstrap-ubuntu-wsl.sh`](../app/bootstrap/bootstrap-ubuntu-wsl.sh) | `setup_prompt`, `install_software`, `setProfileSymlinks`, `ensureOpToken`, `setLocalEnvFile`, `ensureGitHubAuth`, `checkEnv` |
 
 ---
 
 Referencias relacionadas:
 
-- [`bootstrap/README.md`](bootstrap/README.md)
-- [`docs/onedrive.md`](docs/onedrive.md)
-- [`docs/checkenv.md`](docs/checkenv.md)
+- [`app/bootstrap/README.md`](../app/bootstrap/README.md)
+- [`docs/onedrive.md`](onedrive.md)
+- [`docs/checkenv.md`](checkenv.md)

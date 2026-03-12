@@ -79,19 +79,19 @@ C:\Users\pablo\
 |-- Contacts -> D:\OneDrive\documents\profile\contacts
 |-- Favorites -> D:\OneDrive\documents\profile\favorites
 |-- Links -> D:\OneDrive\documents\profile\links
-|-- .ssh      -> C:\Users\pablo\dotfiles\df\ssh
-|-- .assets   -> C:\Users\pablo\dotfiles\df\assets
-|-- .editorconfig -> C:\Users\pablo\dotfiles\df\.editorconfig
-|-- .gitconfig -> C:\Users\pablo\dotfiles\df\git\.gitconfig
-|-- .gitconfig-windows -> C:\Users\pablo\dotfiles\df\git\.gitconfig-windows
-|-- .gitconfig.local.sample -> C:\Users\pablo\dotfiles\df\git\.gitconfig.local.sample
+|-- .ssh      -> C:\Users\pablo\dotfiles\app\df\ssh
+|-- .assets   -> C:\Users\pablo\dotfiles\app\df\assets
+|-- .editorconfig -> C:\Users\pablo\dotfiles\app\df\.editorconfig
+|-- .gitconfig -> C:\Users\pablo\dotfiles\app\df\git\.gitconfig
+|-- .gitconfig-windows -> C:\Users\pablo\dotfiles\app\df\git\.gitconfig-windows
+|-- .gitconfig.local.sample -> C:\Users\pablo\dotfiles\app\df\git\.gitconfig.local.sample
 |-- .config\
-|   |-- git -> C:\Users\pablo\dotfiles\df\git
-|   `-- winfetch -> C:\Users\pablo\dotfiles\df\winfetch
-|-- .oh-my-posh -> C:\Users\pablo\dotfiles\df\oh-my-posh
-|-- .bashrc -> C:\Users\pablo\dotfiles\df\bash\.bashrc
-|-- .bash_profile -> C:\Users\pablo\dotfiles\df\bash\.bash_profile
-`-- .bashrc_profile -> C:\Users\pablo\dotfiles\df\bash\.bashrc_profile
+|   |-- git -> C:\Users\pablo\dotfiles\app\df\git
+|   `-- winfetch -> C:\Users\pablo\dotfiles\app\df\winfetch
+|-- .oh-my-posh -> C:\Users\pablo\dotfiles\app\df\oh-my-posh
+|-- .bashrc -> C:\Users\pablo\dotfiles\app\df\bash\.bashrc
+|-- .bash_profile -> C:\Users\pablo\dotfiles\app\df\bash\.bash_profile
+`-- .bashrc_profile -> C:\Users\pablo\dotfiles\app\df\bash\.bashrc_profile
 ```
 
 ### 1.2 Links adicionais no drive (quando `links_drive_enabled=true`)
@@ -107,18 +107,18 @@ D:\
 ### 1.3 Links de ferramentas e apps
 
 ```text
-C:\Users\pablo\Documents\PowerShell\profile.ps1 -> C:\Users\pablo\dotfiles\df\powershell\profile.ps1
-C:\Users\pablo\Documents\PowerShell\env-vars.ps1 -> C:\Users\pablo\dotfiles\df\powershell\env-vars.ps1
-C:\Users\pablo\Documents\PowerShell\env-check.ps1 -> C:\Users\pablo\dotfiles\df\powershell\env-check.ps1
-C:\Users\pablo\Documents\PowerShell\plugins.ps1 -> C:\Users\pablo\dotfiles\df\powershell\plugins.ps1
-C:\Users\pablo\Documents\PowerShell\aliases.ps1 -> C:\Users\pablo\dotfiles\df\powershell\aliases.ps1
-C:\Users\pablo\Documents\PowerShell\hotkeys.ps1 -> C:\Users\pablo\dotfiles\df\powershell\hotkeys.ps1
-C:\Users\pablo\Documents\PowerShell\wsl.ps1 -> C:\Users\pablo\dotfiles\df\powershell\wsl.ps1
-C:\Users\pablo\Documents\PowerShell\_functions.ps1 -> C:\Users\pablo\dotfiles\df\powershell\_functions.ps1
-C:\Users\pablo\Documents\PowerShell\powershell.config.json -> C:\Users\pablo\dotfiles\df\powershell\powershell.config.json
+C:\Users\pablo\Documents\PowerShell\profile.ps1 -> C:\Users\pablo\dotfiles\app\df\powershell\profile.ps1
+C:\Users\pablo\Documents\PowerShell\env-vars.ps1 -> C:\Users\pablo\dotfiles\app\df\powershell\env-vars.ps1
+C:\Users\pablo\Documents\PowerShell\env-check.ps1 -> C:\Users\pablo\dotfiles\app\df\powershell\env-check.ps1
+C:\Users\pablo\Documents\PowerShell\plugins.ps1 -> C:\Users\pablo\dotfiles\app\df\powershell\plugins.ps1
+C:\Users\pablo\Documents\PowerShell\aliases.ps1 -> C:\Users\pablo\dotfiles\app\df\powershell\aliases.ps1
+C:\Users\pablo\Documents\PowerShell\hotkeys.ps1 -> C:\Users\pablo\dotfiles\app\df\powershell\hotkeys.ps1
+C:\Users\pablo\Documents\PowerShell\wsl.ps1 -> C:\Users\pablo\dotfiles\app\df\powershell\wsl.ps1
+C:\Users\pablo\Documents\PowerShell\_functions.ps1 -> C:\Users\pablo\dotfiles\app\df\powershell\_functions.ps1
+C:\Users\pablo\Documents\PowerShell\powershell.config.json -> C:\Users\pablo\dotfiles\app\df\powershell\powershell.config.json
 
-%APPDATA%\Code\User -> C:\Users\pablo\dotfiles\df\vscode
-<WindowsTerminalPackage>\LocalState\settings.json -> C:\Users\pablo\dotfiles\df\windows-terminal\settings.json
+%APPDATA%\Code\User -> C:\Users\pablo\dotfiles\app\df\vscode
+<WindowsTerminalPackage>\LocalState\settings.json -> C:\Users\pablo\dotfiles\app\df\windows-terminal\settings.json
 ```
 
 ## Secao 2 - Linux/WSL (`/home/{user}`)
@@ -128,24 +128,24 @@ C:\Users\pablo\Documents\PowerShell\powershell.config.json -> C:\Users\pablo\dot
 ```text
 /home/pablo
 |-- dotfiles/                      (repo)
-|-- .ssh -> /home/pablo/dotfiles/df/ssh
-|-- .assets -> /home/pablo/dotfiles/df/assets
-|-- .secrets -> /home/pablo/dotfiles/df/secrets
+|-- .ssh -> /home/pablo/dotfiles/app/df/ssh
+|-- .assets -> /home/pablo/dotfiles/app/df/assets
+|-- .secrets -> /home/pablo/dotfiles/app/df/secrets
 |-- .config/
-|   |-- git -> /home/pablo/dotfiles/df/git
-|   |-- atuin -> /home/pablo/dotfiles/df/config/atuin
-|   `-- Code/User -> /home/pablo/dotfiles/df/vscode
-|-- .oh-my-posh -> /home/pablo/dotfiles/df/oh-my-posh
-|-- .editorconfig -> /home/pablo/dotfiles/df/.editorconfig
-|-- .gitconfig -> /home/pablo/dotfiles/df/git/.gitconfig
-|-- .aliases -> /home/pablo/dotfiles/df/.aliases
-|-- .bash_logout -> /home/pablo/dotfiles/df/bash/.bash_logout
-|-- .bashrc -> /home/pablo/dotfiles/df/bash/.bashrc
-|-- .profile -> /home/pablo/dotfiles/df/bash/.profile
-|-- .blerc -> /home/pablo/dotfiles/df/bash/.blerc
-|-- .zshrc -> /home/pablo/dotfiles/df/zsh/.zshrc
-|-- .zprofile -> /home/pablo/dotfiles/df/zsh/.zprofile
-|-- .zshenv -> /home/pablo/dotfiles/df/zsh/.zshenv
+|   |-- git -> /home/pablo/dotfiles/app/df/git
+|   |-- atuin -> /home/pablo/dotfiles/app/df/config/atuin
+|   `-- Code/User -> /home/pablo/dotfiles/app/df/vscode
+|-- .oh-my-posh -> /home/pablo/dotfiles/app/df/oh-my-posh
+|-- .editorconfig -> /home/pablo/dotfiles/app/df/.editorconfig
+|-- .gitconfig -> /home/pablo/dotfiles/app/df/git/.gitconfig
+|-- .aliases -> /home/pablo/dotfiles/app/df/.aliases
+|-- .bash_logout -> /home/pablo/dotfiles/app/df/bash/.bash_logout
+|-- .bashrc -> /home/pablo/dotfiles/app/df/bash/.bashrc
+|-- .profile -> /home/pablo/dotfiles/app/df/bash/.profile
+|-- .blerc -> /home/pablo/dotfiles/app/df/bash/.blerc
+|-- .zshrc -> /home/pablo/dotfiles/app/df/zsh/.zshrc
+|-- .zprofile -> /home/pablo/dotfiles/app/df/zsh/.zprofile
+|-- .zshenv -> /home/pablo/dotfiles/app/df/zsh/.zshenv
 |-- onedrive -> /mnt/d/OneDrive
 |-- clients -> /mnt/d/OneDrive/clients
 |-- projects -> /mnt/d/OneDrive/clients/pablo/projects

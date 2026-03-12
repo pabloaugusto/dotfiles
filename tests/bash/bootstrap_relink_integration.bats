@@ -16,15 +16,15 @@ setup() {
 }
 
 @test "relink cria symlinks canonicos no perfil Linux" {
-  run bash "$REPO_ROOT/bootstrap/bootstrap-ubuntu-wsl.sh" relink
+  run bash "$REPO_ROOT/app/bootstrap/bootstrap-ubuntu-wsl.sh" relink
 
   [ "$status" -eq 0 ]
   [ -L "$HOME/.ssh" ]
-  [ "$(readlink -f "$HOME/.ssh")" = "$REPO_ROOT/df/ssh" ]
+  [ "$(readlink -f "$HOME/.ssh")" = "$REPO_ROOT/app/df/ssh" ]
   [ -L "$HOME/.config/git" ]
-  [ "$(readlink -f "$HOME/.config/git")" = "$REPO_ROOT/df/git" ]
+  [ "$(readlink -f "$HOME/.config/git")" = "$REPO_ROOT/app/df/git" ]
   [ -L "$HOME/.config/Code/User" ]
-  [ "$(readlink -f "$HOME/.config/Code/User")" = "$REPO_ROOT/df/vscode" ]
+  [ "$(readlink -f "$HOME/.config/Code/User")" = "$REPO_ROOT/app/df/vscode" ]
   [ -L "$HOME/projects" ]
   [ "$(readlink -f "$HOME/projects")" = "$DOTFILES_ONEDRIVE_ROOT/clients/tester/projects" ]
   [ -L "$HOME/clients" ]
@@ -34,13 +34,13 @@ setup() {
 }
 
 @test "relink Linux e idempotente" {
-  run bash "$REPO_ROOT/bootstrap/bootstrap-ubuntu-wsl.sh" relink
+  run bash "$REPO_ROOT/app/bootstrap/bootstrap-ubuntu-wsl.sh" relink
   [ "$status" -eq 0 ]
 
-  run bash "$REPO_ROOT/bootstrap/bootstrap-ubuntu-wsl.sh" relink
+  run bash "$REPO_ROOT/app/bootstrap/bootstrap-ubuntu-wsl.sh" relink
   [ "$status" -eq 0 ]
   [ -L "$HOME/.bashrc" ]
-  [ "$(readlink -f "$HOME/.bashrc")" = "$REPO_ROOT/df/bash/.bashrc" ]
+  [ "$(readlink -f "$HOME/.bashrc")" = "$REPO_ROOT/app/df/bash/.bashrc" ]
   [ -L "$HOME/.zshrc" ]
-  [ "$(readlink -f "$HOME/.zshrc")" = "$REPO_ROOT/df/zsh/.zshrc" ]
+  [ "$(readlink -f "$HOME/.zshrc")" = "$REPO_ROOT/app/df/zsh/.zshrc" ]
 }

@@ -10,7 +10,7 @@ de IA versionada.
 
 - Bootstrap oficial para Windows host e Ubuntu WSL.
 - Modos `new`, `refresh` e `relink`, incluindo reparo idempotente de links.
-- Config central versionada por template em [`bootstrap/user-config.yaml.tpl`](bootstrap/user-config.yaml.tpl).
+- Config central versionada por template em [`app/bootstrap/user-config.yaml.tpl`](app/bootstrap/user-config.yaml.tpl).
 - Normalizacao de caminhos canonicos e sincronismo de artefatos derivados.
 - Suporte a OneDrive no Windows com layout canonico, links de perfil e health
   check pos-bootstrap.
@@ -22,9 +22,9 @@ de IA versionada.
 - `task sync` como fluxo canonico de sincronizacao Git.
 - Gate local Windows -> WSL com `task sync:wsl-gate`.
 - Aliases canonicos por ambiente:
-  - Unix/WSL em [`df/.aliases`](df/.aliases)
-  - PowerShell em [`df/powershell/aliases.ps1`](df/powershell/aliases.ps1)
-  - Git aliases em [`df/git/.gitconfig-base`](df/git/.gitconfig-base)
+  - Unix/WSL em [`app/df/.aliases`](app/df/.aliases)
+  - PowerShell em [`app/df/powershell/aliases.ps1`](app/df/powershell/aliases.ps1)
+  - Git aliases em [`app/df/git/.gitconfig-base`](app/df/git/.gitconfig-base)
 - Config Git por ambiente com overlays dedicados para Windows, Linux, WSL e
   devcontainer.
 
@@ -92,9 +92,10 @@ de IA versionada.
 
 ## Estrutura do repositorio
 
-- [`bootstrap/`](bootstrap/): bootstrap, parser de config, scripts de provisionamento e guia
+- [`app/`](app/): camada runtime explicita da aplicacao e do workstation.
+- [`app/bootstrap/`](app/bootstrap/): bootstrap, parser de config, scripts de provisionamento e guia
   operacional.
-- [`df/`](df/): dotfiles e assets reais que vao para a maquina apos o bootstrap.
+- [`app/df/`](app/df/): dotfiles e assets reais que vao para a maquina apos o bootstrap.
 - [`.agents/`](.agents/): camada canonica de IA e governanca declarativa.
 - [`docs/`](docs/): documentacao tecnica, catalogos operacionais e referencia.
 - [`tests/`](tests/): suites de teste, harnesses e fixtures.
@@ -162,14 +163,14 @@ task test:integration:linux
 
 Arquivos principais:
 
-- template versionado: [`bootstrap/user-config.yaml.tpl`](bootstrap/user-config.yaml.tpl)
+- template versionado: [`app/bootstrap/user-config.yaml.tpl`](app/bootstrap/user-config.yaml.tpl)
 - arquivo local ignorado documentado em [`docs/config-reference.md`](docs/config-reference.md#bootstrapuser-configyaml)
-- template correspondente: [`bootstrap/user-config.yaml.tpl`](bootstrap/user-config.yaml.tpl)
+- template correspondente: [`app/bootstrap/user-config.yaml.tpl`](app/bootstrap/user-config.yaml.tpl)
 
 Derivados sincronizados automaticamente:
 
-- [`df/secrets/secrets-ref.yaml`](df/secrets/secrets-ref.yaml)
-- [`bootstrap/secrets/.env.local.tpl`](bootstrap/secrets/.env.local.tpl)
+- [`app/df/secrets/secrets-ref.yaml`](app/df/secrets/secrets-ref.yaml)
+- [`app/bootstrap/secrets/.env.local.tpl`](app/bootstrap/secrets/.env.local.tpl)
 - derivado local documentado em [`docs/secrets-and-auth.md`](docs/secrets-and-auth.md#ssh-agent-e-git-signing)
 
 Principio atual:
@@ -200,8 +201,9 @@ Catalogos atualizados:
 Comece por estes arquivos:
 
 - [`CONTEXT.md`](CONTEXT.md)
+- [`app/README.md`](app/README.md)
 - [`docs/README.md`](docs/README.md)
-- [`bootstrap/README.md`](bootstrap/README.md)
+- [`app/bootstrap/README.md`](app/bootstrap/README.md)
 - [`docs/bootstrap-flow.md`](docs/bootstrap-flow.md)
 - [`docs/config-reference.md`](docs/config-reference.md)
 - [`docs/checkenv.md`](docs/checkenv.md)

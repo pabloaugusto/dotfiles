@@ -7,8 +7,8 @@ compatibilidade entre `pwsh` e Windows PowerShell e rastreabilidade completa no 
 
 ## Quando usar
 
-- mudancas em [`../../bootstrap/`](../../bootstrap/),
-  [`../../df/powershell/`](../../df/powershell/) ou scripts `.ps1`
+- mudancas em [`../../app/bootstrap/`](../../app/bootstrap/),
+  [`../../app/df/powershell/`](../../app/df/powershell/) ou scripts `.ps1`
 
 ## Skill principal
 

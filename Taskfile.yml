@@ -22,13 +22,13 @@ tasks:
     desc: Windows - sync inteligente do repo local (commit por contexto + pull/push guiado)
     platforms: [windows]
     cmds:
-      - "pwsh -NoProfile -Command \". '{{.TASKFILE_DIR}}/df/powershell/_functions.ps1'; Invoke-DotfilesSmartSync\""
+      - "pwsh -NoProfile -Command \". '{{.TASKFILE_DIR}}/app/df/powershell/_functions.ps1'; Invoke-DotfilesSmartSync\""
 
   sync:linux:
     desc: Linux/WSL - sync inteligente do repo local (commit por contexto + pull/push guiado)
     platforms: [linux]
     cmds:
-      - bash -lc "bash '{{.TASKFILE_DIR}}/df/bash/.inc/sync-smart.sh'"
+      - bash -lc "bash '{{.TASKFILE_DIR}}/app/df/bash/.inc/sync-smart.sh'"
 
   repo:status:
     desc: Auto - status do repo dotfiles no ambiente atual
@@ -60,13 +60,13 @@ tasks:
     desc: Windows - atualizar repo atual
     platforms: [windows]
     cmds:
-      - "pwsh -NoProfile -Command \". '{{.TASKFILE_DIR}}/df/powershell/_functions.ps1'; Invoke-DotfilesRepoUpdate -SwitchMain\""
+      - "pwsh -NoProfile -Command \". '{{.TASKFILE_DIR}}/app/df/powershell/_functions.ps1'; Invoke-DotfilesRepoUpdate -SwitchMain\""
 
   repo:update:linux:
     desc: Linux/WSL - atualizar repo atual
     platforms: [linux]
     cmds:
-      - bash -lc "bash '{{.TASKFILE_DIR}}/df/bash/.inc/sync-smart.sh' update"
+      - bash -lc "bash '{{.TASKFILE_DIR}}/app/df/bash/.inc/sync-smart.sh' update"
 
   repo:update-safe:
     desc: Auto - atualizar com auto-stash para worktree suja
@@ -77,13 +77,13 @@ tasks:
     desc: Windows - atualizar com auto-stash
     platforms: [windows]
     cmds:
-      - "pwsh -NoProfile -Command \". '{{.TASKFILE_DIR}}/df/powershell/_functions.ps1'; Invoke-DotfilesRepoUpdate -Safe -SwitchMain\""
+      - "pwsh -NoProfile -Command \". '{{.TASKFILE_DIR}}/app/df/powershell/_functions.ps1'; Invoke-DotfilesRepoUpdate -Safe -SwitchMain\""
 
   repo:update-safe:linux:
     desc: Linux/WSL - atualizar com auto-stash
     platforms: [linux]
     cmds:
-      - bash -lc "bash '{{.TASKFILE_DIR}}/df/bash/.inc/sync-smart.sh' update-safe"
+      - bash -lc "bash '{{.TASKFILE_DIR}}/app/df/bash/.inc/sync-smart.sh' update-safe"
 
   repo:publish:
     desc: Auto - publicar alteracoes (pull --rebase + commit + push)
@@ -100,7 +100,7 @@ tasks:
     requires:
       vars: [MSG]
     cmds:
-      - "pwsh -NoProfile -Command \". '{{.TASKFILE_DIR}}/df/powershell/_functions.ps1'; Invoke-DotfilesRepoPublish -Message '{{.MSG}}'\""
+      - "pwsh -NoProfile -Command \". '{{.TASKFILE_DIR}}/app/df/powershell/_functions.ps1'; Invoke-DotfilesRepoPublish -Message '{{.MSG}}'\""
 
   repo:publish:linux:
     desc: Linux/WSL - publicar alteracoes
@@ -108,7 +108,7 @@ tasks:
     requires:
       vars: [MSG]
     cmds:
-      - bash -lc "bash '{{.TASKFILE_DIR}}/df/bash/.inc/sync-smart.sh' publish \"{{.MSG}}\""
+      - bash -lc "bash '{{.TASKFILE_DIR}}/app/df/bash/.inc/sync-smart.sh' publish \"{{.MSG}}\""
 
   sync:update:
     desc: Auto - alias para repo:update
@@ -182,7 +182,7 @@ tasks:
     desc: Windows - gate Git-only para sincronizar repo local do WSL
     platforms: [windows]
     cmds:
-      - "pwsh -NoProfile -Command \". '{{.TASKFILE_DIR}}/df/powershell/_functions.ps1'; Sync-DotfilesWindowsToWsl\""
+      - "pwsh -NoProfile -Command \". '{{.TASKFILE_DIR}}/app/df/powershell/_functions.ps1'; Sync-DotfilesWindowsToWsl\""
 
   sync:wsl-gate:linux:
     desc: Linux/WSL - nao aplicavel (execute sync:wsl-gate no Windows)
@@ -199,13 +199,13 @@ tasks:
     desc: Windows - roda checkEnv no PowerShell
     platforms: [windows]
     cmds:
-      - "pwsh -NoProfile -Command \". '{{.TASKFILE_DIR}}/df/powershell/_functions.ps1'; checkEnv -GitSigningMode '{{default \"auto\" .SIGN_MODE}}'\""
+      - "pwsh -NoProfile -Command \". '{{.TASKFILE_DIR}}/app/df/powershell/_functions.ps1'; checkEnv -GitSigningMode '{{default \"auto\" .SIGN_MODE}}'\""
 
   env:check:linux:
     desc: Linux/WSL - roda checkEnv no Bash
     platforms: [linux]
     cmds:
-      - bash -lc "source '{{.TASKFILE_DIR}}/df/bash/.inc/check-env.sh' && checkEnv '{{default \"auto\" .SIGN_MODE}}'"
+      - bash -lc "source '{{.TASKFILE_DIR}}/app/df/bash/.inc/check-env.sh' && checkEnv '{{default \"auto\" .SIGN_MODE}}'"
 
   git:signing:status:
     desc: Exibe o estado do signer Git para a worktree atual
@@ -326,13 +326,13 @@ tasks:
     desc: Windows - bootstrap completo
     platforms: [windows]
     cmds:
-      - "pwsh -NoProfile -Command \"& '{{.TASKFILE_DIR}}/bootstrap/_start.ps1'\""
+      - "pwsh -NoProfile -Command \"& '{{.TASKFILE_DIR}}/app/bootstrap/_start.ps1'\""
 
   bootstrap:windows:refresh:
     desc: Windows - refresh rapido
     platforms: [windows]
     cmds:
-      - "pwsh -NoProfile -Command \"& '{{.TASKFILE_DIR}}/bootstrap/_start.ps1' -Refresh\""
+      - "pwsh -NoProfile -Command \"& '{{.TASKFILE_DIR}}/app/bootstrap/_start.ps1' -Refresh\""
 
   bootstrap:relink:
     desc: Auto - recria os symlinks canonicos do bootstrap no ambiente atual
@@ -343,19 +343,19 @@ tasks:
     desc: Windows - recria symlinks/junctions do bootstrap
     platforms: [windows]
     cmds:
-      - "pwsh -NoProfile -Command \". '{{.TASKFILE_DIR}}/bootstrap/bootstrap-config.ps1'; if (!(Ensure-BootstrapConfigReady -DotFilesDirectory '{{.TASKFILE_DIR}}')) { exit 1 }; . '{{.TASKFILE_DIR}}/bootstrap/bootstrap-windows.ps1' -RelinkOnly\""
+      - "pwsh -NoProfile -Command \". '{{.TASKFILE_DIR}}/app/bootstrap/bootstrap-config.ps1'; if (!(Ensure-BootstrapConfigReady -DotFilesDirectory '{{.TASKFILE_DIR}}')) { exit 1 }; . '{{.TASKFILE_DIR}}/app/bootstrap/bootstrap-windows.ps1' -RelinkOnly\""
 
   bootstrap:linux:
     desc: Linux/WSL - bootstrap Ubuntu
     platforms: [linux]
     cmds:
-      - bash -lc "bash '{{.TASKFILE_DIR}}/bootstrap/bootstrap-ubuntu-wsl.sh'"
+      - bash -lc "bash '{{.TASKFILE_DIR}}/app/bootstrap/bootstrap-ubuntu-wsl.sh'"
 
   bootstrap:linux:relink:
     desc: Linux/WSL - recria symlinks do bootstrap
     platforms: [linux]
     cmds:
-      - bash -lc "bash '{{.TASKFILE_DIR}}/bootstrap/bootstrap-ubuntu-wsl.sh' relink"
+      - bash -lc "bash '{{.TASKFILE_DIR}}/app/bootstrap/bootstrap-ubuntu-wsl.sh' relink"
 
   install:dev:
     desc: Instala dependencias Python de desenvolvimento via uv
@@ -462,14 +462,14 @@ tasks:
     platforms: [windows]
     dir: '{{.TASKFILE_DIR}}'
     cmds:
-      - uv run --locked pymarkdown --disable-rules MD001,MD013,MD032,MD034,MD036,MD038 scan README.md AGENTS.md SECURITY.md docs bootstrap/README.md tests/README.md --respect-gitignore -e docs/AI-WIP-TRACKER.md -e docs/ROADMAP-DECISIONS.md -e docs/reference -e archive
+      - uv run --locked pymarkdown --disable-rules MD001,MD013,MD032,MD034,MD036,MD038 scan README.md AGENTS.md SECURITY.md docs app/bootstrap/README.md tests/README.md --respect-gitignore -e docs/AI-WIP-TRACKER.md -e docs/ROADMAP-DECISIONS.md -e docs/reference -e archive
 
   docs:lint:linux:
     desc: Linux/WSL - aplica pymarkdown nos documentos canonicos do repo
     platforms: [linux]
     dir: '{{.TASKFILE_DIR}}'
     cmds:
-      - uv run --locked pymarkdown --disable-rules MD001,MD013,MD032,MD034,MD036,MD038 scan README.md AGENTS.md SECURITY.md docs bootstrap/README.md tests/README.md --respect-gitignore -e docs/AI-WIP-TRACKER.md -e docs/ROADMAP-DECISIONS.md -e docs/reference -e archive
+      - uv run --locked pymarkdown --disable-rules MD001,MD013,MD032,MD034,MD036,MD038 scan README.md AGENTS.md SECURITY.md docs app/bootstrap/README.md tests/README.md --respect-gitignore -e docs/AI-WIP-TRACKER.md -e docs/ROADMAP-DECISIONS.md -e docs/reference -e archive
 
   docs:check:
     desc: Valida links locais e referencias documentais do repo
@@ -669,7 +669,7 @@ tasks:
     platforms: [windows]
     dir: '{{.TASKFILE_DIR}}'
     cmds:
-      - "pwsh -NoProfile -Command '$ErrorActionPreference=\"Stop\"; $failed=$false; git ls-files \"bootstrap/*.ps1\" \"bootstrap/**/*.ps1\" \"df/*.ps1\" \"df/**/*.ps1\" \"scripts/*.ps1\" \"scripts/**/*.ps1\" \"tests/*.ps1\" \"tests/**/*.ps1\" | ForEach-Object { $errs=$null; [System.Management.Automation.Language.Parser]::ParseFile($_,[ref]$null,[ref]$errs) | Out-Null; if($errs -and $errs.Count -gt 0){ $failed=$true; $errs | ForEach-Object { Write-Host ($_.Extent.File + \":\" + $_.Extent.StartLineNumber + \": \" + $_.Message) } } }; if($failed){ exit 1 }'"
+      - "pwsh -NoProfile -Command '$ErrorActionPreference=\"Stop\"; $failed=$false; git ls-files \"app/bootstrap/*.ps1\" \"app/bootstrap/**/*.ps1\" \"app/df/*.ps1\" \"app/df/**/*.ps1\" \"scripts/*.ps1\" \"scripts/**/*.ps1\" \"tests/*.ps1\" \"tests/**/*.ps1\" | ForEach-Object { $errs=$null; [System.Management.Automation.Language.Parser]::ParseFile($_,[ref]$null,[ref]$errs) | Out-Null; if($errs -and $errs.Count -gt 0){ $failed=$true; $errs | ForEach-Object { Write-Host ($_.Extent.File + \":\" + $_.Extent.StartLineNumber + \": \" + $_.Message) } } }; if($failed){ exit 1 }'"
 
   ci:lint:linux:
     desc: Linux/WSL - validacao sintatica dos scripts .sh

@@ -42,6 +42,6 @@ Atuar como revisor tecnico de codigo PowerShell do repo.
 ## Referencias
 
 - [`references/checklist.md`](references/checklist.md)
-- [`../../../bootstrap/`](../../../bootstrap/)
-- [`../../../df/powershell/`](../../../df/powershell/)
+- [`../../../app/bootstrap/`](../../../app/bootstrap/)
+- [`../../../app/df/powershell/`](../../../app/df/powershell/)
 - [`../../../docs/AI-ORTHOGRAPHY-LEDGER.md`](../../../docs/AI-ORTHOGRAPHY-LEDGER.md)

@@ -9,12 +9,12 @@ COPY [".", "."]
 RUN Invoke-ScriptAnalyzer .
 WORKDIR /src/df
 RUN Invoke-ScriptAnalyzer .
-WORKDIR /src/df/powershell
+WORKDIR /src/app/df/powershell
 RUN Invoke-ScriptAnalyzer .
 
 FROM mcr.microsoft.com/powershell AS base-pwsh
 WORKDIR /src
 COPY [".", "."]
-WORKDIR /src/df/bash
+WORKDIR /src/app/df/bash
 RUN bash -n .bashrc
 #RUN bash -n ./bootstrap.sh

@@ -15,9 +15,9 @@ Materializar uma trilha unica, nao-destrutiva e auditavel para:
 ## Fonte de verdade
 
 - configuracao declarativa: [`config/secrets-rotation.yaml`](../../config/secrets-rotation.yaml)
-- refs canonicas: [`df/secrets/secrets-ref.yaml`](../../df/secrets/secrets-ref.yaml)
-- politica `sops+age`: [`df/secrets/dotfiles.sops.yaml`](../../df/secrets/dotfiles.sops.yaml)
-- runtime cifrado: [`bootstrap/secrets/.env.local.tpl`](../../bootstrap/secrets/.env.local.tpl)
+- refs canonicas: [`app/df/secrets/secrets-ref.yaml`](../../app/df/secrets/secrets-ref.yaml)
+- politica `sops+age`: [`app/df/secrets/dotfiles.sops.yaml`](../../app/df/secrets/dotfiles.sops.yaml)
+- runtime cifrado: [`app/bootstrap/secrets/.env.local.tpl`](../../app/bootstrap/secrets/.env.local.tpl)
 - runbook geral: [`docs/secrets-and-auth.md`](../secrets-and-auth.md)
 
 ## Interface canonica
@@ -108,7 +108,7 @@ Executa validacoes nao-destrutivas por alvo, como:
 
 - tipo: `onepassword_service_account`
 - automacao: `assisted`
-- finalidade: service account do bootstrap/control plane
+- finalidade: service account do app/bootstrap/control plane
 
 ### `github-project-pat`
 

@@ -8,9 +8,9 @@
   - [`onepassword-runtime-read-inventory.md`](onepassword-runtime-read-inventory.md)
   - [`../2026-03-07-onepassword-batch-resolution.md`](../2026-03-07-onepassword-batch-resolution.md)
   - [`../../../docs/secrets-and-auth.md`](../../../docs/secrets-and-auth.md)
-  - [`../../../df/powershell/_functions.ps1`](../../../df/powershell/_functions.ps1)
-  - [`../../../df/bash/.inc/check-env.sh`](../../../df/bash/.inc/check-env.sh)
-  - [`../../../df/bash/.inc/secrets-manager.sh`](../../../df/bash/.inc/secrets-manager.sh)
+  - [`../../../df/powershell/_functions.ps1`](../../../app/df/powershell/_functions.ps1)
+  - [`../../../df/bash/.inc/check-env.sh`](../../../app/df/bash/.inc/check-env.sh)
+  - [`../../../df/bash/.inc/secrets-manager.sh`](../../../app/df/bash/.inc/secrets-manager.sh)
   - [`../../../scripts/git_signing_lib.py`](../../../scripts/git_signing_lib.py)
 
 ## Objetivo
@@ -155,11 +155,11 @@ Esses locais sao para estado nao sensivel, como:
 
 Aplicacao priorizada:
 
-1. [`../../../df/powershell/_functions.ps1`](../../../df/powershell/_functions.ps1)
-2. [`../../../df/bash/.inc/check-env.sh`](../../../df/bash/.inc/check-env.sh)
+1. [`../../../df/powershell/_functions.ps1`](../../../app/df/powershell/_functions.ps1)
+2. [`../../../df/bash/.inc/check-env.sh`](../../../app/df/bash/.inc/check-env.sh)
 3. fallback de `GH_TOKEN` / `GITHUB_TOKEN`
 4. [`../../../scripts/git_signing_lib.py`](../../../scripts/git_signing_lib.py)
-5. [`../../../df/bash/.inc/secrets-manager.sh`](../../../df/bash/.inc/secrets-manager.sh)
+5. [`../../../df/bash/.inc/secrets-manager.sh`](../../../app/df/bash/.inc/secrets-manager.sh)
 
 ## Evidencias desta rodada
 

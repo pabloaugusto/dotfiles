@@ -10,8 +10,8 @@ global_mandatory_gates:
 
 conditional_mandatory_gates:
   - when_any_path_matches:
-      - "bootstrap/**"
-      - "df/**"
+      - "app/bootstrap/**"
+      - "app/df/**"
       - "Taskfile.yml"
       - ".github/workflows/**"
       - "scripts/**"
@@ -44,8 +44,8 @@ conditional_mandatory_gates:
     agents:
       - secrets-rotation-governor
   - when_any_path_matches:
-      - "df/secrets/**"
-      - "bootstrap/secrets/**"
+      - "app/df/secrets/**"
+      - "app/bootstrap/secrets/**"
       - "docs/secrets-and-auth.md"
       - "scripts/secrets*"
       - "config/secrets-rotation*"
@@ -59,10 +59,10 @@ conditional_mandatory_gates:
     agents:
       - python-reviewer
   - when_any_path_matches:
-      - "bootstrap/*.ps1"
-      - "bootstrap/**/*.ps1"
-      - "df/powershell/*.ps1"
-      - "df/powershell/**/*.ps1"
+      - "app/bootstrap/*.ps1"
+      - "app/bootstrap/**/*.ps1"
+      - "app/df/powershell/*.ps1"
+      - "app/df/powershell/**/*.ps1"
       - "scripts/*.ps1"
       - "scripts/**/*.ps1"
       - "tests/powershell/*.ps1"
@@ -77,8 +77,8 @@ conditional_mandatory_gates:
       - "docker/**"
       - "scripts/*.sh"
       - "scripts/**/*.sh"
-      - "bootstrap/*.sh"
-      - "bootstrap/**/*.sh"
+      - "app/bootstrap/*.sh"
+      - "app/bootstrap/**/*.sh"
       - "tests/bash/*"
       - ".githooks/*"
     agents:
@@ -97,7 +97,7 @@ routes:
   - id: route-bootstrap-scope
     match:
       keywords: ["bootstrap", "relink", "refresh", "link", "symlink", "user-config"]
-      paths: ["bootstrap/**", "df/**"]
+      paths: ["app/bootstrap/**", "app/df/**"]
     primary: [bootstrap-operator]
     support: [critical-integrations-guardian, architecture-modernization-authority, pascoalete]
   - id: route-governance-scope
@@ -142,7 +142,7 @@ routes:
   - id: route-secrets-rotation-scope
     match:
       keywords: ["rotate", "rotation", "token", "service-account", "ssh-key", "sops", "age", "secret"]
-      paths: ["df/secrets/**", "bootstrap/secrets/**", "docs/secrets-and-auth.md", "scripts/secrets*", "config/secrets-rotation*"]
+      paths: ["app/df/secrets/**", "app/bootstrap/secrets/**", "docs/secrets-and-auth.md", "scripts/secrets*", "config/secrets-rotation*"]
     primary: [secrets-rotation-governor]
     support: [critical-integrations-guardian, architecture-modernization-authority, lessons-governance-curator, pascoalete]
   - id: route-continuity-scope

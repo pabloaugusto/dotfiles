@@ -24,8 +24,8 @@ Recomendacao inicial:
 - `sim` para a direcao arquitetural
 - `nao` para uma migracao fisica imediata nesta v1
 
-O repo ainda tem acoplamento estrutural demais com os nomes [`df/`](../../df/)
-e [`bootstrap/`](../../bootstrap/). Mover isso agora para [`/app`](../../)
+O repo ainda tem acoplamento estrutural demais com os nomes [`df/`](../../app/df/)
+e [`bootstrap/`](../../app/bootstrap/). Mover isso agora para [`/app`](../../)
 traria custo alto e risco real de regressao em bootstrap, relink, docs, tests e
 integracoes criticas.
 
@@ -41,14 +41,14 @@ O caminho mais seguro e faseado:
 Contagem objetiva desta rodada:
 
 - [`../../Taskfile.yml`](../../Taskfile.yml): `12` referencias a
-  [`df/`](../../df/) e `8` referencias a [`bootstrap/`](../../bootstrap/)
-- [`../../bootstrap/`](../../bootstrap/): `34` referencias diretas a
-  [`df/`](../../df/)
+  [`df/`](../../app/df/) e `8` referencias a [`bootstrap/`](../../app/bootstrap/)
+- [`../../bootstrap/`](../../app/bootstrap/): `34` referencias diretas a
+  [`df/`](../../app/df/)
 - [`../../scripts/`](../../scripts/): `4` referencias diretas a
-  [`df/`](../../df/)
-- [`../../tests/`](../../tests/): `7` referencias diretas a [`df/`](../../df/)
-- [`../../docs/`](../../docs/): `62` referencias a [`df/`](../../df/) e `45` a
-  [`bootstrap/`](../../bootstrap/)
+  [`df/`](../../app/df/)
+- [`../../tests/`](../../tests/): `7` referencias diretas a [`df/`](../../app/df/)
+- [`../../docs/`](../../docs/): `62` referencias a [`df/`](../../app/df/) e `45` a
+  [`bootstrap/`](../../app/bootstrap/)
 
 Superficies mais sensiveis:
 
@@ -70,13 +70,13 @@ Superficies mais sensiveis:
 Se o move fisico fosse feito agora, o impacto mais provavel estaria em:
 
 - links criados pelo bootstrap para `HOME`
-- scripts PowerShell e Bash que assumem [`df/`](../../df/) como raiz
+- scripts PowerShell e Bash que assumem [`df/`](../../app/df/) como raiz
   materializada
-- testes de integracao que validam alvos exatos em [`df/`](../../df/)
+- testes de integracao que validam alvos exatos em [`df/`](../../app/df/)
 - documentacao operacional e diagramas de home structure
 - [`../../Dockerfile`](../../Dockerfile) e harnesses que assumem workdir dentro
-  de [`df/`](../../df/)
-- lookup de refs em [`../../df/secrets/secrets-ref.yaml`](../../df/secrets/secrets-ref.yaml)
+  de [`df/`](../../app/df/)
+- lookup de refs em [`../../df/secrets/secrets-ref.yaml`](../../app/df/secrets/secrets-ref.yaml)
 
 ## Estrategia recomendada
 
@@ -91,7 +91,7 @@ Se o move fisico fosse feito agora, o impacto mais provavel estaria em:
 ### Fase B. Criar camada de compatibilidade
 
 - ensinar bootstrap, tests e docs a consumirem `runtime_root`
-- manter aliases ou ponte temporaria para [`df/`](../../df/) durante a
+- manter aliases ou ponte temporaria para [`df/`](../../app/df/) durante a
   transicao
 - impedir breakage em Windows host e Ubuntu WSL
 
@@ -99,20 +99,20 @@ Se o move fisico fosse feito agora, o impacto mais provavel estaria em:
 
 Opcoes realistas:
 
-- `app/` como container do runtime materializado
-- `app/runtime/` para deixar a intencao ainda mais explicita
+- [`app/`](../../app/) como container do runtime materializado
+- um subdiretorio `runtime` dentro de [`app/`](../../app/) para deixar a intencao ainda mais explicita
 
 Opcao que hoje parece mais segura:
 
-- manter [`bootstrap/`](../../bootstrap/) fora de [`/app`](../../)
-- mover apenas o runtime materializado de [`df/`](../../df/) para um novo root quando a
+- manter [`bootstrap/`](../../app/bootstrap/) fora de [`/app`](../../)
+- mover apenas o runtime materializado de [`df/`](../../app/df/) para um novo root quando a
   camada de compatibilidade estiver pronta
 
 ## Decisao preliminar
 
 No estado atual do repo:
 
-- nao recomendo renomear [`df/`](../../df/) para [`app/`](../../) de imediato
+- nao recomendo renomear [`df/`](../../app/df/) para [`app/`](../../) de imediato
 - recomendo colocar isso como trilha de maturidade da arquitetura portavel
 - recomendo que a primeira entrega concreta seja reduzir o acoplamento por
   path, nao mover pasta
@@ -121,7 +121,7 @@ No estado atual do repo:
 
 A migracao fisica so deve ser considerada quando:
 
-- [`bootstrap/`](../../bootstrap/) nao depender mais de [`df/`](../../df/)
+- [`bootstrap/`](../../app/bootstrap/) nao depender mais de [`df/`](../../app/df/)
   hardcoded
 - `Taskfile`, tests e scripts aceitarem um `runtime_root` canonico
 - docs principais puderem ser atualizadas sem ambiguidade

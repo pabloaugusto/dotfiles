@@ -8,8 +8,8 @@ operacional do bootstrap e do host Windows.
 
 ## Quando usar
 
-- mudancas em [`../../bootstrap/`](../../bootstrap/),
-  [`../../df/powershell/`](../../df/powershell/),
+- mudancas em [`../../app/bootstrap/`](../../app/bootstrap/),
+  [`../../app/df/powershell/`](../../app/df/powershell/),
   [`../../scripts/`](../../scripts/) ou [`../../tests/powershell/`](../../tests/powershell/)
   que contenham `.ps1`
 - revisoes de task, subtask ou PR com escopo PowerShell
