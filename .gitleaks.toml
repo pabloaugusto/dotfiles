@@ -3,7 +3,7 @@ title = "dotfiles-test-harness"
 [allowlist]
 description = "Arquivos publicos, templates ou referencias tecnicas que nao devem bloquear o scan."
 paths = [
-  '''df/ssh/authorized_keys''',
-  '''bootstrap/secrets/.*\.tpl$''',
+  '''app/df/ssh/authorized_keys''',
+  '''app/bootstrap/secrets/.*\.tpl$''',
   '''docs/reference/.*''',
 ]

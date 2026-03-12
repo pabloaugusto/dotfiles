@@ -177,7 +177,7 @@ Exemplos:
 
 - `.cache/`
 - `platforms.local.yaml`
-- [`bootstrap/user-config.yaml.tpl`](../bootstrap/user-config.yaml.tpl) quando o
+- [`app/bootstrap/user-config.yaml.tpl`](../app/bootstrap/user-config.yaml.tpl) quando o
   arquivo materializado local for apenas derivado efemero
 - storages locais do editor
 - runtimes locais de ferramentas

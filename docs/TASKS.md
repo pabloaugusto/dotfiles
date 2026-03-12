@@ -140,7 +140,7 @@ Referencia operacional das tasks canonicas mais importantes do repositorio.
 
 - Funcionalidade: gera task card e delegation plan declarativos a partir de
   `intent`, `paths` e `risk`.
-- Uso manual: `task ai:route INTENT="refatorar bootstrap" PATHS="bootstrap/bootstrap-windows.ps1,Taskfile.yml"`
+- Uso manual: `task ai:route INTENT="refatorar bootstrap" PATHS="app/bootstrap/bootstrap-windows.ps1,Taskfile.yml"`
 
 ### `ai:delegate`
 

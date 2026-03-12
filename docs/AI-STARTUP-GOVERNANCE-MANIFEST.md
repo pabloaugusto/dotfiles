@@ -65,7 +65,7 @@ precise retomar o trabalho sem continuidade confiavel de contexto.
 
 ### Secrets, auth e runtime operacional
 
-- [`df/secrets/secrets-ref.yaml`](../df/secrets/secrets-ref.yaml)
+- [`app/df/secrets/secrets-ref.yaml`](../app/df/secrets/secrets-ref.yaml)
 
 ### Jira, Confluence, agilidade e artifacts normativos
 

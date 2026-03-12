@@ -10,14 +10,14 @@ de troca, rollback objetivo e validacao pos-rotacao.
 
 - criacao, rotacao, revogacao ou expiracao de tokens, PATs, service accounts e
   chaves SSH
-- mudancas em [`df/secrets/`](df/secrets/), [`bootstrap/secrets/`](bootstrap/secrets/),
+- mudancas em [`app/df/secrets/`](app/df/secrets/), [`app/bootstrap/secrets/`](app/bootstrap/secrets/),
   [`docs/secrets-and-auth.md`](docs/secrets-and-auth.md) ou scripts de auth
 - ajustes em `op`, `gh`, `glab`, `sops`, `age`, `ssh`, `ssh-agent`,
   notificador de rotacao ou inventario de credenciais
 - qualquer demanda que possa bloquear bootstrap, assinatura Git, acesso a repos
   ou leitura de secrets de runtime
 - qualquer bug de ACL, ownership, `StrictModes` ou drift em
-  configuracoes locais de `ssh` no Windows e nos configs em [`df/ssh/`](df/ssh/) que possa
+  configuracoes locais de `ssh` no Windows e nos configs em [`app/df/ssh/`](app/df/ssh/) que possa
   quebrar o operador `ssh`
 
 ## Skill principal

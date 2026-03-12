@@ -6,11 +6,11 @@
   - [`../2026-03-07-onepassword-batch-resolution.md`](../2026-03-07-onepassword-batch-resolution.md)
   - [`../2026-03-07-parecer-e-plano-inicial.md`](../2026-03-07-parecer-e-plano-inicial.md)
   - [`../../../docs/secrets-and-auth.md`](../../../docs/secrets-and-auth.md)
-  - [`../../../df/powershell/_functions.ps1`](../../../df/powershell/_functions.ps1)
-  - [`../../../df/bash/.inc/check-env.sh`](../../../df/bash/.inc/check-env.sh)
-  - [`../../../df/bash/.inc/secrets-manager.sh`](../../../df/bash/.inc/secrets-manager.sh)
+  - [`../../../df/powershell/_functions.ps1`](../../../app/df/powershell/_functions.ps1)
+  - [`../../../df/bash/.inc/check-env.sh`](../../../app/df/bash/.inc/check-env.sh)
+  - [`../../../df/bash/.inc/secrets-manager.sh`](../../../app/df/bash/.inc/secrets-manager.sh)
   - [`../../../scripts/git_signing_lib.py`](../../../scripts/git_signing_lib.py)
-  - [`../../../bootstrap/bootstrap-ubuntu-wsl.sh`](../../../bootstrap/bootstrap-ubuntu-wsl.sh)
+  - [`../../../bootstrap/bootstrap-ubuntu-wsl.sh`](../../../app/bootstrap/bootstrap-ubuntu-wsl.sh)
 
 ## Objetivo
 
@@ -37,11 +37,11 @@ rg -n "\bop\s+(read|item get|run|inject|whoami|service-account|signin)\b" \
 
 | Arquivo | Linhas | Chamadas | Leitura operacional | Prioridade |
 | --- | --- | --- | --- | --- |
-| [`../../../df/powershell/_functions.ps1`](../../../df/powershell/_functions.ps1) | `1224`, `1385`, `1722`, `1731`, `1763`, `1857`, `2682` | `op inject`, `op read`, `op whoami` | hot path de terminal, `checkEnv`, signer e fallback de token GitHub | `P0` |
-| [`../../../df/bash/.inc/check-env.sh`](../../../df/bash/.inc/check-env.sh) | `105`, `120`, `143`, `166`, `265` | `op whoami`, `op read` | valida shell interativo, session check, fallback de token e signer tecnico | `P0` |
-| [`../../../df/bash/.inc/secrets-manager.sh`](../../../df/bash/.inc/secrets-manager.sh) | `31`, `200`, `224` | `op whoami`, `op read`, `op inject` | camada de resolucao de secrets acionada por comandos de runtime bash | `P1` |
+| [`../../../df/powershell/_functions.ps1`](../../../app/df/powershell/_functions.ps1) | `1224`, `1385`, `1722`, `1731`, `1763`, `1857`, `2682` | `op inject`, `op read`, `op whoami` | hot path de terminal, `checkEnv`, signer e fallback de token GitHub | `P0` |
+| [`../../../df/bash/.inc/check-env.sh`](../../../app/df/bash/.inc/check-env.sh) | `105`, `120`, `143`, `166`, `265` | `op whoami`, `op read` | valida shell interativo, session check, fallback de token e signer tecnico | `P0` |
+| [`../../../df/bash/.inc/secrets-manager.sh`](../../../app/df/bash/.inc/secrets-manager.sh) | `31`, `200`, `224` | `op whoami`, `op read`, `op inject` | camada de resolucao de secrets acionada por comandos de runtime bash | `P1` |
 | [`../../../scripts/git_signing_lib.py`](../../../scripts/git_signing_lib.py) | `117` | `op read` | signer tecnico recorre ao cofre quando a chave publica ainda nao esta materializada na worktree | `P1` |
-| [`../../../bootstrap/bootstrap-ubuntu-wsl.sh`](../../../bootstrap/bootstrap-ubuntu-wsl.sh) | `391`, `558` | `op inject`, `op read` | bootstrap e fallback de token GitHub fora do hot path de abertura de shell | `P2` |
+| [`../../../bootstrap/bootstrap-ubuntu-wsl.sh`](../../../app/bootstrap/bootstrap-ubuntu-wsl.sh) | `391`, `558` | `op inject`, `op read` | bootstrap e fallback de token GitHub fora do hot path de abertura de shell | `P2` |
 
 ## Priorizacao operacional
 
@@ -57,7 +57,7 @@ diagnostico recorrente e o signer tecnico usado durante a rodada.
 
 ### P1 - Runtime sob comando explicito
 
-- [`df/bash/.inc/secrets-manager.sh`](../../../df/bash/.inc/secrets-manager.sh)
+- [`df/bash/.inc/secrets-manager.sh`](../../../app/df/bash/.inc/secrets-manager.sh)
 - [`scripts/git_signing_lib.py`](../../../scripts/git_signing_lib.py)
 
 Sao caminhos menos frequentes que o shell interativo, mas ainda entram no raio
@@ -65,7 +65,7 @@ de operacao diaria e podem reacender o problema sob carga.
 
 ### P2 - Bootstrap
 
-- [`bootstrap/bootstrap-ubuntu-wsl.sh`](../../../bootstrap/bootstrap-ubuntu-wsl.sh)
+- [`bootstrap/bootstrap-ubuntu-wsl.sh`](../../../app/bootstrap/bootstrap-ubuntu-wsl.sh)
 
 Mantem uso de `op` em pontos controlados e nao e o foco imediato da mitigacao,
 porque nao roda a cada nova sessao interativa.

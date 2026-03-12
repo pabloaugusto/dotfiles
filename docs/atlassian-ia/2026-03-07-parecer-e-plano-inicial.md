@@ -45,8 +45,8 @@ mudanca deve ser abstrair a persistencia e o backend de estado.
 
 Atualizacao aprovada depois deste parecer:
 
-- a fundacao dev-time da migracao deve nascer fora de [`../../df/`](../../df/)
-  e desacoplada de [`../../bootstrap/`](../../bootstrap/)
+- a fundacao dev-time da migracao deve nascer fora de [`../../df/`](../../app/df/)
+  e desacoplada de [`../../bootstrap/`](../../app/bootstrap/)
 - a control plane inicial passa a morar em [`../../config/ai/`](../../config/ai/)
 - `Playwright` entra como capacidade opcional de evidencia, nao como
   dependencia do nucleo dos adapters

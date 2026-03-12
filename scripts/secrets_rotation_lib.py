@@ -135,7 +135,7 @@ def local_age_secret_key(repo_root: Path) -> str:
         return env_secret
 
     candidate_paths = [
-        repo_root / "df" / "secrets" / "dotfiles.age.local.key",
+        repo_root / "app" / "df" / "secrets" / "dotfiles.age.local.key",
         Path.home() / ".config" / "sops" / "age" / "keys.txt",
     ]
     for candidate in candidate_paths:
@@ -226,7 +226,7 @@ def ssh_public_key_fingerprint(public_key: str) -> str:
 
 
 def load_secrets_refs(repo_root: Path) -> dict[str, Any]:
-    return load_yaml_file(repo_root / "df" / "secrets" / "secrets-ref.yaml")
+    return load_yaml_file(repo_root / "app" / "df" / "secrets" / "secrets-ref.yaml")
 
 
 def resolve_secret_ref(secrets_refs: dict[str, Any], ref_key: str) -> str:
@@ -235,7 +235,7 @@ def resolve_secret_ref(secrets_refs: dict[str, Any], ref_key: str) -> str:
     resolved = dotted_get(secrets_refs, ref_key)
     if not resolved:
         raise SecretsRotationError(
-            f"Ref '{ref_key}' nao encontrada em df/secrets/secrets-ref.yaml."
+            f"Ref '{ref_key}' nao encontrada em app/df/secrets/secrets-ref.yaml."
         )
     return resolved
 
@@ -758,7 +758,7 @@ def target_artifact_checks(context: RepoContext, target: RotationTarget) -> list
     if target.kind == "age_runtime_key":
         sops_config_path = expand_path(
             context.repo_root,
-            str(target.config.get("sops_config_path", "df/secrets/dotfiles.sops.yaml")),
+            str(target.config.get("sops_config_path", "app/df/secrets/dotfiles.sops.yaml")),
         )
         payload.append(
             {
@@ -1111,7 +1111,7 @@ def validate_target(
     elif target.kind == "age_runtime_key":
         sops_config_path = expand_path(
             context.repo_root,
-            str(target.config.get("sops_config_path", "df/secrets/dotfiles.sops.yaml")),
+            str(target.config.get("sops_config_path", "app/df/secrets/dotfiles.sops.yaml")),
         )
         configured_recipients = configured_age_recipients(sops_config_path)
         expected_recipient = local_age_recipient(context.repo_root)

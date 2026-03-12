@@ -16,7 +16,7 @@ from scripts.secrets_rotation_lib import (
 
 def write_repo_fixture(repo: pathlib.Path) -> None:
     (repo / "config").mkdir(parents=True, exist_ok=True)
-    (repo / "df" / "secrets").mkdir(parents=True, exist_ok=True)
+    (repo / "app" / "df" / "secrets").mkdir(parents=True, exist_ok=True)
     (repo / "docs").mkdir(parents=True, exist_ok=True)
     (repo / "config" / "secrets-rotation.yaml").write_text(
         "version: 1\n"
@@ -41,13 +41,13 @@ def write_repo_fixture(repo: pathlib.Path) -> None:
         "    order: 20\n"
         '    source_of_truth: "1password"\n'
         '    ref_key: "age.key"\n'
-        '    sops_config_path: "df/secrets/dotfiles.sops.yaml"\n'
+        '    sops_config_path: "app/df/secrets/dotfiles.sops.yaml"\n'
         "    encrypted_artifacts:\n"
         '      - path: "missing.env.sops"\n'
         '        input_type: "dotenv"\n',
         encoding="utf-8",
     )
-    (repo / "df" / "secrets" / "secrets-ref.yaml").write_text(
+    (repo / "app" / "df" / "secrets" / "secrets-ref.yaml").write_text(
         "---\n"
         "1password:\n"
         '  service-account: "op://secrets/dotfiles/1password/service-account"\n'
@@ -55,9 +55,9 @@ def write_repo_fixture(repo: pathlib.Path) -> None:
         '  key: "op://secrets/dotfiles/age/age.key"\n',
         encoding="utf-8",
     )
-    (repo / "df" / "secrets" / "dotfiles.sops.yaml").write_text(
+    (repo / "app" / "df" / "secrets" / "dotfiles.sops.yaml").write_text(
         "creation_rules:\n"
-        "  - path_regex: ^df/secrets/.*$\n"
+        "  - path_regex: ^app/df/secrets/.*$\n"
         "    age:\n"
         "      - age1REPLACE_WITH_YOUR_PUBLIC_AGE_KEY\n",
         encoding="utf-8",
@@ -196,9 +196,9 @@ class SecretsRotationTests(unittest.TestCase):
                 config_path.read_text(encoding="utf-8").replace("    enabled: true\n    kind: \"github_ssh_identity\"\n", "    enabled: false\n    kind: \"github_ssh_identity\"\n", 1),
                 encoding="utf-8",
             )
-            (repo / "df" / "secrets" / "dotfiles.sops.yaml").write_text(
+            (repo / "app" / "df" / "secrets" / "dotfiles.sops.yaml").write_text(
                 "creation_rules:\n"
-                "  - path_regex: ^df/secrets/.*$\n"
+                "  - path_regex: ^app/df/secrets/.*$\n"
                 "    age:\n"
                 "      - age1fixture\n",
                 encoding="utf-8",

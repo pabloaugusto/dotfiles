@@ -75,7 +75,7 @@ class ValidateAiAssetsTests(unittest.TestCase):
         self.assertIn("config/ai/agent-runtime.yaml", module.REQUIRED_FILES)
         self.assertIn("config/ai/contracts.yaml", module.REQUIRED_FILES)
         self.assertIn("config/ai/sync-targets.yaml", module.REQUIRED_FILES)
-        self.assertIn("df/secrets/secrets-ref.yaml", module.REQUIRED_FILES)
+        self.assertIn("app/df/secrets/secrets-ref.yaml", module.REQUIRED_FILES)
         self.assertIn("scripts/ai-prompt-governance.py", module.REQUIRED_FILES)
         self.assertIn("scripts/ai-route.py", module.REQUIRED_FILES)
         self.assertIn("scripts/ai-control-plane.py", module.REQUIRED_FILES)
@@ -611,7 +611,7 @@ class ValidateAiAssetsTests(unittest.TestCase):
             module.CATALOG_REQUIRED_SNIPPETS["docs/TASKS.md"],
         )
         self.assertIn(
-            "df/secrets/secrets-ref.yaml",
+            "app/df/secrets/secrets-ref.yaml",
             module.STARTUP_GOVERNANCE_REQUIRED_SNIPPETS["docs/AI-STARTUP-GOVERNANCE-MANIFEST.md"],
         )
         self.assertIn(

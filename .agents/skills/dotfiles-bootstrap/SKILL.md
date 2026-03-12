@@ -1,6 +1,6 @@
 ---
 name: dotfiles-bootstrap
-description: Diagnosticar, ajustar e validar bootstrap, user-config, links canonicos, refresh/relink e derivados deste repo de dotfiles. Use quando a tarefa tocar [`bootstrap/`](bootstrap/), [`Taskfile.yml`](Taskfile.yml), a config de usuario do bootstrap documentada em [`docs/config-reference.md`](docs/config-reference.md#bootstrapuser-configyaml), symlinks, junctions, canonicalizacao de paths ou paridade Windows/WSL.
+description: Diagnosticar, ajustar e validar bootstrap, user-config, links canonicos, refresh/relink e derivados deste repo de dotfiles. Use quando a tarefa tocar [`app/bootstrap/`](app/bootstrap/), [`Taskfile.yml`](Taskfile.yml), a config de usuario do bootstrap documentada em [`docs/config-reference.md`](docs/config-reference.md#bootstrapuser-configyaml), symlinks, junctions, canonicalizacao de paths ou paridade Windows/WSL.
 ---
 
 # Dotfiles Bootstrap
@@ -16,8 +16,8 @@ Guiar mudancas no bootstrap sem perder previsibilidade, idempotencia e paridade 
 3. Identificar se a mudanca afeta Windows, WSL ou ambos.
 4. Preservar caminhos absolutos canonicos como fonte de verdade.
 5. Quando mudar contrato de config, manter em paridade:
-   - [`bootstrap/user-config.yaml.tpl`](bootstrap/user-config.yaml.tpl)
-   - [`bootstrap/bootstrap-config.ps1`](bootstrap/bootstrap-config.ps1)
+   - [`app/bootstrap/user-config.yaml.tpl`](app/bootstrap/user-config.yaml.tpl)
+   - [`app/bootstrap/bootstrap-config.ps1`](app/bootstrap/bootstrap-config.ps1)
    - documentacao relevante
 6. Validar com tasks, lints e testes aderentes ao escopo.
 

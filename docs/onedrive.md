@@ -113,8 +113,8 @@ C:\Users\pablo\
 |-- etc      -> D:\OneDrive\etc
 |-- clients  -> D:\OneDrive\clients
 |-- projects -> D:\OneDrive\clients\pablo\projects
-|-- .ssh     -> C:\Users\pablo\dotfiles\df\ssh
-|-- .gitconfig -> C:\Users\pablo\dotfiles\df\git\.gitconfig
+|-- .ssh     -> C:\Users\pablo\dotfiles\app\df\ssh
+|-- .gitconfig -> C:\Users\pablo\dotfiles\app\df\git\.gitconfig
 `-- ... (demais links de dotfiles)
 ```
 
@@ -134,10 +134,10 @@ Origem em `C:\Users\<user>\...` para destino em `C:\Users\<user>\dotfiles\...`:
 - `.gitconfig`, `.config\git`, `.gitconfig-windows`, `.gitconfig.local.sample`
 - `.bashrc`, `.bash_profile`, `.bashrc_profile`
 - `.config\winfetch`, `.oh-my-posh`
-- `.ssh\config.local` -> [`df\ssh\config.windows`](df\ssh\config.windows)
+- `.ssh\config.local` -> [`app/df/ssh/config.windows`](../app/df/ssh/config.windows)
 - `Documents\PowerShell\profile.ps1` e arquivos de modulo PowerShell (`env-vars.ps1`, `aliases.ps1`, etc.)
-- `%APPDATA%\Code\User` -> [`df\vscode`](df\vscode)
-- `Windows Terminal settings.json` -> [`df\windows-terminal\settings.json`](df\windows-terminal\settings.json) (quando caminho do app e detectado)
+- `%APPDATA%\Code\User` -> [`app/df/vscode`](../app/df/vscode)
+- `Windows Terminal settings.json` -> [`app/df/windows-terminal/settings.json`](../app/df/windows-terminal/settings.json) (quando caminho do app e detectado)
 
 ## 5) Exemplo alternativo (sem drive D:)
 

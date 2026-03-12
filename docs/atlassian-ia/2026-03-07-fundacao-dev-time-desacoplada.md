@@ -10,8 +10,8 @@
 ## Diretrizes aprovadas
 
 - a camada de configuracao, secrets refs, contratos e artefatos de
-  implementacao/dev nao deve morar em [`df/`](../../df/)
-- essa camada tambem nao deve depender de [`bootstrap/`](../../bootstrap/)
+  implementacao/dev nao deve morar em [`df/`](../../app/df/)
+- essa camada tambem nao deve depender de [`bootstrap/`](../../app/bootstrap/)
 - o repo atual e piloto, mas a fundacao precisa nascer portavel para servir de
   base a futuros projetos
 - agentes opcionais, como design, UX/CRO, SEO e browser validation, devem ser

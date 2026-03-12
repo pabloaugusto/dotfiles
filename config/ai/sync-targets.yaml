@@ -76,9 +76,9 @@ artifact_inventory:
       reason: contratos, manifests e control plane precisam permanecer versionados no Git
     - path: config/runtime-secrets-cache.yaml
       reason: contrato versionado de cache/runtime local
-    - path: df/secrets/secrets-ref.yaml
+    - path: app/df/secrets/secrets-ref.yaml
       reason: inventario declarativo de refs de secrets
-    - path: bootstrap/user-config.yaml.tpl
+    - path: app/bootstrap/user-config.yaml.tpl
       reason: template declarativo do bootstrap
     - path: config/ai/platforms.local.yaml.tpl
       reason: template declarativo do overlay local
@@ -92,13 +92,13 @@ artifact_inventory:
       reason: ledger versionado de inconformidades e cerimonias
     - path: docs/AI-ORTHOGRAPHY-LEDGER.md
       reason: ledger versionado do parecer consultivo do Pascoalete
-    - path: df/vscode/settings.json
+    - path: app/df/vscode/settings.json
       reason: configuracao declarativa do editor
-    - path: df/vscode/keybindings.json
+    - path: app/df/vscode/keybindings.json
       reason: configuracao declarativa do editor
-    - path: df/vscode/mcp.json
+    - path: app/df/vscode/mcp.json
       reason: configuracao declarativa de integracao
-    - path: df/vscode/chatLanguageModels.json
+    - path: app/df/vscode/chatLanguageModels.json
       reason: configuracao declarativa de modelos
 
   runtime_ledger_candidates:
@@ -125,15 +125,15 @@ artifact_inventory:
       reason: backup tecnico local
     - path: config/ai/platforms.local.yaml
       reason: overlay local com refs reais e sensiveis
-    - path: bootstrap/user-config.yaml
+    - path: app/bootstrap/user-config.yaml
       reason: configuracao local materializada do bootstrap
-    - path: df/vscode/globalStorage/
+    - path: app/df/vscode/globalStorage/
       reason: runtime local de ferramenta
-    - path: df/vscode/workspaceStorage/
+    - path: app/df/vscode/workspaceStorage/
       reason: runtime local de ferramenta
-    - path: df/vscode/History/
+    - path: app/df/vscode/History/
       reason: historico local efemero
-    - path: df/vscode/sync/
+    - path: app/df/vscode/sync/
       reason: runtime transitorio do editor
     - path: .gemini/
       reason: runtime local de ferramenta, nao versionavel nem historico perene oficial

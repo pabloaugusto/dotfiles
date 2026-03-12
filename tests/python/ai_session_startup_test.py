@@ -277,7 +277,7 @@ class AiSessionStartupTests(unittest.TestCase):
                     - [`AGENTS.md`](../AGENTS.md)
                     - todos os arquivos `AI-*` em [`docs/`](./)
                     - todos os arquivos em [`.agents/cards/`](../.agents/cards/)
-                    - [`df/secrets/secrets-ref.yaml`](../df/secrets/secrets-ref.yaml)
+                    - [`app/df/secrets/secrets-ref.yaml`](../app/df/secrets/secrets-ref.yaml)
                     """
                 ),
                 encoding="utf-8",
@@ -288,7 +288,7 @@ class AiSessionStartupTests(unittest.TestCase):
             )
             (docs_dir / "AI-STARTUP-AND-RESTART.md").write_text("# runbook\n", encoding="utf-8")
             (cards_dir / "ai-product-owner.md").write_text("# card\n", encoding="utf-8")
-            secrets_dir = repo_root / "df" / "secrets"
+            secrets_dir = repo_root / "app" / "df" / "secrets"
             secrets_dir.mkdir(parents=True)
             (secrets_dir / "secrets-ref.yaml").write_text("---\n", encoding="utf-8")
 
@@ -298,7 +298,7 @@ class AiSessionStartupTests(unittest.TestCase):
         self.assertIn("docs/AI-CHAT-CONTRACTS-REGISTER.md", resolved)
         self.assertIn("docs/AI-STARTUP-AND-RESTART.md", resolved)
         self.assertIn(".agents/cards/ai-product-owner.md", resolved)
-        self.assertIn("df/secrets/secrets-ref.yaml", resolved)
+        self.assertIn("app/df/secrets/secrets-ref.yaml", resolved)
 
     def test_load_pending_chat_contracts_reads_markdown_table(self) -> None:
         with tempfile.TemporaryDirectory() as tmp_dir:
@@ -732,7 +732,7 @@ class AiSessionStartupTests(unittest.TestCase):
                     - [`AGENTS.md`](../AGENTS.md)
                     - todos os arquivos `AI-*` em [`docs/`](./)
                     - todos os arquivos em [`.agents/registry/`](../.agents/registry/)
-                    - [`df/secrets/secrets-ref.yaml`](../df/secrets/secrets-ref.yaml)
+                    - [`app/df/secrets/secrets-ref.yaml`](../app/df/secrets/secrets-ref.yaml)
                     """
                 ),
                 encoding="utf-8",
@@ -999,7 +999,7 @@ class AiSessionStartupTests(unittest.TestCase):
                     - [`AGENTS.md`](../AGENTS.md)
                     - todos os arquivos `AI-*` em [`docs/`](./)
                     - todos os arquivos em [`.agents/registry/`](../.agents/registry/)
-                    - [`df/secrets/secrets-ref.yaml`](../df/secrets/secrets-ref.yaml)
+                    - [`app/df/secrets/secrets-ref.yaml`](../app/df/secrets/secrets-ref.yaml)
                     """
                 ),
                 encoding="utf-8",

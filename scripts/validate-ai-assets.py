@@ -68,7 +68,7 @@ REQUIRED_FILES = [
     "config/ai/agent-runtime.yaml",
     "config/ai/contracts.yaml",
     "config/ai/sync-targets.yaml",
-    "df/secrets/secrets-ref.yaml",
+    "app/df/secrets/secrets-ref.yaml",
     ".agents/README.md",
     ".agents/prompts/README.md",
     ".agents/prompts/CATALOG.md",
@@ -426,7 +426,7 @@ STARTUP_GOVERNANCE_REQUIRED_SNIPPETS = {
     ],
     "docs/AI-STARTUP-GOVERNANCE-MANIFEST.md": [
         "### Secrets, auth e runtime operacional",
-        "df/secrets/secrets-ref.yaml",
+        "app/df/secrets/secrets-ref.yaml",
         "### Prompt packs formais e contexto executavel",
         ".agents/prompts/CATALOG.md",
     ],

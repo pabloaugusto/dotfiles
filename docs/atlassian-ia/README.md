@@ -35,7 +35,7 @@ governanca.
   politica de subtasks.
 - [`2026-03-07-fundacao-dev-time-desacoplada.md`](2026-03-07-fundacao-dev-time-desacoplada.md):
   diretriz aprovada para tirar configs/secrets/contratos dev-time de
-  [`df/`](../../df/) e [`bootstrap/`](../../bootstrap/), mantendo optionalidade
+  [`df/`](../../app/df/) e [`bootstrap/`](../../app/bootstrap/), mantendo optionalidade
   por config e browser validation opcional via `Playwright`.
 - [`2026-03-07-atlassian-product-discovery.md`](2026-03-07-atlassian-product-discovery.md):
   decisao de incorporar `Atlassian Product Discovery` como camada opcional de

@@ -589,7 +589,7 @@ Isso torna a pasta inadequada como fonte de verdade do repo. O que faz sentido v
 
 ## Estrutura no repo
 
-Como [`df/`](df/) guarda apenas o que sera utilizado na maquina apos o bootstrap, os artefatos de governanca do projeto ficam fora dele. Neste repo:
+Como [`app/df/`](../app/df/) guarda apenas o que sera utilizado na maquina apos o bootstrap, os artefatos de governanca do projeto ficam fora dele. Neste repo:
 
 - [`AGENTS.md`](AGENTS.md) define o contrato global do projeto
 - [`.agents/cards/`](.agents/cards/) guarda cartoes versionados de agentes
@@ -600,10 +600,10 @@ Como [`df/`](df/) guarda apenas o que sera utilizado na maquina apos o bootstrap
 - [`.codex/README.md`](.codex/README.md) deixa explicito que adaptadores de assistente nao sao fonte de verdade
 - [`AI-WIP-TRACKER.md`](AI-WIP-TRACKER.md) guarda o fallback local do estado incremental da IA
 - [`docs/AI-REVIEW-LEDGER.md`](docs/AI-REVIEW-LEDGER.md) guarda os pareceres vivos de revisao especializada por worklog
-- [`config/ai/`](config/ai/) guarda a control plane dev-time de plataformas,
+- [`config/ai/`](../config/ai/) guarda a control plane dev-time de plataformas,
   contratos, optionalidade e enablement declarativo dos agentes, desacoplada
-  de [`bootstrap/`](bootstrap/) e de [`df/`](df/)
-- [`df/`](df/) continua reservado aos dotfiles e assets materializados no ambiente
+  de [`app/bootstrap/`](../app/bootstrap/) e de [`app/df/`](../app/df/)
+- [`app/df/`](../app/df/) continua reservado aos dotfiles e assets materializados no ambiente
 
 ## Estrategia de evolucao
 

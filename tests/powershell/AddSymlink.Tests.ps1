@@ -1,6 +1,6 @@
 $here = Split-Path -Parent $MyInvocation.MyCommand.Path
 $repoRoot = (Resolve-Path (Join-Path $here '..\..')).Path
-. (Join-Path $repoRoot 'df\powershell\_functions.ps1')
+. (Join-Path $repoRoot 'app\df\powershell\_functions.ps1')
 
 Describe 'Add-Symlink' {
 	It 'cria um vinculo funcional para arquivo existente' {
