@@ -26,3 +26,16 @@
 - use [`core-rules.md`](core-rules.md) para contratos compartilhados
 - quando um tema tocar startup ou delegacao, leia tambem os temas vizinhos
 
+## Projecoes executaveis
+
+| Tema | Fonte humana | Projecao `.rules` | Obrigatoria no startup |
+| --- | --- | --- | --- |
+| Startup | [`startup-and-resume-rules.md`](startup-and-resume-rules.md) | [`startup.rules`](startup.rules) | sim |
+| Chat | [`chat-and-identity-rules.md`](chat-and-identity-rules.md) | [`chat.rules`](chat.rules) | sim |
+| Git | [`git-rules.md`](git-rules.md) | [`git.rules`](git.rules) | sim |
+| Security | [`auth-secrets-and-critical-integrations-rules.md`](auth-secrets-and-critical-integrations-rules.md) | [`security.rules`](security.rules) | sim |
+
+- o vinculo declarativo oficial entre essas camadas vive em
+  [`projections.yaml`](projections.yaml)
+- novas projecoes `.rules` so devem nascer quando houver consumidor real no
+  runtime, no startup ou em gates automatizados

@@ -1,0 +1,14 @@
+rule AI-CHAT-001
+when: startup-chat
+must:
+- carregar o contrato de chat antes da primeira saida operacional
+- usar display_name oficial quando ele existir
+- manter o ai-startup-governor como dono visivel do chat ate ready_for_work
+
+rule AI-CHAT-002
+when: chat-operations
+must:
+- respeitar o enablement declarativo dos agentes em toda decisao de chat
+- impedir reativacao de agente desabilitado apenas por memoria de chat
+- usar links absolutos para arquivos do repo e links canonicos para Jira e Confluence
+- espelhar marcos relevantes no chat sem substituir a rastreabilidade oficial

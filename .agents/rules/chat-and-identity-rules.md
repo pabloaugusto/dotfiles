@@ -54,6 +54,7 @@ agentes.
 
 ## Artefatos relacionados
 
+- [`chat.rules`](chat.rules)
 - [`../../docs/AI-STARTUP-AND-RESTART.md`](../../docs/AI-STARTUP-AND-RESTART.md)
 - [`../../docs/AI-AGENTS-CATALOG.md`](../../docs/AI-AGENTS-CATALOG.md)
 - [`../../docs/AI-DELEGATION-FLOW.md`](../../docs/AI-DELEGATION-FLOW.md)
@@ -63,4 +64,3 @@ agentes.
 - [`startup-and-resume-rules.md`](startup-and-resume-rules.md)
 - [`delegation-rules.md`](delegation-rules.md)
 - [`scrum-and-ceremonies-rules.md`](scrum-and-ceremonies-rules.md)
-

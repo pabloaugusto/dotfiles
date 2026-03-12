@@ -74,6 +74,10 @@ delegation_plan_schema = ".agents/orchestration/delegation-plan.schema.json"
 default = ".agents/rules/default.rules"
 ci = ".agents/rules/ci.rules"
 security = ".agents/rules/security.rules"
+startup = ".agents/rules/startup.rules"
+chat = ".agents/rules/chat.rules"
+git = ".agents/rules/git.rules"
+projections = ".agents/rules/projections.yaml"
 
 [evals]
 smoke = ".agents/evals/scenarios/smoke.md"

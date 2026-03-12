@@ -28,6 +28,20 @@ def write_control_plane(repo_root: pathlib.Path) -> None:
         ),
         encoding="utf-8",
     )
+    (config_dir / "agent-enablement.yaml").write_text(
+        textwrap.dedent(
+            """\
+            version: 1
+            defaults:
+              registry_agents_enabled_by_default: true
+            roles:
+              ai-product-owner:
+                enabled: true
+            registry_agents: {}
+            """
+        ),
+        encoding="utf-8",
+    )
     (config_dir / "agent-operations.yaml").write_text(
         textwrap.dedent(
             """\

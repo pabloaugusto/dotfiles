@@ -56,6 +56,7 @@ Definir o startup do zero, o restart confiavel e a liberacao de
 
 ## Artefatos relacionados
 
+- [`startup.rules`](startup.rules)
 - [`../../.agents/cards/ai-startup-governor.md`](../../.agents/cards/ai-startup-governor.md)
 - [`../../docs/TASKS.md#aistartupenforce`](../../docs/TASKS.md#aistartupenforce)
 - [`../../docs/AI-CHAT-CONTRACTS-REGISTER.md`](../../docs/AI-CHAT-CONTRACTS-REGISTER.md)

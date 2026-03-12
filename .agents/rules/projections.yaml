@@ -1,0 +1,34 @@
+version: 1
+projections:
+  startup:
+    human_source: .agents/rules/startup-and-resume-rules.md
+    machine_projection: .agents/rules/startup.rules
+    required_for_startup: true
+    parity_terms:
+      - manifest
+      - ready_for_work
+      - ai-startup-governor
+  chat:
+    human_source: .agents/rules/chat-and-identity-rules.md
+    machine_projection: .agents/rules/chat.rules
+    required_for_startup: true
+    parity_terms:
+      - display_name
+      - ai-startup-governor
+      - enablement
+  git:
+    human_source: .agents/rules/git-rules.md
+    machine_projection: .agents/rules/git.rules
+    required_for_startup: true
+    parity_terms:
+      - branch
+      - issue
+      - worktree
+  security:
+    human_source: .agents/rules/auth-secrets-and-critical-integrations-rules.md
+    machine_projection: .agents/rules/security.rules
+    required_for_startup: true
+    parity_terms:
+      - gh
+      - signing
+      - secrets

@@ -1,0 +1,13 @@
+rule AI-GIT-001
+when: startup-git
+must:
+- carregar branch atual, upstream e inventario de worktree antes de escolher a rodada
+- lembrar que cada branch precisa carregar uma unica issue real
+- detectar drift entre branch, worklog e active execution antes de operar
+
+rule AI-GIT-002
+when: publish-closeout
+must:
+- manter commit atomico e PR ligados a uma unica issue
+- podar branch e worktree residuais apos merge seguro
+- bloquear nova rodada quando houver worktree suja sem Doing ativo

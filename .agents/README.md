@@ -27,6 +27,10 @@ Fonte de verdade da camada declarativa e operacional de IA deste repo.
 - Toda regra declarativa portavel deve nascer em [`.agents/`](.agents/).
 - A regra normativa humana por tema deve viver primeiro em
   [`.agents/rules/`](rules/); docs, startup e validadores consomem essa camada.
+- Quando um tema precisar de projecao executavel curta para runtime, startup ou
+  gates, ela deve nascer como `*.rules` declarada em
+  [`.agents/rules/projections.yaml`](rules/projections.yaml), sem substituir a
+  fonte humana em Markdown.
 - Prompt packs versionados tambem devem ficar sob [`.agents/`](.agents/), nunca soltos na raiz do repo.
 - A arvore de prompt packs deve seguir o catalogo canonico em
   [`.agents/prompts/README.md`](prompts/README.md) e
