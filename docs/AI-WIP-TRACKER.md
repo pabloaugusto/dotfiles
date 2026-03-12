@@ -1,6 +1,6 @@
 # AI WIP Tracker
 
-Atualizado em: 2026-03-12 14:55 UTC
+Atualizado em: 2026-03-12 15:09 UTC
 
 Fallback local de continuidade. O Jira e a fonte primaria do fluxo vivo.
 
@@ -35,6 +35,7 @@ Fallback local de continuidade. O Jira e a fonte primaria do fluxo vivo.
 <!-- ai-worklog:done:start -->
 | ID | Tarefa | Branch | Responsavel | Inicio UTC | Concluido UTC | Resultado |
 | --- | --- | --- | --- | --- | --- | --- |
+| WIP-20260312-120449 | Publicacao remota iniciada | prompt/DOT-206-startup-governor-enforcement | ai-developer-config-policy | 2026-03-12 15:06 UTC | 2026-03-12 15:09 UTC | DOT-206 foi publicado em origin, PR #49 foi aberto e integrado em main, deixando a trilha pronta para sincronizacao local final e poda da branch residual. / evidencias: PR #49 mergeado; merge commit 8c75121 |
 | WIP-20260312-142856 | Executar end-to-end o prompt startup-governor-enforcement | prompt/DOT-206-startup-governor-enforcement | ai-developer-config-policy | 2026-03-12 14:28 UTC | 2026-03-12 14:55 UTC | DOT-206 executou o pack startup-governor-enforcement de ponta a ponta, adicionando ai-startup-governor, startup-ready.json, gate ai:startup:enforce e regressao declarativa/execu... |
 | WIP-20260312-141233 | Formalizar pack prompt de guardiao de startup e enforcement inicial da sessao | main | ai-developer-config-policy | 2026-03-12 14:12 UTC | 2026-03-12 14:16 UTC | Pack formal startup-governor-enforcement criado e catalogado na arvore .agents/prompts |
 | WIP-20260312-DOT-205 | Salvar prompt pack formal de centralizacao normativa em .agents/rules | prompt/DOT-205-agents-rules-centralization | codex | 2026-03-12 13:24 UTC | 2026-03-12 13:47 UTC | Pack formal agents-rules-centralization salvo em .agents/prompts/formal e catalogado em .agents/prompts/CATALOG.md. / evidencias: commit ffda714; task docs:check; task ai:validate; task ai:prompts:jira:check; task ai:... |
