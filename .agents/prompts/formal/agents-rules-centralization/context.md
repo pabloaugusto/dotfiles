@@ -19,6 +19,9 @@ executavel em [`Taskfile.yml`](../../../../Taskfile.yml),
   [`DOT-71`](https://pabloaugusto.atlassian.net/browse/DOT-71)
 - a issue dona deste pack e
   [`DOT-205`](https://pabloaugusto.atlassian.net/browse/DOT-205)
+- o operador precisa poder habilitar ou desabilitar agentes por configuracao
+  declarativa no repo, sem depender de memoria de chat para bypass de
+  `pascoalete` ou de qualquer outro papel
 
 ## Fronteiras
 
@@ -26,6 +29,8 @@ executavel em [`Taskfile.yml`](../../../../Taskfile.yml),
 - [`AGENTS.md`](../../../../AGENTS.md), [`docs/`](../../../../docs/) e
   [`config/ai/`](../../../../config/ai/) nao devem competir com a nova
   camada; eles devem apontar para ela e permanecer em paridade
+- toggles de agentes precisam nascer como configuracao declarativa em
+  [`config/ai/`](../../../../config/ai/), e nao como instrucao efemera de chat
 - `fallback` nao deve nascer como arquivo tematico principal neste primeiro
   corte; ele deve virar secao obrigatoria dentro de cada tema relevante
 - a migracao deve acontecer por ondas pequenas, com validacao real e sem
@@ -50,6 +55,8 @@ executavel em [`Taskfile.yml`](../../../../Taskfile.yml),
 - [`docs/git-conventions.md`](../../../../docs/git-conventions.md)
 - [`docs/ai-operating-model.md`](../../../../docs/ai-operating-model.md)
 - [`Taskfile.yml`](../../../../Taskfile.yml)
+- [`config/ai/agents.yaml`](../../../../config/ai/agents.yaml)
+- [`config/ai/agent-enablement.yaml`](../../../../config/ai/agent-enablement.yaml)
 - [`config/ai/contracts.yaml`](../../../../config/ai/contracts.yaml)
 - [`config/ai/agent-operations.yaml`](../../../../config/ai/agent-operations.yaml)
 - [`config/ai/jira-model.yaml`](../../../../config/ai/jira-model.yaml)
@@ -63,4 +70,6 @@ executavel em [`Taskfile.yml`](../../../../Taskfile.yml),
 - `docs` passam a ser consumo humano e derivacao, nao a origem primaria da
   regra
 - startup, agentes e subagentes passam a carregar a nova camada centralizada
+- startup, roteamento e delegacao passam a respeitar um enablement declarativo
+  de agentes carregado do repo
 - validadores e testes passam a proteger a paridade dessa arquitetura

@@ -10,6 +10,8 @@ tema**.
 - [`AGENTS.md`](../../../../../AGENTS.md): contrato global curto, precedencia,
   leitura obrigatoria e ponte para os temas
 - [`.agents/rules/`](../../../../rules/): regra humana canonica por tema
+- [`config/ai/agent-enablement.yaml`](../../../../../config/ai/agent-enablement.yaml):
+  controle declarativo para habilitar ou desabilitar agentes por papel
 - [`docs/`](../../../../../docs/): guias, runbooks, explicacoes e material
   derivado
 - [`Taskfile.yml`](../../../../../Taskfile.yml), [`.githooks/`](../../../../../.githooks/),
@@ -54,3 +56,12 @@ Cada arquivo tematico deve conter:
 
 `fallback` deve aparecer como secao obrigatoria dentro dos temas relevantes, e
 nao como arquivo principal separado neste primeiro corte.
+
+## Controle declarativo de agentes
+
+- o repo deve materializar
+  [`config/ai/agent-enablement.yaml`](../../../../../config/ai/agent-enablement.yaml)
+  como fonte de verdade para enablement por agente
+- startup, roteamento, delegacao, review e validadores devem consultar esse
+  arquivo antes de exigir ou acionar um papel
+- desabilitacao de agente nao pode depender apenas de memoria de chat

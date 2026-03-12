@@ -4,6 +4,11 @@ Catalogo humano dos papeis permanentes de IA deste repo.
 
 ## Gates obrigatorios
 
+O enablement declarativo dos papeis vive em
+[`../config/ai/agent-enablement.yaml`](../config/ai/agent-enablement.yaml). Um
+agente desabilitado ali nao pode ser exigido por memoria de chat ou habito
+operacional.
+
 - `repo-governance-authority`: sempre
 - `execution-worklog-governance-owner`: sempre
 - `ai-startup-governor`: obrigatorio em toda nova sessao ou `restart`, ate a

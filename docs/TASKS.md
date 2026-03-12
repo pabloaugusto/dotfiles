@@ -224,6 +224,8 @@ Referencia operacional das tasks canonicas mais importantes do repositorio.
   usuario, a camada de `display_name`, o drift operacional entre branch/worklog
   e contexto local ativo, o ciclo de vida da branch atual e o pacote minimo de
   contexto para subagentes.
+- Observacao: o relatorio tambem deve expor o estado declarativo de agents
+  `enabled` e `disabled` carregado de [`config/ai/agent-enablement.yaml`](../config/ai/agent-enablement.yaml).
 - Observacao: o relatorio tambem deve expor `pea_status`, incluindo catalogo de
   prompt packs, pack formal carregado e a distincao entre `startup`, `PEA` e
   enforcement.

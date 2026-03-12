@@ -8,6 +8,7 @@ from unittest.mock import patch
 
 from scripts.ai_session_startup_lib import (
     DEFAULT_READINESS_PATH,
+    agent_enablement_payload,
     agent_identity_payload,
     git_governance_payload,
     load_active_worklog_items,
@@ -154,6 +155,27 @@ class AiSessionStartupTests(unittest.TestCase):
             "separation_note": "startup rele a camada e expoe pea_status; PEA alinha entendimento; enforcement real permanece nos gates oficiais",
         }
 
+    @staticmethod
+    def _fake_agent_enablement() -> dict[str, object]:
+        return {
+            "status": "ok",
+            "agents_path": "config/ai/agents.yaml",
+            "overlay_path": "config/ai/agent-enablement.yaml",
+            "overlay_local_path": "config/ai/agent-enablement.local.yaml",
+            "overlay_local_active": False,
+            "declared_roles": [
+                "ai-developer-config-policy",
+                "ai-linguistic-reviewer",
+                "ai-startup-governor",
+            ],
+            "overridden_roles": ["ai-linguistic-reviewer"],
+            "enabled_roles": ["ai-developer-config-policy", "ai-startup-governor"],
+            "disabled_roles": ["ai-linguistic-reviewer"],
+            "required_roles_disabled": [],
+            "enabled_registry_agents": ["repo-governance-authority"],
+            "disabled_registry_agents": ["pascoalete"],
+        }
+
     def test_resolve_startup_manifest_paths_collects_explicit_and_recursive_targets(self) -> None:
         with tempfile.TemporaryDirectory() as tmp_dir:
             repo_root = Path(tmp_dir)
@@ -267,6 +289,72 @@ class AiSessionStartupTests(unittest.TestCase):
         self.assertEqual(payload["active_display_name"], "Engenheiro Agentes IA")
         self.assertEqual(payload["fallback_display"], "technical-id")
 
+    def test_agent_enablement_payload_reads_effective_overlay(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            repo_root = Path(tmp_dir)
+            config_dir = repo_root / "config" / "ai"
+            registry_dir = repo_root / ".agents" / "registry"
+            config_dir.mkdir(parents=True)
+            registry_dir.mkdir(parents=True)
+            (registry_dir / "pascoalete.toml").write_text(
+                'id = "pascoalete"\ndisplay_name = "Pascoalete"\n',
+                encoding="utf-8",
+            )
+            (config_dir / "agents.yaml").write_text(
+                textwrap.dedent(
+                    """\
+                    version: 1
+                    defaults:
+                      registry_agents_enabled_by_default: true
+                    roles:
+                      ai-startup-governor:
+                        enabled: true
+                        required: true
+                      ai-linguistic-reviewer:
+                        enabled: true
+                        required: true
+                    """
+                ),
+                encoding="utf-8",
+            )
+            (config_dir / "agent-enablement.yaml").write_text(
+                textwrap.dedent(
+                    """\
+                    version: 1
+                    roles:
+                      ai-startup-governor:
+                        enabled: true
+                      ai-linguistic-reviewer:
+                        enabled: false
+                    registry_agents:
+                      pascoalete:
+                        enabled: false
+                    """
+                ),
+                encoding="utf-8",
+            )
+            (config_dir / "agent-operations.yaml").write_text(
+                "version: 1\nroles: {}\n",
+                encoding="utf-8",
+            )
+            (config_dir / "contracts.yaml").write_text(
+                "version: 1\nworkflow:\n  always_enabled_columns:\n    - Backlog\n",
+                encoding="utf-8",
+            )
+            (config_dir / "platforms.yaml").write_text(
+                "version: 1\nplatforms:\n  atlassian:\n    enabled: false\n    provider: none\n    auth:\n      mode: disabled\n      site_url: \"\"\n      email: \"\"\n      token: \"\"\n      service_account: \"\"\n      cloud_id: \"\"\n    jira:\n      enabled: false\n      project_key: \"\"\n    confluence:\n      enabled: false\n      space_key: \"\"\n",
+                encoding="utf-8",
+            )
+
+            payload = agent_enablement_payload(repo_root)
+
+        self.assertEqual(payload["status"], "ok")
+        self.assertEqual(payload["overlay_path"], "config/ai/agent-enablement.yaml")
+        self.assertEqual(payload["enabled_roles"], ["ai-startup-governor"])
+        self.assertEqual(payload["disabled_roles"], ["ai-linguistic-reviewer"])
+        self.assertEqual(payload["required_roles_disabled"], ["ai-linguistic-reviewer"])
+        self.assertEqual(payload["disabled_registry_agents"], ["pascoalete"])
+
     def test_git_governance_payload_exposes_sources_without_claiming_enforcement(self) -> None:
         payload = git_governance_payload()
 
@@ -327,6 +415,7 @@ class AiSessionStartupTests(unittest.TestCase):
                     "active_display_name": "Engenheiro Agentes IA",
                     "fallback_display": "technical-id",
                 },
+                agent_enablement=self._fake_agent_enablement(),
                 chat_communication={"status": "ok", "rules": ["usar portugues"]},
                 git_governance={"status": "ok", "sources": [], "rules": [], "enforcement_note": ""},
                 pea_status=self._fake_pea_status(),
@@ -419,6 +508,10 @@ class AiSessionStartupTests(unittest.TestCase):
                     return_value=self._fake_github_auth(),
                 ),
                 patch(
+                    "scripts.ai_session_startup_lib.agent_enablement_payload",
+                    return_value=self._fake_agent_enablement(),
+                ),
+                patch(
                     "scripts.ai_session_startup_lib.atlassian_connectivity_summary",
                     return_value=self._fake_atlassian(),
                 ),
@@ -446,6 +539,7 @@ class AiSessionStartupTests(unittest.TestCase):
         self.assertIn("Engenheiro Agentes IA", report_text)
         self.assertIn("## Drift operacional detectado", report_text)
         self.assertIn("## PEA carregado no startup", report_text)
+        self.assertIn("## Enablement efetivo de agentes", report_text)
         self.assertIn("## Delegacao e subagentes", report_text)
         self.assertIn("## startup_governor_status", report_text)
         self.assertIn("cloud_id", report_text)
@@ -499,6 +593,7 @@ class AiSessionStartupTests(unittest.TestCase):
                 "active_display_name": "Engenheiro Agentes IA",
                 "fallback_display": "technical-id",
             },
+            "agent_enablement": self._fake_agent_enablement(),
             "chat_communication": {
                 "status": "ok",
                 "rules": ["usar portugues", "preferir display_name oficial"],
@@ -561,8 +656,11 @@ class AiSessionStartupTests(unittest.TestCase):
         markdown = render_startup_session_markdown(payload)
 
         self.assertIn("## Comunicacao no chat e identidade", markdown)
+        self.assertIn("## Enablement efetivo de agentes", markdown)
         self.assertIn("## Governanca Git carregada no startup", markdown)
         self.assertIn("## PEA carregado no startup", markdown)
+        self.assertIn("config/ai/agent-enablement.yaml", markdown)
+        self.assertIn("pascoalete", markdown)
         self.assertIn("docs/git-conventions.md", markdown)
         self.assertIn("startup-alignment", markdown)
         self.assertIn("enforcement", markdown)
@@ -653,6 +751,10 @@ class AiSessionStartupTests(unittest.TestCase):
                     return_value=self._fake_github_auth(),
                 ),
                 patch(
+                    "scripts.ai_session_startup_lib.agent_enablement_payload",
+                    return_value=self._fake_agent_enablement(),
+                ),
+                patch(
                     "scripts.ai_session_startup_lib.atlassian_connectivity_summary",
                     return_value=self._fake_atlassian(),
                 ),
@@ -665,6 +767,7 @@ class AiSessionStartupTests(unittest.TestCase):
 
         self.assertEqual(payload["pending_chat_contract_count"], 2)
         self.assertEqual(payload["agent_identity"]["active_display_name"], "Engenheiro Agentes IA")
+        self.assertEqual(payload["agent_enablement"]["overlay_path"], "config/ai/agent-enablement.yaml")
         self.assertEqual(payload["pea_status"]["status"], "ok")
         self.assertEqual(payload["prioritized_work_item"]["identifier"], "DOT-177")
         self.assertEqual(payload["startup_drift"]["status"], "clean")

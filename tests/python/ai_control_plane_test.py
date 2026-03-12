@@ -34,7 +34,13 @@ def write_control_plane(
     token_spec: str = "env://ATLASSIAN_API_TOKEN",
 ) -> None:
     config_dir = repo_root / "config" / "ai"
+    registry_dir = repo_root / ".agents" / "registry"
     config_dir.mkdir(parents=True)
+    registry_dir.mkdir(parents=True)
+    (registry_dir / "pascoalete.toml").write_text(
+        'id = "pascoalete"\ndisplay_name = "Pascoalete"\n',
+        encoding="utf-8",
+    )
     (config_dir / "agents.yaml").write_text(
         textwrap.dedent(
             f"""\
@@ -49,6 +55,26 @@ def write_control_plane(
               ai-seo-specialist:
                 enabled: {"true" if enable_seo else "false"}
                 required: false
+            """
+        ),
+        encoding="utf-8",
+    )
+    (config_dir / "agent-enablement.yaml").write_text(
+        textwrap.dedent(
+            f"""\
+            version: 1
+            defaults:
+              registry_agents_enabled_by_default: true
+            roles:
+              ai-product-owner:
+                enabled: true
+              ai-browser-validator:
+                enabled: false
+              ai-seo-specialist:
+                enabled: {"true" if enable_seo else "false"}
+            registry_agents:
+              pascoalete:
+                enabled: true
             """
         ),
         encoding="utf-8",
@@ -133,6 +159,11 @@ class AiControlPlaneTests(unittest.TestCase):
         self.assertNotIn("SEO Review", payload["workflow_columns"])
         self.assertTrue(payload["platforms"]["atlassian"]["uses_env_site_url"])
         self.assertFalse(payload["local_overrides"]["platforms"])
+        self.assertEqual(
+            payload["role_enablement"]["declared_roles"],
+            ["ai-browser-validator", "ai-product-owner", "ai-seo-specialist"],
+        )
+        self.assertIn("pascoalete", payload["enabled_registry_agents"])
         self.assertEqual(payload["role_operation_coverage"]["missing_roles"], [])
 
     def test_optional_workflow_column_is_enabled_by_role_flag(self) -> None:
@@ -161,13 +192,49 @@ class AiControlPlaneTests(unittest.TestCase):
                 ),
                 encoding="utf-8",
             )
+            (repo_root / "config" / "ai" / "agent-enablement.local.yaml").write_text(
+                textwrap.dedent(
+                    """\
+                    version: 1
+                    roles:
+                      ai-browser-validator:
+                        enabled: true
+                    """
+                ),
+                encoding="utf-8",
+            )
             payload = summary_payload(repo_root)
             control_plane = load_ai_control_plane(repo_root)
             definition = control_plane.atlassian_definition()
             self.assertTrue(payload["local_overrides"]["platforms"])
+            self.assertTrue(payload["local_overrides"]["agent_enablement"])
             self.assertFalse(payload["platforms"]["atlassian"]["uses_env_site_url"])
             self.assertEqual(definition.site_url_spec, "op://vault/item/section/site-url")
             self.assertEqual(definition.token_spec, "op://vault/item/section/api-token")
+            self.assertIn("ai-browser-validator", payload["enabled_roles"])
+            self.assertIn(
+                "ai-browser-validator", payload["role_enablement"]["overridden_roles"]
+            )
+
+    def test_summary_payload_reports_disabled_registry_agent_from_overlay(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            repo_root = pathlib.Path(tmp)
+            write_control_plane(repo_root)
+            (repo_root / "config" / "ai" / "agent-enablement.local.yaml").write_text(
+                textwrap.dedent(
+                    """\
+                    version: 1
+                    registry_agents:
+                      pascoalete:
+                        enabled: false
+                    """
+                ),
+                encoding="utf-8",
+            )
+
+            payload = summary_payload(repo_root)
+
+        self.assertIn("pascoalete", payload["disabled_registry_agents"])
 
     def test_summary_payload_reports_missing_role_operation_contracts(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
@@ -190,6 +257,69 @@ class AiControlPlaneTests(unittest.TestCase):
 
         self.assertIn("ai-browser-validator", payload["role_operation_coverage"]["missing_roles"])
         self.assertIn("ai-seo-specialist", payload["role_operation_coverage"]["missing_roles"])
+
+    def test_summary_payload_reports_required_roles_disabled_by_overlay(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            repo_root = pathlib.Path(tmp)
+            write_control_plane(repo_root)
+            (repo_root / "config" / "ai" / "agent-enablement.local.yaml").write_text(
+                textwrap.dedent(
+                    """\
+                    version: 1
+                    roles:
+                      ai-product-owner:
+                        enabled: false
+                    """
+                ),
+                encoding="utf-8",
+            )
+
+            payload = summary_payload(repo_root)
+
+        self.assertIn("ai-product-owner", payload["disabled_roles"])
+        self.assertEqual(payload["role_enablement"]["required_roles_disabled"], ["ai-product-owner"])
+
+    def test_load_ai_control_plane_rejects_unknown_enablement_role(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            repo_root = pathlib.Path(tmp)
+            write_control_plane(repo_root)
+            (repo_root / "config" / "ai" / "agent-enablement.local.yaml").write_text(
+                textwrap.dedent(
+                    """\
+                    version: 1
+                    roles:
+                      ai-agente-fantasma:
+                        enabled: false
+                    """
+                ),
+                encoding="utf-8",
+            )
+
+            with self.assertRaises(AiControlPlaneError) as ctx:
+                load_ai_control_plane(repo_root).enabled_roles()
+
+        self.assertIn("roles desconhecidos", str(ctx.exception))
+
+    def test_load_ai_control_plane_rejects_unknown_registry_agent(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            repo_root = pathlib.Path(tmp)
+            write_control_plane(repo_root)
+            (repo_root / "config" / "ai" / "agent-enablement.local.yaml").write_text(
+                textwrap.dedent(
+                    """\
+                    version: 1
+                    registry_agents:
+                      agente-fantasma:
+                        enabled: false
+                    """
+                ),
+                encoding="utf-8",
+            )
+
+            with self.assertRaises(AiControlPlaneError) as ctx:
+                load_ai_control_plane(repo_root).disabled_registry_agents()
+
+        self.assertIn("agentes declarativos desconhecidos", str(ctx.exception))
 
     def test_resolve_value_spec_reads_env_values(self) -> None:
         old_value = os.environ.get("ATLASSIAN_SITE_URL")

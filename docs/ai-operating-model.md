@@ -14,7 +14,10 @@ Criar uma camada local de IA que seja:
 
 ### 1. Instrucoes claras e curtas
 
-As instrucoes base devem ser pequenas, diretas e estaveis. O papel de [`AGENTS.md`](AGENTS.md) e alinhar linguagem, guardrails e fontes de verdade; os detalhes operacionais ficam nas skills e referencias.
+As instrucoes base devem ser pequenas, diretas e estaveis. O papel de
+[`AGENTS.md`](AGENTS.md) e alinhar linguagem, guardrails e fontes de verdade;
+as regras humanas por tema passam a viver em [`.agents/rules/`](.agents/rules/)
+e os detalhes operacionais continuam nas skills e referencias.
 
 ### 1.1. Retomada do zero exige releitura integral de governanca
 
@@ -26,6 +29,8 @@ Nessas retomadas, a regra correta passa a ser:
 - reler integralmente todos os arquivos resolvidos por
   [`AI-STARTUP-GOVERNANCE-MANIFEST.md`](AI-STARTUP-GOVERNANCE-MANIFEST.md)
 - tratar o manifest como fonte canonica do que precisa ser relido
+- carregar tambem a camada humana canonica de [`.agents/rules/`](.agents/rules/)
+  e o catalogo tematico correspondente
 - nao operar por amostragem, presuncao ou lembranca parcial de sessao antiga
 - carregar o contrato de comunicacao com o usuario antes da primeira mensagem
   operacional no chat
@@ -33,6 +38,9 @@ Nessas retomadas, a regra correta passa a ser:
   papel autorizado a emitir a primeira resposta operacional
 - carregar a camada de `display_name` antes de exibir agente, papel ou owner em
   chat, `Jira` ou artefato visivel
+- carregar o enablement declarativo de agentes a partir de
+  [`config/ai/agent-enablement.yaml`](../config/ai/agent-enablement.yaml)
+  antes de exigir ou acionar papeis opcionais ou consultivos
 - carregar explicitamente a governanca Git canonica da sessao, lembrando que o
   enforcement de commit atomico, higiene de branch/worktree e fechamento de
   worklog continua nos hooks, tasks e gates oficiais do repo
@@ -308,12 +316,18 @@ Os agentes tipados ficam em [`.agents/registry/`](.agents/registry/) e definem:
 - contrato de saida
 - handoffs e gates obrigatorios
 
+O estado declarativo de enablement por agente fica em
+[`config/ai/agent-enablement.yaml`](../config/ai/agent-enablement.yaml), para
+evitar que habilitacao ou desabilitacao de papeis dependa apenas de memoria de
+chat.
+
 ### Camada 2.2. Orquestracao, rules e evals
 
 Para evitar roteamento implcito e drift entre docs e execucao, o repo tambem versiona:
 
 - [`.agents/orchestration/`](.agents/orchestration/) para capability matrix, routing policy e schemas
-- [`.agents/rules/`](.agents/rules/) para guardrails declarativos de operacao e CI
+- [`.agents/rules/`](.agents/rules/) para a fonte canonica humana das regras
+  normativas por tema
 - [`.agents/evals/`](.agents/evals/) para cenarios e datasets minimos de regressao
 
 ### Camada 2.3. Cerimonias versionadas
@@ -347,6 +361,9 @@ Esses cartoes funcionam como prompt-base para subagentes humanos ou de IA.
 Para evitar ambiguidades e drift:
 
 - [`.agents/`](.agents/) e a fonte canonica de contratos, skills, registry, orchestration, rules e evals
+- [`.agents/rules/README.md`](.agents/rules/README.md) e
+  [`.agents/rules/CATALOG.md`](.agents/rules/CATALOG.md) organizam a camada
+  normativa por tema
 - [`.codex/`](.codex/) no repo guarda apenas um [`README.md`](README.md) de compatibilidade apontando para [`.agents/`](.agents/)
 - adaptadores especificos de assistente devem ser gerados a partir de [`.agents/`](.agents/), nunca mantidos manualmente em paralelo
 - runtime local de IA continua fora do Git
@@ -506,6 +523,10 @@ Toda rotina de startup e restart precisa carregar essa camada antes de iniciar
 comunicacao com o usuario, espelhar marcos no chat ou decidir como exibir um
 papel em logs e artefatos.
 
+Do mesmo modo, toda rotina de startup e restart precisa carregar o estado de
+enablement dos agentes antes de decidir quem pode assumir uma resposta
+operacional, uma delegacao, um review consultivo ou um gate obrigatorio.
+
 Quando a superficie do `Jira` permitir exibicao humana sem perder
 rastreabilidade tecnica, o fluxo deve preferir `display_name`; quando nao
 permitir, o id tecnico permanece como chave interna e o nome humano fica na
@@ -562,8 +583,8 @@ Como [`df/`](df/) guarda apenas o que sera utilizado na maquina apos o bootstrap
 - [`AI-WIP-TRACKER.md`](AI-WIP-TRACKER.md) guarda o fallback local do estado incremental da IA
 - [`docs/AI-REVIEW-LEDGER.md`](docs/AI-REVIEW-LEDGER.md) guarda os pareceres vivos de revisao especializada por worklog
 - [`config/ai/`](config/ai/) guarda a control plane dev-time de plataformas,
-  contratos e optionalidade dos agentes, desacoplada de [`bootstrap/`](bootstrap/)
-  e de [`df/`](df/)
+  contratos, optionalidade e enablement declarativo dos agentes, desacoplada
+  de [`bootstrap/`](bootstrap/) e de [`df/`](df/)
 - [`df/`](df/) continua reservado aos dotfiles e assets materializados no ambiente
 
 ## Estrategia de evolucao
