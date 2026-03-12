@@ -5,15 +5,16 @@
 Implementar no repo [`dotfiles`](../../../../README.md) a separacao arquitetural
 entre:
 
-- a camada runtime da app/workstation, hoje representada principalmente por
-  [`bootstrap/`](../../../../bootstrap/) e [`df/`](../../../../df/)
+- a camada runtime da app e do workstation, hoje representada por
+  [`app/bootstrap/`](../../../../app/bootstrap/) e
+  [`app/df/`](../../../../app/df/)
 - a camada de desenvolvimento, governanca e suporte do repo
 
 O objetivo desta rodada nao e centralizar toda a configuracao do projeto em
 [`config/`](../../../../config/). O objetivo desta rodada e primeiro corrigir a
-fronteira arquitetural do repositorio, criando uma camada `app/` explicita para
-o runtime. A centralizacao da configuracao da camada de desenvolvimento deve
-ficar para a trilha posterior ja rastreada em
+fronteira arquitetural do repositorio, consolidando [`app/`](../../../../app/)
+como camada explicita de runtime. A centralizacao da configuracao da camada de
+desenvolvimento deve ficar para a trilha posterior ja rastreada em
 [`DOT-209`](https://pabloaugusto.atlassian.net/browse/DOT-209).
 
 ## Por que este pack existe
@@ -21,8 +22,9 @@ ficar para a trilha posterior ja rastreada em
 Este pack existe porque o repo ja deixou claro, na pratica, que ha duas
 camadas distintas convivendo no mesmo espaco visual:
 
-- runtime da app/workstation, hoje representado principalmente por
-  [`bootstrap/`](../../../../bootstrap/) e [`df/`](../../../../df/)
+- runtime da app e do workstation, hoje representado por
+  [`app/bootstrap/`](../../../../app/bootstrap/) e
+  [`app/df/`](../../../../app/df/)
 - desenvolvimento, governanca, tooling e suporte do repo
 
 O problema atual nao e so organizacao de pastas. O problema atual e
@@ -43,9 +45,11 @@ arquitetural ainda confusa.
 As evidencias versionadas do repo ja apontam essa separacao conceitual:
 
 - [`CONTEXT.md`](../../../../CONTEXT.md) descreve
-  [`bootstrap/`](../../../../bootstrap/) e [`df/`](../../../../df/) como
-  runtime real do workstation
-- [`README.md`](../../../../README.md) diferencia bootstrap, `df`,
+  [`app/bootstrap/`](../../../../app/bootstrap/) e
+  [`app/df/`](../../../../app/df/) como runtime real do workstation
+- [`README.md`](../../../../README.md) diferencia
+  [`app/bootstrap/`](../../../../app/bootstrap/),
+  [`app/df/`](../../../../app/df/),
   [`config/`](../../../../config/) e
   [`pyproject.toml`](../../../../pyproject.toml)
 - [`pyproject.toml`](../../../../pyproject.toml) ja esta corretamente
@@ -88,14 +92,16 @@ Antes de editar qualquer arquivo versionado:
 Use como evidencias minimas:
 
 - [`CONTEXT.md`](../../../../CONTEXT.md) ja descreve
-  [`bootstrap/`](../../../../bootstrap/) e [`df/`](../../../../df/) como
-  runtime real do workstation
-- [`README.md`](../../../../README.md) ja diferencia bootstrap, `df`,
+  [`app/bootstrap/`](../../../../app/bootstrap/) e
+  [`app/df/`](../../../../app/df/) como runtime real do workstation
+- [`README.md`](../../../../README.md) ja diferencia
+  [`app/bootstrap/`](../../../../app/bootstrap/),
+  [`app/df/`](../../../../app/df/),
   [`config/`](../../../../config/) e
   [`pyproject.toml`](../../../../pyproject.toml)
 - [`pyproject.toml`](../../../../pyproject.toml) ja concentra toolchain,
   dependencias, lint, testes e configuracao de desenvolvimento nao-runtime
-- [`bootstrap/README.md`](../../../../bootstrap/README.md) e
+- [`app/bootstrap/README.md`](../../../../app/bootstrap/README.md) e
   [`docs/bootstrap-flow.md`](../../../../docs/bootstrap-flow.md) comprovam que a
   camada bootstrap e runtime/provisionamento, nao infraestrutura abstrata de
   desenvolvimento
@@ -111,9 +117,9 @@ Ao final da implementacao, o repo deve deixar explicito que:
 - [`pyproject.toml`](../../../../pyproject.toml) continua dono da toolchain
   Python, dependencias, lint, testes e configuracao de desenvolvimento
   nao-runtime
-- runtime da app/workstation nao pertence ao eixo
+- runtime da app e do workstation nao pertence ao eixo
   [`config/`](../../../../config/) + [`pyproject.toml`](../../../../pyproject.toml)
-- runtime deve morar em `app/`
+- runtime deve morar em [`app/`](../../../../app/)
 - [`config/`](../../../../config/) deve permanecer reservado para configuracao
   da camada de desenvolvimento, suporte, control plane e governanca
 
@@ -132,9 +138,11 @@ pyproject.toml
 
 Resultado esperado da fronteira:
 
-- `app/bootstrap/` concentra entrypoints, parser de config do bootstrap,
-  scripts de provisionamento e artefatos ligados ao runtime da app
-- `app/df/` concentra os dotfiles e assets que vao para a maquina
+- [`app/bootstrap/`](../../../../app/bootstrap/) concentra entrypoints, parser
+  de config do bootstrap, scripts de provisionamento e artefatos ligados ao
+  runtime da app
+- [`app/df/`](../../../../app/df/) concentra os dotfiles e assets que vao para
+  a maquina
 - [`config/`](../../../../config/) deixa de competir semanticamente com o
   runtime da app
 - [`pyproject.toml`](../../../../pyproject.toml) preserva suas atribuicoes
@@ -155,18 +163,20 @@ Resultado esperado da fronteira:
 ### 1. Formalizar a fronteira em contratos e docs
 
 - atualizar os contratos e docs que descrevem a arquitetura do repo
-- explicar de forma perene que `app/` e runtime
+- explicar de forma perene que [`app/`](../../../../app/) e runtime
 - explicar de forma perene que [`config/`](../../../../config/) e camada de
   desenvolvimento/suporte
 - explicar de forma perene que
   [`pyproject.toml`](../../../../pyproject.toml) continua como ownership da
   toolchain Python
 
-### 2. Introduzir `app/`
+### 2. Introduzir [`app/`](../../../../app/)
 
-- criar `app/`
-- mover [`bootstrap/`](../../../../bootstrap/) para `app/bootstrap/`
-- mover [`df/`](../../../../df/) para `app/df/`
+- criar [`app/`](../../../../app/)
+- mover [`app/bootstrap/`](../../../../app/bootstrap/) para a camada runtime
+  explicita do repo
+- mover [`app/df/`](../../../../app/df/) para a camada runtime explicita do
+  repo
 - manter compatibilidade temporaria somente quando realmente necessaria para
   nao quebrar bootstrap, tests e automacoes no meio da rodada
 
@@ -202,8 +212,8 @@ Resultado esperado da fronteira:
 - [`README.md`](../../../../README.md)
 - [`AGENTS.md`](../../../../AGENTS.md)
 - [`Taskfile.yml`](../../../../Taskfile.yml)
-- [`bootstrap/`](../../../../bootstrap/)
-- [`df/`](../../../../df/)
+- [`app/bootstrap/`](../../../../app/bootstrap/)
+- [`app/df/`](../../../../app/df/)
 - [`docs/bootstrap-flow.md`](../../../../docs/bootstrap-flow.md)
 - [`docs/config-reference.md`](../../../../docs/config-reference.md)
 - [`docs/ai-operating-model.md`](../../../../docs/ai-operating-model.md)
@@ -212,14 +222,16 @@ Resultado esperado da fronteira:
 
 ## Criterios de aceite
 
-1. o repo passa a ter uma camada `app/` explicita para runtime
-2. [`bootstrap/`](../../../../bootstrap/) e [`df/`](../../../../df/) deixam de
-   ficar soltos na raiz
+1. o repo passa a ter uma camada [`app/`](../../../../app/) explicita para runtime
+2. [`app/bootstrap/`](../../../../app/bootstrap/) e
+   [`app/df/`](../../../../app/df/) ficam consolidados como runtime, sem
+   competir semanticamente com a raiz
 3. [`config/`](../../../../config/) nao recebe runtime da app nesta rodada
 4. [`pyproject.toml`](../../../../pyproject.toml) preserva integralmente o papel
    de toolchain e desenvolvimento nao-runtime
-5. tasks, scripts, docs, startup e testes passam a apontar para `app/bootstrap`
-   e `app/df`
+5. tasks, scripts, docs, startup e testes passam a apontar para
+   [`app/bootstrap/`](../../../../app/bootstrap/) e
+   [`app/df/`](../../../../app/df/)
 6. a fronteira runtime vs desenvolvimento fica explicitamente documentada
 7. a proxima etapa de centralizacao da camada de desenvolvimento permanece
    rastreada por [`DOT-209`](https://pabloaugusto.atlassian.net/browse/DOT-209)

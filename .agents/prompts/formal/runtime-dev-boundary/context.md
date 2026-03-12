@@ -14,9 +14,9 @@ e runtime da app e o que e desenvolvimento/governanca do sistema.
 
 ## Estado atual relevante
 
-- o repo ainda mantem [`bootstrap/`](../../../../bootstrap/) e
-  [`df/`](../../../../df/) na raiz
-- a pasta `app/` ainda nao existe
+- o runtime da app agora mora em [`app/bootstrap/`](../../../../app/bootstrap/)
+  e [`app/df/`](../../../../app/df/)
+- a pasta [`app/`](../../../../app/) ja existe como camada explicita de runtime
 - [`pyproject.toml`](../../../../pyproject.toml) ja esta corretamente
   posicionado como dono da toolchain Python, dependencias, lint, testes e
   configuracao de desenvolvimento nao-runtime
@@ -25,7 +25,8 @@ e runtime da app e o que e desenvolvimento/governanca do sistema.
 
 ## Fronteira desejada
 
-- `app/` deve se tornar a camada explicita de runtime da app/workstation
+- [`app/`](../../../../app/) deve se tornar a camada explicita de runtime da
+  app e do workstation
 - [`config/`](../../../../config/) deve permanecer reservado a
   desenvolvimento/suporte/governanca
 - [`pyproject.toml`](../../../../pyproject.toml) deve permanecer intacto no seu
