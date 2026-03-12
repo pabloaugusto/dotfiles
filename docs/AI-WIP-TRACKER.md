@@ -1,6 +1,6 @@
 # AI WIP Tracker
 
-Atualizado em: 2026-03-12 01:30 UTC
+Atualizado em: 2026-03-12 01:45 UTC
 
 Fallback local de continuidade. O Jira e a fonte primaria do fluxo vivo.
 
@@ -35,6 +35,7 @@ Fallback local de continuidade. O Jira e a fonte primaria do fluxo vivo.
 <!-- ai-worklog:done:start -->
 | ID | Tarefa | Branch | Responsavel | Inicio UTC | Concluido UTC | Resultado |
 | --- | --- | --- | --- | --- | --- | --- |
+| WIP-20260312-014434 | Publicar DOT-180 e sincronizar main | prompt/DOT-180-time-locale-governance | codex | 2026-03-12 01:44 UTC | 2026-03-12 01:45 UTC | DOT-180 foi publicado a partir da branch prompt/DOT-180-time-locale-governance e sincronizado em origin/main, deixando a trilha pronta para saneamento final de branch e worktree. / evidencias: git push origin prompt/D... |
 | WIP-20260312-011221 | Salvar pack formal de governanca temporal | codex/prompt-DOT-180-time-locale-governance | codex | 2026-03-12 01:12 UTC | 2026-03-12 01:30 UTC | Pack formal time-locale-governance salvo na arvore canonica, catalogado e alinhado ao owner issue DOT-180, com context, meta, fragmento e prompt versionados e gate documental ve... / evidencias: task ai:prompts:jira:c... |
 | WIP-20260311-204022 | Finalizar publicacao via PR e sincronizar main apos a fundacao de sync | prompt/DOT-179-sync-foundation-runtime | ai-agent | 2026-03-11 23:40 UTC | 2026-03-11 23:45 UTC | DOT-71 foi separado e mergeado; DOT-179 foi reconstruido em branch correta com scope prompt e a sincronizacao final ficou pronta para publicacao e merge sem drift de governanca. / evidencias: PR #45 mergeado; branch D... |
 | WIP-20260311-220259 | Implementar fundacao de sync, outbox duravel e fonte perene | main | ai-agent | 2026-03-11 22:02 UTC | 2026-03-11 23:08 UTC | Fundacao de sync implementada com manifest, biblioteca, tarefas, documentacao canonica, validator e testes. / evidencias: python scripts/validate-ai-assets.py; python -m pytest --override-ini addopts='' tests/python/a... |
