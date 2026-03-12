@@ -19,7 +19,7 @@ Refs principais:
 - `op://secrets/dotfiles/1password/service-account`
 - `op://secrets/dotfiles/github/token` (preferencial)
 - `op://secrets/github/api/token` (primeiro fallback)
-- `op://Personal/github/token-full-access` (contingencia final)
+- `op://Personal/github/token-full-access` (contingencia final humana)
 - `op://secrets/dotfiles/age/age.key`
 - `git-signing.automation-public-key` em [`app/df/secrets/secrets-ref.yaml`](../app/df/secrets/secrets-ref.yaml) quando o signer tecnico estiver configurado
 
@@ -138,6 +138,9 @@ Arquivos:
 
 Políticas:
 
+- no Windows, `~/.ssh` deve ser um diretorio real no perfil do usuario, com
+  arquivos canonicos materializados a partir de [`app/df/ssh/`](../app/df/ssh/)
+  e ACL segura para o OpenSSH
 - `IdentityFile none` para evitar fallback em chaves locais
 - `gpg.format=ssh`
 - `commit.gpgsign=true`
@@ -192,7 +195,8 @@ Em modo humano, não. É material público (chave pública SSH).
 
 1. usar token dedicado do projeto como padrão
 2. usar `op://secrets/github/api/token` como primeiro fallback
-3. usar `op://Personal/github/token-full-access` como contingencia final
+3. usar `op://Personal/github/token-full-access` como contingencia final em
+   sessao humana interativa
 4. rodar `checkEnv` após mudanças em auth/SSH/Git
 5. rotacionar imediatamente qualquer credencial exposta
 

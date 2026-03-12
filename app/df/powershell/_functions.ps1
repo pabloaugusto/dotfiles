@@ -113,6 +113,172 @@ function Add-Symlink {
 }
 
 ######################################################################################
+# Decide como um ref do 1Password deve ser tratado no contexto atual
+######################################################################################
+function Get-1PasswordRefReadPolicy {
+	[CmdletBinding()]
+	param (
+		[string]$Ref,
+		[string]$UserType
+	)
+
+	if ([string]::IsNullOrWhiteSpace($Ref)) {
+		return 'required'
+	}
+
+	if ($Ref -match '^op://Personal/') {
+		return 'human-contingency'
+	}
+
+	return 'required'
+}
+
+######################################################################################
+# Copy a file ensuring its parent directory exists
+######################################################################################
+function Copy-FileWithParent {
+	[CmdletBinding()]
+	param (
+		[Parameter(Mandatory)]
+		[string]$SourcePath,
+		[Parameter(Mandatory)]
+		[string]$DestinationPath
+	)
+
+	$destinationParent = Split-Path -Path $DestinationPath -Parent
+	if (-not [string]::IsNullOrWhiteSpace($destinationParent) -and -not (Test-Path -Path $destinationParent)) {
+		New-Item -ItemType Directory -Path $destinationParent -Force | Out-Null
+	}
+
+	Copy-Item -Path $SourcePath -Destination $DestinationPath -Force
+}
+
+######################################################################################
+# Apply an OpenSSH-safe ACL to a Windows file or directory
+######################################################################################
+function Set-WindowsOpenSshSafeAcl {
+	[CmdletBinding()]
+	param (
+		[Parameter(Mandatory)]
+		[string]$Path,
+		[switch]$Directory
+	)
+
+	if (-not $IsWindows) { return }
+	if (-not (Test-Path -Path $Path)) { return }
+
+	$currentUser = [System.Security.Principal.WindowsIdentity]::GetCurrent().Name
+	$grantSuffix = if ($Directory) { '(OI)(CI)(F)' } else { '(F)' }
+
+	cmd /c "takeown /f `"$Path`" >nul 2>nul" | Out-Null
+	& icacls.exe $Path '/inheritance:r' | Out-Null
+	& icacls.exe $Path '/grant:r' "${currentUser}:$grantSuffix" "SYSTEM:$grantSuffix" "Administrators:$grantSuffix" | Out-Null
+}
+
+######################################################################################
+# Materialize the Windows SSH runtime in HOME instead of linking ~/.ssh to the repo
+######################################################################################
+function Sync-WindowsSshHomeLayout {
+	[CmdletBinding()]
+	param (
+		[Parameter(Mandatory)]
+		[string]$HomeSshPath,
+		[Parameter(Mandatory)]
+		[string]$RepoSshPath
+	)
+
+	if (-not $IsWindows) {
+		return
+	}
+
+	$resolvedRepoSshPath = [System.IO.Path]::GetFullPath($RepoSshPath)
+	$resolvedHomeSshPath = [System.IO.Path]::GetFullPath($HomeSshPath)
+
+	if (-not (Test-Path -Path $resolvedRepoSshPath -PathType Container)) {
+		throw "Repo SSH path not found: $resolvedRepoSshPath"
+	}
+
+	$canonicalFiles = @(
+		@{ source = 'config'; destination = 'config' },
+		@{ source = 'config.windows'; destination = 'config.windows' },
+		@{ source = 'config.unix'; destination = 'config.unix' },
+		@{ source = 'authorized_keys'; destination = 'authorized_keys' },
+		@{ source = '1Password\config'; destination = '1Password\config' }
+	)
+	$migratedRuntimePatterns = @(
+		'known_hosts',
+		'known_hosts.old',
+		'id_rsa',
+		'id_rsa.pub',
+		'id_ed25519',
+		'id_ed25519.pub',
+		'id_ecdsa',
+		'id_ecdsa.pub',
+		'id_dsa',
+		'id_dsa.pub',
+		'*.pem'
+	)
+
+	$homeItem = Get-Item -Path $resolvedHomeSshPath -Force -ErrorAction SilentlyContinue
+	$isRepoLinkedSsh = $false
+	if ($null -ne $homeItem -and ($homeItem.LinkType -eq 'SymbolicLink' -or $homeItem.LinkType -eq 'Junction')) {
+		$currentTarget = if ($null -ne $homeItem.Target) {
+			[string]($homeItem.Target | Select-Object -First 1)
+		}
+		else {
+			''
+		}
+		if (-not [string]::IsNullOrWhiteSpace($currentTarget)) {
+			$resolvedCurrentTarget = [System.IO.Path]::GetFullPath($currentTarget)
+			$isRepoLinkedSsh = $resolvedCurrentTarget.Equals($resolvedRepoSshPath, [System.StringComparison]::OrdinalIgnoreCase)
+		}
+	}
+
+	if ($null -ne $homeItem -and -not $homeItem.PSIsContainer -and -not $isRepoLinkedSsh) {
+		throw "Expected ~/.ssh to be a directory or repo link, but found file: $resolvedHomeSshPath"
+	}
+
+	if ($isRepoLinkedSsh) {
+		Remove-Item -Path $resolvedHomeSshPath -Recurse -Force -Confirm:$false
+	}
+
+	if (-not (Test-Path -Path $resolvedHomeSshPath -PathType Container)) {
+		New-Item -ItemType Directory -Path $resolvedHomeSshPath -Force | Out-Null
+	}
+
+	foreach ($mapping in $canonicalFiles) {
+		$sourcePath = Join-Path $resolvedRepoSshPath $mapping.source
+		$destinationPath = Join-Path $resolvedHomeSshPath $mapping.destination
+		if (Test-Path -Path $sourcePath -PathType Leaf) {
+			Copy-FileWithParent -SourcePath $sourcePath -DestinationPath $destinationPath
+		}
+	}
+
+	foreach ($pattern in $migratedRuntimePatterns) {
+		foreach ($candidate in (Get-ChildItem -Path $resolvedRepoSshPath -Filter $pattern -Force -ErrorAction SilentlyContinue)) {
+			if ($candidate.PSIsContainer) {
+				continue
+			}
+
+			$destinationPath = Join-Path $resolvedHomeSshPath $candidate.Name
+			if (-not (Test-Path -Path $destinationPath)) {
+				Copy-FileWithParent -SourcePath $candidate.FullName -DestinationPath $destinationPath
+			}
+
+			Remove-Item -Path $candidate.FullName -Force -ErrorAction SilentlyContinue
+		}
+	}
+
+	$configLocalPath = Join-Path $resolvedHomeSshPath 'config.local'
+	Copy-FileWithParent -SourcePath (Join-Path $resolvedRepoSshPath 'config.windows') -DestinationPath $configLocalPath
+
+	Set-WindowsOpenSshSafeAcl -Path $resolvedHomeSshPath -Directory
+	foreach ($item in (Get-ChildItem -Path $resolvedHomeSshPath -Recurse -Force -ErrorAction SilentlyContinue)) {
+		Set-WindowsOpenSshSafeAcl -Path $item.FullName -Directory:$item.PSIsContainer
+	}
+}
+
+######################################################################################
 # Test if command exists
 ######################################################################################
 function Test-CommandExists($cmd) {
@@ -1691,6 +1857,7 @@ function checkEnv {
 	}
 
 	# 3) 1Password CLI session and referenced-secret readability
+	$opUserType = ''
 	if (Test-CommandExists op) {
 		$opHealthy = $false
 		& op whoami *> $null
@@ -1711,6 +1878,16 @@ function checkEnv {
 		}
 
 		if ($opHealthy) {
+			$opWhoamiJson = (& op whoami --format json 2>$null | Out-String).Trim()
+			if (-not [string]::IsNullOrWhiteSpace($opWhoamiJson)) {
+				try {
+					$opWhoamiPayload = $opWhoamiJson | ConvertFrom-Json -ErrorAction Stop
+					$opUserType = [string]($opWhoamiPayload.user_type ?? $opWhoamiPayload.ServiceAccountType ?? '')
+				}
+				catch {
+					$opUserType = ''
+				}
+			}
 			Add-CheckResult -Item '1Password CLI session' -Status 'success' -Detail 'op whoami succeeded.' -Solution ''
 		}
 		else {
@@ -1734,9 +1911,13 @@ function checkEnv {
 			}
 
 			foreach ($ref in $refs) {
+				$refPolicy = Get-1PasswordRefReadPolicy -Ref $ref -UserType $opUserType
 				& op read $ref *> $null
 				if ($LASTEXITCODE -eq 0) {
 					Add-CheckResult -Item "1Password secret ref" -Status 'success' -Detail "$ref is readable." -Solution ''
+				}
+				elseif ($refPolicy -eq 'human-contingency') {
+					Add-CheckResult -Item "1Password secret ref" -Status 'inconclusive' -Detail "$ref e uma contingencia humana e nao e legivel no contexto atual ($opUserType)." -Solution 'Validar essa ref apenas em sessao humana interativa quando o fallback final realmente precisar entrar em uso.'
 				}
 				else {
 					Add-CheckResult -Item "1Password secret ref" -Status 'fail' -Detail "$ref is not readable in current context." -Solution "Validate vault/item permissions for the service account token."

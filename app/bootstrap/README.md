@@ -63,7 +63,7 @@ permitindo que a worktree aplique o signer tecnico sem copiar segredo para o rep
 1. valida pre-requisitos basicos e a config YAML
 2. resolve politica OneDrive
 3. prepara layout local ou OneDrive
-4. cria links canonicos do perfil e do repo
+4. cria links canonicos do perfil e do repo, materializando `~/.ssh` no perfil Windows com ACL segura
 5. instala software, modulos e fontes
 6. resolve runtime secrets via 1Password
 7. cifra runtime env em `~/.env.local.sops`
@@ -133,6 +133,8 @@ Comandos:
 - `checkEnv` falha em `gpg.ssh.program`: valide `op-ssh-sign` no `PATH`.
 - `gh` sem protocolo SSH: rode `gh config set git_protocol ssh --host github.com`.
 - `ssh -T git@github.com` falha: confirme chave publica e agent do 1Password.
+- no Windows, `~/.ssh` e runtime materializado em `HOME`; se a pasta voltar a
+  apontar para o repo por symlink/junction, rerode `task bootstrap:windows:relink`.
 - em worktree de automacao, se o handshake cru continuar exigindo aprovacao do
   1Password, valide `task env:check SIGN_MODE=automation` e confirme o
   `core.sshCommand` tecnico da worktree.
