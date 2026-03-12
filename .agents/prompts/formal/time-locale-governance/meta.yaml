@@ -1,0 +1,28 @@
+id: time-locale-governance
+task_id: prompt/time-locale-governance
+title: Prompt pack de governanca temporal, timezone, locale e regionalizacao
+status: active
+owner_epic: DOT-71
+owner_issue: DOT-180
+jira:
+  summary_prefix: "PROMPT:"
+  required_labels:
+    - prompt
+entrypoints:
+  prompt: prompt.md
+  context: context.md
+fragments:
+  - fragments/config-and-registry.md
+dependencies:
+  prerequisite_packs: []
+  preflight_packs:
+    - startup-alignment
+    - documentation-layer-governance
+    - sync-outbox-foundation
+governance:
+  global_config: config/config.toml
+  surface_registry: config/time-surfaces.yaml
+  retroactive_migration: true
+validation:
+  requires_temporal_registry: true
+  requires_allowlist_validator: true
