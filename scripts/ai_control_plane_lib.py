@@ -525,6 +525,17 @@ class AiControlPlane:
                 return value
         return candidate_values["technical_id"]
 
+    def visible_name_for_reference(self, raw_value: str) -> str:
+        normalized = str(raw_value or "").strip()
+        if not normalized:
+            return ""
+        role_id = self.resolve_role_reference(normalized)
+        if role_id:
+            visible = self.visible_name_for_agent(role_id)
+            if visible:
+                return visible
+        return normalized
+
     def resolve_role_reference(self, raw_value: str) -> str:
         normalized = str(raw_value or "").strip().casefold()
         if not normalized:

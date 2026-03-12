@@ -86,6 +86,9 @@ class AtlassianSeedPlanTests(unittest.TestCase):
             {
                 "repo_root": Path(".").resolve(),
                 "atlassian_definition": staticmethod(lambda: object()),
+                "visible_name_for_reference": staticmethod(
+                    lambda raw: "Sync Documental" if raw == "ai-documentation-sync" else raw
+                ),
             },
         )()
         fake_resolved = type(
@@ -122,7 +125,7 @@ class AtlassianSeedPlanTests(unittest.TestCase):
 
         self.assertEqual(payload["counts"]["confluence_pages"], 1)
         self.assertEqual(fake_jira_comments[0][0], "DOT-1")
-        self.assertIn("Agente: ai-documentation-sync", fake_jira_comments[0][1])
+        self.assertIn("Agente: Sync Documental", fake_jira_comments[0][1])
         self.assertIn("repo como fonte canonica", fake_jira_comments[0][1])
         self.assertTrue(any("sync documental" in note for note in captured_notes))
 

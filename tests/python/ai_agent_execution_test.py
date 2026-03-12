@@ -297,6 +297,8 @@ class AgentExecutionTests(unittest.TestCase):
         self.assertEqual(payload["jira"]["current_agent_role_display"], "Automation Dev")
         self.assertEqual(payload["jira"]["next_required_role_display"], "Tech Lead")
         self.assertEqual(payload["jira"]["role_sync"]["assignee_status"], "synced")
+        self.assertIn("Agent: Automation Dev", fake_jira.logged[-1]["body_text"])
+        self.assertNotIn("Agent: ai-developer-automation", fake_jira.logged[-1]["body_text"])
         self.assertEqual(
             fake_jira.updated_fields[-1]["fields"]["assignee"],
             {"accountId": "account-automation"},
@@ -374,6 +376,8 @@ class AgentExecutionTests(unittest.TestCase):
 
         self.assertEqual(fake_jira.status, "Done")
         self.assertEqual(fake_jira.transitions_taken, ["6"])
+        self.assertIn("Agent: Engenheiro", fake_jira.logged[-1]["body_text"])
+        self.assertNotIn("Agent: ai-engineering-manager", fake_jira.logged[-1]["body_text"])
         self.assertIsNone(payload["context"])
 
     def test_paused_issue_resumes_to_doing_before_advancing(self) -> None:

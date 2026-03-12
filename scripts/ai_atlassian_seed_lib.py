@@ -750,7 +750,7 @@ def sync_confluence_docs(
             migration_issue_key,
             render_structured_comment(
                 {
-                    "agent": "ai-documentation-sync",
+                    "agent": control_plane.visible_name_for_reference("ai-documentation-sync"),
                     "interaction_type": "documentation-sync",
                     "status": canonicalize_workflow_status("Doing"),
                     "contexto": [
@@ -925,7 +925,7 @@ def seed_atlassian(
         migration_issue_key,
         render_structured_comment(
             {
-                "agent": "ai-documentation-sync",
+                "agent": control_plane.visible_name_for_reference("ai-documentation-sync"),
                 "interaction_type": "schema-artifact",
                 "status": canonicalize_workflow_status("Doing"),
                 "contexto": [
@@ -956,7 +956,9 @@ def seed_atlassian(
             issue_key,
             render_structured_comment(
                 {
-                    "agent": record["seed_activity"]["agent"],
+                    "agent": control_plane.visible_name_for_reference(
+                        str(record["seed_activity"]["agent"]).strip()
+                    ),
                     "interaction_type": record["seed_activity"]["interaction_type"],
                     "status": record["seed_activity"]["status"],
                     "contexto": record["seed_activity"]["contexto"],

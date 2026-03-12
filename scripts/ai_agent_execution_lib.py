@@ -444,8 +444,14 @@ def record_activity(
                 "Jira ficou em status divergente apos a transicao: "
                 f"{resolved_issue_key} esperado={normalized_status!r} atual={actual_status!r}."
             )
+    acting_visibility = role_visibility_payload(repo, resolved_agent)
+    comment_agent_name = (
+        acting_visibility.get("visible_name", "").strip()
+        or acting_visibility.get("formal_name", "").strip()
+        or resolved_agent
+    )
     rendered_comment = render_structured_comment(
-        agent=resolved_agent,
+        agent=comment_agent_name,
         interaction_type=interaction_type,
         status=normalized_status,
         contexto=contexto or [],

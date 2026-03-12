@@ -13,6 +13,7 @@ from scripts.ai_agent_execution_lib import (
     render_structured_comment,
     resolve_jira,
 )
+from scripts.ai_control_plane_lib import load_ai_control_plane
 
 LEDGER_PATH = Path("docs/AI-FALLBACK-LEDGER.md")
 TRACKER_PATH = Path("docs/AI-WIP-TRACKER.md")
@@ -421,6 +422,7 @@ def capture_fallback_record(
 
 def build_fallback_sync_comment(
     *,
+    repo_root: Path,
     tracker_relative: str,
     local_reference: str,
     outcome: str,
@@ -428,8 +430,13 @@ def build_fallback_sync_comment(
     ledger_reference: str,
     agent: str,
 ) -> str:
+    visible_agent = str(agent or "").strip()
+    try:
+        visible_agent = load_ai_control_plane(repo_root).visible_name_for_reference(visible_agent)
+    except Exception:
+        visible_agent = str(agent or "").strip()
     return render_structured_comment(
-        agent=agent,
+        agent=visible_agent,
         interaction_type="fallback-sync",
         status="done",
         contexto=[
@@ -508,6 +515,7 @@ def resolve_fallback_record(
             jira,
             effective_issue,
             build_fallback_sync_comment(
+                repo_root=repo_root,
                 tracker_relative=normalized_tracker,
                 local_reference=normalized_ref,
                 outcome=normalized_outcome,

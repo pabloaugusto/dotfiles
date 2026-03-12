@@ -215,6 +215,16 @@ Historico incremental das regras operacionais que nao devem depender de memoria 
 - Prevencao: Tratar a camada documental como sistema cross-surface completo e incluir checks explicitos para source of truth, papeis de publication e roteamento em docs, validators e testes.
 - Validacao: task ai:validate; task docs:check; task ai:eval:smoke; uv run --locked python -m unittest tests.python.ai_atlassian_seed_test tests.python.ai_atlassian_backfill_test tests.python.ai_assets_validator_test tests.python.ai_atlassian_agent_comment_audit_test tests.python.ai_sync_foundation_test
 - Worklog relacionado: `WIP-20260312-033649`
+
+## LA-021 - Alias-first exige migracao viva e auditoria de drift
+
+- Contexto: A troca de schema para apelidos no Jira entrou, mas board e comentarios continuaram mostrando technical_id porque os dados vivos antigos nao foram migrados e o auditor ainda nao denunciava esse drift.
+- Regra: Sempre que um papel ganhar apelido visivel ou mudar a representacao canonica, a rodada deve incluir escrita futura alias-first, backfill dos dados vivos e detector explicito de drift para comentarios, campos e artefatos gerados.
+- Solucao validada: Endurecer o runtime de comentarios e logs para usar alias-first, aplicar backfill dos campos e comentarios vivos no Jira e ampliar a auditoria para marcar valores tecnicos remanescentes.
+- Prevencao: Nao aceitar mudanca de schema isolada como suficiente; emparelhar qualquer migracao de naming com seed/backfill, repair ou auditor equivalente e com validacao final de drift zero.
+- Validacao: python -m unittest tests.python.ai_control_plane_test tests.python.ai_agent_execution_test tests.python.ai_atlassian_backfill_test tests.python.ai_fallback_governance_test tests.python.ai_atlassian_agent_comment_audit_test; task test:unit:python; task ai:validate; task ai:eval:smoke; varredura Jira com field_drift_count=0 e comment_drift_count=0
+- Worklog relacionado: `WIP-DOT-211`
+- Fontes relacionadas: dotfiles
 <!-- ai-lessons:catalog:end -->
 
 ## Revisoes de rodadas
@@ -224,6 +234,7 @@ Toda finalizacao de worklog deve registrar se houve nova licao.
 <!-- ai-lessons:reviews:start -->
 | Data/Hora UTC | Worklog ID | Decisao | Resumo | Licoes | Evidencia |
 | --- | --- | --- | --- | --- | --- |
+| 2026-03-12 19:37 UTC | WIP-DOT-211 | capturada | Schema alias-first so e valido com escrita futura, backfill vivo e auditoria de drift juntos. | LA-021 | Jira live backfill e auditoria final zerada |
 | 2026-03-12 18:43 UTC | WIP-DOT-208 | sem_nova_licao | A rodada endureceu o runtime multiagente, a visibilidade alias-first e a conciliacao role x registry diretamente na governanca canonica, sem exigir nova licao perene alem da propria regra entregue. | - | python -m unittest tests.python.ai_control_plane_test tests.python.ai_session_startup_test tests.python.ai_assets_validator_test tests.python.ai_agent_execution_test tests.python.ai_atlassian_browser_auth_test tests.p... |
 | 2026-03-12 17:41 UTC | WIP-DOT-207 | sem_nova_licao | A primeira onda hibrida .md + .rules foi absorvida diretamente na governanca canonica, no startup e no validator, sem exigir nova licao incremental alem da propria regra entregue. | - | PR #52=merged; [`docs/AI-STARTUP-AND-RESTART.md`](docs/AI-STARTUP-AND-RESTART.md); [`.agents/rules/projections.yaml`](.agents/rules/projections.yaml); [`scripts/ai_rules_lib.py`](scripts/ai_rules_lib.py); [`scripts/validate-ai-assets.py`](scripts/validate-ai-assets.py) |
 | 2026-03-12 16:40 UTC | WIP-20260312-DOT-205-RERUN | sem_nova_licao | As regras e falhas desta trilha foram absorvidas diretamente na camada canonica [`.agents/rules/`](.agents/rules/README.md), no startup e no validator, sem gerar licao incremental adicional. | - | task ai:validate=ok; task docs:check=ok; task ai:eval:smoke=ok; task ci:workflow:sync:check=ok; task ai:startup:enforce PENDING_ACTION=concluir_primeiro=ok |
