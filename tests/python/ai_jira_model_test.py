@@ -206,6 +206,55 @@ class AiJiraModelTests(unittest.TestCase):
             ],
         )
 
+    def test_current_custom_field_option_gaps_supports_visible_role_labels(self) -> None:
+        client = mock.Mock()
+        client.request_json.side_effect = [
+            {
+                "values": [{"name": "Current Agent Role", "id": "customfield_10223"}],
+                "isLast": True,
+                "maxResults": 100,
+            },
+            {
+                "values": [
+                    {
+                        "id": "10333",
+                        "name": "DOT Roles",
+                        "isGlobalContext": False,
+                        "projectIds": ["10005"],
+                    },
+                ],
+            },
+            {
+                "values": [{"value": "PO"}],
+                "isLast": True,
+                "maxResults": 100,
+            },
+        ]
+        model = {
+            "fields": {
+                "custom_fields": [
+                    {
+                        "name": "Current Agent Role",
+                        "type": "single_select",
+                        "options_source": "enabled_role_visible_names",
+                    }
+                ]
+            }
+        }
+
+        gaps = current_custom_field_option_gaps(
+            client,
+            model,
+            role_ids={"ai-product-owner", "ai-scrum-master"},
+            role_labels_by_id={
+                "ai-product-owner": "PO",
+                "ai-scrum-master": "Scrum Master",
+            },
+            project_id="10005",
+        )
+
+        self.assertEqual(gaps[0]["missing_options"], ["Scrum Master"])
+
     def test_current_custom_field_option_gaps_fails_on_duplicate_canonical_field_names(self) -> None:
         client = mock.Mock()
         client.request_json.side_effect = [

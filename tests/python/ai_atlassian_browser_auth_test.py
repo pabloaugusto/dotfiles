@@ -55,6 +55,31 @@ def write_control_plane(repo_root: pathlib.Path) -> None:
         ),
         encoding="utf-8",
     )
+    (config_dir / "agent-runtime.yaml").write_text(
+        textwrap.dedent(
+            """\
+            version: 1
+            policies:
+              enabled_role_statuses: [operational, consultive]
+              required_role_statuses: [operational, consultive]
+              enabled_registry_statuses: [operational, consultive]
+              chat_owner_statuses: [operational, consultive]
+              chat_name_fallback_order: [chat_alias, display_name, technical_id]
+            roles:
+              ai-product-owner:
+                status: operational
+                chat_alias: PO
+                chat_owner_supported: true
+                owner_mode: primary
+                surfaces: [jira, chat]
+                process_scopes: [backlog]
+                runtime_artifacts:
+                  - config/ai/agents.yaml
+            registry_agents: {}
+            """
+        ),
+        encoding="utf-8",
+    )
     (config_dir / "contracts.yaml").write_text(
         textwrap.dedent(
             """\

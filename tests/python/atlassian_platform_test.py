@@ -452,6 +452,33 @@ class AtlassianPlatformTests(unittest.TestCase):
         self.assertEqual(fields["customfield_10001"], {"value": "ai-developer-python"})
         self.assertEqual(fields["customfield_10002"], {"value": "ai-reviewer"})
 
+    def test_jira_adapter_set_agent_roles_can_sync_assignee(self) -> None:
+        client = FakeAtlassianHttpClient(
+            [
+                {
+                    "values": [
+                        {"id": "customfield_10001", "name": "Current Agent Role"},
+                        {"id": "customfield_10002", "name": "Next Required Role"},
+                    ],
+                    "isLast": True,
+                    "maxResults": 100,
+                },
+                {},
+            ]
+        )
+        adapter = JiraAdapter(client)  # type: ignore[arg-type]
+
+        adapter.set_agent_roles(
+            "DOT-99",
+            current_agent_role="Dev Python",
+            next_required_role="Revisor",
+            assignee_account_id="account-123",
+        )
+
+        update_payload = cast(dict[str, object], client.calls[1]["payload"])
+        fields = cast(dict[str, object], update_payload["fields"])
+        self.assertEqual(fields["assignee"], {"accountId": "account-123"})
+
     def test_jira_adapter_log_issue_activity_syncs_comment_and_roles(self) -> None:
         client = FakeAtlassianHttpClient(
             [

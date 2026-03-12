@@ -8,7 +8,10 @@ agentes.
 ## Escopo
 
 - formato do chat
+- ownership visivel do agente atuante (`acting-agent`)
 - `display_name`
+- `chat_alias`
+- campos visiveis do `Jira`
 - visibilidade de agentes `enabled` e `disabled`
 
 ## Fonte canonica e precedencia
@@ -16,14 +19,19 @@ agentes.
 - [`../../config/ai/contracts.yaml`](../../config/ai/contracts.yaml)
 - [`../../config/ai/agent-operations.yaml`](../../config/ai/agent-operations.yaml)
 - [`../../config/ai/agent-enablement.yaml`](../../config/ai/agent-enablement.yaml)
+- [`../../config/ai/agent-runtime.yaml`](../../config/ai/agent-runtime.yaml)
 - [`../../docs/AI-CHAT-CONTRACTS-REGISTER.md`](../../docs/AI-CHAT-CONTRACTS-REGISTER.md)
 - [`../../.agents/registry/`](../../.agents/registry/)
 
 ## Regras obrigatorias
 
-- o chat usa timestamp local real e `display_name` oficial
+- o chat usa timestamp local real e o agente atuante deve ser o owner visivel da mensagem
+- o `acting-agent` deve ser o owner visivel da mensagem que ele executa
+- o nome visivel no chat e no `Jira` deve preferir `chat_alias`, depois `display_name` e so por ultimo o id tecnico
 - a primeira saida operacional ate `ready_for_work` pertence ao
   `ai-startup-governor`
+- `Current Agent Role` e `Next Required Role` no `Jira` usam valor visivel alias-first, nunca memoria manual
+- `Assignee` no `Jira` so pode mudar por mapeamento explicito entre agente e principal real
 - agente desabilitado por config nao pode ser reativado apenas por memoria de
   chat
 - o chat espelha marcos relevantes, mas nao substitui `Jira` nem `Confluence`
@@ -32,6 +40,7 @@ agentes.
 
 - contrato de comunicacao no chat
 - camada de `display_name`
+- camada de `chat_alias` e runtime visivel dos agentes
 - contratos pendentes do chat
 - estado efetivo de enablement dos agentes
 
@@ -40,10 +49,11 @@ agentes.
 - nome humano esperado para a superficie
 - restricoes de comunicacao no chat
 - enablement do papel delegado
+- alias visivel e mapeamento de principal Jira quando houver
 
 ## Fallback e Recuperacao
 
-- sem `display_name`, usar id tecnico como fallback visivel
+- sem `chat_alias` e sem `display_name`, usar id tecnico como fallback visivel
 - se o contrato de chat nao estiver carregado, bloquear saida operacional
 
 ## Enforcement e validacoes

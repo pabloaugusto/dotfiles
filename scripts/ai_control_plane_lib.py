@@ -15,6 +15,11 @@ from urllib.parse import quote
 
 import yaml
 
+try:
+    import tomllib
+except ModuleNotFoundError:  # pragma: no cover - fallback for Python < 3.11
+    tomllib = None  # type: ignore[assignment]
+
 DEFAULT_CONTROL_PLANE_ROOT = Path("config/ai")
 ENV_PREFIX = "env://"
 OP_PREFIX = "op://"
@@ -91,11 +96,14 @@ class AiControlPlane:
     agent_operations_local_path: Path
     contracts_path: Path
     contracts_local_path: Path
+    agent_runtime_path: Path
+    agent_runtime_local_path: Path
     platforms_payload: dict[str, Any]
     agents_payload: dict[str, Any]
     agent_enablement_payload: dict[str, Any]
     agent_operations_payload: dict[str, Any]
     contracts_payload: dict[str, Any]
+    agent_runtime_payload: dict[str, Any]
 
     def roles_payload(self) -> dict[str, Any]:
         roles = self.agents_payload.get("roles") or {}
@@ -209,10 +217,26 @@ class AiControlPlane:
             )
         return registry_agents
 
+    def registry_agents_enabled_by_default(self) -> bool:
+        defaults = self.agent_enablement_payload.get("defaults") or {}
+        if defaults in ({}, None):
+            return True
+        if not isinstance(defaults, dict):
+            raise AiControlPlaneError(
+                "config/ai/agent-enablement.yaml defaults precisa ser mapa quando definido."
+            )
+        raw_value = defaults.get("registry_agents_enabled_by_default", True)
+        if not isinstance(raw_value, bool):
+            raise AiControlPlaneError(
+                "config/ai/agent-enablement.yaml defaults.registry_agents_enabled_by_default precisa ser booleano."
+            )
+        return raw_value
+
     def effective_registry_agents_payload(self) -> dict[str, dict[str, Any]]:
         registry_dir = (self.repo_root / ".agents" / "registry").resolve()
         registry_agents = sorted(candidate.stem for candidate in registry_dir.glob("*.toml"))
         overrides = self.registry_agents_enablement_payload()
+        effective_roles = self.effective_roles_payload()
         unknown_agents = [str(agent_id) for agent_id in overrides if agent_id not in registry_agents]
         if unknown_agents:
             raise AiControlPlaneError(
@@ -221,7 +245,10 @@ class AiControlPlane:
             )
         effective: dict[str, dict[str, Any]] = {}
         for agent_id in registry_agents:
-            enabled = True
+            if agent_id in effective_roles:
+                enabled = bool(effective_roles[agent_id].get("enabled", False))
+            else:
+                enabled = self.registry_agents_enabled_by_default()
             override_entry = overrides.get(agent_id)
             if override_entry is not None:
                 if not isinstance(override_entry, dict):
@@ -232,6 +259,11 @@ class AiControlPlane:
                 if not isinstance(raw_enabled, bool):
                     raise AiControlPlaneError(
                         "config/ai/agent-enablement.yaml registry_agents.<agent>.enabled precisa ser booleano."
+                    )
+                if agent_id in effective_roles and raw_enabled != enabled:
+                    raise AiControlPlaneError(
+                        "config/ai/agent-enablement.yaml registry_agents nao pode divergir do enablement da role para agentes com role correspondente: "
+                        f"{agent_id}"
                     )
                 enabled = raw_enabled
             effective[agent_id] = {"enabled": enabled}
@@ -256,6 +288,21 @@ class AiControlPlane:
             and isinstance(entry, dict)
             and not bool(entry.get("enabled", False))
         )
+
+    def declared_registry_agents(self) -> list[str]:
+        registry_dir = (self.repo_root / ".agents" / "registry").resolve()
+        return sorted(candidate.stem for candidate in registry_dir.glob("*.toml"))
+
+    def registry_agent_display_names(self) -> dict[str, str]:
+        registry_dir = (self.repo_root / ".agents" / "registry").resolve()
+        display_names: dict[str, str] = {}
+        for candidate in sorted(registry_dir.glob("*.toml")):
+            payload = _load_toml(candidate)
+            agent_id = str(payload.get("id", "")).strip() or candidate.stem
+            display_name = str(payload.get("display_name", "")).strip()
+            if agent_id and display_name:
+                display_names[agent_id] = display_name
+        return display_names
 
     def agent_operation_roles_payload(self) -> dict[str, Any]:
         roles = self.agent_operations_payload.get("roles") or {}
@@ -282,6 +329,259 @@ class AiControlPlane:
             role_id
             for role_id in self.agent_operation_roles_payload()
             if role_id not in declared_roles
+        )
+
+    def agent_runtime_roles_payload(self) -> dict[str, Any]:
+        roles = self.agent_runtime_payload.get("roles") or {}
+        if not isinstance(roles, dict):
+            raise AiControlPlaneError(
+                "config/ai/agent-runtime.yaml precisa conter roles como mapa."
+            )
+        return roles
+
+    def agent_runtime_registry_agents_payload(self) -> dict[str, Any]:
+        registry_agents = self.agent_runtime_payload.get("registry_agents") or {}
+        if not isinstance(registry_agents, dict):
+            raise AiControlPlaneError(
+                "config/ai/agent-runtime.yaml precisa conter registry_agents como mapa."
+            )
+        return registry_agents
+
+    def agent_runtime_policies_payload(self) -> dict[str, Any]:
+        policies = self.agent_runtime_payload.get("policies") or {}
+        if not isinstance(policies, dict):
+            raise AiControlPlaneError(
+                "config/ai/agent-runtime.yaml precisa conter policies como mapa."
+            )
+        return policies
+
+    def runtime_status_allowlist(self, policy_name: str) -> list[str]:
+        policies = self.agent_runtime_policies_payload()
+        default_policies = {
+            "enabled_role_statuses": ["operational", "consultive"],
+            "required_role_statuses": ["operational", "consultive"],
+            "enabled_registry_statuses": ["operational", "consultive"],
+            "chat_owner_statuses": ["operational", "consultive"],
+            "chat_name_fallback_order": ["chat_alias", "display_name", "technical_id"],
+        }
+        payload = policies.get(policy_name, default_policies.get(policy_name, []))
+        return ensure_string_list(
+            payload,
+            f"config/ai/agent-runtime.yaml policies.{policy_name}",
+        )
+
+    def chat_name_fallback_order(self) -> list[str]:
+        return self.runtime_status_allowlist("chat_name_fallback_order")
+
+    def role_runtime_entry(self, role_id: str) -> dict[str, Any]:
+        entry = self.agent_runtime_roles_payload().get(role_id) or {}
+        return entry if isinstance(entry, dict) else {}
+
+    def registry_agent_runtime_entry(self, agent_id: str) -> dict[str, Any]:
+        entry = self.agent_runtime_registry_agents_payload().get(agent_id) or {}
+        return entry if isinstance(entry, dict) else {}
+
+    def role_runtime_status(self, role_id: str) -> str:
+        return str(self.role_runtime_entry(role_id).get("status", "")).strip()
+
+    def registry_agent_runtime_status(self, agent_id: str) -> str:
+        status = str(self.registry_agent_runtime_entry(agent_id).get("status", "")).strip()
+        if status:
+            return status
+        return self.role_runtime_status(agent_id)
+
+    def roles_with_runtime_contracts(self) -> list[str]:
+        return sorted(
+            role_id
+            for role_id, entry in self.agent_runtime_roles_payload().items()
+            if isinstance(role_id, str) and isinstance(entry, dict)
+        )
+
+    def roles_missing_runtime_contracts(self) -> list[str]:
+        runtime_roles = set(self.roles_with_runtime_contracts())
+        return sorted(role_id for role_id in self.roles_payload() if role_id not in runtime_roles)
+
+    def runtime_contracts_without_roles(self) -> list[str]:
+        declared_roles = set(self.roles_payload())
+        return sorted(
+            role_id
+            for role_id in self.agent_runtime_roles_payload()
+            if role_id not in declared_roles
+        )
+
+    def registry_agents_with_runtime_contracts(self) -> list[str]:
+        declared_agents = set(self.declared_registry_agents())
+        covered = {
+            agent_id
+            for agent_id, entry in self.agent_runtime_registry_agents_payload().items()
+            if isinstance(agent_id, str) and isinstance(entry, dict)
+        }
+        covered.update(
+            role_id for role_id in self.roles_with_runtime_contracts() if role_id in declared_agents
+        )
+        return sorted(covered)
+
+    def registry_agents_missing_runtime_contracts(self) -> list[str]:
+        runtime_registry_agents = set(self.registry_agents_with_runtime_contracts())
+        return sorted(
+            agent_id
+            for agent_id in self.declared_registry_agents()
+            if agent_id not in runtime_registry_agents
+        )
+
+    def runtime_contracts_without_registry_agents(self) -> list[str]:
+        declared_agents = set(self.declared_registry_agents())
+        return sorted(
+            agent_id
+            for agent_id in self.agent_runtime_registry_agents_payload()
+            if agent_id not in declared_agents
+        )
+
+    def _is_runtime_status_allowed(self, status: str, policy_name: str) -> bool:
+        return status.strip() in set(self.runtime_status_allowlist(policy_name))
+
+    def enabled_roles_without_operational_runtime(self) -> list[str]:
+        return sorted(
+            role_id
+            for role_id in self.enabled_roles()
+            if not self._is_runtime_status_allowed(
+                self.role_runtime_status(role_id),
+                "enabled_role_statuses",
+            )
+        )
+
+    def required_roles_without_operational_runtime(self) -> list[str]:
+        return sorted(
+            role_id
+            for role_id in self.required_roles()
+            if not self._is_runtime_status_allowed(
+                self.role_runtime_status(role_id),
+                "required_role_statuses",
+            )
+        )
+
+    def enabled_registry_agents_without_operational_runtime(self) -> list[str]:
+        return sorted(
+            agent_id
+            for agent_id in self.enabled_registry_agents()
+            if not self._is_runtime_status_allowed(
+                self.registry_agent_runtime_status(agent_id),
+                "enabled_registry_statuses",
+            )
+        )
+
+    def chat_owner_capable_roles(self) -> list[str]:
+        return sorted(
+            role_id
+            for role_id in self.roles_with_runtime_contracts()
+            if bool(self.role_runtime_entry(role_id).get("chat_owner_supported", False))
+            and self._is_runtime_status_allowed(
+                self.role_runtime_status(role_id),
+                "chat_owner_statuses",
+            )
+        )
+
+    def chat_owner_capable_registry_agents(self) -> list[str]:
+        return sorted(
+            agent_id
+            for agent_id in self.registry_agents_with_runtime_contracts()
+            if bool(self.registry_agent_runtime_entry(agent_id).get("chat_owner_supported", False))
+            and self._is_runtime_status_allowed(
+                self.registry_agent_runtime_status(agent_id),
+                "chat_owner_statuses",
+            )
+        )
+
+    def formal_name_for_agent(self, agent_id: str) -> str:
+        role_entry = self.roles_payload().get(agent_id)
+        if isinstance(role_entry, dict):
+            display_name = str(role_entry.get("display_name", "")).strip()
+            if display_name:
+                return display_name
+        return self.registry_agent_display_names().get(agent_id, "")
+
+    def chat_alias_for_agent(self, agent_id: str) -> str:
+        role_entry = self.role_runtime_entry(agent_id)
+        if role_entry:
+            return str(role_entry.get("chat_alias", "")).strip()
+        registry_entry = self.registry_agent_runtime_entry(agent_id)
+        return str(registry_entry.get("chat_alias", "")).strip()
+
+    def visible_name_for_agent(
+        self,
+        agent_id: str,
+        *,
+        order: list[str] | None = None,
+    ) -> str:
+        fallback_order = order or self.chat_name_fallback_order()
+        candidate_values = {
+            "chat_alias": self.chat_alias_for_agent(agent_id),
+            "display_name": self.formal_name_for_agent(agent_id),
+            "technical_id": str(agent_id).strip(),
+        }
+        for key in fallback_order:
+            value = candidate_values.get(key, "").strip()
+            if value:
+                return value
+        return candidate_values["technical_id"]
+
+    def resolve_role_reference(self, raw_value: str) -> str:
+        normalized = str(raw_value or "").strip().casefold()
+        if not normalized:
+            return ""
+        if normalized in {role_id.casefold(): role_id for role_id in self.roles_payload()}:
+            return {
+                role_id.casefold(): role_id for role_id in self.roles_payload()
+            }[normalized]
+        for role_id in self.roles_payload():
+            candidates = {
+                role_id.strip().casefold(),
+                self.formal_name_for_agent(role_id).casefold(),
+                self.visible_name_for_agent(role_id).casefold(),
+                self.chat_alias_for_agent(role_id).casefold(),
+            }
+            if normalized in {candidate for candidate in candidates if candidate}:
+                return role_id
+        return ""
+
+    def enabled_role_visible_names(self) -> list[str]:
+        return sorted(self.visible_name_for_agent(role_id) for role_id in self.enabled_roles())
+
+    def enabled_role_visible_names_by_id(self) -> dict[str, str]:
+        return {
+            role_id: self.visible_name_for_agent(role_id)
+            for role_id in self.enabled_roles()
+        }
+
+    def duplicate_enabled_role_visible_names(self) -> list[str]:
+        occurrences: dict[str, int] = {}
+        for name in self.enabled_role_visible_names():
+            normalized = name.casefold()
+            occurrences[normalized] = occurrences.get(normalized, 0) + 1
+        return sorted(
+            name
+            for name in self.enabled_role_visible_names()
+            if occurrences.get(name.casefold(), 0) > 1
+        )
+
+    def role_jira_assignee_payload(self, role_id: str) -> dict[str, Any]:
+        runtime_entry = self.role_runtime_entry(role_id)
+        payload = runtime_entry.get("jira_assignee") or {}
+        return payload if isinstance(payload, dict) else {}
+
+    def enabled_roles_missing_jira_assignee_mapping(self) -> list[str]:
+        return sorted(
+            role_id
+            for role_id in self.enabled_roles()
+            if bool(self.role_runtime_entry(role_id).get("chat_owner_supported", False))
+            and not str(self.role_jira_assignee_payload(role_id).get("account_id", "")).strip()
+        )
+
+    def jira_assignable_roles(self) -> list[str]:
+        return sorted(
+            role_id
+            for role_id in self.enabled_roles()
+            if str(self.role_jira_assignee_payload(role_id).get("account_id", "")).strip()
         )
 
     def effective_workflow_columns(self) -> list[str]:
@@ -560,6 +860,18 @@ def ensure_string_list(payload: Any, label: str) -> list[str]:
     return values
 
 
+def _load_toml(path: Path) -> dict[str, Any]:
+    if tomllib is None:
+        raise AiControlPlaneError("tomllib nao esta disponivel neste runtime Python.")
+    if not path.exists():
+        raise AiControlPlaneError(f"Arquivo TOML nao encontrado: {path}")
+    with path.open("rb") as handle:
+        payload = tomllib.load(handle)
+    if not isinstance(payload, dict):
+        raise AiControlPlaneError(f"TOML invalido em {path}: esperado objeto raiz.")
+    return payload
+
+
 def load_yaml_map(path: Path) -> dict[str, Any]:
     if not path.exists():
         raise AiControlPlaneError(f"Arquivo YAML nao encontrado: {path}")
@@ -600,6 +912,7 @@ def load_ai_control_plane(repo_root: str | Path | None = None) -> AiControlPlane
     agent_enablement_path = config_root / "agent-enablement.yaml"
     agent_operations_path = config_root / "agent-operations.yaml"
     contracts_path = config_root / "contracts.yaml"
+    agent_runtime_path = config_root / "agent-runtime.yaml"
     platforms_payload, platforms_local_path = load_yaml_map_with_optional_overlay(platforms_path)
     agents_payload, agents_local_path = load_yaml_map_with_optional_overlay(agents_path)
     agent_enablement_payload, agent_enablement_local_path = load_yaml_map_with_optional_overlay(
@@ -609,6 +922,9 @@ def load_ai_control_plane(repo_root: str | Path | None = None) -> AiControlPlane
         agent_operations_path
     )
     contracts_payload, contracts_local_path = load_yaml_map_with_optional_overlay(contracts_path)
+    agent_runtime_payload, agent_runtime_local_path = load_yaml_map_with_optional_overlay(
+        agent_runtime_path
+    )
     return AiControlPlane(
         repo_root=resolved_repo_root,
         config_root=config_root,
@@ -622,11 +938,14 @@ def load_ai_control_plane(repo_root: str | Path | None = None) -> AiControlPlane
         agent_operations_local_path=agent_operations_local_path,
         contracts_path=contracts_path,
         contracts_local_path=contracts_local_path,
+        agent_runtime_path=agent_runtime_path,
+        agent_runtime_local_path=agent_runtime_local_path,
         platforms_payload=platforms_payload,
         agents_payload=agents_payload,
         agent_enablement_payload=agent_enablement_payload,
         agent_operations_payload=agent_operations_payload,
         contracts_payload=contracts_payload,
+        agent_runtime_payload=agent_runtime_payload,
     )
 
 
@@ -982,12 +1301,15 @@ def summary_payload(
         "agent_operations_local_path": str(loaded.agent_operations_local_path),
         "contracts_path": str(loaded.contracts_path),
         "contracts_local_path": str(loaded.contracts_local_path),
+        "agent_runtime_path": str(loaded.agent_runtime_path),
+        "agent_runtime_local_path": str(loaded.agent_runtime_local_path),
         "local_overrides": {
             "platforms": loaded.platforms_local_path.exists(),
             "agents": loaded.agents_local_path.exists(),
             "agent_enablement": loaded.agent_enablement_local_path.exists(),
             "agent_operations": loaded.agent_operations_local_path.exists(),
             "contracts": loaded.contracts_local_path.exists(),
+            "agent_runtime": loaded.agent_runtime_local_path.exists(),
         },
         "enabled_roles": loaded.enabled_roles(),
         "required_roles": loaded.required_roles(),
@@ -1003,6 +1325,31 @@ def summary_payload(
             "covered_roles": loaded.roles_with_operation_contracts(),
             "missing_roles": loaded.roles_missing_operation_contracts(),
             "orphan_contracts": loaded.operation_contracts_without_roles(),
+        },
+        "role_runtime_coverage": {
+            "covered_roles": loaded.roles_with_runtime_contracts(),
+            "missing_roles": loaded.roles_missing_runtime_contracts(),
+            "orphan_contracts": loaded.runtime_contracts_without_roles(),
+        },
+        "registry_runtime_coverage": {
+            "covered_registry_agents": loaded.registry_agents_with_runtime_contracts(),
+            "missing_registry_agents": loaded.registry_agents_missing_runtime_contracts(),
+            "orphan_contracts": loaded.runtime_contracts_without_registry_agents(),
+        },
+        "runtime_operability": {
+            "enabled_roles_without_operational_runtime": loaded.enabled_roles_without_operational_runtime(),
+            "required_roles_without_operational_runtime": loaded.required_roles_without_operational_runtime(),
+            "enabled_registry_agents_without_operational_runtime": loaded.enabled_registry_agents_without_operational_runtime(),
+            "enabled_roles_missing_jira_assignee_mapping": loaded.enabled_roles_missing_jira_assignee_mapping(),
+            "jira_assignable_roles": loaded.jira_assignable_roles(),
+        },
+        "chat_identity_runtime": {
+            "chat_name_fallback_order": loaded.chat_name_fallback_order(),
+            "chat_owner_capable_roles": loaded.chat_owner_capable_roles(),
+            "chat_owner_capable_registry_agents": loaded.chat_owner_capable_registry_agents(),
+            "enabled_role_visible_names": loaded.enabled_role_visible_names(),
+            "enabled_role_visible_names_by_id": loaded.enabled_role_visible_names_by_id(),
+            "duplicate_enabled_role_visible_names": loaded.duplicate_enabled_role_visible_names(),
         },
         "workflow_columns": loaded.effective_workflow_columns(),
         "platforms": {

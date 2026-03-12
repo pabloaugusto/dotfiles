@@ -1,6 +1,6 @@
 # AI WIP Tracker
 
-Atualizado em: 2026-03-12 17:41 UTC
+Atualizado em: 2026-03-12 18:43 UTC
 
 Fallback local de continuidade. O Jira e a fonte primaria do fluxo vivo.
 
@@ -35,6 +35,7 @@ Fallback local de continuidade. O Jira e a fonte primaria do fluxo vivo.
 <!-- ai-worklog:done:start -->
 | ID | Tarefa | Branch | Responsavel | Inicio UTC | Concluido UTC | Resultado |
 | --- | --- | --- | --- | --- | --- | --- |
+| WIP-DOT-208 | Implementar runtime multiagente funcional, com ownership real de chat e status operacional verificavel por agente. | feat/DOT-208-agent-runtime-enforcement | ai-developer-config-policy | 2026-03-12 17:52 UTC | 2026-03-12 18:43 UTC | Runtime multiagente funcional entregue com ownership alias-first no chat e no Jira, sync opcional de Assignee por principal mapeado, enforcement de startup/runtime no control pl... / evidencias: python -m unittest tes... |
 | WIP-DOT-207 | Adicionar projecoes .rules para startup, chat, git e security sob DOT-207 | feat/DOT-207-rules-projections | ai-developer-config-policy | 2026-03-12 17:09 UTC | 2026-03-12 17:41 UTC | Projecoes .rules hibridas para startup, chat, git e security entregues, com catalogo declarativo, consumo no startup/report/validator, regressao Python atualizada e PR funcional... / evidencias: PR #52=merged; merge b... |
 | WIP-20260312-DOT-205-RERUN | Executar agents-rules-centralization desde o inicio com toggle declarativo de agentes | prompt/DOT-205-agents-rules-centralization | ai-developer-config-policy | 2026-03-12 16:06 UTC | 2026-03-12 16:40 UTC | DOT-205 executou agents-rules-centralization de ponta a ponta com camada humana canonica em .agents/rules, overlay declarativo config/ai/agent-enablement.yaml e startup/report/v... / evidencias: task ai:validate=ok; t... |
 | WIP-20260312-120449 | Publicacao remota iniciada | prompt/DOT-206-startup-governor-enforcement | ai-developer-config-policy | 2026-03-12 15:06 UTC | 2026-03-12 15:09 UTC | DOT-206 foi publicado em origin, PR #49 foi aberto e integrado em main, deixando a trilha pronta para sincronizacao local final e poda da branch residual. / evidencias: PR #49 mergeado; merge commit 8c75121 |

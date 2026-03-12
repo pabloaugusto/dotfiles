@@ -27,6 +27,10 @@ perder continuidade confiavel.
    comunicacao no chat e a identidade humana oficial dos agentes
    (`display_name`), lembrando idioma, tom, formato de links e demais regras
    vivas da sessao.
+   Carregar tambem o runtime operacional dos agentes em
+   [`config/ai/agent-runtime.yaml`](../config/ai/agent-runtime.yaml), porque e
+   ele que declara quem esta realmente operante, qual alias deve aparecer no
+   chat/Jira e quais papeis podem assumir ownership visivel de superficie.
    Carregar tambem o enablement declarativo de agentes em
    [`config/ai/agent-enablement.yaml`](../config/ai/agent-enablement.yaml).
    Esse estado precisa ser aplicado antes de decidir quais papeis podem falar,
@@ -90,12 +94,16 @@ perder continuidade confiavel.
    no startup antes de decidir se a rodada vai abrir, atualizar ou mergear `PR`.
 25. Avisar o usuario se houver contratos nascidos no chat ainda nao perenizados,
    listando quais estao pendentes e quais ja tem **work item** dono.
-26. Antes de delegar para subagentes, preparar ou referenciar o pacote minimo
+26. Validar se o agente operacional priorizado tambem esta apto a ser owner
+    visivel de chat e de `Current Agent Role`/`Next Required Role`, sempre em
+    alias-first; quando houver principal Jira mapeado para o papel, preparar
+    tambem o sync de `Assignee`.
+27. Antes de delegar para subagentes, preparar ou referenciar o pacote minimo
     de contexto da rodada: issue dona, branch atual, startup report, estado
     declarativo de enablement dos agentes, regras aplicaveis, classificacao do
     `PEA` quando houver, assuncoes relevantes e caminhos normativos do papel
     delegado.
-27. So depois desse preflight completo escolher a proxima
+28. So depois desse preflight completo escolher a proxima
    **fatia de incremento testavel**.
 
 ## Restart com continuidade comprovada
@@ -118,6 +126,7 @@ automaticamente para o **startup do zero**.
   propria sessao antes da primeira mensagem operacional
 - ownership explicito do `Guardiao de Startup` ate `ready_for_work`
 - estado declarativo de agentes `enabled` e `disabled` carregado do repo
+- estado declarativo de runtime operacional e aliases visiveis carregado do repo
 - contratos Git canonicos carregados explicitamente, com nota de que o
   enforcement real permanece em hooks, tasks e gates oficiais do repo
 - `pea_status` expondo catalogo, pack formal carregado e a distincao entre
@@ -138,6 +147,7 @@ automaticamente para o **startup do zero**.
 - quadro de contratos do chat ainda pendentes de promocao
 - pacote minimo de contexto obrigatorio para subagentes quando houver delegacao
 - indicacao explicita do **work item** priorizado para a rodada seguinte
+- prova de qual agente pode assumir ownership visivel de chat e Jira na rodada
 
 ## Automacao oficial
 

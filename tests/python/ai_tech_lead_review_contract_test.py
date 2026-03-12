@@ -68,7 +68,7 @@ class AiTechLeadReviewContractTests(unittest.TestCase):
         self.assertEqual(len(tech_lead_filters), 1)
         self.assertEqual(
             tech_lead_filters[0].get("jql"),
-            'status = Review AND "Next Required Role" = "ai-tech-lead"',
+            'status = Review AND "Next Required Role" = "Tech Lead"',
         )
 
 

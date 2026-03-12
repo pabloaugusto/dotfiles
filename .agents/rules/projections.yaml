@@ -13,9 +13,11 @@ projections:
     machine_projection: .agents/rules/chat.rules
     required_for_startup: true
     parity_terms:
+      - chat_alias
       - display_name
       - ai-startup-governor
       - enablement
+      - acting-agent
   git:
     human_source: .agents/rules/git-rules.md
     machine_projection: .agents/rules/git.rules

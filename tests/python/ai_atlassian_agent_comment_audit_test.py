@@ -30,6 +30,31 @@ def structured_comment(
     }
 
 
+def default_role_reference_map() -> dict[str, str]:
+    return {
+        "ai-developer-python": "ai-developer-python",
+        "dev python": "ai-developer-python",
+        "ai-reviewer": "ai-reviewer",
+        "revisor": "ai-reviewer",
+        "ai-product-owner": "ai-product-owner",
+        "po": "ai-product-owner",
+        "ai-engineering-architect": "ai-engineering-architect",
+        "arquiteto": "ai-engineering-architect",
+        "ai-devops": "ai-devops",
+        "devops": "ai-devops",
+        "ai-qa": "ai-qa",
+        "testador (qa)": "ai-qa",
+        "ai-reviewer-config-policy": "ai-reviewer-config-policy",
+        "revisor config policy": "ai-reviewer-config-policy",
+        "ai-documentation-agent": "ai-documentation-agent",
+        "ai-documentation-writer": "ai-documentation-writer",
+        "ai-documentation-sync": "ai-documentation-sync",
+        "ai-documentation-reviewer": "ai-documentation-reviewer",
+        "ai-linguistic-reviewer": "ai-linguistic-reviewer",
+        "pascoalete": "ai-linguistic-reviewer",
+    }
+
+
 class ParseStructuredCommentTest(unittest.TestCase):
     def test_parse_structured_comment_extracts_header_and_lists(self) -> None:
         parsed = parse_structured_comment(
@@ -61,8 +86,8 @@ class EvaluateIssueCommentContractTest(unittest.TestCase):
                 "status": {"name": "DOING"},
                 "issuetype": {"name": "Task"},
                 "priority": {"name": "Medium"},
-                "customfield_1": {"value": "ai-developer-python"},
-                "customfield_2": {"value": "ai-reviewer"},
+                "customfield_1": {"value": "Dev Python"},
+                "customfield_2": {"value": "Revisor"},
             },
         }
         comments = [structured_comment(agent="ai-developer-python", status="In Progress")]
@@ -71,6 +96,7 @@ class EvaluateIssueCommentContractTest(unittest.TestCase):
             comments,
             current_agent_field_id="customfield_1",
             next_required_field_id="customfield_2",
+            role_reference_map=default_role_reference_map(),
         )
         self.assertNotIn(
             "latest_comment_status_mismatch",
@@ -95,6 +121,7 @@ class EvaluateIssueCommentContractTest(unittest.TestCase):
             comments,
             current_agent_field_id="customfield_1",
             next_required_field_id="customfield_2",
+            role_reference_map=default_role_reference_map(),
         )
         self.assertIn(
             "latest_comment_status_mismatch",
@@ -119,6 +146,7 @@ class EvaluateIssueCommentContractTest(unittest.TestCase):
             comments,
             current_agent_field_id="customfield_1",
             next_required_field_id="customfield_2",
+            role_reference_map=default_role_reference_map(),
         )
         self.assertIn(
             "missing_current_agent_comment",
@@ -143,6 +171,7 @@ class EvaluateIssueCommentContractTest(unittest.TestCase):
             comments,
             current_agent_field_id="customfield_1",
             next_required_field_id="customfield_2",
+            role_reference_map=default_role_reference_map(),
         )
         codes = {entry["code"] for entry in report["findings"]}
         self.assertIn("missing_qa_comment", codes)
@@ -174,6 +203,7 @@ class EvaluateIssueCommentContractTest(unittest.TestCase):
             comments,
             current_agent_field_id="customfield_1",
             next_required_field_id="customfield_2",
+            role_reference_map=default_role_reference_map(),
         )
         self.assertNotIn(
             "missing_reviewer_comment",
@@ -202,6 +232,7 @@ class EvaluateIssueCommentContractTest(unittest.TestCase):
             comments,
             current_agent_field_id="customfield_1",
             next_required_field_id="customfield_2",
+            role_reference_map=default_role_reference_map(),
         )
         self.assertNotIn(
             "missing_delivery_agent_comment",
@@ -235,6 +266,7 @@ class EvaluateIssueCommentContractTest(unittest.TestCase):
             comments,
             current_agent_field_id="customfield_1",
             next_required_field_id="customfield_2",
+            role_reference_map=default_role_reference_map(),
         )
         codes = {entry["code"] for entry in report["findings"]}
         self.assertNotIn("missing_delivery_agent_comment", codes)
@@ -266,6 +298,7 @@ class EvaluateIssueCommentContractTest(unittest.TestCase):
             comments,
             current_agent_field_id="customfield_1",
             next_required_field_id="customfield_2",
+            role_reference_map=default_role_reference_map(),
         )
         self.assertNotIn(
             "missing_reviewer_comment",

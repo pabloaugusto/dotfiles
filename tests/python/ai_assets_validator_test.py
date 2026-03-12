@@ -72,6 +72,7 @@ class ValidateAiAssetsTests(unittest.TestCase):
         self.assertIn("config/ai/agents.yaml", module.REQUIRED_FILES)
         self.assertIn("config/ai/agent-enablement.yaml", module.REQUIRED_FILES)
         self.assertIn("config/ai/agent-operations.yaml", module.REQUIRED_FILES)
+        self.assertIn("config/ai/agent-runtime.yaml", module.REQUIRED_FILES)
         self.assertIn("config/ai/contracts.yaml", module.REQUIRED_FILES)
         self.assertIn("config/ai/sync-targets.yaml", module.REQUIRED_FILES)
         self.assertIn("df/secrets/secrets-ref.yaml", module.REQUIRED_FILES)

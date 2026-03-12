@@ -38,6 +38,9 @@ Nessas retomadas, a regra correta passa a ser:
   papel autorizado a emitir a primeira resposta operacional
 - carregar a camada de `display_name` antes de exibir agente, papel ou owner em
   chat, `Jira` ou artefato visivel
+- carregar tambem [`config/ai/agent-runtime.yaml`](../config/ai/agent-runtime.yaml)
+  para distinguir `habilitado` de `realmente operante`, carregar `chat_alias`
+  e saber qual papel pode assumir ownership visivel de chat/Jira
 - carregar o enablement declarativo de agentes a partir de
   [`config/ai/agent-enablement.yaml`](../config/ai/agent-enablement.yaml)
   antes de exigir ou acionar papeis opcionais ou consultivos
@@ -321,6 +324,12 @@ O estado declarativo de enablement por agente fica em
 evitar que habilitacao ou desabilitacao de papeis dependa apenas de memoria de
 chat.
 
+O runtime operacional visivel fica em
+[`config/ai/agent-runtime.yaml`](../config/ai/agent-runtime.yaml), para provar
+quais papeis estao codados e operantes de fato, qual alias precisa aparecer no
+chat e no `Jira`, e se existe principal Jira mapeado para sincronizar
+`Assignee`.
+
 ### Camada 2.2. Orquestracao, rules e evals
 
 Para evitar roteamento implcito e drift entre docs e execucao, o repo tambem versiona:
@@ -529,6 +538,12 @@ papel em logs e artefatos.
 Do mesmo modo, toda rotina de startup e restart precisa carregar o estado de
 enablement dos agentes antes de decidir quem pode assumir uma resposta
 operacional, uma delegacao, um review consultivo ou um gate obrigatorio.
+
+Quando um agente estiver realmente executando trabalho, ele deve ser o owner
+visivel da mensagem correspondente no chat. Nos campos visiveis do `Jira`, a
+regra passa a ser `chat_alias -> display_name -> technical-id`. O `Assignee`
+segue a mesma trilha de ownership, mas so sincroniza quando existir um
+mapeamento explicito entre agente e principal Jira real.
 
 Quando a superficie do `Jira` permitir exibicao humana sem perder
 rastreabilidade tecnica, o fluxo deve preferir `display_name`; quando nao

@@ -2,13 +2,21 @@ rule AI-CHAT-001
 when: startup-chat
 must:
 - carregar o contrato de chat antes da primeira saida operacional
-- usar display_name oficial quando ele existir
+- usar chat_alias, depois display_name e so por ultimo technical_id
 - manter o ai-startup-governor como dono visivel do chat ate ready_for_work
 
 rule AI-CHAT-002
 when: chat-operations
 must:
+- garantir que o acting-agent seja o owner visivel da mensagem de chat
+- garantir que o agente atuante seja o owner visivel da mensagem de chat
 - respeitar o enablement declarativo dos agentes em toda decisao de chat
 - impedir reativacao de agente desabilitado apenas por memoria de chat
 - usar links absolutos para arquivos do repo e links canonicos para Jira e Confluence
 - espelhar marcos relevantes no chat sem substituir a rastreabilidade oficial
+
+rule AI-CHAT-003
+when: jira-visible-agent-ownership
+must:
+- current-agent-role e next-required-role no Jira devem usar valor visivel alias-first
+- assignee no Jira so pode sincronizar quando houver principal mapeado para o agente

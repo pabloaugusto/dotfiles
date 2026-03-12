@@ -147,6 +147,7 @@ def evaluate_issue_comment_contract(
     *,
     current_agent_field_id: str,
     next_required_field_id: str,
+    role_reference_map: dict[str, str],
 ) -> dict[str, Any]:
     fields = issue.get("fields") or {}
     issue_key = str(issue.get("key", "")).strip()
@@ -158,6 +159,11 @@ def evaluate_issue_comment_contract(
     )
     next_required_role = (
         extract_option_value(fields.get(next_required_field_id)) if next_required_field_id else ""
+    )
+    current_agent_id = role_reference_map.get(current_agent.casefold(), current_agent)
+    next_required_role_id = role_reference_map.get(
+        next_required_role.casefold(),
+        next_required_role,
     )
 
     structured_comments: list[dict[str, Any]] = []
@@ -193,7 +199,7 @@ def evaluate_issue_comment_contract(
                 "message": "A issue esta ativa, mas nao possui comentarios estruturados de agentes.",
             }
         )
-    if current_agent and current_agent not in agents_seen:
+    if current_agent_id and current_agent_id not in agents_seen:
         findings.append(
             {
                 "code": "missing_current_agent_comment",
@@ -212,7 +218,7 @@ def evaluate_issue_comment_contract(
     if (
         current_agent
         and latest_agent
-        and latest_agent != current_agent
+        and latest_agent != current_agent_id
         and status_normalized in ACTIVE_STATUS_NAMES
     ):
         findings.append(
@@ -259,7 +265,9 @@ def evaluate_issue_comment_contract(
         "status": status_name,
         "priority": str(((fields.get("priority") or {}).get("name")) or "").strip(),
         "current_agent_role": current_agent,
+        "current_agent_role_id": current_agent_id,
         "next_required_role": next_required_role,
+        "next_required_role_id": next_required_role_id,
         "agents_seen": agents_seen,
         "structured_comment_count": len(structured_comments),
         "latest_structured_comment_agent": latest_agent,
@@ -319,6 +327,16 @@ def audit_issue_comments(
     )
     client = AtlassianHttpClient(resolved)
     jira = JiraAdapter(client)
+    role_reference_map: dict[str, str] = {}
+    for role_id in control.roles_payload():
+        for candidate in (
+            role_id,
+            control.formal_name_for_agent(role_id),
+            control.visible_name_for_agent(role_id),
+        ):
+            normalized_candidate = str(candidate).strip().casefold()
+            if normalized_candidate:
+                role_reference_map[normalized_candidate] = role_id
 
     current_agent_field_id = jira.field_id_by_name("Current Agent Role")
     next_required_field_id = jira.field_id_by_name("Next Required Role")
@@ -344,6 +362,7 @@ def audit_issue_comments(
                 comments,
                 current_agent_field_id=current_agent_field_id,
                 next_required_field_id=next_required_field_id,
+                role_reference_map=role_reference_map,
             )
         )
     issues_with_findings = [item for item in evaluated if item.get("findings")]

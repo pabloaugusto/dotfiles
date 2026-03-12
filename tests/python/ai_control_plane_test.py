@@ -100,6 +100,62 @@ def write_control_plane(
         ),
         encoding="utf-8",
     )
+    (config_dir / "agent-runtime.yaml").write_text(
+        textwrap.dedent(
+            f"""\
+            version: 1
+            policies:
+              enabled_role_statuses: [operational, consultive]
+              required_role_statuses: [operational, consultive]
+              enabled_registry_statuses: [operational, consultive]
+              chat_owner_statuses: [operational, consultive]
+              chat_name_fallback_order: [chat_alias, display_name, technical_id]
+            roles:
+              ai-product-owner:
+                status: operational
+                chat_alias: PO
+                chat_owner_supported: true
+                owner_mode: primary
+                surfaces: [jira, chat]
+                process_scopes: [backlog]
+                jira_assignee:
+                  account_id: account-po
+                runtime_artifacts:
+                  - config/ai/agents.yaml
+              ai-browser-validator:
+                status: disabled_stub
+                chat_alias: Browser Validator
+                chat_owner_supported: false
+                owner_mode: optional
+                surfaces: [browser]
+                process_scopes: [browser-validation]
+                runtime_artifacts:
+                  - config/ai/agents.yaml
+              ai-seo-specialist:
+                status: {"operational" if enable_seo else "disabled_stub"}
+                chat_alias: SEO Specialist
+                chat_owner_supported: {"true" if enable_seo else "false"}
+                owner_mode: optional
+                surfaces: [jira, chat]
+                process_scopes: [seo-review]
+                jira_assignee:
+                  account_id: {"account-seo" if enable_seo else '""'}
+                runtime_artifacts:
+                  - config/ai/agents.yaml
+            registry_agents:
+              pascoalete:
+                status: operational
+                chat_alias: Pascoalete
+                chat_owner_supported: true
+                owner_mode: consultive
+                surfaces: [chat, docs]
+                process_scopes: [linguistic-review]
+                runtime_artifacts:
+                  - .agents/registry/pascoalete.toml
+            """
+        ),
+        encoding="utf-8",
+    )
     (config_dir / "contracts.yaml").write_text(
         textwrap.dedent(
             """\
@@ -165,6 +221,18 @@ class AiControlPlaneTests(unittest.TestCase):
         )
         self.assertIn("pascoalete", payload["enabled_registry_agents"])
         self.assertEqual(payload["role_operation_coverage"]["missing_roles"], [])
+        self.assertEqual(payload["role_runtime_coverage"]["missing_roles"], [])
+        self.assertEqual(payload["registry_runtime_coverage"]["missing_registry_agents"], [])
+        self.assertEqual(
+            payload["runtime_operability"]["enabled_roles_without_operational_runtime"],
+            [],
+        )
+        self.assertEqual(
+            payload["chat_identity_runtime"]["enabled_role_visible_names_by_id"][
+                "ai-product-owner"
+            ],
+            "PO",
+        )
 
     def test_optional_workflow_column_is_enabled_by_role_flag(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
