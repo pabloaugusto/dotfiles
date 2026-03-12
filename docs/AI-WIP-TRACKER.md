@@ -1,6 +1,6 @@
 # AI WIP Tracker
 
-Atualizado em: 2026-03-12 03:36 UTC
+Atualizado em: 2026-03-12 05:05 UTC
 
 Fallback local de continuidade. O Jira e a fonte primaria do fluxo vivo.
 
@@ -27,7 +27,7 @@ Fallback local de continuidade. O Jira e a fonte primaria do fluxo vivo.
 <!-- ai-worklog:doing:start -->
 | ID | Tarefa | Branch | Responsavel | Inicio UTC | Ultima atualizacao UTC | Proximo passo | Bloqueios |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| WIP-20260312-033649 | Implementar prompt pack de governanca da camada documental por agentes de IA | prompt/DOT-181-documentation-layer-governance | codex | 2026-03-12 03:36 UTC | 2026-03-12 03:36 UTC | Auditar a malha documental atual e materializar a arquitetura nuclear em cards, registry, contracts, routing e validators. | - |
+| (sem itens) | - | - | - | - | - | - | - |
 <!-- ai-worklog:doing:end -->
 
 ## Done
@@ -35,6 +35,7 @@ Fallback local de continuidade. O Jira e a fonte primaria do fluxo vivo.
 <!-- ai-worklog:done:start -->
 | ID | Tarefa | Branch | Responsavel | Inicio UTC | Concluido UTC | Resultado |
 | --- | --- | --- | --- | --- | --- | --- |
+| WIP-20260312-033649 | Implementar prompt pack de governanca da camada documental por agentes de IA | prompt/DOT-181-documentation-layer-governance | codex | 2026-03-12 03:36 UTC | 2026-03-12 05:05 UTC | DOT-181 governanca da camada documental integrada no PR #47 / evidencias: PR https://github.com/pabloaugusto/dotfiles/pull/47; task ai:validate=ok; task docs:check=ok; task ai:eval:smoke=ok; task type:check=ok; task c... |
 | WIP-20260312-014434 | Publicar DOT-180 e sincronizar main | prompt/DOT-180-time-locale-governance | codex | 2026-03-12 01:44 UTC | 2026-03-12 01:45 UTC | DOT-180 foi publicado a partir da branch prompt/DOT-180-time-locale-governance e sincronizado em origin/main, deixando a trilha pronta para saneamento final de branch e worktree. / evidencias: git push origin prompt/D... |
 | WIP-20260312-011221 | Salvar pack formal de governanca temporal | codex/prompt-DOT-180-time-locale-governance | codex | 2026-03-12 01:12 UTC | 2026-03-12 01:30 UTC | Pack formal time-locale-governance salvo na arvore canonica, catalogado e alinhado ao owner issue DOT-180, com context, meta, fragmento e prompt versionados e gate documental ve... / evidencias: task ai:prompts:jira:c... |
 | WIP-20260311-204022 | Finalizar publicacao via PR e sincronizar main apos a fundacao de sync | prompt/DOT-179-sync-foundation-runtime | ai-agent | 2026-03-11 23:40 UTC | 2026-03-11 23:45 UTC | DOT-71 foi separado e mergeado; DOT-179 foi reconstruido em branch correta com scope prompt e a sincronizacao final ficou pronta para publicacao e merge sem drift de governanca. / evidencias: PR #45 mergeado; branch D... |
@@ -90,5 +91,5 @@ Fallback local de continuidade. O Jira e a fonte primaria do fluxo vivo.
 <!-- ai-worklog:log:start -->
 | Data/Hora UTC | ID | Status | Resumo | Proximo passo | Bloqueios | Contexto | Notas |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| 2026-03-12 03:36 UTC | WIP-20260312-033649 | doing | Implementar prompt pack de governanca da camada documental por agentes de IA | Auditar a malha documental atual e materializar a arquitetura nuclear em cards, registry, contracts, routing e validators. | - | prompt/documentation-layer-governance | inicio da tarefa |
+| (sem itens) | - | - | - | - | - | - | - |
 <!-- ai-worklog:log:end -->
