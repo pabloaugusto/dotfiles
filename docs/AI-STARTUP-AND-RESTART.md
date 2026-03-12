@@ -31,6 +31,9 @@ perder continuidade confiavel.
    [`config/ai/agent-enablement.yaml`](../config/ai/agent-enablement.yaml).
    Esse estado precisa ser aplicado antes de decidir quais papeis podem falar,
    revisar, delegar ou permanecer desabilitados na rodada.
+   Carregar tambem as projecoes `.rules` obrigatorias declaradas em
+   [`.agents/rules/projections.yaml`](../.agents/rules/projections.yaml),
+   especialmente `startup.rules`, `chat.rules`, `git.rules` e `security.rules`.
 5. Enquanto a sessao ainda nao tiver `ready_for_work`, a primeira resposta
    operacional e qualquer bloqueio objetivo pertencem ao `Guardiao de Startup`
    (`ai-startup-governor`), nunca ao agente dono da entrega.
@@ -121,6 +124,8 @@ automaticamente para o **startup do zero**.
   `startup`, `PEA` e `enforcement`
 - camada normativa por tema em [`.agents/rules/`](../.agents/rules/) e o
   enablement declarativo carregados no startup
+- projecoes `.rules` criticas carregadas a partir de
+  [`.agents/rules/projections.yaml`](../.agents/rules/projections.yaml)
 - `startup_governor_status` com estado, `clearance`, bloqueios e handoff
 - artefato executavel `.cache/ai/startup-ready.json`
 - inventario atual de worktrees e branches abertas, com ciclo de vida da branch

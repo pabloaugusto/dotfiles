@@ -50,6 +50,7 @@ Consolidar branch, commit, PR, merge e higiene de worktree.
 
 ## Artefatos relacionados
 
+- [`git.rules`](git.rules)
 - [`../../docs/TASKS.md`](../../docs/TASKS.md)
 - [`../../docs/AI-WIP-TRACKER.md`](../../docs/AI-WIP-TRACKER.md)
 - [`../../.github/pull_request_template.md`](../../.github/pull_request_template.md)
@@ -59,4 +60,3 @@ Consolidar branch, commit, PR, merge e higiene de worktree.
 - [`worklog-and-lessons-rules.md`](worklog-and-lessons-rules.md)
 - [`prompt-pack-rules.md`](prompt-pack-rules.md)
 - [`startup-and-resume-rules.md`](startup-and-resume-rules.md)
-

@@ -17,6 +17,7 @@ except ModuleNotFoundError:  # pragma: no cover - fallback for Python < 3.11
 from scripts.ai_agent_execution_lib import load_context
 from scripts.ai_control_plane_lib import load_ai_control_plane, resolve_atlassian_platform
 from scripts.ai_fallback_governance_lib import fallback_status_payload
+from scripts.ai_rules_lib import rules_projection_payload as load_rules_projection_payload
 from scripts.atlassian_platform_lib import connectivity_payload
 from scripts.github_auth_probe_lib import GitHubAuthProbeError, probe_github_auth
 
@@ -278,7 +279,9 @@ def agent_enablement_payload(repo_root: Path) -> dict[str, Any]:
         "status": "ok",
         "agents_path": control_plane.agents_path.relative_to(repo_root).as_posix(),
         "overlay_path": control_plane.agent_enablement_path.relative_to(repo_root).as_posix(),
-        "overlay_local_path": control_plane.agent_enablement_local_path.relative_to(repo_root).as_posix(),
+        "overlay_local_path": control_plane.agent_enablement_local_path.relative_to(
+            repo_root
+        ).as_posix(),
         "overlay_local_active": control_plane.agent_enablement_local_path.exists(),
         "declared_roles": control_plane.declared_enablement_roles(),
         "overridden_roles": control_plane.enablement_overridden_roles(),
@@ -319,18 +322,69 @@ def manifest_evidence_payload(repo_root: Path, resolved_paths: list[str]) -> dic
     }
 
 
-def chat_communication_payload() -> dict[str, Any]:
+def rules_projections_payload(repo_root: Path) -> dict[str, Any]:
+    payload = load_rules_projection_payload(repo_root)
+    if payload.get("status") == "error":
+        return payload
+    projections = payload.get("projections", {})
     return {
-        "status": "ok",
-        "rules": list(CHAT_COMMUNICATION_RULES),
+        **payload,
+        "projection_count": len(projections) if isinstance(projections, dict) else 0,
+        "loaded_required_count": len(payload.get("loaded_for_startup", [])),
     }
 
 
-def git_governance_payload() -> dict[str, Any]:
+def _projection_rules(
+    rules_projections: dict[str, Any],
+    projection_id: str,
+    fallback_rules: list[str],
+) -> tuple[str, str, list[str]]:
+    projections = rules_projections.get("projections", {})
+    if not isinstance(projections, dict):
+        return "", "", list(fallback_rules)
+    projection = projections.get(projection_id, {})
+    if not isinstance(projection, dict):
+        return "", "", list(fallback_rules)
+    rules = [str(item).strip() for item in projection.get("must", []) if str(item).strip()]
+    return (
+        str(projection.get("human_source", "")).strip(),
+        str(projection.get("machine_projection", "")).strip(),
+        rules or list(fallback_rules),
+    )
+
+
+def chat_communication_payload(
+    repo_root: Path, rules_projections: dict[str, Any] | None = None
+) -> dict[str, Any]:
+    resolved_projections = rules_projections or rules_projections_payload(repo_root)
+    human_source, machine_projection, rules = _projection_rules(
+        resolved_projections,
+        "chat",
+        CHAT_COMMUNICATION_RULES,
+    )
     return {
-        "status": "ok",
+        "status": "ok" if rules else "missing",
+        "human_source": human_source,
+        "machine_projection": machine_projection,
+        "rules": rules,
+    }
+
+
+def git_governance_payload(
+    repo_root: Path, rules_projections: dict[str, Any] | None = None
+) -> dict[str, Any]:
+    resolved_projections = rules_projections or rules_projections_payload(repo_root)
+    human_source, machine_projection, rules = _projection_rules(
+        resolved_projections,
+        "git",
+        GIT_GOVERNANCE_STARTUP_RULES,
+    )
+    return {
+        "status": "ok" if rules else "missing",
+        "human_source": human_source,
+        "machine_projection": machine_projection,
         "sources": list(GIT_GOVERNANCE_STARTUP_SOURCES),
-        "rules": list(GIT_GOVERNANCE_STARTUP_RULES),
+        "rules": rules,
         "enforcement_note": (
             "o startup relembra a governanca Git, mas o enforcement real continua nos hooks, "
             "tasks e gates oficiais do repo"
@@ -347,13 +401,13 @@ def pea_status_payload(repo_root: Path, resolved_paths: list[str]) -> dict[str, 
         prompt_root / "meta.yaml",
     ]
     missing = [
-        path.relative_to(repo_root).as_posix()
-        for path in required_files
-        if not path.is_file()
+        path.relative_to(repo_root).as_posix() for path in required_files if not path.is_file()
     ]
     startup_loads_pack = all(relative in resolved_paths for relative in PEA_REQUIRED_PATHS)
     return {
-        "status": "ok" if catalog_path.is_file() and not missing and startup_loads_pack else "missing",
+        "status": "ok"
+        if catalog_path.is_file() and not missing and startup_loads_pack
+        else "missing",
         "catalog_path": PROMPTS_CATALOG_PATH.as_posix(),
         "pack_root": PEA_PROMPT_ROOT.as_posix(),
         "required_paths": list(PEA_REQUIRED_PATHS),
@@ -458,12 +512,20 @@ def startup_drift_payload(
                 f"contexto ativo aponta para `{active_issue}`, mas o worklog ativo aponta para `{worklog_issue}`"
             )
 
-    if git_inventory.get("dirty_entries") and active_execution.get("status") != "ok" and not active_worklog_items:
+    if (
+        git_inventory.get("dirty_entries")
+        and active_execution.get("status") != "ok"
+        and not active_worklog_items
+    ):
         findings.append("arvore dirty sem contexto ativo nem worklog Doing correspondente")
 
     lifecycle = git_inventory.get("branch_lifecycle", {})
-    if lifecycle.get("prune_candidate") and (active_execution.get("status") == "ok" or active_worklog_items):
-        findings.append("branch atual ja foi absorvida em origin/main, mas ainda aparece como trilha ativa")
+    if lifecycle.get("prune_candidate") and (
+        active_execution.get("status") == "ok" or active_worklog_items
+    ):
+        findings.append(
+            "branch atual ja foi absorvida em origin/main, mas ainda aparece como trilha ativa"
+        )
 
     return {
         "status": "clean" if not findings else "drift",
@@ -592,9 +654,7 @@ def git_inventory_payload(repo_root: Path) -> dict[str, Any]:
             )
             pr_probe_status = "ok" if pr_probe.returncode == 0 else "error"
             pr_probe_note = (
-                ""
-                if pr_probe.returncode == 0
-                else (pr_probe.stderr or pr_probe.stdout).strip()
+                "" if pr_probe.returncode == 0 else (pr_probe.stderr or pr_probe.stdout).strip()
             )
             try:
                 parsed = json.loads(pr_probe.stdout or "[]")
@@ -694,12 +754,8 @@ def github_auth_summary(repo_root: Path) -> dict[str, Any]:
             "active_sources_without_env_tokens": payload["auth_status"]["without_env_tokens"][
                 "active_sources"
             ],
-            "ssh_signing_keys_probe": payload["endpoint_probes"]["user/ssh_signing_keys"][
-                "status"
-            ],
-            "user_installations_probe": payload["endpoint_probes"]["user/installations"][
-                "status"
-            ],
+            "ssh_signing_keys_probe": payload["endpoint_probes"]["user/ssh_signing_keys"]["status"],
+            "user_installations_probe": payload["endpoint_probes"]["user/installations"]["status"],
             "graphql_probe": {
                 "status": graphql_status,
                 "note": graphql_output,
@@ -787,6 +843,7 @@ def startup_governor_status_payload(
     active_execution: dict[str, Any],
     agent_identity: dict[str, Any],
     agent_enablement: dict[str, Any],
+    rules_projections: dict[str, Any],
     chat_communication: dict[str, Any],
     git_governance: dict[str, Any],
     pea_status: dict[str, Any],
@@ -799,9 +856,7 @@ def startup_governor_status_payload(
 ) -> dict[str, Any]:
     normalized_pending_action = _normalize_pending_action(pending_action)
     display_names = load_agent_display_names(repo_root)
-    governor_display_name = display_names.get(
-        STARTUP_GOVERNOR_AGENT, STARTUP_GOVERNOR_DISPLAY_NAME
-    )
+    governor_display_name = display_names.get(STARTUP_GOVERNOR_AGENT, STARTUP_GOVERNOR_DISPLAY_NAME)
     blockers: list[str] = []
     warnings: list[str] = []
     progression = ["not_started"]
@@ -812,6 +867,12 @@ def startup_governor_status_payload(
         progression.append(state)
     else:
         blockers.append("manifest canonico nao foi relido integralmente com prova valida")
+
+    if rules_projections.get("status") == "ok" and not rules_projections.get("missing_required"):
+        state = "rules_projections_loaded"
+        progression.append(state)
+    else:
+        blockers.append("projecoes .rules obrigatorias do startup nao ficaram carregadas")
 
     if pending_contracts:
         warnings.append(
@@ -896,7 +957,9 @@ def startup_governor_status_payload(
         )
 
     current_branch = str(git_inventory.get("current_branch", "")).strip()
-    worklog_ids = [str(item.get("ID", "")).strip() for item in active_worklog_items if item.get("ID")]
+    worklog_ids = [
+        str(item.get("ID", "")).strip() for item in active_worklog_items if item.get("ID")
+    ]
     snapshot = {
         "manifest_sha256": str(manifest_evidence.get("sha256", "")).strip(),
         "current_branch": current_branch,
@@ -1022,8 +1085,9 @@ def startup_session_payload(
         active_execution["agent_display_name"] = agent_identity["active_display_name"]
     prioritized_work_item = prioritized_work_item_payload(active_execution, active_worklog_items)
     startup_drift = startup_drift_payload(active_execution, active_worklog_items, git_inventory)
-    chat_communication = chat_communication_payload()
-    git_governance = git_governance_payload()
+    rules_projections = rules_projections_payload(repo_root)
+    chat_communication = chat_communication_payload(repo_root, rules_projections)
+    git_governance = git_governance_payload(repo_root, rules_projections)
     pea_status = pea_status_payload(repo_root, resolved_paths)
     delegation_context = delegation_context_payload(prioritized_work_item, git_inventory)
     fallback_status = (
@@ -1070,6 +1134,7 @@ def startup_session_payload(
         active_execution=active_execution,
         agent_identity=agent_identity,
         agent_enablement=enablement,
+        rules_projections=rules_projections,
         chat_communication=chat_communication,
         git_governance=git_governance,
         pea_status=pea_status,
@@ -1098,6 +1163,7 @@ def startup_session_payload(
         "active_execution": active_execution,
         "agent_identity": agent_identity,
         "agent_enablement": enablement,
+        "rules_projections": rules_projections,
         "chat_communication": chat_communication,
         "git_governance": git_governance,
         "pea_status": pea_status,
@@ -1154,6 +1220,7 @@ def render_startup_session_markdown(payload: dict[str, Any]) -> str:
     chat_communication = payload["chat_communication"]
     agent_identity = payload["agent_identity"]
     agent_enablement = payload["agent_enablement"]
+    rules_projections = payload["rules_projections"]
     lines.extend(["", "## Comunicacao no chat e identidade", ""])
     lines.append(
         f"- agente ativo visivel: `{agent_identity.get('active_display_name', 'desconhecido')}`"
@@ -1163,14 +1230,38 @@ def render_startup_session_markdown(payload: dict[str, Any]) -> str:
     )
     for rule in chat_communication.get("rules", []):
         lines.append(f"- regra de comunicacao: {rule}")
+    if chat_communication.get("human_source"):
+        lines.append(f"- fonte humana: `{chat_communication.get('human_source', '')}`")
+    if chat_communication.get("machine_projection"):
+        lines.append(f"- projecao executavel: `{chat_communication.get('machine_projection', '')}`")
+
+    lines.extend(["", "## Projecoes .rules criticas", ""])
+    lines.append(f"- catalogo declarativo: `{rules_projections.get('catalog_path', '')}`")
+    lines.append(
+        "- projecoes obrigatorias no startup: "
+        f"`{', '.join(rules_projections.get('required_for_startup', [])) or 'nenhuma'}`"
+    )
+    lines.append(
+        "- projecoes carregadas: "
+        f"`{', '.join(rules_projections.get('loaded_for_startup', [])) or 'nenhuma'}`"
+    )
+    if rules_projections.get("missing_required"):
+        lines.append(
+            f"- projecoes faltantes: `{', '.join(rules_projections.get('missing_required', []))}`"
+        )
+    for projection_id, entry in sorted((rules_projections.get("projections") or {}).items()):
+        if not isinstance(entry, dict):
+            continue
+        lines.append(
+            f"- {projection_id}: `{entry.get('machine_projection', '')}` <- "
+            f"`{entry.get('human_source', '')}` ({entry.get('status', 'unknown')})"
+        )
 
     lines.extend(["", "## Enablement efetivo de agentes", ""])
     lines.append(f"- status: `{agent_enablement.get('status', 'unknown')}`")
     lines.append(f"- base declarativa: `{agent_enablement.get('agents_path', '')}`")
     lines.append(f"- overlay declarativo: `{agent_enablement.get('overlay_path', '')}`")
-    lines.append(
-        f"- overlay local ativo: `{agent_enablement.get('overlay_local_active', False)}`"
-    )
+    lines.append(f"- overlay local ativo: `{agent_enablement.get('overlay_local_active', False)}`")
     lines.append(
         f"- total de roles declaradas no overlay: `{len(agent_enablement.get('declared_roles', []))}`"
     )
@@ -1203,6 +1294,10 @@ def render_startup_session_markdown(payload: dict[str, Any]) -> str:
         lines.append(f"- fonte carregada: `{source}`")
     for rule in git_governance.get("rules", []):
         lines.append(f"- contrato Git lembrado: {rule}")
+    if git_governance.get("human_source"):
+        lines.append(f"- fonte humana: `{git_governance.get('human_source', '')}`")
+    if git_governance.get("machine_projection"):
+        lines.append(f"- projecao executavel: `{git_governance.get('machine_projection', '')}`")
     lines.append(f"- enforcement: {git_governance.get('enforcement_note', '')}")
 
     pea_status = payload["pea_status"]
@@ -1223,7 +1318,9 @@ def render_startup_session_markdown(payload: dict[str, Any]) -> str:
     git_inventory = payload["git_inventory"]
     lines.extend(["", "## Inventario Git e worktree", ""])
     if git_inventory.get("status") != "ok":
-        lines.append(f"- inventario indisponivel: `{git_inventory.get('error', 'erro nao detalhado')}`")
+        lines.append(
+            f"- inventario indisponivel: `{git_inventory.get('error', 'erro nao detalhado')}`"
+        )
     else:
         lines.append(f"- branch atual: `{git_inventory['current_branch']}`")
         lines.append(f"- branches locais abertas: `{git_inventory['local_branch_count']}`")
@@ -1239,7 +1336,9 @@ def render_startup_session_markdown(payload: dict[str, Any]) -> str:
         lines.append(
             f"- branch atual absorvida em origin/main: `{lifecycle.get('absorbed_in_origin_main', False)}`"
         )
-        lines.append(f"- branch atual candidata a poda: `{lifecycle.get('prune_candidate', False)}`")
+        lines.append(
+            f"- branch atual candidata a poda: `{lifecycle.get('prune_candidate', False)}`"
+        )
         lines.append(f"- worktrees abertas: `{len(git_inventory['worktrees'])}`")
         lines.append(f"- dirty entries: `{len(git_inventory['dirty_entries'])}`")
         for branch in git_inventory["merged_local_branches"]:
@@ -1391,9 +1490,7 @@ def render_startup_session_markdown(payload: dict[str, Any]) -> str:
         lines.append("- bloqueio: nenhum")
     for warning in governor.get("warnings", []):
         lines.append(f"- aviso: {warning}")
-    lines.append(
-        f"- context_fingerprint: `{governor.get('context_fingerprint', '')}`"
-    )
+    lines.append(f"- context_fingerprint: `{governor.get('context_fingerprint', '')}`")
 
     lines.extend(
         [

@@ -20,8 +20,13 @@ from scripts.ai_contract_paths import (
     legacy_codex_root,
     orchestration_root,
     registry_root,
-    rules_root,
     skills_root,
+)
+from scripts.ai_rules_lib import (
+    AiRulesError,
+    load_rules_projection_catalog,
+    parse_rules_file,
+    rules_contract_paths,
 )
 
 try:
@@ -111,9 +116,13 @@ REQUIRED_FILES = [
     ".agents/rules/auth-secrets-and-critical-integrations-rules.md",
     ".agents/rules/sync-foundation-rules.md",
     ".agents/rules/source-audit-and-cross-repo-rules.md",
+    ".agents/rules/projections.yaml",
     ".agents/rules/default.rules",
     ".agents/rules/ci.rules",
     ".agents/rules/security.rules",
+    ".agents/rules/startup.rules",
+    ".agents/rules/chat.rules",
+    ".agents/rules/git.rules",
     ".agents/evals/scenarios/smoke.md",
     ".agents/evals/scenarios/regression.md",
     ".agents/evals/scenarios/security.md",
@@ -132,6 +141,7 @@ REQUIRED_FILES = [
     "scripts/ai-fallback.py",
     "scripts/ai-session-startup.py",
     "scripts/ai_control_plane_lib.py",
+    "scripts/ai_rules_lib.py",
     "scripts/ai_sync_foundation_lib.py",
     "scripts/ai_fallback_governance_lib.py",
     "scripts/ai_session_startup_lib.py",
@@ -630,6 +640,27 @@ AGENT_IDENTITY_REQUIRED_SNIPPETS = {
     ],
 }
 
+RULES_LAYER_REQUIRED_SNIPPETS = {
+    ".agents/config.toml": [
+        'startup = ".agents/rules/startup.rules"',
+        'chat = ".agents/rules/chat.rules"',
+        'git = ".agents/rules/git.rules"',
+        'projections = ".agents/rules/projections.yaml"',
+    ],
+    ".agents/rules/README.md": [
+        "os arquivos `*.md` continuam sendo a fonte humana primaria",
+        "os arquivos `*.rules` sao projecoes executaveis curtas",
+        "[`projections.yaml`](projections.yaml)",
+    ],
+    ".agents/rules/CATALOG.md": [
+        "## Projecoes executaveis",
+        "[`startup.rules`](startup.rules)",
+        "[`chat.rules`](chat.rules)",
+        "[`git.rules`](git.rules)",
+        "[`security.rules`](security.rules)",
+    ],
+}
+
 BOARD_OPERATION_REQUIRED_SNIPPETS = {
     "config/ai/contracts.yaml": [
         "board-must-be-read-right-to-left",
@@ -953,9 +984,9 @@ def validate_skill_dir(skill_dir: Path, failures: list[str]) -> None:
         expected_skill_ref = f"${skill_dir.name}"
         default_prompt_re = rf'(?m)^\s*default_prompt:\s*".*{re.escape(expected_skill_ref)}.*"\s*$'
         if not re.search(default_prompt_re, agent_content):
-                failures.append(
-                    f"default_prompt precisa mencionar {expected_skill_ref} em {skill_dir.name}/agents/openai.yaml"
-                )
+            failures.append(
+                f"default_prompt precisa mencionar {expected_skill_ref} em {skill_dir.name}/agents/openai.yaml"
+            )
         short_match = re.search(r'(?m)^\s*short_description:\s*"(?P<value>.+)"\s*$', agent_content)
         if not short_match:
             failures.append(f"short_description ausente em {skill_dir.name}/agents/openai.yaml")
@@ -978,6 +1009,103 @@ def validate_thematic_rules(repo_root: Path, failures: list[str]) -> None:
         for heading in REQUIRED_THEME_RULE_HEADINGS:
             if heading not in content:
                 failures.append(f"Heading obrigatorio ausente em {relative}: {heading}")
+
+
+def validate_rules_projections(repo_root: Path, failures: list[str]) -> None:
+    try:
+        rules_contract = rules_contract_paths(repo_root)
+    except AiRulesError as exc:
+        failures.append(str(exc))
+        return
+
+    expected_rules = {
+        "startup": ".agents/rules/startup.rules",
+        "chat": ".agents/rules/chat.rules",
+        "git": ".agents/rules/git.rules",
+        "security": ".agents/rules/security.rules",
+        "projections": ".agents/rules/projections.yaml",
+    }
+    for key, expected in expected_rules.items():
+        actual = rules_contract.get(key, "")
+        if actual != expected:
+            failures.append(
+                f".agents/config.toml [rules].{key} deve apontar para {expected!r}, nao {actual!r}"
+            )
+
+    try:
+        catalog = load_rules_projection_catalog(repo_root)
+    except AiRulesError as exc:
+        failures.append(str(exc))
+        return
+
+    projections = catalog.get("projections", {})
+    if not isinstance(projections, dict):
+        failures.append("Catalogo de projecoes .rules invalido: projections precisa ser mapa.")
+        return
+
+    required_projection_ids = {"startup", "chat", "git", "security"}
+    missing_projection_ids = sorted(required_projection_ids - set(projections))
+    if missing_projection_ids:
+        failures.append(
+            "Catalogo de projecoes .rules sem ids obrigatorios: "
+            + ", ".join(missing_projection_ids)
+        )
+
+    for projection_id, entry in sorted(projections.items()):
+        if not isinstance(entry, dict):
+            failures.append(f"Projecao .rules invalida em {projection_id}: payload nao e mapa.")
+            continue
+        human_source = str(entry.get("human_source", "")).strip()
+        machine_projection = str(entry.get("machine_projection", "")).strip()
+        parity_terms = [
+            str(term).strip() for term in entry.get("parity_terms", []) if str(term).strip()
+        ]
+        required_for_startup = bool(entry.get("required_for_startup", False))
+        if projection_id in required_projection_ids and not required_for_startup:
+            failures.append(
+                f"Projecao {projection_id} precisa ser marcada como required_for_startup."
+            )
+        if not human_source.endswith(".md"):
+            failures.append(
+                f"Projecao {projection_id} precisa apontar human_source markdown valido."
+            )
+        if not machine_projection.endswith(".rules"):
+            failures.append(
+                f"Projecao {projection_id} precisa apontar machine_projection .rules valido."
+            )
+        if not parity_terms:
+            failures.append(f"Projecao {projection_id} precisa declarar parity_terms.")
+            continue
+
+        human_path = repo_root / human_source
+        machine_path = repo_root / machine_projection
+        if not human_path.is_file():
+            failures.append(f"human_source ausente em projecao {projection_id}: {human_source}")
+            continue
+        if not machine_path.is_file():
+            failures.append(
+                f"machine_projection ausente em projecao {projection_id}: {machine_projection}"
+            )
+            continue
+
+        try:
+            parsed_rules = parse_rules_file(machine_path)
+        except AiRulesError as exc:
+            failures.append(str(exc))
+            continue
+        if not parsed_rules:
+            failures.append(f"machine_projection sem regras parseaveis em {machine_projection}")
+            continue
+
+        human_content = human_path.read_text(encoding="utf-8")
+        machine_content = machine_path.read_text(encoding="utf-8")
+        for term in parity_terms:
+            if term not in human_content:
+                failures.append(f"parity_term ausente no human_source de {projection_id}: {term}")
+            if term not in machine_content:
+                failures.append(
+                    f"parity_term ausente na machine_projection de {projection_id}: {term}"
+                )
 
 
 def validate_registry_agent(agent_file: Path, skill_names: set[str], failures: list[str]) -> None:
@@ -1424,6 +1552,11 @@ def main(argv: list[str]) -> int:
         if path.is_file():
             require_snippets(path.read_text(encoding="utf-8"), snippets, relative, failures)
 
+    for relative, snippets in RULES_LAYER_REQUIRED_SNIPPETS.items():
+        path = repo_root / relative
+        if path.is_file():
+            require_snippets(path.read_text(encoding="utf-8"), snippets, relative, failures)
+
     for relative, snippets in BOARD_OPERATION_REQUIRED_SNIPPETS.items():
         path = repo_root / relative
         if path.is_file():
@@ -1475,6 +1608,7 @@ def main(argv: list[str]) -> int:
 
     validate_ai_config(repo_root, failures)
     validate_thematic_rules(repo_root, failures)
+    validate_rules_projections(repo_root, failures)
     validate_prompt_packs(repo_root, failures)
     validate_legacy_codex_stub(repo_root, failures)
 
@@ -1493,15 +1627,25 @@ def main(argv: list[str]) -> int:
         if dataset_path.is_file():
             validate_jsonl(dataset_path, failures)
 
-    for rule_path in (
-        rules_root(repo_root) / "default.rules",
-        rules_root(repo_root) / "ci.rules",
-        rules_root(repo_root) / "security.rules",
+    try:
+        configured_rules = rules_contract_paths(repo_root)
+    except AiRulesError as exc:
+        failures.append(str(exc))
+        configured_rules = {}
+
+    for relative in sorted(
+        {
+            value
+            for value in configured_rules.values()
+            if isinstance(value, str) and value.endswith(".rules")
+        }
     ):
-        if rule_path.is_file():
-            content = rule_path.read_text(encoding="utf-8")
-            if "rule " not in content or "must:" not in content:
-                failures.append(f"Formato minimo ausente em {rule_path.as_posix()}")
+        rule_path = repo_root / relative
+        if not rule_path.is_file():
+            continue
+        content = rule_path.read_text(encoding="utf-8")
+        if "rule " not in content or "must:" not in content:
+            failures.append(f"Formato minimo ausente em {rule_path.as_posix()}")
 
     cards_dir = cards_root(repo_root)
     if not cards_dir.is_dir():

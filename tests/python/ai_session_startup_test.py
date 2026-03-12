@@ -16,6 +16,7 @@ from scripts.ai_session_startup_lib import (
     manifest_evidence_payload,
     render_startup_session_markdown,
     resolve_startup_manifest_paths,
+    rules_projections_payload,
     startup_drift_payload,
     startup_governor_status_payload,
     startup_session_payload,
@@ -174,6 +175,45 @@ class AiSessionStartupTests(unittest.TestCase):
             "required_roles_disabled": [],
             "enabled_registry_agents": ["repo-governance-authority"],
             "disabled_registry_agents": ["pascoalete"],
+        }
+
+    @staticmethod
+    def _fake_rules_projections() -> dict[str, object]:
+        return {
+            "status": "ok",
+            "catalog_path": ".agents/rules/projections.yaml",
+            "declared_projection_ids": ["chat", "git", "security", "startup"],
+            "required_for_startup": ["chat", "git", "security", "startup"],
+            "loaded_for_startup": ["chat", "git", "security", "startup"],
+            "missing_required": [],
+            "projection_count": 4,
+            "loaded_required_count": 4,
+            "projections": {
+                "chat": {
+                    "status": "ok",
+                    "human_source": ".agents/rules/chat-and-identity-rules.md",
+                    "machine_projection": ".agents/rules/chat.rules",
+                    "must": ["usar display_name oficial", "carregar o contrato de chat"],
+                },
+                "git": {
+                    "status": "ok",
+                    "human_source": ".agents/rules/git-rules.md",
+                    "machine_projection": ".agents/rules/git.rules",
+                    "must": ["manter commit atomico", "podar branch e worktree residuais"],
+                },
+                "startup": {
+                    "status": "ok",
+                    "human_source": ".agents/rules/startup-and-resume-rules.md",
+                    "machine_projection": ".agents/rules/startup.rules",
+                    "must": ["reler integralmente o manifest resolvido"],
+                },
+                "security": {
+                    "status": "ok",
+                    "human_source": ".agents/rules/auth-secrets-and-critical-integrations-rules.md",
+                    "machine_projection": ".agents/rules/security.rules",
+                    "must": ["proteger gh, op, sops, age, ssh-agent, signing e checkEnv"],
+                },
+            },
         }
 
     def test_resolve_startup_manifest_paths_collects_explicit_and_recursive_targets(self) -> None:
@@ -342,7 +382,7 @@ class AiSessionStartupTests(unittest.TestCase):
                 encoding="utf-8",
             )
             (config_dir / "platforms.yaml").write_text(
-                "version: 1\nplatforms:\n  atlassian:\n    enabled: false\n    provider: none\n    auth:\n      mode: disabled\n      site_url: \"\"\n      email: \"\"\n      token: \"\"\n      service_account: \"\"\n      cloud_id: \"\"\n    jira:\n      enabled: false\n      project_key: \"\"\n    confluence:\n      enabled: false\n      space_key: \"\"\n",
+                'version: 1\nplatforms:\n  atlassian:\n    enabled: false\n    provider: none\n    auth:\n      mode: disabled\n      site_url: ""\n      email: ""\n      token: ""\n      service_account: ""\n      cloud_id: ""\n    jira:\n      enabled: false\n      project_key: ""\n    confluence:\n      enabled: false\n      space_key: ""\n',
                 encoding="utf-8",
             )
 
@@ -355,12 +395,150 @@ class AiSessionStartupTests(unittest.TestCase):
         self.assertEqual(payload["required_roles_disabled"], ["ai-linguistic-reviewer"])
         self.assertEqual(payload["disabled_registry_agents"], ["pascoalete"])
 
+    def test_rules_projections_payload_reads_catalog_and_required_layers(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            repo_root = Path(tmp_dir)
+            rules_dir = repo_root / ".agents" / "rules"
+            rules_dir.mkdir(parents=True)
+            (repo_root / ".agents" / "config.toml").write_text(
+                textwrap.dedent(
+                    """\
+                    version = 1
+
+                    [skills]
+                    required = []
+                    mandatory_parallel = []
+
+                    [agents]
+                    required = []
+                    mandatory_global = []
+                    mandatory_platform = []
+
+                    [orchestration]
+                    capability_matrix = ".agents/orchestration/capability-matrix.yaml"
+                    routing_policy = ".agents/orchestration/routing-policy.yaml"
+                    task_card_schema = ".agents/orchestration/task-card.schema.json"
+                    delegation_plan_schema = ".agents/orchestration/delegation-plan.schema.json"
+
+                    [rules]
+                    default = ".agents/rules/default.rules"
+                    ci = ".agents/rules/ci.rules"
+                    security = ".agents/rules/security.rules"
+                    startup = ".agents/rules/startup.rules"
+                    chat = ".agents/rules/chat.rules"
+                    git = ".agents/rules/git.rules"
+                    projections = ".agents/rules/projections.yaml"
+
+                    [evals]
+                    smoke = ".agents/evals/scenarios/smoke.md"
+                    regression = ".agents/evals/scenarios/regression.md"
+                    security = ".agents/evals/scenarios/security.md"
+                    routing_dataset = ".agents/evals/datasets/routing.jsonl"
+                    governance_dataset = ".agents/evals/datasets/governance.jsonl"
+
+                    [ceremonies]
+                    root = ".agents/cerimonias"
+                    schema = ".agents/cerimonias/ceremony.schema.json"
+                    default_log_root = ".agents/cerimonias/logs"
+
+                    [identity]
+                    registry_root = ".agents/registry"
+                    display_name_field = "display_name"
+                    card_title_mirror_required = true
+                    fallback_display = "technical-id"
+                    """
+                ),
+                encoding="utf-8",
+            )
+            (rules_dir / "chat-and-identity-rules.md").write_text(
+                "display_name\nenablement\nai-startup-governor\n",
+                encoding="utf-8",
+            )
+            (rules_dir / "git-rules.md").write_text("branch\nissue\nworktree\n", encoding="utf-8")
+            (rules_dir / "startup-and-resume-rules.md").write_text(
+                "manifest\nready_for_work\nai-startup-governor\n",
+                encoding="utf-8",
+            )
+            (rules_dir / "auth-secrets-and-critical-integrations-rules.md").write_text(
+                "gh\nsigning\nsecrets\n",
+                encoding="utf-8",
+            )
+            (rules_dir / "chat.rules").write_text(
+                "rule AI-CHAT-001\nwhen: startup-chat\nmust:\n- usar display_name oficial\n",
+                encoding="utf-8",
+            )
+            (rules_dir / "git.rules").write_text(
+                "rule AI-GIT-001\nwhen: startup-git\nmust:\n- manter commit atomico\n",
+                encoding="utf-8",
+            )
+            (rules_dir / "startup.rules").write_text(
+                "rule AI-STARTUP-001\nwhen: startup\nmust:\n- reler integralmente o manifest resolvido\n",
+                encoding="utf-8",
+            )
+            (rules_dir / "security.rules").write_text(
+                "rule AI-SEC-001\nwhen: startup-critical-integrations\nmust:\n- proteger gh, signing e secrets\n",
+                encoding="utf-8",
+            )
+            (rules_dir / "projections.yaml").write_text(
+                textwrap.dedent(
+                    """\
+                    version: 1
+                    projections:
+                      startup:
+                        human_source: .agents/rules/startup-and-resume-rules.md
+                        machine_projection: .agents/rules/startup.rules
+                        required_for_startup: true
+                        parity_terms:
+                          - manifest
+                          - ready_for_work
+                          - ai-startup-governor
+                      chat:
+                        human_source: .agents/rules/chat-and-identity-rules.md
+                        machine_projection: .agents/rules/chat.rules
+                        required_for_startup: true
+                        parity_terms:
+                          - display_name
+                          - ai-startup-governor
+                          - enablement
+                      git:
+                        human_source: .agents/rules/git-rules.md
+                        machine_projection: .agents/rules/git.rules
+                        required_for_startup: true
+                        parity_terms:
+                          - branch
+                          - issue
+                          - worktree
+                      security:
+                        human_source: .agents/rules/auth-secrets-and-critical-integrations-rules.md
+                        machine_projection: .agents/rules/security.rules
+                        required_for_startup: true
+                        parity_terms:
+                          - gh
+                          - signing
+                          - secrets
+                    """
+                ),
+                encoding="utf-8",
+            )
+
+            payload = rules_projections_payload(repo_root)
+
+        self.assertEqual(payload["status"], "ok")
+        self.assertEqual(payload["catalog_path"], ".agents/rules/projections.yaml")
+        self.assertEqual(payload["loaded_required_count"], 4)
+        self.assertEqual(payload["missing_required"], [])
+        self.assertEqual(
+            payload["projections"]["chat"]["machine_projection"],
+            ".agents/rules/chat.rules",
+        )
+
     def test_git_governance_payload_exposes_sources_without_claiming_enforcement(self) -> None:
-        payload = git_governance_payload()
+        payload = git_governance_payload(Path.cwd(), self._fake_rules_projections())
 
         self.assertEqual(payload["status"], "ok")
         self.assertIn("docs/git-conventions.md", payload["sources"])
-        self.assertTrue(any("commits devem ser atomicos" in item for item in payload["rules"]))
+        self.assertTrue(any("commit atomico" in item for item in payload["rules"]))
+        self.assertEqual(payload["machine_projection"], ".agents/rules/git.rules")
         self.assertIn("enforcement real", payload["enforcement_note"])
 
     def test_startup_drift_payload_detects_branch_mismatch(self) -> None:
@@ -416,6 +594,7 @@ class AiSessionStartupTests(unittest.TestCase):
                     "fallback_display": "technical-id",
                 },
                 agent_enablement=self._fake_agent_enablement(),
+                rules_projections=self._fake_rules_projections(),
                 chat_communication={"status": "ok", "rules": ["usar portugues"]},
                 git_governance={"status": "ok", "sources": [], "rules": [], "enforcement_note": ""},
                 pea_status=self._fake_pea_status(),
@@ -423,13 +602,20 @@ class AiSessionStartupTests(unittest.TestCase):
                 fallback_status=self._fake_fallback_status(),
                 github_auth=self._fake_github_auth(),
                 atlassian_connectivity=self._fake_atlassian(),
-                prioritized_work_item={"source": "active-execution", "identifier": "DOT-177", "summary": "Startup"},
+                prioritized_work_item={
+                    "source": "active-execution",
+                    "identifier": "DOT-177",
+                    "summary": "Startup",
+                },
             )
 
         self.assertEqual(status["state"], "wip_decision_pending")
         self.assertFalse(status["clearance_granted"])
         self.assertTrue(
-            any("concluir_primeiro" in item or "roadmap_pendente" in item for item in status["blocking_findings"])
+            any(
+                "concluir_primeiro" in item or "roadmap_pendente" in item
+                for item in status["blocking_findings"]
+            )
         )
 
     def test_write_startup_session_report_persists_markdown_report(self) -> None:
@@ -510,6 +696,10 @@ class AiSessionStartupTests(unittest.TestCase):
                 patch(
                     "scripts.ai_session_startup_lib.agent_enablement_payload",
                     return_value=self._fake_agent_enablement(),
+                ),
+                patch(
+                    "scripts.ai_session_startup_lib.rules_projections_payload",
+                    return_value=self._fake_rules_projections(),
                 ),
                 patch(
                     "scripts.ai_session_startup_lib.atlassian_connectivity_summary",
@@ -594,6 +784,7 @@ class AiSessionStartupTests(unittest.TestCase):
                 "fallback_display": "technical-id",
             },
             "agent_enablement": self._fake_agent_enablement(),
+            "rules_projections": self._fake_rules_projections(),
             "chat_communication": {
                 "status": "ok",
                 "rules": ["usar portugues", "preferir display_name oficial"],
@@ -632,7 +823,12 @@ class AiSessionStartupTests(unittest.TestCase):
                 "clearance": "granted",
                 "clearance_granted": True,
                 "pending_action": "concluir_primeiro",
-                "progression": ["not_started", "reading_manifest", "ready_for_work"],
+                "progression": [
+                    "not_started",
+                    "reading_manifest",
+                    "rules_projections_loaded",
+                    "ready_for_work",
+                ],
                 "blocking_findings": [],
                 "warnings": ["existem contratos pendentes"],
                 "blocked_actions": [],
@@ -656,10 +852,12 @@ class AiSessionStartupTests(unittest.TestCase):
         markdown = render_startup_session_markdown(payload)
 
         self.assertIn("## Comunicacao no chat e identidade", markdown)
+        self.assertIn("## Projecoes .rules criticas", markdown)
         self.assertIn("## Enablement efetivo de agentes", markdown)
         self.assertIn("## Governanca Git carregada no startup", markdown)
         self.assertIn("## PEA carregado no startup", markdown)
         self.assertIn("config/ai/agent-enablement.yaml", markdown)
+        self.assertIn(".agents/rules/projections.yaml", markdown)
         self.assertIn("pascoalete", markdown)
         self.assertIn("docs/git-conventions.md", markdown)
         self.assertIn("startup-alignment", markdown)
@@ -755,6 +953,10 @@ class AiSessionStartupTests(unittest.TestCase):
                     return_value=self._fake_agent_enablement(),
                 ),
                 patch(
+                    "scripts.ai_session_startup_lib.rules_projections_payload",
+                    return_value=self._fake_rules_projections(),
+                ),
+                patch(
                     "scripts.ai_session_startup_lib.atlassian_connectivity_summary",
                     return_value=self._fake_atlassian(),
                 ),
@@ -767,7 +969,12 @@ class AiSessionStartupTests(unittest.TestCase):
 
         self.assertEqual(payload["pending_chat_contract_count"], 2)
         self.assertEqual(payload["agent_identity"]["active_display_name"], "Engenheiro Agentes IA")
-        self.assertEqual(payload["agent_enablement"]["overlay_path"], "config/ai/agent-enablement.yaml")
+        self.assertEqual(
+            payload["agent_enablement"]["overlay_path"], "config/ai/agent-enablement.yaml"
+        )
+        self.assertEqual(
+            payload["rules_projections"]["catalog_path"], ".agents/rules/projections.yaml"
+        )
         self.assertEqual(payload["pea_status"]["status"], "ok")
         self.assertEqual(payload["prioritized_work_item"]["identifier"], "DOT-177")
         self.assertEqual(payload["startup_drift"]["status"], "clean")

@@ -1,0 +1,13 @@
+rule AI-STARTUP-001
+when: startup
+must:
+- reler integralmente o manifest resolvido antes de qualquer operacao relevante
+- carregar README.md e CATALOG.md de .agents/rules junto das projecoes obrigatorias
+- bloquear saida operacional ate ready_for_work com ownership visivel do ai-startup-governor
+
+rule AI-STARTUP-002
+when: startup-clearance
+must:
+- exigir startup-ready.json valido antes de handoff operacional
+- invalidar a clearance quando houver drift de branch, worklog, active execution ou dirty tree
+- tratar startup incompleto como trabalho rejeitavel

@@ -1,6 +1,6 @@
 # AI WIP Tracker
 
-Atualizado em: 2026-03-12 16:40 UTC
+Atualizado em: 2026-03-12 17:09 UTC
 
 Fallback local de continuidade. O Jira e a fonte primaria do fluxo vivo.
 
@@ -27,7 +27,7 @@ Fallback local de continuidade. O Jira e a fonte primaria do fluxo vivo.
 <!-- ai-worklog:doing:start -->
 | ID | Tarefa | Branch | Responsavel | Inicio UTC | Ultima atualizacao UTC | Proximo passo | Bloqueios |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| (sem itens) | - | - | - | - | - | - | - |
+| WIP-DOT-207 | Adicionar projecoes .rules para startup, chat, git e security sob DOT-207 | feat/DOT-207-rules-projections | ai-developer-config-policy | 2026-03-12 17:09 UTC | 2026-03-12 17:09 UTC | Mapear o consumo atual de .rules e implementar a primeira onda hibrida sem substituir os .md. | - |
 <!-- ai-worklog:doing:end -->
 
 ## Done
@@ -96,5 +96,5 @@ Fallback local de continuidade. O Jira e a fonte primaria do fluxo vivo.
 <!-- ai-worklog:log:start -->
 | Data/Hora UTC | ID | Status | Resumo | Proximo passo | Bloqueios | Contexto | Notas |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| (sem itens) | - | - | - | - | - | - | - |
+| 2026-03-12 17:09 UTC | WIP-DOT-207 | doing | Adicionar projecoes .rules para startup, chat, git e security sob DOT-207 | Mapear o consumo atual de .rules e implementar a primeira onda hibrida sem substituir os .md. | - | governanca | inicio da tarefa |
 <!-- ai-worklog:log:end -->

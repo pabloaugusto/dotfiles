@@ -364,6 +364,9 @@ Para evitar ambiguidades e drift:
 - [`.agents/rules/README.md`](.agents/rules/README.md) e
   [`.agents/rules/CATALOG.md`](.agents/rules/CATALOG.md) organizam a camada
   normativa por tema
+- os `.md` em [`.agents/rules/`](.agents/rules/) sao a fonte humana primaria e
+  os `*.rules` entram apenas como projecoes executaveis curtas declaradas em
+  [`.agents/rules/projections.yaml`](.agents/rules/projections.yaml)
 - [`.codex/`](.codex/) no repo guarda apenas um [`README.md`](README.md) de compatibilidade apontando para [`.agents/`](.agents/)
 - adaptadores especificos de assistente devem ser gerados a partir de [`.agents/`](.agents/), nunca mantidos manualmente em paralelo
 - runtime local de IA continua fora do Git

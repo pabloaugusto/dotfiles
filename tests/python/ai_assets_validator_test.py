@@ -47,9 +47,13 @@ class ValidateAiAssetsTests(unittest.TestCase):
         self.assertIn(".agents/registry/ai-startup-governor.toml", module.REQUIRED_FILES)
         self.assertIn(".agents/rules/README.md", module.REQUIRED_FILES)
         self.assertIn(".agents/rules/CATALOG.md", module.REQUIRED_FILES)
+        self.assertIn(".agents/rules/projections.yaml", module.REQUIRED_FILES)
         self.assertIn(".agents/rules/core-rules.md", module.REQUIRED_FILES)
         self.assertIn(".agents/rules/chat-and-identity-rules.md", module.REQUIRED_FILES)
         self.assertIn(".agents/rules/startup-and-resume-rules.md", module.REQUIRED_FILES)
+        self.assertIn(".agents/rules/startup.rules", module.REQUIRED_FILES)
+        self.assertIn(".agents/rules/chat.rules", module.REQUIRED_FILES)
+        self.assertIn(".agents/rules/git.rules", module.REQUIRED_FILES)
         self.assertIn("docs/AI-AGENTS-CATALOG.md", module.REQUIRED_FILES)
         self.assertIn("docs/AI-CHAT-CONTRACTS-REGISTER.md", module.REQUIRED_FILES)
         self.assertIn("docs/AI-FALLBACK-LEDGER.md", module.REQUIRED_FILES)
@@ -78,6 +82,7 @@ class ValidateAiAssetsTests(unittest.TestCase):
         self.assertIn("scripts/ai-fallback.py", module.REQUIRED_FILES)
         self.assertIn("scripts/ai-session-startup.py", module.REQUIRED_FILES)
         self.assertIn("scripts/ai_control_plane_lib.py", module.REQUIRED_FILES)
+        self.assertIn("scripts/ai_rules_lib.py", module.REQUIRED_FILES)
         self.assertIn("scripts/ai_fallback_governance_lib.py", module.REQUIRED_FILES)
         self.assertIn("scripts/ai_session_startup_lib.py", module.REQUIRED_FILES)
         self.assertIn("scripts/atlassian_platform_lib.py", module.REQUIRED_FILES)
@@ -88,7 +93,9 @@ class ValidateAiAssetsTests(unittest.TestCase):
         self.assertIn("## Validacao recomendada", module.REQUIRED_AGENT_HEADINGS)
         self.assertIn("## Regras", module.REQUIRED_SKILL_HEADINGS)
         self.assertIn("## Entregas esperadas", module.REQUIRED_SKILL_HEADINGS)
-        self.assertIn("## Startup: o que precisa ser carregado", module.REQUIRED_THEME_RULE_HEADINGS)
+        self.assertIn(
+            "## Startup: o que precisa ser carregado", module.REQUIRED_THEME_RULE_HEADINGS
+        )
         self.assertIn(".agents/rules/delegation-rules.md", module.THEMATIC_RULE_FILES)
         self.assertIn("Nunca operar por amostragem", module.AGENTS_REQUIRED_SNIPPETS)
         self.assertIn("docs/AI-STARTUP-GOVERNANCE-MANIFEST.md", module.AGENTS_REQUIRED_SNIPPETS)
@@ -198,6 +205,15 @@ class ValidateAiAssetsTests(unittest.TestCase):
         self.assertIn(
             'display_name = "PO"',
             module.AGENT_IDENTITY_REQUIRED_SNIPPETS[".agents/registry/ai-product-owner.toml"],
+        )
+        self.assertIn(".agents/config.toml", module.RULES_LAYER_REQUIRED_SNIPPETS)
+        self.assertIn(
+            'projections = ".agents/rules/projections.yaml"',
+            module.RULES_LAYER_REQUIRED_SNIPPETS[".agents/config.toml"],
+        )
+        self.assertIn(
+            "## Projecoes executaveis",
+            module.RULES_LAYER_REQUIRED_SNIPPETS[".agents/rules/CATALOG.md"],
         )
         self.assertIn("config/ai/contracts.yaml", module.BOARD_OPERATION_REQUIRED_SNIPPETS)
         self.assertIn(
