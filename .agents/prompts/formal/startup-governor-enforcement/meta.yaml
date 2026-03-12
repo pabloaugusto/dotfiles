@@ -1,0 +1,35 @@
+id: startup-governor-enforcement
+task_id: prompt/startup-governor-enforcement
+title: Pack formal para endurecer startup com guardiao dedicado e clearance obrigatoria
+status: active
+owner_epic: DOT-71
+owner_issue: DOT-206
+jira:
+  summary_prefix: "PROMPT:"
+  required_labels:
+    - prompt
+entrypoints:
+  prompt: prompt.md
+  context: context.md
+fragments:
+  - fragments/evidence-and-rationale.md
+  - fragments/role-and-handoff.md
+  - fragments/clearance-and-gates.md
+dependencies:
+  prerequisite_packs: []
+  preflight_packs:
+    - startup-alignment
+    - agents-rules-centralization
+startup:
+  mandatory_load: true
+  report_key: startup_governor_status
+  requires_manifest_integration: true
+  first_response_gate: true
+governance:
+  dedicated_agent_role: ai-startup-governor
+  readiness_artifact: .cache/ai/startup-ready.json
+  handoff_required: true
+validation:
+  requires_agent_catalog_parity: true
+  requires_asset_validator_parity: true
+  requires_first_response_block: true

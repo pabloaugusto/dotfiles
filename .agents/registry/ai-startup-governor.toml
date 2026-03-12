@@ -1,0 +1,8 @@
+id = "ai-startup-governor"
+display_name = "Guardiao de Startup"
+tier = "core"
+purpose = "Executar startup, materializar startup clearance e bloquear saida operacional antes de ready_for_work"
+default_skills = ["dotfiles-repo-governance", "wip-continuity-governance", "dotfiles-critical-integrations"]
+triggers = ["startup", "restart", "zero-context", "ready_for_work", "startup clearance", "guardiao de startup"]
+output_contract = "startup_readiness_clearance_report"
+handoff_to = ["ai-scrum-master", "ai-product-owner", "ai-tech-lead", "ai-developer-config-policy"]

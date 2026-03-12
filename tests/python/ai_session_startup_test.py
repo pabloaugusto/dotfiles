@@ -7,13 +7,16 @@ from pathlib import Path
 from unittest.mock import patch
 
 from scripts.ai_session_startup_lib import (
+    DEFAULT_READINESS_PATH,
     agent_identity_payload,
     git_governance_payload,
     load_active_worklog_items,
     load_pending_chat_contracts,
+    manifest_evidence_payload,
     render_startup_session_markdown,
     resolve_startup_manifest_paths,
     startup_drift_payload,
+    startup_governor_status_payload,
     startup_session_payload,
     write_startup_session_report,
 )
@@ -292,6 +295,54 @@ class AiSessionStartupTests(unittest.TestCase):
         self.assertEqual(payload["status"], "drift")
         self.assertTrue(any("worklog ativo aponta" in item for item in payload["findings"]))
 
+    def test_startup_governor_status_blocks_without_pending_action_for_active_worklog(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            repo_root = Path(tmp_dir)
+            docs_dir = repo_root / "docs"
+            registry_dir = repo_root / ".agents" / "registry"
+            docs_dir.mkdir(parents=True)
+            registry_dir.mkdir(parents=True)
+            (registry_dir / "ai-startup-governor.toml").write_text(
+                'id = "ai-startup-governor"\ndisplay_name = "Guardiao de Startup"\n',
+                encoding="utf-8",
+            )
+            manifest_evidence = manifest_evidence_payload(repo_root, [])
+            status = startup_governor_status_payload(
+                repo_root,
+                manifest_evidence=manifest_evidence,
+                pending_contracts=[],
+                git_inventory=self._fake_git_inventory(),
+                active_worklog_items=[
+                    {
+                        "ID": "WIP-DOT-177",
+                        "Tarefa": "Startup",
+                        "Branch": "feat/DOT-177-startup-preflight-memory",
+                    }
+                ],
+                active_execution=self._fake_active_execution(),
+                agent_identity={
+                    "status": "ok",
+                    "registry_count": 1,
+                    "active_agent": "ai-developer-config-policy",
+                    "active_display_name": "Engenheiro Agentes IA",
+                    "fallback_display": "technical-id",
+                },
+                chat_communication={"status": "ok", "rules": ["usar portugues"]},
+                git_governance={"status": "ok", "sources": [], "rules": [], "enforcement_note": ""},
+                pea_status=self._fake_pea_status(),
+                startup_drift={"status": "clean", "findings": []},
+                fallback_status=self._fake_fallback_status(),
+                github_auth=self._fake_github_auth(),
+                atlassian_connectivity=self._fake_atlassian(),
+                prioritized_work_item={"source": "active-execution", "identifier": "DOT-177", "summary": "Startup"},
+            )
+
+        self.assertEqual(status["state"], "wip_decision_pending")
+        self.assertFalse(status["clearance_granted"])
+        self.assertTrue(
+            any("concluir_primeiro" in item or "roadmap_pendente" in item for item in status["blocking_findings"])
+        )
+
     def test_write_startup_session_report_persists_markdown_report(self) -> None:
         with tempfile.TemporaryDirectory() as tmp_dir:
             repo_root = Path(tmp_dir)
@@ -376,20 +427,30 @@ class AiSessionStartupTests(unittest.TestCase):
                     return_value=self._fake_pea_status(),
                 ),
             ):
-                payload = write_startup_session_report(repo_root)
+                payload = write_startup_session_report(
+                    repo_root,
+                    pending_action="concluir_primeiro",
+                )
 
             report_path = repo_root / payload["report_path"]
+            readiness_path = repo_root / payload["readiness_artifact_path"]
             report_exists = report_path.exists()
+            readiness_exists = readiness_path.exists()
             report_text = report_path.read_text(encoding="utf-8")
+            readiness_text = readiness_path.read_text(encoding="utf-8")
 
         self.assertTrue(report_exists)
+        self.assertTrue(readiness_exists)
         self.assertIn("AI Startup Session Report", report_text)
         self.assertIn("## Comunicacao no chat e identidade", report_text)
         self.assertIn("Engenheiro Agentes IA", report_text)
         self.assertIn("## Drift operacional detectado", report_text)
         self.assertIn("## PEA carregado no startup", report_text)
         self.assertIn("## Delegacao e subagentes", report_text)
+        self.assertIn("## startup_governor_status", report_text)
         self.assertIn("cloud_id", report_text)
+        self.assertIn('"state": "ready_for_work"', readiness_text)
+        self.assertIn(DEFAULT_READINESS_PATH.as_posix(), payload["default_readiness_path"])
 
     def test_render_startup_session_markdown_lists_new_sections(self) -> None:
         payload = {
@@ -398,6 +459,14 @@ class AiSessionStartupTests(unittest.TestCase):
             "chat_contracts_register_path": "docs/AI-CHAT-CONTRACTS-REGISTER.md",
             "resolved_paths": ["AGENTS.md", "docs/AI-CHAT-CONTRACTS-REGISTER.md"],
             "resolved_count": 2,
+            "manifest_evidence": {
+                "status": "ok",
+                "resolved_count": 2,
+                "textual_line_count": 10,
+                "textual_bytes": 120,
+                "sha256": "abc123",
+                "missing_paths": [],
+            },
             "pending_chat_contracts": [
                 {
                     "contract_id": "CHAT-001",
@@ -409,6 +478,9 @@ class AiSessionStartupTests(unittest.TestCase):
                 }
             ],
             "pending_chat_contract_count": 1,
+            "default_report_path": ".cache/ai/startup-session.md",
+            "default_readiness_path": ".cache/ai/startup-ready.json",
+            "pending_action": "concluir_primeiro",
             "active_worklog_count": 1,
             "git_inventory": self._fake_git_inventory(),
             "active_worklog_items": [
@@ -457,6 +529,33 @@ class AiSessionStartupTests(unittest.TestCase):
                 "identifier": "DOT-177",
                 "summary": "Startup",
             },
+            "startup_governor_status": {
+                "owner_role": "ai-startup-governor",
+                "owner_display_name": "Guardiao de Startup",
+                "audit_owner_role": "ai-scrum-master",
+                "state": "ready_for_work",
+                "clearance": "granted",
+                "clearance_granted": True,
+                "pending_action": "concluir_primeiro",
+                "progression": ["not_started", "reading_manifest", "ready_for_work"],
+                "blocking_findings": [],
+                "warnings": ["existem contratos pendentes"],
+                "blocked_actions": [],
+                "harness": {
+                    "report_path": ".cache/ai/startup-session.md",
+                    "readiness_artifact": ".cache/ai/startup-ready.json",
+                },
+                "handoff": {
+                    "allowed": True,
+                    "current_chat_owner_role": "ai-startup-governor",
+                    "current_chat_owner_display_name": "Guardiao de Startup",
+                    "next_owner_role": "ai-developer-config-policy",
+                    "next_owner_display_name": "Engenheiro Agentes IA",
+                },
+                "context_snapshot": {"current_branch": "feat/DOT-177-startup-preflight-memory"},
+                "context_fingerprint": "fingerprint-123",
+            },
+            "readiness_artifact_path": ".cache/ai/startup-ready.json",
         }
 
         markdown = render_startup_session_markdown(payload)
@@ -472,6 +571,9 @@ class AiSessionStartupTests(unittest.TestCase):
         self.assertIn("## GitHub auth e fallback", markdown)
         self.assertIn("## Atlassian", markdown)
         self.assertIn("## Delegacao e subagentes", markdown)
+        self.assertIn("## startup_governor_status", markdown)
+        self.assertIn("startup-ready.json", markdown)
+        self.assertIn("fingerprint-123", markdown)
         self.assertIn("op://Personal/github/token-full-access", markdown)
 
     def test_startup_session_payload_counts_pending_contracts(self) -> None:
@@ -559,13 +661,15 @@ class AiSessionStartupTests(unittest.TestCase):
                     return_value=self._fake_pea_status(),
                 ),
             ):
-                payload = startup_session_payload(repo_root)
+                payload = startup_session_payload(repo_root, pending_action="concluir_primeiro")
 
         self.assertEqual(payload["pending_chat_contract_count"], 2)
         self.assertEqual(payload["agent_identity"]["active_display_name"], "Engenheiro Agentes IA")
         self.assertEqual(payload["pea_status"]["status"], "ok")
         self.assertEqual(payload["prioritized_work_item"]["identifier"], "DOT-177")
         self.assertEqual(payload["startup_drift"]["status"], "clean")
+        self.assertEqual(payload["startup_governor_status"]["state"], "ready_for_work")
+        self.assertTrue(payload["startup_governor_status"]["clearance_granted"])
 
 
 if __name__ == "__main__":

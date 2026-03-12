@@ -846,20 +846,45 @@ tasks:
       - task: ai:startup:session:{{if or (eq .OS "Windows_NT") (eq .OS "windows")}}windows{{else}}linux{{end}}
         vars:
           OUT: "{{.OUT}}"
+          READY_OUT: "{{.READY_OUT}}"
+          PENDING_ACTION: "{{.PENDING_ACTION}}"
 
   ai:startup:session:windows:
     desc: Windows - gera o relatorio operacional de startup/restart da sessao de IA
     platforms: [windows]
     dir: '{{.TASKFILE_DIR}}'
     cmds:
-      - "pwsh -NoProfile -File ./scripts/run-ai-startup-session.ps1 -RepoRoot '{{.TASKFILE_DIR}}' -Out '{{default \".cache/ai/startup-session.md\" .OUT}}'"
+      - "pwsh -NoProfile -File ./scripts/run-ai-startup-session.ps1 -RepoRoot '{{.TASKFILE_DIR}}' -Out '{{default \".cache/ai/startup-session.md\" .OUT}}' -ReadyOut '{{default \".cache/ai/startup-ready.json\" .READY_OUT}}' -PendingAction '{{default \"\" .PENDING_ACTION}}'"
 
   ai:startup:session:linux:
     desc: Linux/WSL - gera o relatorio operacional de startup/restart da sessao de IA
     platforms: [linux]
     dir: '{{.TASKFILE_DIR}}'
     cmds:
-      - "bash -lc 'bash ./scripts/run-python.sh ./scripts/ai-session-startup.py report --repo-root \"{{.TASKFILE_DIR}}\" --out \"{{default \".cache/ai/startup-session.md\" .OUT}}\"'"
+      - "bash -lc 'bash ./scripts/run-python.sh ./scripts/ai-session-startup.py report --repo-root \"{{.TASKFILE_DIR}}\" --out \"{{default \".cache/ai/startup-session.md\" .OUT}}\" --ready-out \"{{default \".cache/ai/startup-ready.json\" .READY_OUT}}\"{{if .PENDING_ACTION}} --pending-action \"{{.PENDING_ACTION}}\"{{end}}'"
+
+  ai:startup:enforce:
+    desc: Recalcula o startup oficial e falha sem ready_for_work
+    cmds:
+      - task: ai:startup:enforce:{{if or (eq .OS "Windows_NT") (eq .OS "windows")}}windows{{else}}linux{{end}}
+        vars:
+          OUT: "{{.OUT}}"
+          READY_OUT: "{{.READY_OUT}}"
+          PENDING_ACTION: "{{.PENDING_ACTION}}"
+
+  ai:startup:enforce:windows:
+    desc: Windows - endurece startup e falha quando a sessao nao estiver pronta
+    platforms: [windows]
+    dir: '{{.TASKFILE_DIR}}'
+    cmds:
+      - "pwsh -NoProfile -Command \"& './scripts/invoke-python.ps1' -ScriptPath './scripts/ai-session-startup.py' -Arguments @('enforce','--repo-root','{{.TASKFILE_DIR}}','--out','{{default \".cache/ai/startup-session.md\" .OUT}}','--ready-out','{{default \".cache/ai/startup-ready.json\" .READY_OUT}}'{{if .PENDING_ACTION}},'--pending-action','{{.PENDING_ACTION}}'{{end}})\""
+
+  ai:startup:enforce:linux:
+    desc: Linux/WSL - endurece startup e falha quando a sessao nao estiver pronta
+    platforms: [linux]
+    dir: '{{.TASKFILE_DIR}}'
+    cmds:
+      - "bash -lc 'bash ./scripts/run-python.sh ./scripts/ai-session-startup.py enforce --repo-root \"{{.TASKFILE_DIR}}\" --out \"{{default \".cache/ai/startup-session.md\" .OUT}}\" --ready-out \"{{default \".cache/ai/startup-ready.json\" .READY_OUT}}\"{{if .PENDING_ACTION}} --pending-action \"{{.PENDING_ACTION}}\"{{end}}'"
 
   ai:1password:ratelimit:
     desc: Exibe o rate limit atual da service account usada pelo 1Password CLI

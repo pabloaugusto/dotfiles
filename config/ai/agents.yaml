@@ -38,6 +38,18 @@ roles:
       - governance-ledger
       - jira-bug-escalation
 
+  ai-startup-governor:
+    enabled: true
+    required: true
+    category: governance
+    display_name: Guardiao de Startup
+    responsibilities:
+      - startup-gatekeeping
+      - startup-readiness
+      - first-response-clearance
+      - startup-drift-detection
+      - startup-handoff
+
   ai-engineering-architect:
     enabled: true
     required: true
