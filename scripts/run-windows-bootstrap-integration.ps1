@@ -53,6 +53,36 @@ function Assert-LinkTarget {
 	}
 }
 
+function Assert-RealDirectory {
+	param ([string]$Path)
+
+	if (-not (Test-Path -Path $Path -PathType Container)) {
+		throw "Diretorio ausente: $Path"
+	}
+
+	$item = Get-Item -Path $Path -Force -ErrorAction Stop
+	if ($null -ne $item.LinkType) {
+		throw "Diretorio '$Path' nao deveria ser link. LinkType atual: $($item.LinkType)"
+	}
+}
+
+function Assert-FileContentMatches {
+	param (
+		[string]$Path,
+		[string]$ExpectedTarget
+	)
+
+	if (-not (Test-Path -Path $Path -PathType Leaf)) {
+		throw "Arquivo ausente: $Path"
+	}
+
+	$currentContent = Get-Content -Path $Path -Raw -ErrorAction Stop
+	$expectedContent = Get-Content -Path $ExpectedTarget -Raw -ErrorAction Stop
+	if ($currentContent -ne $expectedContent) {
+		throw "Conteudo inesperado para '$Path'."
+	}
+}
+
 $tempRoot = Join-Path $env:TEMP ("dotfiles-bootstrap-windows-{0}" -f ([guid]::NewGuid().ToString('N')))
 $profileRoot = Join-Path $tempRoot 'profile'
 $documentsPath = Join-Path $profileRoot 'Documents'
@@ -108,7 +138,10 @@ try {
 	Set-ProcessOverrides -Items $overrides
 	. (Join-Path $RepoRoot 'app\bootstrap\bootstrap-windows.ps1') -RelinkOnly
 
-	Assert-LinkTarget -Path (Join-Path $profileRoot '.ssh') -ExpectedTarget (Join-Path $RepoRoot 'app\df\ssh')
+	Assert-RealDirectory -Path (Join-Path $profileRoot '.ssh')
+	Assert-FileContentMatches -Path (Join-Path $profileRoot '.ssh\config') -ExpectedTarget (Join-Path $RepoRoot 'app\df\ssh\config')
+	Assert-FileContentMatches -Path (Join-Path $profileRoot '.ssh\config.local') -ExpectedTarget (Join-Path $RepoRoot 'app\df\ssh\config.windows')
+	Assert-FileContentMatches -Path (Join-Path $profileRoot '.ssh\1Password\config') -ExpectedTarget (Join-Path $RepoRoot 'app\df\ssh\1Password\config')
 	Assert-LinkTarget -Path (Join-Path $profileRoot '.assets') -ExpectedTarget (Join-Path $RepoRoot 'app\df\assets')
 	Assert-LinkTarget -Path (Join-Path $profileRoot '.config\git') -ExpectedTarget (Join-Path $RepoRoot 'app\df\git')
 	Assert-LinkTarget -Path (Join-Path $profileRoot '.oh-my-posh') -ExpectedTarget (Join-Path $RepoRoot 'app\df\oh-my-posh')
