@@ -11,8 +11,8 @@ pyproject.toml
 
 ## Regras de ownership
 
-- `app/bootstrap/` -> runtime e provisionamento da app/workstation
-- `app/df/` -> dotfiles e assets runtime
+- [`app/bootstrap/`](../../../../../app/bootstrap/) -> runtime e provisionamento da app e do workstation
+- [`app/df/`](../../../../../app/df/) -> dotfiles e assets runtime
 - [`config/`](../../../../../config/) -> desenvolvimento, suporte, control plane
   e governanca
 - [`pyproject.toml`](../../../../../pyproject.toml) -> toolchain Python,
