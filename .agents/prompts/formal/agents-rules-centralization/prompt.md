@@ -46,6 +46,7 @@ Antes de editar:
    - [`docs/AI-DELEGATION-FLOW.md`](../../../../docs/AI-DELEGATION-FLOW.md)
    - [`docs/git-conventions.md`](../../../../docs/git-conventions.md)
    - [`Taskfile.yml`](../../../../Taskfile.yml)
+   - [`config/ai/agents.yaml`](../../../../config/ai/agents.yaml)
    - [`config/ai/contracts.yaml`](../../../../config/ai/contracts.yaml)
    - [`config/ai/agent-operations.yaml`](../../../../config/ai/agent-operations.yaml)
    - [`config/ai/jira-model.yaml`](../../../../config/ai/jira-model.yaml)
@@ -80,6 +81,9 @@ Implementar esta decisao arquitetural no repo:
   temas
 - [`Taskfile.yml`](../../../../Taskfile.yml), [`.githooks/`](../../../../.githooks/),
   scripts e testes continuam como **enforcement executavel**
+- [`config/ai/agent-enablement.yaml`](../../../../config/ai/agent-enablement.yaml)
+  passa a ser a fonte declarativa para habilitar ou desabilitar agentes por
+  papel, sem depender de memoria de chat
 - [`docs/`](../../../../docs/) passa a conter guias, explicacoes, runbooks e
   material derivado, nao a fonte primaria das regras
 - `fallback` nao deve nascer como arquivo tematico principal no primeiro corte;
@@ -209,8 +213,11 @@ Migrar regras hoje espalhadas em:
 - [`docs/AI-STARTUP-GOVERNANCE-MANIFEST.md`](../../../../docs/AI-STARTUP-GOVERNANCE-MANIFEST.md)
 - [`docs/AI-STARTUP-AND-RESTART.md`](../../../../docs/AI-STARTUP-AND-RESTART.md)
 - [`config/ai/contracts.yaml`](../../../../config/ai/contracts.yaml)
+- [`config/ai/agent-enablement.yaml`](../../../../config/ai/agent-enablement.yaml)
 - camada `display_name`
 - contratos de comunicacao no chat
+- toggles declarativos de agentes carregados antes da primeira resposta
+  operacional ao usuario
 
 ### Onda 4 - Intake, backlog e execucao Jira
 
@@ -243,6 +250,15 @@ Migrar regras hoje espalhadas em:
 - [`docs/AI-SCRUM-MASTER-LEDGER.md`](../../../../docs/AI-SCRUM-MASTER-LEDGER.md)
 - [`.agents/cerimonias/`](../../../../.agents/cerimonias/)
 - [`config/ai/agent-operations.yaml`](../../../../config/ai/agent-operations.yaml)
+- [`config/ai/agent-enablement.yaml`](../../../../config/ai/agent-enablement.yaml)
+
+Nesta onda, implementar tambem:
+
+- o arquivo [`config/ai/agent-enablement.yaml`](../../../../config/ai/agent-enablement.yaml)
+  com toggle por agente
+- semantica minima de `enabled`, `disabled_by_default`, `motivo` e `owner`
+- enforcement para que agentes desabilitados nao sejam acionados por memoria
+  de chat, habito operacional ou regra residual
 
 ### Onda 6 - Documentacao, prompts, auth e sync
 
@@ -280,6 +296,8 @@ Migrar o que hoje esta espalhado entre:
 Atualizar:
 
 - startup para carregar a nova camada
+- startup, roteamento e delegacao para carregar e respeitar
+  [`config/ai/agent-enablement.yaml`](../../../../config/ai/agent-enablement.yaml)
 - manifest para incluir [`.agents/rules/`](../../../rules/)
 - validadores para exigir catalogacao e linkagem
 - testes de startup e validacao
@@ -312,6 +330,8 @@ Deve:
 
 - carregar a nova camada centralizada
 - expor no report quais regras tematicas foram carregadas
+- expor no report quais agentes estao `enabled` e `disabled`, com origem no
+  arquivo declarativo de enablement
 - continuar distinguindo `startup`, `PEA` e `enforcement`
 
 ### validadores
@@ -321,6 +341,8 @@ Devem:
 - falhar quando um tema critico nao estiver catalogado
 - falhar quando docs e `AGENTS` apontarem para regra errada ou antiga
 - falhar quando houver drift claro entre tema canonico e contratos derivados
+- falhar quando um agente marcado como `disabled` continuar sendo exigido por
+  startup, roteamento, delegacao ou review sem override humano rastreavel
 
 ## Regras especificas sobre fallback
 
@@ -365,6 +387,10 @@ A entrega so estara correta se:
 9. nao houver nova fonte concorrente de verdade fora dessa arquitetura
 10. toda nova sessao ou restart continuar absorvendo essa camada centralizada
     como parte do startup oficial
+11. o repo ganhar um controle declarativo para habilitar ou desabilitar
+    agentes sem depender de memoria de chat
+12. startup, roteamento, delegacao, reviews e validadores respeitarem esse
+    controle de forma consistente
 
 ## Validacoes minimas esperadas
 
@@ -399,6 +425,8 @@ Executar o que for cabivel em cada fatia:
   `docs`
 - transformar Markdown em enforcement
 - deixar docs e validadores sem apontar para a nova fonte
+- depender de memoria de chat para desabilitar `pascoalete` ou qualquer outro
+  agente
 - operar por memoria parcial ou sem startup quando a sessao tiver sido retomada
   do zero
 - criar `Epic` novo sem preflight

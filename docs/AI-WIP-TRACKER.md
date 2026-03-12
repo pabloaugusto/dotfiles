@@ -1,6 +1,6 @@
 # AI WIP Tracker
 
-Atualizado em: 2026-03-12 15:09 UTC
+Atualizado em: 2026-03-12 16:06 UTC
 
 Fallback local de continuidade. O Jira e a fonte primaria do fluxo vivo.
 
@@ -27,7 +27,7 @@ Fallback local de continuidade. O Jira e a fonte primaria do fluxo vivo.
 <!-- ai-worklog:doing:start -->
 | ID | Tarefa | Branch | Responsavel | Inicio UTC | Ultima atualizacao UTC | Proximo passo | Bloqueios |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| (sem itens) | - | - | - | - | - | - | - |
+| WIP-20260312-DOT-205-RERUN | Executar agents-rules-centralization desde o inicio com toggle declarativo de agentes | prompt/DOT-205-agents-rules-centralization | ai-developer-config-policy | 2026-03-12 16:06 UTC | 2026-03-12 16:06 UTC | Commitar o ajuste do prompt pack e iniciar a implementacao da centralizacao normativa | Bypass explicito de pascoalete por ordem humana nesta sessao |
 <!-- ai-worklog:doing:end -->
 
 ## Done
@@ -95,5 +95,5 @@ Fallback local de continuidade. O Jira e a fonte primaria do fluxo vivo.
 <!-- ai-worklog:log:start -->
 | Data/Hora UTC | ID | Status | Resumo | Proximo passo | Bloqueios | Contexto | Notas |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| (sem itens) | - | - | - | - | - | - | - |
+| 2026-03-12 16:06 UTC | WIP-20260312-DOT-205-RERUN | doing | Executar agents-rules-centralization desde o inicio com toggle declarativo de agentes | Commitar o ajuste do prompt pack e iniciar a implementacao da centralizacao normativa | Bypass explicito de pascoalete por ordem humana nesta sessao | prompt | inicio da tarefa |
 <!-- ai-worklog:log:end -->

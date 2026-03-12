@@ -22,6 +22,8 @@ governance:
   canonical_rules_root: .agents/rules
   fallback_model: per-theme-section
   migration_strategy: waves
+  agent_enablement_config: config/ai/agent-enablement.yaml
 validation:
   requires_manifest_integration: true
   requires_asset-validator-parity: true
+  requires_agent_enablement_enforcement: true
