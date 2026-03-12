@@ -564,12 +564,12 @@ def worklog_records(paths: BackfillPaths, *, done: bool) -> list[dict[str, Any]]
                     ),
                 ),
                 "seed_activity": build_seed_activity(
-                    agent="ai-documentation-agent",
+                    agent="ai-documentation-sync",
                     interaction_type="progress-update",
                     status=state_hint,
                     contexto=[
                         "Backfill retroativo do worklog local para Jira com estado refletindo a operacao real.",
-                        "Registro espelhado do tracker operacional versionado no GitHub.",
+                        "Registro espelhado do tracker operacional versionado no GitHub, com rastreabilidade cross-surface quando aplicavel.",
                     ],
                     evidencias=[
                         github_blob_url(
@@ -577,7 +577,7 @@ def worklog_records(paths: BackfillPaths, *, done: bool) -> list[dict[str, Any]]
                             paths.wip_tracker.relative_to(paths.repo_root).as_posix(),
                         ),
                     ],
-                    proximo_passo="Confirmar o vinculo com a pagina correspondente no Confluence e manter o status do Jira alinhado ao trabalho real.",
+                    proximo_passo="Confirmar backlinks ou documentation-link quando houver superficie remota elegivel e manter o status do Jira alinhado ao trabalho real.",
                 ),
             }
         )

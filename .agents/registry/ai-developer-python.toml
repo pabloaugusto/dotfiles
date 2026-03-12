@@ -5,4 +5,4 @@ purpose = "Implementar mudancas Python com evidencias, testes e handoff rastreav
 default_skills = ["dotfiles-python-review"]
 triggers = ["python", ".py", "scripts", "tests/python", "ty", "ruff"]
 output_contract = "python_delivery_report"
-handoff_to = ["ai-qa", "ai-reviewer-python", "ai-documentation-agent"]
+handoff_to = ["ai-qa", "ai-reviewer-python", "ai-documentation-reviewer", "ai-documentation-writer"]

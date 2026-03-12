@@ -53,6 +53,23 @@ artifacts:
       keep_last_synced_days: 14
       max_attempts_before_dead_letter: 5
 
+  documentation_links:
+    artifact_type: runtime_ledger
+    definition_source: repo
+    sync_eligibility: candidate
+    source_of_truth: confluence
+    remote_target:
+      kind: confluence
+      strategy: append-page-ledger
+      page_title: DOT - Documentation Sync Ledger
+      page_scope: documentation
+    local_outbox:
+      path: outbox/confluence/documentation-links.jsonl
+    retention_policy:
+      on_remote_ack: compact
+      keep_last_synced_days: 14
+      max_attempts_before_dead_letter: 5
+
 artifact_inventory:
   repo_canonical:
     - path: config/ai/
@@ -91,6 +108,9 @@ artifact_inventory:
     - path: prompt-runs
       artifact_key: prompt_runs
       reason: eventos de execucao de prompt devem nascer no outbox local e ganhar historico remoto perene
+    - path: documentation-links
+      artifact_key: documentation_links
+      reason: documentation-link, backlinks e rastreabilidade cross-surface podem precisar historico remoto perene
 
   remote_ineligible:
     - path: .cache/

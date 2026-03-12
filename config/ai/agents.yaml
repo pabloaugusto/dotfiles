@@ -154,20 +154,73 @@ roles:
       - infra
       - automation
 
-  ai-documentation-agent:
+  ai-linguistic-reviewer:
     enabled: true
     required: true
     category: knowledge
-    display_name: Escrivão
+    display_name: Pascoalete
     responsibilities:
-      - confluence
-      - mirrors
-      - adr-linking
-      - jira-confluence-bidirectional-linking
-      - traceability-enforcement
-      - artifact-first-documentation
-      - migration-bundle-curation
-      - schema-sync-governance
+      - linguistic-review
+      - terminology
+      - cspell-governance
+      - microcopy
+      - local-ambiguity-detection
+
+  ai-documentation-writer:
+    enabled: true
+    required: true
+    category: knowledge
+    display_name: Escrivao
+    responsibilities:
+      - technical-writing
+      - documentation-drafting
+      - information-synthesis
+      - documentation-rewrite
+
+  ai-documentation-reviewer:
+    enabled: true
+    required: true
+    category: knowledge
+    display_name: Revisor Documental
+    responsibilities:
+      - documentation-review
+      - completeness-analysis
+      - documentation-severity
+      - operational-safety-review
+
+  ai-documentation-manager:
+    enabled: true
+    required: true
+    category: knowledge
+    display_name: Gestor Documental
+    responsibilities:
+      - source-of-truth-management
+      - documentation-placement
+      - lifecycle-governance
+      - documentation-deduplication
+      - sync-eligibility-classification
+
+  ai-documentation-sync:
+    enabled: true
+    required: true
+    category: knowledge
+    display_name: Sync Documental
+    responsibilities:
+      - confluence-publication
+      - documentation-link
+      - backlinks
+      - cross-surface-traceability
+      - sync-foundation-consumption
+
+  ai-documentation-agent:
+    enabled: false
+    required: false
+    category: knowledge-legacy
+    display_name: Escrivao (legado)
+    responsibilities:
+      - legacy-documentation-compatibility
+      - decomposition-handoff
+      - migration-compatibility
 
   ai-browser-validator:
     enabled: false

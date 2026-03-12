@@ -46,6 +46,10 @@ task test:unit:python:windows
 - `critical-integrations-guardian` protege toda mudanca sensivel a bootstrap, auth, secrets, CI, sync ou CLI critica.
 - `secrets-rotation-governor` protege toda mudanca de lifecycle de credenciais e exige ordem segura de substituicao.
 - `pascoalete` revisa ortografia tecnica e higiene do dicionario `cspell` em modo consultivo; quando reprova e a rodada nao corrige, a falha deve gerar pendencia rastreavel no backlog vigente.
+- `ai-documentation-writer`, `ai-documentation-reviewer`,
+  `ai-documentation-manager` e `ai-documentation-sync` precisam permanecer com
+  fronteiras explicitas; regressao que volte a concentrar esses ownerships em
+  um unico papel deve falhar.
 - `python-reviewer`, `powershell-reviewer` e `automation-reviewer` revisam toda mudanca de codigo ou automacao da sua familia e podem reprovar o fechamento tecnico.
 - parecer especializado aprovado ou reprovado precisa ficar rastreado em [`docs/AI-REVIEW-LEDGER.md`](AI-REVIEW-LEDGER.md).
 - parecer ortografico consultivo precisa ficar rastreado em [`docs/AI-ORTHOGRAPHY-LEDGER.md`](AI-ORTHOGRAPHY-LEDGER.md).

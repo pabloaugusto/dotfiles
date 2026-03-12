@@ -4,7 +4,7 @@
 
 Revisar YAML, JSON, TOML, Markdown, schemas, contratos declarativos e politicas
 de configuracao com foco em sintaxe, aderencia a schema, compatibilidade,
-governanca documental e rastreabilidade.
+governanca declarativa e rastreabilidade.
 
 ## Quando usar
 
@@ -55,6 +55,10 @@ governanca documental e rastreabilidade.
   quando houver schema aplicavel.
 - Nao aceitar drift entre contrato declarado, documentacao e uso real no repo.
 - Toda critica precisa ter evidencia, impacto e melhor correcao sugerida.
+- Nao substituir `ai-documentation-reviewer` na aprovacao semantica de conteudo
+  documental.
+- Nao substituir `ai-documentation-manager` em decisoes de source of truth,
+  placement ou lifecycle.
 
 ## Validacao recomendada
 

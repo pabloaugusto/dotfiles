@@ -45,7 +45,7 @@ Mapa das documentacoes versionadas do projeto e ordem recomendada de leitura.
 - [`config/ai/agent-operations.yaml`](../config/ai/agent-operations.yaml): contrato operacional por papel para `Jira` e `Confluence`, com passo a passo, handoffs e evidencia obrigatoria.
 - [`config/ai/contracts.yaml`](../config/ai/contracts.yaml): contratos Jira + Confluence do fluxo-alvo.
 - [`config/ai/sync-targets.yaml`](../config/ai/sync-targets.yaml): manifest declarativo da fundacao de sync, com classificacao de artefatos, outbox local duravel e destinos remotos elegiveis.
-- [`config/ai/confluence-model.yaml`](../config/ai/confluence-model.yaml): arquitetura de informacao alvo do space e contrato de sync `repo-first -> Confluence`.
+- [`config/ai/confluence-model.yaml`](../config/ai/confluence-model.yaml): arquitetura de informacao alvo do space, com governanca `repo-first -> Confluence`, ownership de `source of truth` no `ai-documentation-manager` e publication no `ai-documentation-sync`.
 - [`docs/ai-sync-foundation.md`](ai-sync-foundation.md): arquitetura-base do fluxo `repo declarativo -> outbox local duravel -> fonte perene remota`.
 - [`vendor/atlassian/README.md`](../vendor/atlassian/README.md): specs OpenAPI vendorizados da Atlassian para codegen e auditoria.
 - [`docs/atlassian-ia/README.md`](atlassian-ia/README.md): trilha versionada de contexto,

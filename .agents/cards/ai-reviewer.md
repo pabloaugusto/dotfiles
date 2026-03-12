@@ -44,6 +44,8 @@ quando o escopo exigir consolidacao acima do reviewer especializado.
 - Nao substituir reviewer especializado quando ele for aplicavel.
 - Nao aprovar demanda sem cobertura especializada minima para o escopo tocado.
 - Nao tratar checklist vazio como aprovacao implicita.
+- Nao substituir `ai-documentation-reviewer`, `ai-linguistic-reviewer` ou
+  `ai-reviewer-config-policy` quando a camada documental exigir esses papeis.
 
 ## Validacao recomendada
 

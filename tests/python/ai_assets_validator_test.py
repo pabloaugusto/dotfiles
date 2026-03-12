@@ -414,6 +414,12 @@ class ValidateAiAssetsTests(unittest.TestCase):
                 ".agents/prompts/formal/documentation-layer-governance/meta.yaml"
             ],
         )
+        self.assertIn(
+            "owner_issue: DOT-181",
+            module.PROMPT_PACK_REQUIRED_SNIPPETS[
+                ".agents/prompts/formal/documentation-layer-governance/meta.yaml"
+            ],
+        )
         self.assertIn("docs/ai-sync-foundation.md", module.SYNC_FOUNDATION_REQUIRED_SNIPPETS)
         self.assertIn(
             "workspace_id",
@@ -442,8 +448,16 @@ class ValidateAiAssetsTests(unittest.TestCase):
             module.PROMPT_PACK_REQUIRED_SNIPPETS[".agents/prompts/CATALOG.md"],
         )
         self.assertIn(
+            "DOT-181",
+            module.PROMPT_PACK_REQUIRED_SNIPPETS[".agents/prompts/CATALOG.md"],
+        )
+        self.assertIn(
             "prompt/sync-outbox-foundation",
             module.PROMPT_PACK_REQUIRED_SNIPPETS[".agents/prompts/CATALOG.md"],
+        )
+        self.assertIn(
+            "documentation_links",
+            module.SYNC_FOUNDATION_REQUIRED_SNIPPETS["docs/ai-sync-foundation.md"],
         )
         self.assertIn(
             "### `ai:prompts:jira:check`",
@@ -456,6 +470,50 @@ class ValidateAiAssetsTests(unittest.TestCase):
         self.assertIn(
             "df/secrets/secrets-ref.yaml",
             module.STARTUP_GOVERNANCE_REQUIRED_SNIPPETS["docs/AI-STARTUP-GOVERNANCE-MANIFEST.md"],
+        )
+        self.assertIn(
+            "| Escrivao |",
+            module.AGENT_IDENTITY_REQUIRED_SNIPPETS["docs/AI-AGENTS-CATALOG.md"],
+        )
+        self.assertIn(
+            "| Revisor Documental |",
+            module.AGENT_IDENTITY_REQUIRED_SNIPPETS["docs/AI-AGENTS-CATALOG.md"],
+        )
+        self.assertIn(
+            "ai-documentation-manager",
+            module.CATALOG_REQUIRED_SNIPPETS["docs/AI-AGENTS-CATALOG.md"],
+        )
+        self.assertIn(
+            "ai-documentation-sync",
+            module.CATALOG_REQUIRED_SNIPPETS["docs/AI-DELEGATION-FLOW.md"],
+        )
+        self.assertIn(
+            "ai-documentation-reviewer",
+            module.CATALOG_REQUIRED_SNIPPETS["docs/AI-GOVERNANCE-AND-REGRESSION.md"],
+        )
+        self.assertIn(
+            "config/ai/contracts.yaml",
+            module.DOCUMENTATION_LAYER_REQUIRED_SNIPPETS,
+        )
+        self.assertIn(
+            "ownership_by_surface:",
+            module.DOCUMENTATION_LAYER_REQUIRED_SNIPPETS["config/ai/contracts.yaml"],
+        )
+        self.assertIn(
+            "documentation: repo-first-then-confluence",
+            module.DOCUMENTATION_LAYER_REQUIRED_SNIPPETS["config/ai/jira-model.yaml"],
+        )
+        self.assertIn(
+            "delivery_role: ai-documentation-sync",
+            module.DOCUMENTATION_LAYER_REQUIRED_SNIPPETS["config/ai/confluence-model.yaml"],
+        )
+        self.assertIn(
+            "ai-documentation-writer:",
+            module.DOCUMENTATION_LAYER_REQUIRED_SNIPPETS["config/ai/agent-operations.yaml"],
+        )
+        self.assertIn(
+            "Camada documental opera por competencia dominante",
+            module.DOCUMENTATION_LAYER_REQUIRED_SNIPPETS["docs/ai-operating-model.md"],
         )
 
     def test_validator_passes_on_current_repo(self) -> None:

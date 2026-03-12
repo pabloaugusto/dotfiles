@@ -208,6 +208,70 @@ class EvaluateIssueCommentContractTest(unittest.TestCase):
             {entry["code"] for entry in report["findings"]},
         )
 
+    def test_accepts_documentation_writer_and_sync_roles_as_delivery(self) -> None:
+        issue = {
+            "key": "DOT-6",
+            "fields": {
+                "summary": "Teste",
+                "status": {"name": "Done"},
+                "issuetype": {"name": "Task"},
+                "priority": {"name": "Medium"},
+                "customfield_1": None,
+                "customfield_2": None,
+            },
+        }
+        comments = [
+            structured_comment(agent="ai-documentation-writer", status="done"),
+            structured_comment(agent="ai-documentation-sync", status="done"),
+            structured_comment(agent="ai-qa", status="done", interaction_type="test-success"),
+            structured_comment(
+                agent="ai-documentation-reviewer",
+                status="done",
+                interaction_type="approval",
+            ),
+        ]
+        report = evaluate_issue_comment_contract(
+            issue,
+            comments,
+            current_agent_field_id="customfield_1",
+            next_required_field_id="customfield_2",
+        )
+        codes = {entry["code"] for entry in report["findings"]}
+        self.assertNotIn("missing_delivery_agent_comment", codes)
+        self.assertNotIn("missing_reviewer_comment", codes)
+
+    def test_accepts_linguistic_reviewer_as_reviewer_role(self) -> None:
+        issue = {
+            "key": "DOT-7",
+            "fields": {
+                "summary": "Teste",
+                "status": {"name": "Done"},
+                "issuetype": {"name": "Task"},
+                "priority": {"name": "Medium"},
+                "customfield_1": None,
+                "customfield_2": None,
+            },
+        }
+        comments = [
+            structured_comment(agent="ai-documentation-writer", status="done"),
+            structured_comment(agent="ai-qa", status="done", interaction_type="test-success"),
+            structured_comment(
+                agent="ai-linguistic-reviewer",
+                status="done",
+                interaction_type="approval",
+            ),
+        ]
+        report = evaluate_issue_comment_contract(
+            issue,
+            comments,
+            current_agent_field_id="customfield_1",
+            next_required_field_id="customfield_2",
+        )
+        self.assertNotIn(
+            "missing_reviewer_comment",
+            {entry["code"] for entry in report["findings"]},
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

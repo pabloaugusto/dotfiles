@@ -677,12 +677,103 @@ roles:
       - comentar risco de ambiente, rollback e dependencias
       - anexar links de pipeline ou runbook e definir proximo papel
 
-  ai-documentation-agent:
+  ai-linguistic-reviewer:
+    profile: quality-common
+    jira:
+      primary_issue_actions:
+        - revisar linguagem, terminologia e microcopy da superficie textual
+        - registrar parecer consultivo quando houver risco de drift linguistico
+      transitions_owned:
+        - sem-transicao-exclusiva
+      required_comment_types:
+        - review-feedback
+        - approval
+      required_evidence:
+        - spell review, diff textual ou checklist linguistico
+    confluence:
+      page_actions:
+        - sugerir ajustes textuais sem assumir publication
+    operating_steps:
+      - revisar ortografia tecnica, terminologia e clareza local
+      - distinguir achado consultivo de risco semantico
+      - escalar para ai-documentation-reviewer ou reviewer tecnico quando o risco for operacional
+      - registrar parecer consultivo e backlog quando a rodada encerrar sem correcao
+
+  ai-documentation-writer:
+    profile: developer-common
+    jira:
+      primary_issue_actions:
+        - produzir ou consolidar conteudo documental sob demanda
+        - registrar progresso de redacao e contexto do artefato preparado
+      transitions_owned:
+        - Ready -> Doing
+        - Doing -> Paused
+        - Paused -> Doing
+        - Changes Requested -> Doing
+      required_comment_types:
+        - progress-update
+        - technical-decision
+      required_evidence:
+        - diff documental, rascunho estruturado ou secao preparada para review
+    confluence:
+      page_actions:
+        - preparar texto para publicacao por outro papel
+    operating_steps:
+      - receber contexto e destino do papel dono
+      - redigir ou reescrever o conteudo sem assumir placement ou sync
+      - encaminhar o texto para review documental, linguistico ou tecnico
+      - devolver o ownership do contexto ao papel chamador
+
+  ai-documentation-reviewer:
+    profile: quality-common
+    jira:
+      primary_issue_actions:
+        - revisar completude, utilidade, clareza global e risco operacional do conteudo
+        - classificar findings documentais bloqueantes ou nao bloqueantes
+      transitions_owned:
+        - Review -> Changes Requested
+      required_comment_types:
+        - review-feedback
+        - approval
+      required_evidence:
+        - checklist documental, diff revisado ou referencia ao artefato aprovado
+    confluence:
+      page_actions:
+        - registrar parecer documental quando a revisao precisar ficar perene
+    operating_steps:
+      - revisar o artefato na camada semantica e estrutural
+      - distinguir problema documental, linguistico e tecnico da familia
+      - devolver para ajuste quando houver bloqueio documental
+      - aprovar semanticamente quando o artefato estiver pronto para sync ou fechamento
+
+  ai-documentation-manager:
     profile: governance-common
     jira:
       primary_issue_actions:
-        - registrar linkagem bidirecional Jira <-> Confluence
-        - confirmar documentacao antes de Done
+        - decidir source of truth, placement, lifecycle e elegibilidade de sync
+        - registrar conflitos documentais cross-surface e sua resolucao
+      transitions_owned:
+        - sem-transicao-exclusiva
+      required_comment_types:
+        - technical-decision
+        - progress-update
+      required_evidence:
+        - matriz de superficie, decisao de source of truth ou classificacao de sync
+    confluence:
+      page_actions:
+        - governar a arquitetura documental sem assumir publication como ownership dominante
+    operating_steps:
+      - classificar a superficie documental e seu owner dominante
+      - decidir source of truth, placement e lifecycle
+      - encaminhar escrita, revisao e sync para os papeis especializados
+      - impedir publicacao cross-surface sem decisao documental explicita
+
+  ai-documentation-sync:
+    profile: governance-common
+    jira:
+      primary_issue_actions:
+        - registrar backlinks Jira <-> Confluence e documentation-link
+        - concluir a rastreabilidade documental antes de Done
       transitions_owned:
         - Review -> Done
       required_comment_types:
@@ -690,7 +781,7 @@ roles:
         - approval
         - schema-artifact
       required_evidence:
-        - URL da pagina do Confluence, attachment, migration bundle ou diff documental
+        - URL da pagina do Confluence, bundle, attachment, diff documental ou evento registrado na fundacao de sync
     confluence:
       pages_owned:
         - hub
@@ -702,12 +793,33 @@ roles:
         - criar paginas
         - atualizar paginas
         - manter backlinks para Jira
+        - consumir a fundacao oficial de sync quando o artefato for elegivel
     operating_steps:
-      - confirmar se a issue tem pagina relacionada ou n/a explicito
+      - confirmar a decisao do ai-documentation-manager antes de publicar
       - criar ou atualizar a pagina correspondente no Confluence
       - registrar comentario documentation-link com evidencias no Jira
-      - validar backlinks, anexos e bundle de migracao quando houver
+      - validar backlinks, anexos, bundle e uso da fundacao de sync quando houver
       - concluir o handoff para Done somente quando a rastreabilidade estiver completa
+
+  ai-documentation-agent:
+    profile: governance-common
+    jira:
+      primary_issue_actions:
+        - redirecionar trilhas historicas para writer, reviewer, manager ou sync
+        - preservar compatibilidade declarativa com referencias legadas
+      transitions_owned:
+        - sem-transicao-exclusiva
+      required_comment_types:
+        - technical-decision
+      required_evidence:
+        - referencia ao papel nuclear acionado ou ao artefato historico conciliado
+    confluence:
+      page_actions:
+        - n/a por default; publication pertence ao ai-documentation-sync
+    operating_steps:
+      - identificar qual responsabilidade legada estava implicita
+      - encaminhar a execucao ao papel nuclear correspondente
+      - evitar que o papel legado recupere ownership dominante da camada documental
 
   ai-browser-validator:
     profile: quality-common

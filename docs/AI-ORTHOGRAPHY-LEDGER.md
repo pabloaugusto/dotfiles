@@ -20,6 +20,62 @@ Registro consultivo do agente Pascoalete para ortografia e higiene vocabular.
 <!-- ai-orthography:records:start -->
 | Data/Hora UTC | Worklog ID | Revisor | Status | Arquivo | Achados | Evidencia |
 | --- | --- | --- | --- | --- | --- | --- |
+| 2026-03-12 04:51 UTC | WIP-20260312-033649 | pascoalete | reprovado | .agents/registry/ai-linguistic-reviewer.toml | Pascoalete | task spell:check |
+| 2026-03-12 04:51 UTC | WIP-20260312-033649 | pascoalete | reprovado | .agents/registry/ai-documentation-writer.toml | Escrivao, conteudo | task spell:check |
+| 2026-03-12 04:51 UTC | WIP-20260312-033649 | pascoalete | reprovado | .agents/registry/ai-documentation-sync.toml | fundacao, backlink | task spell:check |
+| 2026-03-12 04:51 UTC | WIP-20260312-033649 | pascoalete | reprovado | .agents/registry/ai-documentation-reviewer.toml | seguranca, semantica, conteudo | task spell:check |
+| 2026-03-12 04:51 UTC | WIP-20260312-033649 | pascoalete | reprovado | .agents/registry/ai-documentation-manager.toml | deduplicacao | task spell:check |
+| 2026-03-12 04:51 UTC | WIP-20260312-033649 | pascoalete | reprovado | .agents/cards/ai-linguistic-reviewer.md | Pascoalete, linguistico, tecnica, docstrings, legiveis, terminologica, decisao, revisao (+12) | task spell:check |
+| 2026-03-12 04:51 UTC | WIP-20260312-033649 | pascoalete | reprovado | .agents/cards/ai-documentation-writer.md | Escrivao, conteudo, funcao, redacao, tecnicos, producao, consolidacao, docstrings (+18) | task spell:check |
+| 2026-03-12 04:51 UTC | WIP-20260312-033649 | pascoalete | reprovado | .agents/cards/ai-documentation-sync.md | publicacao, atualizacao, backlinks, fundacao, publicacao, materializacao, backlinks, elegiveis (+24) | task spell:check |
+| 2026-03-12 04:51 UTC | WIP-20260312-033649 | pascoalete | reprovado | .agents/cards/ai-documentation-reviewer.md | semantica, nivel, prontidao, conteudo, docstrings, conteudo, aprovacao, semantica (+17) | task spell:check |
+| 2026-03-12 04:51 UTC | WIP-20260312-033649 | pascoalete | reprovado | .agents/cards/ai-documentation-manager.md | deduplicacao, superficie, publicacao, deduplicacao, obsolescencia, fundacao, promocao, fundacao (+14) | task spell:check |
+| 2026-03-12 04:51 UTC | WIP-20260312-033649 | pascoalete | reprovado | tests/python/ai_sync_foundation_test.py | backlinks, efemero, backlinks, acks, acked | task spell:check |
+| 2026-03-12 04:51 UTC | WIP-20260312-033649 | pascoalete | reprovado | tests/python/ai_atlassian_seed_test.py | linkify, Conteudo, Conteudo, linkify | task spell:check |
+| 2026-03-12 04:51 UTC | WIP-20260312-033649 | pascoalete | reprovado | tests/python/ai_atlassian_backfill_test.py | Criterios, Criterios, LICOES, LICOES, LICOES | task spell:check |
+| 2026-03-12 04:51 UTC | WIP-20260312-033649 | pascoalete | reprovado | tests/python/ai_atlassian_agent_comment_audit_test.py | interacao, interacao, pascoalete | task spell:check |
+| 2026-03-12 04:51 UTC | WIP-20260312-033649 | pascoalete | reprovado | tests/python/ai_assets_validator_test.py | possivel, LICOES, Validacao, comunicacao, LICOES, comecar, Orquestracao, evals (+9) | task spell:check |
+| 2026-03-12 04:51 UTC | WIP-20260312-033649 | pascoalete | reprovado | scripts/validate-ai-assets.py | evals, LICOES, evals, evals, evals, evals, autolog, autolog (+75) | task spell:check |
+| 2026-03-12 04:51 UTC | WIP-20260312-033649 | pascoalete | reprovado | scripts/ai_atlassian_seed_lib.py | linkify, Padrao, tambem, Criterios, legivel, rastreavel, aplicavel, conteudo (+19) | task spell:check |
+| 2026-03-12 04:51 UTC | WIP-20260312-033649 | pascoalete | reprovado | scripts/ai_atlassian_backfill_lib.py | linkify, Responsavel, atualizacao, Responsavel, Concluido, exibicao, responsavel, autonomo (+40) | task spell:check |
+| 2026-03-12 04:51 UTC | WIP-20260312-033649 | pascoalete | reprovado | scripts/ai_atlassian_agent_comment_audit_lib.py | interacao, pascoalete, concluida, tecnica, concluida, concluida | task spell:check |
+| 2026-03-12 04:51 UTC | WIP-20260312-033649 | pascoalete | reprovado | docs/config-reference.md | worktree, materializacao, precedencia, padrao, nucleo, obrigatorio, comunicacao, dominio (+28) | task spell:check |
+| 2026-03-12 04:51 UTC | WIP-20260312-033649 | pascoalete | reprovado | docs/atlassian-ia/artifacts/agent-operations.md | Sincronizacao, tecnicos, atuacao, tambem, atuacoes, pascoalete, atuacao, decisao (+90) | task spell:check |
+| 2026-03-12 04:51 UTC | WIP-20260312-033649 | pascoalete | reprovado | docs/ai-sync-foundation.md | duravel, elegivel, fundacao, dominio, duravel, publicacao, recuperavel, fundacao (+33) | task spell:check |
+| 2026-03-12 04:51 UTC | WIP-20260312-033649 | pascoalete | reprovado | docs/ai-operating-model.md | reutilizavel, testavel, worktree, Principios, Instrucoes, instrucoes, estaveis, sessao (+201) | task spell:check |
+| 2026-03-12 04:51 UTC | WIP-20260312-033649 | pascoalete | reprovado | docs/README.md | fundacao, duravel, elegiveis, duravel, canonico, canonico, remediacoes, excecoes | task spell:check |
+| 2026-03-12 04:51 UTC | WIP-20260312-033649 | pascoalete | reprovado | docs/AI-GOVERNANCE-AND-REGRESSION.md | Principios, licoes, importacao, concluido, revisao, LICOES, ausencia, catalogos (+26) | task spell:check |
+| 2026-03-12 04:51 UTC | WIP-20260312-033649 | pascoalete | reprovado | docs/AI-DELEGATION-FLOW.md | canonico, LICOES, sessao, confiavel, relatorio, importacao, aderencia, decomposicao (+54) | task spell:check |
+| 2026-03-12 04:51 UTC | WIP-20260312-033649 | pascoalete | reprovado | docs/AI-AGENTS-CATALOG.md | obrigatorios, comunicacao, obrigatorio, mudanca, obrigatorio, mudanca, expiracao, revogacao (+47) | task spell:check |
+| 2026-03-12 04:51 UTC | WIP-20260312-033649 | pascoalete | reprovado | config/ai/sync-targets.yaml | Pascoalete, integracao, backlinks, efemero, proibe, duravel, relatorio, sessao (+10) | task spell:check |
+| 2026-03-12 04:51 UTC | WIP-20260312-033649 | pascoalete | reprovado | config/ai/jira-model.yaml | finishable, tecnica, reducao, decomposicao, Recomendacao, Criterios, Criterios, Criterios (+11) | task spell:check |
+| 2026-03-12 04:51 UTC | WIP-20260312-033649 | pascoalete | reprovado | config/ai/contracts.yaml | worktrees, worktree, worktree, worktree, condicao, worktrees, worktrees, docstrings (+5) | task spell:check |
+| 2026-03-12 04:51 UTC | WIP-20260312-033649 | pascoalete | reprovado | config/ai/confluence-model.yaml | navegacao, onepassword, onepassword, onepassword, onepassword, onepassword, fundacao, Evolucao (+1) | task spell:check |
+| 2026-03-12 04:51 UTC | WIP-20260312-033649 | pascoalete | reprovado | config/ai/agents.yaml | Pascoalete, Escrivao, backlinks, Escrivao, figma | task spell:check |
+| 2026-03-12 04:51 UTC | WIP-20260312-033649 | pascoalete | reprovado | config/ai/agent-operations.yaml | atuacao, decisao, decisao, linkar, implementacao, mudanca, atualizacao, necessario (+149) | task spell:check |
+| 2026-03-12 04:51 UTC | WIP-20260312-033649 | pascoalete | aprovado | .agents/registry/ai-reviewer.toml | sem achados | task spell:check |
+| 2026-03-12 04:51 UTC | WIP-20260312-033649 | pascoalete | reprovado | .agents/registry/ai-reviewer-python.toml | mudancas, decisao, tecnica, mypy | task spell:check |
+| 2026-03-12 04:51 UTC | WIP-20260312-033649 | pascoalete | reprovado | .agents/registry/ai-reviewer-powershell.toml | mudancas, idempotencia, seguranca | task spell:check |
+| 2026-03-12 04:51 UTC | WIP-20260312-033649 | pascoalete | aprovado | .agents/registry/ai-reviewer-config-policy.toml | sem achados | task spell:check |
+| 2026-03-12 04:51 UTC | WIP-20260312-033649 | pascoalete | reprovado | .agents/registry/ai-reviewer-automation.toml | seguranca | task spell:check |
+| 2026-03-12 04:51 UTC | WIP-20260312-033649 | pascoalete | aprovado | .agents/registry/ai-product-owner.toml | sem achados | task spell:check |
+| 2026-03-12 04:51 UTC | WIP-20260312-033649 | pascoalete | reprovado | .agents/registry/ai-documentation-agent.toml | Escrivao, historica | task spell:check |
+| 2026-03-12 04:51 UTC | WIP-20260312-033649 | pascoalete | reprovado | .agents/registry/ai-devops.toml | integracoes | task spell:check |
+| 2026-03-12 04:51 UTC | WIP-20260312-033649 | pascoalete | reprovado | .agents/registry/ai-developer-python.toml | mudancas, rastreavel | task spell:check |
+| 2026-03-12 04:51 UTC | WIP-20260312-033649 | pascoalete | reprovado | .agents/registry/ai-developer-powershell.toml | mudancas, idempotencia | task spell:check |
+| 2026-03-12 04:51 UTC | WIP-20260312-033649 | pascoalete | reprovado | .agents/registry/ai-developer-config-policy.toml | mudancas | task spell:check |
+| 2026-03-12 04:51 UTC | WIP-20260312-033649 | pascoalete | reprovado | .agents/registry/ai-developer-automation.toml | automacoes | task spell:check |
+| 2026-03-12 04:51 UTC | WIP-20260312-033649 | pascoalete | aprovado | .agents/prompts/formal/documentation-layer-governance/meta.yaml | sem achados | task spell:check |
+| 2026-03-12 04:51 UTC | WIP-20260312-033649 | pascoalete | reprovado | .agents/prompts/CATALOG.md | Dependencias, superficie, dependencia, fundacao, superficie, semantica, legiveis, dependencias (+1) | task spell:check |
+| 2026-03-12 04:51 UTC | WIP-20260312-033649 | pascoalete | reprovado | .agents/orchestration/routing-policy.yaml | LICOES, pascoalete, pascoalete, glossario, backlink, pascoalete, pascoalete, pascoalete (+2) | task spell:check |
+| 2026-03-12 04:51 UTC | WIP-20260312-033649 | pascoalete | reprovado | .agents/orchestration/capability-matrix.yaml | docstrings, adrs, backlinks, pascoalete | task spell:check |
+| 2026-03-12 04:51 UTC | WIP-20260312-033649 | pascoalete | reprovado | .agents/evals/datasets/routing.jsonl | agil | task spell:check |
+| 2026-03-12 04:51 UTC | WIP-20260312-033649 | pascoalete | reprovado | .agents/config.toml | pascoalete, evals, evals, evals, evals, evals | task spell:check |
+| 2026-03-12 04:51 UTC | WIP-20260312-033649 | pascoalete | reprovado | .agents/cards/revisor-config-policy.md | aderencia, mudancas, alteracoes, catalogos, aplicaveis, Saidas, decisao, validacoes (+15) | task spell:check |
+| 2026-03-12 04:51 UTC | WIP-20260312-033649 | pascoalete | reprovado | .agents/cards/pascoalete.md | Pascoalete, tecnica, worktree, dicionarios, Saidas, ortografico, redundancia, rastreavel (+14) | task spell:check |
+| 2026-03-12 04:51 UTC | WIP-20260312-033649 | pascoalete | reprovado | .agents/cards/curador-repo.md | organizacao, automacoes, linkagem, repositorio, viaveis, mudancas, mudancas, mudancas (+39) | task spell:check |
+| 2026-03-12 04:51 UTC | WIP-20260312-033649 | pascoalete | reprovado | .agents/cards/ai-reviewer.md | aprovacao, consolidacao, multiplas, revisoes, Saidas, aprovacao, devolucao, verificacao (+10) | task spell:check |
+| 2026-03-12 04:51 UTC | WIP-20260312-033649 | pascoalete | reprovado | .agents/cards/ai-documentation-agent.md | Escrivao, historica, concentracao, historicas, Saidas, decomposicao, semantico, publicacao (+4) | task spell:check |
 | 2026-03-11 23:03 UTC | WIP-20260311-220259 | pascoalete | reprovado | tests/python/ai_sync_foundation_test.py | efemero, acks, acked | task spell:check |
 | 2026-03-11 23:03 UTC | WIP-20260311-220259 | pascoalete | reprovado | tests/python/ai_control_plane_test.py | linkify, pabloaugusto, pabloaugusto, linkify, linkify, linkify, linkify | task spell:check |
 | 2026-03-11 23:03 UTC | WIP-20260311-220259 | pascoalete | reprovado | tests/python/ai_assets_validator_test.py | possivel, LICOES, Validacao, comunicacao, LICOES, comecar, Orquestracao, evals (+7) | task spell:check |

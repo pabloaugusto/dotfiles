@@ -38,13 +38,20 @@ ACTIVE_STATUS_NAMES = {
 DELIVERY_ISSUE_TYPES = {"task", "story", "bug", "sub-task"}
 BUILDER_ROLES = (
     "ai-documentation-agent",
+    "ai-documentation-writer",
+    "ai-documentation-sync",
     "ai-developer",
     "ai-developer-",
     "ai-devops",
     "ai-tech-lead",
     "ai-engineering-architect",
 )
-REVIEWER_ROLES = {"ai-reviewer", "pascoalete"}
+REVIEWER_ROLES = {
+    "ai-reviewer",
+    "pascoalete",
+    "ai-linguistic-reviewer",
+    "ai-documentation-reviewer",
+}
 REVIEWER_ROLE_PREFIXES = ("ai-reviewer-",)
 REVIEWER_ROLE_SUFFIXES = ("-reviewer",)
 QA_ROLES = {"ai-qa"}

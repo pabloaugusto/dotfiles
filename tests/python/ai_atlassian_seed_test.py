@@ -19,6 +19,7 @@ from scripts.ai_atlassian_seed_lib import (
     logical_status_from_name,
     markdown_to_storage_html,
     normalize_status_label,
+    sync_confluence_docs,
     state_hint_to_logical_status,
     workflow_transition_path,
 )
@@ -48,6 +49,82 @@ class AtlassianSeedPlanTests(unittest.TestCase):
         self.assertGreater(payload["confluence"]["total_pages"], 0)
         self.assertTrue(payload["preconditions"]["board_layout_confirmed"])
         self.assertEqual(payload["preconditions"]["board_layout_status"], "confirmed")
+
+    def test_sync_confluence_docs_uses_documentation_sync_role(self) -> None:
+        fake_jira_comments: list[tuple[str, str]] = []
+        captured_notes: list[str] = []
+
+        class FakeJira:
+            def find_issue_by_summary(
+                self,
+                *,
+                project_key: str,
+                summary: str,
+                issue_types: list[str] | None = None,
+            ) -> dict[str, str]:
+                return {"key": "DOT-1"}
+
+            def get_issue(
+                self, issue_key: str, *, fields: list[str] | None = None
+            ) -> dict[str, object]:
+                return {"key": issue_key, "fields": {"summary": "Migracao"}}
+
+            def ensure_comment(self, issue_key: str, body_text: str) -> dict[str, object]:
+                fake_jira_comments.append((issue_key, body_text))
+                return {"id": "1"}
+
+        def fake_sync_confluence_page_tree(**kwargs: object) -> dict[str, dict[str, str]]:
+            notes = kwargs.get("notes") or []
+            captured_notes.extend(str(item) for item in notes)
+            return {
+                "DOT - AI Control Plane Hub": {"url": "https://example.atlassian.net/wiki/hub"}
+            }
+
+        fake_control_plane = type(
+            "ControlPlane",
+            (),
+            {
+                "repo_root": Path(".").resolve(),
+                "atlassian_definition": staticmethod(lambda: object()),
+            },
+        )()
+        fake_resolved = type(
+            "Resolved",
+            (),
+            {
+                "site_url": "https://example.atlassian.net",
+                "jira_project_key": "DOT",
+            },
+        )()
+
+        with (
+            patch(
+                "scripts.ai_atlassian_seed_lib.load_ai_control_plane",
+                return_value=fake_control_plane,
+            ),
+            patch(
+                "scripts.ai_atlassian_seed_lib.resolve_atlassian_platform",
+                return_value=fake_resolved,
+            ),
+            patch(
+                "scripts.ai_atlassian_seed_lib.load_confluence_model",
+                return_value=(Path("config/ai/confluence-model.yaml"), {}),
+            ),
+            patch("scripts.ai_atlassian_seed_lib.AtlassianHttpClient", return_value=object()),
+            patch("scripts.ai_atlassian_seed_lib.ConfluenceAdapter", return_value=object()),
+            patch("scripts.ai_atlassian_seed_lib.JiraAdapter", return_value=FakeJira()),
+            patch(
+                "scripts.ai_atlassian_seed_lib.sync_confluence_page_tree",
+                side_effect=fake_sync_confluence_page_tree,
+            ),
+        ):
+            payload = sync_confluence_docs(Path("."))
+
+        self.assertEqual(payload["counts"]["confluence_pages"], 1)
+        self.assertEqual(fake_jira_comments[0][0], "DOT-1")
+        self.assertIn("Agente: ai-documentation-sync", fake_jira_comments[0][1])
+        self.assertIn("repo como fonte canonica", fake_jira_comments[0][1])
+        self.assertTrue(any("sync documental" in note for note in captured_notes))
 
     def test_flatten_page_tree_keeps_declared_titles(self) -> None:
         model = load_yaml_map(Path("config/ai/confluence-model.yaml"))

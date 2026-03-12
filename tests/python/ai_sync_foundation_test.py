@@ -59,6 +59,22 @@ def write_sync_manifest(repo_root: pathlib.Path) -> None:
                   on_remote_ack: compact
                   keep_last_synced_days: 14
                   max_attempts_before_dead_letter: 5
+              documentation_links:
+                artifact_type: runtime_ledger
+                definition_source: repo
+                sync_eligibility: candidate
+                source_of_truth: confluence
+                remote_target:
+                  kind: confluence
+                  strategy: append-page-ledger
+                  page_title: DOT - Documentation Sync Ledger
+                  page_scope: documentation
+                local_outbox:
+                  path: outbox/confluence/documentation-links.jsonl
+                retention_policy:
+                  on_remote_ack: compact
+                  keep_last_synced_days: 14
+                  max_attempts_before_dead_letter: 5
             artifact_inventory:
               repo_canonical:
                 - path: config/ai/
@@ -67,6 +83,9 @@ def write_sync_manifest(repo_root: pathlib.Path) -> None:
                 - path: prompt-runs
                   artifact_key: prompt_runs
                   reason: eventos de prompt
+                - path: documentation-links
+                  artifact_key: documentation_links
+                  reason: backlinks e documentation-link
               remote_ineligible:
                 - path: .cache/
                   reason: efemero
@@ -131,15 +150,26 @@ class AiSyncFoundationTests(unittest.TestCase):
             with patch.dict(os.environ, {"HOME": tmp, "USERPROFILE": tmp}, clear=False):
                 manifest = load_sync_manifest(repo_root)
                 payload = sync_check_payload(repo_root)
+                status_payload = sync_status_payload(repo_root)
 
         self.assertEqual(manifest.workspace_id, "workstation-governance")
         self.assertEqual(payload["workspace"]["id"], "workstation-governance")
         self.assertIn("prompt_runs", payload["artifact_keys"])
+        self.assertIn("documentation_links", payload["artifact_keys"])
         self.assertEqual(
             pathlib.Path(payload["workspace"]["workspace_root"]).as_posix(),
             (
                 pathlib.Path(tmp) / ".ai-control-plane" / "workspaces" / "workstation-governance"
             ).as_posix(),
+        )
+        runtime_candidates = status_payload["artifact_inventory"]["runtime_ledger_candidates"]
+        self.assertIn(
+            {
+                "path": "documentation-links",
+                "artifact_key": "documentation_links",
+                "reason": "backlinks e documentation-link",
+            },
+            runtime_candidates,
         )
 
     def test_record_sync_event_creates_outbox_and_status(self) -> None:

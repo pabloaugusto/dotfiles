@@ -27,6 +27,24 @@ agents:
   - id: automation-reviewer
     domains: [shell, workflows, taskfile, docker, ci, review]
     default_skills: [dotfiles-automation-review]
+  - id: ai-linguistic-reviewer
+    domains: [orthography, terminology, cspell, microcopy, docs, comments, docstrings]
+    default_skills: [dotfiles-orthography-review]
+  - id: ai-documentation-writer
+    domains: [technical-writing, docs, runbooks, adrs, confluence-drafts, narrative]
+    default_skills: [dotfiles-repo-governance, dotfiles-lessons-governance]
+  - id: ai-documentation-reviewer
+    domains: [documentation-review, completeness, semantic-risk, readability, operational-safety]
+    default_skills: [dotfiles-repo-governance, dotfiles-architecture-modernization]
+  - id: ai-documentation-manager
+    domains: [documentation-governance, source-of-truth, placement, lifecycle, deduplication, sync-eligibility]
+    default_skills: [dotfiles-repo-governance, dotfiles-architecture-modernization, dotfiles-lessons-governance]
+  - id: ai-documentation-sync
+    domains: [documentation-sync, confluence, backlinks, documentation-link, bundles, cross-surface-traceability]
+    default_skills: [dotfiles-repo-governance, dotfiles-critical-integrations]
+  - id: ai-documentation-agent
+    domains: [legacy-documentation-compatibility, historical-handoffs]
+    default_skills: [dotfiles-repo-governance]
   - id: pascoalete
     domains: [orthography, cspell, vocabulary, docs, comments, review]
     default_skills: [dotfiles-orthography-review]

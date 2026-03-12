@@ -1,6 +1,6 @@
 # AI WIP Tracker
 
-Atualizado em: 2026-03-12 01:45 UTC
+Atualizado em: 2026-03-12 03:36 UTC
 
 Fallback local de continuidade. O Jira e a fonte primaria do fluxo vivo.
 
@@ -27,7 +27,7 @@ Fallback local de continuidade. O Jira e a fonte primaria do fluxo vivo.
 <!-- ai-worklog:doing:start -->
 | ID | Tarefa | Branch | Responsavel | Inicio UTC | Ultima atualizacao UTC | Proximo passo | Bloqueios |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| (sem itens) | - | - | - | - | - | - | - |
+| WIP-20260312-033649 | Implementar prompt pack de governanca da camada documental por agentes de IA | prompt/DOT-181-documentation-layer-governance | codex | 2026-03-12 03:36 UTC | 2026-03-12 03:36 UTC | Auditar a malha documental atual e materializar a arquitetura nuclear em cards, registry, contracts, routing e validators. | - |
 <!-- ai-worklog:doing:end -->
 
 ## Done
@@ -90,5 +90,5 @@ Fallback local de continuidade. O Jira e a fonte primaria do fluxo vivo.
 <!-- ai-worklog:log:start -->
 | Data/Hora UTC | ID | Status | Resumo | Proximo passo | Bloqueios | Contexto | Notas |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| (sem itens) | - | - | - | - | - | - | - |
+| 2026-03-12 03:36 UTC | WIP-20260312-033649 | doing | Implementar prompt pack de governanca da camada documental por agentes de IA | Auditar a malha documental atual e materializar a arquitetura nuclear em cards, registry, contracts, routing e validators. | - | prompt/documentation-layer-governance | inicio da tarefa |
 <!-- ai-worklog:log:end -->

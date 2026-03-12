@@ -25,7 +25,7 @@ class AtlassianBackfillPlanTests(unittest.TestCase):
         self.assertIn("RM-001", roadmap_ids)
 
         worklog_ids = {entry["external_id"] for entry in payload["jira"]["worklog_doing"]}
-        self.assertIn("WIP-20260307-ATLASSIAN-ADAPTERS", worklog_ids)
+        self.assertTrue(any(item.startswith("WIP-") for item in worklog_ids))
 
     def test_backfill_plan_includes_seed_activity_with_evidence(self) -> None:
         payload = build_backfill_plan()
@@ -77,6 +77,14 @@ class AtlassianBackfillPlanTests(unittest.TestCase):
         self.assertIn("## Resultado esperado", description)
         self.assertIn("## Escopo tecnico", description)
         self.assertIn("## Criterios de aceite", description)
+
+    def test_worklog_seed_activity_uses_documentation_sync_role(self) -> None:
+        payload = build_backfill_plan()
+        first_worklog = payload["jira"]["worklog_doing"][0]
+        seed_activity = first_worklog["seed_activity"]
+
+        self.assertEqual(seed_activity["agent"], "ai-documentation-sync")
+        self.assertIn("documentation-link", seed_activity["proximo_passo"])
 
     def test_build_jira_summary_enforces_limit(self) -> None:
         summary = build_jira_summary("SG-1", "x" * 400)

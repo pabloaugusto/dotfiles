@@ -5,4 +5,4 @@ purpose = "Operar pipelines, integracoes, releases e infraestrutura de suporte a
 default_skills = ["dotfiles-critical-integrations", "dotfiles-automation-review", "dotfiles-test-harness"]
 triggers = ["devops", "pipeline", "deployment", "release", "integration", "github", "jira dev"]
 output_contract = "devops_delivery_report"
-handoff_to = ["ai-qa", "ai-reviewer-automation", "ai-documentation-agent"]
+handoff_to = ["ai-qa", "ai-reviewer-automation", "ai-documentation-sync", "ai-documentation-manager"]

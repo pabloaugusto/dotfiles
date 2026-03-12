@@ -1,0 +1,8 @@
+id = "ai-documentation-reviewer"
+display_name = "Revisor Documental"
+tier = "specialist"
+purpose = "Revisar completude, utilidade e seguranca semantica do conteudo documental antes de sync ou fechamento"
+default_skills = ["dotfiles-repo-governance", "dotfiles-architecture-modernization"]
+triggers = ["documentation review", "docs", "runbook", "playbook", "comment", "docstring", "help text", "microcopy", "markdown"]
+output_contract = "documentation_review_report"
+handoff_to = ["ai-reviewer", "ai-tech-lead", "ai-documentation-sync", "ai-documentation-manager"]

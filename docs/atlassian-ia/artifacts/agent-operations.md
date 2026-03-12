@@ -92,7 +92,8 @@ Essa visibilidade em chat:
 
 - toda pagina gerada por trabalho deve linkar a issue correspondente no `Jira`
 - atualizacao documental relevante deve ser mencionada na issue correspondente
-- o `AI Documentation Agent` governa a arvore de paginas, backlinks e espelhos
+- o `ai-documentation-manager` governa source of truth, placement e lifecycle
+- o `ai-documentation-sync` governa publication, backlinks e `documentation-link`
 
 ## Semantica operacional de `Paused`
 
@@ -239,10 +240,11 @@ Essa visibilidade em chat:
 
 ### `ai-documentation-agent`
 
-- cria e atualiza paginas oficiais no `Confluence`
-- garante backlinks `Jira <-> Confluence`
-- registra comentario `documentation-link` com prova no `Jira`
-- so libera `Done` quando a rastreabilidade estiver completa
+- papel legado preservado apenas para compatibilidade e leitura historica
+- escrita dominante agora pertence a `ai-documentation-writer`
+- revisao documental dominante agora pertence a `ai-documentation-reviewer`
+- source of truth, placement e lifecycle agora pertencem a `ai-documentation-manager`
+- publication, backlinks e `documentation-link` agora pertencem a `ai-documentation-sync`
 
 ### `pascoalete`
 

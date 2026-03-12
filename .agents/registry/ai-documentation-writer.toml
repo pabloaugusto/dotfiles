@@ -1,0 +1,8 @@
+id = "ai-documentation-writer"
+display_name = "Escrivao"
+tier = "specialist"
+purpose = "Escrever, reescrever e consolidar conteudo documental sob demanda sem absorver governanca, placement ou sync"
+default_skills = ["dotfiles-repo-governance", "dotfiles-lessons-governance"]
+triggers = ["docs", "markdown", "runbook", "playbook", "adr", "confluence", "comment", "docstring", "help text"]
+output_contract = "documentation_draft_report"
+handoff_to = ["ai-documentation-reviewer", "ai-linguistic-reviewer", "ai-documentation-manager"]

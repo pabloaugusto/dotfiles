@@ -274,6 +274,11 @@ Exemplo direto:
 - o pack
   [`documentation-layer-governance`](../.agents/prompts/formal/documentation-layer-governance/prompt.md)
   usa esta fundacao como base para o futuro `ai-documentation-sync`
+- o manifest
+  [`config/ai/sync-targets.yaml`](../config/ai/sync-targets.yaml) ja pode
+  carregar artefatos como `documentation_links` para `documentation-link`,
+  backlinks e rastreabilidade cross-surface quando a policy documental os
+  classificar como elegiveis
 
 Regra obrigatoria:
 

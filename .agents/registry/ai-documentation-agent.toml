@@ -1,8 +1,8 @@
 id = "ai-documentation-agent"
-display_name = "Escrivão"
-tier = "core"
-purpose = "Sincronizar repo, Jira e Confluence com documentacao viva e rastreavel"
-default_skills = ["dotfiles-repo-governance", "dotfiles-lessons-governance", "dotfiles-orthography-review"]
-triggers = ["docs", "confluence", "markdown", "adr", "artifact", "migration bundle", "traceability"]
-output_contract = "documentation_sync_report"
-handoff_to = ["ai-product-owner", "ai-reviewer", "pascoalete"]
+display_name = "Escrivao (legado)"
+tier = "legacy"
+purpose = "Preservar compatibilidade historica enquanto a camada documental e decomposta entre writer, reviewer, manager e sync"
+default_skills = ["dotfiles-repo-governance"]
+triggers = ["legacy docs", "compatibilidade documental", "historico jira", "historico confluence", "migration compatibility"]
+output_contract = "documentation_legacy_handoff_report"
+handoff_to = ["ai-documentation-writer", "ai-documentation-reviewer", "ai-documentation-manager", "ai-documentation-sync"]

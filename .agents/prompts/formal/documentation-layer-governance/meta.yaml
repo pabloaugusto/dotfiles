@@ -3,6 +3,7 @@ task_id: prompt/documentation-layer-governance
 title: Prompt pack de governanca da camada documental por agentes de IA
 status: active
 owner_epic: DOT-71
+owner_issue: DOT-181
 jira:
   summary_prefix: "PROMPT:"
   required_labels:
