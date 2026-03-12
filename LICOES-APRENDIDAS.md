@@ -224,6 +224,7 @@ Toda finalizacao de worklog deve registrar se houve nova licao.
 <!-- ai-lessons:reviews:start -->
 | Data/Hora UTC | Worklog ID | Decisao | Resumo | Licoes | Evidencia |
 | --- | --- | --- | --- | --- | --- |
+| 2026-03-12 15:09 UTC | WIP-20260312-120449 | sem_nova_licao | A rodada apenas concluiu a publicacao remota e o closeout operacional de DOT-206, sem nova licao perene alem do proprio fechamento canonico. | - | PR #49 mergeado; merge commit 8c75121 |
 | 2026-03-12 14:55 UTC | WIP-20260312-142856 | sem_nova_licao | A rodada endureceu estruturalmente o startup com Guardiao de Startup, readiness artifact e enforcement do first-response gate, sem revelar licao perene adicional alem do proprio incremento entregue. | - | - |
 | 2026-03-12 14:16 UTC | WIP-20260312-141233 | sem_nova_licao | A rodada formalizou um novo pack de execucao para endurecer o startup, sem revelar licao perene nova alem do proprio artefato entregue. | - | - |
 | 2026-03-12 13:47 UTC | WIP-20260312-DOT-205 | sem_nova_licao | Prompt pack formal salvo no padrao canonico, com task Jira dona e backlog consultivo de ortografia rastreado. | - | commit ffda714; task docs:check; task ai:validate; task ai:prompts:jira:check; task ai:eval:smoke; task spell:dictionary:audit; SG-ORTHO-WIP-20260312-DOT-205 |
