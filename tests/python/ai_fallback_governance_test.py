@@ -122,6 +122,7 @@ class AiFallbackGovernanceTests(unittest.TestCase):
             repo = pathlib.Path(tmp)
             ledger = repo / LEDGER_PATH
             ensure_fallback_ledger_file(ledger)
+            captured_comments: list[str] = []
 
             capture_fallback_record(
                 repo,
@@ -150,7 +151,8 @@ class AiFallbackGovernanceTests(unittest.TestCase):
                 issue_key: str,
                 body_text: str,
             ) -> dict[str, str]:
-                del jira, body_text
+                del jira
+                captured_comments.append(body_text)
                 return {
                     "id": "comment-1",
                     "issue_key": issue_key,
@@ -160,6 +162,21 @@ class AiFallbackGovernanceTests(unittest.TestCase):
             with (
                 patch.object(module, "issue_url", stub_issue_url),
                 patch.object(module, "ensure_comment", stub_ensure_comment),
+                patch.object(
+                    module,
+                    "load_ai_control_plane",
+                    return_value=type(
+                        "FakeControlPlane",
+                        (),
+                        {
+                            "visible_name_for_reference": staticmethod(
+                                lambda raw: "Engenheiro Agentes IA"
+                                if raw == "ai-developer-config-policy"
+                                else raw
+                            )
+                        },
+                    )(),
+                ),
             ):
                 payload = resolve_fallback_record(
                     repo,
@@ -181,6 +198,7 @@ class AiFallbackGovernanceTests(unittest.TestCase):
             self.assertEqual(len(resolved), 1)
             self.assertEqual(resolved[0]["Estado"], "drained")
             self.assertIn("DOT-106", resolved[0]["Jira"])
+            self.assertIn("Agent: Engenheiro Agentes IA", captured_comments[0])
 
     def test_external_ledger_path_is_reported_without_relative_to_failure(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:

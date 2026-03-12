@@ -153,6 +153,31 @@ class EvaluateIssueCommentContractTest(unittest.TestCase):
             {entry["code"] for entry in report["findings"]},
         )
 
+    def test_flags_technical_id_drift_in_fields_and_comments(self) -> None:
+        issue = {
+            "key": "DOT-2A",
+            "fields": {
+                "summary": "Teste",
+                "status": {"name": "DOING"},
+                "issuetype": {"name": "Task"},
+                "priority": {"name": "High"},
+                "customfield_1": {"value": "ai-devops"},
+                "customfield_2": {"value": "ai-product-owner"},
+            },
+        }
+        comments = [structured_comment(agent="ai-devops", status="doing")]
+        report = evaluate_issue_comment_contract(
+            issue,
+            comments,
+            current_agent_field_id="customfield_1",
+            next_required_field_id="customfield_2",
+            role_reference_map=default_role_reference_map(),
+        )
+        codes = {entry["code"] for entry in report["findings"]}
+        self.assertIn("current_agent_role_uses_technical_id", codes)
+        self.assertIn("next_required_role_uses_technical_id", codes)
+        self.assertIn("structured_comment_agent_uses_technical_id", codes)
+
     def test_flags_done_delivery_issue_missing_qa_and_reviewer(self) -> None:
         issue = {
             "key": "DOT-3",

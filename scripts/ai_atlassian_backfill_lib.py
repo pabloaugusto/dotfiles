@@ -8,6 +8,7 @@ from typing import Any
 from scripts.ai_control_plane_lib import (
     github_blob_url,
     linkify_repo_relative_paths,
+    load_ai_control_plane,
     resolve_repo_root,
 )
 from scripts.ai_roadmap_lib import (
@@ -101,9 +102,16 @@ def build_seed_activity(
     contexto: list[str],
     evidencias: list[str],
     proximo_passo: str,
+    repo_root: str | Path | None = None,
 ) -> dict[str, Any]:
+    visible_agent = str(agent or "").strip()
+    if repo_root:
+        try:
+            visible_agent = load_ai_control_plane(repo_root).visible_name_for_reference(visible_agent)
+        except Exception:
+            visible_agent = str(agent or "").strip()
     return {
-        "agent": agent,
+        "agent": visible_agent,
         "interaction_type": interaction_type,
         "status": canonicalize_workflow_status(status) or str(status).strip(),
         "contexto": [entry for entry in contexto if entry.strip()],
@@ -394,6 +402,7 @@ def roadmap_backlog_records(paths: BackfillPaths) -> list[dict[str, Any]]:
                         ),
                     ],
                     proximo_passo="Linkar a documentacao correspondente no Confluence, revisar a prioridade final e definir o proximo papel.",
+                    repo_root=paths.repo_root,
                 ),
             }
         )
@@ -483,6 +492,7 @@ def roadmap_suggestion_records(paths: BackfillPaths) -> list[dict[str, Any]]:
                         ),
                     ],
                     proximo_passo="Refinar a demanda no Jira, linkar a documentacao correspondente e decidir se a quebra em subtarefas ja e necessaria.",
+                    repo_root=paths.repo_root,
                 ),
             }
         )
@@ -578,6 +588,7 @@ def worklog_records(paths: BackfillPaths, *, done: bool) -> list[dict[str, Any]]
                         ),
                     ],
                     proximo_passo="Confirmar backlinks ou documentation-link quando houver superficie remota elegivel e manter o status do Jira alinhado ao trabalho real.",
+                    repo_root=paths.repo_root,
                 ),
             }
         )

@@ -243,6 +243,14 @@ class AiControlPlaneTests(unittest.TestCase):
             control_plane = load_ai_control_plane(repo_root)
             self.assertIn("SEO Review", control_plane.effective_workflow_columns())
 
+    def test_visible_name_for_reference_prefers_alias_when_available(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            repo_root = pathlib.Path(tmp)
+            write_control_plane(repo_root)
+            control_plane = load_ai_control_plane(repo_root)
+            self.assertEqual(control_plane.visible_name_for_reference("ai-product-owner"), "PO")
+            self.assertEqual(control_plane.visible_name_for_reference("PO"), "PO")
+
     def test_local_overlay_overrides_base_specs(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             repo_root = pathlib.Path(tmp)

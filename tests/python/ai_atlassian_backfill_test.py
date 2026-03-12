@@ -31,7 +31,7 @@ class AtlassianBackfillPlanTests(unittest.TestCase):
         payload = build_backfill_plan()
 
         first_backlog = payload["jira"]["roadmap_backlog"][0]
-        self.assertEqual(first_backlog["seed_activity"]["agent"], "ai-product-owner")
+        self.assertEqual(first_backlog["seed_activity"]["agent"], "PO")
         self.assertGreater(len(first_backlog["seed_activity"]["evidencias"]), 0)
         self.assertTrue(
             first_backlog["seed_activity"]["evidencias"][0].startswith(
@@ -83,7 +83,7 @@ class AtlassianBackfillPlanTests(unittest.TestCase):
         first_worklog = payload["jira"]["worklog_doing"][0]
         seed_activity = first_worklog["seed_activity"]
 
-        self.assertEqual(seed_activity["agent"], "ai-documentation-sync")
+        self.assertEqual(seed_activity["agent"], "Sync Documental")
         self.assertIn("documentation-link", seed_activity["proximo_passo"])
 
     def test_build_jira_summary_enforces_limit(self) -> None:

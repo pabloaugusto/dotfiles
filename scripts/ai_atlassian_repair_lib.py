@@ -145,6 +145,14 @@ def canonicalize_generated_comment_text(
     )
     parsed = parse_structured_comment(normalized)
     if parsed:
+        if repo_root:
+            try:
+                control_plane = load_ai_control_plane(repo_root)
+                parsed["agent"] = control_plane.visible_name_for_reference(
+                    str(parsed.get("agent", "")).strip()
+                )
+            except Exception:
+                pass
         return render_structured_comment(parsed)
     return normalized
 

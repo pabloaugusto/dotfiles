@@ -141,6 +141,16 @@ def is_qa_role(agent: str) -> bool:
     return any(normalized.startswith(prefix) for prefix in QA_ROLE_PREFIXES)
 
 
+def uses_technical_role_id(raw_value: str, resolved_role_id: str) -> bool:
+    normalized_raw = str(raw_value or "").strip()
+    normalized_role = str(resolved_role_id or "").strip()
+    if not normalized_raw or not normalized_role:
+        return False
+    if normalized_raw.casefold() != normalized_role.casefold():
+        return False
+    return normalized_raw.casefold().startswith("ai-")
+
+
 def evaluate_issue_comment_contract(
     issue: dict[str, Any],
     comments: list[dict[str, Any]],
@@ -207,6 +217,22 @@ def evaluate_issue_comment_contract(
                 "message": f'O campo "Current Agent Role" aponta para {current_agent}, mas nao existe comentario estruturado desse agente.',
             }
         )
+    if uses_technical_role_id(current_agent, current_agent_id):
+        findings.append(
+            {
+                "code": "current_agent_role_uses_technical_id",
+                "severity": "medium",
+                "message": f'O campo "Current Agent Role" ainda usa o identificador tecnico "{current_agent}" em vez do apelido visivel.',
+            }
+        )
+    if uses_technical_role_id(next_required_role, next_required_role_id):
+        findings.append(
+            {
+                "code": "next_required_role_uses_technical_id",
+                "severity": "medium",
+                "message": f'O campo "Next Required Role" ainda usa o identificador tecnico "{next_required_role}" em vez do apelido visivel.',
+            }
+        )
     if latest_status and normalize_status_name(latest_status) != status_normalized:
         findings.append(
             {
@@ -226,6 +252,17 @@ def evaluate_issue_comment_contract(
                 "code": "latest_comment_agent_mismatch",
                 "severity": "medium",
                 "message": f"O comentario estruturado mais recente e de {latest_agent}, mas o agente atual da issue e {current_agent}.",
+            }
+        )
+    if any(
+        uses_technical_role_id(entry["agent"], role_reference_map.get(entry["agent"].casefold(), ""))
+        for entry in structured_comments
+    ):
+        findings.append(
+            {
+                "code": "structured_comment_agent_uses_technical_id",
+                "severity": "medium",
+                "message": "Existe comentario estruturado ainda serializando identificador tecnico de agente onde ja deveria aparecer o apelido visivel.",
             }
         )
 

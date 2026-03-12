@@ -4,6 +4,7 @@ import subprocess
 from pathlib import Path
 from typing import Any
 
+from scripts.ai_control_plane_lib import load_ai_control_plane
 from scripts.ai_contract_paths import ROOT
 from scripts.ai_dispatch_lib import build_route_payload
 from scripts.ai_lessons_lib import (
@@ -33,6 +34,36 @@ SPECIALIST_REVIEWERS = {
     "powershell-reviewer",
     "automation-reviewer",
 }
+
+
+def _repo_root_for_document(path: Path) -> Path:
+    candidate = path.resolve()
+    for base in (candidate.parent, *candidate.parents):
+        if (base / "config" / "ai").is_dir():
+            return base
+    return candidate.parent.resolve()
+
+
+def visible_reviewer_name(review_path: Path, reviewer: str) -> str:
+    normalized = str(reviewer or "").strip()
+    if not normalized:
+        return ""
+    try:
+        control_plane = load_ai_control_plane(_repo_root_for_document(review_path))
+    except Exception:
+        return normalized
+    return control_plane.visible_name_for_reference(normalized) or normalized
+
+
+def normalize_reviewer_reference(review_path: Path, reviewer: str) -> str:
+    normalized = str(reviewer or "").strip()
+    if not normalized:
+        return ""
+    try:
+        control_plane = load_ai_control_plane(_repo_root_for_document(review_path))
+    except Exception:
+        return normalized
+    return control_plane.resolve_role_reference(normalized) or normalized
 
 
 def review_template() -> str:
@@ -177,17 +208,21 @@ def record_review(
     if reviewer not in SPECIALIST_REVIEWERS:
         raise ValueError("Revisor especializado invalido para este ledger.")
 
+    visible_reviewer = visible_reviewer_name(review_path, reviewer)
     rows = [
         row
         for row in load_reviews(review_path)
-        if not (row["Worklog ID"] == worklog_id and row["Revisor"] == reviewer)
+        if not (
+            row["Worklog ID"] == worklog_id
+            and normalize_reviewer_reference(review_path, row["Revisor"]) == reviewer
+        )
     ]
     rows.insert(
         0,
         {
             "Data/Hora UTC": now_human_utc(),
             "Worklog ID": normalize_cell(worklog_id, max_len=80),
-            "Revisor": reviewer,
+            "Revisor": visible_reviewer,
             "Status": normalized_status,
             "Arquivos": normalize_cell(", ".join(normalize_path_list(paths)), max_len=1000),
             "Resumo": normalize_cell(summary, max_len=220),
@@ -212,7 +247,7 @@ def latest_reviews_for_worklog(
     for row in load_reviews(review_path):
         if row["Worklog ID"] != worklog_id:
             continue
-        reviewer = row["Revisor"]
+        reviewer = normalize_reviewer_reference(review_path, row["Revisor"])
         if reviewer in latest:
             continue
         latest[reviewer] = row

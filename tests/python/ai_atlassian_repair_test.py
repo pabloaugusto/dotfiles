@@ -114,7 +114,7 @@ class AtlassianRepairTests(unittest.TestCase):
             legacy_space_key="DO",
             canonical_space_key="DOT",
         )
-        self.assertIn("Agente: ai-qa", rendered)
+        self.assertIn("Agente: Testador (QA)", rendered)
         self.assertIn("## Evidencias", rendered)
 
     def test_canonicalize_generated_text_linkifies_repo_paths(self) -> None:
