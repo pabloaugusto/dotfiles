@@ -23,6 +23,7 @@ project:
       pull_precondition: no-rightward-advance-available
       idle_agent_policy: assign-rightmost-finishable-item-first
     card_layout_fields:
+      - Assignee
       - Current Agent Role
       - Next Required Role
       - Priority
@@ -75,29 +76,29 @@ project:
       - name: Needs Docs
         jql: 'labels = docs-needed OR component = "documentation-governance"'
       - name: Ready for Dev
-        jql: 'status = Ready AND "Next Required Role" in ("ai-developer-python", "ai-developer-powershell", "ai-developer-automation", "ai-developer-config-policy")'
+        jql: 'status = Ready AND "Next Required Role" in ("Automation Dev", "Dev Python", "Engenheiro Agentes IA", "PowerShell Dev")'
       - name: Ready for QA
-        jql: 'status = Testing AND "Next Required Role" = "ai-qa"'
+        jql: 'status = Testing AND "Next Required Role" = "Testador (QA)"'
       - name: Ready for Review
-        jql: 'status = Review AND "Next Required Role" in ("ai-reviewer", "ai-reviewer-python", "ai-reviewer-powershell", "ai-reviewer-automation", "ai-reviewer-config-policy", "ai-documentation-reviewer", "ai-tech-lead")'
+        jql: 'status = Review AND "Next Required Role" in ("Revisor", "Revisor Automacao", "Revisor Config Policy", "Revisor Documental", "Revisor PowerShell", "Revisor Python", "Tech Lead")'
       - name: Ready for Tech Lead Review
-        jql: 'status = Review AND "Next Required Role" = "ai-tech-lead"'
+        jql: 'status = Review AND "Next Required Role" = "Tech Lead"'
       - name: Ready for Python Review
-        jql: 'status = Review AND "Next Required Role" = "ai-reviewer-python"'
+        jql: 'status = Review AND "Next Required Role" = "Revisor Python"'
       - name: Ready for PowerShell Review
-        jql: 'status = Review AND "Next Required Role" = "ai-reviewer-powershell"'
+        jql: 'status = Review AND "Next Required Role" = "Revisor PowerShell"'
       - name: Ready for Automation Review
-        jql: 'status = Review AND "Next Required Role" = "ai-reviewer-automation"'
+        jql: 'status = Review AND "Next Required Role" = "Revisor Automacao"'
       - name: Ready for Config Review
-        jql: 'status = Review AND "Next Required Role" = "ai-reviewer-config-policy"'
+        jql: 'status = Review AND "Next Required Role" = "Revisor Config Policy"'
       - name: Paused
         jql: 'status = Paused'
       - name: Needs Spike
         jql: 'status = Refinement AND issuetype in (Story, Task)'
       - name: Needs PO
-        jql: '"Current Agent Role" = "ai-product-owner" OR "Next Required Role" = "ai-product-owner"'
+        jql: '"Current Agent Role" = "PO" OR "Next Required Role" = "PO"'
       - name: Needs Scrum Master
-        jql: '"Current Agent Role" = "ai-scrum-master" OR "Next Required Role" = "ai-scrum-master"'
+        jql: '"Current Agent Role" = "Scrum Master" OR "Next Required Role" = "Scrum Master"'
 
 issue_types:
   standard:
@@ -431,11 +432,11 @@ fields:
     - name: Current Agent Role
       type: single_select
       required: false
-      options_source: enabled_roles
+      options_source: enabled_role_visible_names
     - name: Next Required Role
       type: single_select
       required: false
-      options_source: enabled_roles
+      options_source: enabled_role_visible_names
     - name: Confluence Source
       type: url
       required: false

@@ -71,9 +71,18 @@ def configured_custom_field_options(
     field: dict[str, Any],
     *,
     role_ids: set[str],
+    role_labels_by_id: dict[str, str] | None = None,
 ) -> list[str]:
     options_source = str(field.get("options_source", "")).strip()
     if options_source == "enabled_roles":
+        return sorted(role_ids)
+    if options_source == "enabled_role_visible_names":
+        if role_labels_by_id:
+            return sorted(
+                label.strip()
+                for role_id, label in role_labels_by_id.items()
+                if role_id in role_ids and label.strip()
+            )
         return sorted(role_ids)
     raw_options = field.get("options")
     if isinstance(raw_options, list):
@@ -225,6 +234,7 @@ def current_custom_field_option_gaps(
     *,
     role_ids: set[str],
     project_id: str = "",
+    role_labels_by_id: dict[str, str] | None = None,
 ) -> list[dict[str, Any]]:
     active_fields = active_custom_fields(model, role_ids=role_ids)
     field_catalog = resolve_named_fields(
@@ -240,7 +250,11 @@ def current_custom_field_option_gaps(
         field_name = str(field.get("name", "")).strip()
         if not field_name:
             continue
-        desired_options = configured_custom_field_options(field, role_ids=role_ids)
+        desired_options = configured_custom_field_options(
+            field,
+            role_ids=role_ids,
+            role_labels_by_id=role_labels_by_id,
+        )
         if not desired_options:
             continue
         field_entry = field_catalog.get(field_name) or {}
@@ -451,6 +465,7 @@ def live_delta_payload(repo_root: str | Path | None = None) -> dict[str, Any]:
         model,
         role_ids=role_ids,
         project_id=str((current.get("project") or {}).get("id", "")).strip(),
+        role_labels_by_id=control_plane.enabled_role_visible_names_by_id(),
     )
 
     return {

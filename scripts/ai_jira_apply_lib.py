@@ -94,9 +94,18 @@ def configured_custom_field_options(
     spec: dict[str, Any],
     *,
     role_ids: set[str],
+    role_labels_by_id: dict[str, str] | None = None,
 ) -> list[str]:
     options_source = str(field.get("options_source", "")).strip()
     if options_source == "enabled_roles":
+        return sorted(role_ids)
+    if options_source == "enabled_role_visible_names":
+        if role_labels_by_id:
+            return sorted(
+                label.strip()
+                for role_id, label in role_labels_by_id.items()
+                if role_id in role_ids and label.strip()
+            )
         return sorted(role_ids)
     raw_options = field.get("options")
     if isinstance(raw_options, list):
@@ -1044,6 +1053,7 @@ def apply_jira_model(repo_root: str | Path | None = None) -> dict[str, Any]:
             field,
             spec,
             role_ids=role_ids,
+            role_labels_by_id=control_plane.enabled_role_visible_names_by_id(),
         )
         ensure_result = ensure_field_options(
             client,

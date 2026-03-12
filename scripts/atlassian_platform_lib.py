@@ -672,6 +672,7 @@ class JiraAdapter:
         *,
         current_agent_role: str = "",
         next_required_role: str = "",
+        assignee_account_id: str = "",
     ) -> dict[str, Any]:
         current_field_id = self.field_id_by_name("Current Agent Role")
         next_field_id = self.field_id_by_name("Next Required Role")
@@ -684,6 +685,8 @@ class JiraAdapter:
             fields[next_field_id] = (
                 {"value": next_required_role.strip()} if next_required_role.strip() else None
             )
+        if assignee_account_id.strip():
+            fields["assignee"] = {"accountId": assignee_account_id.strip()}
         if not fields:
             return {}
         return self.update_issue_fields(issue_key, fields)
@@ -700,6 +703,7 @@ class JiraAdapter:
         proximo_passo: str = "",
         current_agent_role: str = "",
         next_required_role: str = "",
+        assignee_account_id: str = "",
         sync_roles: bool = True,
     ) -> dict[str, Any]:
         rendered = render_structured_comment(
@@ -719,6 +723,7 @@ class JiraAdapter:
                 issue_key,
                 current_agent_role=current_agent_role,
                 next_required_role=next_required_role,
+                assignee_account_id=assignee_account_id,
             )
         return {
             "comment": comment,

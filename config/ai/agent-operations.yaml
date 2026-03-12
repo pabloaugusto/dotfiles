@@ -57,6 +57,7 @@ global_contract:
       - required-ceremony-chain-must-produce-log-ledger-confluence-and-jira-when-applicable
       - unresolved-ceremony-findings-must-open-or-link-governance-bug
       - every-meaningful-agent-milestone-must-also-be-summarized-in-chat
+      - acting-agent-must-own-the-chat-message-for-the-work-it-is-executing
       - zero-context-startup-must-load-chat-contract-before-first-user-message
       - first-operational-chat-message-belongs-to-ai-startup-governor-until-ready-for-work
       - chat-summaries-must-stay-human-short-and-non-robotic
@@ -68,6 +69,8 @@ global_contract:
       - repo-file-chat-links-must-not-use-vscode-resource-or-custom-uri
       - jira-and-confluence-work-items-in-chat-must-use-canonical-web-links
       - chat-summaries-do-not-replace-jira-or-confluence-traceability
+      - jira-current-and-next-role-fields-must-use-alias-first-visible-values
+      - jira-assignee-must-sync-to-the-acting-agent-when-an-explicit-principal-mapping-exists
       - no-subagent-delegation-before-startup-context-is-loaded-or-linked
       - startup-governor-must-materialize-startup-ready-artifact-before-handoff
       - startup-governor-must-block-operational-output-when-clearance-is-not-ready

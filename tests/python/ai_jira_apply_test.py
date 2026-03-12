@@ -104,6 +104,24 @@ class AiJiraApplyTests(unittest.TestCase):
             ["ai-product-owner", "ai-reviewer-python", "ai-tech-lead"],
         )
 
+    def test_configured_custom_field_options_can_follow_visible_role_labels(self) -> None:
+        options = configured_custom_field_options(
+            {
+                "name": "Current Agent Role",
+                "type": "single_select",
+                "options_source": "enabled_role_visible_names",
+            },
+            {"supports_options": True},
+            role_ids={"ai-reviewer-python", "ai-product-owner", "ai-tech-lead"},
+            role_labels_by_id={
+                "ai-product-owner": "PO",
+                "ai-reviewer-python": "Revisor Python",
+                "ai-tech-lead": "Tech Lead",
+            },
+        )
+
+        self.assertEqual(options, ["PO", "Revisor Python", "Tech Lead"])
+
     def test_field_screens_returns_values_list(self) -> None:
         client = FakeAtlassianHttpClient(
             {

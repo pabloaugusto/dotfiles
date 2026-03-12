@@ -1,0 +1,448 @@
+version: 1
+
+policies:
+  enabled_role_statuses:
+    - operational
+    - consultive
+  required_role_statuses:
+    - operational
+    - consultive
+  enabled_registry_statuses:
+    - operational
+    - consultive
+  chat_owner_statuses:
+    - operational
+    - consultive
+  chat_name_fallback_order:
+    - chat_alias
+    - display_name
+    - technical_id
+
+roles:
+  ai-product-owner:
+    status: operational
+    chat_alias: PO
+    chat_owner_supported: true
+    owner_mode: primary
+    surfaces: [jira, chat, active-execution]
+    process_scopes: [intake, backlog, prioritization, refinement, ready]
+    runtime_artifacts:
+      - .agents/cards/ai-product-owner.md
+      - scripts/ai-agent-execution.py
+      - scripts/ai_agent_execution_lib.py
+      - config/ai/agent-operations.yaml
+  ai-scrum-master:
+    status: operational
+    chat_alias: Scrum Master
+    chat_owner_supported: true
+    owner_mode: primary
+    surfaces: [jira, chat, active-execution, scrum-ledger]
+    process_scopes: [board, wip, ceremonies, compliance]
+    runtime_artifacts:
+      - .agents/cards/ai-scrum-master.md
+      - scripts/ai-agent-execution.py
+      - scripts/ai_agent_execution_lib.py
+      - docs/AI-SCRUM-MASTER-LEDGER.md
+  ai-startup-governor:
+    status: operational
+    chat_alias: Guardiao de Startup
+    chat_owner_supported: true
+    owner_mode: primary
+    surfaces: [startup, chat, jira, startup-report, readiness-artifact]
+    process_scopes: [startup, restart, clearance, handoff]
+    runtime_artifacts:
+      - .agents/cards/ai-startup-governor.md
+      - scripts/ai-session-startup.py
+      - scripts/ai_session_startup_lib.py
+      - docs/AI-STARTUP-AND-RESTART.md
+  ai-engineering-architect:
+    status: operational
+    chat_alias: Arquiteto
+    chat_owner_supported: true
+    owner_mode: primary
+    surfaces: [jira, chat, active-execution]
+    process_scopes: [architecture, adr, refinement]
+    runtime_artifacts:
+      - .agents/cards/ai-engineering-architect.md
+      - scripts/ai-agent-execution.py
+      - scripts/ai_agent_execution_lib.py
+      - config/ai/agent-operations.yaml
+  ai-engineering-manager:
+    status: operational
+    chat_alias: Engenheiro
+    chat_owner_supported: true
+    owner_mode: primary
+    surfaces: [jira, chat, active-execution]
+    process_scopes: [capacity, blockers, escalation]
+    runtime_artifacts:
+      - .agents/cards/ai-engineering-manager.md
+      - scripts/ai-agent-execution.py
+      - scripts/ai_agent_execution_lib.py
+      - config/ai/agent-operations.yaml
+  ai-tech-lead:
+    status: operational
+    chat_alias: Tech Lead
+    chat_owner_supported: true
+    owner_mode: primary
+    surfaces: [jira, chat, active-execution, review]
+    process_scopes: [decomposition, handoff, technical-direction]
+    runtime_artifacts:
+      - .agents/cards/ai-tech-lead.md
+      - scripts/ai-agent-execution.py
+      - scripts/ai_agent_execution_lib.py
+      - config/ai/agent-operations.yaml
+  ai-developer-python:
+    status: operational
+    chat_alias: Dev Python
+    chat_owner_supported: true
+    owner_mode: primary
+    surfaces: [jira, chat, active-execution]
+    process_scopes: [python-delivery]
+    runtime_artifacts:
+      - .agents/cards/ai-developer-python.md
+      - scripts/ai-agent-execution.py
+      - scripts/ai_agent_execution_lib.py
+      - .agents/skills/dotfiles-python-review/SKILL.md
+  ai-developer-powershell:
+    status: operational
+    chat_alias: PowerShell Dev
+    chat_owner_supported: true
+    owner_mode: primary
+    surfaces: [jira, chat, active-execution]
+    process_scopes: [powershell-delivery]
+    runtime_artifacts:
+      - .agents/cards/ai-developer-powershell.md
+      - scripts/ai-agent-execution.py
+      - scripts/ai_agent_execution_lib.py
+      - .agents/skills/dotfiles-powershell-review/SKILL.md
+  ai-developer-automation:
+    status: operational
+    chat_alias: Automation Dev
+    chat_owner_supported: true
+    owner_mode: primary
+    surfaces: [jira, chat, active-execution]
+    process_scopes: [automation-delivery, ci-cd]
+    runtime_artifacts:
+      - .agents/cards/ai-developer-automation.md
+      - scripts/ai-agent-execution.py
+      - scripts/ai_agent_execution_lib.py
+      - .agents/skills/dotfiles-automation-review/SKILL.md
+  ai-developer-config-policy:
+    status: operational
+    chat_alias: Engenheiro Agentes IA
+    chat_owner_supported: true
+    owner_mode: primary
+    surfaces: [jira, chat, active-execution, validator]
+    process_scopes: [config-policy, schemas, governance]
+    runtime_artifacts:
+      - .agents/cards/ai-developer-config-policy.md
+      - scripts/ai-agent-execution.py
+      - scripts/ai_agent_execution_lib.py
+      - scripts/validate-ai-assets.py
+  ai-qa:
+    status: operational
+    chat_alias: Testador (QA)
+    chat_owner_supported: true
+    owner_mode: primary
+    surfaces: [jira, chat, active-execution, tests]
+    process_scopes: [validation, acceptance, evidence]
+    runtime_artifacts:
+      - .agents/cards/ai-qa.md
+      - scripts/ai-agent-execution.py
+      - scripts/ai_agent_execution_lib.py
+      - .agents/skills/dotfiles-test-harness/SKILL.md
+  ai-reviewer-python:
+    status: consultive
+    chat_alias: Revisor Python
+    chat_owner_supported: true
+    owner_mode: consultive
+    surfaces: [jira, chat, review-ledger]
+    process_scopes: [python-review]
+    runtime_artifacts:
+      - .agents/cards/revisor-python.md
+      - scripts/ai-review.py
+      - docs/AI-REVIEW-LEDGER.md
+      - .agents/skills/dotfiles-python-review/SKILL.md
+  ai-reviewer-powershell:
+    status: consultive
+    chat_alias: Revisor PowerShell
+    chat_owner_supported: true
+    owner_mode: consultive
+    surfaces: [jira, chat, review-ledger]
+    process_scopes: [powershell-review]
+    runtime_artifacts:
+      - .agents/cards/revisor-powershell.md
+      - scripts/ai-review.py
+      - docs/AI-REVIEW-LEDGER.md
+      - .agents/skills/dotfiles-powershell-review/SKILL.md
+  ai-reviewer-automation:
+    status: consultive
+    chat_alias: Revisor Automacao
+    chat_owner_supported: true
+    owner_mode: consultive
+    surfaces: [jira, chat, review-ledger]
+    process_scopes: [automation-review]
+    runtime_artifacts:
+      - .agents/cards/revisor-automacao.md
+      - scripts/ai-review.py
+      - docs/AI-REVIEW-LEDGER.md
+      - .agents/skills/dotfiles-automation-review/SKILL.md
+  ai-reviewer-config-policy:
+    status: consultive
+    chat_alias: Revisor Config Policy
+    chat_owner_supported: true
+    owner_mode: consultive
+    surfaces: [jira, chat, review-ledger]
+    process_scopes: [config-policy-review]
+    runtime_artifacts:
+      - .agents/cards/revisor-config-policy.md
+      - scripts/ai-review.py
+      - docs/AI-REVIEW-LEDGER.md
+      - .agents/skills/dotfiles-repo-governance/SKILL.md
+  ai-reviewer:
+    status: operational
+    chat_alias: Revisor
+    chat_owner_supported: true
+    owner_mode: primary
+    surfaces: [jira, chat, review-ledger]
+    process_scopes: [cross-review, approval]
+    runtime_artifacts:
+      - .agents/cards/ai-reviewer.md
+      - scripts/ai-review.py
+      - docs/AI-REVIEW-LEDGER.md
+      - config/ai/agent-operations.yaml
+  ai-devops:
+    status: operational
+    chat_alias: Devops
+    chat_owner_supported: true
+    owner_mode: primary
+    surfaces: [jira, chat, active-execution, ci-cd]
+    process_scopes: [infra, release, pipelines]
+    runtime_artifacts:
+      - .agents/cards/ai-devops.md
+      - scripts/ai-agent-execution.py
+      - scripts/ai_agent_execution_lib.py
+      - .agents/skills/dotfiles-critical-integrations/SKILL.md
+  ai-linguistic-reviewer:
+    status: consultive
+    chat_alias: Pascoalete
+    chat_owner_supported: true
+    owner_mode: consultive
+    surfaces: [jira, chat, orthography-ledger]
+    process_scopes: [linguistic-review, terminology, cspell]
+    runtime_artifacts:
+      - .agents/cards/ai-linguistic-reviewer.md
+      - docs/AI-ORTHOGRAPHY-LEDGER.md
+      - .agents/skills/dotfiles-orthography-review/SKILL.md
+  ai-documentation-writer:
+    status: operational
+    chat_alias: Escrivao
+    chat_owner_supported: true
+    owner_mode: primary
+    surfaces: [jira, chat, docs]
+    process_scopes: [technical-writing, documentation-drafting]
+    runtime_artifacts:
+      - .agents/cards/ai-documentation-writer.md
+      - scripts/ai-agent-execution.py
+      - scripts/ai_agent_execution_lib.py
+      - docs/AI-AGENTS-CATALOG.md
+  ai-documentation-reviewer:
+    status: consultive
+    chat_alias: Revisor Documental
+    chat_owner_supported: true
+    owner_mode: consultive
+    surfaces: [jira, chat, docs]
+    process_scopes: [documentation-review, completeness]
+    runtime_artifacts:
+      - .agents/cards/ai-documentation-reviewer.md
+      - scripts/ai-agent-execution.py
+      - scripts/ai_agent_execution_lib.py
+      - docs/AI-AGENTS-CATALOG.md
+  ai-documentation-manager:
+    status: operational
+    chat_alias: Gestor Documental
+    chat_owner_supported: true
+    owner_mode: primary
+    surfaces: [jira, chat, docs, confluence]
+    process_scopes: [source-of-truth, placement, lifecycle]
+    runtime_artifacts:
+      - .agents/cards/ai-documentation-manager.md
+      - scripts/ai-agent-execution.py
+      - scripts/ai_agent_execution_lib.py
+      - docs/AI-AGENTS-CATALOG.md
+  ai-documentation-sync:
+    status: operational
+    chat_alias: Sync Documental
+    chat_owner_supported: true
+    owner_mode: primary
+    surfaces: [jira, chat, confluence, sync]
+    process_scopes: [publication, backlinks, documentation-link]
+    runtime_artifacts:
+      - .agents/cards/ai-documentation-sync.md
+      - scripts/ai-agent-execution.py
+      - scripts/ai_agent_execution_lib.py
+      - docs/ai-sync-foundation.md
+  ai-documentation-agent:
+    status: disabled_legacy
+    chat_owner_supported: false
+    owner_mode: legacy
+    surfaces: [compatibility]
+    process_scopes: [legacy-documentation]
+  ai-browser-validator:
+    status: disabled_stub
+    chat_owner_supported: false
+    owner_mode: planned
+    surfaces: [browser]
+    process_scopes: [browser-validation]
+  ai-designer:
+    status: disabled_stub
+    chat_owner_supported: false
+    owner_mode: planned
+    surfaces: [figma]
+    process_scopes: [design]
+  ai-ux-cro-analyst:
+    status: disabled_stub
+    chat_owner_supported: false
+    owner_mode: planned
+    surfaces: [analysis]
+    process_scopes: [ux, cro]
+  ai-seo-specialist:
+    status: disabled_stub
+    chat_owner_supported: false
+    owner_mode: planned
+    surfaces: [analysis]
+    process_scopes: [seo]
+
+registry_agents:
+  architecture-modernization-authority:
+    status: consultive
+    chat_alias: Arquiteto Modernizacao
+    chat_owner_supported: true
+    owner_mode: consultive
+    surfaces: [chat, governance, backlog]
+    process_scopes: [architecture, modernization]
+    runtime_artifacts:
+      - .agents/cards/arquiteto-modernizacao.md
+      - .agents/skills/dotfiles-architecture-modernization/SKILL.md
+      - docs/AI-AGENTS-CATALOG.md
+  automation-reviewer:
+    status: consultive
+    chat_alias: Revisor Automacao
+    chat_owner_supported: true
+    owner_mode: consultive
+    surfaces: [chat, review-ledger]
+    process_scopes: [automation-review]
+    runtime_artifacts:
+      - .agents/cards/revisor-automacao.md
+      - .agents/skills/dotfiles-automation-review/SKILL.md
+      - scripts/ai-review.py
+  bootstrap-operator:
+    status: operational
+    chat_alias: Bootstrap Operador
+    chat_owner_supported: true
+    owner_mode: primary
+    surfaces: [chat, bootstrap, jira]
+    process_scopes: [bootstrap, relink, config]
+    runtime_artifacts:
+      - .agents/cards/bootstrap-operador.md
+      - .agents/skills/dotfiles-bootstrap/SKILL.md
+      - docs/bootstrap-flow.md
+  critical-integrations-guardian:
+    status: consultive
+    chat_alias: Guardiao Integracoes Criticas
+    chat_owner_supported: true
+    owner_mode: consultive
+    surfaces: [chat, jira, governance]
+    process_scopes: [auth, secrets, ci, sync]
+    runtime_artifacts:
+      - .agents/cards/guardiao-integracoes-criticas.md
+      - .agents/skills/dotfiles-critical-integrations/SKILL.md
+      - docs/secrets-and-auth.md
+  execution-worklog-governance-owner:
+    status: operational
+    chat_alias: Governador Continuidade WIP
+    chat_owner_supported: true
+    owner_mode: primary
+    surfaces: [chat, jira, worklog]
+    process_scopes: [worklog, doing, done, continuity]
+    runtime_artifacts:
+      - .agents/cards/governador-continuidade-wip.md
+      - .agents/skills/wip-continuity-governance/SKILL.md
+      - scripts/ai-worklog.py
+  lessons-governance-curator:
+    status: consultive
+    chat_alias: Curador Licoes Aprendidas
+    chat_owner_supported: true
+    owner_mode: consultive
+    surfaces: [chat, lessons, jira]
+    process_scopes: [lessons, retrospective, closeout]
+    runtime_artifacts:
+      - .agents/cards/curador-licoes-aprendidas.md
+      - .agents/skills/dotfiles-lessons-governance/SKILL.md
+      - scripts/ai-lessons.py
+  orchestrator:
+    status: operational
+    chat_alias: Orquestrador Delegacao
+    chat_owner_supported: true
+    owner_mode: primary
+    surfaces: [chat, jira, delegation]
+    process_scopes: [routing, decomposition, delegation]
+    runtime_artifacts:
+      - .agents/cards/orquestrador-delegacao.md
+      - .agents/skills/task-routing-and-decomposition/SKILL.md
+      - docs/AI-DELEGATION-FLOW.md
+  pascoalete:
+    status: consultive
+    chat_alias: Pascoalete
+    chat_owner_supported: true
+    owner_mode: consultive
+    surfaces: [chat, orthography-ledger]
+    process_scopes: [orthography, terminology, cspell]
+    runtime_artifacts:
+      - .agents/cards/pascoalete.md
+      - .agents/skills/dotfiles-orthography-review/SKILL.md
+      - docs/AI-ORTHOGRAPHY-LEDGER.md
+  powershell-reviewer:
+    status: consultive
+    chat_alias: Revisor PowerShell
+    chat_owner_supported: true
+    owner_mode: consultive
+    surfaces: [chat, review-ledger]
+    process_scopes: [powershell-review]
+    runtime_artifacts:
+      - .agents/cards/revisor-powershell.md
+      - .agents/skills/dotfiles-powershell-review/SKILL.md
+      - scripts/ai-review.py
+  python-reviewer:
+    status: consultive
+    chat_alias: Revisor Python
+    chat_owner_supported: true
+    owner_mode: consultive
+    surfaces: [chat, review-ledger]
+    process_scopes: [python-review]
+    runtime_artifacts:
+      - .agents/cards/revisor-python.md
+      - .agents/skills/dotfiles-python-review/SKILL.md
+      - scripts/ai-review.py
+  repo-governance-authority:
+    status: operational
+    chat_alias: Curador Repo
+    chat_owner_supported: true
+    owner_mode: primary
+    surfaces: [chat, governance, validator]
+    process_scopes: [repo-governance, naming, docs, rules]
+    runtime_artifacts:
+      - .agents/cards/curador-repo.md
+      - .agents/skills/dotfiles-repo-governance/SKILL.md
+      - scripts/validate-ai-assets.py
+  secrets-rotation-governor:
+    status: operational
+    chat_alias: Guardiao Rotacao Secrets
+    chat_owner_supported: true
+    owner_mode: primary
+    surfaces: [chat, jira, security]
+    process_scopes: [secrets-rotation, revocation, inventory]
+    runtime_artifacts:
+      - .agents/cards/guardiao-rotacao-secrets.md
+      - .agents/skills/dotfiles-secrets-rotation/SKILL.md
+      - scripts/secrets-rotation.py

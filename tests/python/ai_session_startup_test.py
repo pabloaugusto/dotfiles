@@ -178,6 +178,47 @@ class AiSessionStartupTests(unittest.TestCase):
         }
 
     @staticmethod
+    def _fake_agent_runtime() -> dict[str, object]:
+        return {
+            "status": "ok",
+            "runtime_path": "config/ai/agent-runtime.yaml",
+            "runtime_local_path": "config/ai/agent-runtime.local.yaml",
+            "runtime_local_active": False,
+            "covered_roles": [
+                "ai-developer-config-policy",
+                "ai-scrum-master",
+                "ai-startup-governor",
+            ],
+            "missing_roles": [],
+            "orphan_role_contracts": [],
+            "covered_registry_agents": ["repo-governance-authority"],
+            "missing_registry_agents": [],
+            "orphan_registry_contracts": [],
+            "enabled_roles_without_operational_runtime": [],
+            "required_roles_without_operational_runtime": [],
+            "enabled_registry_agents_without_operational_runtime": [],
+            "chat_owner_capable_roles": [
+                "ai-developer-config-policy",
+                "ai-scrum-master",
+                "ai-startup-governor",
+            ],
+            "chat_owner_capable_registry_agents": [],
+            "chat_name_fallback_order": ["chat_alias", "display_name", "technical_id"],
+            "role_visible_names": {
+                "ai-developer-config-policy": "Engenheiro Agentes IA",
+                "ai-scrum-master": "Scrum Master",
+                "ai-startup-governor": "Guardiao de Startup",
+            },
+            "enabled_role_visible_names": [
+                "Engenheiro Agentes IA",
+                "Guardiao de Startup",
+            ],
+            "duplicate_enabled_role_visible_names": [],
+            "jira_assignable_roles": ["ai-developer-config-policy"],
+            "enabled_roles_missing_jira_assignee_mapping": [],
+        }
+
+    @staticmethod
     def _fake_rules_projections() -> dict[str, object]:
         return {
             "status": "ok",
@@ -375,6 +416,49 @@ class AiSessionStartupTests(unittest.TestCase):
             )
             (config_dir / "agent-operations.yaml").write_text(
                 "version: 1\nroles: {}\n",
+                encoding="utf-8",
+            )
+            (config_dir / "agent-runtime.yaml").write_text(
+                textwrap.dedent(
+                    """\
+                    version: 1
+                    policies:
+                      enabled_role_statuses: [operational, consultive]
+                      required_role_statuses: [operational, consultive]
+                      enabled_registry_statuses: [operational, consultive]
+                      chat_owner_statuses: [operational, consultive]
+                      chat_name_fallback_order: [chat_alias, display_name, technical_id]
+                    roles:
+                      ai-startup-governor:
+                        status: operational
+                        chat_alias: Guardiao de Startup
+                        chat_owner_supported: true
+                        owner_mode: primary
+                        surfaces: [startup, chat]
+                        process_scopes: [startup]
+                        runtime_artifacts:
+                          - config/ai/agents.yaml
+                      ai-linguistic-reviewer:
+                        status: disabled_stub
+                        chat_alias: Pascoalete
+                        chat_owner_supported: false
+                        owner_mode: consultive
+                        surfaces: [chat]
+                        process_scopes: [linguistic-review]
+                        runtime_artifacts:
+                          - config/ai/agents.yaml
+                    registry_agents:
+                      pascoalete:
+                        status: disabled_stub
+                        chat_alias: Pascoalete
+                        chat_owner_supported: false
+                        owner_mode: consultive
+                        surfaces: [chat]
+                        process_scopes: [linguistic-review]
+                        runtime_artifacts:
+                          - .agents/registry/pascoalete.toml
+                    """
+                ),
                 encoding="utf-8",
             )
             (config_dir / "contracts.yaml").write_text(
@@ -591,9 +675,16 @@ class AiSessionStartupTests(unittest.TestCase):
                     "registry_count": 1,
                     "active_agent": "ai-developer-config-policy",
                     "active_display_name": "Engenheiro Agentes IA",
+                    "active_chat_name": "Engenheiro Agentes IA",
                     "fallback_display": "technical-id",
+                    "chat_name_fallback_order": [
+                        "chat_alias",
+                        "display_name",
+                        "technical_id",
+                    ],
                 },
                 agent_enablement=self._fake_agent_enablement(),
+                agent_runtime=self._fake_agent_runtime(),
                 rules_projections=self._fake_rules_projections(),
                 chat_communication={"status": "ok", "rules": ["usar portugues"]},
                 git_governance={"status": "ok", "sources": [], "rules": [], "enforcement_note": ""},
@@ -698,6 +789,10 @@ class AiSessionStartupTests(unittest.TestCase):
                     return_value=self._fake_agent_enablement(),
                 ),
                 patch(
+                    "scripts.ai_session_startup_lib.agent_runtime_payload",
+                    return_value=self._fake_agent_runtime(),
+                ),
+                patch(
                     "scripts.ai_session_startup_lib.rules_projections_payload",
                     return_value=self._fake_rules_projections(),
                 ),
@@ -730,6 +825,7 @@ class AiSessionStartupTests(unittest.TestCase):
         self.assertIn("## Drift operacional detectado", report_text)
         self.assertIn("## PEA carregado no startup", report_text)
         self.assertIn("## Enablement efetivo de agentes", report_text)
+        self.assertIn("## Runtime operacional de agentes", report_text)
         self.assertIn("## Delegacao e subagentes", report_text)
         self.assertIn("## startup_governor_status", report_text)
         self.assertIn("cloud_id", report_text)
@@ -781,9 +877,16 @@ class AiSessionStartupTests(unittest.TestCase):
                 "registry_count": 1,
                 "active_agent": "ai-developer-config-policy",
                 "active_display_name": "Engenheiro Agentes IA",
+                "active_chat_name": "Engenheiro Agentes IA",
                 "fallback_display": "technical-id",
+                "chat_name_fallback_order": [
+                    "chat_alias",
+                    "display_name",
+                    "technical_id",
+                ],
             },
             "agent_enablement": self._fake_agent_enablement(),
+            "agent_runtime": self._fake_agent_runtime(),
             "rules_projections": self._fake_rules_projections(),
             "chat_communication": {
                 "status": "ok",
@@ -854,6 +957,7 @@ class AiSessionStartupTests(unittest.TestCase):
         self.assertIn("## Comunicacao no chat e identidade", markdown)
         self.assertIn("## Projecoes .rules criticas", markdown)
         self.assertIn("## Enablement efetivo de agentes", markdown)
+        self.assertIn("## Runtime operacional de agentes", markdown)
         self.assertIn("## Governanca Git carregada no startup", markdown)
         self.assertIn("## PEA carregado no startup", markdown)
         self.assertIn("config/ai/agent-enablement.yaml", markdown)
@@ -953,6 +1057,10 @@ class AiSessionStartupTests(unittest.TestCase):
                     return_value=self._fake_agent_enablement(),
                 ),
                 patch(
+                    "scripts.ai_session_startup_lib.agent_runtime_payload",
+                    return_value=self._fake_agent_runtime(),
+                ),
+                patch(
                     "scripts.ai_session_startup_lib.rules_projections_payload",
                     return_value=self._fake_rules_projections(),
                 ),
@@ -972,6 +1080,7 @@ class AiSessionStartupTests(unittest.TestCase):
         self.assertEqual(
             payload["agent_enablement"]["overlay_path"], "config/ai/agent-enablement.yaml"
         )
+        self.assertEqual(payload["agent_runtime"]["runtime_path"], "config/ai/agent-runtime.yaml")
         self.assertEqual(
             payload["rules_projections"]["catalog_path"], ".agents/rules/projections.yaml"
         )

@@ -22,6 +22,7 @@ from scripts.ai_contract_paths import (
     registry_root,
     skills_root,
 )
+from scripts.ai_control_plane_lib import AiControlPlaneError, load_ai_control_plane
 from scripts.ai_rules_lib import (
     AiRulesError,
     load_rules_projection_catalog,
@@ -64,6 +65,7 @@ REQUIRED_FILES = [
     "config/ai/agents.yaml",
     "config/ai/agent-enablement.yaml",
     "config/ai/agent-operations.yaml",
+    "config/ai/agent-runtime.yaml",
     "config/ai/contracts.yaml",
     "config/ai/sync-targets.yaml",
     "df/secrets/secrets-ref.yaml",
@@ -602,7 +604,8 @@ AGENT_IDENTITY_REQUIRED_SNIPPETS = {
         "agent_identity:",
         "source_of_truth: .agents/registry/*.toml::display_name",
         "startup-and-restart-must-load-display-name-layer",
-        "jira-must-prefer-display-name-when-surface-allows",
+        "chat-must-prefer-chat-alias-then-display-name-then-technical-id",
+        "jira-current-and-next-role-fields-must-prefer-chat-alias-then-display-name-then-technical-id",
     ],
     "config/ai/agents.yaml": [
         "display_name: Guardiao de Startup",
@@ -1189,6 +1192,92 @@ def validate_ai_config(repo_root: Path, failures: list[str]) -> None:
                 )
 
 
+def validate_agent_runtime_contracts(repo_root: Path, failures: list[str]) -> None:
+    try:
+        control_plane = load_ai_control_plane(repo_root)
+    except AiControlPlaneError as exc:
+        failures.append(str(exc))
+        return
+
+    for role_id in control_plane.roles_missing_runtime_contracts():
+        failures.append(
+            f"Role declarada sem contrato de runtime operacional em config/ai/agent-runtime.yaml: {role_id}"
+        )
+    for role_id in control_plane.runtime_contracts_without_roles():
+        failures.append(
+            f"Contrato de runtime sem role declarada em config/ai/agents.yaml: {role_id}"
+        )
+    for agent_id in control_plane.registry_agents_missing_runtime_contracts():
+        failures.append(
+            f"Agente declarativo sem contrato de runtime operacional em config/ai/agent-runtime.yaml: {agent_id}"
+        )
+    for agent_id in control_plane.runtime_contracts_without_registry_agents():
+        failures.append(
+            f"Contrato de runtime sem agente declarativo correspondente: {agent_id}"
+        )
+    for role_id in control_plane.required_roles_without_operational_runtime():
+        failures.append(f"Role required sem runtime operacional/consultivo valido: {role_id}")
+    for role_id in control_plane.enabled_roles_without_operational_runtime():
+        failures.append(f"Role habilitada sem runtime operacional/consultivo valido: {role_id}")
+    for agent_id in control_plane.enabled_registry_agents_without_operational_runtime():
+        failures.append(
+            f"Agente declarativo habilitado sem runtime operacional/consultivo valido: {agent_id}"
+        )
+    duplicates = control_plane.duplicate_enabled_role_visible_names()
+    if duplicates:
+        failures.append(
+            "Aliases visiveis duplicados entre roles habilitados para chat/Jira: "
+            + ", ".join(duplicates)
+        )
+
+    allowed_chat_statuses = set(control_plane.runtime_status_allowlist("chat_owner_statuses"))
+    for role_id in control_plane.roles_with_runtime_contracts():
+        entry = control_plane.role_runtime_entry(role_id)
+        status = control_plane.role_runtime_status(role_id)
+        if bool(entry.get("chat_owner_supported", False)) and status not in allowed_chat_statuses:
+            failures.append(
+                "Role marca chat_owner_supported=true sem status compativel com policies.chat_owner_statuses: "
+                f"{role_id} ({status or 'sem-status'})"
+            )
+        artifacts = entry.get("runtime_artifacts")
+        if status in {"operational", "consultive"}:
+            if not isinstance(artifacts, list) or not any(str(item).strip() for item in artifacts):
+                failures.append(
+                    f"Role operacional/consultiva sem runtime_artifacts declarados: {role_id}"
+                )
+            else:
+                for raw_item in artifacts:
+                    artifact = str(raw_item).strip()
+                    if artifact and not (repo_root / artifact).exists():
+                        failures.append(
+                            f"Runtime artifact ausente para role {role_id}: {artifact}"
+                        )
+
+    for agent_id in control_plane.registry_agents_with_runtime_contracts():
+        entry = control_plane.registry_agent_runtime_entry(agent_id)
+        if not entry and control_plane.role_runtime_entry(agent_id):
+            continue
+        status = control_plane.registry_agent_runtime_status(agent_id)
+        if bool(entry.get("chat_owner_supported", False)) and status not in allowed_chat_statuses:
+            failures.append(
+                "Agente declarativo marca chat_owner_supported=true sem status compativel com policies.chat_owner_statuses: "
+                f"{agent_id} ({status or 'sem-status'})"
+            )
+        artifacts = entry.get("runtime_artifacts")
+        if status in {"operational", "consultive"}:
+            if not isinstance(artifacts, list) or not any(str(item).strip() for item in artifacts):
+                failures.append(
+                    f"Agente declarativo operacional/consultivo sem runtime_artifacts: {agent_id}"
+                )
+            else:
+                for raw_item in artifacts:
+                    artifact = str(raw_item).strip()
+                    if artifact and not (repo_root / artifact).exists():
+                        failures.append(
+                            f"Runtime artifact ausente para agente declarativo {agent_id}: {artifact}"
+                        )
+
+
 def validate_prompt_packs(repo_root: Path, failures: list[str]) -> None:
     prompts_root = repo_root / ".agents" / "prompts"
     legacy_root = prompts_root / "legacy"
@@ -1607,6 +1696,7 @@ def main(argv: list[str]) -> int:
             validate_registry_agent(agent_file, skill_names, failures)
 
     validate_ai_config(repo_root, failures)
+    validate_agent_runtime_contracts(repo_root, failures)
     validate_thematic_rules(repo_root, failures)
     validate_rules_projections(repo_root, failures)
     validate_prompt_packs(repo_root, failures)

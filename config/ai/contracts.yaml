@@ -483,6 +483,7 @@ operator_chat_visibility:
   owner_role: ai-scrum-master
   mandatory_rules:
     - every-meaningful-agent-milestone-must-be-mirrored-to-chat
+    - acting-agent-must-own-the-chat-message-for-the-work-it-is-executing
     - scrum-master-must-audit-chat-contract-compliance
     - scrum-master-must-report-dysfunctions-and-ceremonies-to-chat
     - startup-governor-owns-first-operational-chat-message-until-ready-for-work
@@ -495,9 +496,10 @@ agent_identity:
   operating_rules:
     - official-display-name-must-live-in-registry
     - card-title-must-mirror-official-display-name-when-defined
-    - chat-must-prefer-display-name-over-technical-id
+    - chat-must-prefer-chat-alias-then-display-name-then-technical-id
     - startup-and-restart-must-load-display-name-layer
-    - jira-must-prefer-display-name-when-surface-allows
+    - jira-current-and-next-role-fields-must-prefer-chat-alias-then-display-name-then-technical-id
+    - jira-assignee-must-follow-explicit-agent-to-principal-mapping-when-available
     - technical-id-remains-internal-automation-key
 
 scrum_master_enforcement:

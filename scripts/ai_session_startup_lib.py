@@ -259,14 +259,33 @@ def load_agent_display_names(repo_root: Path) -> dict[str, str]:
 
 
 def agent_identity_payload(repo_root: Path, active_execution: dict[str, Any]) -> dict[str, Any]:
-    display_names = load_agent_display_names(repo_root)
     active_agent = str(active_execution.get("agent", "")).strip()
+    try:
+        control_plane = load_ai_control_plane(repo_root)
+    except Exception:
+        display_names = load_agent_display_names(repo_root)
+        return {
+            "status": "ok" if display_names else "missing",
+            "registry_count": len(display_names),
+            "active_agent": active_agent,
+            "active_display_name": display_names.get(active_agent, active_agent or "desconhecido"),
+            "active_chat_name": display_names.get(active_agent, active_agent or "desconhecido"),
+            "fallback_display": "technical-id",
+            "chat_name_fallback_order": ["display_name", "technical-id"],
+        }
+    display_names = control_plane.registry_agent_display_names()
     return {
         "status": "ok" if display_names else "missing",
         "registry_count": len(display_names),
         "active_agent": active_agent,
-        "active_display_name": display_names.get(active_agent, active_agent or "desconhecido"),
+        "active_display_name": control_plane.formal_name_for_agent(active_agent)
+        or active_agent
+        or "desconhecido",
+        "active_chat_name": control_plane.visible_name_for_agent(active_agent)
+        or active_agent
+        or "desconhecido",
         "fallback_display": "technical-id",
+        "chat_name_fallback_order": control_plane.chat_name_fallback_order(),
     }
 
 
@@ -290,6 +309,41 @@ def agent_enablement_payload(repo_root: Path) -> dict[str, Any]:
         "required_roles_disabled": control_plane.required_roles_disabled(),
         "enabled_registry_agents": control_plane.enabled_registry_agents(),
         "disabled_registry_agents": control_plane.disabled_registry_agents(),
+    }
+
+
+def agent_runtime_payload(repo_root: Path) -> dict[str, Any]:
+    try:
+        control_plane = load_ai_control_plane(repo_root)
+    except Exception as exc:
+        return {"status": "error", "error": str(exc)}
+    declared_roles = sorted(control_plane.roles_payload())
+    return {
+        "status": "ok",
+        "runtime_path": control_plane.agent_runtime_path.relative_to(repo_root).as_posix(),
+        "runtime_local_path": control_plane.agent_runtime_local_path.relative_to(
+            repo_root
+        ).as_posix(),
+        "runtime_local_active": control_plane.agent_runtime_local_path.exists(),
+        "covered_roles": control_plane.roles_with_runtime_contracts(),
+        "missing_roles": control_plane.roles_missing_runtime_contracts(),
+        "orphan_role_contracts": control_plane.runtime_contracts_without_roles(),
+        "covered_registry_agents": control_plane.registry_agents_with_runtime_contracts(),
+        "missing_registry_agents": control_plane.registry_agents_missing_runtime_contracts(),
+        "orphan_registry_contracts": control_plane.runtime_contracts_without_registry_agents(),
+        "enabled_roles_without_operational_runtime": control_plane.enabled_roles_without_operational_runtime(),
+        "required_roles_without_operational_runtime": control_plane.required_roles_without_operational_runtime(),
+        "enabled_registry_agents_without_operational_runtime": control_plane.enabled_registry_agents_without_operational_runtime(),
+        "chat_owner_capable_roles": control_plane.chat_owner_capable_roles(),
+        "chat_owner_capable_registry_agents": control_plane.chat_owner_capable_registry_agents(),
+        "chat_name_fallback_order": control_plane.chat_name_fallback_order(),
+        "role_visible_names": {
+            role_id: control_plane.visible_name_for_agent(role_id) for role_id in declared_roles
+        },
+        "enabled_role_visible_names": control_plane.enabled_role_visible_names(),
+        "duplicate_enabled_role_visible_names": control_plane.duplicate_enabled_role_visible_names(),
+        "jira_assignable_roles": control_plane.jira_assignable_roles(),
+        "enabled_roles_missing_jira_assignee_mapping": control_plane.enabled_roles_missing_jira_assignee_mapping(),
     }
 
 
@@ -843,6 +897,7 @@ def startup_governor_status_payload(
     active_execution: dict[str, Any],
     agent_identity: dict[str, Any],
     agent_enablement: dict[str, Any],
+    agent_runtime: dict[str, Any],
     rules_projections: dict[str, Any],
     chat_communication: dict[str, Any],
     git_governance: dict[str, Any],
@@ -856,7 +911,10 @@ def startup_governor_status_payload(
 ) -> dict[str, Any]:
     normalized_pending_action = _normalize_pending_action(pending_action)
     display_names = load_agent_display_names(repo_root)
-    governor_display_name = display_names.get(STARTUP_GOVERNOR_AGENT, STARTUP_GOVERNOR_DISPLAY_NAME)
+    role_visible_names = agent_runtime.get("role_visible_names", {})
+    governor_display_name = str(
+        role_visible_names.get(STARTUP_GOVERNOR_AGENT, STARTUP_GOVERNOR_DISPLAY_NAME)
+    ).strip() or STARTUP_GOVERNOR_DISPLAY_NAME
     blockers: list[str] = []
     warnings: list[str] = []
     progression = ["not_started"]
@@ -897,6 +955,36 @@ def startup_governor_status_payload(
         blockers.append(
             "existem agentes marcados como required em config/ai/agents.yaml e desabilitados no overlay declarativo"
         )
+
+    if agent_runtime.get("status") != "ok":
+        blockers.append("camada declarativa de runtime operacional dos agentes nao ficou carregada")
+    else:
+        if agent_runtime.get("missing_roles"):
+            blockers.append("existem papeis declarados sem contrato de runtime operacional")
+        if agent_runtime.get("orphan_role_contracts"):
+            blockers.append("config/ai/agent-runtime.yaml contem papeis sem declaracao em agents.yaml")
+        if agent_runtime.get("missing_registry_agents"):
+            blockers.append("existem agentes declarativos sem contrato de runtime operacional")
+        if agent_runtime.get("orphan_registry_contracts"):
+            blockers.append(
+                "config/ai/agent-runtime.yaml contem contratos de registry sem agente declarativo correspondente"
+            )
+        if agent_runtime.get("required_roles_without_operational_runtime"):
+            blockers.append(
+                "existem papeis required habilitados sem runtime operacional/consultivo valido"
+            )
+        if agent_runtime.get("enabled_registry_agents_without_operational_runtime"):
+            blockers.append(
+                "existem agentes declarativos habilitados sem runtime operacional/consultivo valido"
+            )
+        if agent_runtime.get("duplicate_enabled_role_visible_names"):
+            blockers.append(
+                "existem aliases visiveis duplicados entre roles habilitados para Jira/chat"
+            )
+        if agent_runtime.get("enabled_roles_missing_jira_assignee_mapping"):
+            warnings.append(
+                "nem todos os papeis habilitados possuem principal Jira mapeado para sync de assignee"
+            )
 
     if git_inventory.get("status") == "ok" and git_governance.get("status") == "ok":
         state = "git_context_loaded"
@@ -985,7 +1073,9 @@ def startup_governor_status_payload(
         next_owner_role = str(active_worklog_items[0].get("Responsavel", "")).strip()
     if not next_owner_role and prioritized_work_item.get("identifier"):
         next_owner_role = "ai-product-owner"
-    next_owner_display_name = display_names.get(next_owner_role, next_owner_role or "a definir")
+    next_owner_display_name = str(role_visible_names.get(next_owner_role, "")).strip()
+    if not next_owner_display_name:
+        next_owner_display_name = display_names.get(next_owner_role, next_owner_role or "a definir")
     disabled_roles = set(agent_enablement.get("disabled_roles", []))
     if STARTUP_GOVERNOR_AGENT in disabled_roles:
         blockers.append("ai-startup-governor esta desabilitado no overlay declarativo")
@@ -994,6 +1084,11 @@ def startup_governor_status_payload(
     if next_owner_role and next_owner_role in disabled_roles:
         blockers.append(
             f"papel operacional priorizado esta desabilitado no overlay declarativo: {next_owner_role}"
+        )
+    chat_owner_capable_roles = set(agent_runtime.get("chat_owner_capable_roles", []))
+    if next_owner_role and next_owner_role not in chat_owner_capable_roles:
+        blockers.append(
+            f"papel operacional priorizado nao tem runtime apto a ownership visivel de chat: {next_owner_role}"
         )
 
     if blockers and state != "wip_decision_pending":
@@ -1081,6 +1176,7 @@ def startup_session_payload(
     active_execution = active_execution_payload(repo_root)
     agent_identity = agent_identity_payload(repo_root, active_execution)
     enablement = agent_enablement_payload(repo_root)
+    agent_runtime = agent_runtime_payload(repo_root)
     if active_execution.get("status") == "ok":
         active_execution["agent_display_name"] = agent_identity["active_display_name"]
     prioritized_work_item = prioritized_work_item_payload(active_execution, active_worklog_items)
@@ -1134,6 +1230,7 @@ def startup_session_payload(
         active_execution=active_execution,
         agent_identity=agent_identity,
         agent_enablement=enablement,
+        agent_runtime=agent_runtime,
         rules_projections=rules_projections,
         chat_communication=chat_communication,
         git_governance=git_governance,
@@ -1163,6 +1260,7 @@ def startup_session_payload(
         "active_execution": active_execution,
         "agent_identity": agent_identity,
         "agent_enablement": enablement,
+        "agent_runtime": agent_runtime,
         "rules_projections": rules_projections,
         "chat_communication": chat_communication,
         "git_governance": git_governance,
@@ -1220,13 +1318,21 @@ def render_startup_session_markdown(payload: dict[str, Any]) -> str:
     chat_communication = payload["chat_communication"]
     agent_identity = payload["agent_identity"]
     agent_enablement = payload["agent_enablement"]
+    agent_runtime = payload["agent_runtime"]
     rules_projections = payload["rules_projections"]
     lines.extend(["", "## Comunicacao no chat e identidade", ""])
     lines.append(
         f"- agente ativo visivel: `{agent_identity.get('active_display_name', 'desconhecido')}`"
     )
     lines.append(
+        f"- agente ativo no chat: `{agent_identity.get('active_chat_name', 'desconhecido')}`"
+    )
+    lines.append(
         f"- fallback de exibicao quando faltar display_name: `{agent_identity.get('fallback_display', 'technical-id')}`"
+    )
+    lines.append(
+        "- ordem de fallback do nome visivel: "
+        f"`{', '.join(agent_identity.get('chat_name_fallback_order', [])) or 'technical-id'}`"
     )
     for rule in chat_communication.get("rules", []):
         lines.append(f"- regra de comunicacao: {rule}")
@@ -1287,6 +1393,53 @@ def render_startup_session_markdown(payload: dict[str, Any]) -> str:
         )
     if agent_enablement.get("error"):
         lines.append(f"- erro: `{agent_enablement.get('error', '')}`")
+
+    lines.extend(["", "## Runtime operacional de agentes", ""])
+    lines.append(f"- status: `{agent_runtime.get('status', 'unknown')}`")
+    lines.append(f"- contrato de runtime: `{agent_runtime.get('runtime_path', '')}`")
+    lines.append(
+        f"- overlay local de runtime ativo: `{agent_runtime.get('runtime_local_active', False)}`"
+    )
+    lines.append(
+        "- fallback visivel de chat/Jira: "
+        f"`{', '.join(agent_runtime.get('chat_name_fallback_order', [])) or 'technical-id'}`"
+    )
+    lines.append(
+        f"- roles cobertos por runtime: `{len(agent_runtime.get('covered_roles', []))}`"
+    )
+    lines.append(
+        f"- agentes declarativos cobertos por runtime: `{len(agent_runtime.get('covered_registry_agents', []))}`"
+    )
+    lines.append(
+        "- roles aptos a ownership de chat: "
+        f"`{', '.join(agent_runtime.get('chat_owner_capable_roles', [])) or 'nenhum'}`"
+    )
+    lines.append(
+        "- roles habilitados sem principal Jira mapeado: "
+        f"`{', '.join(agent_runtime.get('enabled_roles_missing_jira_assignee_mapping', [])) or 'nenhum'}`"
+    )
+    if agent_runtime.get("missing_roles"):
+        lines.append(
+            "- roles sem runtime: "
+            f"`{', '.join(agent_runtime.get('missing_roles', []))}`"
+        )
+    if agent_runtime.get("missing_registry_agents"):
+        lines.append(
+            "- agentes declarativos sem runtime: "
+            f"`{', '.join(agent_runtime.get('missing_registry_agents', []))}`"
+        )
+    if agent_runtime.get("required_roles_without_operational_runtime"):
+        lines.append(
+            "- roles required sem runtime operacional: "
+            f"`{', '.join(agent_runtime.get('required_roles_without_operational_runtime', []))}`"
+        )
+    if agent_runtime.get("duplicate_enabled_role_visible_names"):
+        lines.append(
+            "- aliases visiveis duplicados: "
+            f"`{', '.join(agent_runtime.get('duplicate_enabled_role_visible_names', []))}`"
+        )
+    if agent_runtime.get("error"):
+        lines.append(f"- erro: `{agent_runtime.get('error', '')}`")
 
     git_governance = payload["git_governance"]
     lines.extend(["", "## Governanca Git carregada no startup", ""])

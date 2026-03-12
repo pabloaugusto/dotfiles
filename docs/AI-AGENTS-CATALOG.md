@@ -9,6 +9,12 @@ O enablement declarativo dos papeis vive em
 agente desabilitado ali nao pode ser exigido por memoria de chat ou habito
 operacional.
 
+O runtime operacional e a identidade visivel de chat/Jira vivem em
+[`../config/ai/agent-runtime.yaml`](../config/ai/agent-runtime.yaml). Um papel
+habilitado so deve ser tratado como realmente operante quando tambem estiver
+codado ali com status compativel, alias visivel e ownership de superficie
+declarados.
+
 - `repo-governance-authority`: sempre
 - `execution-worklog-governance-owner`: sempre
 - `ai-startup-governor`: obrigatorio em toda nova sessao ou `restart`, ate a
@@ -23,6 +29,11 @@ operacional.
 - `python-reviewer`, `powershell-reviewer` e `automation-reviewer`: obrigatorios quando a mudanca tocar a familia de arquivo correspondente
 
 ## Catalogo
+
+No chat e nos campos visiveis do `Jira`, o repo agora prefere `chat_alias`; se
+ele nao existir, cai para `display_name` e, so por ultimo, para o id tecnico.
+O agente atuante tambem deve ser o owner visivel da mensagem de chat e, quando
+houver principal Jira mapeado, do `Assignee` da issue em execucao.
 
 | Papel | Cartao | Agente declarativo | Skill principal | Quando entra |
 | --- | --- | --- | --- | --- |

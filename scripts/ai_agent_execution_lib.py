@@ -255,28 +255,76 @@ def field_catalog_by_name(jira: JiraAdapter) -> dict[str, str]:
     return catalog
 
 
+def role_visibility_payload(repo_root: Path, role_id: str) -> dict[str, str]:
+    normalized_role_id = role_id.strip()
+    if not normalized_role_id:
+        return {
+            "role_id": "",
+            "visible_name": "",
+            "formal_name": "",
+            "assignee_account_id": "",
+        }
+    try:
+        control_plane = load_ai_control_plane(repo_root)
+    except Exception:
+        return {
+            "role_id": normalized_role_id,
+            "visible_name": normalized_role_id,
+            "formal_name": normalized_role_id,
+            "assignee_account_id": "",
+        }
+    assignee = control_plane.role_jira_assignee_payload(normalized_role_id)
+    return {
+        "role_id": normalized_role_id,
+        "visible_name": control_plane.visible_name_for_agent(normalized_role_id),
+        "formal_name": control_plane.formal_name_for_agent(normalized_role_id)
+        or normalized_role_id,
+        "assignee_account_id": str(assignee.get("account_id", "")).strip(),
+    }
+
+
 def sync_agent_roles(
     jira: JiraAdapter,
     issue_key: str,
     *,
+    repo_root: Path,
+    acting_agent: str,
     current_agent_role: str,
     next_required_role: str,
 ) -> dict[str, Any]:
+    current_visibility = role_visibility_payload(repo_root, current_agent_role)
+    next_visibility = role_visibility_payload(repo_root, next_required_role)
+    acting_visibility = role_visibility_payload(repo_root, acting_agent or current_agent_role)
     fields_catalog = field_catalog_by_name(jira)
     payload_fields: dict[str, Any] = {}
     current_field_id = fields_catalog.get("Current Agent Role", "")
     next_field_id = fields_catalog.get("Next Required Role", "")
     if current_field_id:
         payload_fields[current_field_id] = (
-            {"value": current_agent_role.strip()} if current_agent_role.strip() else None
+            {"value": current_visibility["visible_name"]}
+            if current_visibility["visible_name"]
+            else None
         )
     if next_field_id:
         payload_fields[next_field_id] = (
-            {"value": next_required_role.strip()} if next_required_role.strip() else None
+            {"value": next_visibility["visible_name"]} if next_visibility["visible_name"] else None
         )
-    if not payload_fields:
-        return {}
-    return jira.update_issue_fields(issue_key, payload_fields)
+    assignee_account_id = acting_visibility["assignee_account_id"]
+    assignee_status = "skipped"
+    if assignee_account_id:
+        payload_fields["assignee"] = {"accountId": assignee_account_id}
+        assignee_status = "synced"
+    elif acting_visibility["role_id"]:
+        assignee_status = "unmapped"
+    update_result = jira.update_issue_fields(issue_key, payload_fields) if payload_fields else {}
+    return {
+        "update_result": update_result,
+        "current_agent_role_display": current_visibility["visible_name"],
+        "next_required_role_display": next_visibility["visible_name"],
+        "acting_agent_display": acting_visibility["visible_name"],
+        "assignee_status": assignee_status,
+        "assignee_account_id": assignee_account_id,
+    }
 
 
 def _choose_transition(jira: JiraAdapter, issue_key: str, target_status: str) -> dict[str, Any]:
@@ -410,6 +458,8 @@ def record_activity(
         role_payload = sync_agent_roles(
             jira,
             resolved_issue_key,
+            repo_root=repo,
+            acting_agent=resolved_agent,
             current_agent_role=current_agent_role.strip(),
             next_required_role=next_required_role.strip(),
         )
@@ -417,6 +467,8 @@ def record_activity(
         "comment": comment,
         "current_agent_role": current_agent_role.strip(),
         "next_required_role": next_required_role.strip(),
+        "current_agent_role_display": role_payload.get("current_agent_role_display", ""),
+        "next_required_role_display": role_payload.get("next_required_role_display", ""),
         "role_sync": role_payload,
         "status": normalized_status,
     }
