@@ -11,6 +11,7 @@ from pathlib import Path
 if __package__ in {None, ""}:  # pragma: no cover - execucao direta do script
     sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
+from scripts.ai_control_plane_lib import load_ai_control_plane
 from scripts.ai_lessons_lib import (
     check_reviews,
     ensure_lessons_file,
@@ -388,6 +389,25 @@ def resolve_branch() -> str:
     return completed.stdout.strip() or "unknown"
 
 
+def repo_root_for_document(path: Path) -> Path:
+    candidate = path.resolve()
+    for base in (candidate.parent, *candidate.parents):
+        if (base / "config" / "ai").is_dir():
+            return base
+    return candidate.parent.resolve()
+
+
+def visible_owner_name(tracker_path: Path, owner: str) -> str:
+    normalized = str(owner or "").strip()
+    if not normalized:
+        return ""
+    try:
+        control_plane = load_ai_control_plane(repo_root_for_document(tracker_path))
+    except Exception:
+        return normalized
+    return control_plane.visible_name_for_reference(normalized) or normalized
+
+
 def collect_dirty_paths(repo_root_value: str) -> list[str]:
     repo_root = (repo_root_value or "").strip()
     if not repo_root:
@@ -589,7 +609,7 @@ def run_branch_check(args: argparse.Namespace) -> None:
     tracker = Path(args.file)
     ensure_tracker_file(tracker)
     branch = (args.branch or "").strip() or resolve_branch()
-    owner = (args.owner or "").strip()
+    owner = visible_owner_name(tracker, args.owner)
     doing, _, _ = load_tracker(tracker)
     pending = [
         row
@@ -625,11 +645,12 @@ def run_start(args: argparse.Namespace) -> None:
     worklog_id = (args.worklog_id or "").strip() or next_worklog_id(existing)
     if worklog_id in existing:
         raise SystemExit(f"ID de worklog ja existe: {worklog_id}")
+    owner = visible_owner_name(tracker, (args.owner or "").strip() or "ai-agent")
     row = {
         "ID": worklog_id,
         "Tarefa": normalize_cell(args.message),
         "Branch": normalize_cell((args.branch or "").strip() or resolve_branch(), max_len=80),
-        "Responsavel": normalize_cell((args.owner or "").strip() or "ai-agent", max_len=60),
+        "Responsavel": normalize_cell(owner, max_len=60),
         "Inicio UTC": now_human_utc(),
         "Ultima atualizacao UTC": now_human_utc(),
         "Proximo passo": normalize_cell(
@@ -676,7 +697,7 @@ def run_update(args: argparse.Namespace) -> None:
         if args.branch:
             row["Branch"] = normalize_cell(args.branch, max_len=80)
         if args.owner:
-            row["Responsavel"] = normalize_cell(args.owner, max_len=60)
+            row["Responsavel"] = normalize_cell(visible_owner_name(tracker, args.owner), max_len=60)
         updated = row
         break
     if updated is None:

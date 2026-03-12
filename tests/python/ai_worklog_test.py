@@ -77,6 +77,83 @@ def init_git_repo(path: pathlib.Path) -> None:
     )
 
 
+def write_ai_runtime(repo_root: pathlib.Path) -> None:
+    config_dir = repo_root / "config" / "ai"
+    config_dir.mkdir(parents=True, exist_ok=True)
+    (config_dir / "agents.yaml").write_text(
+        """version: 1
+roles:
+  ai-developer-config-policy:
+    enabled: true
+    required: false
+    category: governance
+    display_name: Engenheiro Agentes IA
+  python-reviewer:
+    enabled: true
+    required: false
+    category: quality
+    display_name: Revisor Python
+""",
+        encoding="utf-8",
+    )
+    (config_dir / "agent-enablement.yaml").write_text(
+        """version: 1
+defaults:
+  registry_agents_enabled_by_default: true
+roles:
+  ai-developer-config-policy:
+    enabled: true
+  python-reviewer:
+    enabled: true
+registry_agents: {}
+""",
+        encoding="utf-8",
+    )
+    (config_dir / "agent-operations.yaml").write_text(
+        "version: 1\nroles:\n  ai-developer-config-policy: {}\n  python-reviewer: {}\n",
+        encoding="utf-8",
+    )
+    (config_dir / "contracts.yaml").write_text(
+        "version: 1\nworkflow:\n  always_enabled_columns: [Backlog, Doing, Review, Done]\n",
+        encoding="utf-8",
+    )
+    (config_dir / "platforms.yaml").write_text(
+        "version: 1\nplatforms:\n  atlassian:\n    enabled: false\n",
+        encoding="utf-8",
+    )
+    (config_dir / "agent-runtime.yaml").write_text(
+        """version: 1
+policies:
+  enabled_role_statuses: [operational, consultive]
+  required_role_statuses: [operational, consultive]
+  enabled_registry_statuses: [operational, consultive]
+  chat_owner_statuses: [operational, consultive]
+  chat_name_fallback_order: [chat_alias, display_name, technical_id]
+roles:
+  ai-developer-config-policy:
+    status: operational
+    chat_alias: Engenheiro Agentes IA
+    chat_owner_supported: true
+    owner_mode: primary
+    surfaces: [jira, chat, active-execution]
+    process_scopes: [governance]
+    runtime_artifacts:
+      - config/ai/agent-runtime.yaml
+  python-reviewer:
+    status: consultive
+    chat_alias: Revisor Python
+    chat_owner_supported: true
+    owner_mode: consultive
+    surfaces: [jira, chat, review]
+    process_scopes: [review]
+    runtime_artifacts:
+      - config/ai/agent-runtime.yaml
+registry_agents: {}
+""",
+        encoding="utf-8",
+    )
+
+
 class AiWorklogTests(unittest.TestCase):
     def test_check_fails_without_pending_action_when_doing_exists(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
@@ -320,6 +397,28 @@ class AiWorklogTests(unittest.TestCase):
 
             self.assertIn("Checkpoint real de progresso", log)
             self.assertIn("Aplicar ajuste final", log)
+
+    def test_start_normalizes_owner_to_visible_alias_when_runtime_exists(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            repo = pathlib.Path(tmp)
+            write_ai_runtime(repo)
+            tracker = repo / "docs" / "AI-WIP-TRACKER.md"
+            run_worklog(
+                "start",
+                "--file",
+                str(tracker),
+                "--message",
+                "Alias-first no worklog",
+                "--worklog-id",
+                "WIP-TEST-ALIAS",
+                "--owner",
+                "ai-developer-config-policy",
+            )
+
+            rendered = tracker.read_text(encoding="utf-8")
+
+            self.assertIn("Engenheiro Agentes IA", rendered)
+            self.assertNotIn("| ai-developer-config-policy |", rendered)
 
     def test_branch_check_blocks_pending_for_same_branch(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:

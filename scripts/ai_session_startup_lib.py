@@ -259,7 +259,9 @@ def load_agent_display_names(repo_root: Path) -> dict[str, str]:
 
 
 def agent_identity_payload(repo_root: Path, active_execution: dict[str, Any]) -> dict[str, Any]:
-    active_agent = str(active_execution.get("agent", "")).strip()
+    active_agent = str(active_execution.get("agent_id", "")).strip() or str(
+        active_execution.get("agent", "")
+    ).strip()
     try:
         control_plane = load_ai_control_plane(repo_root)
     except Exception:
@@ -770,8 +772,13 @@ def active_execution_payload(repo_root: Path) -> dict[str, Any]:
         "issue_summary": context.issue_summary,
         "issue_url": context.issue_url,
         "agent": context.agent,
+        "agent_id": context.agent_id,
         "agent_display_name": context.agent,
         "workflow_status": context.status,
+        "current_agent_role": context.current_agent_role,
+        "current_agent_role_id": context.current_agent_role_id,
+        "next_required_role": context.next_required_role,
+        "next_required_role_id": context.next_required_role_id,
         "branch": context.branch,
         "worktree_root": context.worktree_root,
         "started_at": context.started_at,
@@ -1054,6 +1061,7 @@ def startup_governor_status_payload(
         "dirty_entry_count": len(git_inventory.get("dirty_entries", [])),
         "active_execution_issue": str(active_execution.get("issue_key", "")).strip(),
         "active_execution_agent": str(active_execution.get("agent", "")).strip(),
+        "active_execution_agent_id": str(active_execution.get("agent_id", "")).strip(),
         "active_worklog_ids": worklog_ids,
         "enabled_roles": list(agent_enablement.get("enabled_roles", [])),
         "disabled_roles": list(agent_enablement.get("disabled_roles", [])),
@@ -1068,7 +1076,9 @@ def startup_governor_status_payload(
         json.dumps(snapshot, ensure_ascii=False, sort_keys=True).encode("utf-8")
     ).hexdigest()
 
-    next_owner_role = str(active_execution.get("agent", "")).strip()
+    next_owner_role = str(active_execution.get("agent_id", "")).strip() or str(
+        active_execution.get("agent", "")
+    ).strip()
     if not next_owner_role and active_worklog_items:
         next_owner_role = str(active_worklog_items[0].get("Responsavel", "")).strip()
     if not next_owner_role and prioritized_work_item.get("identifier"):

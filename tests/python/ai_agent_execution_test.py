@@ -292,8 +292,13 @@ class AgentExecutionTests(unittest.TestCase):
         context = payload["context"]
         self.assertIsInstance(context, dict)
         self.assertEqual(context["issue_key"], "DOT-101")
-        self.assertEqual(context["agent"], "ai-developer-automation")
+        self.assertEqual(context["agent"], "Automation Dev")
+        self.assertEqual(context["agent_id"], "ai-developer-automation")
         self.assertEqual(context["status"], "doing")
+        self.assertEqual(context["current_agent_role"], "Automation Dev")
+        self.assertEqual(context["current_agent_role_id"], "ai-developer-automation")
+        self.assertEqual(context["next_required_role"], "Tech Lead")
+        self.assertEqual(context["next_required_role_id"], "ai-tech-lead")
         self.assertEqual(payload["jira"]["current_agent_role_display"], "Automation Dev")
         self.assertEqual(payload["jira"]["next_required_role_display"], "Tech Lead")
         self.assertEqual(payload["jira"]["role_sync"]["assignee_status"], "synced")
@@ -379,6 +384,41 @@ class AgentExecutionTests(unittest.TestCase):
         self.assertIn("Agent: Engenheiro", fake_jira.logged[-1]["body_text"])
         self.assertNotIn("Agent: ai-engineering-manager", fake_jira.logged[-1]["body_text"])
         self.assertIsNone(payload["context"])
+
+    def test_load_context_migrates_legacy_schema_to_alias_first(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            repo = Path(tmp)
+            write_runtime(repo)
+            context_path = default_context_path(repo)
+            context_path.parent.mkdir(parents=True, exist_ok=True)
+            context_path.write_text(
+                json.dumps(
+                    {
+                        "issue_key": "DOT-101",
+                        "issue_summary": "Instrumentar execucao local por agente e issue",
+                        "issue_url": "https://example.atlassian.net/browse/DOT-101",
+                        "agent": "ai-reviewer-automation",
+                        "status": "review",
+                        "current_agent_role": "ai-reviewer-automation",
+                        "next_required_role": "ai-engineering-manager",
+                        "branch": "feat/DOT-101-agent-issue-instrumentation",
+                        "worktree_root": str(repo),
+                        "started_at": "2026-03-09T00:00:00-03:00",
+                        "updated_at": "2026-03-09T00:10:00-03:00",
+                    }
+                ),
+                encoding="utf-8",
+            )
+
+            context = load_context(repo)
+
+        self.assertIsNotNone(context)
+        self.assertEqual(context.agent, "Revisor Automacao")
+        self.assertEqual(context.agent_id, "ai-reviewer-automation")
+        self.assertEqual(context.current_agent_role, "Revisor Automacao")
+        self.assertEqual(context.current_agent_role_id, "ai-reviewer-automation")
+        self.assertEqual(context.next_required_role, "Engenheiro")
+        self.assertEqual(context.next_required_role_id, "ai-engineering-manager")
 
     def test_paused_issue_resumes_to_doing_before_advancing(self) -> None:
         fake_jira = FakeJira()
