@@ -58,6 +58,7 @@ global_contract:
       - unresolved-ceremony-findings-must-open-or-link-governance-bug
       - every-meaningful-agent-milestone-must-also-be-summarized-in-chat
       - zero-context-startup-must-load-chat-contract-before-first-user-message
+      - first-operational-chat-message-belongs-to-ai-startup-governor-until-ready-for-work
       - chat-summaries-must-stay-human-short-and-non-robotic
       - chat-summaries-must-start-with-bracketed-dd-mm-hh-mm-timestamp-and-bold-agent-name-prefix
       - chat-summary-timestamp-must-use-real-local-system-clock-at-send-time
@@ -68,6 +69,8 @@ global_contract:
       - jira-and-confluence-work-items-in-chat-must-use-canonical-web-links
       - chat-summaries-do-not-replace-jira-or-confluence-traceability
       - no-subagent-delegation-before-startup-context-is-loaded-or-linked
+      - startup-governor-must-materialize-startup-ready-artifact-before-handoff
+      - startup-governor-must-block-operational-output-when-clearance-is-not-ready
       - subagent-handoff-must-carry-owner-issue-startup-context-and-applicable-rules
       - subagent-handoff-must-carry-pea-classification-when-applicable
       - ambiguous-or-structural-work-must-run-pre-execution-alignment-before-execution
@@ -163,6 +166,33 @@ profiles:
         - atualizar pagina de qualidade quando houver regra nova ou evidencias permanentes
 
 roles:
+  ai-startup-governor:
+    profile: governance-common
+    jira:
+      primary_issue_actions:
+        - executar o startup obrigatorio e carregar o contexto canonico da sessao
+        - materializar startup readiness, clearance e bloqueios antes da primeira resposta operacional
+        - fazer handoff formal para o agente operacional apenas quando houver ready_for_work
+      transitions_owned:
+        - sem-transicao-exclusiva
+      required_comment_types:
+        - progress-update
+        - blocker
+        - technical-decision
+      required_evidence:
+        - startup report atualizado
+        - readiness artifact da sessao
+        - evidencia objetiva de drift, bloqueio ou handoff
+    confluence:
+      page_actions:
+        - linkar pagina operacional somente quando a governanca do startup mudar
+    operating_steps:
+      - executar o startup do zero ou restart endurecido quando a continuidade nao for comprovada
+      - carregar contrato de chat, display_name, governanca Git e contratos pendentes antes de qualquer saida operacional
+      - materializar readiness e clearance da sessao como artefato executavel
+      - bloquear saida operacional e delegacao enquanto o estado nao for ready_for_work
+      - fazer handoff formal para o agente dono da rodada quando a sessao estiver liberada
+
   ai-product-owner:
     profile: governance-common
     jira:

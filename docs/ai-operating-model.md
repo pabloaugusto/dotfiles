@@ -29,6 +29,8 @@ Nessas retomadas, a regra correta passa a ser:
 - nao operar por amostragem, presuncao ou lembranca parcial de sessao antiga
 - carregar o contrato de comunicacao com o usuario antes da primeira mensagem
   operacional no chat
+- garantir que, ate `ready_for_work`, o `Guardiao de Startup` seja o unico
+  papel autorizado a emitir a primeira resposta operacional
 - carregar a camada de `display_name` antes de exibir agente, papel ou owner em
   chat, `Jira` ou artefato visivel
 - carregar explicitamente a governanca Git canonica da sessao, lembrando que o
@@ -55,6 +57,7 @@ Nessas retomadas, a regra correta passa a ser:
   criacao nova
 - preparar o pacote minimo de contexto antes de delegar para subagentes
 - gerar o relatorio operacional de retomada com `task ai:startup:session`
+- materializar `startup clearance` em `.cache/ai/startup-ready.json`
 - tratar trabalho iniciado sem esse startup integral como materialmente
   rejeitavel ate a remediacao do contexto
 
@@ -75,6 +78,8 @@ Nem toda definicao nasce primeiro em doc oficial. Quando isso acontecer:
 Neste repo, `startup`, `PEA` e `enforcement` sao camadas diferentes.
 
 - `startup` rele a governanca e recalcula o contexto operacional da sessao
+- `startup` tambem materializa a `startup clearance` e define se ja existe
+  `ready_for_work`
 - `PEA` alinha entendimento antes da execucao quando houver ambiguidade,
   impacto persistente, risco estrutural ou pre-condicao faltante
 - `enforcement` continua nos hooks, tasks, validadores, reviews, `Jira`,

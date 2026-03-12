@@ -29,6 +29,7 @@ required = [
   "lessons-governance-curator",
   "orchestrator",
   "ai-product-owner",
+  "ai-startup-governor",
   "ai-scrum-master",
   "ai-engineering-architect",
   "ai-engineering-manager",

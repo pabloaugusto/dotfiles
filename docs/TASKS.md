@@ -211,6 +211,8 @@ Referencia operacional das tasks canonicas mais importantes do repositorio.
   resumindo o preflight operacional minimo da rodada.
 - Uso manual: `task ai:startup:session`
 - Uso com caminho customizado: `task ai:startup:session OUT=".cache/ai/startup-session.md"`
+- Uso com decisao explicita de WIP:
+  `task ai:startup:session PENDING_ACTION=concluir_primeiro`
 - Observacao: a task escreve por padrao o artefato local em
   `.cache/ai/startup-session.md`, usando como fontes
   [`docs/AI-STARTUP-GOVERNANCE-MANIFEST.md`](AI-STARTUP-GOVERNANCE-MANIFEST.md)
@@ -225,6 +227,8 @@ Referencia operacional das tasks canonicas mais importantes do repositorio.
 - Observacao: o relatorio tambem deve expor `pea_status`, incluindo catalogo de
   prompt packs, pack formal carregado e a distincao entre `startup`, `PEA` e
   enforcement.
+- Observacao: a task tambem deve materializar `.cache/ai/startup-ready.json`
+  com `startup_governor_status`, `clearance`, bloqueios e readiness da sessao.
 - Observacao: o startup deve explicitar tambem que a governanca Git canonica
   foi carregada de [`AGENTS.md`](../AGENTS.md),
   [`docs/git-conventions.md`](git-conventions.md), [`Taskfile.yml`](../Taskfile.yml)
@@ -232,6 +236,18 @@ Referencia operacional das tasks canonicas mais importantes do repositorio.
   [`.github/pull_request_template.md`](../.github/pull_request_template.md), mas
   o enforcement de commit atomico, higiene de branch/worktree e fechamento de
   worklog continua nos gates oficiais.
+
+### `ai:startup:enforce`
+
+- Funcionalidade: recalcula o startup oficial, atualiza o relatorio humano e
+  falha quando a sessao ainda nao estiver `ready_for_work`.
+- Uso manual: `task ai:startup:enforce`
+- Uso com decisao explicita de WIP:
+  `task ai:startup:enforce PENDING_ACTION=concluir_primeiro`
+- Uso com caminhos customizados:
+  `task ai:startup:enforce OUT=".cache/ai/startup-session.md" READY_OUT=".cache/ai/startup-ready.json" PENDING_ACTION=concluir_primeiro`
+- Observacao: o gate existe para endurecer `first-response clearance`,
+  ownership do `Guardiao de Startup` e bloqueio de saida operacional prematura.
 
 ### `ai:1password:ratelimit`
 

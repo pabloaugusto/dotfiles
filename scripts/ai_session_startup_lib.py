@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import hashlib
 import json
 import re
 import subprocess
@@ -26,6 +27,7 @@ PROMPTS_CATALOG_PATH = Path(".agents/prompts/CATALOG.md")
 PEA_PROMPT_ROOT = Path(".agents/prompts/formal/startup-alignment")
 REGISTRY_ROOT = Path(".agents/registry")
 DEFAULT_REPORT_PATH = Path(".cache/ai/startup-session.md")
+DEFAULT_READINESS_PATH = Path(".cache/ai/startup-ready.json")
 WORKLOG_DOING_START = "<!-- ai-worklog:doing:start -->"
 WORKLOG_DOING_END = "<!-- ai-worklog:doing:end -->"
 WORKLOG_HEADERS = [
@@ -46,6 +48,9 @@ GITHUB_FALLBACK_CHAIN = [
     "op://secrets/github/api/token",
     "op://Personal/github/token-full-access",
 ]
+STARTUP_GOVERNOR_AGENT = "ai-startup-governor"
+STARTUP_GOVERNOR_DISPLAY_NAME = "Guardiao de Startup"
+ALLOWED_PENDING_ACTIONS = {"", "concluir_primeiro", "roadmap_pendente"}
 
 PENDING_MARKERS = (
     "<!-- ai-chat-contracts:pending:start -->",
@@ -115,6 +120,13 @@ class ChatContractEntry:
     owner: str
     destination: str
     status: str
+
+
+def _normalize_pending_action(pending_action: str) -> str:
+    normalized = str(pending_action or "").strip()
+    if normalized not in ALLOWED_PENDING_ACTIONS:
+        raise ValueError("pending_action invalida. Use concluir_primeiro ou roadmap_pendente.")
+    return normalized
 
 
 def _read_utf8(path: Path) -> str:
@@ -257,6 +269,35 @@ def agent_identity_payload(repo_root: Path, active_execution: dict[str, Any]) ->
     }
 
 
+def manifest_evidence_payload(repo_root: Path, resolved_paths: list[str]) -> dict[str, Any]:
+    digest = hashlib.sha256()
+    total_bytes = 0
+    total_lines = 0
+    missing_paths: list[str] = []
+    for relative in resolved_paths:
+        candidate = (repo_root / relative).resolve()
+        if not candidate.is_file():
+            missing_paths.append(relative)
+            continue
+        content = _read_utf8(candidate)
+        encoded = content.encode("utf-8")
+        total_bytes += len(encoded)
+        total_lines += len(content.splitlines())
+        digest.update(relative.encode("utf-8"))
+        digest.update(b"\0")
+        digest.update(encoded)
+        digest.update(b"\0")
+    status = "ok" if resolved_paths and not missing_paths else "missing"
+    return {
+        "status": status,
+        "resolved_count": len(resolved_paths),
+        "textual_line_count": total_lines,
+        "textual_bytes": total_bytes,
+        "sha256": digest.hexdigest() if resolved_paths else "",
+        "missing_paths": missing_paths,
+    }
+
+
 def chat_communication_payload() -> dict[str, Any]:
     return {
         "status": "ok",
@@ -380,7 +421,7 @@ def startup_drift_payload(
     if active_worklog_items:
         worklog = active_worklog_items[0]
         worklog_branch = str(worklog.get("Branch", "")).strip()
-        worklog_issue = _extract_issue_key(str(worklog.get("ID", ""))) or _extract_issue_key(
+        worklog_issue = _extract_issue_key(worklog_branch) or _extract_issue_key(
             str(worklog.get("Tarefa", ""))
         )
         if worklog_branch and current_branch and worklog_branch != current_branch:
@@ -699,15 +740,204 @@ def prioritized_work_item_payload(
         }
     if active_worklog_items:
         first = active_worklog_items[0]
+        identifier = _extract_issue_key(str(first.get("Branch", ""))) or _extract_issue_key(
+            str(first.get("Tarefa", ""))
+        )
         return {
             "source": "worklog-doing",
-            "identifier": str(first.get("ID", "")).strip(),
+            "identifier": identifier or str(first.get("ID", "")).strip(),
             "summary": str(first.get("Tarefa", "")).strip(),
         }
     return {
         "source": "jira-board-required",
         "identifier": "",
         "summary": "Ler o Jira board para definir o proximo work item da rodada.",
+    }
+
+
+def startup_governor_status_payload(
+    repo_root: Path,
+    *,
+    manifest_evidence: dict[str, Any],
+    pending_contracts: list[ChatContractEntry],
+    git_inventory: dict[str, Any],
+    active_worklog_items: list[dict[str, str]],
+    active_execution: dict[str, Any],
+    agent_identity: dict[str, Any],
+    chat_communication: dict[str, Any],
+    git_governance: dict[str, Any],
+    pea_status: dict[str, Any],
+    startup_drift: dict[str, Any],
+    fallback_status: dict[str, Any],
+    github_auth: dict[str, Any],
+    atlassian_connectivity: dict[str, Any],
+    prioritized_work_item: dict[str, str],
+    pending_action: str = "",
+) -> dict[str, Any]:
+    normalized_pending_action = _normalize_pending_action(pending_action)
+    display_names = load_agent_display_names(repo_root)
+    governor_display_name = display_names.get(
+        STARTUP_GOVERNOR_AGENT, STARTUP_GOVERNOR_DISPLAY_NAME
+    )
+    blockers: list[str] = []
+    warnings: list[str] = []
+    progression = ["not_started"]
+    state = "not_started"
+
+    if manifest_evidence.get("status") == "ok":
+        state = "reading_manifest"
+        progression.append(state)
+    else:
+        blockers.append("manifest canonico nao foi relido integralmente com prova valida")
+
+    if pending_contracts:
+        warnings.append(
+            f"existem {len(pending_contracts)} contratos nascidos no chat ainda pendentes de promocao"
+        )
+
+    if chat_communication.get("status") == "ok":
+        state = "chat_contract_loaded"
+        progression.append(state)
+    else:
+        blockers.append("contrato de comunicacao do chat nao ficou carregado corretamente")
+
+    if agent_identity.get("status") == "ok":
+        state = "identity_loaded"
+        progression.append(state)
+    else:
+        blockers.append("camada de display_name nao ficou carregada corretamente")
+
+    if git_inventory.get("status") == "ok" and git_governance.get("status") == "ok":
+        state = "git_context_loaded"
+        progression.append(state)
+    else:
+        blockers.append("governanca Git ou inventario de branch/worktree falhou no startup")
+
+    if pea_status.get("status") != "ok":
+        blockers.append("catalogo de prompt packs ou pack formal de startup/PEA nao foi carregado")
+
+    if git_inventory.get("pr_probe_status") == "error":
+        blockers.append("nao foi possivel capturar PRs abertos da branch atual no startup")
+
+    github_status = str(github_auth.get("status", "")).strip()
+    graphql_status = str(github_auth.get("graphql_probe", {}).get("status", "")).strip()
+    if github_status not in {"ok", "skipped"}:
+        blockers.append("gh auth status ou probes basicos do GitHub falharam no startup")
+    if graphql_status not in {"ok", "skipped"}:
+        blockers.append("probe GraphQL falhou durante o startup")
+
+    atlassian_status = str(atlassian_connectivity.get("status", "")).strip()
+    fallback_mode = str(fallback_status.get("mode", "")).strip()
+    if atlassian_status not in {"ok", "disabled", "skipped"}:
+        if fallback_mode in {"degraded", "recovery"}:
+            warnings.append(
+                "Atlassian indisponivel no probe resumido; fallback local esta ativo e precisa de reconciliacao dirigida"
+            )
+        else:
+            blockers.append(
+                "saude minima de Jira/Confluence nao ficou comprovada e nenhum fallback ativo foi detectado"
+            )
+
+    if github_status in {"ok", "skipped"} and graphql_status in {"ok", "skipped"}:
+        if atlassian_status in {"ok", "disabled", "skipped"} or fallback_mode in {
+            "degraded",
+            "recovery",
+        }:
+            state = "probes_passed"
+            progression.append(state)
+
+    if startup_drift.get("status") != "clean":
+        blockers.extend(
+            f"drift operacional detectado: {finding}"
+            for finding in startup_drift.get("findings", [])
+        )
+
+    if active_worklog_items and normalized_pending_action == "":
+        state = "wip_decision_pending"
+        progression.append(state)
+        blockers.append(
+            "task ai:worklog:check exige decisao humana explicita: concluir_primeiro ou roadmap_pendente"
+        )
+    elif normalized_pending_action == "roadmap_pendente":
+        state = "wip_decision_pending"
+        progression.append(state)
+        blockers.append(
+            "pending_action=roadmap_pendente mantem a sessao sem ready_for_work ate a retomada correta da rodada"
+        )
+
+    current_branch = str(git_inventory.get("current_branch", "")).strip()
+    worklog_ids = [str(item.get("ID", "")).strip() for item in active_worklog_items if item.get("ID")]
+    snapshot = {
+        "manifest_sha256": str(manifest_evidence.get("sha256", "")).strip(),
+        "current_branch": current_branch,
+        "dirty_entry_count": len(git_inventory.get("dirty_entries", [])),
+        "active_execution_issue": str(active_execution.get("issue_key", "")).strip(),
+        "active_execution_agent": str(active_execution.get("agent", "")).strip(),
+        "active_worklog_ids": worklog_ids,
+        "fallback_mode": fallback_mode,
+        "github_status": github_status,
+        "graphql_status": graphql_status,
+        "atlassian_status": atlassian_status,
+        "pending_action": normalized_pending_action,
+        "prioritized_work_item": str(prioritized_work_item.get("identifier", "")).strip(),
+    }
+    fingerprint = hashlib.sha256(
+        json.dumps(snapshot, ensure_ascii=False, sort_keys=True).encode("utf-8")
+    ).hexdigest()
+
+    next_owner_role = str(active_execution.get("agent", "")).strip()
+    if not next_owner_role and active_worklog_items:
+        next_owner_role = str(active_worklog_items[0].get("Responsavel", "")).strip()
+    if not next_owner_role and prioritized_work_item.get("identifier"):
+        next_owner_role = "ai-product-owner"
+    next_owner_display_name = display_names.get(next_owner_role, next_owner_role or "a definir")
+
+    if blockers and state != "wip_decision_pending":
+        state = "startup_failed"
+        progression.append(state)
+
+    clearance_granted = not blockers
+    if clearance_granted:
+        state = "ready_for_work"
+        progression.append(state)
+
+    return {
+        "owner_role": STARTUP_GOVERNOR_AGENT,
+        "owner_display_name": governor_display_name,
+        "audit_owner_role": "ai-scrum-master",
+        "state": state,
+        "clearance": "granted" if clearance_granted else "blocked",
+        "clearance_granted": clearance_granted,
+        "pending_action": normalized_pending_action,
+        "progression": progression,
+        "blocking_findings": blockers,
+        "warnings": warnings,
+        "blocked_actions": []
+        if clearance_granted
+        else ["operational-output", "subagent-delegation", "operational-handoff"],
+        "harness": {
+            "report_path": DEFAULT_REPORT_PATH.as_posix(),
+            "readiness_artifact": DEFAULT_READINESS_PATH.as_posix(),
+        },
+        "handoff": {
+            "allowed": clearance_granted,
+            "current_chat_owner_role": STARTUP_GOVERNOR_AGENT,
+            "current_chat_owner_display_name": governor_display_name,
+            "next_owner_role": next_owner_role,
+            "next_owner_display_name": next_owner_display_name,
+        },
+        "context_snapshot": snapshot,
+        "context_fingerprint": fingerprint,
+        "invalidate_when": [
+            "branch atual mudar",
+            "dirty tree mudar",
+            "active execution mudar",
+            "worklog Doing mudar",
+            "status de GitHub/GraphQL mudar",
+            "status de Jira/Confluence ou fallback mudar",
+            "pending_action mudar",
+            "manifest evidence mudar",
+        ],
     }
 
 
@@ -731,8 +961,15 @@ def load_pending_chat_contracts(repo_root: Path) -> list[ChatContractEntry]:
     return entries
 
 
-def startup_session_payload(repo_root: Path, *, include_runtime_probes: bool = True) -> dict[str, Any]:
+def startup_session_payload(
+    repo_root: Path,
+    *,
+    include_runtime_probes: bool = True,
+    pending_action: str = "",
+) -> dict[str, Any]:
+    normalized_pending_action = _normalize_pending_action(pending_action)
     resolved_paths = resolve_startup_manifest_paths(repo_root)
+    manifest_evidence = manifest_evidence_payload(repo_root, resolved_paths)
     pending_contracts = load_pending_chat_contracts(repo_root)
     git_inventory = git_inventory_payload(repo_root)
     active_worklog_items = load_active_worklog_items(repo_root)
@@ -781,15 +1018,36 @@ def startup_session_payload(repo_root: Path, *, include_runtime_probes: bool = T
         if include_runtime_probes
         else {"status": "skipped", "overall_ok": False, "recovery_hints": []}
     )
+    startup_governor_status = startup_governor_status_payload(
+        repo_root,
+        manifest_evidence=manifest_evidence,
+        pending_contracts=pending_contracts,
+        git_inventory=git_inventory,
+        active_worklog_items=active_worklog_items,
+        active_execution=active_execution,
+        agent_identity=agent_identity,
+        chat_communication=chat_communication,
+        git_governance=git_governance,
+        pea_status=pea_status,
+        startup_drift=startup_drift,
+        fallback_status=fallback_status,
+        github_auth=github_auth,
+        atlassian_connectivity=atlassian_connectivity,
+        prioritized_work_item=prioritized_work_item,
+        pending_action=normalized_pending_action,
+    )
     return {
         "generated_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
         "manifest_path": MANIFEST_PATH.as_posix(),
         "chat_contracts_register_path": CHAT_CONTRACTS_REGISTER_PATH.as_posix(),
         "resolved_paths": resolved_paths,
         "resolved_count": len(resolved_paths),
+        "manifest_evidence": manifest_evidence,
         "pending_chat_contracts": [asdict(entry) for entry in pending_contracts],
         "pending_chat_contract_count": len(pending_contracts),
         "default_report_path": DEFAULT_REPORT_PATH.as_posix(),
+        "default_readiness_path": DEFAULT_READINESS_PATH.as_posix(),
+        "pending_action": normalized_pending_action,
         "git_inventory": git_inventory,
         "active_worklog_items": active_worklog_items,
         "active_worklog_count": len(active_worklog_items),
@@ -804,10 +1062,12 @@ def startup_session_payload(repo_root: Path, *, include_runtime_probes: bool = T
         "github_auth": github_auth,
         "atlassian_connectivity": atlassian_connectivity,
         "prioritized_work_item": prioritized_work_item,
+        "startup_governor_status": startup_governor_status,
     }
 
 
 def render_startup_session_markdown(payload: dict[str, Any]) -> str:
+    manifest_evidence = payload["manifest_evidence"]
     lines = [
         "# AI Startup Session Report",
         "",
@@ -815,14 +1075,21 @@ def render_startup_session_markdown(payload: dict[str, Any]) -> str:
         f"- Manifest canonico: `{payload['manifest_path']}`",
         f"- Registro de contratos do chat: `{payload['chat_contracts_register_path']}`",
         f"- Total de arquivos textuais resolvidos: `{payload['resolved_count']}`",
+        f"- Linhas textuais relidas: `{manifest_evidence.get('textual_line_count', 0)}`",
+        f"- Bytes textuais relidos: `{manifest_evidence.get('textual_bytes', 0)}`",
+        f"- Digest do startup: `{manifest_evidence.get('sha256', '')}`",
         f"- Total de contratos do chat ainda pendentes: `{payload['pending_chat_contract_count']}`",
         f"- Worklogs ativos no fallback local: `{payload['active_worklog_count']}`",
+        f"- Pending action aplicada: `{payload.get('pending_action', '') or 'nenhuma'}`",
         "",
         "## Arquivos canonicos resolvidos",
         "",
     ]
     for relative in payload["resolved_paths"]:
         lines.append(f"- `{relative}`")
+    if manifest_evidence.get("missing_paths"):
+        for relative in manifest_evidence.get("missing_paths", []):
+            lines.append(f"- caminho ausente ao reler o manifest: `{relative}`")
     lines.extend(["", "## Contratos do chat ainda pendentes", ""])
     pending = payload["pending_chat_contracts"]
     if not pending:
@@ -1019,6 +1286,36 @@ def render_startup_session_markdown(payload: dict[str, Any]) -> str:
         lines.append(f"- regra de subagente: {rule}")
     lines.append("- regra de subagente: repassar classificacao do PEA quando aplicavel")
 
+    governor = payload["startup_governor_status"]
+    lines.extend(["", "## startup_governor_status", ""])
+    lines.append(f"- owner_role: `{governor.get('owner_role', '')}`")
+    lines.append(f"- owner_display_name: `{governor.get('owner_display_name', '')}`")
+    lines.append(f"- audit_owner_role: `{governor.get('audit_owner_role', '')}`")
+    lines.append(f"- state: `{governor.get('state', 'unknown')}`")
+    lines.append(f"- clearance: `{governor.get('clearance', 'blocked')}`")
+    lines.append(
+        f"- readiness_artifact: `{payload.get('readiness_artifact_path', payload.get('default_readiness_path', ''))}`"
+    )
+    lines.append(
+        f"- current_chat_owner: `{governor.get('handoff', {}).get('current_chat_owner_display_name', '')}`"
+    )
+    if governor.get("handoff", {}).get("next_owner_role"):
+        lines.append(
+            "- proximo owner operacional elegivel: "
+            f"`{governor.get('handoff', {}).get('next_owner_display_name', '')}` "
+            f"(`{governor.get('handoff', {}).get('next_owner_role', '')}`)"
+        )
+    if governor.get("blocking_findings"):
+        for finding in governor.get("blocking_findings", []):
+            lines.append(f"- bloqueio: {finding}")
+    else:
+        lines.append("- bloqueio: nenhum")
+    for warning in governor.get("warnings", []):
+        lines.append(f"- aviso: {warning}")
+    lines.append(
+        f"- context_fingerprint: `{governor.get('context_fingerprint', '')}`"
+    )
+
     lines.extend(
         [
             "",
@@ -1028,6 +1325,7 @@ def render_startup_session_markdown(payload: dict[str, Any]) -> str:
             "- avisar o usuario se a tabela de contratos pendentes nao estiver vazia",
             "- carregar o contrato de comunicacao e a camada de display_name antes da primeira resposta operacional ao usuario",
             "- carregar o catalogo de prompt packs e expor `pea_status` antes de operar por memoria residual",
+            "- materializar `startup_governor_status` e `.cache/ai/startup-ready.json` antes do handoff operacional",
             "- validar `gh auth status` e, se o fluxo de GitHub ou GraphQL falhar, consultar a cadeia de fallback documentada em `docs/secrets-and-auth.md` antes de concluir que o `gh` esta bloqueado",
             "- quando a rodada depender de Jira ou Confluence, confirmar tambem o probe resumido dessas plataformas antes de operar por memoria",
             "- nao delegar para subagentes sem pacote minimo de contexto, owner issue e regras aplicaveis",
@@ -1041,14 +1339,34 @@ def write_startup_session_report(
     repo_root: Path,
     *,
     out_path: Path | None = None,
+    ready_out: Path | None = None,
     include_runtime_probes: bool = True,
+    pending_action: str = "",
 ) -> dict[str, Any]:
-    payload = startup_session_payload(repo_root, include_runtime_probes=include_runtime_probes)
+    payload = startup_session_payload(
+        repo_root,
+        include_runtime_probes=include_runtime_probes,
+        pending_action=pending_action,
+    )
     report_path = (repo_root / (out_path or DEFAULT_REPORT_PATH)).resolve()
+    readiness_path = (repo_root / (ready_out or DEFAULT_READINESS_PATH)).resolve()
     report_path.parent.mkdir(parents=True, exist_ok=True)
+    readiness_path.parent.mkdir(parents=True, exist_ok=True)
+    payload["report_path"] = report_path.relative_to(repo_root).as_posix()
+    payload["readiness_artifact_path"] = readiness_path.relative_to(repo_root).as_posix()
+    governor_status = dict(payload["startup_governor_status"])
+    governor_status["harness"] = {
+        **governor_status.get("harness", {}),
+        "report_path": payload["report_path"],
+        "readiness_artifact": payload["readiness_artifact_path"],
+    }
+    payload["startup_governor_status"] = governor_status
     report_text = render_startup_session_markdown(payload)
     report_path.write_text(report_text, encoding="utf-8")
-    payload["report_path"] = report_path.relative_to(repo_root).as_posix()
+    readiness_path.write_text(
+        json.dumps(payload["startup_governor_status"], ensure_ascii=False, indent=2) + "\n",
+        encoding="utf-8",
+    )
     return payload
 
 

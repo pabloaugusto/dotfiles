@@ -6,6 +6,8 @@ Catalogo humano dos papeis permanentes de IA deste repo.
 
 - `repo-governance-authority`: sempre
 - `execution-worklog-governance-owner`: sempre
+- `ai-startup-governor`: obrigatorio em toda nova sessao ou `restart`, ate a
+  sessao atingir `ready_for_work`
 - `ai-scrum-master`: sempre, como gate global de **board**, **WIP**,
   comunicacao, ownership, ledger de enforcement e **cerimonias**
 - `architecture-modernization-authority`: sempre, em paralelo
@@ -38,6 +40,7 @@ Catalogo humano dos papeis permanentes de IA deste repo.
 | Papel | Cartao | Agente declarativo | Skill principal | Quando entra |
 | --- | --- | --- | --- | --- |
 | PO | [`.agents/cards/ai-product-owner.md`](../.agents/cards/ai-product-owner.md) | `ai-product-owner` | `$task-routing-and-decomposition` | valor, intake, backlog, prioridade, refinement, ready, product goal e timeline |
+| Guardiao de Startup | [`.agents/cards/ai-startup-governor.md`](../.agents/cards/ai-startup-governor.md) | `ai-startup-governor` | `$dotfiles-repo-governance` | startup do zero, restart, `startup clearance`, bloqueio da primeira resposta operacional e handoff para o agente dono da rodada |
 | Scrum Master | [`.agents/cards/ai-scrum-master.md`](../.agents/cards/ai-scrum-master.md) | `ai-scrum-master` | `$wip-continuity-governance` | gate global de **board**, **WIP**, ownership, comunicacao, conformidade de agentes, ledger de enforcement e **cerimonias** |
 | Arquiteto | [`.agents/cards/ai-engineering-architect.md`](../.agents/cards/ai-engineering-architect.md) | `ai-engineering-architect` | `$dotfiles-architecture-modernization` | discovery tecnico, ADR, enriquecimento de backlog e refinement |
 | Engenheiro | [`.agents/cards/ai-engineering-manager.md`](../.agents/cards/ai-engineering-manager.md) | `ai-engineering-manager` | `$wip-continuity-governance` | capacidade, gargalos, pausas, riscos, bloqueios e escalacoes |

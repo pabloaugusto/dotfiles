@@ -3,7 +3,7 @@ task_id: prompt/startup-governor-enforcement
 title: Pack formal para endurecer startup com guardiao dedicado e clearance obrigatoria
 status: active
 owner_epic: DOT-71
-owner_issue: DOT-205
+owner_issue: DOT-206
 jira:
   summary_prefix: "PROMPT:"
   required_labels:

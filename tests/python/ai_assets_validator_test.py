@@ -39,10 +39,12 @@ class ValidateAiAssetsTests(unittest.TestCase):
             module.REQUIRED_FILES,
         )
         self.assertIn(".agents/config.toml", module.REQUIRED_FILES)
+        self.assertIn(".agents/cards/ai-startup-governor.md", module.REQUIRED_FILES)
         self.assertIn(".agents/cerimonias/README.md", module.REQUIRED_FILES)
         self.assertIn(".agents/cerimonias/ceremony.schema.json", module.REQUIRED_FILES)
         self.assertIn(".agents/cerimonias/retrospectiva.yaml", module.REQUIRED_FILES)
         self.assertIn(".codex/README.md", module.REQUIRED_FILES)
+        self.assertIn(".agents/registry/ai-startup-governor.toml", module.REQUIRED_FILES)
         self.assertIn("docs/AI-AGENTS-CATALOG.md", module.REQUIRED_FILES)
         self.assertIn("docs/AI-CHAT-CONTRACTS-REGISTER.md", module.REQUIRED_FILES)
         self.assertIn("docs/AI-FALLBACK-LEDGER.md", module.REQUIRED_FILES)
@@ -174,6 +176,18 @@ class ValidateAiAssetsTests(unittest.TestCase):
         )
         self.assertIn(".agents/config.toml", module.AGENT_IDENTITY_REQUIRED_SNIPPETS)
         self.assertIn(
+            "display_name: Guardiao de Startup",
+            module.AGENT_IDENTITY_REQUIRED_SNIPPETS["config/ai/agents.yaml"],
+        )
+        self.assertIn(
+            "| Guardiao de Startup |",
+            module.AGENT_IDENTITY_REQUIRED_SNIPPETS["docs/AI-AGENTS-CATALOG.md"],
+        )
+        self.assertIn(
+            'display_name = "Guardiao de Startup"',
+            module.AGENT_IDENTITY_REQUIRED_SNIPPETS[".agents/registry/ai-startup-governor.toml"],
+        )
+        self.assertIn(
             'display_name = "PO"',
             module.AGENT_IDENTITY_REQUIRED_SNIPPETS[".agents/registry/ai-product-owner.toml"],
         )
@@ -297,6 +311,14 @@ class ValidateAiAssetsTests(unittest.TestCase):
             module.CATALOG_REQUIRED_SNIPPETS["docs/AI-AGENTS-CATALOG.md"],
         )
         self.assertIn(
+            "ai-startup-governor",
+            module.CATALOG_REQUIRED_SNIPPETS["docs/AI-AGENTS-CATALOG.md"],
+        )
+        self.assertIn(
+            "ai-startup-governor",
+            module.CATALOG_REQUIRED_SNIPPETS["docs/AI-DELEGATION-FLOW.md"],
+        )
+        self.assertIn(
             "### `ai:fallback:status`",
             module.CATALOG_REQUIRED_SNIPPETS["docs/TASKS.md"],
         )
@@ -325,6 +347,10 @@ class ValidateAiAssetsTests(unittest.TestCase):
             module.CATALOG_REQUIRED_SNIPPETS["docs/TASKS.md"],
         )
         self.assertIn(
+            "### `ai:startup:enforce`",
+            module.CATALOG_REQUIRED_SNIPPETS["docs/TASKS.md"],
+        )
+        self.assertIn(
             "gh auth status",
             module.STARTUP_AND_RESTART_REQUIRED_SNIPPETS,
         )
@@ -337,7 +363,23 @@ class ValidateAiAssetsTests(unittest.TestCase):
             module.STARTUP_AND_RESTART_REQUIRED_SNIPPETS,
         )
         self.assertIn(
+            "Guardiao de Startup",
+            module.STARTUP_AND_RESTART_REQUIRED_SNIPPETS,
+        )
+        self.assertIn(
             "pea_status",
+            module.STARTUP_AND_RESTART_REQUIRED_SNIPPETS,
+        )
+        self.assertIn(
+            "startup_governor_status",
+            module.STARTUP_AND_RESTART_REQUIRED_SNIPPETS,
+        )
+        self.assertIn(
+            "startup-ready.json",
+            module.STARTUP_AND_RESTART_REQUIRED_SNIPPETS,
+        )
+        self.assertIn(
+            "ai:startup:enforce",
             module.STARTUP_AND_RESTART_REQUIRED_SNIPPETS,
         )
         self.assertIn(
@@ -353,12 +395,68 @@ class ValidateAiAssetsTests(unittest.TestCase):
             module.STARTUP_GOVERNANCE_REQUIRED_SNIPPETS["config/ai/contracts.yaml"],
         )
         self.assertIn(
+            "startup_readiness:",
+            module.STARTUP_GOVERNANCE_REQUIRED_SNIPPETS["config/ai/contracts.yaml"],
+        )
+        self.assertIn(
+            "owner_role: ai-startup-governor",
+            module.STARTUP_GOVERNANCE_REQUIRED_SNIPPETS["config/ai/contracts.yaml"],
+        )
+        self.assertIn(
+            "readiness_artifact: .cache/ai/startup-ready.json",
+            module.STARTUP_GOVERNANCE_REQUIRED_SNIPPETS["config/ai/contracts.yaml"],
+        )
+        self.assertIn(
             "capture-current-branch-lifecycle-upstream-and-main-absorption-state",
+            module.STARTUP_GOVERNANCE_REQUIRED_SNIPPETS["config/ai/contracts.yaml"],
+        )
+        self.assertIn(
+            "startup-governor-must-own-the-first-user-facing-message-until-ready-for-work",
+            module.STARTUP_GOVERNANCE_REQUIRED_SNIPPETS["config/ai/contracts.yaml"],
+        )
+        self.assertIn(
+            "startup-governor-must-block-operational-output-when-clearance-is-not-ready",
             module.STARTUP_GOVERNANCE_REQUIRED_SNIPPETS["config/ai/contracts.yaml"],
         )
         self.assertIn(
             "startup-report-must-expose-pea-status",
             module.STARTUP_GOVERNANCE_REQUIRED_SNIPPETS["config/ai/contracts.yaml"],
+        )
+        self.assertIn(
+            "startup_governor_status",
+            module.STARTUP_GOVERNANCE_REQUIRED_SNIPPETS["docs/TASKS.md"],
+        )
+        self.assertIn(
+            "startup-ready.json",
+            module.STARTUP_GOVERNANCE_REQUIRED_SNIPPETS["docs/TASKS.md"],
+        )
+        self.assertIn(
+            "ai:startup:enforce",
+            module.STARTUP_GOVERNANCE_REQUIRED_SNIPPETS["docs/TASKS.md"],
+        )
+        self.assertIn(
+            "Guardiao de Startup",
+            module.STARTUP_GOVERNANCE_REQUIRED_SNIPPETS["docs/ai-operating-model.md"],
+        )
+        self.assertIn(
+            "first-operational-chat-message-belongs-to-ai-startup-governor-until-ready-for-work",
+            module.STARTUP_GOVERNANCE_REQUIRED_SNIPPETS["config/ai/agent-operations.yaml"],
+        )
+        self.assertIn(
+            "startup-governor-must-materialize-startup-ready-artifact-before-handoff",
+            module.STARTUP_GOVERNANCE_REQUIRED_SNIPPETS["config/ai/agent-operations.yaml"],
+        )
+        self.assertIn(
+            "startup-governor-must-block-operational-output-when-clearance-is-not-ready",
+            module.STARTUP_GOVERNANCE_REQUIRED_SNIPPETS["config/ai/agent-operations.yaml"],
+        )
+        self.assertIn(
+            "startup-ready.json",
+            module.STARTUP_GOVERNANCE_REQUIRED_SNIPPETS["docs/AI-DELEGATION-FLOW.md"],
+        )
+        self.assertIn(
+            "ai-startup-governor",
+            module.STARTUP_GOVERNANCE_REQUIRED_SNIPPETS["docs/AI-DELEGATION-FLOW.md"],
         )
         self.assertIn(
             "fallback GitHub/PAT",
