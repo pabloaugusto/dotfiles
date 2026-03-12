@@ -1,0 +1,34 @@
+id: runtime-dev-boundary
+task_id: prompt/runtime-dev-boundary
+title: Prompt pack canonico para separar runtime da app e camada de desenvolvimento
+status: active
+owner_epic: DOT-71
+owner_issue: DOT-210
+jira:
+  summary_prefix: "PROMPT:"
+  required_labels:
+    - prompt
+entrypoints:
+  prompt: prompt.md
+  context: context.md
+fragments:
+  - fragments/target-architecture.md
+  - fragments/migration-waves.md
+dependencies:
+  prerequisite_packs: []
+  preflight_packs:
+    - startup-alignment
+    - agents-rules-centralization
+    - documentation-layer-governance
+startup:
+  mandatory_load: false
+  report_key: runtime_dev_boundary_pack
+  requires_manifest_integration: false
+delegation:
+  propagate_pea_context: true
+  required_payload_fields:
+    - owner_issue
+    - current_branch
+    - startup_report
+    - assumptions
+    - ambiguities
