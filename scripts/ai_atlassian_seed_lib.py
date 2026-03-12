@@ -739,8 +739,8 @@ def sync_confluence_docs(
         model=confluence_model,
         related_links=related_links,
         notes=[
-            "Pagina resincronizada pelo docs sync dedicado do Confluence.",
-            "Sincronizacao desacoplada do seed completo para manter a documentacao viva.",
+            "Pagina resincronizada pela camada oficial de sync documental.",
+            "Sincronizacao desacoplada do seed completo para manter a documentacao viva sem rebaixar o repo como fonte canonica quando aplicavel.",
         ],
         version_message="sync-atlassian-docs",
     )
@@ -750,12 +750,12 @@ def sync_confluence_docs(
             migration_issue_key,
             render_structured_comment(
                 {
-                    "agent": "ai-documentation-agent",
+                    "agent": "ai-documentation-sync",
                     "interaction_type": "documentation-sync",
                     "status": canonicalize_workflow_status("Doing"),
                     "contexto": [
                         "Confluence resincronizado por task dedicada, sem depender da semeadura completa.",
-                        "O objetivo e manter a documentacao oficial viva enquanto o board do Jira Software ainda esta em tratamento.",
+                        "O objetivo e manter a superficie cross-surface oficial viva sem substituir o repo como fonte canonica quando aplicavel.",
                     ],
                     "evidencias": [page["url"] for page in page_lookup.values()],
                     "proximo_passo": "Continuar refletindo no Confluence qualquer atualizacao aprovada do control plane e dos artefatos de migracao.",
@@ -908,7 +908,7 @@ def seed_atlassian(
         model=confluence_model,
         related_links=[migration_link, *seed_issue_links],
         notes=[
-            "Pagina sincronizada automaticamente pelo AI Documentation Agent.",
+            "Pagina sincronizada automaticamente pela camada oficial de sync documental.",
             f"Bundle de migracao: {Path(bundle['zip_path']).name}",
         ],
         version_message="sync-atlassian-seed",
@@ -925,12 +925,12 @@ def seed_atlassian(
         migration_issue_key,
         render_structured_comment(
             {
-                "agent": "ai-documentation-agent",
+                "agent": "ai-documentation-sync",
                 "interaction_type": "schema-artifact",
                 "status": canonicalize_workflow_status("Doing"),
                 "contexto": [
                     "Schema Jira aplicado e bundle auditavel gerado antes da semeadura.",
-                    "Confluence sincronizado como fonte oficial de documentacao viva.",
+                    "Confluence sincronizado como superficie cross-surface oficial da documentacao viva, preservando o repo como fonte canonica quando aplicavel.",
                 ],
                 "evidencias": migration_evidences,
                 "proximo_passo": "Concluir a semeadura retroativa e manter a operacao nativa em Jira/Confluence.",

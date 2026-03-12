@@ -4,8 +4,8 @@
 
 Manter convencoes operacionais, higiene de versionamento e organizacao de
 prompts, skills, docs e automacoes deste repo, incluindo a governanca de
-documentacao, a linkagem interna para ativos do proprio repositorio e a
-higiene de referencias externas viaveis.
+documentacao repo-local, a linkagem interna para ativos do proprio repositorio
+e a higiene de referencias externas viaveis.
 
 ## Quando usar
 
@@ -15,6 +15,8 @@ higiene de referencias externas viaveis.
 - decisoes sobre versionar ou ignorar runtime local de ferramentas
 - qualquer sweep ou regra sobre referencias internas em Markdown, comentarios
   documentais, referencias externas e catalogos do repo
+- definicao de fronteira entre docs versionadas do repo e superficies externas
+  quando o `ai-documentation-manager` precisar de suporte repo-local
 
 ## Skill principal
 
@@ -60,6 +62,8 @@ higiene de referencias externas viaveis.
 - Nao permitir que [`.codex/`](.codex/) volte a acumular contratos declarativos; a fonte de verdade e [`.agents/`](.agents/).
 - Nao deixar [`LICOES-APRENDIDAS.md`](LICOES-APRENDIDAS.md) fora do fluxo de fechamento e validacao.
 - Nao permitir que rodadas concluidas se acumulem sem commit checkpoint quando a worktree estiver dirty.
+- Nao assumir publication, `documentation-link`, backlinks ou sync como papel
+  dominante; isso pertence a `ai-documentation-sync`.
 
 ## Validacao recomendada
 

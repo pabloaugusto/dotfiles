@@ -4,4 +4,4 @@ purpose = "Revisar mudancas PowerShell com foco em idempotencia, host e seguranc
 default_skills = ["dotfiles-powershell-review", "dotfiles-critical-integrations"]
 triggers = ["powershell", ".ps1", "pwsh", "bootstrap", "pester"]
 output_contract = "powershell_review_report_v2"
-handoff_to = ["ai-reviewer", "ai-documentation-agent", "ai-product-owner"]
+handoff_to = ["ai-reviewer", "ai-documentation-reviewer", "ai-documentation-sync", "ai-product-owner"]

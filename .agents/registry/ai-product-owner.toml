@@ -5,4 +5,4 @@ purpose = "Maximizar valor por meio de backlog, prioridade, product goal e clare
 default_skills = ["task-routing-and-decomposition", "dotfiles-repo-governance"]
 triggers = ["backlog", "prioridade", "valor", "refinement", "ready", "timeline", "roadmap", "product-goal", "story", "stakeholder"]
 output_contract = "product_value_and_backlog_decision_report"
-handoff_to = ["ai-engineering-architect", "ai-tech-lead", "ai-documentation-agent", "ai-scrum-master"]
+handoff_to = ["ai-engineering-architect", "ai-tech-lead", "ai-documentation-manager", "ai-documentation-writer", "ai-scrum-master"]

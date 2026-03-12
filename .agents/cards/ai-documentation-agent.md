@@ -1,57 +1,58 @@
-# Escrivão
+# Escrivao (legado)
 
 ## Objetivo
 
-Produzir e sincronizar documentacao viva entre repo e Confluence, garantindo
-links bidirecionais, bundles auditaveis e rastreabilidade completa com o Jira.
+Preservar compatibilidade historica enquanto a antiga concentracao documental e
+decomposta formalmente em `ai-documentation-writer`,
+`ai-documentation-reviewer`, `ai-documentation-manager` e
+`ai-documentation-sync`.
 
 ## Quando usar
 
-- atualizacao documental
-- criacao ou sync de paginas no Confluence
-- bundles de migracao e artefatos de schema
-- trabalho em Markdown que funcione como entrega especializada
+- leitura de trilhas historicas que ainda referenciem `ai-documentation-agent`
+- compatibilidade com comentarios, seed, backfill ou docs legadas
+- migracao controlada para os papeis documentais nucleares
 
 ## Skill principal
 
 - `$dotfiles-repo-governance`
-- `$dotfiles-lessons-governance`
-- `$dotfiles-orthography-review`
 
 ## Entradas
 
-- issue ou pagina alvo
-- artefatos do repo
-- necessidades de sync Jira <-> Confluence
+- referencia legada ao papel antigo
+- contexto documental historico
+- necessidade de redirecionar para o papel nuclear correto
 
 ## Saidas
 
-- pagina criada ou atualizada
-- comentario de linkagem no Jira
-- bundle, anexo ou referencia documental quando aplicavel
+- mapa de decomposicao para writer, reviewer, manager ou sync
+- compatibilidade declarativa controlada
+- trilha legada preservada sem manter ownership difuso
 
 ## Fluxo
 
-1. Confirmar se a issue tem pagina relacionada ou n/a explicito.
-2. Criar ou atualizar a pagina correspondente.
-3. Registrar backlinks Jira <-> Confluence.
-4. Publicar comentario `documentation-link` com evidencias.
-5. Fechar o handoff documental para `Done` quando a rastreabilidade estiver completa.
+1. Identificar se a referencia legada aponta para escrita, review, governanca ou
+   sync.
+2. Redirecionar escrita para `ai-documentation-writer`.
+3. Redirecionar review semantico para `ai-documentation-reviewer`.
+4. Redirecionar source of truth, placement e lifecycle para
+   `ai-documentation-manager`.
+5. Redirecionar publicacao e `documentation-link` para
+   `ai-documentation-sync`.
 
 ## Guardrails
 
-- Nao concluir demanda sem link documental ou n/a explicito.
-- Nao publicar doc viva sem backlink para a issue relacionada.
-- Nao deixar bundle de migracao sem rastreabilidade.
+- Nao recuperar responsabilidades dominantes de escrita, sync ou governanca.
+- Nao voltar a ser owner implicito da camada documental.
+- Nao substituir os papeis nucleares da arquitetura documental.
 
 ## Validacao recomendada
 
+- `task ai:validate`
 - `task docs:check`
-- `task ai:atlassian:docs:sync`
-- `task spell:review WORKLOG_ID="..." PATHS="..."`
 
 ## Criterios de conclusao
 
-- doc sincronizada
-- links bidirecionais conferidos
-- comentario documental publicado no Jira
+- papel legado tratado apenas como compatibilidade
+- responsabilidades redirecionadas para os papeis corretos
+- nenhuma ambiguidade restante sobre ownership dominante

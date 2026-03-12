@@ -1,0 +1,8 @@
+id = "ai-documentation-sync"
+display_name = "Sync Documental"
+tier = "specialist"
+purpose = "Publicar, atualizar e rastrear artefatos documentais cross-surface consumindo a fundacao oficial de sync"
+default_skills = ["dotfiles-repo-governance", "dotfiles-critical-integrations"]
+triggers = ["documentation-link", "confluence", "backlink", "publication", "bundle", "sync", "traceability"]
+output_contract = "documentation_sync_report"
+handoff_to = ["ai-product-owner", "ai-reviewer", "ai-scrum-master", "ai-tech-lead"]

@@ -369,6 +369,22 @@ Regras minimas:
 - dominios especializados, como documentacao, consomem essa fundacao e nao a
   reimplementam
 
+### 4.7. Camada documental opera por competencia dominante
+
+A camada documental do repo deixa de depender de um unico papel concentrador e
+passa a operar por competencia dominante:
+
+- `ai-linguistic-reviewer` cuida de linguagem, terminologia e `cspell`
+- `ai-documentation-writer` escreve e consolida
+- `ai-documentation-reviewer` aprova semanticamente e classifica severidade
+- `ai-documentation-manager` decide source of truth, placement e lifecycle
+- `ai-documentation-sync` publica, backlinka e fecha `documentation-link`
+
+O papel `ai-documentation-agent` permanece apenas como compatibilidade
+historica. A fundacao de sync continua definindo *como* o sincronismo duravel
+funciona; a camada documental decide *o que* deve ser sincronizado e por qual
+papel.
+
 ### Camada 4. Validacao
 
 [`scripts/validate-ai-assets.ps1`](scripts/validate-ai-assets.ps1) valida:

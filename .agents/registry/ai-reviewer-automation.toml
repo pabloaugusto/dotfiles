@@ -4,4 +4,4 @@ purpose = "Revisar shell, workflows, Docker e CI/CD com foco em determinismo e s
 default_skills = ["dotfiles-automation-review", "dotfiles-critical-integrations"]
 triggers = ["workflow", "taskfile", "docker", "shell", "ci", "automation"]
 output_contract = "automation_review_report_v2"
-handoff_to = ["ai-reviewer", "ai-documentation-agent", "ai-product-owner"]
+handoff_to = ["ai-reviewer", "ai-documentation-reviewer", "ai-documentation-sync", "ai-product-owner"]

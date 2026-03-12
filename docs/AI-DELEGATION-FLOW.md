@@ -16,7 +16,7 @@
 10. Antes de qualquer subagente, preparar o pacote minimo de contexto: issue dona, branch atual, startup report, classificacao do `PEA` quando aplicavel, assuncoes e ambiguidades relevantes, regras aplicaveis ao papel, arquivos normativos relevantes e proximo passo objetivo.
 11. Se o escopo tocar bootstrap, auth, secrets, CI, sync, CLI ou ambiente, acionar `critical-integrations-guardian`.
 12. Se o escopo tocar rotacao, backup, expiracao, revogacao ou inventario de credenciais, chaves SSH, `sops+age` ou notificacao de segredos, acionar `secrets-rotation-governor`.
-13. Se houver texto, comentario, documentacao, config textual ou identificadores legiveis alterados, acionar `pascoalete` em modo consultivo com `task spell:review`.
+13. Se houver texto, comentario, documentacao, config textual ou identificadores legiveis alterados, acionar `pascoalete` em modo consultivo com `task spell:review`, lembrando que ele funciona como alias local do `ai-linguistic-reviewer`.
 14. Se houver mudanca em Python, PowerShell ou automacao, acionar o revisor especialista aplicavel antes do fechamento tecnico.
 15. Se o escopo tocar [`../LICOES-APRENDIDAS.md`](../LICOES-APRENDIDAS.md), fechamento de rodada ou retroativo, acionar `lessons-governance-curator`.
 16. Implementar e validar.
@@ -34,6 +34,10 @@
 - auth, secrets, `gh`, `op`, `sops`, `age`, `ssh-agent`, CI, sync, signing -> `critical-integrations-guardian`
 - rotacao, revogacao, expiracao, backup, inventario e notificacao de secrets -> `secrets-rotation-governor`
 - docs, comentarios, configs textuais, dicionario `cspell` e revisao ortografica consultiva -> `pascoalete`
+- escrita e consolidacao documental -> `ai-documentation-writer`
+- revisao semantica e completude documental -> `ai-documentation-reviewer`
+- source of truth, placement, lifecycle e elegibilidade de sync -> `ai-documentation-manager`
+- publication, backlinks, `documentation-link` e rastreabilidade cross-surface -> `ai-documentation-sync`
 - Python -> `python-reviewer`
 - PowerShell -> `powershell-reviewer`
 - shell, workflows, Taskfile, Docker e CI/CD -> `automation-reviewer`
@@ -54,6 +58,8 @@
 - `critical-integrations-guardian` e obrigatorio em mudancas de plataforma e integracoes criticas.
 - `secrets-rotation-governor` e obrigatorio em mudancas de lifecycle de credenciais.
 - `pascoalete` e obrigatorio em modo consultivo para alteracoes textuais e deve abrir pendencia no backlog se reprovar algo que permanecer sem correcao.
+- `ai-documentation-manager` deve entrar quando a decisao envolver source of truth, placement, lifecycle, deduplicacao ou elegibilidade de sync documental.
+- `ai-documentation-sync` deve entrar quando houver publicacao cross-surface, backlinks ou `documentation-link`.
 - revisores especialistas sao obrigatorios quando a mudanca tocar a familia de arquivo correspondente.
 - parecer especializado precisa ser registrado em [`AI-REVIEW-LEDGER.md`](AI-REVIEW-LEDGER.md) antes do `done`.
 - `orchestrator` governa `ai:chat:intake`, `ai:route` e `ai:delegate` quando a demanda exigir triagem ou decomposicao.

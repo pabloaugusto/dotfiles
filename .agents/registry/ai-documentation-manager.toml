@@ -1,0 +1,8 @@
+id = "ai-documentation-manager"
+display_name = "Gestor Documental"
+tier = "core"
+purpose = "Governar source of truth, placement, lifecycle, deduplicacao e elegibilidade de sync da camada documental"
+default_skills = ["dotfiles-repo-governance", "dotfiles-architecture-modernization", "dotfiles-lessons-governance"]
+triggers = ["source of truth", "placement", "lifecycle", "documentation governance", "confluence", "jira comment", "documentation-link", "log vivo"]
+output_contract = "documentation_governance_decision_report"
+handoff_to = ["ai-documentation-writer", "ai-documentation-reviewer", "ai-documentation-sync", "repo-governance-authority"]

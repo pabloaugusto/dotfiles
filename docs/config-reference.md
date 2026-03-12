@@ -87,9 +87,16 @@ Pontos criticos:
   comunicacao, conformidade de agentes e **cerimonias**
 - `ai-browser-validator`: capacidade opcional para evidencias via `Playwright`
 - papeis como design, UX/CRO e SEO permanecem opcionais por dominio
-- `ai-documentation-agent`: governa a linkagem bidirecional `Jira <-> Confluence`
-  como contrato perene de rastreabilidade
-  e a governanca `artifact-first -> sync`
+- `ai-linguistic-reviewer`: reviewer linguistico formal da camada documental;
+  `pascoalete` continua como alias consultivo local
+- `ai-documentation-writer`: ownership de escrita e consolidacao textual
+- `ai-documentation-reviewer`: ownership da revisao semantica e de completude
+- `ai-documentation-manager`: ownership de source of truth, placement,
+  lifecycle e deduplicacao
+- `ai-documentation-sync`: ownership de publication, backlinks e
+  `documentation-link`
+- `ai-documentation-agent`: papel legado de compatibilidade, sem ownership
+  dominante da camada documental
 
 ## [`config/ai/agent-operations.yaml`](../config/ai/agent-operations.yaml)
 
@@ -124,10 +131,14 @@ Pontos criticos:
   principais
 - `documentation.require_bidirectional_links`: obriga vinculo entre issue e
   pagina sempre que a demanda gerar trabalho nas duas plataformas
-- `documentation.linking_contract`: define ownership e regras de enforcement da
-  linkagem bidirecional governada pelo `AI Documentation Agent`
+- `documentation.ownership_by_surface`: explicita writer, reviewer, manager,
+  sync e reviewer tecnico por superficie textual
+- `documentation.linking_contract`: define ownership do
+  `ai-documentation-sync` e decisao do `ai-documentation-manager` para a
+  linkagem bidirecional
 - `documentation.artifact_governance`: exige que schema, endpoint catalog e
-  plano de sync existam no repo antes de apply e semeadura
+  plano de sync existam no repo antes de apply e semeadura, sempre com
+  classificacao documental explicita
 - `documentation.artifact_governance.migration_bundle`: exige bundle auditavel
   em `.zip`, pronto para anexo na issue correspondente do `Jira`
 - `agent_activity`: endurece o contrato de comentarios estruturados com
@@ -179,6 +190,10 @@ Pontos criticos:
 - `page_tree`: define hub, paginas de schema, operacao e migration plan
 - `sync_contract.mode = repo-first-then-sync`: o repo nasce primeiro; o
   `Confluence` recebe a materializacao oficial depois
+- `metadata.owner_role` e `home_page.owner_role`: ownership de governanca do
+  `ai-documentation-manager`
+- `sync_contract.delivery_role`: publication e rastreabilidade owned pelo
+  `ai-documentation-sync`
 
 ## [`vendor/atlassian/`](../vendor/atlassian/README.md)
 

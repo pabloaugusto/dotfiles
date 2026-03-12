@@ -6,6 +6,9 @@ Governar a ortografia tecnica do repo com `cspell`, mantendo a higiene do
 dicionario local e emitindo parecer consultivo por arquivo sem bloquear
 PR, branch, commit, worktree, deploy ou release.
 
+Este papel continua como alias consultivo local do reviewer formal
+`ai-linguistic-reviewer`.
+
 ## Quando usar
 
 - qualquer arquivo versionado editado, criado, refatorado, revisado ou lido
@@ -50,6 +53,7 @@ PR, branch, commit, worktree, deploy ou release.
 - Nao usar o parecer ortografico como gate duro de merge ou `done` tecnico.
 - Nao deixar reprovacao ortografica sem rastreabilidade em ledger e backlog.
 - Toda revisao ortografica deve usar a stack canonica de `cspell` do repo.
+- Nao assumir escrita, placement, lifecycle, sync ou publicacao documental.
 
 ## Validacao recomendada
 

@@ -376,6 +376,7 @@ PROMPT_PACK_REQUIRED_SNIPPETS = {
         "## Legados",
         "DOT-178",
         "DOT-179",
+        "DOT-181",
     ],
     ".agents/prompts/formal/startup-alignment/prompt.md": [
         "Pre-Execution Alignment",
@@ -417,6 +418,7 @@ PROMPT_PACK_REQUIRED_SNIPPETS = {
     ".agents/prompts/formal/documentation-layer-governance/meta.yaml": [
         "id: documentation-layer-governance",
         "task_id: prompt/documentation-layer-governance",
+        "owner_issue: DOT-181",
         'summary_prefix: "PROMPT:"',
         "required_labels:",
         "dependencies:",
@@ -451,6 +453,7 @@ SYNC_FOUNDATION_REQUIRED_SNIPPETS = {
         "dead-letter",
         "runtime ledger candidate",
         "documentation-layer-governance",
+        "documentation_links",
     ],
     "docs/TASKS.md": [
         "### `ai:control-plane:sync:check`",
@@ -520,7 +523,10 @@ AGENT_IDENTITY_REQUIRED_SNIPPETS = {
         "| PO |",
         "| Scrum Master |",
         "| Engenheiro Agentes IA |",
-        "| Escrivão |",
+        "| Escrivao |",
+        "| Revisor Documental |",
+        "| Gestor Documental |",
+        "| Sync Documental |",
     ],
     ".agents/cards/ai-developer-config-policy.md": [
         "# Engenheiro Agentes IA",
@@ -642,6 +648,11 @@ CATALOG_REQUIRED_SNIPPETS = {
         "critical-integrations-guardian",
         "lessons-governance-curator",
         "pascoalete",
+        "ai-linguistic-reviewer",
+        "ai-documentation-writer",
+        "ai-documentation-reviewer",
+        "ai-documentation-manager",
+        "ai-documentation-sync",
         "python-reviewer",
         "powershell-reviewer",
         "automation-reviewer",
@@ -662,6 +673,9 @@ CATALOG_REQUIRED_SNIPPETS = {
         "critical-integrations-guardian",
         "lessons-governance-curator",
         "pascoalete",
+        "ai-documentation-manager",
+        "ai-documentation-reviewer",
+        "ai-documentation-sync",
         "orchestrator",
         "python-reviewer",
         "powershell-reviewer",
@@ -678,6 +692,10 @@ CATALOG_REQUIRED_SNIPPETS = {
         "task ai:eval:smoke",
         "task ci:workflow:sync:check",
         "pascoalete",
+        "ai-documentation-writer",
+        "ai-documentation-reviewer",
+        "ai-documentation-manager",
+        "ai-documentation-sync",
         "python-reviewer",
         "powershell-reviewer",
         "automation-reviewer",
@@ -706,6 +724,48 @@ CATALOG_REQUIRED_SNIPPETS = {
         "### `bootstrap-integration.yml`",
         "### `pr-validate.yml`",
         "spell:review",
+    ],
+}
+
+DOCUMENTATION_LAYER_REQUIRED_SNIPPETS = {
+    "config/ai/contracts.yaml": [
+        "foundation_dependency:",
+        "role_boundaries:",
+        "ai-linguistic-reviewer",
+        "ai-documentation-writer",
+        "ai-documentation-reviewer",
+        "ai-documentation-manager",
+        "ai-documentation-sync",
+        "ownership_by_surface:",
+        "documentation-link-belongs-to-documentation-sync",
+    ],
+    "config/ai/jira-model.yaml": [
+        "documentation: repo-first-then-confluence",
+    ],
+    "config/ai/confluence-model.yaml": [
+        "owner_role: ai-documentation-manager",
+        "documentation: repo-first-then-confluence",
+        "delivery_role: ai-documentation-sync",
+    ],
+    "config/ai/agent-operations.yaml": [
+        "ai-linguistic-reviewer:",
+        "ai-documentation-writer:",
+        "ai-documentation-reviewer:",
+        "ai-documentation-manager:",
+        "ai-documentation-sync:",
+        "publication pertence ao ai-documentation-sync",
+    ],
+    "docs/config-reference.md": [
+        "ai-linguistic-reviewer",
+        "ai-documentation-writer",
+        "ai-documentation-reviewer",
+        "ai-documentation-manager",
+        "ai-documentation-sync",
+    ],
+    "docs/ai-operating-model.md": [
+        "Camada documental opera por competencia dominante",
+        "ai-documentation-manager",
+        "ai-documentation-sync",
     ],
 }
 
@@ -1274,6 +1334,11 @@ def main(argv: list[str]) -> int:
             require_snippets(path.read_text(encoding="utf-8"), snippets, relative, failures)
 
     for relative, snippets in CATALOG_REQUIRED_SNIPPETS.items():
+        path = repo_root / relative
+        if path.is_file():
+            require_snippets(path.read_text(encoding="utf-8"), snippets, relative, failures)
+
+    for relative, snippets in DOCUMENTATION_LAYER_REQUIRED_SNIPPETS.items():
         path = repo_root / relative
         if path.is_file():
             require_snippets(path.read_text(encoding="utf-8"), snippets, relative, failures)

@@ -5,7 +5,7 @@ metadata:
   owner_role: ai-product-owner
   source_of_truth:
     backlog: jira
-    documentation: confluence
+    documentation: repo-first-then-confluence
 
 project:
   key: DOT
@@ -79,7 +79,7 @@ project:
       - name: Ready for QA
         jql: 'status = Testing AND "Next Required Role" = "ai-qa"'
       - name: Ready for Review
-        jql: 'status = Review AND "Next Required Role" in ("ai-reviewer", "ai-reviewer-python", "ai-reviewer-powershell", "ai-reviewer-automation", "ai-reviewer-config-policy", "ai-tech-lead")'
+        jql: 'status = Review AND "Next Required Role" in ("ai-reviewer", "ai-reviewer-python", "ai-reviewer-powershell", "ai-reviewer-automation", "ai-reviewer-config-policy", "ai-documentation-reviewer", "ai-tech-lead")'
       - name: Ready for Tech Lead Review
         jql: 'status = Review AND "Next Required Role" = "ai-tech-lead"'
       - name: Ready for Python Review
@@ -318,7 +318,7 @@ workflow:
         - ai-reviewer-powershell
         - ai-reviewer-automation
         - ai-reviewer-config-policy
-        - ai-documentation-agent
+        - ai-documentation-sync
         - ai-product-owner
     - from: Review
       to: Cancelled

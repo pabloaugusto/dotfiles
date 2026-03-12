@@ -117,6 +117,14 @@ routes:
         ]
     primary: [repo-governance-authority]
     support: [architecture-modernization-authority, lessons-governance-curator, pascoalete]
+  - id: route-documentation-layer-scope
+    match:
+      keywords:
+        ["documentation", "documentacao", "confluence", "documentation-link", "terminologia", "glossario", "cspell", "source of truth", "placement", "lifecycle", "logs vivos", "backlink"]
+      paths:
+        ["docs/**", ".agents/cards/ai-documentation-*.md", ".agents/cards/pascoalete.md", ".agents/registry/ai-documentation-*.toml", ".agents/registry/pascoalete.toml", "config/ai/confluence-model.yaml", "config/ai/contracts.yaml", "config/ai/sync-targets.yaml"]
+    primary: [ai-documentation-manager]
+    support: [ai-documentation-reviewer, ai-documentation-writer, ai-documentation-sync, ai-linguistic-reviewer, repo-governance-authority, pascoalete]
   - id: route-scrum-master-scope
     match:
       keywords: ["scrum", "board", "wip", "cerimonia", "retrospectiva", "workflow agil", "kanban"]

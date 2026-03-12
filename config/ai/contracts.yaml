@@ -141,12 +141,115 @@ git_governance:
     - fail-when-local-merged-branches-or-worktrees-remain-without-purpose
 
 documentation:
-  system_of_record: confluence
-  repo_docs_mode: espelho-essencial
+  system_of_record: cross-surface
+  repo_docs_mode: repo-first-with-explicit-source-of-truth
   require_bidirectional_links: true
+  foundation_dependency:
+    prompt_pack: prompt/documentation-layer-governance
+    consumes_sync_foundation: true
+    sync_manifest: config/ai/sync-targets.yaml
+  role_boundaries:
+    linguistic_reviewer: ai-linguistic-reviewer
+    writer: ai-documentation-writer
+    reviewer: ai-documentation-reviewer
+    manager: ai-documentation-manager
+    sync: ai-documentation-sync
+    legacy_wrapper: ai-documentation-agent
+    repo_local_curator: repo-governance-authority
+    structural_reviewer: ai-reviewer-config-policy
+    cross_review: ai-reviewer
+  source_of_truth:
+    repo:
+      - versioned-technical-docs
+      - contracts
+      - cards
+      - skills
+      - prompts
+      - policies
+      - code-local-comments-docstrings-help-when-the-code-is-canonical
+    confluence:
+      - cross-surface-navigation
+      - institutional-hubs
+      - structured-mirrors-when-policy-requires
+      - remote-runtime-ledgers-eligible-under-sync-foundation
+    jira:
+      - live-flow
+      - ownership
+      - handoffs
+      - structured-comments
+      - backlog
+      - operational-evidence
+    live_logs:
+      - operational-memory
+      - incremental-trace
+      - never-silent-substitute-for-stable-documentation
+  ownership_by_surface:
+    markdown_docs:
+      placement_role: ai-documentation-manager
+      writer_role: ai-documentation-writer
+      reviewer_role: ai-documentation-reviewer
+      linguistic_role: ai-linguistic-reviewer
+      structural_role: ai-reviewer-config-policy
+      sync_role: ai-documentation-sync
+      repo_local_role: repo-governance-authority
+    code_comments:
+      context_owner: technical-family-owner
+      writer_role: ai-documentation-writer
+      reviewer_role: ai-documentation-reviewer
+      linguistic_role: ai-linguistic-reviewer
+      correctness_owner: technical-family-reviewer
+      sync_role: not-applicable-by-default
+    docstrings:
+      context_owner: technical-family-owner
+      writer_role: ai-documentation-writer
+      reviewer_role: ai-documentation-reviewer
+      linguistic_role: ai-linguistic-reviewer
+      correctness_owner: technical-family-reviewer
+      sync_role: not-applicable-by-default
+    help_texts:
+      context_owner: technical-family-owner
+      writer_role: ai-documentation-writer
+      reviewer_role: ai-documentation-reviewer
+      linguistic_role: ai-linguistic-reviewer
+      correctness_owner: technical-family-reviewer
+      sync_role: not-applicable-by-default
+    messages:
+      context_owner: technical-family-owner
+      writer_role: ai-documentation-writer
+      reviewer_role: ai-documentation-reviewer
+      linguistic_role: ai-linguistic-reviewer
+      correctness_owner: technical-family-reviewer
+      sync_role: not-applicable-by-default
+    jira_comments:
+      context_owner: acting-agent
+      writer_role: ai-documentation-writer
+      reviewer_role: ai-documentation-reviewer
+      linguistic_role: ai-linguistic-reviewer
+      manager_role: ai-documentation-manager
+      sync_role: ai-documentation-sync
+    confluence_pages:
+      placement_role: ai-documentation-manager
+      writer_role: ai-documentation-writer
+      reviewer_role: ai-documentation-reviewer
+      linguistic_role: ai-linguistic-reviewer
+      sync_role: ai-documentation-sync
+    live_logs:
+      lifecycle_role: ai-documentation-manager
+      writer_role: ai-documentation-writer
+      reviewer_role: ai-documentation-reviewer
+      linguistic_role: ai-linguistic-reviewer
+      sync_role: ai-documentation-sync
+      operating_owner_retained: true
+    documentation_links:
+      decision_role: ai-documentation-manager
+      delivery_role: ai-documentation-sync
+      writer_role: ai-documentation-writer
+      reviewer_role: ai-documentation-reviewer
+      linguistic_role: ai-linguistic-reviewer
   artifact_governance:
     mode: repo-first-then-sync
-    owner_role: ai-documentation-agent
+    owner_role: ai-documentation-manager
+    delivery_role: ai-documentation-sync
     migration_bundle:
       required: true
       format: zip
@@ -161,13 +264,17 @@ documentation:
       - jira-schema-synced
       - confluence-schema-synced
       - migration-bundle-attached
+      - documentation-surface-classified
     enforcement:
       - no-schema-apply-without-repo-artifact
       - no-seed-without-artifact-sync-plan
       - every-generated-asset-must-be-documented
       - every-export-batch-must-have-auditable-bundle
+      - no-documentation-sync-without-manager-classification
+      - no-cross-surface-publication-without-explicit-source-of-truth
   linking_contract:
-    owner_role: ai-documentation-agent
+    owner_role: ai-documentation-sync
+    decision_role: ai-documentation-manager
     required_links:
       - jira-issue-to-confluence-page
       - confluence-page-to-jira-issue
@@ -175,6 +282,45 @@ documentation:
       - no-done-without-doc-link-or-explicit-na
       - no-doc-page-without-related-issue-when-work-driven
       - comments-must-capture-doc-links-when-created-or-updated
+      - documentation-link-belongs-to-documentation-sync
+  live_log_policy:
+    owner_role: ai-documentation-manager
+    operating_owner_retained: true
+    rules:
+      - live-log-must-not-silently-replace-stable-documentation
+      - live-log-promotion-requires-explicit-source-of-truth-decision
+      - live-log-promotion-may-trigger-cross-surface-sync-when-eligible
+      - live-log-lifecycle-must-be-explicit
+  terminology_policy:
+    owner_role: ai-linguistic-reviewer
+    escalation_role: ai-documentation-reviewer
+    rules:
+      - cspell-governance-remains-consultive-by-default
+      - semantic-risk-must-escalate-beyond-linguistic-review
+      - accepted-and-forbidden-synonyms-must-be-explicit-when-needed
+  lifecycle:
+    owner_role: ai-documentation-manager
+    states:
+      - Draft
+      - Active
+      - Deprecated
+      - Superseded
+      - Archived
+  severity_policy:
+    owner_role: ai-documentation-reviewer
+    levels:
+      - blocking
+      - non-blocking
+      - debt
+      - linguistic-nit
+  anti_overlap:
+    - ai-linguistic-reviewer-never-writes-as-owner
+    - ai-documentation-writer-never-governs-syncs-or-publishes-as-owner
+    - ai-documentation-reviewer-never-replaces-the-technical-family-reviewer
+    - ai-documentation-manager-never-replaces-writer-or-reviewer-as-dominant-role
+    - ai-documentation-sync-never-decides-source-of-truth-placement-or-lifecycle
+    - ai-reviewer-config-policy-remains-structural-not-semantic-document-review
+    - repo-governance-authority-remains-repo-local-not-cross-surface-sync-owner
 
 sync_foundation:
   manifest: config/ai/sync-targets.yaml

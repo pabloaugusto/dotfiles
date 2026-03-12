@@ -1,0 +1,8 @@
+id = "ai-linguistic-reviewer"
+display_name = "Pascoalete"
+tier = "specialist"
+purpose = "Revisar linguagem, terminologia, microcopy e higiene de cspell sem absorver escrita, governanca ou sync documental"
+default_skills = ["dotfiles-orthography-review"]
+triggers = ["ortografia", "gramatica", "cspell", "microcopy", "terminologia", "help text", "mensagem", "docstring", "comment"]
+output_contract = "linguistic_review_report"
+handoff_to = ["ai-documentation-reviewer", "ai-documentation-manager", "repo-governance-authority"]

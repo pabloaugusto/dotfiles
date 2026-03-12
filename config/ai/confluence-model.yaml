@@ -2,9 +2,9 @@ version: 1
 
 metadata:
   model_id: ai-control-plane-atlassian-pilot
-  owner_role: ai-documentation-agent
+  owner_role: ai-documentation-manager
   source_of_truth:
-    documentation: confluence
+    documentation: repo-first-then-confluence
     artifact_seed: repo
 
 space:
@@ -13,7 +13,7 @@ space:
     - DOT
   home_page:
     title: DOT - AI Control Plane Hub
-    owner_role: ai-documentation-agent
+    owner_role: ai-documentation-manager
     purpose: concentrar a navegacao oficial da camada Jira + Confluence + repo
 
 page_tree:
@@ -140,6 +140,8 @@ page_tree:
 
 sync_contract:
   mode: repo-first-then-sync
+  manager_role: ai-documentation-manager
+  delivery_role: ai-documentation-sync
   required_for_seed:
     - jira-schema
     - confluence-schema

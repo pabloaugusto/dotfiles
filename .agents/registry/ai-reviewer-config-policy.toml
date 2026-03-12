@@ -4,4 +4,4 @@ purpose = "Revisar schemas, policies e contracts declarativos com foco em compat
 default_skills = ["dotfiles-repo-governance", "dotfiles-automation-review"]
 triggers = ["yaml", "json", "toml", "markdown", "schema", "policy", "contract", "metadata"]
 output_contract = "config_policy_review_report"
-handoff_to = ["ai-reviewer", "ai-documentation-agent", "ai-product-owner"]
+handoff_to = ["ai-reviewer", "ai-documentation-reviewer", "ai-documentation-manager", "ai-product-owner"]

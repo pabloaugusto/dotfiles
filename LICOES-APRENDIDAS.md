@@ -206,6 +206,15 @@ Historico incremental das regras operacionais que nao devem depender de memoria 
 - Validacao: task git:signing:status:windows; task env:check:windows SIGN_MODE=human; task docs:check:windows; task docs:check:linux; task ai:validate:windows; task ai:validate:linux; task type:check:windows; task test:unit:python:windows; task test:unit:powershell; bash -n [`df/bash/.inc/check-env.sh`](df/bash/.inc/check-env.sh)
 - Worklog relacionado: `WIP-20260307-GIT-AUTOMATION-SIGNING`
 - Fontes relacionadas: dotfiles-test-harness
+
+## LA-020 - Camadas documentais cross-surface exigem alinhamento do nucleo declarativo e das bordas Atlassian
+
+- Contexto: A decomposicao da camada documental ficou correta no nucleo declarativo, mas o drift persistiu em jira-model, confluence-model e adaptadores Atlassian que ainda reintroduziam ownership legado e source of truth divergente.
+- Regra: Sempre que uma mudanca alterar a governanca documental cross-surface, revisar em conjunto contracts, jira-model, confluence-model, routing e adaptadores Atlassian antes do fechamento.
+- Solucao validada: A rodada DOT-181 so ficou coerente apos alinhar source of truth entre os modelos, trocar ai-documentation-agent por ai-documentation-sync nas bordas Atlassian e adicionar regressao dedicada para os pontos de drift.
+- Prevencao: Tratar a camada documental como sistema cross-surface completo e incluir checks explicitos para source of truth, papeis de publication e roteamento em docs, validators e testes.
+- Validacao: task ai:validate; task docs:check; task ai:eval:smoke; uv run --locked python -m unittest tests.python.ai_atlassian_seed_test tests.python.ai_atlassian_backfill_test tests.python.ai_assets_validator_test tests.python.ai_atlassian_agent_comment_audit_test tests.python.ai_sync_foundation_test
+- Worklog relacionado: `WIP-20260312-033649`
 <!-- ai-lessons:catalog:end -->
 
 ## Revisoes de rodadas
@@ -215,6 +224,7 @@ Toda finalizacao de worklog deve registrar se houve nova licao.
 <!-- ai-lessons:reviews:start -->
 | Data/Hora UTC | Worklog ID | Decisao | Resumo | Licoes | Evidencia |
 | --- | --- | --- | --- | --- | --- |
+| 2026-03-12 05:05 UTC | WIP-20260312-033649 | capturada | A rodada consolidou LA-020 sobre alinhamento cross-surface da camada documental entre modelos, adaptadores e publication. | LA-020 | LICOES-APRENDIDAS.md; task ai:lessons:check=ok |
 | 2026-03-12 01:45 UTC | WIP-20260312-014434 | sem_nova_licao | A rodada apenas publicou o commit ja validado de DOT-180 em main, sem nova licao perene alem do proprio fechamento operacional. | - | commit=9b03ac6; origin/main atualizado |
 | 2026-03-12 01:30 UTC | WIP-20260312-011221 | sem_nova_licao | A rodada apenas formalizou e catalogou o novo pack temporal, sem revelar licao perene adicional alem do proprio artefato entregue. | - | DOT-180; task ai:prompts:jira:check=ok; task docs:check=ok; task ai:validate=ok |
 | 2026-03-11 23:45 UTC | WIP-20260311-204022 | sem_nova_licao | A rodada foi uma cirurgia controlada de publicacao e sincronismo Git para adequar commits e branches aos hooks existentes; nao surgiu licao perene nova alem das regras ja formalizadas de governanca Git e prompts. | - | PR #45 mergeado; branch DOT-179 reconstruida a partir de origin/main; cherry-pick do diff da fundacao de sync refeito com subject prompt; task ai:worklog:check; task ai:lessons:check; task ai:worklog:close:gate |
