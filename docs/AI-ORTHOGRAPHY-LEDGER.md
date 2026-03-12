@@ -20,6 +20,12 @@ Registro consultivo do agente Pascoalete para ortografia e higiene vocabular.
 <!-- ai-orthography:records:start -->
 | Data/Hora UTC | Worklog ID | Revisor | Status | Arquivo | Achados | Evidencia |
 | --- | --- | --- | --- | --- | --- | --- |
+| 2026-03-12 13:40 UTC | WIP-20260312-DOT-205 | pascoalete | reprovado | docs/AI-WIP-TRACKER.md | solicitacao, acionavel, indisponivel, degradacao, primario, obrigatorio, Responsavel, atualizacao (+115) | task spell:check |
+| 2026-03-12 13:40 UTC | WIP-20260312-DOT-205 | pascoalete | reprovado | .agents/prompts/formal/agents-rules-centralization/prompt.md | Missao, unificacao, centralizacao, dominio, duplicacao, aderencia, criacao, obrigatorio (+72) | task spell:check |
+| 2026-03-12 13:40 UTC | WIP-20260312-DOT-205 | pascoalete | reprovado | .agents/prompts/formal/agents-rules-centralization/fragments/target-architecture.md | Separacao, precedencia, explicacoes, executavel, obrigatorio, tematico, precedencia, obrigatorias (+3) | task spell:check |
+| 2026-03-12 13:40 UTC | WIP-20260312-DOT-205 | pascoalete | reprovado | .agents/prompts/formal/agents-rules-centralization/context.md | executavel, canonico, tematico, secao, validacao, Dependencias, separacao, LICOES (+1) | task spell:check |
+| 2026-03-12 13:40 UTC | WIP-20260312-DOT-205 | pascoalete | reprovado | .agents/prompts/formal/agents-rules-centralization/meta.yaml | unificacao, centralizacao | task spell:check |
+| 2026-03-12 13:40 UTC | WIP-20260312-DOT-205 | pascoalete | reprovado | .agents/prompts/CATALOG.md | Dependencias, unificacao, tematico, superficie, dependencia, fundacao, superficie, semantica (+3) | task spell:check |
 | 2026-03-12 04:51 UTC | WIP-20260312-033649 | pascoalete | reprovado | .agents/registry/ai-linguistic-reviewer.toml | Pascoalete | task spell:check |
 | 2026-03-12 04:51 UTC | WIP-20260312-033649 | pascoalete | reprovado | .agents/registry/ai-documentation-writer.toml | Escrivao, conteudo | task spell:check |
 | 2026-03-12 04:51 UTC | WIP-20260312-033649 | pascoalete | reprovado | .agents/registry/ai-documentation-sync.toml | fundacao, backlink | task spell:check |

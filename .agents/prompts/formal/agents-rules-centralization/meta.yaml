@@ -1,0 +1,27 @@
+id: agents-rules-centralization
+task_id: prompt/agents-rules-centralization
+title: Prompt pack de unificacao e centralizacao normativa em .agents/rules
+status: active
+owner_epic: DOT-71
+owner_issue: DOT-205
+jira:
+  summary_prefix: "PROMPT:"
+  required_labels:
+    - prompt
+entrypoints:
+  prompt: prompt.md
+  context: context.md
+fragments:
+  - fragments/target-architecture.md
+dependencies:
+  prerequisite_packs: []
+  preflight_packs:
+    - startup-alignment
+    - documentation-layer-governance
+governance:
+  canonical_rules_root: .agents/rules
+  fallback_model: per-theme-section
+  migration_strategy: waves
+validation:
+  requires_manifest_integration: true
+  requires_asset-validator-parity: true

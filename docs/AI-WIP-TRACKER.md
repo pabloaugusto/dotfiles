@@ -1,6 +1,6 @@
 # AI WIP Tracker
 
-Atualizado em: 2026-03-12 05:05 UTC
+Atualizado em: 2026-03-12 13:25 UTC
 
 Fallback local de continuidade. O Jira e a fonte primaria do fluxo vivo.
 
@@ -27,7 +27,7 @@ Fallback local de continuidade. O Jira e a fonte primaria do fluxo vivo.
 <!-- ai-worklog:doing:start -->
 | ID | Tarefa | Branch | Responsavel | Inicio UTC | Ultima atualizacao UTC | Proximo passo | Bloqueios |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| (sem itens) | - | - | - | - | - | - | - |
+| WIP-20260312-DOT-205 | Salvar prompt pack formal de centralizacao normativa em .agents/rules | prompt/DOT-205-agents-rules-centralization | codex | 2026-03-12 13:24 UTC | 2026-03-12 13:25 UTC | Criar os arquivos formais do pack e catalogar a nova entrada. | - |
 <!-- ai-worklog:doing:end -->
 
 ## Done
@@ -91,5 +91,6 @@ Fallback local de continuidade. O Jira e a fonte primaria do fluxo vivo.
 <!-- ai-worklog:log:start -->
 | Data/Hora UTC | ID | Status | Resumo | Proximo passo | Bloqueios | Contexto | Notas |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| (sem itens) | - | - | - | - | - | - | - |
+| 2026-03-12 13:25 UTC | WIP-20260312-DOT-205 | doing | Salvar prompt pack formal de centralizacao normativa em .agents/rules | Criar pack formal, catalogar e sincronizar contrato Jira do prompt pack. | - | prompt | inicio da tarefa |
+| 2026-03-12 13:25 UTC | WIP-20260312-DOT-205 | doing | Slug do pack definido como agents-rules-centralization e branch alinhada ao namespace prompt. | Criar os arquivos formais do pack e catalogar a nova entrada. | - | prompt | checkpoint incremental |
 <!-- ai-worklog:log:end -->
