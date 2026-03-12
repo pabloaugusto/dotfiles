@@ -6,7 +6,9 @@ Manter este repo de dotfiles confiavel, testavel e reproduzivel em Windows host 
 
 ## Escopo e precedencia
 
-- Este arquivo define as regras permanentes de trabalho da IA neste repo.
+- Este arquivo define o contrato global e transversal de trabalho da IA neste repo.
+- As regras humanas canonicas por tema vivem em [`.agents/rules/README.md`](.agents/rules/README.md)
+  e [`.agents/rules/CATALOG.md`](.agents/rules/CATALOG.md).
 - [`LICOES-APRENDIDAS.md`](LICOES-APRENDIDAS.md) complementa o contrato com memoria normativa incremental.
 - Em caso de conflito:
   1. politicas da plataforma e do sistema
@@ -28,6 +30,13 @@ Manter este repo de dotfiles confiavel, testavel e reproduzivel em Windows host 
 5. [`LICOES-APRENDIDAS.md`](LICOES-APRENDIDAS.md)
 6. [`docs/bootstrap-flow.md`](docs/bootstrap-flow.md) quando a tarefa tocar bootstrap
 7. [`Taskfile.yml`](Taskfile.yml)
+
+## Mapa normativo por tema
+
+- Consultar [`.agents/rules/README.md`](.agents/rules/README.md) para a camada
+  humana canonica de regras por dominio.
+- Consultar [`.agents/rules/CATALOG.md`](.agents/rules/CATALOG.md) para o
+  indice tematico e a relacao entre regras vizinhas.
 
 ## Leitura integral obrigatoria ao retomar do zero
 
@@ -73,6 +82,12 @@ Leia a skill mais proxima do escopo antes de editar arquivos relevantes.
 
 ## Guardrails
 
+- Em governanca normativa humana por tema, [`.agents/rules/`](.agents/rules/)
+  passa a ser a fonte canonica; [`AGENTS.md`](AGENTS.md), [`docs/`](docs/) e
+  [`config/ai/`](config/ai/) devem apontar para ela e permanecer em paridade.
+- O estado declarativo de habilitacao ou desabilitacao dos agentes deve vir de
+  [`config/ai/agent-enablement.yaml`](config/ai/agent-enablement.yaml), nunca
+  apenas de memoria de chat.
 - Preferir `task` e scripts existentes antes de criar fluxos paralelos.
 - Manter tasks e scripts worktree-friendly usando `{{.TASKFILE_DIR}}` quando aplicavel.
 - Preservar paridade entre Windows e WSL sempre que a mudanca tocar bootstrap, links, auth ou Git.

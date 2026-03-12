@@ -39,6 +39,9 @@ precise retomar o trabalho sem continuidade confiavel de contexto.
 - todos os arquivos em [`.agents/orchestration/`](../.agents/orchestration/)
 - todos os arquivos em [`.agents/registry/`](../.agents/registry/)
 - todos os arquivos em [`.agents/cards/`](../.agents/cards/)
+- todos os arquivos em [`.agents/rules/`](../.agents/rules/)
+- [`.agents/rules/README.md`](../.agents/rules/README.md)
+- [`.agents/rules/CATALOG.md`](../.agents/rules/CATALOG.md)
 
 ### Prompt packs formais e contexto executavel
 

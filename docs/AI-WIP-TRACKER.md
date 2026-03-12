@@ -1,6 +1,6 @@
 # AI WIP Tracker
 
-Atualizado em: 2026-03-12 16:06 UTC
+Atualizado em: 2026-03-12 16:40 UTC
 
 Fallback local de continuidade. O Jira e a fonte primaria do fluxo vivo.
 
@@ -27,7 +27,7 @@ Fallback local de continuidade. O Jira e a fonte primaria do fluxo vivo.
 <!-- ai-worklog:doing:start -->
 | ID | Tarefa | Branch | Responsavel | Inicio UTC | Ultima atualizacao UTC | Proximo passo | Bloqueios |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| WIP-20260312-DOT-205-RERUN | Executar agents-rules-centralization desde o inicio com toggle declarativo de agentes | prompt/DOT-205-agents-rules-centralization | ai-developer-config-policy | 2026-03-12 16:06 UTC | 2026-03-12 16:06 UTC | Commitar o ajuste do prompt pack e iniciar a implementacao da centralizacao normativa | Bypass explicito de pascoalete por ordem humana nesta sessao |
+| (sem itens) | - | - | - | - | - | - | - |
 <!-- ai-worklog:doing:end -->
 
 ## Done
@@ -35,6 +35,7 @@ Fallback local de continuidade. O Jira e a fonte primaria do fluxo vivo.
 <!-- ai-worklog:done:start -->
 | ID | Tarefa | Branch | Responsavel | Inicio UTC | Concluido UTC | Resultado |
 | --- | --- | --- | --- | --- | --- | --- |
+| WIP-20260312-DOT-205-RERUN | Executar agents-rules-centralization desde o inicio com toggle declarativo de agentes | prompt/DOT-205-agents-rules-centralization | ai-developer-config-policy | 2026-03-12 16:06 UTC | 2026-03-12 16:40 UTC | DOT-205 executou agents-rules-centralization de ponta a ponta com camada humana canonica em .agents/rules, overlay declarativo config/ai/agent-enablement.yaml e startup/report/v... / evidencias: task ai:validate=ok; t... |
 | WIP-20260312-120449 | Publicacao remota iniciada | prompt/DOT-206-startup-governor-enforcement | ai-developer-config-policy | 2026-03-12 15:06 UTC | 2026-03-12 15:09 UTC | DOT-206 foi publicado em origin, PR #49 foi aberto e integrado em main, deixando a trilha pronta para sincronizacao local final e poda da branch residual. / evidencias: PR #49 mergeado; merge commit 8c75121 |
 | WIP-20260312-142856 | Executar end-to-end o prompt startup-governor-enforcement | prompt/DOT-206-startup-governor-enforcement | ai-developer-config-policy | 2026-03-12 14:28 UTC | 2026-03-12 14:55 UTC | DOT-206 executou o pack startup-governor-enforcement de ponta a ponta, adicionando ai-startup-governor, startup-ready.json, gate ai:startup:enforce e regressao declarativa/execu... |
 | WIP-20260312-141233 | Formalizar pack prompt de guardiao de startup e enforcement inicial da sessao | main | ai-developer-config-policy | 2026-03-12 14:12 UTC | 2026-03-12 14:16 UTC | Pack formal startup-governor-enforcement criado e catalogado na arvore .agents/prompts |
@@ -95,5 +96,5 @@ Fallback local de continuidade. O Jira e a fonte primaria do fluxo vivo.
 <!-- ai-worklog:log:start -->
 | Data/Hora UTC | ID | Status | Resumo | Proximo passo | Bloqueios | Contexto | Notas |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| 2026-03-12 16:06 UTC | WIP-20260312-DOT-205-RERUN | doing | Executar agents-rules-centralization desde o inicio com toggle declarativo de agentes | Commitar o ajuste do prompt pack e iniciar a implementacao da centralizacao normativa | Bypass explicito de pascoalete por ordem humana nesta sessao | prompt | inicio da tarefa |
+| (sem itens) | - | - | - | - | - | - | - |
 <!-- ai-worklog:log:end -->

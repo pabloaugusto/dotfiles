@@ -57,6 +57,7 @@ REQUIRED_FILES = [
     "config/ai/platforms.yaml",
     "config/ai/platforms.local.yaml.tpl",
     "config/ai/agents.yaml",
+    "config/ai/agent-enablement.yaml",
     "config/ai/agent-operations.yaml",
     "config/ai/contracts.yaml",
     "config/ai/sync-targets.yaml",
@@ -93,6 +94,23 @@ REQUIRED_FILES = [
     ".agents/orchestration/routing-policy.yaml",
     ".agents/orchestration/task-card.schema.json",
     ".agents/orchestration/delegation-plan.schema.json",
+    ".agents/rules/README.md",
+    ".agents/rules/CATALOG.md",
+    ".agents/rules/core-rules.md",
+    ".agents/rules/chat-and-identity-rules.md",
+    ".agents/rules/startup-and-resume-rules.md",
+    ".agents/rules/git-rules.md",
+    ".agents/rules/intake-and-backlog-rules.md",
+    ".agents/rules/jira-execution-rules.md",
+    ".agents/rules/documentation-and-confluence-rules.md",
+    ".agents/rules/delegation-rules.md",
+    ".agents/rules/review-and-quality-rules.md",
+    ".agents/rules/worklog-and-lessons-rules.md",
+    ".agents/rules/scrum-and-ceremonies-rules.md",
+    ".agents/rules/prompt-pack-rules.md",
+    ".agents/rules/auth-secrets-and-critical-integrations-rules.md",
+    ".agents/rules/sync-foundation-rules.md",
+    ".agents/rules/source-audit-and-cross-repo-rules.md",
     ".agents/rules/default.rules",
     ".agents/rules/ci.rules",
     ".agents/rules/security.rules",
@@ -210,6 +228,39 @@ REQUIRED_SKILL_HEADINGS = [
     "## Referencias",
 ]
 
+REQUIRED_THEME_RULE_HEADINGS = [
+    "## Objetivo",
+    "## Escopo",
+    "## Fonte canonica e precedencia",
+    "## Regras obrigatorias",
+    "## Startup: o que precisa ser carregado",
+    "## Delegacao: o que o subagente precisa receber",
+    "## Fallback e Recuperacao",
+    "## Enforcement e validacoes",
+    "## Artefatos relacionados",
+    "## Temas vizinhos",
+]
+
+THEMATIC_RULE_FILES = [
+    ".agents/rules/README.md",
+    ".agents/rules/CATALOG.md",
+    ".agents/rules/core-rules.md",
+    ".agents/rules/chat-and-identity-rules.md",
+    ".agents/rules/startup-and-resume-rules.md",
+    ".agents/rules/git-rules.md",
+    ".agents/rules/intake-and-backlog-rules.md",
+    ".agents/rules/jira-execution-rules.md",
+    ".agents/rules/documentation-and-confluence-rules.md",
+    ".agents/rules/delegation-rules.md",
+    ".agents/rules/review-and-quality-rules.md",
+    ".agents/rules/worklog-and-lessons-rules.md",
+    ".agents/rules/scrum-and-ceremonies-rules.md",
+    ".agents/rules/prompt-pack-rules.md",
+    ".agents/rules/auth-secrets-and-critical-integrations-rules.md",
+    ".agents/rules/sync-foundation-rules.md",
+    ".agents/rules/source-audit-and-cross-repo-rules.md",
+]
+
 AGENTS_REQUIRED_SNIPPETS = [
     "Nunca operar por amostragem",
     "docs/AI-SOURCE-AUDIT.md",
@@ -291,6 +342,14 @@ STARTUP_AND_RESTART_REQUIRED_SNIPPETS = [
 ]
 
 STARTUP_GOVERNANCE_REQUIRED_SNIPPETS = {
+    "config/ai/agent-enablement.yaml": [
+        "version: 1",
+        "registry_agents:",
+        "roles:",
+        "ai-startup-governor:",
+        "ai-linguistic-reviewer:",
+        "pascoalete:",
+    ],
     "config/ai/contracts.yaml": [
         "load-chat-communication-contract-before-first-user-facing-message",
         "load-display-name-layer-before-chat-jira-or-confluence-visible-communication",
@@ -894,9 +953,9 @@ def validate_skill_dir(skill_dir: Path, failures: list[str]) -> None:
         expected_skill_ref = f"${skill_dir.name}"
         default_prompt_re = rf'(?m)^\s*default_prompt:\s*".*{re.escape(expected_skill_ref)}.*"\s*$'
         if not re.search(default_prompt_re, agent_content):
-            failures.append(
-                f"default_prompt precisa mencionar {expected_skill_ref} em {skill_dir.name}/agents/openai.yaml"
-            )
+                failures.append(
+                    f"default_prompt precisa mencionar {expected_skill_ref} em {skill_dir.name}/agents/openai.yaml"
+                )
         short_match = re.search(r'(?m)^\s*short_description:\s*"(?P<value>.+)"\s*$', agent_content)
         if not short_match:
             failures.append(f"short_description ausente em {skill_dir.name}/agents/openai.yaml")
@@ -906,6 +965,19 @@ def validate_skill_dir(skill_dir: Path, failures: list[str]) -> None:
                 failures.append(
                     f"short_description fora do intervalo 25-64 em {skill_dir.name}/agents/openai.yaml"
                 )
+
+
+def validate_thematic_rules(repo_root: Path, failures: list[str]) -> None:
+    for relative in THEMATIC_RULE_FILES:
+        path = repo_root / relative
+        if not path.is_file():
+            continue
+        if path.name in {"README.md", "CATALOG.md"}:
+            continue
+        content = path.read_text(encoding="utf-8")
+        for heading in REQUIRED_THEME_RULE_HEADINGS:
+            if heading not in content:
+                failures.append(f"Heading obrigatorio ausente em {relative}: {heading}")
 
 
 def validate_registry_agent(agent_file: Path, skill_names: set[str], failures: list[str]) -> None:
@@ -1402,6 +1474,7 @@ def main(argv: list[str]) -> int:
             validate_registry_agent(agent_file, skill_names, failures)
 
     validate_ai_config(repo_root, failures)
+    validate_thematic_rules(repo_root, failures)
     validate_prompt_packs(repo_root, failures)
     validate_legacy_codex_stub(repo_root, failures)
 

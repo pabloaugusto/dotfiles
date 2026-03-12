@@ -16,7 +16,7 @@
 8. Acionar `ai-scrum-master` como gate global de board, WIP, ownership, cerimonias e aderencia do fluxo.
 9. Acionar `architecture-modernization-authority` em paralelo, sempre lendo e monitorando [`AI-WIP-TRACKER.md`](AI-WIP-TRACKER.md), [`../ROADMAP.md`](../ROADMAP.md), [`ROADMAP-DECISIONS.md`](ROADMAP-DECISIONS.md) e demais registradores vivos de backlog/pendencias.
 10. Se a tarefa pedir triagem, decomposicao ou plano de delegacao, acionar `orchestrator` com `$task-routing-and-decomposition`.
-11. Antes de qualquer subagente, preparar o pacote minimo de contexto: issue dona, branch atual, startup report, readiness artifact, classificacao do `PEA` quando aplicavel, assuncoes e ambiguidades relevantes, regras aplicaveis ao papel, arquivos normativos relevantes e proximo passo objetivo.
+11. Antes de qualquer subagente, preparar o pacote minimo de contexto: issue dona, branch atual, startup report, readiness artifact, classificacao do `PEA` quando aplicavel, estado declarativo de enablement dos agentes, assuncoes e ambiguidades relevantes, regras aplicaveis ao papel, arquivos normativos relevantes e proximo passo objetivo.
 12. Se o escopo tocar bootstrap, auth, secrets, CI, sync, CLI ou ambiente, acionar `critical-integrations-guardian`.
 13. Se o escopo tocar rotacao, backup, expiracao, revogacao ou inventario de credenciais, chaves SSH, `sops+age` ou notificacao de segredos, acionar `secrets-rotation-governor`.
 14. Se houver texto, comentario, documentacao, config textual ou identificadores legiveis alterados, acionar `pascoalete` em modo consultivo com `task spell:review`, lembrando que ele funciona como alias local do `ai-linguistic-reviewer`.
@@ -55,6 +55,8 @@
 - `architecture-modernization-authority` deve observar continuamente WIP, backlog, roadmap, decisions e outros artefatos vivos para nao sugerir trabalho fora de contexto.
 - nenhuma delegacao para subagente e valida sem startup carregado ou
   explicitamente linkado na rodada atual.
+- agente desabilitado em [`../config/ai/agent-enablement.yaml`](../config/ai/agent-enablement.yaml)
+  nao pode ser delegado por memoria de chat, atalho manual ou habito legado.
 - nenhum agente operacional deve assumir o chat antes de `ready_for_work`; ate
   la o ownership visivel da sessao pertence ao `ai-startup-governor`.
 - todo subagente deve receber contexto suficiente para operar de imediato no seu

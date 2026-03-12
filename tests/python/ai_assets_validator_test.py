@@ -45,6 +45,11 @@ class ValidateAiAssetsTests(unittest.TestCase):
         self.assertIn(".agents/cerimonias/retrospectiva.yaml", module.REQUIRED_FILES)
         self.assertIn(".codex/README.md", module.REQUIRED_FILES)
         self.assertIn(".agents/registry/ai-startup-governor.toml", module.REQUIRED_FILES)
+        self.assertIn(".agents/rules/README.md", module.REQUIRED_FILES)
+        self.assertIn(".agents/rules/CATALOG.md", module.REQUIRED_FILES)
+        self.assertIn(".agents/rules/core-rules.md", module.REQUIRED_FILES)
+        self.assertIn(".agents/rules/chat-and-identity-rules.md", module.REQUIRED_FILES)
+        self.assertIn(".agents/rules/startup-and-resume-rules.md", module.REQUIRED_FILES)
         self.assertIn("docs/AI-AGENTS-CATALOG.md", module.REQUIRED_FILES)
         self.assertIn("docs/AI-CHAT-CONTRACTS-REGISTER.md", module.REQUIRED_FILES)
         self.assertIn("docs/AI-FALLBACK-LEDGER.md", module.REQUIRED_FILES)
@@ -61,6 +66,7 @@ class ValidateAiAssetsTests(unittest.TestCase):
         self.assertIn("config/ai/platforms.yaml", module.REQUIRED_FILES)
         self.assertIn("config/ai/platforms.local.yaml.tpl", module.REQUIRED_FILES)
         self.assertIn("config/ai/agents.yaml", module.REQUIRED_FILES)
+        self.assertIn("config/ai/agent-enablement.yaml", module.REQUIRED_FILES)
         self.assertIn("config/ai/agent-operations.yaml", module.REQUIRED_FILES)
         self.assertIn("config/ai/contracts.yaml", module.REQUIRED_FILES)
         self.assertIn("config/ai/sync-targets.yaml", module.REQUIRED_FILES)
@@ -82,6 +88,8 @@ class ValidateAiAssetsTests(unittest.TestCase):
         self.assertIn("## Validacao recomendada", module.REQUIRED_AGENT_HEADINGS)
         self.assertIn("## Regras", module.REQUIRED_SKILL_HEADINGS)
         self.assertIn("## Entregas esperadas", module.REQUIRED_SKILL_HEADINGS)
+        self.assertIn("## Startup: o que precisa ser carregado", module.REQUIRED_THEME_RULE_HEADINGS)
+        self.assertIn(".agents/rules/delegation-rules.md", module.THEMATIC_RULE_FILES)
         self.assertIn("Nunca operar por amostragem", module.AGENTS_REQUIRED_SNIPPETS)
         self.assertIn("docs/AI-STARTUP-GOVERNANCE-MANIFEST.md", module.AGENTS_REQUIRED_SNIPPETS)
         self.assertIn("docs/AI-FALLBACK-LEDGER.md", module.AGENTS_REQUIRED_SNIPPETS)
@@ -389,6 +397,26 @@ class ValidateAiAssetsTests(unittest.TestCase):
         self.assertIn(
             "validate-gh-auth-and-graphql-before-github-pr-or-merge-operations",
             module.STARTUP_GOVERNANCE_REQUIRED_SNIPPETS["config/ai/contracts.yaml"],
+        )
+        self.assertIn(
+            "version: 1",
+            module.STARTUP_GOVERNANCE_REQUIRED_SNIPPETS["config/ai/agent-enablement.yaml"],
+        )
+        self.assertIn(
+            "registry_agents:",
+            module.STARTUP_GOVERNANCE_REQUIRED_SNIPPETS["config/ai/agent-enablement.yaml"],
+        )
+        self.assertIn(
+            "ai-startup-governor:",
+            module.STARTUP_GOVERNANCE_REQUIRED_SNIPPETS["config/ai/agent-enablement.yaml"],
+        )
+        self.assertIn(
+            "ai-linguistic-reviewer:",
+            module.STARTUP_GOVERNANCE_REQUIRED_SNIPPETS["config/ai/agent-enablement.yaml"],
+        )
+        self.assertIn(
+            "pascoalete:",
+            module.STARTUP_GOVERNANCE_REQUIRED_SNIPPETS["config/ai/agent-enablement.yaml"],
         )
         self.assertIn(
             "load-chat-communication-contract-before-first-user-facing-message",

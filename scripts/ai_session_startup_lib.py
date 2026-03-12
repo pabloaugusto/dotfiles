@@ -269,6 +269,27 @@ def agent_identity_payload(repo_root: Path, active_execution: dict[str, Any]) ->
     }
 
 
+def agent_enablement_payload(repo_root: Path) -> dict[str, Any]:
+    try:
+        control_plane = load_ai_control_plane(repo_root)
+    except Exception as exc:
+        return {"status": "error", "error": str(exc)}
+    return {
+        "status": "ok",
+        "agents_path": control_plane.agents_path.relative_to(repo_root).as_posix(),
+        "overlay_path": control_plane.agent_enablement_path.relative_to(repo_root).as_posix(),
+        "overlay_local_path": control_plane.agent_enablement_local_path.relative_to(repo_root).as_posix(),
+        "overlay_local_active": control_plane.agent_enablement_local_path.exists(),
+        "declared_roles": control_plane.declared_enablement_roles(),
+        "overridden_roles": control_plane.enablement_overridden_roles(),
+        "enabled_roles": control_plane.enabled_roles(),
+        "disabled_roles": control_plane.disabled_roles(),
+        "required_roles_disabled": control_plane.required_roles_disabled(),
+        "enabled_registry_agents": control_plane.enabled_registry_agents(),
+        "disabled_registry_agents": control_plane.disabled_registry_agents(),
+    }
+
+
 def manifest_evidence_payload(repo_root: Path, resolved_paths: list[str]) -> dict[str, Any]:
     digest = hashlib.sha256()
     total_bytes = 0
@@ -461,6 +482,7 @@ def delegation_context_payload(
         "current_branch": current_branch,
         "required_paths": [
             "AGENTS.md",
+            "config/ai/agent-enablement.yaml",
             "docs/AI-STARTUP-AND-RESTART.md",
             "docs/AI-DELEGATION-FLOW.md",
             "docs/ai-operating-model.md",
@@ -764,6 +786,7 @@ def startup_governor_status_payload(
     active_worklog_items: list[dict[str, str]],
     active_execution: dict[str, Any],
     agent_identity: dict[str, Any],
+    agent_enablement: dict[str, Any],
     chat_communication: dict[str, Any],
     git_governance: dict[str, Any],
     pea_status: dict[str, Any],
@@ -806,6 +829,13 @@ def startup_governor_status_payload(
         progression.append(state)
     else:
         blockers.append("camada de display_name nao ficou carregada corretamente")
+
+    if agent_enablement.get("status") != "ok":
+        blockers.append("overlay declarativo de enablement de agentes nao ficou carregado")
+    elif agent_enablement.get("required_roles_disabled"):
+        blockers.append(
+            "existem agentes marcados como required em config/ai/agents.yaml e desabilitados no overlay declarativo"
+        )
 
     if git_inventory.get("status") == "ok" and git_governance.get("status") == "ok":
         state = "git_context_loaded"
@@ -874,6 +904,8 @@ def startup_governor_status_payload(
         "active_execution_issue": str(active_execution.get("issue_key", "")).strip(),
         "active_execution_agent": str(active_execution.get("agent", "")).strip(),
         "active_worklog_ids": worklog_ids,
+        "enabled_roles": list(agent_enablement.get("enabled_roles", [])),
+        "disabled_roles": list(agent_enablement.get("disabled_roles", [])),
         "fallback_mode": fallback_mode,
         "github_status": github_status,
         "graphql_status": graphql_status,
@@ -891,6 +923,15 @@ def startup_governor_status_payload(
     if not next_owner_role and prioritized_work_item.get("identifier"):
         next_owner_role = "ai-product-owner"
     next_owner_display_name = display_names.get(next_owner_role, next_owner_role or "a definir")
+    disabled_roles = set(agent_enablement.get("disabled_roles", []))
+    if STARTUP_GOVERNOR_AGENT in disabled_roles:
+        blockers.append("ai-startup-governor esta desabilitado no overlay declarativo")
+    if "ai-scrum-master" in disabled_roles:
+        blockers.append("ai-scrum-master esta desabilitado no overlay declarativo")
+    if next_owner_role and next_owner_role in disabled_roles:
+        blockers.append(
+            f"papel operacional priorizado esta desabilitado no overlay declarativo: {next_owner_role}"
+        )
 
     if blockers and state != "wip_decision_pending":
         state = "startup_failed"
@@ -935,6 +976,7 @@ def startup_governor_status_payload(
             "worklog Doing mudar",
             "status de GitHub/GraphQL mudar",
             "status de Jira/Confluence ou fallback mudar",
+            "agent enablement mudar",
             "pending_action mudar",
             "manifest evidence mudar",
         ],
@@ -975,6 +1017,7 @@ def startup_session_payload(
     active_worklog_items = load_active_worklog_items(repo_root)
     active_execution = active_execution_payload(repo_root)
     agent_identity = agent_identity_payload(repo_root, active_execution)
+    enablement = agent_enablement_payload(repo_root)
     if active_execution.get("status") == "ok":
         active_execution["agent_display_name"] = agent_identity["active_display_name"]
     prioritized_work_item = prioritized_work_item_payload(active_execution, active_worklog_items)
@@ -1026,6 +1069,7 @@ def startup_session_payload(
         active_worklog_items=active_worklog_items,
         active_execution=active_execution,
         agent_identity=agent_identity,
+        agent_enablement=enablement,
         chat_communication=chat_communication,
         git_governance=git_governance,
         pea_status=pea_status,
@@ -1053,6 +1097,7 @@ def startup_session_payload(
         "active_worklog_count": len(active_worklog_items),
         "active_execution": active_execution,
         "agent_identity": agent_identity,
+        "agent_enablement": enablement,
         "chat_communication": chat_communication,
         "git_governance": git_governance,
         "pea_status": pea_status,
@@ -1108,6 +1153,7 @@ def render_startup_session_markdown(payload: dict[str, Any]) -> str:
 
     chat_communication = payload["chat_communication"]
     agent_identity = payload["agent_identity"]
+    agent_enablement = payload["agent_enablement"]
     lines.extend(["", "## Comunicacao no chat e identidade", ""])
     lines.append(
         f"- agente ativo visivel: `{agent_identity.get('active_display_name', 'desconhecido')}`"
@@ -1117,6 +1163,39 @@ def render_startup_session_markdown(payload: dict[str, Any]) -> str:
     )
     for rule in chat_communication.get("rules", []):
         lines.append(f"- regra de comunicacao: {rule}")
+
+    lines.extend(["", "## Enablement efetivo de agentes", ""])
+    lines.append(f"- status: `{agent_enablement.get('status', 'unknown')}`")
+    lines.append(f"- base declarativa: `{agent_enablement.get('agents_path', '')}`")
+    lines.append(f"- overlay declarativo: `{agent_enablement.get('overlay_path', '')}`")
+    lines.append(
+        f"- overlay local ativo: `{agent_enablement.get('overlay_local_active', False)}`"
+    )
+    lines.append(
+        f"- total de roles declaradas no overlay: `{len(agent_enablement.get('declared_roles', []))}`"
+    )
+    lines.append(
+        f"- roles efetivamente habilitadas: `{len(agent_enablement.get('enabled_roles', []))}`"
+    )
+    lines.append(
+        f"- roles efetivamente desabilitadas: `{len(agent_enablement.get('disabled_roles', []))}`"
+    )
+    lines.append(
+        "- agentes declarativos desabilitados: "
+        f"`{', '.join(agent_enablement.get('disabled_registry_agents', [])) or 'nenhum'}`"
+    )
+    if agent_enablement.get("overridden_roles"):
+        lines.append(
+            "- overrides efetivos de enablement: "
+            f"`{', '.join(agent_enablement.get('overridden_roles', []))}`"
+        )
+    if agent_enablement.get("required_roles_disabled"):
+        lines.append(
+            "- required desabilitados no overlay: "
+            f"`{', '.join(agent_enablement.get('required_roles_disabled', []))}`"
+        )
+    if agent_enablement.get("error"):
+        lines.append(f"- erro: `{agent_enablement.get('error', '')}`")
 
     git_governance = payload["git_governance"]
     lines.extend(["", "## Governanca Git carregada no startup", ""])

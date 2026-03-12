@@ -85,12 +85,15 @@ class AiControlPlane:
     platforms_local_path: Path
     agents_path: Path
     agents_local_path: Path
+    agent_enablement_path: Path
+    agent_enablement_local_path: Path
     agent_operations_path: Path
     agent_operations_local_path: Path
     contracts_path: Path
     contracts_local_path: Path
     platforms_payload: dict[str, Any]
     agents_payload: dict[str, Any]
+    agent_enablement_payload: dict[str, Any]
     agent_operations_payload: dict[str, Any]
     contracts_payload: dict[str, Any]
 
@@ -100,8 +103,65 @@ class AiControlPlane:
             raise AiControlPlaneError("config/ai/agents.yaml precisa conter roles como mapa.")
         return roles
 
-    def enabled_roles(self) -> list[str]:
+    def agent_enablement_roles_payload(self) -> dict[str, Any]:
+        roles = self.agent_enablement_payload.get("roles") or {}
+        if not isinstance(roles, dict):
+            raise AiControlPlaneError(
+                "config/ai/agent-enablement.yaml precisa conter roles como mapa."
+            )
+        return roles
+
+    def role_enablement_overrides(self) -> dict[str, bool]:
         roles = self.roles_payload()
+        overrides: dict[str, bool] = {}
+        unknown_roles: list[str] = []
+        for role_id, entry in self.agent_enablement_roles_payload().items():
+            if role_id not in roles:
+                unknown_roles.append(str(role_id))
+                continue
+            if not isinstance(entry, dict):
+                raise AiControlPlaneError(
+                    "config/ai/agent-enablement.yaml roles aceita apenas mapas por agente."
+                )
+            enabled = entry.get("enabled")
+            if not isinstance(enabled, bool):
+                raise AiControlPlaneError(
+                    "config/ai/agent-enablement.yaml roles.<agent>.enabled precisa ser booleano."
+                )
+            overrides[str(role_id)] = enabled
+        if unknown_roles:
+            raise AiControlPlaneError(
+                "config/ai/agent-enablement.yaml contem roles desconhecidos: "
+                + ", ".join(sorted(unknown_roles))
+            )
+        return overrides
+
+    def effective_roles_payload(self) -> dict[str, dict[str, Any]]:
+        overrides = self.role_enablement_overrides()
+        effective: dict[str, dict[str, Any]] = {}
+        for role_id, entry in self.roles_payload().items():
+            if not isinstance(role_id, str) or not isinstance(entry, dict):
+                continue
+            effective_entry = dict(entry)
+            if role_id in overrides:
+                effective_entry["enabled"] = overrides[role_id]
+            effective[role_id] = effective_entry
+        return effective
+
+    def declared_enablement_roles(self) -> list[str]:
+        return sorted(str(role_id) for role_id in self.agent_enablement_roles_payload())
+
+    def enablement_overridden_roles(self) -> list[str]:
+        roles = self.roles_payload()
+        overrides = self.role_enablement_overrides()
+        return sorted(
+            role_id
+            for role_id, enabled in overrides.items()
+            if bool(roles.get(role_id, {}).get("enabled", False)) != enabled
+        )
+
+    def enabled_roles(self) -> list[str]:
+        roles = self.effective_roles_payload()
         return sorted(
             role_id
             for role_id, entry in roles.items()
@@ -111,7 +171,7 @@ class AiControlPlane:
         )
 
     def required_roles(self) -> list[str]:
-        roles = self.roles_payload()
+        roles = self.effective_roles_payload()
         return sorted(
             role_id
             for role_id, entry in roles.items()
@@ -120,12 +180,79 @@ class AiControlPlane:
             and bool(entry.get("required", False))
         )
 
-    def disabled_roles(self) -> list[str]:
-        roles = self.roles_payload()
+    def required_roles_disabled(self) -> list[str]:
+        roles = self.effective_roles_payload()
         return sorted(
             role_id
             for role_id, entry in roles.items()
             if isinstance(role_id, str)
+            and isinstance(entry, dict)
+            and bool(entry.get("required", False))
+            and not bool(entry.get("enabled", False))
+        )
+
+    def disabled_roles(self) -> list[str]:
+        roles = self.effective_roles_payload()
+        return sorted(
+            role_id
+            for role_id, entry in roles.items()
+            if isinstance(role_id, str)
+            and isinstance(entry, dict)
+            and not bool(entry.get("enabled", False))
+        )
+
+    def registry_agents_enablement_payload(self) -> dict[str, Any]:
+        registry_agents = self.agent_enablement_payload.get("registry_agents") or {}
+        if not isinstance(registry_agents, dict):
+            raise AiControlPlaneError(
+                "config/ai/agent-enablement.yaml precisa conter registry_agents como mapa."
+            )
+        return registry_agents
+
+    def effective_registry_agents_payload(self) -> dict[str, dict[str, Any]]:
+        registry_dir = (self.repo_root / ".agents" / "registry").resolve()
+        registry_agents = sorted(candidate.stem for candidate in registry_dir.glob("*.toml"))
+        overrides = self.registry_agents_enablement_payload()
+        unknown_agents = [str(agent_id) for agent_id in overrides if agent_id not in registry_agents]
+        if unknown_agents:
+            raise AiControlPlaneError(
+                "config/ai/agent-enablement.yaml contem agentes declarativos desconhecidos: "
+                + ", ".join(sorted(unknown_agents))
+            )
+        effective: dict[str, dict[str, Any]] = {}
+        for agent_id in registry_agents:
+            enabled = True
+            override_entry = overrides.get(agent_id)
+            if override_entry is not None:
+                if not isinstance(override_entry, dict):
+                    raise AiControlPlaneError(
+                        "config/ai/agent-enablement.yaml registry_agents aceita apenas mapas por agente."
+                    )
+                raw_enabled = override_entry.get("enabled")
+                if not isinstance(raw_enabled, bool):
+                    raise AiControlPlaneError(
+                        "config/ai/agent-enablement.yaml registry_agents.<agent>.enabled precisa ser booleano."
+                    )
+                enabled = raw_enabled
+            effective[agent_id] = {"enabled": enabled}
+        return effective
+
+    def enabled_registry_agents(self) -> list[str]:
+        registry_agents = self.effective_registry_agents_payload()
+        return sorted(
+            agent_id
+            for agent_id, entry in registry_agents.items()
+            if isinstance(agent_id, str)
+            and isinstance(entry, dict)
+            and bool(entry.get("enabled", False))
+        )
+
+    def disabled_registry_agents(self) -> list[str]:
+        registry_agents = self.effective_registry_agents_payload()
+        return sorted(
+            agent_id
+            for agent_id, entry in registry_agents.items()
+            if isinstance(agent_id, str)
             and isinstance(entry, dict)
             and not bool(entry.get("enabled", False))
         )
@@ -470,10 +597,14 @@ def load_ai_control_plane(repo_root: str | Path | None = None) -> AiControlPlane
     config_root = (resolved_repo_root / DEFAULT_CONTROL_PLANE_ROOT).resolve()
     platforms_path = config_root / "platforms.yaml"
     agents_path = config_root / "agents.yaml"
+    agent_enablement_path = config_root / "agent-enablement.yaml"
     agent_operations_path = config_root / "agent-operations.yaml"
     contracts_path = config_root / "contracts.yaml"
     platforms_payload, platforms_local_path = load_yaml_map_with_optional_overlay(platforms_path)
     agents_payload, agents_local_path = load_yaml_map_with_optional_overlay(agents_path)
+    agent_enablement_payload, agent_enablement_local_path = load_yaml_map_with_optional_overlay(
+        agent_enablement_path
+    )
     agent_operations_payload, agent_operations_local_path = load_yaml_map_with_optional_overlay(
         agent_operations_path
     )
@@ -485,12 +616,15 @@ def load_ai_control_plane(repo_root: str | Path | None = None) -> AiControlPlane
         platforms_local_path=platforms_local_path,
         agents_path=agents_path,
         agents_local_path=agents_local_path,
+        agent_enablement_path=agent_enablement_path,
+        agent_enablement_local_path=agent_enablement_local_path,
         agent_operations_path=agent_operations_path,
         agent_operations_local_path=agent_operations_local_path,
         contracts_path=contracts_path,
         contracts_local_path=contracts_local_path,
         platforms_payload=platforms_payload,
         agents_payload=agents_payload,
+        agent_enablement_payload=agent_enablement_payload,
         agent_operations_payload=agent_operations_payload,
         contracts_payload=contracts_payload,
     )
@@ -842,6 +976,8 @@ def summary_payload(
         "platforms_local_path": str(loaded.platforms_local_path),
         "agents_path": str(loaded.agents_path),
         "agents_local_path": str(loaded.agents_local_path),
+        "agent_enablement_path": str(loaded.agent_enablement_path),
+        "agent_enablement_local_path": str(loaded.agent_enablement_local_path),
         "agent_operations_path": str(loaded.agent_operations_path),
         "agent_operations_local_path": str(loaded.agent_operations_local_path),
         "contracts_path": str(loaded.contracts_path),
@@ -849,12 +985,20 @@ def summary_payload(
         "local_overrides": {
             "platforms": loaded.platforms_local_path.exists(),
             "agents": loaded.agents_local_path.exists(),
+            "agent_enablement": loaded.agent_enablement_local_path.exists(),
             "agent_operations": loaded.agent_operations_local_path.exists(),
             "contracts": loaded.contracts_local_path.exists(),
         },
         "enabled_roles": loaded.enabled_roles(),
         "required_roles": loaded.required_roles(),
         "disabled_roles": loaded.disabled_roles(),
+        "enabled_registry_agents": loaded.enabled_registry_agents(),
+        "disabled_registry_agents": loaded.disabled_registry_agents(),
+        "role_enablement": {
+            "declared_roles": loaded.declared_enablement_roles(),
+            "overridden_roles": loaded.enablement_overridden_roles(),
+            "required_roles_disabled": loaded.required_roles_disabled(),
+        },
         "role_operation_coverage": {
             "covered_roles": loaded.roles_with_operation_contracts(),
             "missing_roles": loaded.roles_missing_operation_contracts(),
