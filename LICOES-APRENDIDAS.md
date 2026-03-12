@@ -224,6 +224,7 @@ Toda finalizacao de worklog deve registrar se houve nova licao.
 <!-- ai-lessons:reviews:start -->
 | Data/Hora UTC | Worklog ID | Decisao | Resumo | Licoes | Evidencia |
 | --- | --- | --- | --- | --- | --- |
+| 2026-03-12 13:47 UTC | WIP-20260312-DOT-205 | sem_nova_licao | Prompt pack formal salvo no padrao canonico, com task Jira dona e backlog consultivo de ortografia rastreado. | - | commit ffda714; task docs:check; task ai:validate; task ai:prompts:jira:check; task ai:eval:smoke; task spell:dictionary:audit; SG-ORTHO-WIP-20260312-DOT-205 |
 | 2026-03-12 05:05 UTC | WIP-20260312-033649 | capturada | A rodada consolidou LA-020 sobre alinhamento cross-surface da camada documental entre modelos, adaptadores e publication. | LA-020 | LICOES-APRENDIDAS.md; task ai:lessons:check=ok |
 | 2026-03-12 01:45 UTC | WIP-20260312-014434 | sem_nova_licao | A rodada apenas publicou o commit ja validado de DOT-180 em main, sem nova licao perene alem do proprio fechamento operacional. | - | commit=9b03ac6; origin/main atualizado |
 | 2026-03-12 01:30 UTC | WIP-20260312-011221 | sem_nova_licao | A rodada apenas formalizou e catalogou o novo pack temporal, sem revelar licao perene adicional alem do proprio artefato entregue. | - | DOT-180; task ai:prompts:jira:check=ok; task docs:check=ok; task ai:validate=ok |
