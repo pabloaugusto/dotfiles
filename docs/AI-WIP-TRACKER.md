@@ -1,6 +1,6 @@
 # AI WIP Tracker
 
-Atualizado em: 2026-03-12 01:30 UTC
+Atualizado em: 2026-03-12 01:41 UTC
 
 Fallback local de continuidade. O Jira e a fonte primaria do fluxo vivo.
 
@@ -27,7 +27,7 @@ Fallback local de continuidade. O Jira e a fonte primaria do fluxo vivo.
 <!-- ai-worklog:doing:start -->
 | ID | Tarefa | Branch | Responsavel | Inicio UTC | Ultima atualizacao UTC | Proximo passo | Bloqueios |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| (sem itens) | - | - | - | - | - | - | - |
+| WIP-20260312-014106 | Publicar DOT-180 e sincronizar main | prompt/DOT-180-time-locale-governance | codex | 2026-03-12 01:41 UTC | 2026-03-12 01:41 UTC | publicar branch, abrir PR e sincronizar main | - |
 <!-- ai-worklog:doing:end -->
 
 ## Done
@@ -89,5 +89,6 @@ Fallback local de continuidade. O Jira e a fonte primaria do fluxo vivo.
 <!-- ai-worklog:log:start -->
 | Data/Hora UTC | ID | Status | Resumo | Proximo passo | Bloqueios | Contexto | Notas |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| (sem itens) | - | - | - | - | - | - | - |
+| 2026-03-12 01:41 UTC | WIP-20260312-014106 | doing | Publicar DOT-180 e sincronizar main | intake registrado | - | prompt/time-locale-governance | inicio da tarefa |
+| 2026-03-12 01:41 UTC | WIP-20260312-014106 | doing | Branch renomeada para o padrao canonico do repo antes da publicacao remota. | publicar branch, abrir PR e sincronizar main | - | - | checkpoint incremental |
 <!-- ai-worklog:log:end -->
