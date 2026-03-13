@@ -1,6 +1,6 @@
 # AI WIP Tracker
 
-Atualizado em: 2026-03-12 23:00 UTC
+Atualizado em: 2026-03-13 01:49 UTC
 
 Fallback local de continuidade. O Jira e a fonte primaria do fluxo vivo.
 
@@ -35,7 +35,7 @@ Fallback local de continuidade. O Jira e a fonte primaria do fluxo vivo.
 <!-- ai-worklog:done:start -->
 | ID | Tarefa | Branch | Responsavel | Inicio UTC | Concluido UTC | Resultado |
 | --- | --- | --- | --- | --- | --- | --- |
-| WIP-20260312-223235 | DOT-21 corrigir bootstrap/checkEnv SSH Windows e probe de fallback 1Password em contexto service-account | fix/DOT-21-windows-ssh-checkenv | Devops | 2026-03-12 22:32 UTC | 2026-03-12 23:00 UTC | Bootstrap Windows agora materializa ~/.ssh em HOME com ACL segura, checkEnv reclassifica o fallback Personal como contingencia humana e o profile deixa de falhar quando kubectl-... / evidencias: task test:unit:powersh... |
+| WIP-DOT-214 | Restaurar symlinks do bootstrap Windows para ~/.ssh com paths em app/ | fix/DOT-214-ssh-symlink-restore | Devops | 2026-03-13 01:18 UTC | 2026-03-13 01:49 UTC | Modelo canonico de symlink do bootstrap Windows restaurado para `~/.ssh`, `config.local` e malha de links associada, com contrato incorreto de materializacao drenado dos artefatos vivos e runtime local revalidado. / evidencias: sudo task bootstrap:windows:relink; task test:unit:powershell; task test:integration:windows; task docs:check; task ai:validate; task ai:lessons:check; task ai:eval:smoke; task env:check:windows; SYMLINK_AUDIT_OK count=25 |
 | WIP-20260312-DOT-212 | DOT-212 separar runtime em app e ajustar consumidores | feat/DOT-212-runtime-app-boundary | Engenheiro Agentes IA | 2026-03-12 21:04 UTC | 2026-03-12 21:39 UTC | Camada runtime separada da camada de desenvolvimento com migracao de bootstrap/ e df/ para app/, consumidores ajustados e paridade Windows/WSL preservada. / evidencias: task ai:validate; task docs:check; task ai:eval:... |
 | WIP-DOT-211-LEDGER-ALIAS | Normalizar alias-first em worklog, review ledger e historico local visivel | fix/DOT-211-agent-alias-first-drift | Engenheiro Agentes IA | 2026-03-12 20:08 UTC | 2026-03-12 20:13 UTC | Emissores locais de worklog/review agora normalizam alias-first, e os ledgers humanos mais visiveis foram drenados dos ids tecnicos remanescentes nos campos de ownership. / evidencias: task test:unit:python=ok; task a... |
 | WIP-DOT-211-RUNTIME-FINAL | Fechar drift residual de alias-first no active-execution e no startup | fix/DOT-211-agent-alias-first-drift | Engenheiro Agentes IA | 2026-03-12 19:50 UTC | 2026-03-12 19:57 UTC | Alias-first estendido ao active-execution e ao startup, com ids tecnicos movidos para campos *_id e compatibilidade com schema legado preservada. / evidencias: python -m unittest tests.python.ai_agent_execution_test t... |

@@ -246,15 +246,6 @@ Historico incremental das regras operacionais que nao devem depender de memoria 
 - Worklog relacionado: `WIP-20260312-DOT-212`
 - Fontes relacionadas: dotfiles
 
-## LA-024 - Runtime SSH Windows precisa ser materializado em HOME, nao linkado ao repo
-
-- Contexto: A migracao de runtime para [`app/`](app/) preservou o repositorio como fonte canonica, mas manter `~/.ssh` do Windows como symlink/junction para o repo quebrou ACL do OpenSSH, degradou bootstrap/relink e introduziu falso negativo em `checkEnv`.
-- Regra: No Windows, caminhos de runtime sensiveis ao host como ~/.ssh devem existir como diretorio real no perfil do usuario, com ACL segura e arquivos canonicos materializados a partir do repo; o repo nao deve ser o runtime vivo desse diretorio inteiro.
-- Solucao validada: Substituir o link de `~/.ssh` por materializacao controlada em `HOME`, copiar [`config`](app/df/ssh/config), [`config.windows`](app/df/ssh/config.windows), [`config.unix`](app/df/ssh/config.unix), [`authorized_keys`](app/df/ssh/authorized_keys) e [`1Password/config`](app/df/ssh/1Password/config) a partir de [`app/df/ssh/`](app/df/ssh/), migrar `known_hosts` e outros residuos locais, aplicar ACL segura com `icacls` e manter o fallback Personal do 1Password como contingencia humana no `checkEnv`.
-- Prevencao: Manter bootstrap:windows:relink, o harness de integracao Windows e checkEnv alinhados com a regra de HOME materializado; qualquer drift que reintroduza symlink/junction de ~/.ssh para dentro do repo deve ser tratado como regressao.
-- Validacao: task test:unit:powershell; task test:integration:windows; task ci:lint:windows; task env:check:windows; task ai:validate; task docs:check
-- Worklog relacionado: `WIP-20260312-223235`
-- Fontes relacionadas: dotfiles
 <!-- ai-lessons:catalog:end -->
 
 ## Revisoes de rodadas
@@ -264,7 +255,7 @@ Toda finalizacao de worklog deve registrar se houve nova licao.
 <!-- ai-lessons:reviews:start -->
 | Data/Hora UTC | Worklog ID | Decisao | Resumo | Licoes | Evidencia |
 | --- | --- | --- | --- | --- | --- |
-| 2026-03-12 23:00 UTC | WIP-20260312-223235 | capturada | A rodada consolidou que o runtime SSH sensivel do Windows nao pode permanecer linkado ao repo; ele precisa ser materializado em HOME com ACL segura, e o fallback Personal do 1Password deve ser tratado como contingenci... | LA-024 | task test:unit:powershell; task test:integration:windows; task ci:lint:windows; task env:check:windows; task docs:check; task ai:validate; task ai:eval:smoke |
+| 2026-03-13 01:49 UTC | WIP-DOT-214 | sem_nova_licao | A rodada apenas restaurou o contrato canonico de symlinks do bootstrap Windows e drenou dos artefatos vivos a regra incorreta de materializacao, sem introduzir nova licao perene alem dos guardrails ja vigentes. | - | sudo task bootstrap:windows:relink; task test:unit:powershell; task test:integration:windows; task docs:check; task ai:validate; task ai:lessons:check; task ai:eval:smoke; task env:check:windows; SYMLINK_AUDIT_OK count=25 |
 | 2026-03-12 21:39 UTC | WIP-20260312-DOT-212 | capturada | A fronteira runtime vs desenvolvimento precisa ser resolvida antes de centralizar configuracao. | LA-023 | task ai:validate; task docs:check; task ai:eval:smoke; task test:unit:powershell; task test:integration:windows; task test:integration:linux; task test:unit:python |
 | 2026-03-12 20:13 UTC | WIP-DOT-211-LEDGER-ALIAS | sem_nova_licao | LA-022 ja cobre a necessidade de alias-first nos artefatos locais visiveis; esta fatia apenas expandiu a aplicacao e drenou o historico local mais exposto. | - | worklog/review ledger alias-first; scrum master ledger e paused audit drenados nos campos visiveis |
 | 2026-03-12 19:57 UTC | WIP-DOT-211-RUNTIME-FINAL | capturada | Alias-first precisa cobrir tambem artefatos locais visiveis, mantendo ids tecnicos apenas em campos canonicos separados. | LA-022 | active-execution alias-first regravado; startup passou a consumir agent_id/current_agent_role_id/next_required_role_id |

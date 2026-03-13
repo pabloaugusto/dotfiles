@@ -1011,7 +1011,7 @@ catch {
 		}
 	}
 
-	Sync-WindowsSshHomeLayout -HomeSshPath "$Env:USERPROFILE\.ssh" -RepoSshPath "$DotFilesDirectory\app\df\ssh"
+	Add-Symlink "$Env:USERPROFILE\.ssh" "$DotFilesDirectory\app\df\ssh" > $null
 	Add-Symlink "$Env:USERPROFILE\.assets" "$DotFilesDirectory\app\df\assets" > $null
 	Add-Symlink "$Env:USERPROFILE\.editorconfig" "$DotFilesDirectory\app\df\.editorconfig" > $null
 	Add-Symlink "$Env:USERPROFILE\.gitconfig" "$DotFilesDirectory\app\df\git\.gitconfig" > $null
@@ -1025,9 +1025,9 @@ catch {
 	Add-Symlink "$Env:USERPROFILE\.oh-my-posh" "$DotFilesDirectory\app\df\oh-my-posh" > $null
 
 	# ----------------------------------------------------
-	# Windows OpenSSH exige ACL segura em HOME; a selecao de ambiente para SSH
-	# fica materializada localmente em ~/.ssh/config.local.
+	# Symlink para a config de ssh baseada no ambiente
 	# ----------------------------------------------------
+	Add-Symlink "$env:USERPROFILE\.ssh\config.local" "$DotFilesDirectory\app\df\ssh\config.windows" > $null
 
 	# ----------------------------------------------------
 	# Symlink Powershell dotfiles
