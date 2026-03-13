@@ -140,13 +140,18 @@ REQUIRED_FILES = [
     "scripts/ai-review.py",
     "scripts/ai_review_lib.py",
     "scripts/ai-control-plane.py",
+    "scripts/ai-atlassian-actor.py",
+    "scripts/ai-atlassian-actor-backfill.py",
     "scripts/ai-fallback.py",
     "scripts/ai-session-startup.py",
     "scripts/ai_control_plane_lib.py",
+    "scripts/ai_atlassian_actor_lib.py",
+    "scripts/ai_atlassian_actor_backfill_lib.py",
     "scripts/ai_rules_lib.py",
     "scripts/ai_sync_foundation_lib.py",
     "scripts/ai_fallback_governance_lib.py",
     "scripts/ai_session_startup_lib.py",
+    "scripts/ai_atlassian_seed_lib.py",
     "scripts/atlassian_platform_lib.py",
     "scripts/git-governance-check.py",
     "scripts/run-ai-atlassian-check.ps1",
@@ -1219,6 +1224,9 @@ def validate_agent_runtime_contracts(repo_root: Path, failures: list[str]) -> No
         failures.append(f"Role required sem runtime operacional/consultivo valido: {role_id}")
     for role_id in control_plane.enabled_roles_without_operational_runtime():
         failures.append(f"Role habilitada sem runtime operacional/consultivo valido: {role_id}")
+    for role_id in control_plane.roles_with_atlassian_actor():
+        for failure in control_plane.role_atlassian_actor_validation_failures(role_id):
+            failures.append(f"Contrato Atlassian por agente invalido: {failure}")
     for agent_id in control_plane.enabled_registry_agents_without_operational_runtime():
         failures.append(
             f"Agente declarativo habilitado sem runtime operacional/consultivo valido: {agent_id}"
@@ -1276,6 +1284,28 @@ def validate_agent_runtime_contracts(repo_root: Path, failures: list[str]) -> No
                         failures.append(
                             f"Runtime artifact ausente para agente declarativo {agent_id}: {artifact}"
                         )
+
+    guarded_runtime_scripts = [
+        repo_root / "scripts" / "ai_agent_execution_lib.py",
+        repo_root / "scripts" / "ai_atlassian_actor_backfill_lib.py",
+        repo_root / "scripts" / "ai_atlassian_seed_lib.py",
+        repo_root / "scripts" / "ai_atlassian_repair_lib.py",
+        repo_root / "scripts" / "ai_atlassian_agent_comment_audit_lib.py",
+    ]
+    for script_path in guarded_runtime_scripts:
+        if not script_path.exists():
+            continue
+        content = script_path.read_text(encoding="utf-8")
+        if "ai_atlassian_actor_lib" not in content:
+            failures.append(
+                "Script Atlassian governado sem resolvedor central de actor por agente: "
+                f"{script_path.relative_to(repo_root).as_posix()}"
+            )
+        if "AtlassianHttpClient(" in content:
+            failures.append(
+                "Script Atlassian governado ainda instancia AtlassianHttpClient fora do resolvedor central: "
+                f"{script_path.relative_to(repo_root).as_posix()}"
+            )
 
 
 def validate_prompt_packs(repo_root: Path, failures: list[str]) -> None:

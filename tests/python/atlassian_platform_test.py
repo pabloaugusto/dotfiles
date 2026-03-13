@@ -663,6 +663,21 @@ class AtlassianPlatformTests(unittest.TestCase):
         typed_params = cast(dict[str, str], params)
         self.assertIn(r"C:\\Users\\pablo\\.ssh\\config", typed_params["jql"])
 
+    def test_jira_search_users_uses_user_search_endpoint(self) -> None:
+        client = FakeAtlassianHttpClient(
+            [[{"accountId": "account-po", "displayName": "ia-product-owner"}]]
+        )
+        adapter = JiraAdapter(client)  # type: ignore[arg-type]
+
+        payload = adapter.search_users("ia-product-owner", max_results=20)
+
+        self.assertEqual(payload[0]["accountId"], "account-po")
+        self.assertEqual(client.calls[0]["path"], "/rest/api/3/user/search")
+        self.assertEqual(
+            client.calls[0]["params"],
+            {"query": "ia-product-owner", "maxResults": "20"},
+        )
+
     def test_jira_add_attachment_uses_multipart_with_no_check_header(self) -> None:
         client = FakeAtlassianHttpClient([[{"id": "10000", "filename": "artifact.zip"}]])
         adapter = JiraAdapter(client)  # type: ignore[arg-type]

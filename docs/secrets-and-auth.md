@@ -45,6 +45,112 @@ Referencia canonica de scopes/permissoes e rotacao Atlassian:
 
 - [`docs/atlassian-ia/2026-03-07-atlassian-auth-scopes-and-permissions.md`](atlassian-ia/2026-03-07-atlassian-auth-scopes-and-permissions.md)
 
+## Service accounts Atlassian por agente
+
+O runtime Atlassian da camada de IA agora aceita service account propria por
+agente, declarada em [`config/ai/agent-runtime.yaml`](../config/ai/agent-runtime.yaml).
+
+Regra canonica:
+
+1. se o agente tiver `atlassian_actor.enabled=true` para a surface pedida, usar
+   a service account propria dele
+2. se nao tiver service account propria para a surface, usar a service account
+   global definida em [`config/ai/platforms.yaml`](../config/ai/platforms.yaml)
+3. se a service account propria falhar por identidade, permissao ou escrita, o
+   runtime pode cair para a conta global quando
+   `fallback_to_global_on_error=true`
+4. todo fallback relevante vira incidente rastreavel em `Jira`; fallback
+   silencioso e drift
+
+Superficies suportadas hoje:
+
+- `jira-comment`
+- `jira-assignee`
+- `confluence-comment`
+- `confluence-page`
+
+Cada agente declara capacidades separadas por surface. O runtime nao assume que
+uma conta que comenta tambem pode atribuir issue.
+
+### Naming canonico dos secrets por agente
+
+Padrao recomendado:
+
+- `op://secrets/dotfiles/atlassian-service-accounts/<agent>-api-token`
+- `op://secrets/dotfiles/atlassian-service-accounts/<agent>-email`
+- `op://secrets/dotfiles/atlassian-service-accounts/<agent>-id`
+
+Exemplo do piloto atual do `PO`:
+
+- `op://secrets/dotfiles/atlassian-service-accounts/ai-product-owner-api-token`
+- `op://secrets/dotfiles/atlassian-service-accounts/ai-product-owner-email`
+- `op://secrets/dotfiles/atlassian-service-accounts/ai-product-owner-id`
+
+### Como obter o service account ID
+
+Fluxo manual rapido:
+
+1. descobrir o e-mail da service account no 1Password
+2. abrir a busca de usuarios do Jira com esse identificador, por exemplo:
+   [user search do PO](https://pabloaugusto.atlassian.net/rest/api/3/user/search?query=ia-product-owner)
+3. validar no resultado:
+   - `active = true`
+   - `accountType = app`
+   - `displayName` esperado
+   - `emailAddress` esperado quando a API devolver esse campo
+4. registrar o `accountId` no secret `.../<agent>-id`
+
+Fluxo automatizado do repo:
+
+- [`scripts/ai-atlassian-actor.py`](../scripts/ai-atlassian-actor.py)
+  resolve a identidade efetiva por agente e surface
+- [`scripts/ai-atlassian-actor-backfill.py`](../scripts/ai-atlassian-actor-backfill.py)
+  audita e aplica o backfill de comentarios Jira quando a autoria precisa migrar
+  da conta global para a conta propria do agente
+
+Exemplos:
+
+```powershell
+python scripts/ai-atlassian-actor.py resolve --role ai-product-owner --surface jira-comment
+python scripts/ai-atlassian-actor.py resolve --role ai-product-owner --surface jira-assignee
+python scripts/ai-atlassian-actor.py state
+```
+
+### Ordem canonica de resolucao
+
+Para qualquer agente com service account propria:
+
+1. ler `account_id` do secret `.../<agent>-id`
+2. validar coerencia minima com `email` e `token` da mesma conta
+3. se o `account_id` falhar, tentar busca no Jira
+4. se a busca resolver com seguranca, usar o valor apenas em memoria na rodada
+   atual
+5. abrir ou comentar uma `Bug` deduplicada no Jira, porque o fallback indica
+   defeito, drift ou rotacao incompleta
+6. se a busca tambem falhar, usar a service account global quando o contrato da
+   surface permitir
+
+O fallback por busca e contingencia, nao fluxo-base.
+
+### Backfill de comentarios
+
+O piloto inicial cobre `Jira`.
+
+Contrato do backfill:
+
+- limitar a comentarios estruturados da automacao
+- identificar comentarios do agente escritos pela conta global
+- recriar com a service account propria do agente
+- so depois remover o comentario legado, quando a escrita correta ficar
+  comprovada
+
+Exemplos:
+
+```powershell
+python scripts/ai-atlassian-actor-backfill.py --role ai-product-owner
+python scripts/ai-atlassian-actor-backfill.py --role ai-product-owner --apply
+```
+
 Para `service-account-api-token`, o acesso REST oficial usa o gateway
 `api.atlassian.com` com `cloud_id`. Nessa modalidade:
 

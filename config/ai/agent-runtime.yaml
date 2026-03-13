@@ -26,8 +26,32 @@ roles:
     owner_mode: primary
     surfaces: [jira, chat, active-execution]
     process_scopes: [intake, backlog, prioritization, refinement, ready]
+    atlassian_actor:
+      enabled: true
+      fallback_to_global_on_error: true
+      email_secret_ref: op://secrets/dotfiles/atlassian-service-accounts/ai-product-owner-email
+      token_secret_ref: op://secrets/dotfiles/atlassian-service-accounts/ai-product-owner-api-token
+      account_id_secret_ref: op://secrets/dotfiles/atlassian-service-accounts/ai-product-owner-id
+      search_fallback:
+        enabled: true
+        prefer_email_lookup: true
+        query: ia-product-owner
+        expected_display_name: ia-product-owner
+        expected_email_secret_ref: op://secrets/dotfiles/atlassian-service-accounts/ai-product-owner-email
+        expected_account_type: app
+        require_active: true
+      surfaces:
+        jira-comment:
+          enabled: true
+        jira-assignee:
+          enabled: true
+        confluence-comment:
+          enabled: false
+        confluence-page:
+          enabled: false
     runtime_artifacts:
       - .agents/cards/ai-product-owner.md
+      - scripts/ai_atlassian_actor_lib.py
       - scripts/ai-agent-execution.py
       - scripts/ai_agent_execution_lib.py
       - config/ai/agent-operations.yaml

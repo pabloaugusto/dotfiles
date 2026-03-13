@@ -15,6 +15,7 @@ except ModuleNotFoundError:  # pragma: no cover - fallback for Python < 3.11
     tomllib = None  # type: ignore[assignment]
 
 from scripts.ai_agent_execution_lib import load_context
+from scripts.ai_atlassian_actor_lib import actor_runtime_state
 from scripts.ai_control_plane_lib import load_ai_control_plane, resolve_atlassian_platform
 from scripts.ai_fallback_governance_lib import fallback_status_payload
 from scripts.ai_rules_lib import rules_projection_payload as load_rules_projection_payload
@@ -346,6 +347,10 @@ def agent_runtime_payload(repo_root: Path) -> dict[str, Any]:
         "duplicate_enabled_role_visible_names": control_plane.duplicate_enabled_role_visible_names(),
         "jira_assignable_roles": control_plane.jira_assignable_roles(),
         "enabled_roles_missing_jira_assignee_mapping": control_plane.enabled_roles_missing_jira_assignee_mapping(),
+        "enabled_roles_with_atlassian_actor": control_plane.enabled_roles_with_atlassian_actor(),
+        "enabled_roles_using_global_atlassian_actor": control_plane.enabled_roles_using_global_atlassian_actor(),
+        "enabled_roles_with_incomplete_atlassian_actor": control_plane.enabled_roles_with_incomplete_atlassian_actor(),
+        "atlassian_actor_surface_matrix": control_plane.role_atlassian_actor_surface_matrix(),
     }
 
 
@@ -992,6 +997,10 @@ def startup_governor_status_payload(
             warnings.append(
                 "nem todos os papeis habilitados possuem principal Jira mapeado para sync de assignee"
             )
+        if agent_runtime.get("enabled_roles_with_incomplete_atlassian_actor"):
+            warnings.append(
+                "existem agentes com service account propria declarada, mas com configuracao Atlassian incompleta"
+            )
 
     if git_inventory.get("status") == "ok" and git_governance.get("status") == "ok":
         state = "git_context_loaded"
@@ -1187,6 +1196,7 @@ def startup_session_payload(
     agent_identity = agent_identity_payload(repo_root, active_execution)
     enablement = agent_enablement_payload(repo_root)
     agent_runtime = agent_runtime_payload(repo_root)
+    atlassian_actor_state = actor_runtime_state(repo_root)
     if active_execution.get("status") == "ok":
         active_execution["agent_display_name"] = agent_identity["active_display_name"]
     prioritized_work_item = prioritized_work_item_payload(active_execution, active_worklog_items)
@@ -1271,6 +1281,7 @@ def startup_session_payload(
         "agent_identity": agent_identity,
         "agent_enablement": enablement,
         "agent_runtime": agent_runtime,
+        "atlassian_actor_state": atlassian_actor_state,
         "rules_projections": rules_projections,
         "chat_communication": chat_communication,
         "git_governance": git_governance,
@@ -1428,6 +1439,32 @@ def render_startup_session_markdown(payload: dict[str, Any]) -> str:
         "- roles habilitados sem principal Jira mapeado: "
         f"`{', '.join(agent_runtime.get('enabled_roles_missing_jira_assignee_mapping', [])) or 'nenhum'}`"
     )
+    lines.append(
+        "- roles com service account propria: "
+        f"`{', '.join(agent_runtime.get('enabled_roles_with_atlassian_actor', [])) or 'nenhum'}`"
+    )
+    lines.append(
+        "- roles em fallback global Atlassian: "
+        f"`{', '.join(agent_runtime.get('enabled_roles_using_global_atlassian_actor', [])) or 'nenhum'}`"
+    )
+    lines.append(
+        "- roles com service account incompleta: "
+        f"`{', '.join(agent_runtime.get('enabled_roles_with_incomplete_atlassian_actor', [])) or 'nenhum'}`"
+    )
+    surface_matrix = agent_runtime.get("atlassian_actor_surface_matrix", {})
+    if isinstance(surface_matrix, dict) and surface_matrix:
+        for role_id, surfaces in sorted(surface_matrix.items()):
+            if not isinstance(surfaces, list):
+                continue
+            lines.append(
+                f"- surfaces Atlassian de `{role_id}`: `{', '.join(str(item) for item in surfaces) or 'nenhuma'}`"
+            )
+    actor_state = payload.get("atlassian_actor_state", {})
+    if isinstance(actor_state, dict):
+        lines.append(
+            "- resolucoes com search fallback na ultima rodada: "
+            f"`{', '.join(actor_state.get('search_fallback_resolutions', [])) or 'nenhuma'}`"
+        )
     if agent_runtime.get("missing_roles"):
         lines.append(
             "- roles sem runtime: "

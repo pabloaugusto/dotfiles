@@ -5,6 +5,7 @@ import unittest
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from typing import Any, cast
+from types import SimpleNamespace
 from unittest.mock import patch
 
 from scripts.ai_atlassian_seed_lib import (
@@ -97,6 +98,7 @@ class AtlassianSeedPlanTests(unittest.TestCase):
             {
                 "site_url": "https://example.atlassian.net",
                 "jira_project_key": "DOT",
+                "confluence_space_key": "DOT",
             },
         )()
 
@@ -113,9 +115,27 @@ class AtlassianSeedPlanTests(unittest.TestCase):
                 "scripts.ai_atlassian_seed_lib.load_confluence_model",
                 return_value=(Path("config/ai/confluence-model.yaml"), {}),
             ),
-            patch("scripts.ai_atlassian_seed_lib.AtlassianHttpClient", return_value=object()),
-            patch("scripts.ai_atlassian_seed_lib.ConfluenceAdapter", return_value=object()),
-            patch("scripts.ai_atlassian_seed_lib.JiraAdapter", return_value=FakeJira()),
+            patch(
+                "scripts.ai_atlassian_seed_lib.confluence_adapter_for_role",
+                return_value=(
+                    object(),
+                    SimpleNamespace(
+                        actor_mode="role-service-account",
+                        as_platform=lambda: fake_resolved,
+                    ),
+                ),
+            ),
+            patch(
+                "scripts.ai_atlassian_seed_lib.global_jira_adapter",
+                return_value=FakeJira(),
+            ),
+            patch(
+                "scripts.ai_atlassian_seed_lib.with_jira_actor",
+                side_effect=lambda repo_root, role_id, surface, operation, context_issue_key="": (
+                    operation(FakeJira(), SimpleNamespace(actor_mode="role-service-account")),
+                    SimpleNamespace(actor_mode="role-service-account"),
+                ),
+            ),
             patch(
                 "scripts.ai_atlassian_seed_lib.sync_confluence_page_tree",
                 side_effect=fake_sync_confluence_page_tree,

@@ -181,6 +181,71 @@ Scope de token nao substitui permissao do principal. A service account precisa:
   - criar paginas
   - editar paginas
 
+## Service accounts por agente
+
+O repo passa a aceitar service account dedicada por agente, sem abandonar a
+conta global.
+
+Contrato operacional:
+
+- se o agente tiver `atlassian_actor.enabled=true` na propria entrada de
+  [`../../config/ai/agent-runtime.yaml`](../../config/ai/agent-runtime.yaml),
+  usar a conta dele nas surfaces habilitadas
+- se nao tiver bloco proprio, usar a conta global de
+  [`../../config/ai/platforms.yaml`](../../config/ai/platforms.yaml)
+- capacidades sao separadas por surface; uma conta pode comentar sem
+  necessariamente poder atribuir issue
+- divergencia de permissao por surface deve aparecer como incidente especifico,
+  nunca como falha generica da conta
+
+Superficies canonicas:
+
+- `jira-comment`
+- `jira-assignee`
+- `confluence-comment`
+- `confluence-page`
+
+### Fontes primarias e contingencias
+
+Primario por agente:
+
+1. `email_secret_ref`
+2. `token_secret_ref`
+3. `account_id_secret_ref`
+
+Contingencias:
+
+1. busca em `Jira user search`
+2. conta global Atlassian
+
+Regra perene:
+
+- busca por nome ou e-mail e fallback contingencial
+- `account_id` versionado no secret continua sendo a fonte primaria
+- toda contingencia bem-sucedida precisa abrir `Bug` deduplicada no Jira
+
+### Validacoes minimas do fallback por busca
+
+Ao buscar `accountId` por `user/search`, exigir:
+
+- `active = true`
+- `accountType = app`
+- `displayName` esperado quando existir
+- `emailAddress` esperado quando a API devolver
+- falha dura quando a busca retornar mais de um candidato valido
+
+### Dedupe obrigatorio do incidente
+
+Quando o runtime precisar cair para busca ou para a conta global por falha da
+conta propria, o incidente deve ser deduplicado por:
+
+- agente
+- surface
+- motivo
+- tipo de fallback
+
+Se o item ja existir aberto, o runtime comenta nele; nao abre ruido novo.
+
 ## Observacoes do tenant atual
 
 - o secret configurado no overlay local derivado de

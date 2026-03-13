@@ -580,19 +580,147 @@ class AiControlPlane:
         payload = runtime_entry.get("jira_assignee") or {}
         return payload if isinstance(payload, dict) else {}
 
+    def role_has_jira_assignee_mapping(self, role_id: str) -> bool:
+        if str(self.role_jira_assignee_payload(role_id).get("account_id", "")).strip():
+            return True
+        return bool(
+            self.role_atlassian_actor_enabled(role_id)
+            and self.role_atlassian_actor_surface_enabled(role_id, "jira-assignee")
+        )
+
     def enabled_roles_missing_jira_assignee_mapping(self) -> list[str]:
         return sorted(
             role_id
             for role_id in self.enabled_roles()
             if bool(self.role_runtime_entry(role_id).get("chat_owner_supported", False))
-            and not str(self.role_jira_assignee_payload(role_id).get("account_id", "")).strip()
+            and not self.role_has_jira_assignee_mapping(role_id)
         )
 
     def jira_assignable_roles(self) -> list[str]:
         return sorted(
             role_id
             for role_id in self.enabled_roles()
-            if str(self.role_jira_assignee_payload(role_id).get("account_id", "")).strip()
+            if self.role_has_jira_assignee_mapping(role_id)
+        )
+
+    def role_atlassian_actor_payload(self, role_id: str) -> dict[str, Any]:
+        runtime_entry = self.role_runtime_entry(role_id)
+        payload = runtime_entry.get("atlassian_actor") or {}
+        return payload if isinstance(payload, dict) else {}
+
+    def role_atlassian_actor_enabled(self, role_id: str) -> bool:
+        return bool(self.role_atlassian_actor_payload(role_id).get("enabled", False))
+
+    def role_atlassian_actor_surface_payload(self, role_id: str, surface: str) -> dict[str, Any]:
+        actor_payload = self.role_atlassian_actor_payload(role_id)
+        surfaces = actor_payload.get("surfaces") or {}
+        if not isinstance(surfaces, dict):
+            raise AiControlPlaneError(
+                "config/ai/agent-runtime.yaml roles.<agent>.atlassian_actor.surfaces precisa ser mapa."
+            )
+        payload = surfaces.get(str(surface).strip()) or {}
+        return payload if isinstance(payload, dict) else {}
+
+    def role_atlassian_actor_surface_enabled(self, role_id: str, surface: str) -> bool:
+        if not self.role_atlassian_actor_enabled(role_id):
+            return False
+        payload = self.role_atlassian_actor_surface_payload(role_id, surface)
+        return bool(payload.get("enabled", False))
+
+    def role_atlassian_actor_surface_names(self, role_id: str) -> list[str]:
+        actor_payload = self.role_atlassian_actor_payload(role_id)
+        surfaces = actor_payload.get("surfaces") or {}
+        if not isinstance(surfaces, dict):
+            raise AiControlPlaneError(
+                "config/ai/agent-runtime.yaml roles.<agent>.atlassian_actor.surfaces precisa ser mapa."
+            )
+        return sorted(str(surface).strip() for surface in surfaces if str(surface).strip())
+
+    def roles_with_atlassian_actor(self) -> list[str]:
+        return sorted(
+            role_id
+            for role_id in self.roles_with_runtime_contracts()
+            if self.role_atlassian_actor_enabled(role_id)
+        )
+
+    def enabled_roles_with_atlassian_actor(self) -> list[str]:
+        enabled_roles = set(self.enabled_roles())
+        return sorted(role_id for role_id in self.roles_with_atlassian_actor() if role_id in enabled_roles)
+
+    def enabled_roles_using_global_atlassian_actor(self) -> list[str]:
+        return sorted(
+            role_id
+            for role_id in self.enabled_roles()
+            if bool(self.role_runtime_entry(role_id).get("chat_owner_supported", False))
+            and not self.role_atlassian_actor_enabled(role_id)
+        )
+
+    def role_atlassian_actor_surface_matrix(self) -> dict[str, list[str]]:
+        matrix: dict[str, list[str]] = {}
+        for role_id in self.enabled_roles_with_atlassian_actor():
+            enabled_surfaces = [
+                surface
+                for surface in self.role_atlassian_actor_surface_names(role_id)
+                if self.role_atlassian_actor_surface_enabled(role_id, surface)
+            ]
+            matrix[role_id] = enabled_surfaces
+        return matrix
+
+    def role_atlassian_actor_validation_failures(self, role_id: str) -> list[str]:
+        actor_payload = self.role_atlassian_actor_payload(role_id)
+        if not actor_payload:
+            return []
+        failures: list[str] = []
+        if not self.role_atlassian_actor_enabled(role_id):
+            return failures
+        email_secret_ref = str(actor_payload.get("email_secret_ref", "")).strip()
+        token_secret_ref = str(actor_payload.get("token_secret_ref", "")).strip()
+        account_id_secret_ref = str(actor_payload.get("account_id_secret_ref", "")).strip()
+        if not email_secret_ref:
+            failures.append(
+                f"roles.{role_id}.atlassian_actor.enabled=true exige email_secret_ref"
+            )
+        if not token_secret_ref:
+            failures.append(
+                f"roles.{role_id}.atlassian_actor.enabled=true exige token_secret_ref"
+            )
+        search_fallback = actor_payload.get("search_fallback") or {}
+        if search_fallback and not isinstance(search_fallback, dict):
+            failures.append(
+                f"roles.{role_id}.atlassian_actor.search_fallback precisa ser mapa"
+            )
+            search_fallback = {}
+        search_enabled = bool(search_fallback.get("enabled", False))
+        if search_enabled:
+            query = str(search_fallback.get("query", "")).strip()
+            expected_display_name = str(search_fallback.get("expected_display_name", "")).strip()
+            expected_email_ref = str(search_fallback.get("expected_email_secret_ref", "")).strip()
+            if not any((query, expected_display_name, expected_email_ref)):
+                failures.append(
+                    "roles."
+                    f"{role_id}.atlassian_actor.search_fallback.enabled=true exige query, expected_display_name ou expected_email_secret_ref"
+                )
+        enabled_surfaces = [
+            surface
+            for surface in self.role_atlassian_actor_surface_names(role_id)
+            if self.role_atlassian_actor_surface_enabled(role_id, surface)
+        ]
+        if not enabled_surfaces:
+            failures.append(
+                f"roles.{role_id}.atlassian_actor.enabled=true exige ao menos uma surface enabled"
+            )
+        if "jira-assignee" in enabled_surfaces and not (account_id_secret_ref or search_enabled):
+            failures.append(
+                "roles."
+                f"{role_id}.atlassian_actor.surfaces.jira-assignee.enabled=true exige account_id_secret_ref ou search_fallback.enabled=true"
+            )
+        return failures
+
+    def enabled_roles_with_incomplete_atlassian_actor(self) -> list[str]:
+        return sorted(
+            role_id
+            for role_id in self.enabled_roles_with_atlassian_actor()
+            if self.role_atlassian_actor_validation_failures(role_id)
         )
 
     def effective_workflow_columns(self) -> list[str]:
@@ -1353,6 +1481,10 @@ def summary_payload(
             "enabled_registry_agents_without_operational_runtime": loaded.enabled_registry_agents_without_operational_runtime(),
             "enabled_roles_missing_jira_assignee_mapping": loaded.enabled_roles_missing_jira_assignee_mapping(),
             "jira_assignable_roles": loaded.jira_assignable_roles(),
+            "enabled_roles_with_atlassian_actor": loaded.enabled_roles_with_atlassian_actor(),
+            "enabled_roles_using_global_atlassian_actor": loaded.enabled_roles_using_global_atlassian_actor(),
+            "enabled_roles_with_incomplete_atlassian_actor": loaded.enabled_roles_with_incomplete_atlassian_actor(),
+            "atlassian_actor_surface_matrix": loaded.role_atlassian_actor_surface_matrix(),
         },
         "chat_identity_runtime": {
             "chat_name_fallback_order": loaded.chat_name_fallback_order(),

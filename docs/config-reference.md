@@ -98,6 +98,38 @@ Pontos criticos:
 - `ai-documentation-agent`: papel legado de compatibilidade, sem ownership
   dominante da camada documental
 
+## [`config/ai/agent-runtime.yaml`](../config/ai/agent-runtime.yaml)
+
+Uso:
+
+- concentra o runtime declarativo dos agentes e os contratos operacionais que
+  precisam ser resolvidos em tempo de execucao
+- fica acima de naming, alias, ownership de chat, `Jira assignee` e service
+  accounts proprias por agente
+
+Pontos criticos:
+
+- `roles.*.chat_alias`: apelido preferencial visivel no chat e no Jira
+- `roles.*.jira_assignee.account_id`: mapping legado ou fallback explicito para
+  atribuicao nativa no Jira
+- `roles.*.atlassian_actor.enabled`: liga a service account propria do agente
+- `roles.*.atlassian_actor.fallback_to_global_on_error`: permite cair para a
+  conta global quando a conta propria falhar
+- `roles.*.atlassian_actor.email_secret_ref`,
+  `token_secret_ref` e `account_id_secret_ref`: refs canonicas no 1Password
+- `roles.*.atlassian_actor.search_fallback`: contingencia declarativa para
+  resolver `accountId` por `user/search` quando o secret do id falhar
+- `roles.*.atlassian_actor.surfaces`: matriz por surface; nao assumir que toda
+  conta pode escrever em tudo
+
+Regra perene:
+
+- se o agente tiver service account propria para a surface, usar ela
+- se nao tiver, usar a service account global de
+  [`config/ai/platforms.yaml`](../config/ai/platforms.yaml)
+- se o fallback por busca ou por conta global precisar ser usado, o runtime
+  abre incidente deduplicado no Jira
+
 ## [`config/ai/agent-operations.yaml`](../config/ai/agent-operations.yaml)
 
 Uso:

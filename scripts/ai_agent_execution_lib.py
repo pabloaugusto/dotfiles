@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+from json import JSONDecodeError
 import subprocess
 from dataclasses import asdict, dataclass
 from datetime import datetime
@@ -8,8 +9,9 @@ from pathlib import Path
 from typing import Any
 from urllib.parse import quote
 
-from scripts.ai_control_plane_lib import load_ai_control_plane, resolve_atlassian_platform
-from scripts.atlassian_platform_lib import AtlassianHttpClient, JiraAdapter
+from scripts.ai_atlassian_actor_lib import global_jira_adapter, with_jira_actor
+from scripts.ai_control_plane_lib import load_ai_control_plane
+from scripts.atlassian_platform_lib import JiraAdapter
 
 WORKFLOW_ORDER = [
     ("backlog", {"backlog"}),
@@ -103,12 +105,7 @@ def current_branch(repo_root: Path) -> str:
 
 
 def resolve_jira(repo_root: Path) -> JiraAdapter:
-    control_plane = load_ai_control_plane(repo_root)
-    resolved = resolve_atlassian_platform(
-        control_plane.atlassian_definition(),
-        repo_root=control_plane.repo_root,
-    )
-    return JiraAdapter(AtlassianHttpClient(resolved))
+    return global_jira_adapter(repo_root)
 
 
 def issue_url(jira: JiraAdapter, issue_key: str) -> str:
@@ -169,7 +166,10 @@ def load_context(repo_root: str | Path | None = None) -> AgentExecutionContext |
     context_path = default_context_path(repo_root)
     if not context_path.exists():
         return None
-    payload = json.loads(context_path.read_text(encoding="utf-8"))
+    try:
+        payload = json.loads(context_path.read_text(encoding="utf-8"))
+    except JSONDecodeError as exc:
+        raise AgentExecutionError(f"Contexto ativo corrompido em {context_path}.") from exc
     if not isinstance(payload, dict):
         raise AgentExecutionError("Contexto ativo em formato invalido.")
     repo = Path(repo_root).resolve() if repo_root else Path.cwd().resolve()
@@ -330,7 +330,6 @@ def role_visibility_payload(repo_root: Path, role_id: str) -> dict[str, str]:
             "role_id": "",
             "visible_name": "",
             "formal_name": "",
-            "assignee_account_id": "",
         }
     try:
         control_plane = load_ai_control_plane(repo_root)
@@ -339,15 +338,12 @@ def role_visibility_payload(repo_root: Path, role_id: str) -> dict[str, str]:
             "role_id": normalized_role_id,
             "visible_name": normalized_role_id,
             "formal_name": normalized_role_id,
-            "assignee_account_id": "",
         }
-    assignee = control_plane.role_jira_assignee_payload(normalized_role_id)
     return {
         "role_id": normalized_role_id,
         "visible_name": control_plane.visible_name_for_agent(normalized_role_id),
         "formal_name": control_plane.formal_name_for_agent(normalized_role_id)
         or normalized_role_id,
-        "assignee_account_id": str(assignee.get("account_id", "")).strip(),
     }
 
 
@@ -359,6 +355,7 @@ def sync_agent_roles(
     acting_agent: str,
     current_agent_role: str,
     next_required_role: str,
+    assignee_account_id: str = "",
 ) -> dict[str, Any]:
     current_visibility = role_visibility_payload(repo_root, current_agent_role)
     next_visibility = role_visibility_payload(repo_root, next_required_role)
@@ -377,10 +374,10 @@ def sync_agent_roles(
         payload_fields[next_field_id] = (
             {"value": next_visibility["visible_name"]} if next_visibility["visible_name"] else None
         )
-    assignee_account_id = acting_visibility["assignee_account_id"]
     assignee_status = "skipped"
-    if assignee_account_id:
-        payload_fields["assignee"] = {"accountId": assignee_account_id}
+    normalized_assignee_account_id = str(assignee_account_id or "").strip()
+    if normalized_assignee_account_id:
+        payload_fields["assignee"] = {"accountId": normalized_assignee_account_id}
         assignee_status = "synced"
     elif acting_visibility["role_id"]:
         assignee_status = "unmapped"
@@ -391,7 +388,7 @@ def sync_agent_roles(
         "next_required_role_display": next_visibility["visible_name"],
         "acting_agent_display": acting_visibility["visible_name"],
         "assignee_status": assignee_status,
-        "assignee_account_id": assignee_account_id,
+        "assignee_account_id": normalized_assignee_account_id,
     }
 
 
@@ -546,19 +543,40 @@ def record_activity(
         evidencias=evidencias or [],
         proximo_passo=proximo_passo,
     )
-    comment = ensure_comment(jira, resolved_issue_key, rendered_comment)
+    comment, comment_actor = with_jira_actor(
+        repo,
+        resolved_agent,
+        "jira-comment",
+        lambda actor_jira, _actor: ensure_comment(actor_jira, resolved_issue_key, rendered_comment),
+        context_issue_key=resolved_issue_key,
+    )
     role_payload: dict[str, Any] = {}
+    role_actor_mode = ""
+    role_actor_account_id_source = ""
     if sync_roles:
-        role_payload = sync_agent_roles(
-            jira,
-            resolved_issue_key,
-            repo_root=repo,
-            acting_agent=resolved_agent,
-            current_agent_role=current_agent_role.strip(),
-            next_required_role=next_required_role.strip(),
+        role_payload, role_actor = with_jira_actor(
+            repo,
+            resolved_agent,
+            "jira-assignee",
+            lambda actor_jira, actor: sync_agent_roles(
+                actor_jira,
+                resolved_issue_key,
+                repo_root=repo,
+                acting_agent=resolved_agent,
+                current_agent_role=current_agent_role.strip(),
+                next_required_role=next_required_role.strip(),
+                assignee_account_id=actor.account_id,
+            ),
+            context_issue_key=resolved_issue_key,
         )
+        role_actor_mode = role_actor.actor_mode
+        role_actor_account_id_source = role_actor.account_id_source
     payload = {
         "comment": comment,
+        "comment_actor_mode": comment_actor.actor_mode,
+        "comment_actor_account_id_source": comment_actor.account_id_source,
+        "role_actor_mode": role_actor_mode,
+        "role_actor_account_id_source": role_actor_account_id_source,
         "current_agent_role": current_agent_role.strip(),
         "next_required_role": next_required_role.strip(),
         "current_agent_role_display": role_payload.get("current_agent_role_display", ""),

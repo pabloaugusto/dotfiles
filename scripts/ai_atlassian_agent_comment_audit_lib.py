@@ -6,9 +6,9 @@ import re
 from pathlib import Path
 from typing import Any
 
-from scripts.ai_control_plane_lib import load_ai_control_plane, resolve_atlassian_platform
+from scripts.ai_atlassian_actor_lib import global_jira_adapter
+from scripts.ai_control_plane_lib import load_ai_control_plane
 from scripts.atlassian_platform_lib import (
-    AtlassianHttpClient,
     JiraAdapter,
     adf_to_text,
     canonicalize_workflow_status,
@@ -359,11 +359,7 @@ def audit_issue_comments(
     max_results: int = 100,
 ) -> dict[str, Any]:
     control = load_ai_control_plane(repo_root)
-    resolved = resolve_atlassian_platform(
-        control.atlassian_definition(), repo_root=control.repo_root
-    )
-    client = AtlassianHttpClient(resolved)
-    jira = JiraAdapter(client)
+    jira = global_jira_adapter(control.repo_root)
     role_reference_map: dict[str, str] = {}
     for role_id in control.roles_payload():
         for candidate in (
@@ -377,7 +373,10 @@ def audit_issue_comments(
 
     current_agent_field_id = jira.field_id_by_name("Current Agent Role")
     next_required_field_id = jira.field_id_by_name("Next Required Role")
-    effective_jql = jql.strip() or f'project = "{resolved.jira_project_key}" ORDER BY updated DESC'
+    effective_jql = (
+        jql.strip()
+        or f'project = "{jira.client.resolved.jira_project_key}" ORDER BY updated DESC'
+    )
     issues = jira.search_issues(
         effective_jql,
         fields=[
@@ -404,7 +403,7 @@ def audit_issue_comments(
         )
     issues_with_findings = [item for item in evaluated if item.get("findings")]
     return {
-        "project_key": resolved.jira_project_key,
+        "project_key": jira.client.resolved.jira_project_key,
         "jql": effective_jql,
         "summary": {
             "issues_audited": len(evaluated),
