@@ -1,0 +1,42 @@
+version = 1
+
+[project]
+id = "dotfiles"
+source_of_truth = "config/config.toml"
+default_config_ref_convention = "arquivo::chave"
+
+[contexts]
+dev_root = "config"
+dev_manifest = "config/config.toml"
+runtime_root = "app/config"
+runtime_manifest = "app/config/config.toml"
+ai_root = ".agents/config"
+ai_manifest = ".agents/config/config.toml"
+
+[resolution]
+precedence = ["defaults", "context_config", "domain_files", "local_overlay", "environment", "cli"]
+literal_lint_enabled = true
+generated_tables_enabled = true
+single_resolution_library_required = true
+
+[regionalization]
+timezone_name = "America/Sao_Paulo"
+locale = "pt-BR"
+language = "pt-BR"
+currency = "BRL"
+calendar_system = "gregorian"
+default_surface_class = "default_regionalized"
+human_date_format = "dd/MM/yyyy"
+human_time_format = "HH:mm"
+human_datetime_format = "dd/MM/yyyy HH:mm:ss"
+inherit_runtime_timezone = false
+inherit_runtime_locale = false
+expose_effective_timezone = true
+expose_effective_locale = true
+
+[domains]
+dev = "config/dev.toml"
+integrations = "config/integrations.toml"
+quality = "config/quality.toml"
+time_surfaces = "config/time-surfaces.yaml"
+schema = "config/schema.json"

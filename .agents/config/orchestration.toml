@@ -1,0 +1,13 @@
+version = 1
+
+[paths]
+capability_matrix = ".agents/orchestration/capability-matrix.yaml"
+routing_policy = ".agents/orchestration/routing-policy.yaml"
+task_card_schema = ".agents/orchestration/task-card.schema.json"
+delegation_plan_schema = ".agents/orchestration/delegation-plan.schema.json"
+
+[delegation]
+require_owner_issue = true
+require_startup_artifact = true
+require_applicable_rules = true
+config_ref_convention = "arquivo::chave"

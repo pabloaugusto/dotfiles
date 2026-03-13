@@ -4,6 +4,7 @@ import unittest
 from email.message import Message
 from io import BytesIO
 from pathlib import Path
+from types import SimpleNamespace
 from typing import cast
 from unittest.mock import patch
 from urllib.error import HTTPError
@@ -478,6 +479,42 @@ class AtlassianPlatformTests(unittest.TestCase):
         update_payload = cast(dict[str, object], client.calls[1]["payload"])
         fields = cast(dict[str, object], update_payload["fields"])
         self.assertEqual(fields["assignee"], {"accountId": "account-123"})
+
+    def test_jira_adapter_set_agent_roles_uses_configured_field_names(self) -> None:
+        client = FakeAtlassianHttpClient(
+            [
+                {
+                    "values": [
+                        {"id": "customfield_20001", "name": "Agente Atual"},
+                        {"id": "customfield_20002", "name": "Proximo Papel"},
+                    ],
+                    "isLast": True,
+                    "maxResults": 100,
+                },
+                {},
+            ]
+        )
+        adapter = JiraAdapter(client)  # type: ignore[arg-type]
+
+        with patch(
+            "scripts.atlassian_platform_lib.load_ai_control_plane",
+            return_value=SimpleNamespace(
+                jira_field_name=lambda logical_name: {
+                    "current_agent_role": "Agente Atual",
+                    "next_required_role": "Proximo Papel",
+                }.get(logical_name, "")
+            ),
+        ):
+            adapter.set_agent_roles(
+                "DOT-99",
+                current_agent_role="Automation Dev",
+                next_required_role="Tech Lead",
+            )
+
+        update_payload = cast(dict[str, object], client.calls[1]["payload"])
+        fields = cast(dict[str, object], update_payload["fields"])
+        self.assertEqual(fields["customfield_20001"], {"value": "Automation Dev"})
+        self.assertEqual(fields["customfield_20002"], {"value": "Tech Lead"})
 
     def test_jira_adapter_log_issue_activity_syncs_comment_and_roles(self) -> None:
         client = FakeAtlassianHttpClient(

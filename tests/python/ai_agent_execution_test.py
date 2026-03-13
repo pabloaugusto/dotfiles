@@ -4,8 +4,8 @@ import json
 import tempfile
 import unittest
 from pathlib import Path
-from typing import Any
 from types import SimpleNamespace
+from typing import Any, cast
 from unittest.mock import patch
 
 from scripts.ai_agent_execution_lib import (
@@ -19,7 +19,145 @@ from scripts.ai_agent_execution_lib import (
 
 def write_runtime(repo_root: Path) -> None:
     config_dir = repo_root / "config" / "ai"
+    root_config_dir = repo_root / "config"
+    app_config_dir = repo_root / "app" / "config"
+    agents_config_dir = repo_root / ".agents" / "config"
     config_dir.mkdir(parents=True, exist_ok=True)
+    app_config_dir.mkdir(parents=True, exist_ok=True)
+    agents_config_dir.mkdir(parents=True, exist_ok=True)
+    (root_config_dir / "config.toml").write_text(
+        """version = 1
+
+[project]
+id = "dotfiles"
+source_of_truth = "config/config.toml"
+default_config_ref_convention = "arquivo::chave"
+
+[contexts]
+dev_root = "config"
+dev_manifest = "config/config.toml"
+runtime_root = "app/config"
+runtime_manifest = "app/config/config.toml"
+ai_root = ".agents/config"
+ai_manifest = ".agents/config/config.toml"
+
+[regionalization]
+timezone_name = "America/Sao_Paulo"
+locale = "pt-BR"
+language = "pt-BR"
+currency = "BRL"
+calendar_system = "gregorian"
+
+[domains]
+dev = "config/dev.toml"
+integrations = "config/integrations.toml"
+quality = "config/quality.toml"
+time_surfaces = "config/time-surfaces.yaml"
+schema = "config/schema.json"
+""",
+        encoding="utf-8",
+    )
+    (root_config_dir / "dev.toml").write_text("version = 1\n", encoding="utf-8")
+    (root_config_dir / "integrations.toml").write_text("version = 1\n", encoding="utf-8")
+    (root_config_dir / "quality.toml").write_text("version = 1\n", encoding="utf-8")
+    (root_config_dir / "schema.json").write_text("{}", encoding="utf-8")
+    (root_config_dir / "time-surfaces.yaml").write_text("surfaces: {}\n", encoding="utf-8")
+    (app_config_dir / "config.toml").write_text(
+        """version = 1
+
+[context]
+kind = "runtime"
+source_of_truth = "app/config/config.toml"
+inherits_regionalization = "config/config.toml::regionalization"
+
+[domains]
+runtime = "app/config/runtime.toml"
+bootstrap = "app/config/bootstrap.toml"
+links = "app/config/links.toml"
+schema = "app/config/schema.json"
+""",
+        encoding="utf-8",
+    )
+    (app_config_dir / "runtime.toml").write_text("version = 1\n", encoding="utf-8")
+    (app_config_dir / "bootstrap.toml").write_text("version = 1\n", encoding="utf-8")
+    (app_config_dir / "links.toml").write_text("version = 1\n", encoding="utf-8")
+    (app_config_dir / "schema.json").write_text("{}", encoding="utf-8")
+    (agents_config_dir / "config.toml").write_text(
+        """version = 1
+
+[context]
+kind = "ai"
+source_of_truth = ".agents/config/config.toml"
+inherits_regionalization = "config/config.toml::regionalization"
+
+[domains]
+agents = ".agents/config/agents.toml"
+communication = ".agents/config/communication.toml"
+startup = ".agents/config/startup.toml"
+orchestration = ".agents/config/orchestration.toml"
+reviews = ".agents/config/reviews.toml"
+prompts = ".agents/config/prompts.toml"
+schema = ".agents/config/schema.json"
+
+[compatibility]
+bridge_manifest = ".agents/config.toml"
+legacy_control_plane_root = "config/ai"
+legacy_agents = "config/ai/agents.yaml"
+legacy_agent_enablement = "config/ai/agent-enablement.yaml"
+legacy_agent_runtime = "config/ai/agent-runtime.yaml"
+legacy_agent_operations = "config/ai/agent-operations.yaml"
+legacy_contracts = "config/ai/contracts.yaml"
+""",
+        encoding="utf-8",
+    )
+    (agents_config_dir / "agents.toml").write_text(
+        """version = 1
+
+[source_of_truth]
+display_name_registry = ".agents/registry/*.toml::display_name"
+
+[identity]
+display_name_source = ".agents/registry/*.toml::display_name"
+chat_alias_source = "config/ai/agent-runtime.yaml::roles"
+enablement_source = "config/ai/agent-enablement.yaml::roles"
+""",
+        encoding="utf-8",
+    )
+    (agents_config_dir / "communication.toml").write_text(
+        """version = 1
+
+[chat]
+prefix_template = "[{timestamp}] **{visible_name}**"
+timestamp_display_pattern = "dd-mm hh:mm"
+timestamp_surface = "chat"
+timestamp_source = "local_system_clock"
+body_starts_on_next_line = true
+visible_name_fallback_order = ["chat_alias", "display_name", "technical_id"]
+display_name_source = ".agents/config/agents.toml::source_of_truth.display_name_registry"
+
+[jira.fields]
+current_agent_role = "Current Agent Role"
+next_required_role = "Next Required Role"
+
+[literal_lint]
+managed_literals = ["[{timestamp}] **{visible_name}**", "dd-mm hh:mm"]
+""",
+        encoding="utf-8",
+    )
+    (agents_config_dir / "startup.toml").write_text("version = 1\n", encoding="utf-8")
+    (agents_config_dir / "orchestration.toml").write_text("version = 1\n", encoding="utf-8")
+    (agents_config_dir / "reviews.toml").write_text("version = 1\n", encoding="utf-8")
+    (agents_config_dir / "prompts.toml").write_text("version = 1\n", encoding="utf-8")
+    (agents_config_dir / "schema.json").write_text("{}", encoding="utf-8")
+    (repo_root / ".agents" / "config.toml").write_text(
+        """version = 1
+
+[config_context]
+manifest = ".agents/config/config.toml"
+bridge_mode = "legacy-rules-and-identity-contracts"
+""",
+        encoding="utf-8",
+    )
     (config_dir / "agents.yaml").write_text(
         """version: 1
 roles:
@@ -303,12 +441,16 @@ class AgentExecutionTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             repo = Path(tmp)
             write_runtime(repo)
-            with patch("scripts.ai_agent_execution_lib.resolve_jira", return_value=fake_jira), patch(
-                "scripts.ai_agent_execution_lib.with_jira_actor",
-                side_effect=fake_with_jira_actor(fake_jira),
-            ), patch(
-                "scripts.ai_agent_execution_lib.current_branch",
-                return_value="feat/DOT-101-agent-issue-instrumentation",
+            with (
+                patch("scripts.ai_agent_execution_lib.resolve_jira", return_value=fake_jira),
+                patch(
+                    "scripts.ai_agent_execution_lib.with_jira_actor",
+                    side_effect=fake_with_jira_actor(fake_jira),
+                ),
+                patch(
+                    "scripts.ai_agent_execution_lib.current_branch",
+                    return_value="feat/DOT-101-agent-issue-instrumentation",
+                ),
             ):
                 payload = record_activity(
                     repo_root=repo,
@@ -340,12 +482,77 @@ class AgentExecutionTests(unittest.TestCase):
         self.assertEqual(payload["jira"]["role_sync"]["assignee_status"], "synced")
         self.assertEqual(payload["jira"]["comment_actor_mode"], "role-service-account")
         self.assertEqual(payload["jira"]["role_actor_mode"], "role-service-account")
-        self.assertIn("Agent: Automation Dev", fake_jira.logged[-1]["body_text"])
-        self.assertNotIn("Agent: ai-developer-automation", fake_jira.logged[-1]["body_text"])
+        last_comment = cast(dict[str, object], fake_jira.logged[-1])
+        self.assertIn("Agent: Automation Dev", cast(str, last_comment["body_text"]))
+        self.assertNotIn(
+            "Agent: ai-developer-automation",
+            cast(str, last_comment["body_text"]),
+        )
+        last_update = cast(dict[str, object], fake_jira.updated_fields[-1])
+        last_update_fields = cast(dict[str, object], last_update["fields"])
         self.assertEqual(
-            fake_jira.updated_fields[-1]["fields"]["assignee"],
+            last_update_fields["assignee"],
             {"accountId": "account-automation"},
         )
+
+    def test_start_uses_configured_jira_field_names(self) -> None:
+        fake_jira = FakeJira()
+        fake_control_plane = SimpleNamespace(
+            jira_field_names=lambda: {
+                "current_agent_role": "Agente Atual",
+                "next_required_role": "Proximo Papel",
+            },
+            visible_name_for_agent=lambda role_id: {
+                "ai-developer-automation": "Automation Dev",
+                "ai-tech-lead": "Tech Lead",
+            }.get(role_id, role_id),
+            formal_name_for_agent=lambda role_id: {
+                "ai-developer-automation": "Automation Dev",
+                "ai-tech-lead": "Tech Lead",
+            }.get(role_id, role_id),
+        )
+        with tempfile.TemporaryDirectory() as tmp:
+            repo = Path(tmp)
+            write_runtime(repo)
+            with (
+                patch("scripts.ai_agent_execution_lib.resolve_jira", return_value=fake_jira),
+                patch(
+                    "scripts.ai_agent_execution_lib.with_jira_actor",
+                    side_effect=fake_with_jira_actor(fake_jira),
+                ),
+                patch(
+                    "scripts.ai_agent_execution_lib.current_branch",
+                    return_value="feat/DOT-101-agent-issue-instrumentation",
+                ),
+                patch(
+                    "scripts.ai_agent_execution_lib.field_catalog_by_name",
+                    return_value={
+                        "Agente Atual": "customfield_20001",
+                        "Proximo Papel": "customfield_20002",
+                    },
+                ),
+                patch(
+                    "scripts.ai_agent_execution_lib.load_ai_control_plane",
+                    return_value=fake_control_plane,
+                ),
+            ):
+                record_activity(
+                    repo_root=repo,
+                    issue_key="DOT-101",
+                    agent="ai-developer-automation",
+                    interaction_type="progress-update",
+                    status="doing",
+                    contexto=["rodada iniciada"],
+                    evidencias=["worktree dedicada"],
+                    proximo_passo="continuar",
+                    current_agent_role="ai-developer-automation",
+                    next_required_role="ai-tech-lead",
+                )
+
+        last_update = cast(dict[str, object], fake_jira.updated_fields[-1])
+        fields = cast(dict[str, object], last_update["fields"])
+        self.assertEqual(fields["customfield_20001"], {"value": "Automation Dev"})
+        self.assertEqual(fields["customfield_20002"], {"value": "Tech Lead"})
 
     def test_handoff_clears_local_context_after_logging(self) -> None:
         fake_jira = FakeJira()
@@ -353,12 +560,16 @@ class AgentExecutionTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             repo = Path(tmp)
             write_runtime(repo)
-            with patch("scripts.ai_agent_execution_lib.resolve_jira", return_value=fake_jira), patch(
-                "scripts.ai_agent_execution_lib.with_jira_actor",
-                side_effect=fake_with_jira_actor(fake_jira),
-            ), patch(
-                "scripts.ai_agent_execution_lib.current_branch",
-                return_value="feat/DOT-101-agent-issue-instrumentation",
+            with (
+                patch("scripts.ai_agent_execution_lib.resolve_jira", return_value=fake_jira),
+                patch(
+                    "scripts.ai_agent_execution_lib.with_jira_actor",
+                    side_effect=fake_with_jira_actor(fake_jira),
+                ),
+                patch(
+                    "scripts.ai_agent_execution_lib.current_branch",
+                    return_value="feat/DOT-101-agent-issue-instrumentation",
+                ),
             ):
                 record_activity(
                     repo_root=repo,
@@ -387,12 +598,16 @@ class AgentExecutionTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             repo = Path(tmp)
             write_runtime(repo)
-            with patch("scripts.ai_agent_execution_lib.resolve_jira", return_value=fake_jira), patch(
-                "scripts.ai_agent_execution_lib.with_jira_actor",
-                side_effect=fake_with_jira_actor(fake_jira),
-            ), patch(
-                "scripts.ai_agent_execution_lib.current_branch",
-                return_value="feat/DOT-101-agent-issue-instrumentation",
+            with (
+                patch("scripts.ai_agent_execution_lib.resolve_jira", return_value=fake_jira),
+                patch(
+                    "scripts.ai_agent_execution_lib.with_jira_actor",
+                    side_effect=fake_with_jira_actor(fake_jira),
+                ),
+                patch(
+                    "scripts.ai_agent_execution_lib.current_branch",
+                    return_value="feat/DOT-101-agent-issue-instrumentation",
+                ),
             ):
                 context_path = default_context_path(repo)
                 context_path.parent.mkdir(parents=True, exist_ok=True)
@@ -425,8 +640,12 @@ class AgentExecutionTests(unittest.TestCase):
 
         self.assertEqual(fake_jira.status, "Done")
         self.assertEqual(fake_jira.transitions_taken, ["6"])
-        self.assertIn("Agent: Engenheiro", fake_jira.logged[-1]["body_text"])
-        self.assertNotIn("Agent: ai-engineering-manager", fake_jira.logged[-1]["body_text"])
+        last_comment = cast(dict[str, object], fake_jira.logged[-1])
+        self.assertIn("Agent: Engenheiro", cast(str, last_comment["body_text"]))
+        self.assertNotIn(
+            "Agent: ai-engineering-manager",
+            cast(str, last_comment["body_text"]),
+        )
         self.assertIsNone(payload["context"])
 
     def test_load_context_migrates_legacy_schema_to_alias_first(self) -> None:
@@ -457,6 +676,7 @@ class AgentExecutionTests(unittest.TestCase):
             context = load_context(repo)
 
         self.assertIsNotNone(context)
+        context = cast(Any, context)
         self.assertEqual(context.agent, "Revisor Automacao")
         self.assertEqual(context.agent_id, "ai-reviewer-automation")
         self.assertEqual(context.current_agent_role, "Revisor Automacao")
@@ -470,12 +690,16 @@ class AgentExecutionTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             repo = Path(tmp)
             write_runtime(repo)
-            with patch("scripts.ai_agent_execution_lib.resolve_jira", return_value=fake_jira), patch(
-                "scripts.ai_agent_execution_lib.with_jira_actor",
-                side_effect=fake_with_jira_actor(fake_jira),
-            ), patch(
-                "scripts.ai_agent_execution_lib.current_branch",
-                return_value="feat/DOT-101-agent-issue-instrumentation",
+            with (
+                patch("scripts.ai_agent_execution_lib.resolve_jira", return_value=fake_jira),
+                patch(
+                    "scripts.ai_agent_execution_lib.with_jira_actor",
+                    side_effect=fake_with_jira_actor(fake_jira),
+                ),
+                patch(
+                    "scripts.ai_agent_execution_lib.current_branch",
+                    return_value="feat/DOT-101-agent-issue-instrumentation",
+                ),
             ):
                 payload = record_activity(
                     repo_root=repo,
@@ -496,9 +720,12 @@ class AgentExecutionTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             repo = Path(tmp)
             write_runtime(repo)
-            with patch("scripts.ai_agent_execution_lib.resolve_jira", return_value=fake_jira), patch(
-                "scripts.ai_agent_execution_lib.with_jira_actor",
-                side_effect=fake_with_jira_actor(fake_jira),
+            with (
+                patch("scripts.ai_agent_execution_lib.resolve_jira", return_value=fake_jira),
+                patch(
+                    "scripts.ai_agent_execution_lib.with_jira_actor",
+                    side_effect=fake_with_jira_actor(fake_jira),
+                ),
             ):
                 with self.assertRaises(AgentExecutionError):
                     record_activity(
@@ -512,12 +739,16 @@ class AgentExecutionTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             repo = Path(tmp)
             write_runtime(repo)
-            with patch("scripts.ai_agent_execution_lib.resolve_jira", return_value=fake_jira), patch(
-                "scripts.ai_agent_execution_lib.with_jira_actor",
-                side_effect=fake_with_jira_actor(fake_jira),
-            ), patch(
-                "scripts.ai_agent_execution_lib.current_branch",
-                return_value="feat/DOT-101-agent-issue-instrumentation",
+            with (
+                patch("scripts.ai_agent_execution_lib.resolve_jira", return_value=fake_jira),
+                patch(
+                    "scripts.ai_agent_execution_lib.with_jira_actor",
+                    side_effect=fake_with_jira_actor(fake_jira),
+                ),
+                patch(
+                    "scripts.ai_agent_execution_lib.current_branch",
+                    return_value="feat/DOT-101-agent-issue-instrumentation",
+                ),
             ):
                 with self.assertRaises(AgentExecutionError):
                     record_activity(

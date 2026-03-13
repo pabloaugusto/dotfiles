@@ -8,6 +8,35 @@ inline seguros (JSON/TOML/etc.) ou que devem permanecer enxutos.
 - documentar significado de chaves sem quebrar sintaxe de consumidores
 - reduzir custo de manutenção para humanos e agentes de IA
 
+## Config canonica por contexto
+
+Os valores vigentes do projeto agora devem ser lidos primeiro das configuracoes
+canonicas por contexto:
+
+- [`../config/config.toml`](../config/config.toml) para defaults globais,
+  regionalizacao, integracoes de dev e precedencia
+- [`../app/config/config.toml`](../app/config/config.toml) para runtime do
+  produto dotfiles
+- [`../.agents/config/config.toml`](../.agents/config/config.toml) para startup,
+  identidade, prompts, orchestration e demais contratos declarativos da IA
+
+Os arquivos legados em [`../config/ai/`](../config/ai/) permanecem apenas como
+ponte de compatibilidade durante a drenagem.
+
+Config canonica gerada:
+
+<!-- config-context:generated:start -->
+| Contexto | Manifesto canonico | Dominios iniciais | Observacao |
+| --- | --- | --- | --- |
+| Projeto / defaults globais | [`config/config.toml`](../config/config.toml) | `dev` -> [config/dev.toml](../config/dev.toml)<br>`integrations` -> [config/integrations.toml](../config/integrations.toml)<br>`quality` -> [config/quality.toml](../config/quality.toml)<br>`schema` -> [config/schema.json](../config/schema.json)<br>`time_surfaces` -> [config/time-surfaces.yaml](../config/time-surfaces.yaml) | Source of truth para locale, idioma, moeda, calendario, timezone e precedencia global. |
+| Runtime | [`app/config/config.toml`](../app/config/config.toml) | `bootstrap` -> [app/config/bootstrap.toml](../app/config/bootstrap.toml)<br>`links` -> [app/config/links.toml](../app/config/links.toml)<br>`runtime` -> [app/config/runtime.toml](../app/config/runtime.toml)<br>`schema` -> [app/config/schema.json](../app/config/schema.json) | Config do produto dotfiles e comportamento real do workstation. |
+| IA | [`.agents/config/config.toml`](../.agents/config/config.toml) | `agents` -> [.agents/config/agents.toml](../.agents/config/agents.toml)<br>`communication` -> [.agents/config/communication.toml](../.agents/config/communication.toml)<br>`migration_matrix` -> [.agents/config/migration-matrix.yaml](../.agents/config/migration-matrix.yaml)<br>`orchestration` -> [.agents/config/orchestration.toml](../.agents/config/orchestration.toml)<br>`prompts` -> [.agents/config/prompts.toml](../.agents/config/prompts.toml)<br>`reviews` -> [.agents/config/reviews.toml](../.agents/config/reviews.toml)<br>`schema` -> [.agents/config/schema.json](../.agents/config/schema.json)<br>`startup` -> [.agents/config/startup.toml](../.agents/config/startup.toml) | Config declarativa da camada de IA, startup, identidade, prompts e orchestration. |
+
+Default global de regionalizacao: Locale `pt-BR`, idioma `pt-BR`, moeda `BRL`, timezone `America/Sao_Paulo`.
+Registry complementar de superficies temporais: [`config/time-surfaces.yaml`](../config/time-surfaces.yaml).
+Toolchain Python permanece em [`pyproject.toml`](../pyproject.toml) e nao entra como hub generico.
+<!-- config-context:generated:end -->
+
 ## [`app/bootstrap/user-config.yaml`](../app/bootstrap/user-config.yaml.tpl)
 
 Uso:
@@ -36,11 +65,70 @@ Pontos críticos (Git/signing):
 - `git.automation_signing_key_ref`: ref opcional do 1Password para a chave
   pública do signer técnico aplicado por worktree
 
+## [`.agents/config/config.toml`](../.agents/config/config.toml)
+
+Uso:
+
+- manifesto raiz da camada de IA
+- source of truth da topologia declarativa de startup, identidade, orchestration,
+  prompts e reviews
+
+Pontos criticos:
+
+- `domains.*`: entrypoints dos arquivos canonicos por dominio na camada IA
+- `compatibility.*`: ponte explicita para os artefatos legados que ainda nao
+  foram drenados
+- `inherits_regionalization`: referencia obrigatoria para
+  [`../config/config.toml`](../config/config.toml)`::regionalization`
+
+## [`.agents/config/agents.toml`](../.agents/config/agents.toml)
+
+Uso:
+
+- concentrar a source of truth declarativa da identidade dos agentes
+- registrar a ponte canonica entre registry, enablement, runtime e campos vivos
+  de Jira
+
+Pontos criticos:
+
+- `source_of_truth.display_name_registry`: `display_name` canonico do registry
+- `identity.display_name_source`: lookup canonico da identidade humana
+- `identity.chat_alias_source`: ponte declarativa para o runtime visivel
+- `jira.fields.*`: nomes dos campos vivos governados do Jira
+
+## [`.agents/config/communication.toml`](../.agents/config/communication.toml)
+
+Uso:
+
+- concentrar o formato visivel do chat e os nomes vivos de Jira
+
+Pontos criticos:
+
+- `chat.prefix_template`: literal canonico do prefixo do chat
+- `chat.timestamp_display_pattern`: padrao canonico do timestamp humano
+- `chat.visible_name_fallback_order`: ordem oficial alias-first
+- `literal_lint.managed_literals`: literais governados que nao podem reaparecer
+  fora da config canonica sem allowlist
+
+## [`.agents/config/startup.toml`](../.agents/config/startup.toml)
+
+Uso:
+
+- concentrar ownership, artefatos e handoff do startup governado
+
+Pontos criticos:
+
+- `startup.owner_role`: owner visivel canonico do startup
+- `startup.readiness_artifact`: artefato obrigatorio de readiness
+- `handoff.chat_contract_ref`: referencia oficial do contrato de chat
+
 ## [`config/ai/platforms.yaml`](../config/ai/platforms.yaml)
 
 Uso:
 
 - fonte de verdade dev-time para plataformas externas da camada de IA
+- permanece no contexto dev ate a drenagem completa para
+  [`../config/integrations.toml`](../config/integrations.toml)
 - separada de [`app/bootstrap/`](../app/bootstrap/) e [`app/df/`](../app/df/) por nao ser
   runtime materializado na maquina
 - intencionalmente generica para que outros repos consumam o mesmo contrato
@@ -78,6 +166,8 @@ Pontos criticos:
 Uso:
 
 - liga/desliga papeis operacionais e capacidades opcionais do modelo multiagente
+- permanece como ponte legada ate a identidade declarativa migrar por completo
+  para [`.agents/config/agents.toml`](../.agents/config/agents.toml)
 
 Pontos criticos:
 
@@ -104,6 +194,9 @@ Uso:
 
 - concentra o runtime declarativo dos agentes e os contratos operacionais que
   precisam ser resolvidos em tempo de execucao
+- permanece como ponte legada durante a migracao para
+  [`.agents/config/agents.toml`](../.agents/config/agents.toml) e
+  [`.agents/config/communication.toml`](../.agents/config/communication.toml)
 - fica acima de naming, alias, ownership de chat, `Jira assignee` e service
   accounts proprias por agente
 

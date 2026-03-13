@@ -1,0 +1,13 @@
+version = 1
+
+[paths]
+root = ".agents/prompts"
+catalog = ".agents/prompts/CATALOG.md"
+readme = ".agents/prompts/README.md"
+formal_root = ".agents/prompts/formal"
+
+[pack_contract]
+task_id_prefix = "prompt/"
+jira_summary_prefix = "PROMPT:"
+required_labels = ["prompt"]
+approved_plan_artifact = "approved-plan.md"

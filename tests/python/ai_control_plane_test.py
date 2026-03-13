@@ -36,9 +36,297 @@ def write_control_plane(
     include_po_jira_assignee: bool = True,
 ) -> None:
     config_dir = repo_root / "config" / "ai"
+    root_config_dir = repo_root / "config"
+    app_config_dir = repo_root / "app" / "config"
+    agents_config_dir = repo_root / ".agents" / "config"
     registry_dir = repo_root / ".agents" / "registry"
     config_dir.mkdir(parents=True)
+    root_config_dir.mkdir(parents=True, exist_ok=True)
+    app_config_dir.mkdir(parents=True, exist_ok=True)
+    agents_config_dir.mkdir(parents=True, exist_ok=True)
     registry_dir.mkdir(parents=True)
+    (root_config_dir / "config.toml").write_text(
+        textwrap.dedent(
+            """\
+            version = 1
+
+            [project]
+            id = "dotfiles"
+            source_of_truth = "config/config.toml"
+            default_config_ref_convention = "arquivo::chave"
+
+            [contexts]
+            dev_root = "config"
+            dev_manifest = "config/config.toml"
+            runtime_root = "app/config"
+            runtime_manifest = "app/config/config.toml"
+            ai_root = ".agents/config"
+            ai_manifest = ".agents/config/config.toml"
+
+            [resolution]
+            precedence = ["defaults", "context_config", "domain_files", "local_overlay", "environment", "cli"]
+            literal_lint_enabled = true
+            generated_tables_enabled = true
+            single_resolution_library_required = true
+
+            [regionalization]
+            timezone_name = "America/Sao_Paulo"
+            locale = "pt-BR"
+            language = "pt-BR"
+            currency = "BRL"
+            calendar_system = "gregorian"
+
+            [domains]
+            dev = "config/dev.toml"
+            integrations = "config/integrations.toml"
+            quality = "config/quality.toml"
+            time_surfaces = "config/time-surfaces.yaml"
+            schema = "config/schema.json"
+            """
+        ),
+        encoding="utf-8",
+    )
+    (root_config_dir / "dev.toml").write_text(
+        textwrap.dedent(
+            """\
+            version = 1
+
+            [context]
+            kind = "dev"
+            """
+        ),
+        encoding="utf-8",
+    )
+    (root_config_dir / "integrations.toml").write_text(
+        textwrap.dedent(
+            """\
+            version = 1
+
+            [context]
+            kind = "dev-integrations"
+            """
+        ),
+        encoding="utf-8",
+    )
+    (root_config_dir / "quality.toml").write_text(
+        textwrap.dedent(
+            """\
+            version = 1
+
+            [literal_lint]
+            enabled = true
+            scope = ["docs", "scripts", ".agents", "config"]
+            allowlist = []
+            """
+        ),
+        encoding="utf-8",
+    )
+    (root_config_dir / "schema.json").write_text("{}", encoding="utf-8")
+    (root_config_dir / "time-surfaces.yaml").write_text(
+        "version: 1\nsurfaces: {}\n", encoding="utf-8"
+    )
+    (app_config_dir / "config.toml").write_text(
+        textwrap.dedent(
+            """\
+            version = 1
+
+            [context]
+            kind = "runtime"
+            source_of_truth = "app/config/config.toml"
+            inherits_regionalization = "config/config.toml::regionalization"
+
+            [domains]
+            runtime = "app/config/runtime.toml"
+            bootstrap = "app/config/bootstrap.toml"
+            links = "app/config/links.toml"
+            schema = "app/config/schema.json"
+
+            [compatibility]
+            legacy_df_root = "app/df"
+            legacy_bootstrap_root = "app/bootstrap"
+            """
+        ),
+        encoding="utf-8",
+    )
+    (app_config_dir / "runtime.toml").write_text(
+        textwrap.dedent(
+            """\
+            version = 1
+
+            [regionalization]
+            defaults = "config/config.toml::regionalization"
+            surfaces = "config/time-surfaces.yaml::surfaces"
+            """
+        ),
+        encoding="utf-8",
+    )
+    (app_config_dir / "bootstrap.toml").write_text("version = 1\n", encoding="utf-8")
+    (app_config_dir / "links.toml").write_text("version = 1\n", encoding="utf-8")
+    (app_config_dir / "schema.json").write_text("{}", encoding="utf-8")
+    (agents_config_dir / "config.toml").write_text(
+        textwrap.dedent(
+            """\
+            version = 1
+
+            [context]
+            kind = "ai"
+            source_of_truth = ".agents/config/config.toml"
+            inherits_regionalization = "config/config.toml::regionalization"
+
+            [domains]
+            agents = ".agents/config/agents.toml"
+            communication = ".agents/config/communication.toml"
+            startup = ".agents/config/startup.toml"
+            orchestration = ".agents/config/orchestration.toml"
+            reviews = ".agents/config/reviews.toml"
+            prompts = ".agents/config/prompts.toml"
+            migration_matrix = ".agents/config/migration-matrix.yaml"
+            schema = ".agents/config/schema.json"
+
+            [compatibility]
+            bridge_manifest = ".agents/config.toml"
+            legacy_control_plane_root = "config/ai"
+            legacy_agents = "config/ai/agents.yaml"
+            legacy_agent_enablement = "config/ai/agent-enablement.yaml"
+            legacy_agent_runtime = "config/ai/agent-runtime.yaml"
+            legacy_agent_operations = "config/ai/agent-operations.yaml"
+            legacy_contracts = "config/ai/contracts.yaml"
+            """
+        ),
+        encoding="utf-8",
+    )
+    (agents_config_dir / "agents.toml").write_text(
+        textwrap.dedent(
+            """\
+            version = 1
+
+            [source_of_truth]
+            display_name_registry = ".agents/registry/*.toml::display_name"
+
+            [identity]
+            display_name_source = ".agents/registry/*.toml::display_name"
+            chat_alias_source = "config/ai/agent-runtime.yaml::roles"
+            enablement_source = "config/ai/agent-enablement.yaml::roles"
+            """
+        ),
+        encoding="utf-8",
+    )
+    (agents_config_dir / "communication.toml").write_text(
+        textwrap.dedent(
+            """\
+            version = 1
+
+            [chat]
+            prefix_template = "[{timestamp}] **{visible_name}**"
+            timestamp_display_pattern = "dd-mm hh:mm"
+            timestamp_surface = "chat"
+            timestamp_source = "local_system_clock"
+            body_starts_on_next_line = true
+            visible_name_fallback_order = ["chat_alias", "display_name", "technical_id"]
+            display_name_source = ".agents/config/agents.toml::source_of_truth.display_name_registry"
+
+            [jira.fields]
+            current_agent_role = "Current Agent Role"
+            next_required_role = "Next Required Role"
+
+            [literal_lint]
+            managed_literals = ["[{timestamp}] **{visible_name}**", "dd-mm hh:mm"]
+            """
+        ),
+        encoding="utf-8",
+    )
+    (agents_config_dir / "startup.toml").write_text(
+        textwrap.dedent(
+            """\
+            version = 1
+
+            [startup]
+            owner_role = "ai-startup-governor"
+            audit_owner_role = "ai-scrum-master"
+            report_path = ".cache/ai/startup-session.md"
+            readiness_artifact = ".cache/ai/startup-ready.json"
+            clearance_required = true
+            report_key = "startup_governor_status"
+
+            [handoff]
+            current_chat_owner_role = "ai-startup-governor"
+            blocked_before_ready = true
+            next_owner_resolution = "active_execution_agent"
+            chat_contract_ref = ".agents/config/communication.toml::chat"
+            """
+        ),
+        encoding="utf-8",
+    )
+    (agents_config_dir / "orchestration.toml").write_text(
+        textwrap.dedent(
+            """\
+            version = 1
+
+            [paths]
+            capability_matrix = ".agents/orchestration/capability-matrix.yaml"
+            routing_policy = ".agents/orchestration/routing-policy.yaml"
+            task_card_schema = ".agents/orchestration/task-card.schema.json"
+            delegation_plan_schema = ".agents/orchestration/delegation-plan.schema.json"
+            """
+        ),
+        encoding="utf-8",
+    )
+    (agents_config_dir / "reviews.toml").write_text("version = 1\n", encoding="utf-8")
+    (agents_config_dir / "prompts.toml").write_text("version = 1\n", encoding="utf-8")
+    (agents_config_dir / "migration-matrix.yaml").write_text(
+        "version: 1\nentries: []\n", encoding="utf-8"
+    )
+    (agents_config_dir / "schema.json").write_text("{}", encoding="utf-8")
+    (repo_root / ".agents" / "config.toml").write_text(
+        textwrap.dedent(
+            """\
+            version = 1
+
+            [skills]
+            required = []
+            mandatory_parallel = []
+
+            [agents]
+            required = []
+            mandatory_global = []
+            mandatory_platform = []
+
+            [orchestration]
+            capability_matrix = ".agents/orchestration/capability-matrix.yaml"
+            routing_policy = ".agents/orchestration/routing-policy.yaml"
+            task_card_schema = ".agents/orchestration/task-card.schema.json"
+            delegation_plan_schema = ".agents/orchestration/delegation-plan.schema.json"
+
+            [rules]
+            default = ".agents/rules/default.rules"
+            ci = ".agents/rules/ci.rules"
+            security = ".agents/rules/security.rules"
+            startup = ".agents/rules/startup.rules"
+            chat = ".agents/rules/chat.rules"
+            git = ".agents/rules/git.rules"
+            projections = ".agents/rules/projections.yaml"
+
+            [evals]
+            smoke = ".agents/evals/scenarios/smoke.md"
+            regression = ".agents/evals/scenarios/regression.md"
+            security = ".agents/evals/scenarios/security.md"
+            routing_dataset = ".agents/evals/datasets/routing.jsonl"
+            governance_dataset = ".agents/evals/datasets/governance.jsonl"
+
+            [ceremonies]
+            root = ".agents/cerimonias"
+            schema = ".agents/cerimonias/ceremony.schema.json"
+            default_log_root = ".agents/cerimonias/logs"
+
+            [identity]
+            registry_root = ".agents/registry"
+            display_name_field = "display_name"
+            card_title_mirror_required = true
+            fallback_display = "technical-id"
+            """
+        ),
+        encoding="utf-8",
+    )
     (registry_dir / "pascoalete.toml").write_text(
         'id = "pascoalete"\ndisplay_name = "Pascoalete"\n',
         encoding="utf-8",
@@ -129,8 +417,7 @@ def write_control_plane(
     po_jira_assignee_block = ""
     if include_po_jira_assignee:
         po_jira_assignee_block = (
-            "                jira_assignee:\n"
-            "                  account_id: account-po\n"
+            "                jira_assignee:\n                  account_id: account-po\n"
         )
 
     (config_dir / "agent-runtime.yaml").write_text(
@@ -282,6 +569,42 @@ class AiControlPlaneTests(unittest.TestCase):
             self.assertEqual(control_plane.visible_name_for_reference("ai-product-owner"), "PO")
             self.assertEqual(control_plane.visible_name_for_reference("PO"), "PO")
 
+    def test_communication_manifest_drives_chat_order_and_jira_field_names(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            repo_root = pathlib.Path(tmp)
+            write_control_plane(repo_root)
+            (repo_root / ".agents" / "config" / "communication.toml").write_text(
+                textwrap.dedent(
+                    """\
+                    version = 1
+
+                    [chat]
+                    prefix_template = "[{timestamp}] **{visible_name}**"
+                    timestamp_display_pattern = "dd-mm hh:mm"
+                    timestamp_surface = "chat"
+                    timestamp_source = "local_system_clock"
+                    body_starts_on_next_line = true
+                    visible_name_fallback_order = ["display_name", "technical_id"]
+                    display_name_source = ".agents/config/agents.toml::source_of_truth.display_name_registry"
+
+                    [jira.fields]
+                    current_agent_role = "Agente Atual"
+                    next_required_role = "Proximo Papel"
+
+                    [literal_lint]
+                    managed_literals = ["[{timestamp}] **{visible_name}**", "dd-mm hh:mm"]
+                    """
+                ),
+                encoding="utf-8",
+            )
+            control_plane = load_ai_control_plane(repo_root)
+            self.assertEqual(
+                control_plane.chat_name_fallback_order(),
+                ["display_name", "technical_id"],
+            )
+            self.assertEqual(control_plane.jira_field_name("current_agent_role"), "Agente Atual")
+            self.assertEqual(control_plane.jira_field_name("next_required_role"), "Proximo Papel")
+
     def test_summary_payload_reports_roles_with_own_atlassian_actor(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             repo_root = pathlib.Path(tmp)
@@ -351,9 +674,7 @@ class AiControlPlaneTests(unittest.TestCase):
             self.assertEqual(definition.site_url_spec, "op://vault/item/section/site-url")
             self.assertEqual(definition.token_spec, "op://vault/item/section/api-token")
             self.assertIn("ai-browser-validator", payload["enabled_roles"])
-            self.assertIn(
-                "ai-browser-validator", payload["role_enablement"]["overridden_roles"]
-            )
+            self.assertIn("ai-browser-validator", payload["role_enablement"]["overridden_roles"])
 
     def test_summary_payload_reports_disabled_registry_agent_from_overlay(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
@@ -416,7 +737,9 @@ class AiControlPlaneTests(unittest.TestCase):
             payload = summary_payload(repo_root)
 
         self.assertIn("ai-product-owner", payload["disabled_roles"])
-        self.assertEqual(payload["role_enablement"]["required_roles_disabled"], ["ai-product-owner"])
+        self.assertEqual(
+            payload["role_enablement"]["required_roles_disabled"], ["ai-product-owner"]
+        )
 
     def test_load_ai_control_plane_rejects_unknown_enablement_role(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:

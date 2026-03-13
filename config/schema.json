@@ -1,0 +1,67 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "dotfiles-root-config",
+  "type": "object",
+  "required": [
+    "version",
+    "project",
+    "contexts",
+    "resolution",
+    "regionalization",
+    "domains"
+  ],
+  "properties": {
+    "version": {
+      "type": "integer",
+      "const": 1
+    },
+    "project": {
+      "type": "object",
+      "required": [
+        "id",
+        "source_of_truth",
+        "default_config_ref_convention"
+      ]
+    },
+    "contexts": {
+      "type": "object",
+      "required": [
+        "dev_root",
+        "dev_manifest",
+        "runtime_root",
+        "runtime_manifest",
+        "ai_root",
+        "ai_manifest"
+      ]
+    },
+    "resolution": {
+      "type": "object",
+      "required": [
+        "precedence",
+        "literal_lint_enabled",
+        "generated_tables_enabled",
+        "single_resolution_library_required"
+      ]
+    },
+    "regionalization": {
+      "type": "object",
+      "required": [
+        "timezone_name",
+        "locale",
+        "language",
+        "currency",
+        "calendar_system"
+      ]
+    },
+    "domains": {
+      "type": "object",
+      "required": [
+        "dev",
+        "integrations",
+        "quality",
+        "time_surfaces",
+        "schema"
+      ]
+    }
+  }
+}

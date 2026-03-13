@@ -29,6 +29,19 @@ from scripts.ai_rules_lib import (
     parse_rules_file,
     rules_contract_paths,
 )
+from scripts.config_context_docs_lib import (
+    AGENTS_CATALOG_MARKERS,
+    CONFIG_REFERENCE_MARKERS,
+    generated_reference_docs,
+)
+from scripts.config_context_lib import (
+    ConfigContextError,
+    load_context_manifest,
+    load_toml_map,
+    load_yaml_map,
+    manifest_domain_paths,
+    resolve_config_ref,
+)
 
 try:
     import tomllib
@@ -39,6 +52,26 @@ except ModuleNotFoundError:  # pragma: no cover - fallback for Python < 3.11
 REQUIRED_FILES = [
     "AGENTS.md",
     "LICOES-APRENDIDAS.md",
+    "config/config.toml",
+    "config/dev.toml",
+    "config/integrations.toml",
+    "config/quality.toml",
+    "config/schema.json",
+    "config/time-surfaces.yaml",
+    "app/config/config.toml",
+    "app/config/runtime.toml",
+    "app/config/bootstrap.toml",
+    "app/config/links.toml",
+    "app/config/schema.json",
+    ".agents/config/config.toml",
+    ".agents/config/agents.toml",
+    ".agents/config/communication.toml",
+    ".agents/config/startup.toml",
+    ".agents/config/orchestration.toml",
+    ".agents/config/reviews.toml",
+    ".agents/config/prompts.toml",
+    ".agents/config/schema.json",
+    ".agents/config/migration-matrix.yaml",
     "docs/AI-AGENTS-CATALOG.md",
     "docs/AI-CHAT-CONTRACTS-REGISTER.md",
     "docs/AI-DELEGATION-FLOW.md",
@@ -153,6 +186,9 @@ REQUIRED_FILES = [
     "scripts/ai_session_startup_lib.py",
     "scripts/ai_atlassian_seed_lib.py",
     "scripts/atlassian_platform_lib.py",
+    "scripts/config_context_lib.py",
+    "scripts/config_context_docs_lib.py",
+    "scripts/generate-config-context-docs.py",
     "scripts/git-governance-check.py",
     "scripts/run-ai-atlassian-check.ps1",
     "scripts/run-ai-startup-session.ps1",
@@ -916,6 +952,35 @@ REQUIRED_AI_CONFIG_SECTIONS = [
     "identity",
 ]
 
+REQUIRED_ROOT_CONFIG_SECTIONS = [
+    "project",
+    "contexts",
+    "resolution",
+    "regionalization",
+    "domains",
+]
+
+REQUIRED_APP_CONFIG_SECTIONS = [
+    "context",
+    "domains",
+    "compatibility",
+]
+
+REQUIRED_AI_CONTEXT_SECTIONS = [
+    "context",
+    "domains",
+    "compatibility",
+]
+
+CONFIG_REFERENCE_ALLOWED_EXTENSIONS = {
+    ".md",
+    ".py",
+    ".toml",
+    ".yaml",
+    ".yml",
+    ".json",
+}
+
 
 def frontmatter_value(frontmatter: str, key: str) -> str | None:
     match = re.search(rf"(?m)^{re.escape(key)}:\s*(.+?)\s*$", frontmatter)
@@ -1217,9 +1282,7 @@ def validate_agent_runtime_contracts(repo_root: Path, failures: list[str]) -> No
             f"Agente declarativo sem contrato de runtime operacional em config/ai/agent-runtime.yaml: {agent_id}"
         )
     for agent_id in control_plane.runtime_contracts_without_registry_agents():
-        failures.append(
-            f"Contrato de runtime sem agente declarativo correspondente: {agent_id}"
-        )
+        failures.append(f"Contrato de runtime sem agente declarativo correspondente: {agent_id}")
     for role_id in control_plane.required_roles_without_operational_runtime():
         failures.append(f"Role required sem runtime operacional/consultivo valido: {role_id}")
     for role_id in control_plane.enabled_roles_without_operational_runtime():
@@ -1257,9 +1320,7 @@ def validate_agent_runtime_contracts(repo_root: Path, failures: list[str]) -> No
                 for raw_item in artifacts:
                     artifact = str(raw_item).strip()
                     if artifact and not (repo_root / artifact).exists():
-                        failures.append(
-                            f"Runtime artifact ausente para role {role_id}: {artifact}"
-                        )
+                        failures.append(f"Runtime artifact ausente para role {role_id}: {artifact}")
 
     for agent_id in control_plane.registry_agents_with_runtime_contracts():
         entry = control_plane.registry_agent_runtime_entry(agent_id)
@@ -1540,6 +1601,308 @@ def string_list_setting(section: object, key: str) -> list[str]:
     return [item for item in raw_value if isinstance(item, str)]
 
 
+def marker_block(content: str, start_marker: str, end_marker: str) -> str:
+    start = content.find(start_marker)
+    end = content.find(end_marker)
+    if start == -1 or end == -1 or end < start:
+        raise ValueError(f"Marcadores ausentes ou invalidos: {start_marker} / {end_marker}")
+    start += len(start_marker)
+    return content[start:end].strip()
+
+
+def validate_context_config_manifests(repo_root: Path, failures: list[str]) -> None:
+    try:
+        root_path, root_payload = load_context_manifest(repo_root, context="root")
+        app_path, app_payload = load_context_manifest(repo_root, context="app")
+        ai_path, ai_payload = load_context_manifest(repo_root, context="ai")
+    except ConfigContextError as exc:
+        failures.append(str(exc))
+        return
+
+    manifests = [
+        (root_path, root_payload, REQUIRED_ROOT_CONFIG_SECTIONS),
+        (app_path, app_payload, REQUIRED_APP_CONFIG_SECTIONS),
+        (ai_path, ai_payload, REQUIRED_AI_CONTEXT_SECTIONS),
+    ]
+    for manifest_path, payload, required_sections in manifests:
+        for section_name in required_sections:
+            if section_name not in payload:
+                failures.append(
+                    f"Secao obrigatoria ausente em {manifest_path.relative_to(repo_root).as_posix()}: [{section_name}]"
+                )
+        try:
+            for relative_path in manifest_domain_paths(payload).values():
+                if not (repo_root / relative_path).exists():
+                    failures.append(
+                        f"Manifesto referencia dominio ausente em {manifest_path.relative_to(repo_root).as_posix()}: {relative_path}"
+                    )
+        except ConfigContextError as exc:
+            failures.append(str(exc))
+
+    expected_contexts = {
+        "dev_manifest": "config/config.toml",
+        "runtime_manifest": "app/config/config.toml",
+        "ai_manifest": ".agents/config/config.toml",
+    }
+    contexts_section = root_payload.get("contexts") or {}
+    if isinstance(contexts_section, dict):
+        for key, expected in expected_contexts.items():
+            actual = str(contexts_section.get(key, "")).strip()
+            if actual != expected:
+                failures.append(
+                    f"config/config.toml [contexts].{key} deve apontar para {expected!r}, nao {actual!r}"
+                )
+
+    required_regionalization_keys = {
+        "timezone_name",
+        "locale",
+        "language",
+        "currency",
+        "calendar_system",
+    }
+    regionalization = root_payload.get("regionalization") or {}
+    if not isinstance(regionalization, dict):
+        failures.append("config/config.toml precisa conter [regionalization] como mapa.")
+    else:
+        missing_regionalization = sorted(required_regionalization_keys - set(regionalization))
+        if missing_regionalization:
+            failures.append(
+                "config/config.toml [regionalization] sem chaves obrigatorias: "
+                + ", ".join(missing_regionalization)
+            )
+
+    ref_checks = {
+        "app/config/config.toml [context].inherits_regionalization": str(
+            (
+                (app_payload.get("context") or {})
+                if isinstance(app_payload.get("context"), dict)
+                else {}
+            ).get("inherits_regionalization", "")
+        ),
+        ".agents/config/config.toml [context].inherits_regionalization": str(
+            (
+                (ai_payload.get("context") or {})
+                if isinstance(ai_payload.get("context"), dict)
+                else {}
+            ).get("inherits_regionalization", "")
+        ),
+    }
+    try:
+        app_runtime_payload = load_toml_map(repo_root / "app" / "config" / "runtime.toml")
+        startup_payload = load_toml_map(repo_root / ".agents" / "config" / "startup.toml")
+        agents_payload = load_toml_map(repo_root / ".agents" / "config" / "agents.toml")
+        communication_payload = load_toml_map(
+            repo_root / ".agents" / "config" / "communication.toml"
+        )
+    except ConfigContextError as exc:
+        failures.append(str(exc))
+        return
+
+    app_runtime_regionalization = app_runtime_payload.get("regionalization") or {}
+    if isinstance(app_runtime_regionalization, dict):
+        ref_checks["app/config/runtime.toml [regionalization].defaults"] = str(
+            app_runtime_regionalization.get("defaults", "")
+        )
+        ref_checks["app/config/runtime.toml [regionalization].surfaces"] = str(
+            app_runtime_regionalization.get("surfaces", "")
+        )
+    handoff_payload = startup_payload.get("handoff") or {}
+    if isinstance(handoff_payload, dict):
+        ref_checks[".agents/config/startup.toml [handoff].chat_contract_ref"] = str(
+            handoff_payload.get("chat_contract_ref", "")
+        )
+    source_of_truth = agents_payload.get("source_of_truth") or {}
+    identity_payload = agents_payload.get("identity") or {}
+    if isinstance(source_of_truth, dict):
+        ref_checks[".agents/config/agents.toml [source_of_truth].display_name_registry"] = str(
+            source_of_truth.get("display_name_registry", "")
+        )
+    if isinstance(identity_payload, dict):
+        ref_checks[".agents/config/agents.toml [identity].display_name_source"] = str(
+            identity_payload.get("display_name_source", "")
+        )
+    chat_payload = communication_payload.get("chat") or {}
+    if isinstance(chat_payload, dict):
+        ref_checks[".agents/config/communication.toml [chat].display_name_source"] = str(
+            chat_payload.get("display_name_source", "")
+        )
+    for label, raw_ref in ref_checks.items():
+        if not raw_ref.strip():
+            failures.append(f"Config ref obrigatoria ausente em {label}")
+            continue
+        try:
+            resolve_config_ref(raw_ref, repo_root=repo_root)
+        except ConfigContextError as exc:
+            failures.append(f"Config ref invalida em {label}: {exc}")
+
+
+def validate_migration_matrix(repo_root: Path, failures: list[str]) -> None:
+    matrix_path = repo_root / ".agents" / "config" / "migration-matrix.yaml"
+    try:
+        payload = load_yaml_map(matrix_path)
+    except ConfigContextError as exc:
+        failures.append(str(exc))
+        return
+    entries = payload.get("entries") or []
+    if not isinstance(entries, list) or not entries:
+        failures.append(
+            ".agents/config/migration-matrix.yaml precisa conter entries como lista nao vazia."
+        )
+        return
+    required_fields = {"origin", "destination", "justification", "owner", "status", "type"}
+    for index, entry in enumerate(entries, start=1):
+        if not isinstance(entry, dict):
+            failures.append(
+                f".agents/config/migration-matrix.yaml entrada {index} precisa ser mapa."
+            )
+            continue
+        missing = sorted(required_fields - set(entry))
+        if missing:
+            failures.append(
+                f".agents/config/migration-matrix.yaml entrada {index} sem campos obrigatorios: {', '.join(missing)}"
+            )
+        origin = str(entry.get("origin", "")).strip()
+        destination = str(entry.get("destination", "")).strip()
+        entry_type = str(entry.get("type", "")).strip()
+        if origin and "*" not in origin and not (repo_root / origin).exists():
+            failures.append(
+                f".agents/config/migration-matrix.yaml referencia origem inexistente: {origin}"
+            )
+        if (
+            destination
+            and entry_type != "deprecated"
+            and "*" not in destination
+            and not (repo_root / destination).exists()
+        ):
+            failures.append(
+                f".agents/config/migration-matrix.yaml referencia destino inexistente: {destination}"
+            )
+
+
+def validate_generated_doc_tables(repo_root: Path, failures: list[str]) -> None:
+    try:
+        generated = generated_reference_docs(repo_root)
+    except (ConfigContextError, AiControlPlaneError) as exc:
+        failures.append(str(exc))
+        return
+    marker_map = {
+        "docs/config-reference.md": CONFIG_REFERENCE_MARKERS,
+        "docs/AI-AGENTS-CATALOG.md": AGENTS_CATALOG_MARKERS,
+    }
+    for relative, expected_block in generated.items():
+        path = repo_root / relative
+        content = path.read_text(encoding="utf-8")
+        try:
+            current_block = marker_block(content, marker_map[relative][0], marker_map[relative][1])
+        except ValueError as exc:
+            failures.append(f"{relative}: {exc}")
+            continue
+        if current_block != expected_block.strip():
+            failures.append(
+                f"Tabela/documentacao gerada stale em {relative}; rode python scripts/generate-config-context-docs.py"
+            )
+
+
+def validate_literal_lint(repo_root: Path, failures: list[str]) -> None:
+    try:
+        quality_payload = load_toml_map(repo_root / "config" / "quality.toml")
+        communication_payload = load_toml_map(
+            repo_root / ".agents" / "config" / "communication.toml"
+        )
+    except ConfigContextError as exc:
+        failures.append(str(exc))
+        return
+    literal_lint = quality_payload.get("literal_lint") or {}
+    if not isinstance(literal_lint, dict) or not bool(literal_lint.get("enabled", False)):
+        return
+
+    scopes = [str(item).strip() for item in literal_lint.get("scope", []) if str(item).strip()]
+    allowlist = {
+        str(item).strip() for item in literal_lint.get("allowlist", []) if str(item).strip()
+    }
+    managed_literals = []
+    comm_literal_lint = communication_payload.get("literal_lint") or {}
+    if isinstance(comm_literal_lint, dict):
+        managed_literals = [
+            str(item).strip()
+            for item in comm_literal_lint.get("managed_literals", [])
+            if str(item).strip()
+        ]
+    if not managed_literals:
+        failures.append(
+            ".agents/config/communication.toml precisa declarar literal_lint.managed_literals."
+        )
+        return
+
+    for scope in scopes:
+        scope_path = repo_root / scope
+        if not scope_path.exists():
+            failures.append(f"Escopo de literal lint inexistente em config/quality.toml: {scope}")
+            continue
+        candidates = [scope_path] if scope_path.is_file() else list(scope_path.rglob("*"))
+        for candidate in candidates:
+            if not candidate.is_file():
+                continue
+            relative = candidate.relative_to(repo_root).as_posix()
+            if relative in allowlist:
+                continue
+            if candidate.suffix.lower() not in CONFIG_REFERENCE_ALLOWED_EXTENSIONS:
+                continue
+            content = candidate.read_text(encoding="utf-8")
+            for literal in managed_literals:
+                if literal in content:
+                    failures.append(
+                        f"Literal governado fora da config canonica em {relative}: {literal!r}"
+                    )
+
+
+def validate_config_managed_markdown_refs(repo_root: Path, failures: list[str]) -> None:
+    targets = [
+        repo_root / ".agents" / "rules" / "chat-and-identity-rules.md",
+        repo_root / "docs" / "config-reference.md",
+        repo_root / "docs" / "AI-AGENTS-CATALOG.md",
+    ]
+    required_snippets = [
+        ".agents/config/config.toml",
+        ".agents/config/agents.toml",
+        ".agents/config/communication.toml",
+    ]
+    for path in targets:
+        content = path.read_text(encoding="utf-8")
+        for snippet in required_snippets:
+            if snippet not in content:
+                failures.append(
+                    f"Documento governado sem ponte para a config canonica: {path.relative_to(repo_root).as_posix()} -> {snippet}"
+                )
+
+
+def validate_single_config_resolution_library(repo_root: Path, failures: list[str]) -> None:
+    allowed_script_refs = {
+        "scripts/config_context_lib.py",
+        "scripts/ai_control_plane_lib.py",
+        "scripts/ai_rules_lib.py",
+        "scripts/validate-ai-assets.py",
+        "scripts/config_context_docs_lib.py",
+        "scripts/generate-config-context-docs.py",
+    }
+    managed_literals = {
+        "config/config.toml",
+        "app/config/config.toml",
+        ".agents/config/config.toml",
+    }
+    scripts_root = repo_root / "scripts"
+    for script_path in sorted(scripts_root.rglob("*.py")):
+        relative = script_path.relative_to(repo_root).as_posix()
+        if relative in allowed_script_refs:
+            continue
+        content = script_path.read_text(encoding="utf-8")
+        if any(literal in content for literal in managed_literals):
+            failures.append(
+                "Script fora da biblioteca canonica referencia manifesto de contexto diretamente: "
+                f"{relative}"
+            )
+
+
 def validate_agent_card(card: Path, skill_names: set[str], failures: list[str]) -> None:
     content = card.read_text(encoding="utf-8")
     for heading in REQUIRED_AGENT_HEADINGS:
@@ -1726,6 +2089,12 @@ def main(argv: list[str]) -> int:
             validate_registry_agent(agent_file, skill_names, failures)
 
     validate_ai_config(repo_root, failures)
+    validate_context_config_manifests(repo_root, failures)
+    validate_migration_matrix(repo_root, failures)
+    validate_generated_doc_tables(repo_root, failures)
+    validate_literal_lint(repo_root, failures)
+    validate_config_managed_markdown_refs(repo_root, failures)
+    validate_single_config_resolution_library(repo_root, failures)
     validate_agent_runtime_contracts(repo_root, failures)
     validate_thematic_rules(repo_root, failures)
     validate_rules_projections(repo_root, failures)
@@ -1733,6 +2102,9 @@ def main(argv: list[str]) -> int:
     validate_legacy_codex_stub(repo_root, failures)
 
     for schema_path in (
+        repo_root / "config" / "schema.json",
+        repo_root / "app" / "config" / "schema.json",
+        repo_root / ".agents" / "config" / "schema.json",
         orchestration_root(repo_root) / "task-card.schema.json",
         orchestration_root(repo_root) / "delegation-plan.schema.json",
         repo_root / ".agents" / "cerimonias" / "ceremony.schema.json",

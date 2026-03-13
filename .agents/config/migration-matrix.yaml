@@ -1,0 +1,75 @@
+version: 1
+
+entries:
+  - origin: config/ai/agents.yaml
+    destination: .agents/config/agents.toml
+    justification: concentrar identidade declarativa e source of truth da camada de IA
+    owner: ai-developer-config-policy
+    status: phase-1-live-with-bridge
+    type: migrar
+  - origin: config/ai/agent-enablement.yaml
+    destination: .agents/config/agents.toml
+    justification: concentrar enablement por contexto na raiz da IA
+    owner: ai-developer-config-policy
+    status: phase-1-live-with-bridge
+    type: migrar
+  - origin: config/ai/agent-runtime.yaml
+    destination: .agents/config/agents.toml
+    justification: concentrar runtime declarativo e aliases da camada de IA
+    owner: ai-developer-config-policy
+    status: phase-1-live-with-bridge
+    type: migrar
+  - origin: config/ai/agent-operations.yaml
+    destination: .agents/config/orchestration.toml
+    justification: separar operacao declarativa de execucao da identidade de agentes
+    owner: ai-developer-config-policy
+    status: phase-1-live-with-bridge
+    type: migrar
+  - origin: config/ai/contracts.yaml
+    destination: .agents/config/startup.toml
+    justification: consolidar startup, chat e handoff em config canonica da IA
+    owner: ai-developer-config-policy
+    status: phase-1-live-with-bridge
+    type: migrar
+  - origin: config/ai/reviewer-policies.yaml
+    destination: .agents/config/reviews.toml
+    justification: concentrar governanca de review e qualidade da camada de IA
+    owner: ai-developer-config-policy
+    status: phase-1-live-with-bridge
+    type: migrar
+  - origin: config/ai/reviewer-standards.yaml
+    destination: .agents/config/reviews.toml
+    justification: manter standards de review sob a mesma raiz da IA
+    owner: ai-developer-config-policy
+    status: phase-1-live-with-bridge
+    type: migrar
+  - origin: config/ai/platforms.yaml
+    destination: config/integrations.toml
+    justification: manter plataformas externas no contexto dev, nao na raiz da IA
+    owner: ai-developer-config-policy
+    status: phase-1-live-with-bridge
+    type: referenciar
+  - origin: config/ai/jira-model.yaml
+    destination: config/integrations.toml
+    justification: manter modelo Jira no contexto dev e referenciado pelo root config
+    owner: ai-developer-config-policy
+    status: phase-1-live-with-bridge
+    type: referenciar
+  - origin: config/ai/confluence-model.yaml
+    destination: config/integrations.toml
+    justification: manter modelo Confluence no contexto dev e referenciado pelo root config
+    owner: ai-developer-config-policy
+    status: phase-1-live-with-bridge
+    type: referenciar
+  - origin: config/ai/sync-targets.yaml
+    destination: config/integrations.toml
+    justification: manter foundation de sync no contexto dev
+    owner: ai-developer-config-policy
+    status: phase-1-live-with-bridge
+    type: referenciar
+  - origin: .agents/config.toml
+    destination: .agents/config/config.toml
+    justification: reduzir drift e manter bridge temporaria para consumidores legados
+    owner: ai-developer-config-policy
+    status: bridge-active
+    type: deprecated

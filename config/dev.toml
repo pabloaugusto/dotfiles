@@ -1,0 +1,19 @@
+version = 1
+
+[context]
+kind = "dev"
+
+[paths]
+legacy_ai_root = "config/ai"
+runtime_root = "app"
+agents_root = ".agents"
+
+[legacy_sources]
+platforms = "config/ai/platforms.yaml"
+jira_model = "config/ai/jira-model.yaml"
+confluence_model = "config/ai/confluence-model.yaml"
+sync_targets = "config/ai/sync-targets.yaml"
+
+[policy]
+root_regionalization = "config/config.toml::regionalization"
+python_toolchain_root = "pyproject.toml"

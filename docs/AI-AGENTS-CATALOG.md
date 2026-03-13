@@ -5,15 +5,18 @@ Catalogo humano dos papeis permanentes de IA deste repo.
 ## Gates obrigatorios
 
 O enablement declarativo dos papeis vive em
-[`../config/ai/agent-enablement.yaml`](../config/ai/agent-enablement.yaml). Um
-agente desabilitado ali nao pode ser exigido por memoria de chat ou habito
+[`../.agents/config/agents.toml`](../.agents/config/agents.toml), com ponte
+temporaria para [`../config/ai/agent-enablement.yaml`](../config/ai/agent-enablement.yaml).
+Um agente desabilitado ali nao pode ser exigido por memoria de chat ou habito
 operacional.
 
 O runtime operacional e a identidade visivel de chat/Jira vivem em
-[`../config/ai/agent-runtime.yaml`](../config/ai/agent-runtime.yaml). Um papel
-habilitado so deve ser tratado como realmente operante quando tambem estiver
-codado ali com status compativel, alias visivel e ownership de superficie
-declarados.
+[`../.agents/config/communication.toml`](../.agents/config/communication.toml)
+e [`../.agents/config/agents.toml`](../.agents/config/agents.toml), com ponte
+temporaria para [`../config/ai/agent-runtime.yaml`](../config/ai/agent-runtime.yaml).
+Um papel habilitado so deve ser tratado como realmente operante quando tambem
+estiver codado ali com status compativel, alias visivel e ownership de
+superficie declarados.
 
 - `repo-governance-authority`: sempre
 - `execution-worklog-governance-owner`: sempre
@@ -34,6 +37,46 @@ No chat e nos campos visiveis do `Jira`, o repo agora prefere `chat_alias`; se
 ele nao existir, cai para `display_name` e, so por ultimo, para o id tecnico.
 O agente atuante tambem deve ser o owner visivel da mensagem de chat e, quando
 houver principal Jira mapeado, do `Assignee` da issue em execucao.
+
+Identidade canonica gerada:
+
+<!-- ai-agents:generated-identity:start -->
+| Role tecnica | Nome visivel efetivo | `display_name` | `chat_alias` | Habilitado |
+| --- | --- | --- | --- | --- |
+| `ai-browser-validator` | ai-browser-validator | - | - | `false` |
+| `ai-designer` | ai-designer | - | - | `false` |
+| `ai-developer-automation` | Automation Dev | Automation Dev | Automation Dev | `true` |
+| `ai-developer-config-policy` | Engenheiro Agentes IA | Engenheiro Agentes IA | Engenheiro Agentes IA | `true` |
+| `ai-developer-powershell` | PowerShell Dev | PowerShell Dev | PowerShell Dev | `true` |
+| `ai-developer-python` | Dev Python | Dev Python | Dev Python | `true` |
+| `ai-devops` | Devops | Devops | Devops | `true` |
+| `ai-documentation-agent` | Escrivao (legado) | Escrivao (legado) | - | `false` |
+| `ai-documentation-manager` | Gestor Documental | Gestor Documental | Gestor Documental | `true` |
+| `ai-documentation-reviewer` | Revisor Documental | Revisor Documental | Revisor Documental | `true` |
+| `ai-documentation-sync` | Sync Documental | Sync Documental | Sync Documental | `true` |
+| `ai-documentation-writer` | Escrivao | Escrivao | Escrivao | `true` |
+| `ai-engineering-architect` | Arquiteto | Arquiteto | Arquiteto | `true` |
+| `ai-engineering-manager` | Engenheiro | Engenheiro | Engenheiro | `true` |
+| `ai-linguistic-reviewer` | Pascoalete | Pascoalete | Pascoalete | `true` |
+| `ai-product-owner` | PO | PO | PO | `true` |
+| `ai-qa` | Testador (QA) | Testador (QA) | Testador (QA) | `true` |
+| `ai-reviewer` | Revisor | Revisor | Revisor | `true` |
+| `ai-reviewer-automation` | Revisor Automacao | - | Revisor Automacao | `true` |
+| `ai-reviewer-config-policy` | Revisor Config Policy | - | Revisor Config Policy | `true` |
+| `ai-reviewer-powershell` | Revisor PowerShell | - | Revisor PowerShell | `true` |
+| `ai-reviewer-python` | Revisor Python | - | Revisor Python | `true` |
+| `ai-scrum-master` | Scrum Master | Scrum Master | Scrum Master | `true` |
+| `ai-seo-specialist` | ai-seo-specialist | - | - | `false` |
+| `ai-startup-governor` | Guardiao de Startup | Guardiao de Startup | Guardiao de Startup | `true` |
+| `ai-tech-lead` | Tech Lead | Tech Lead | Tech Lead | `true` |
+| `ai-ux-cro-analyst` | ai-ux-cro-analyst | - | - | `false` |
+
+Config canonica:
+- manifesto da camada IA: [`.agents/config/config.toml`](../.agents/config/config.toml)
+- identidade declarativa: [`.agents/config/agents.toml`](../.agents/config/agents.toml)
+- runtime visivel de chat/Jira: [`.agents/config/communication.toml`](../.agents/config/communication.toml)
+- ponte legada temporaria: [`.agents/config.toml`](../.agents/config.toml)
+<!-- ai-agents:generated-identity:end -->
 
 | Papel | Cartao | Agente declarativo | Skill principal | Quando entra |
 | --- | --- | --- | --- | --- |

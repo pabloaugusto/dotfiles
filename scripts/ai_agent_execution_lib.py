@@ -1,10 +1,10 @@
 from __future__ import annotations
 
 import json
-from json import JSONDecodeError
 import subprocess
 from dataclasses import asdict, dataclass
 from datetime import datetime
+from json import JSONDecodeError
 from pathlib import Path
 from typing import Any
 from urllib.parse import quote
@@ -273,7 +273,9 @@ def render_structured_comment(
     return "\n".join(lines).strip()
 
 
-def list_comments(jira: JiraAdapter, issue_key: str, *, max_results: int = 200) -> list[dict[str, Any]]:
+def list_comments(
+    jira: JiraAdapter, issue_key: str, *, max_results: int = 200
+) -> list[dict[str, Any]]:
     payload = jira.client.request_json(
         "jira",
         f"/rest/api/3/issue/{quote(issue_key, safe='')}/comment",
@@ -360,10 +362,18 @@ def sync_agent_roles(
     current_visibility = role_visibility_payload(repo_root, current_agent_role)
     next_visibility = role_visibility_payload(repo_root, next_required_role)
     acting_visibility = role_visibility_payload(repo_root, acting_agent or current_agent_role)
+    try:
+        control_plane = load_ai_control_plane(repo_root)
+        jira_field_names = control_plane.jira_field_names()
+    except Exception:
+        jira_field_names = {
+            "current_agent_role": "Current Agent Role",
+            "next_required_role": "Next Required Role",
+        }
     fields_catalog = field_catalog_by_name(jira)
     payload_fields: dict[str, Any] = {}
-    current_field_id = fields_catalog.get("Current Agent Role", "")
-    next_field_id = fields_catalog.get("Next Required Role", "")
+    current_field_id = fields_catalog.get(jira_field_names["current_agent_role"], "")
+    next_field_id = fields_catalog.get(jira_field_names["next_required_role"], "")
     if current_field_id:
         payload_fields[current_field_id] = (
             {"value": current_visibility["visible_name"]}
@@ -407,7 +417,9 @@ def _choose_transition(jira: JiraAdapter, issue_key: str, target_status: str) ->
 def ensure_issue_status(jira: JiraAdapter, issue_key: str, target_status: str) -> None:
     target = normalize_status(target_status)
     issue = jira.get_issue(issue_key, fields=["status"])
-    current = normalize_status(str(((issue.get("fields") or {}).get("status") or {}).get("name") or ""))
+    current = normalize_status(
+        str(((issue.get("fields") or {}).get("status") or {}).get("name") or "")
+    )
     if current == target:
         return
     while current != target:
@@ -488,8 +500,7 @@ def build_context(
             or next_payload.get("formal_name", "").strip()
             or next_required_role.strip()
         ),
-        next_required_role_id=next_payload.get("role_id", "").strip()
-        or next_required_role.strip(),
+        next_required_role_id=next_payload.get("role_id", "").strip() or next_required_role.strip(),
         branch=current_branch(repo_root),
         worktree_root=str(repo_root),
         started_at=started_at,

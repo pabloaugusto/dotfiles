@@ -1,0 +1,16 @@
+version = 1
+
+[context]
+kind = "runtime"
+source_of_truth = "app/config/config.toml"
+inherits_regionalization = "config/config.toml::regionalization"
+
+[domains]
+runtime = "app/config/runtime.toml"
+bootstrap = "app/config/bootstrap.toml"
+links = "app/config/links.toml"
+schema = "app/config/schema.json"
+
+[compatibility]
+legacy_df_root = "app/df"
+legacy_bootstrap_root = "app/bootstrap"

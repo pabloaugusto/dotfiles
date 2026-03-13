@@ -1,0 +1,28 @@
+version = 1
+
+[context]
+kind = "ai"
+source_of_truth = ".agents/config/config.toml"
+inherits_regionalization = "config/config.toml::regionalization"
+
+[domains]
+agents = ".agents/config/agents.toml"
+communication = ".agents/config/communication.toml"
+startup = ".agents/config/startup.toml"
+orchestration = ".agents/config/orchestration.toml"
+reviews = ".agents/config/reviews.toml"
+prompts = ".agents/config/prompts.toml"
+migration_matrix = ".agents/config/migration-matrix.yaml"
+schema = ".agents/config/schema.json"
+
+[compatibility]
+bridge_manifest = ".agents/config.toml"
+legacy_control_plane_root = "config/ai"
+legacy_agents = "config/ai/agents.yaml"
+legacy_agent_enablement = "config/ai/agent-enablement.yaml"
+legacy_agent_runtime = "config/ai/agent-runtime.yaml"
+legacy_agent_operations = "config/ai/agent-operations.yaml"
+legacy_contracts = "config/ai/contracts.yaml"
+legacy_jira_model = "config/ai/jira-model.yaml"
+legacy_confluence_model = "config/ai/confluence-model.yaml"
+legacy_sync_targets = "config/ai/sync-targets.yaml"

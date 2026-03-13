@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "dotfiles-runtime-config",
+  "type": "object",
+  "required": [
+    "version",
+    "context",
+    "domains",
+    "compatibility"
+  ],
+  "properties": {
+    "version": {
+      "type": "integer",
+      "const": 1
+    },
+    "context": {
+      "type": "object",
+      "required": [
+        "kind",
+        "source_of_truth",
+        "inherits_regionalization"
+      ]
+    },
+    "domains": {
+      "type": "object",
+      "required": [
+        "runtime",
+        "bootstrap",
+        "links",
+        "schema"
+      ]
+    },
+    "compatibility": {
+      "type": "object",
+      "required": [
+        "legacy_df_root",
+        "legacy_bootstrap_root"
+      ]
+    }
+  }
+}

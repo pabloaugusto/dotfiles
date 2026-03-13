@@ -1,0 +1,6 @@
+version = 1
+
+[paths]
+source_root = "app/df"
+bootstrap_root = "app/bootstrap"
+runtime_doc = "docs/config-reference.md"

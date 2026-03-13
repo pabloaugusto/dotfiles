@@ -1,0 +1,27 @@
+version = 1
+
+[context]
+kind = "dev-quality"
+
+[generated_tables]
+config_reference = "docs/config-reference.md::generated_config_contexts"
+agents_catalog = "docs/AI-AGENTS-CATALOG.md::generated_agent_identity_contract"
+
+[literal_lint]
+enabled = true
+scope = ["docs", "scripts", ".agents", "config"]
+allowlist = [
+  ".agents/config/communication.toml",
+  "docs/config-reference.md",
+  "docs/AI-AGENTS-CATALOG.md",
+  ".agents/prompts/formal/config-context-centralization/prompt.md",
+  ".agents/prompts/formal/config-context-centralization/approved-plan.md",
+]
+
+[schemas]
+root = "config/schema.json"
+runtime = "app/config/schema.json"
+ai = ".agents/config/schema.json"
+
+[migration_matrix]
+path = ".agents/config/migration-matrix.yaml"
