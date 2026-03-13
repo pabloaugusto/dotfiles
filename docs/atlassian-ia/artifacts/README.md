@@ -5,7 +5,7 @@ sincronizacao da trilha `Jira + Confluence + repo`.
 
 ## Regra desta pasta
 
-- todo schema nasce primeiro aqui ou em [`../../../config/ai/`](../../../config/ai/)
+- todo schema nasce primeiro aqui ou em [`config/`](../../../config/) e [`.agents/config/`](../../../.agents/config/)
   como artefato versionado no repo
 - depois da aplicacao ou da semeadura, o mesmo artefato deve ser refletido em
   tarefa correspondente do `Jira` e/ou em pagina correspondente do `Confluence`
@@ -15,10 +15,10 @@ sincronizacao da trilha `Jira + Confluence + repo`.
 ## Artefatos atuais
 
 - [`jira-schema.md`](jira-schema.md): schema funcional alvo do projeto `DOT`
-  no `Jira`, derivado de [`../../../config/ai/jira-model.yaml`](../../../config/ai/jira-model.yaml)
+  no `Jira`, derivado de [`../../../config/jira-model.yaml`](../../../config/jira-model.yaml)
 - [`confluence-schema.md`](confluence-schema.md): arquitetura de informacao e
   estrategia de publicacao do `Confluence`, derivada de
-  [`../../../config/ai/confluence-model.yaml`](../../../config/ai/confluence-model.yaml)
+  [`../../../config/confluence-model.yaml`](../../../config/confluence-model.yaml)
 - [`atlassian-endpoints.md`](atlassian-endpoints.md): catalogo dos endpoints
   oficiais usados para aplicar schema, semear backlog e sincronizar a
   documentacao

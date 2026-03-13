@@ -18,7 +18,7 @@ sem desconectar a execucao das regras reais do [`dotfiles`](../../../../README.m
 - este pack nao autoriza operar fora de [`AGENTS.md`](../../../../AGENTS.md),
   [`LICOES-APRENDIDAS.md`](../../../../LICOES-APRENDIDAS.md),
   [`docs/ai-operating-model.md`](../../../../docs/ai-operating-model.md) e
-  [`config/ai/contracts.yaml`](../../../../config/ai/contracts.yaml)
+  [`.agents/config/startup.toml`](../../../../.agents/config/startup.toml)
 - o PEA deve reduzir drift antes da execucao, nao competir com o enforcement
   real dos hooks, tasks, validadores e workflows
 - quando houver delegacao, o resumo do PEA so e valido se viajar junto com a
@@ -41,8 +41,8 @@ sem desconectar a execucao das regras reais do [`dotfiles`](../../../../README.m
 - [`docs/AI-DELEGATION-FLOW.md`](../../../../docs/AI-DELEGATION-FLOW.md)
 - [`docs/TASKS.md`](../../../../docs/TASKS.md)
 - [`docs/ai-operating-model.md`](../../../../docs/ai-operating-model.md)
-- [`config/ai/contracts.yaml`](../../../../config/ai/contracts.yaml)
-- [`config/ai/agent-operations.yaml`](../../../../config/ai/agent-operations.yaml)
+- [`.agents/config/startup.toml`](../../../../.agents/config/startup.toml)
+- [`.agents/config/orchestration.toml`](../../../../.agents/config/orchestration.toml)
 - [`scripts/ai_session_startup_lib.py`](../../../../scripts/ai_session_startup_lib.py)
 - [`scripts/validate-ai-assets.py`](../../../../scripts/validate-ai-assets.py)
 

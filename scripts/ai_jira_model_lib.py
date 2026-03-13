@@ -15,7 +15,7 @@ from scripts.atlassian_platform_lib import (
     AtlassianPlatformError,
 )
 
-DEFAULT_JIRA_MODEL_PATH = Path("config/ai/jira-model.yaml")
+DEFAULT_JIRA_MODEL_PATH = Path("config/jira-model.yaml")
 OPTION_DEFAULTS_BY_TYPE = {
     "checkbox": ["required"],
 }
@@ -46,7 +46,7 @@ def active_custom_fields(
     fields = (model.get("fields") or {}).get("custom_fields") or []
     if not isinstance(fields, list):
         raise AiControlPlaneError(
-            "config/ai/jira-model.yaml fields.custom_fields precisa ser lista."
+            "config/jira-model.yaml fields.custom_fields precisa ser lista."
         )
     result: list[dict[str, Any]] = []
     for entry in fields:
@@ -330,7 +330,7 @@ def model_summary_payload(repo_root: str | Path | None = None) -> dict[str, Any]
             ],
             "required_scopes": ensure_string_list(
                 board.get("board_api_scopes", []),
-                "config/ai/jira-model.yaml project.target_board.board_api_scopes",
+                "config/jira-model.yaml project.target_board.board_api_scopes",
             ),
         },
         "workflow_statuses": [
@@ -338,16 +338,16 @@ def model_summary_payload(repo_root: str | Path | None = None) -> dict[str, Any]
         ],
         "issue_types": ensure_string_list(
             issue_types,
-            "config/ai/jira-model.yaml issue_types.standard",
+            "config/jira-model.yaml issue_types.standard",
         ),
         "custom_fields": [str(entry.get("name", "")).strip() for entry in fields],
         "components": ensure_string_list(
             components,
-            "config/ai/jira-model.yaml components",
+            "config/jira-model.yaml components",
         ),
         "labels": ensure_string_list(
             labels,
-            "config/ai/jira-model.yaml labels.baseline",
+            "config/jira-model.yaml labels.baseline",
         ),
         "dashboards": [str(entry.get("name", "")).strip() for entry in dashboards],
     }

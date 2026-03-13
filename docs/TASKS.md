@@ -182,12 +182,12 @@ Referencia operacional das tasks canonicas mais importantes do repositorio.
 
 ### `ai:control-plane:show`
 
-- Funcionalidade: exibe o resumo da control plane dev-time em [`config/ai/`](../config/ai/) e inclui o check resumido da fundacao de sync.
+- Funcionalidade: exibe o resumo da control plane dev-time em [`config/`](../config/) e [`.agents/config/`](../.agents/config/) e inclui o check resumido da fundacao de sync.
 - Uso manual: `task ai:control-plane:show`
 
 ### `ai:control-plane:sync:check`
 
-- Funcionalidade: valida o manifest [`config/ai/sync-targets.yaml`](../config/ai/sync-targets.yaml), a identidade de runtime e a estrutura esperada do state local duravel, sem drenar o outbox.
+- Funcionalidade: valida o manifest [`config/sync-targets.yaml`](../config/sync-targets.yaml), a identidade de runtime e a estrutura esperada do state local duravel, sem drenar o outbox.
 - Uso manual: `task ai:control-plane:sync:check`
 
 ### `ai:control-plane:sync:status`
@@ -225,7 +225,7 @@ Referencia operacional das tasks canonicas mais importantes do repositorio.
   e contexto local ativo, o ciclo de vida da branch atual e o pacote minimo de
   contexto para subagentes.
 - Observacao: o relatorio tambem deve expor o estado declarativo de agents
-  `enabled` e `disabled` carregado de [`config/ai/agent-enablement.yaml`](../config/ai/agent-enablement.yaml).
+  `enabled` e `disabled` carregado de [`.agents/config/agents.toml`](../.agents/config/agents.toml).
 - Observacao: o relatorio tambem deve expor `pea_status`, incluindo catalogo de
   prompt packs, pack formal carregado e a distincao entre `startup`, `PEA` e
   enforcement.
@@ -266,9 +266,9 @@ Referencia operacional das tasks canonicas mais importantes do repositorio.
   com `Jira` e `Confluence` via API oficial.
 - Uso manual: `task ai:atlassian:check`
 - Uso com override pontual: `task ai:atlassian:check SITE_URL="https://sua-org.atlassian.net"`
-- Observacao: a task usa a control plane base em [`config/ai/platforms.yaml`](../config/ai/platforms.yaml)
+- Observacao: a task usa a control plane base em [`config/platforms.yaml`](../config/platforms.yaml)
   e respeita o overlay local derivado de
-  [`config/ai/platforms.local.yaml.tpl`](../config/ai/platforms.local.yaml.tpl)
+  [`config/platforms.local.yaml.tpl`](../config/platforms.local.yaml.tpl)
   quando presente; `SITE_URL` segue disponivel para override pontual.
 
 ### `ai:prompts:jira:check`
@@ -305,7 +305,7 @@ Referencia operacional das tasks canonicas mais importantes do repositorio.
 ### `ai:jira:model:show`
 
 - Funcionalidade: exibe o modelo declarativo alvo do projeto `Jira` mantido em
-  [`config/ai/jira-model.yaml`](../config/ai/jira-model.yaml).
+  [`config/jira-model.yaml`](../config/jira-model.yaml).
 - Uso manual: `task ai:jira:model:show`
 
 ### `ai:jira:model:delta`

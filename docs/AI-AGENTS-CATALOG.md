@@ -5,15 +5,13 @@ Catalogo humano dos papeis permanentes de IA deste repo.
 ## Gates obrigatorios
 
 O enablement declarativo dos papeis vive em
-[`../.agents/config/agents.toml`](../.agents/config/agents.toml), com ponte
-temporaria para [`../config/ai/agent-enablement.yaml`](../config/ai/agent-enablement.yaml).
+[`../.agents/config/agents.toml`](../.agents/config/agents.toml).
 Um agente desabilitado ali nao pode ser exigido por memoria de chat ou habito
 operacional.
 
 O runtime operacional e a identidade visivel de chat/Jira vivem em
 [`../.agents/config/communication.toml`](../.agents/config/communication.toml)
-e [`../.agents/config/agents.toml`](../.agents/config/agents.toml), com ponte
-temporaria para [`../config/ai/agent-runtime.yaml`](../config/ai/agent-runtime.yaml).
+e [`../.agents/config/agents.toml`](../.agents/config/agents.toml).
 Um papel habilitado so deve ser tratado como realmente operante quando tambem
 estiver codado ali com status compativel, alias visivel e ownership de
 superficie declarados.
@@ -57,7 +55,7 @@ Identidade canonica gerada:
 | `ai-documentation-writer` | Escrivao | Escrivao | Escrivao | `true` |
 | `ai-engineering-architect` | Arquiteto | Arquiteto | Arquiteto | `true` |
 | `ai-engineering-manager` | Engenheiro | Engenheiro | Engenheiro | `true` |
-| `ai-linguistic-reviewer` | Pascoalete | Pascoalete | Pascoalete | `true` |
+| `ai-linguistic-reviewer` | Pascoalete | Pascoalete | Pascoalete | `false` |
 | `ai-product-owner` | PO | PO | PO | `true` |
 | `ai-qa` | Testador (QA) | Testador (QA) | Testador (QA) | `true` |
 | `ai-reviewer` | Revisor | Revisor | Revisor | `true` |
@@ -75,7 +73,7 @@ Config canonica:
 - manifesto da camada IA: [`.agents/config/config.toml`](../.agents/config/config.toml)
 - identidade declarativa: [`.agents/config/agents.toml`](../.agents/config/agents.toml)
 - runtime visivel de chat/Jira: [`.agents/config/communication.toml`](../.agents/config/communication.toml)
-- ponte legada temporaria: [`.agents/config.toml`](../.agents/config.toml)
+- manifesto operacional da camada IA: [`.agents/config.toml`](../.agents/config.toml)
 <!-- ai-agents:generated-identity:end -->
 
 | Papel | Cartao | Agente declarativo | Skill principal | Quando entra |

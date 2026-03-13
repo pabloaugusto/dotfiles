@@ -12,7 +12,7 @@ Consolidar board, WIP, Scrum Master e cerimonias obrigatorias.
 
 ## Fonte canonica e precedencia
 
-- [`../../config/ai/contracts.yaml`](../../config/ai/contracts.yaml)
+- [`../../.agents/config/startup.toml`](../../.agents/config/startup.toml)
 - [`../../docs/AI-SCRUM-MASTER-LEDGER.md`](../../docs/AI-SCRUM-MASTER-LEDGER.md)
 - [`../../.agents/cerimonias/`](../../.agents/cerimonias/)
 

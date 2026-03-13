@@ -16,7 +16,7 @@ from urllib.parse import quote
 import yaml
 
 from scripts.config_context_lib import (
-    ai_bridge_path as ai_bridge_manifest_path,
+    ai_operation_manifest_path,
 )
 from scripts.config_context_lib import (
     ai_config_path as ai_context_manifest_path,
@@ -42,7 +42,6 @@ try:
 except ModuleNotFoundError:  # pragma: no cover - fallback for Python < 3.11
     tomllib = None  # type: ignore[assignment]
 
-DEFAULT_CONTROL_PLANE_ROOT = Path("config/ai")
 ENV_PREFIX = "env://"
 OP_PREFIX = "op://"
 OP_REF_RE = re.compile(r"^op://(?P<body>.+)$")
@@ -111,7 +110,7 @@ class AiControlPlane:
     root_manifest_path: Path
     app_manifest_path: Path
     ai_manifest_path: Path
-    ai_bridge_manifest_path: Path
+    ai_operation_manifest_path: Path
     platforms_path: Path
     platforms_local_path: Path
     agents_path: Path
@@ -137,14 +136,25 @@ class AiControlPlane:
     def roles_payload(self) -> dict[str, Any]:
         roles = self.agents_payload.get("roles") or {}
         if not isinstance(roles, dict):
-            raise AiControlPlaneError("config/ai/agents.yaml precisa conter roles como mapa.")
-        return roles
+            raise AiControlPlaneError(
+                ".agents/config/agents.toml precisa conter [roles] como mapa."
+            )
+        defaults_entry = roles.get("defaults")
+        if defaults_entry not in ({}, None) and not isinstance(defaults_entry, dict):
+            raise AiControlPlaneError(
+                ".agents/config/agents.toml [roles.defaults] precisa ser mapa quando definido."
+            )
+        return {
+            str(role_id): entry
+            for role_id, entry in roles.items()
+            if role_id != "defaults" and isinstance(role_id, str) and isinstance(entry, dict)
+        }
 
     def agent_enablement_roles_payload(self) -> dict[str, Any]:
         roles = self.agent_enablement_payload.get("roles") or {}
         if not isinstance(roles, dict):
             raise AiControlPlaneError(
-                "config/ai/agent-enablement.yaml precisa conter roles como mapa."
+                ".agents/config/agents.toml precisa conter [enablement.roles] como mapa."
             )
         return roles
 
@@ -158,17 +168,17 @@ class AiControlPlane:
                 continue
             if not isinstance(entry, dict):
                 raise AiControlPlaneError(
-                    "config/ai/agent-enablement.yaml roles aceita apenas mapas por agente."
+                    ".agents/config/agents.toml [enablement.roles] aceita apenas mapas por agente."
                 )
             enabled = entry.get("enabled")
             if not isinstance(enabled, bool):
                 raise AiControlPlaneError(
-                    "config/ai/agent-enablement.yaml roles.<agent>.enabled precisa ser booleano."
+                    ".agents/config/agents.toml [enablement.roles.<agent>] enabled precisa ser booleano."
                 )
             overrides[str(role_id)] = enabled
         if unknown_roles:
             raise AiControlPlaneError(
-                "config/ai/agent-enablement.yaml contem roles desconhecidos: "
+                ".agents/config/agents.toml [enablement.roles] contem roles desconhecidos: "
                 + ", ".join(sorted(unknown_roles))
             )
         return overrides
@@ -242,7 +252,7 @@ class AiControlPlane:
         registry_agents = self.agent_enablement_payload.get("registry_agents") or {}
         if not isinstance(registry_agents, dict):
             raise AiControlPlaneError(
-                "config/ai/agent-enablement.yaml precisa conter registry_agents como mapa."
+                ".agents/config/agents.toml precisa conter [enablement.registry_agents] como mapa."
             )
         return registry_agents
 
@@ -252,12 +262,12 @@ class AiControlPlane:
             return True
         if not isinstance(defaults, dict):
             raise AiControlPlaneError(
-                "config/ai/agent-enablement.yaml defaults precisa ser mapa quando definido."
+                ".agents/config/agents.toml [enablement.defaults] precisa ser mapa quando definido."
             )
         raw_value = defaults.get("registry_agents_enabled_by_default", True)
         if not isinstance(raw_value, bool):
             raise AiControlPlaneError(
-                "config/ai/agent-enablement.yaml defaults.registry_agents_enabled_by_default precisa ser booleano."
+                ".agents/config/agents.toml [enablement.defaults] registry_agents_enabled_by_default precisa ser booleano."
             )
         return raw_value
 
@@ -271,7 +281,7 @@ class AiControlPlane:
         ]
         if unknown_agents:
             raise AiControlPlaneError(
-                "config/ai/agent-enablement.yaml contem agentes declarativos desconhecidos: "
+                ".agents/config/agents.toml [enablement.registry_agents] contem agentes declarativos desconhecidos: "
                 + ", ".join(sorted(unknown_agents))
             )
         effective: dict[str, dict[str, Any]] = {}
@@ -284,16 +294,16 @@ class AiControlPlane:
             if override_entry is not None:
                 if not isinstance(override_entry, dict):
                     raise AiControlPlaneError(
-                        "config/ai/agent-enablement.yaml registry_agents aceita apenas mapas por agente."
+                        ".agents/config/agents.toml [enablement.registry_agents] aceita apenas mapas por agente."
                     )
                 raw_enabled = override_entry.get("enabled")
                 if not isinstance(raw_enabled, bool):
                     raise AiControlPlaneError(
-                        "config/ai/agent-enablement.yaml registry_agents.<agent>.enabled precisa ser booleano."
+                        ".agents/config/agents.toml [enablement.registry_agents.<agent>] enabled precisa ser booleano."
                     )
                 if agent_id in effective_roles and raw_enabled != enabled:
                     raise AiControlPlaneError(
-                        "config/ai/agent-enablement.yaml registry_agents nao pode divergir do enablement da role para agentes com role correspondente: "
+                        ".agents/config/agents.toml [enablement.registry_agents] nao pode divergir do enablement da role para agentes com role correspondente: "
                         f"{agent_id}"
                     )
                 enabled = raw_enabled
@@ -339,7 +349,7 @@ class AiControlPlane:
         roles = self.agent_operations_payload.get("roles") or {}
         if not isinstance(roles, dict):
             raise AiControlPlaneError(
-                "config/ai/agent-operations.yaml precisa conter roles como mapa."
+                ".agents/config/orchestration.toml precisa conter [roles] como mapa."
             )
         return roles
 
@@ -366,7 +376,7 @@ class AiControlPlane:
         roles = self.agent_runtime_payload.get("roles") or {}
         if not isinstance(roles, dict):
             raise AiControlPlaneError(
-                "config/ai/agent-runtime.yaml precisa conter roles como mapa."
+                ".agents/config/agents.toml precisa conter [runtime.roles] como mapa."
             )
         return roles
 
@@ -374,7 +384,7 @@ class AiControlPlane:
         registry_agents = self.agent_runtime_payload.get("registry_agents") or {}
         if not isinstance(registry_agents, dict):
             raise AiControlPlaneError(
-                "config/ai/agent-runtime.yaml precisa conter registry_agents como mapa."
+                ".agents/config/agents.toml precisa conter [runtime.registry_agents] como mapa."
             )
         return registry_agents
 
@@ -382,7 +392,7 @@ class AiControlPlane:
         policies = self.agent_runtime_payload.get("policies") or {}
         if not isinstance(policies, dict):
             raise AiControlPlaneError(
-                "config/ai/agent-runtime.yaml precisa conter policies como mapa."
+                ".agents/config/agents.toml precisa conter [runtime.policies] como mapa."
             )
         return policies
 
@@ -447,7 +457,7 @@ class AiControlPlane:
         payload = policies.get(policy_name, default_policies.get(policy_name, []))
         return ensure_string_list(
             payload,
-            f"config/ai/agent-runtime.yaml policies.{policy_name}",
+            f".agents/config/agents.toml runtime.policies.{policy_name}",
         )
 
     def chat_name_fallback_order(self) -> list[str]:
@@ -718,7 +728,7 @@ class AiControlPlane:
         surfaces = actor_payload.get("surfaces") or {}
         if not isinstance(surfaces, dict):
             raise AiControlPlaneError(
-                "config/ai/agent-runtime.yaml roles.<agent>.atlassian_actor.surfaces precisa ser mapa."
+                ".agents/config/agents.toml runtime.roles.<agent>.atlassian_actor.surfaces precisa ser mapa."
             )
         payload = surfaces.get(str(surface).strip()) or {}
         return payload if isinstance(payload, dict) else {}
@@ -734,7 +744,7 @@ class AiControlPlane:
         surfaces = actor_payload.get("surfaces") or {}
         if not isinstance(surfaces, dict):
             raise AiControlPlaneError(
-                "config/ai/agent-runtime.yaml roles.<agent>.atlassian_actor.surfaces precisa ser mapa."
+                ".agents/config/agents.toml runtime.roles.<agent>.atlassian_actor.surfaces precisa ser mapa."
             )
         return sorted(str(surface).strip() for surface in surfaces if str(surface).strip())
 
@@ -824,23 +834,23 @@ class AiControlPlane:
     def effective_workflow_columns(self) -> list[str]:
         workflow = ensure_mapping(
             self.contracts_payload.get("workflow"),
-            "config/ai/contracts.yaml workflow",
+            ".agents/config/startup.toml workflow",
         )
         always_enabled = ensure_string_list(
             workflow.get("always_enabled_columns"),
-            "config/ai/contracts.yaml workflow.always_enabled_columns",
+            ".agents/config/startup.toml workflow.always_enabled_columns",
         )
         columns = list(always_enabled)
         optional_columns = workflow.get("optional_columns") or []
         if not isinstance(optional_columns, list):
             raise AiControlPlaneError(
-                "config/ai/contracts.yaml workflow.optional_columns precisa ser lista."
+                ".agents/config/startup.toml workflow.optional_columns precisa ser lista."
             )
         enabled_roles = set(self.enabled_roles())
         for entry in optional_columns:
             if not isinstance(entry, dict):
                 raise AiControlPlaneError(
-                    "config/ai/contracts.yaml workflow.optional_columns aceita apenas mapas."
+                    ".agents/config/startup.toml workflow.optional_columns aceita apenas mapas."
                 )
             name = str(entry.get("name", "")).strip()
             enabled_when_role = str(entry.get("enabled_when_role", "")).strip()
@@ -854,23 +864,23 @@ class AiControlPlane:
     def atlassian_definition(self) -> AtlassianPlatformDefinition:
         platforms = ensure_mapping(
             self.platforms_payload.get("platforms"),
-            "config/ai/platforms.yaml platforms",
+            "config/platforms.yaml platforms",
         )
         atlassian = ensure_mapping(
             platforms.get("atlassian"),
-            "config/ai/platforms.yaml platforms.atlassian",
+            "config/platforms.yaml platforms.atlassian",
         )
         auth = ensure_mapping(
             atlassian.get("auth"),
-            "config/ai/platforms.yaml platforms.atlassian.auth",
+            "config/platforms.yaml platforms.atlassian.auth",
         )
         jira = ensure_mapping(
             atlassian.get("jira"),
-            "config/ai/platforms.yaml platforms.atlassian.jira",
+            "config/platforms.yaml platforms.atlassian.jira",
         )
         confluence = ensure_mapping(
             atlassian.get("confluence"),
-            "config/ai/platforms.yaml platforms.atlassian.confluence",
+            "config/platforms.yaml platforms.atlassian.confluence",
         )
         return AtlassianPlatformDefinition(
             enabled=bool(atlassian.get("enabled", False)),
@@ -1146,44 +1156,54 @@ def load_ai_control_plane(repo_root: str | Path | None = None) -> AiControlPlane
     root_manifest_path = root_context_manifest_path(resolved_repo_root)
     app_manifest_path = app_context_manifest_path(resolved_repo_root)
     ai_manifest_path = ai_context_manifest_path(resolved_repo_root)
-    ai_bridge_path = ai_bridge_manifest_path(resolved_repo_root)
+    ai_operation_manifest = ai_operation_manifest_path(resolved_repo_root)
     root_manifest_payload = load_context_toml_map(root_manifest_path)
     app_manifest_payload = load_context_toml_map(app_manifest_path)
     ai_manifest_payload = load_context_toml_map(ai_manifest_path)
-    compatibility = ai_manifest_payload.get("compatibility") or {}
-    if not isinstance(compatibility, dict):
-        raise AiControlPlaneError(".agents/config/config.toml precisa conter [compatibility].")
-    legacy_root_relative = str(
-        compatibility.get("legacy_control_plane_root", str(DEFAULT_CONTROL_PLANE_ROOT))
-    ).strip()
-    if not legacy_root_relative:
+    domains = manifest_domain_paths(ai_manifest_payload)
+    config_root = ai_manifest_path.parent.resolve()
+    agents_path = (resolved_repo_root / domains.get("agents", "")).resolve()
+    startup_path = (resolved_repo_root / domains.get("startup", "")).resolve()
+    orchestration_path = (resolved_repo_root / domains.get("orchestration", "")).resolve()
+    if not agents_path.is_file():
         raise AiControlPlaneError(
-            ".agents/config/config.toml compatibility.legacy_control_plane_root nao pode ser vazio."
+            ".agents/config/config.toml precisa declarar domains.agents valido."
         )
-    config_root = (resolved_repo_root / legacy_root_relative).resolve()
-    platforms_path = config_root / "platforms.yaml"
-    agents_path = config_root / "agents.yaml"
-    agent_enablement_path = config_root / "agent-enablement.yaml"
-    agent_operations_path = config_root / "agent-operations.yaml"
-    contracts_path = config_root / "contracts.yaml"
-    agent_runtime_path = config_root / "agent-runtime.yaml"
+    if not startup_path.is_file():
+        raise AiControlPlaneError(
+            ".agents/config/config.toml precisa declarar domains.startup valido."
+        )
+    if not orchestration_path.is_file():
+        raise AiControlPlaneError(
+            ".agents/config/config.toml precisa declarar domains.orchestration valido."
+        )
+    root_domains = manifest_domain_paths(root_manifest_payload)
+    integrations_path = (resolved_repo_root / root_domains.get("integrations", "")).resolve()
+    if not integrations_path.is_file():
+        raise AiControlPlaneError(
+            "config/config.toml precisa declarar domains.integrations valido."
+        )
+    integrations_payload, _ = load_context_config_map_with_optional_overlay(integrations_path)
+    atlassian_integrations = integrations_payload.get("atlassian") or {}
+    if not isinstance(atlassian_integrations, dict):
+        raise AiControlPlaneError("config/integrations.toml precisa conter [atlassian].")
+    platforms_relative = str(atlassian_integrations.get("platforms", "")).strip()
+    if not platforms_relative:
+        raise AiControlPlaneError(
+            "config/integrations.toml [atlassian].platforms nao pode ser vazio."
+        )
+    platforms_path = (resolved_repo_root / platforms_relative).resolve()
+    agent_enablement_path = agents_path
+    agent_operations_path = orchestration_path
+    contracts_path = startup_path
+    agent_runtime_path = agents_path
     platforms_payload, platforms_local_path = load_context_config_map_with_optional_overlay(
         platforms_path
     )
     agents_payload, agents_local_path = load_context_config_map_with_optional_overlay(agents_path)
-    (
-        agent_enablement_payload,
-        agent_enablement_local_path,
-    ) = load_context_config_map_with_optional_overlay(agent_enablement_path)
-    (
-        agent_operations_payload,
-        agent_operations_local_path,
-    ) = load_context_config_map_with_optional_overlay(agent_operations_path)
-    contracts_payload, contracts_local_path = load_context_config_map_with_optional_overlay(
-        contracts_path
-    )
-    agent_runtime_payload, agent_runtime_local_path = load_context_config_map_with_optional_overlay(
-        agent_runtime_path
+    startup_payload, startup_local_path = load_context_config_map_with_optional_overlay(startup_path)
+    orchestration_payload, orchestration_local_path = load_context_config_map_with_optional_overlay(
+        orchestration_path
     )
     return AiControlPlane(
         repo_root=resolved_repo_root,
@@ -1191,28 +1211,34 @@ def load_ai_control_plane(repo_root: str | Path | None = None) -> AiControlPlane
         root_manifest_path=root_manifest_path,
         app_manifest_path=app_manifest_path,
         ai_manifest_path=ai_manifest_path,
-        ai_bridge_manifest_path=ai_bridge_path,
+        ai_operation_manifest_path=ai_operation_manifest,
         platforms_path=platforms_path,
         platforms_local_path=platforms_local_path,
         agents_path=agents_path,
         agents_local_path=agents_local_path,
         agent_enablement_path=agent_enablement_path,
-        agent_enablement_local_path=agent_enablement_local_path,
+        agent_enablement_local_path=agents_local_path,
         agent_operations_path=agent_operations_path,
-        agent_operations_local_path=agent_operations_local_path,
+        agent_operations_local_path=orchestration_local_path,
         contracts_path=contracts_path,
-        contracts_local_path=contracts_local_path,
+        contracts_local_path=startup_local_path,
         agent_runtime_path=agent_runtime_path,
-        agent_runtime_local_path=agent_runtime_local_path,
+        agent_runtime_local_path=agents_local_path,
         root_manifest_payload=root_manifest_payload,
         app_manifest_payload=app_manifest_payload,
         ai_manifest_payload=ai_manifest_payload,
         platforms_payload=platforms_payload,
         agents_payload=agents_payload,
-        agent_enablement_payload=agent_enablement_payload,
-        agent_operations_payload=agent_operations_payload,
-        contracts_payload=contracts_payload,
-        agent_runtime_payload=agent_runtime_payload,
+        agent_enablement_payload=ensure_mapping(
+            agents_payload.get("enablement"),
+            ".agents/config/agents.toml [enablement]",
+        ),
+        agent_operations_payload=orchestration_payload,
+        contracts_payload=startup_payload,
+        agent_runtime_payload=ensure_mapping(
+            agents_payload.get("runtime"),
+            ".agents/config/agents.toml [runtime]",
+        ),
     )
 
 
@@ -1560,7 +1586,7 @@ def summary_payload(
         "root_manifest_path": str(loaded.root_manifest_path),
         "app_manifest_path": str(loaded.app_manifest_path),
         "ai_manifest_path": str(loaded.ai_manifest_path),
-        "ai_bridge_manifest_path": str(loaded.ai_bridge_manifest_path),
+        "ai_operation_manifest_path": str(loaded.ai_operation_manifest_path),
         "config_root": str(loaded.config_root),
         "platforms_path": str(loaded.platforms_path),
         "platforms_local_path": str(loaded.platforms_local_path),

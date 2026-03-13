@@ -3,19 +3,18 @@ from __future__ import annotations
 import pathlib
 import unittest
 
-import yaml
+from scripts.config_context_lib import load_toml_map
 
 REPO_ROOT = pathlib.Path(__file__).resolve().parents[2]
 
 
 class AiReviewerStandardsTests(unittest.TestCase):
     def setUp(self) -> None:
-        self.agents = yaml.safe_load((REPO_ROOT / "config" / "ai" / "agents.yaml").read_text(encoding="utf-8"))
-        self.operations = yaml.safe_load(
-            (REPO_ROOT / "config" / "ai" / "agent-operations.yaml").read_text(encoding="utf-8")
-        )
-        self.standards = yaml.safe_load(
-            (REPO_ROOT / "config" / "ai" / "reviewer-standards.yaml").read_text(encoding="utf-8")
+        self.agents = load_toml_map(REPO_ROOT / ".agents" / "config" / "agents.toml")
+        self.operations = load_toml_map(REPO_ROOT / ".agents" / "config" / "orchestration.toml")
+        self.standards = (
+            (load_toml_map(REPO_ROOT / ".agents" / "config" / "reviews.toml").get("standards"))
+            or {}
         )
 
     def test_each_active_specialist_reviewer_has_a_standards_profile(self) -> None:
@@ -43,10 +42,10 @@ class AiReviewerStandardsTests(unittest.TestCase):
         profiles = (self.standards.get("profiles") or {})
         for profile_name, profile in profiles.items():
             with self.subTest(profile=profile_name):
-                layers = profile.get("governance_layers") or []
+                layers = profile.get("governance_layers") or {}
                 references = [
                     reference
-                    for layer in layers
+                    for layer in layers.values()
                     if isinstance(layer, dict)
                     for reference in (layer.get("references") or [])
                     if isinstance(reference, dict)

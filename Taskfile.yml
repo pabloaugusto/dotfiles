@@ -22,7 +22,7 @@ tasks:
     desc: Windows - sync inteligente do repo local (commit por contexto + pull/push guiado)
     platforms: [windows]
     cmds:
-      - "pwsh -NoProfile -Command \". '{{.TASKFILE_DIR}}/app/df/powershell/_functions.ps1'; Invoke-DotfilesSmartSync\""
+      - 'pwsh -NoProfile -Command ". ''{{.TASKFILE_DIR}}/app/df/powershell/_functions.ps1''; Invoke-DotfilesSmartSync"'
 
   sync:linux:
     desc: Linux/WSL - sync inteligente do repo local (commit por contexto + pull/push guiado)
@@ -60,7 +60,7 @@ tasks:
     desc: Windows - atualizar repo atual
     platforms: [windows]
     cmds:
-      - "pwsh -NoProfile -Command \". '{{.TASKFILE_DIR}}/app/df/powershell/_functions.ps1'; Invoke-DotfilesRepoUpdate -SwitchMain\""
+      - 'pwsh -NoProfile -Command ". ''{{.TASKFILE_DIR}}/app/df/powershell/_functions.ps1''; Invoke-DotfilesRepoUpdate -SwitchMain"'
 
   repo:update:linux:
     desc: Linux/WSL - atualizar repo atual
@@ -77,7 +77,7 @@ tasks:
     desc: Windows - atualizar com auto-stash
     platforms: [windows]
     cmds:
-      - "pwsh -NoProfile -Command \". '{{.TASKFILE_DIR}}/app/df/powershell/_functions.ps1'; Invoke-DotfilesRepoUpdate -Safe -SwitchMain\""
+      - 'pwsh -NoProfile -Command ". ''{{.TASKFILE_DIR}}/app/df/powershell/_functions.ps1''; Invoke-DotfilesRepoUpdate -Safe -SwitchMain"'
 
   repo:update-safe:linux:
     desc: Linux/WSL - atualizar com auto-stash
@@ -92,7 +92,7 @@ tasks:
     cmds:
       - task: repo:publish:{{if or (eq .OS "Windows_NT") (eq .OS "windows")}}windows{{else}}linux{{end}}
         vars:
-          MSG: "{{.MSG}}"
+          MSG: '{{.MSG}}'
 
   repo:publish:windows:
     desc: Windows - publicar alteracoes
@@ -100,7 +100,7 @@ tasks:
     requires:
       vars: [MSG]
     cmds:
-      - "pwsh -NoProfile -Command \". '{{.TASKFILE_DIR}}/app/df/powershell/_functions.ps1'; Invoke-DotfilesRepoPublish -Message '{{.MSG}}'\""
+      - 'pwsh -NoProfile -Command ". ''{{.TASKFILE_DIR}}/app/df/powershell/_functions.ps1''; Invoke-DotfilesRepoPublish -Message ''{{.MSG}}''"'
 
   repo:publish:linux:
     desc: Linux/WSL - publicar alteracoes
@@ -151,7 +151,7 @@ tasks:
     cmds:
       - task: repo:publish
         vars:
-          MSG: "{{.MSG}}"
+          MSG: '{{.MSG}}'
 
   sync:publish:windows:
     desc: Windows - alias para repo:publish:windows
@@ -161,7 +161,7 @@ tasks:
     cmds:
       - task: repo:publish:windows
         vars:
-          MSG: "{{.MSG}}"
+          MSG: '{{.MSG}}'
 
   sync:publish:linux:
     desc: Linux/WSL - alias para repo:publish:linux
@@ -171,7 +171,7 @@ tasks:
     cmds:
       - task: repo:publish:linux
         vars:
-          MSG: "{{.MSG}}"
+          MSG: '{{.MSG}}'
 
   sync:wsl-gate:
     desc: Auto - gate Git-only para sincronizar Windows repo -> WSL repo local
@@ -182,7 +182,7 @@ tasks:
     desc: Windows - gate Git-only para sincronizar repo local do WSL
     platforms: [windows]
     cmds:
-      - "pwsh -NoProfile -Command \". '{{.TASKFILE_DIR}}/app/df/powershell/_functions.ps1'; Sync-DotfilesWindowsToWsl\""
+      - 'pwsh -NoProfile -Command ". ''{{.TASKFILE_DIR}}/app/df/powershell/_functions.ps1''; Sync-DotfilesWindowsToWsl"'
 
   sync:wsl-gate:linux:
     desc: Linux/WSL - nao aplicavel (execute sync:wsl-gate no Windows)
@@ -199,7 +199,7 @@ tasks:
     desc: Windows - roda checkEnv no PowerShell
     platforms: [windows]
     cmds:
-      - "pwsh -NoProfile -Command \". '{{.TASKFILE_DIR}}/app/df/powershell/_functions.ps1'; checkEnv -GitSigningMode '{{default \"auto\" .SIGN_MODE}}'\""
+      - 'pwsh -NoProfile -Command ". ''{{.TASKFILE_DIR}}/app/df/powershell/_functions.ps1''; checkEnv -GitSigningMode ''{{default "auto" .SIGN_MODE}}''"'
 
   env:check:linux:
     desc: Linux/WSL - roda checkEnv no Bash
@@ -217,7 +217,7 @@ tasks:
     platforms: [windows]
     dir: '{{.TASKFILE_DIR}}'
     cmds:
-      - "pwsh -NoProfile -Command \"& './scripts/invoke-python.ps1' -ScriptPath './scripts/git-signing-mode.py' -Arguments @('status')\""
+      - 'pwsh -NoProfile -Command "& ''./scripts/invoke-python.ps1'' -ScriptPath ''./scripts/git-signing-mode.py'' -Arguments @(''status'')"'
 
   git:signing:status:linux:
     desc: Linux/WSL - exibe o estado do signer Git para a worktree atual
@@ -236,7 +236,7 @@ tasks:
     platforms: [windows]
     dir: '{{.TASKFILE_DIR}}'
     cmds:
-      - "pwsh -NoProfile -Command \"& './scripts/invoke-python.ps1' -ScriptPath './scripts/git-signing-mode.py' -Arguments @('use-human')\""
+      - 'pwsh -NoProfile -Command "& ''./scripts/invoke-python.ps1'' -ScriptPath ''./scripts/git-signing-mode.py'' -Arguments @(''use-human'')"'
 
   git:signing:mode:human:linux:
     desc: Linux/WSL - reverte a worktree para o signer Git humano
@@ -250,47 +250,47 @@ tasks:
     cmds:
       - task: git:signing:mode:automation:{{if or (eq .OS "Windows_NT") (eq .OS "windows")}}windows{{else}}linux{{end}}
         vars:
-          PUBLIC_KEY_REF: "{{.PUBLIC_KEY_REF}}"
-          PUBLIC_KEY: "{{.PUBLIC_KEY}}"
-          TITLE: "{{.TITLE}}"
-          ENSURE_GITHUB: "{{default \"1\" .ENSURE_GITHUB}}"
+          PUBLIC_KEY_REF: '{{.PUBLIC_KEY_REF}}'
+          PUBLIC_KEY: '{{.PUBLIC_KEY}}'
+          TITLE: '{{.TITLE}}'
+          ENSURE_GITHUB: '{{default "1" .ENSURE_GITHUB}}'
 
   git:signing:mode:automation:windows:
     desc: Windows - aplica signer tecnico de automacao na worktree atual
     platforms: [windows]
     dir: '{{.TASKFILE_DIR}}'
     cmds:
-      - "pwsh -NoProfile -Command \"& './scripts/invoke-python.ps1' -ScriptPath './scripts/git-signing-mode.py' -Arguments @('use-automation','--public-key-ref','{{default \"\" .PUBLIC_KEY_REF}}','--public-key','{{default \"\" .PUBLIC_KEY}}','--ensure-github','{{default \"1\" .ENSURE_GITHUB}}','--title','{{default \"\" .TITLE}}')\""
+      - 'pwsh -NoProfile -Command "& ''./scripts/invoke-python.ps1'' -ScriptPath ''./scripts/git-signing-mode.py'' -Arguments @(''use-automation'',''--public-key-ref'',''{{default "" .PUBLIC_KEY_REF}}'',''--public-key'',''{{default "" .PUBLIC_KEY}}'',''--ensure-github'',''{{default "1" .ENSURE_GITHUB}}'',''--title'',''{{default "" .TITLE}}'')"'
 
   git:signing:mode:automation:linux:
     desc: Linux/WSL - aplica signer tecnico de automacao na worktree atual
     platforms: [linux]
     dir: '{{.TASKFILE_DIR}}'
     cmds:
-      - "bash -lc 'bash ./scripts/run-python.sh ./scripts/git-signing-mode.py use-automation --public-key-ref \"{{default \"\" .PUBLIC_KEY_REF}}\" --public-key \"{{default \"\" .PUBLIC_KEY}}\" --ensure-github \"{{default \"1\" .ENSURE_GITHUB}}\" --title \"{{default \"\" .TITLE}}\"'"
+      - 'bash -lc ''bash ./scripts/run-python.sh ./scripts/git-signing-mode.py use-automation --public-key-ref "{{default "" .PUBLIC_KEY_REF}}" --public-key "{{default "" .PUBLIC_KEY}}" --ensure-github "{{default "1" .ENSURE_GITHUB}}" --title "{{default "" .TITLE}}"'''
 
   git:signing:github:ensure:
     desc: Garante que a chave publica do signer tecnico exista no GitHub como signing key
     cmds:
       - task: git:signing:github:ensure:{{if or (eq .OS "Windows_NT") (eq .OS "windows")}}windows{{else}}linux{{end}}
         vars:
-          PUBLIC_KEY_REF: "{{.PUBLIC_KEY_REF}}"
-          PUBLIC_KEY: "{{.PUBLIC_KEY}}"
-          TITLE: "{{.TITLE}}"
+          PUBLIC_KEY_REF: '{{.PUBLIC_KEY_REF}}'
+          PUBLIC_KEY: '{{.PUBLIC_KEY}}'
+          TITLE: '{{.TITLE}}'
 
   git:signing:github:ensure:windows:
     desc: Windows - registra ou reaproveita a signing key tecnica no GitHub
     platforms: [windows]
     dir: '{{.TASKFILE_DIR}}'
     cmds:
-      - "pwsh -NoProfile -Command \"& './scripts/invoke-python.ps1' -ScriptPath './scripts/git-signing-mode.py' -Arguments @('ensure-github-signing-key','--public-key-ref','{{default \"\" .PUBLIC_KEY_REF}}','--public-key','{{default \"\" .PUBLIC_KEY}}','--title','{{default \"\" .TITLE}}')\""
+      - 'pwsh -NoProfile -Command "& ''./scripts/invoke-python.ps1'' -ScriptPath ''./scripts/git-signing-mode.py'' -Arguments @(''ensure-github-signing-key'',''--public-key-ref'',''{{default "" .PUBLIC_KEY_REF}}'',''--public-key'',''{{default "" .PUBLIC_KEY}}'',''--title'',''{{default "" .TITLE}}'')"'
 
   git:signing:github:ensure:linux:
     desc: Linux/WSL - registra ou reaproveita a signing key tecnica no GitHub
     platforms: [linux]
     dir: '{{.TASKFILE_DIR}}'
     cmds:
-      - "bash -lc 'bash ./scripts/run-python.sh ./scripts/git-signing-mode.py ensure-github-signing-key --public-key-ref \"{{default \"\" .PUBLIC_KEY_REF}}\" --public-key \"{{default \"\" .PUBLIC_KEY}}\" --title \"{{default \"\" .TITLE}}\"'"
+      - 'bash -lc ''bash ./scripts/run-python.sh ./scripts/git-signing-mode.py ensure-github-signing-key --public-key-ref "{{default "" .PUBLIC_KEY_REF}}" --public-key "{{default "" .PUBLIC_KEY}}" --title "{{default "" .TITLE}}"'''
 
   git:governance:check:
     desc: Valida higiene Git local e falha com branches ou worktrees residuais ja absorvidas em main
@@ -302,14 +302,14 @@ tasks:
     platforms: [windows]
     dir: '{{.TASKFILE_DIR}}'
     cmds:
-      - "pwsh -NoProfile -File ./scripts/invoke-python.ps1 -ScriptPath ./scripts/git-governance-check.py --repo-root \"{{.TASKFILE_DIR}}\" --strict"
+      - 'pwsh -NoProfile -File ./scripts/invoke-python.ps1 -ScriptPath ./scripts/git-governance-check.py --repo-root "{{.TASKFILE_DIR}}" --strict'
 
   git:governance:check:linux:
     desc: Linux/WSL - valida higiene Git local contra origin/main ou main
     platforms: [linux]
     dir: '{{.TASKFILE_DIR}}'
     cmds:
-      - "bash -lc 'bash ./scripts/run-python.sh ./scripts/git-governance-check.py --repo-root \"{{.TASKFILE_DIR}}\" --strict'"
+      - 'bash -lc ''bash ./scripts/run-python.sh ./scripts/git-governance-check.py --repo-root "{{.TASKFILE_DIR}}" --strict'''
 
   bootstrap:
     desc: Auto - bootstrap no ambiente atual
@@ -326,13 +326,13 @@ tasks:
     desc: Windows - bootstrap completo
     platforms: [windows]
     cmds:
-      - "pwsh -NoProfile -Command \"& '{{.TASKFILE_DIR}}/app/bootstrap/_start.ps1'\""
+      - 'pwsh -NoProfile -Command "& ''{{.TASKFILE_DIR}}/app/bootstrap/_start.ps1''"'
 
   bootstrap:windows:refresh:
     desc: Windows - refresh rapido
     platforms: [windows]
     cmds:
-      - "pwsh -NoProfile -Command \"& '{{.TASKFILE_DIR}}/app/bootstrap/_start.ps1' -Refresh\""
+      - 'pwsh -NoProfile -Command "& ''{{.TASKFILE_DIR}}/app/bootstrap/_start.ps1'' -Refresh"'
 
   bootstrap:relink:
     desc: Auto - recria os symlinks canonicos do bootstrap no ambiente atual
@@ -343,7 +343,7 @@ tasks:
     desc: Windows - recria symlinks/junctions do bootstrap
     platforms: [windows]
     cmds:
-      - "pwsh -NoProfile -Command \". '{{.TASKFILE_DIR}}/app/bootstrap/bootstrap-config.ps1'; if (!(Ensure-BootstrapConfigReady -DotFilesDirectory '{{.TASKFILE_DIR}}')) { exit 1 }; . '{{.TASKFILE_DIR}}/app/bootstrap/bootstrap-windows.ps1' -RelinkOnly\""
+      - 'pwsh -NoProfile -Command ". ''{{.TASKFILE_DIR}}/app/bootstrap/bootstrap-config.ps1''; if (!(Ensure-BootstrapConfigReady -DotFilesDirectory ''{{.TASKFILE_DIR}}'')) { exit 1 }; . ''{{.TASKFILE_DIR}}/app/bootstrap/bootstrap-windows.ps1'' -RelinkOnly"'
 
   bootstrap:linux:
     desc: Linux/WSL - bootstrap Ubuntu
@@ -481,7 +481,7 @@ tasks:
     platforms: [windows]
     dir: '{{.TASKFILE_DIR}}'
     cmds:
-      - "pwsh -NoProfile -File ./scripts/invoke-python.ps1 -ScriptPath ./scripts/validate_docs.py"
+      - 'pwsh -NoProfile -File ./scripts/invoke-python.ps1 -ScriptPath ./scripts/validate_docs.py'
 
   docs:check:linux:
     desc: Linux/WSL - valida links locais e referencias documentais
@@ -500,7 +500,7 @@ tasks:
     platforms: [windows]
     dir: '{{.TASKFILE_DIR}}'
     cmds:
-      - "pwsh -NoProfile -File ./scripts/invoke-python.ps1 -ScriptPath ./scripts/cspell-governance.py check . --config .cspell.json"
+      - 'pwsh -NoProfile -File ./scripts/invoke-python.ps1 -ScriptPath ./scripts/cspell-governance.py check . --config .cspell.json'
 
   spell:check:linux:
     desc: Linux/WSL - valida ortografia com CSpell
@@ -514,43 +514,43 @@ tasks:
     cmds:
       - task: spell:dictionary:audit:{{if or (eq .OS "Windows_NT") (eq .OS "windows")}}windows{{else}}linux{{end}}
         vars:
-          FIX: "{{.FIX}}"
+          FIX: '{{.FIX}}'
 
   spell:dictionary:audit:windows:
     desc: Windows - audita redundancias no dicionario local do CSpell
     platforms: [windows]
     dir: '{{.TASKFILE_DIR}}'
     cmds:
-      - "pwsh -NoProfile -File ./scripts/invoke-python.ps1 -ScriptPath ./scripts/cspell-governance.py dictionary-audit --config .cspell.json --project-words .cspell/project-words.txt{{if eq .FIX \"1\"}} --fix{{end}}"
+      - 'pwsh -NoProfile -File ./scripts/invoke-python.ps1 -ScriptPath ./scripts/cspell-governance.py dictionary-audit --config .cspell.json --project-words .cspell/project-words.txt{{if eq .FIX "1"}} --fix{{end}}'
 
   spell:dictionary:audit:linux:
     desc: Linux/WSL - audita redundancias no dicionario local do CSpell
     platforms: [linux]
     dir: '{{.TASKFILE_DIR}}'
     cmds:
-      - "bash -lc 'bash ./scripts/run-python.sh ./scripts/cspell-governance.py dictionary-audit --config .cspell.json --project-words .cspell/project-words.txt{{if eq .FIX \"1\"}} --fix{{end}}'"
+      - 'bash -lc ''bash ./scripts/run-python.sh ./scripts/cspell-governance.py dictionary-audit --config .cspell.json --project-words .cspell/project-words.txt{{if eq .FIX "1"}} --fix{{end}}'''
 
   spell:curate:
     desc: Curadoria assistida do dicionario do CSpell para um escopo especifico
     cmds:
       - task: spell:curate:{{if or (eq .OS "Windows_NT") (eq .OS "windows")}}windows{{else}}linux{{end}}
         vars:
-          TARGETS: "{{default \".\" .TARGETS}}"
-          APPLY: "{{.APPLY}}"
+          TARGETS: '{{default "." .TARGETS}}'
+          APPLY: '{{.APPLY}}'
 
   spell:curate:windows:
     desc: Windows - curadoria de palavras desconhecidas do CSpell
     platforms: [windows]
     dir: '{{.TASKFILE_DIR}}'
     cmds:
-      - "pwsh -NoProfile -File ./scripts/invoke-python.ps1 -ScriptPath ./scripts/cspell-governance.py curate {{.TARGETS}} --config .cspell.json --project-words .cspell/project-words.txt{{if eq .APPLY \"1\"}} --apply{{end}}"
+      - 'pwsh -NoProfile -File ./scripts/invoke-python.ps1 -ScriptPath ./scripts/cspell-governance.py curate {{.TARGETS}} --config .cspell.json --project-words .cspell/project-words.txt{{if eq .APPLY "1"}} --apply{{end}}'
 
   spell:curate:linux:
     desc: Linux/WSL - curadoria de palavras desconhecidas do CSpell
     platforms: [linux]
     dir: '{{.TASKFILE_DIR}}'
     cmds:
-      - "bash -lc 'bash ./scripts/run-python.sh ./scripts/cspell-governance.py curate {{.TARGETS}} --config .cspell.json --project-words .cspell/project-words.txt{{if eq .APPLY \"1\"}} --apply{{end}}'"
+      - 'bash -lc ''bash ./scripts/run-python.sh ./scripts/cspell-governance.py curate {{.TARGETS}} --config .cspell.json --project-words .cspell/project-words.txt{{if eq .APPLY "1"}} --apply{{end}}'''
 
   spell:review:
     desc: Review consultivo de ortografia por arquivo via Pascoalete
@@ -559,11 +559,11 @@ tasks:
     cmds:
       - task: spell:review:{{if or (eq .OS "Windows_NT") (eq .OS "windows")}}windows{{else}}linux{{end}}
         vars:
-          WORKLOG_ID: "{{.WORKLOG_ID}}"
-          PATHS: "{{.PATHS}}"
-          REVIEWER: "{{default \"pascoalete\" .REVIEWER}}"
-          REGISTER_PENDING: "{{default \"1\" .REGISTER_PENDING}}"
-          FIX_DICTIONARY: "{{default \"1\" .FIX_DICTIONARY}}"
+          WORKLOG_ID: '{{.WORKLOG_ID}}'
+          PATHS: '{{.PATHS}}'
+          REVIEWER: '{{default "pascoalete" .REVIEWER}}'
+          REGISTER_PENDING: '{{default "1" .REGISTER_PENDING}}'
+          FIX_DICTIONARY: '{{default "1" .FIX_DICTIONARY}}'
 
   spell:review:windows:
     desc: Windows - review consultivo de ortografia por arquivo
@@ -572,7 +572,7 @@ tasks:
     requires:
       vars: [WORKLOG_ID, PATHS]
     cmds:
-      - "pwsh -NoProfile -File ./scripts/invoke-python.ps1 -ScriptPath ./scripts/cspell-governance.py review --worklog-id \"{{.WORKLOG_ID}}\" --reviewer \"{{default \"pascoalete\" .REVIEWER}}\" --paths \"{{.PATHS}}\" --ledger-file docs/AI-ORTHOGRAPHY-LEDGER.md --config .cspell.json --project-words .cspell/project-words.txt --roadmap-file ROADMAP.md --decisions-file docs/ROADMAP-DECISIONS.md{{if eq .REGISTER_PENDING \"0\"}} --no-register-pending{{end}}{{if eq .FIX_DICTIONARY \"0\"}} --no-fix-dictionary{{end}}"
+      - 'pwsh -NoProfile -File ./scripts/invoke-python.ps1 -ScriptPath ./scripts/cspell-governance.py review --worklog-id "{{.WORKLOG_ID}}" --reviewer "{{default "pascoalete" .REVIEWER}}" --paths "{{.PATHS}}" --ledger-file docs/AI-ORTHOGRAPHY-LEDGER.md --config .cspell.json --project-words .cspell/project-words.txt --roadmap-file ROADMAP.md --decisions-file docs/ROADMAP-DECISIONS.md{{if eq .REGISTER_PENDING "0"}} --no-register-pending{{end}}{{if eq .FIX_DICTIONARY "0"}} --no-fix-dictionary{{end}}'
 
   spell:review:linux:
     desc: Linux/WSL - review consultivo de ortografia por arquivo
@@ -581,7 +581,7 @@ tasks:
     requires:
       vars: [WORKLOG_ID, PATHS]
     cmds:
-      - "bash -lc 'bash ./scripts/run-python.sh ./scripts/cspell-governance.py review --worklog-id \"{{.WORKLOG_ID}}\" --reviewer \"{{default \"pascoalete\" .REVIEWER}}\" --paths \"{{.PATHS}}\" --ledger-file docs/AI-ORTHOGRAPHY-LEDGER.md --config .cspell.json --project-words .cspell/project-words.txt --roadmap-file ROADMAP.md --decisions-file docs/ROADMAP-DECISIONS.md{{if eq .REGISTER_PENDING \"0\"}} --no-register-pending{{end}}{{if eq .FIX_DICTIONARY \"0\"}} --no-fix-dictionary{{end}}'"
+      - 'bash -lc ''bash ./scripts/run-python.sh ./scripts/cspell-governance.py review --worklog-id "{{.WORKLOG_ID}}" --reviewer "{{default "pascoalete" .REVIEWER}}" --paths "{{.PATHS}}" --ledger-file docs/AI-ORTHOGRAPHY-LEDGER.md --config .cspell.json --project-words .cspell/project-words.txt --roadmap-file ROADMAP.md --decisions-file docs/ROADMAP-DECISIONS.md{{if eq .REGISTER_PENDING "0"}} --no-register-pending{{end}}{{if eq .FIX_DICTIONARY "0"}} --no-fix-dictionary{{end}}'''
 
   lint:yaml:
     desc: Aplica yamllint nos arquivos YAML do repo
@@ -612,7 +612,7 @@ tasks:
     platforms: [windows]
     dir: '{{.TASKFILE_DIR}}'
     cmds:
-      - "pwsh -NoProfile -File ./scripts/invoke-python.ps1 -ScriptPath ./scripts/run_actionlint.py"
+      - 'pwsh -NoProfile -File ./scripts/invoke-python.ps1 -ScriptPath ./scripts/run_actionlint.py'
 
   validate:actions:linux:
     desc: Linux/WSL - valida workflows do GitHub Actions com actionlint pinado
@@ -631,7 +631,7 @@ tasks:
     platforms: [windows]
     dir: '{{.TASKFILE_DIR}}'
     cmds:
-      - "pwsh -NoProfile -Command \"& './scripts/invoke-python.ps1' -ScriptPath './scripts/run_gitleaks.py' -Arguments @('dir', '.', '--no-banner', '--redact', '--config', '.gitleaks.toml')\""
+      - 'pwsh -NoProfile -Command "& ''./scripts/invoke-python.ps1'' -ScriptPath ''./scripts/run_gitleaks.py'' -Arguments @(''dir'', ''.'', ''--no-banner'', ''--redact'', ''--config'', ''.gitleaks.toml'')"'
 
   security:secrets:linux:
     desc: Linux/WSL - escaneia segredos versionados com gitleaks pinado
@@ -669,7 +669,7 @@ tasks:
     platforms: [windows]
     dir: '{{.TASKFILE_DIR}}'
     cmds:
-      - "pwsh -NoProfile -Command '$ErrorActionPreference=\"Stop\"; $failed=$false; git ls-files \"app/bootstrap/*.ps1\" \"app/bootstrap/**/*.ps1\" \"app/df/*.ps1\" \"app/df/**/*.ps1\" \"scripts/*.ps1\" \"scripts/**/*.ps1\" \"tests/*.ps1\" \"tests/**/*.ps1\" | ForEach-Object { $errs=$null; [System.Management.Automation.Language.Parser]::ParseFile($_,[ref]$null,[ref]$errs) | Out-Null; if($errs -and $errs.Count -gt 0){ $failed=$true; $errs | ForEach-Object { Write-Host ($_.Extent.File + \":\" + $_.Extent.StartLineNumber + \": \" + $_.Message) } } }; if($failed){ exit 1 }'"
+      - 'pwsh -NoProfile -Command ''$ErrorActionPreference="Stop"; $failed=$false; git ls-files "app/bootstrap/*.ps1" "app/bootstrap/**/*.ps1" "app/df/*.ps1" "app/df/**/*.ps1" "scripts/*.ps1" "scripts/**/*.ps1" "tests/*.ps1" "tests/**/*.ps1" | ForEach-Object { $errs=$null; [System.Management.Automation.Language.Parser]::ParseFile($_,[ref]$null,[ref]$errs) | Out-Null; if($errs -and $errs.Count -gt 0){ $failed=$true; $errs | ForEach-Object { Write-Host ($_.Extent.File + ":" + $_.Extent.StartLineNumber + ": " + $_.Message) } } }; if($failed){ exit 1 }'''
 
   ci:lint:linux:
     desc: Linux/WSL - validacao sintatica dos scripts .sh
@@ -682,7 +682,7 @@ tasks:
     desc: Executa testes Pester da pasta tests/powershell
     dir: '{{.TASKFILE_DIR}}'
     cmds:
-      - "pwsh -NoProfile -Command \"if (-not (Get-Command Invoke-Pester -ErrorAction SilentlyContinue)) { throw 'Invoke-Pester nao encontrado. Instale Pester antes de rodar esta task.' }; Invoke-Pester -Path './tests/powershell'\""
+      - 'pwsh -NoProfile -Command "if (-not (Get-Command Invoke-Pester -ErrorAction SilentlyContinue)) { throw ''Invoke-Pester nao encontrado. Instale Pester antes de rodar esta task.'' }; Invoke-Pester -Path ''./tests/powershell''"'
 
   test:integration:
     desc: Executa harness de integracao do bootstrap no ambiente atual
@@ -694,14 +694,14 @@ tasks:
     platforms: [windows]
     dir: '{{.TASKFILE_DIR}}'
     cmds:
-      - "pwsh -NoProfile -File ./scripts/run-windows-bootstrap-integration.ps1"
+      - 'pwsh -NoProfile -File ./scripts/run-windows-bootstrap-integration.ps1'
 
   test:integration:linux:
     desc: Linux/WSL - relink integration em container OCI com Bats
     platforms: [linux]
     dir: '{{.TASKFILE_DIR}}'
     cmds:
-      - "bash ./scripts/run-linux-bootstrap-integration.sh"
+      - 'bash ./scripts/run-linux-bootstrap-integration.sh'
 
   ci:bootstrap:integration:
     desc: Executa a camada canonica do workflow Bootstrap Integration no ambiente atual
@@ -730,14 +730,14 @@ tasks:
     platforms: [windows]
     dir: '{{.TASKFILE_DIR}}'
     cmds:
-      - "pwsh -NoProfile -File ./scripts/run-python-unittests.ps1"
+      - 'pwsh -NoProfile -File ./scripts/run-python-unittests.ps1'
 
   test:unit:python:linux:
     desc: Linux/WSL - executa testes unitarios Python da pasta tests/python
     platforms: [linux]
     dir: '{{.TASKFILE_DIR}}'
     cmds:
-      - "bash -lc 'bash ./scripts/run-python.sh -m unittest discover -s ./tests/python -p \"*_test.py\"'"
+      - 'bash -lc ''bash ./scripts/run-python.sh -m unittest discover -s ./tests/python -p "*_test.py"'''
 
   ai:validate:
     desc: Valida AGENTS, skills, cartoes de agentes e politica de IA do repo
@@ -750,7 +750,7 @@ tasks:
     dir: '{{.TASKFILE_DIR}}'
     cmds:
       - task: git:governance:check:windows
-      - "pwsh -NoProfile -File ./scripts/invoke-python.ps1 -ScriptPath ./scripts/validate-ai-assets.py"
+      - 'pwsh -NoProfile -File ./scripts/invoke-python.ps1 -ScriptPath ./scripts/validate-ai-assets.py'
 
   ai:validate:linux:
     desc: Linux/WSL - valida AGENTS, skills, cartoes de agentes e politica de IA do repo
@@ -770,7 +770,7 @@ tasks:
     platforms: [windows]
     dir: '{{.TASKFILE_DIR}}'
     cmds:
-      - "pwsh -NoProfile -File ./scripts/invoke-python.ps1 -ScriptPath ./scripts/ai-control-plane.py -Arguments show"
+      - 'pwsh -NoProfile -File ./scripts/invoke-python.ps1 -ScriptPath ./scripts/ai-control-plane.py -Arguments show'
 
   ai:control-plane:show:linux:
     desc: Linux/WSL - exibe o resumo da control plane de IA
@@ -822,111 +822,111 @@ tasks:
     cmds:
       - task: ai:control-plane:sync:drain:{{if or (eq .OS "Windows_NT") (eq .OS "windows")}}windows{{else}}linux{{end}}
         vars:
-          ARTIFACT_KEY: "{{default \"\" .ARTIFACT_KEY}}"
-          APPLY: "{{default \"0\" .APPLY}}"
-          MAX_EVENTS: "{{default \"0\" .MAX_EVENTS}}"
+          ARTIFACT_KEY: '{{default "" .ARTIFACT_KEY}}'
+          APPLY: '{{default "0" .APPLY}}'
+          MAX_EVENTS: '{{default "0" .MAX_EVENTS}}'
 
   ai:control-plane:sync:drain:windows:
     desc: Windows - planeja ou executa a drenagem do outbox local duravel
     platforms: [windows]
     dir: '{{.TASKFILE_DIR}}'
     cmds:
-      - "pwsh -NoProfile -File ./scripts/invoke-python.ps1 -ScriptPath ./scripts/ai-control-plane.py -Arguments @('sync-drain'{{if .ARTIFACT_KEY}},'--artifact-key','{{.ARTIFACT_KEY}}'{{end}}{{if eq .APPLY \"1\"}},'--apply'{{end}}{{if ne .MAX_EVENTS \"0\"}},'--max-events','{{.MAX_EVENTS}}'{{end}})"
+      - 'pwsh -NoProfile -File ./scripts/invoke-python.ps1 -ScriptPath ./scripts/ai-control-plane.py -Arguments @(''sync-drain''{{if .ARTIFACT_KEY}},''--artifact-key'',''{{.ARTIFACT_KEY}}''{{end}}{{if eq .APPLY "1"}},''--apply''{{end}}{{if ne .MAX_EVENTS "0"}},''--max-events'',''{{.MAX_EVENTS}}''{{end}})'
 
   ai:control-plane:sync:drain:linux:
     desc: Linux/WSL - planeja ou executa a drenagem do outbox local duravel
     platforms: [linux]
     dir: '{{.TASKFILE_DIR}}'
     cmds:
-      - "bash -lc 'bash ./scripts/run-python.sh ./scripts/ai-control-plane.py sync-drain{{if .ARTIFACT_KEY}} --artifact-key \"{{.ARTIFACT_KEY}}\"{{end}}{{if eq .APPLY \"1\"}} --apply{{end}}{{if ne .MAX_EVENTS \"0\"}} --max-events {{.MAX_EVENTS}}{{end}}'"
+      - 'bash -lc ''bash ./scripts/run-python.sh ./scripts/ai-control-plane.py sync-drain{{if .ARTIFACT_KEY}} --artifact-key "{{.ARTIFACT_KEY}}"{{end}}{{if eq .APPLY "1"}} --apply{{end}}{{if ne .MAX_EVENTS "0"}} --max-events {{.MAX_EVENTS}}{{end}}'''
 
   ai:startup:session:
     desc: Gera o relatorio operacional de startup/restart da sessao de IA
     cmds:
       - task: ai:startup:session:{{if or (eq .OS "Windows_NT") (eq .OS "windows")}}windows{{else}}linux{{end}}
         vars:
-          OUT: "{{.OUT}}"
-          READY_OUT: "{{.READY_OUT}}"
-          PENDING_ACTION: "{{.PENDING_ACTION}}"
+          OUT: '{{.OUT}}'
+          READY_OUT: '{{.READY_OUT}}'
+          PENDING_ACTION: '{{.PENDING_ACTION}}'
 
   ai:startup:session:windows:
     desc: Windows - gera o relatorio operacional de startup/restart da sessao de IA
     platforms: [windows]
     dir: '{{.TASKFILE_DIR}}'
     cmds:
-      - "pwsh -NoProfile -File ./scripts/run-ai-startup-session.ps1 -RepoRoot '{{.TASKFILE_DIR}}' -Out '{{default \".cache/ai/startup-session.md\" .OUT}}' -ReadyOut '{{default \".cache/ai/startup-ready.json\" .READY_OUT}}' -PendingAction '{{default \"\" .PENDING_ACTION}}'"
+      - 'pwsh -NoProfile -File ./scripts/run-ai-startup-session.ps1 -RepoRoot ''{{.TASKFILE_DIR}}'' -Out ''{{default ".cache/ai/startup-session.md" .OUT}}'' -ReadyOut ''{{default ".cache/ai/startup-ready.json" .READY_OUT}}'' -PendingAction ''{{default "" .PENDING_ACTION}}'''
 
   ai:startup:session:linux:
     desc: Linux/WSL - gera o relatorio operacional de startup/restart da sessao de IA
     platforms: [linux]
     dir: '{{.TASKFILE_DIR}}'
     cmds:
-      - "bash -lc 'bash ./scripts/run-python.sh ./scripts/ai-session-startup.py report --repo-root \"{{.TASKFILE_DIR}}\" --out \"{{default \".cache/ai/startup-session.md\" .OUT}}\" --ready-out \"{{default \".cache/ai/startup-ready.json\" .READY_OUT}}\"{{if .PENDING_ACTION}} --pending-action \"{{.PENDING_ACTION}}\"{{end}}'"
+      - 'bash -lc ''bash ./scripts/run-python.sh ./scripts/ai-session-startup.py report --repo-root "{{.TASKFILE_DIR}}" --out "{{default ".cache/ai/startup-session.md" .OUT}}" --ready-out "{{default ".cache/ai/startup-ready.json" .READY_OUT}}"{{if .PENDING_ACTION}} --pending-action "{{.PENDING_ACTION}}"{{end}}'''
 
   ai:startup:enforce:
     desc: Recalcula o startup oficial e falha sem ready_for_work
     cmds:
       - task: ai:startup:enforce:{{if or (eq .OS "Windows_NT") (eq .OS "windows")}}windows{{else}}linux{{end}}
         vars:
-          OUT: "{{.OUT}}"
-          READY_OUT: "{{.READY_OUT}}"
-          PENDING_ACTION: "{{.PENDING_ACTION}}"
+          OUT: '{{.OUT}}'
+          READY_OUT: '{{.READY_OUT}}'
+          PENDING_ACTION: '{{.PENDING_ACTION}}'
 
   ai:startup:enforce:windows:
     desc: Windows - endurece startup e falha quando a sessao nao estiver pronta
     platforms: [windows]
     dir: '{{.TASKFILE_DIR}}'
     cmds:
-      - "pwsh -NoProfile -Command \"& './scripts/invoke-python.ps1' -ScriptPath './scripts/ai-session-startup.py' -Arguments @('enforce','--repo-root','{{.TASKFILE_DIR}}','--out','{{default \".cache/ai/startup-session.md\" .OUT}}','--ready-out','{{default \".cache/ai/startup-ready.json\" .READY_OUT}}'{{if .PENDING_ACTION}},'--pending-action','{{.PENDING_ACTION}}'{{end}})\""
+      - 'pwsh -NoProfile -Command "& ''./scripts/invoke-python.ps1'' -ScriptPath ''./scripts/ai-session-startup.py'' -Arguments @(''enforce'',''--repo-root'',''{{.TASKFILE_DIR}}'',''--out'',''{{default ".cache/ai/startup-session.md" .OUT}}'',''--ready-out'',''{{default ".cache/ai/startup-ready.json" .READY_OUT}}''{{if .PENDING_ACTION}},''--pending-action'',''{{.PENDING_ACTION}}''{{end}})"'
 
   ai:startup:enforce:linux:
     desc: Linux/WSL - endurece startup e falha quando a sessao nao estiver pronta
     platforms: [linux]
     dir: '{{.TASKFILE_DIR}}'
     cmds:
-      - "bash -lc 'bash ./scripts/run-python.sh ./scripts/ai-session-startup.py enforce --repo-root \"{{.TASKFILE_DIR}}\" --out \"{{default \".cache/ai/startup-session.md\" .OUT}}\" --ready-out \"{{default \".cache/ai/startup-ready.json\" .READY_OUT}}\"{{if .PENDING_ACTION}} --pending-action \"{{.PENDING_ACTION}}\"{{end}}'"
+      - 'bash -lc ''bash ./scripts/run-python.sh ./scripts/ai-session-startup.py enforce --repo-root "{{.TASKFILE_DIR}}" --out "{{default ".cache/ai/startup-session.md" .OUT}}" --ready-out "{{default ".cache/ai/startup-ready.json" .READY_OUT}}"{{if .PENDING_ACTION}} --pending-action "{{.PENDING_ACTION}}"{{end}}'''
 
   ai:1password:ratelimit:
     desc: Exibe o rate limit atual da service account usada pelo 1Password CLI
     cmds:
       - task: ai:1password:ratelimit:{{if or (eq .OS "Windows_NT") (eq .OS "windows")}}windows{{else}}linux{{end}}
         vars:
-          REFRESH: "{{default \"0\" .REFRESH}}"
+          REFRESH: '{{default "0" .REFRESH}}'
 
   ai:1password:ratelimit:windows:
     desc: Windows - exibe o rate limit atual da service account do 1Password
     platforms: [windows]
     dir: '{{.TASKFILE_DIR}}'
     cmds:
-      - "pwsh -NoProfile -File ./scripts/invoke-python.ps1 -ScriptPath ./scripts/ai-control-plane.py op-ratelimit{{if eq .REFRESH \"1\"}} --refresh{{end}}"
+      - 'pwsh -NoProfile -File ./scripts/invoke-python.ps1 -ScriptPath ./scripts/ai-control-plane.py op-ratelimit{{if eq .REFRESH "1"}} --refresh{{end}}'
 
   ai:1password:ratelimit:linux:
     desc: Linux/WSL - exibe o rate limit atual da service account do 1Password
     platforms: [linux]
     dir: '{{.TASKFILE_DIR}}'
     cmds:
-      - "bash -lc 'bash ./scripts/run-python.sh ./scripts/ai-control-plane.py op-ratelimit{{if eq .REFRESH \"1\"}} --refresh{{end}}'"
+      - 'bash -lc ''bash ./scripts/run-python.sh ./scripts/ai-control-plane.py op-ratelimit{{if eq .REFRESH "1"}} --refresh{{end}}'''
 
   ai:atlassian:check:
     desc: Valida a control plane Atlassian e testa conectividade Jira/Confluence via API
     cmds:
       - task: ai:atlassian:check:{{if or (eq .OS "Windows_NT") (eq .OS "windows")}}windows{{else}}linux{{end}}
         vars:
-          SITE_URL: "{{.SITE_URL}}"
+          SITE_URL: '{{.SITE_URL}}'
 
   ai:atlassian:check:windows:
     desc: Windows - valida a control plane Atlassian e testa conectividade
     platforms: [windows]
     dir: '{{.TASKFILE_DIR}}'
     cmds:
-      - "pwsh -NoProfile -File ./scripts/run-ai-atlassian-check.ps1 -SiteUrl '{{default \"\" .SITE_URL}}'"
+      - 'pwsh -NoProfile -File ./scripts/run-ai-atlassian-check.ps1 -SiteUrl ''{{default "" .SITE_URL}}'''
 
   ai:atlassian:check:linux:
     desc: Linux/WSL - valida a control plane Atlassian e testa conectividade
     platforms: [linux]
     dir: '{{.TASKFILE_DIR}}'
     cmds:
-      - "bash -lc 'bash ./scripts/run-python.sh ./scripts/ai-control-plane.py atlassian-check --site-url \"{{default \"\" .SITE_URL}}\"'"
+      - 'bash -lc ''bash ./scripts/run-python.sh ./scripts/ai-control-plane.py atlassian-check --site-url "{{default "" .SITE_URL}}"'''
 
   ai:prompts:jira:check:
     desc: Valida o contrato Jira dos prompt packs formais com owner_issue
@@ -938,14 +938,14 @@ tasks:
     platforms: [windows]
     dir: '{{.TASKFILE_DIR}}'
     cmds:
-      - "pwsh -NoProfile -Command \"& './scripts/invoke-python.ps1' -ScriptPath './scripts/ai-prompt-governance.py' -Arguments @('check','--repo-root','{{.TASKFILE_DIR}}')\""
+      - 'pwsh -NoProfile -Command "& ''./scripts/invoke-python.ps1'' -ScriptPath ''./scripts/ai-prompt-governance.py'' -Arguments @(''check'',''--repo-root'',''{{.TASKFILE_DIR}}'')"'
 
   ai:prompts:jira:check:linux:
     desc: Linux/WSL - valida titulo e labels Jira dos prompt packs formais
     platforms: [linux]
     dir: '{{.TASKFILE_DIR}}'
     cmds:
-      - "bash -lc 'bash ./scripts/run-python.sh ./scripts/ai-prompt-governance.py check --repo-root \"{{.TASKFILE_DIR}}\"'"
+      - 'bash -lc ''bash ./scripts/run-python.sh ./scripts/ai-prompt-governance.py check --repo-root "{{.TASKFILE_DIR}}"'''
 
   ai:prompts:jira:sync:
     desc: Sincroniza titulo e labels Jira dos prompt packs formais com owner_issue
@@ -957,14 +957,14 @@ tasks:
     platforms: [windows]
     dir: '{{.TASKFILE_DIR}}'
     cmds:
-      - "pwsh -NoProfile -Command \"& './scripts/invoke-python.ps1' -ScriptPath './scripts/ai-prompt-governance.py' -Arguments @('sync','--repo-root','{{.TASKFILE_DIR}}')\""
+      - 'pwsh -NoProfile -Command "& ''./scripts/invoke-python.ps1'' -ScriptPath ''./scripts/ai-prompt-governance.py'' -Arguments @(''sync'',''--repo-root'',''{{.TASKFILE_DIR}}'')"'
 
   ai:prompts:jira:sync:linux:
     desc: Linux/WSL - sincroniza titulo e labels Jira dos prompt packs formais
     platforms: [linux]
     dir: '{{.TASKFILE_DIR}}'
     cmds:
-      - "bash -lc 'bash ./scripts/run-python.sh ./scripts/ai-prompt-governance.py sync --repo-root \"{{.TASKFILE_DIR}}\"'"
+      - 'bash -lc ''bash ./scripts/run-python.sh ./scripts/ai-prompt-governance.py sync --repo-root "{{.TASKFILE_DIR}}"'''
 
   ai:atlassian:openapi:show:
     desc: Exibe o catalogo dos specs OpenAPI oficiais da Atlassian usados no repo
@@ -976,7 +976,7 @@ tasks:
     platforms: [windows]
     dir: '{{.TASKFILE_DIR}}'
     cmds:
-      - "pwsh -NoProfile -File ./scripts/invoke-python.ps1 -ScriptPath ./scripts/ai-atlassian-openapi.py -Arguments show"
+      - 'pwsh -NoProfile -File ./scripts/invoke-python.ps1 -ScriptPath ./scripts/ai-atlassian-openapi.py -Arguments show'
 
   ai:atlassian:openapi:show:linux:
     desc: Linux/WSL - exibe o catalogo dos specs OpenAPI Atlassian
@@ -995,7 +995,7 @@ tasks:
     platforms: [windows]
     dir: '{{.TASKFILE_DIR}}'
     cmds:
-      - "pwsh -NoProfile -File ./scripts/invoke-python.ps1 -ScriptPath ./scripts/ai-atlassian-openapi.py -Arguments vendor"
+      - 'pwsh -NoProfile -File ./scripts/invoke-python.ps1 -ScriptPath ./scripts/ai-atlassian-openapi.py -Arguments vendor'
 
   ai:atlassian:openapi:vendor:linux:
     desc: Linux/WSL - vendoriza os specs OpenAPI Atlassian
@@ -1014,7 +1014,7 @@ tasks:
     platforms: [windows]
     dir: '{{.TASKFILE_DIR}}'
     cmds:
-      - "pwsh -NoProfile -File ./scripts/invoke-python.ps1 -ScriptPath ./scripts/ai-jira-model.py -Arguments show"
+      - 'pwsh -NoProfile -File ./scripts/invoke-python.ps1 -ScriptPath ./scripts/ai-jira-model.py -Arguments show'
 
   ai:jira:model:show:linux:
     desc: Linux/WSL - exibe o modelo declarativo alvo do Jira
@@ -1033,7 +1033,7 @@ tasks:
     platforms: [windows]
     dir: '{{.TASKFILE_DIR}}'
     cmds:
-      - "pwsh -NoProfile -File ./scripts/invoke-python.ps1 -ScriptPath ./scripts/ai-jira-model.py -Arguments live-delta"
+      - 'pwsh -NoProfile -File ./scripts/invoke-python.ps1 -ScriptPath ./scripts/ai-jira-model.py -Arguments live-delta'
 
   ai:jira:model:delta:linux:
     desc: Linux/WSL - compara o tenant Jira atual com o modelo declarativo alvo
@@ -1052,7 +1052,7 @@ tasks:
     platforms: [windows]
     dir: '{{.TASKFILE_DIR}}'
     cmds:
-      - "pwsh -NoProfile -File ./scripts/invoke-python.ps1 -ScriptPath ./scripts/ai-atlassian-backfill.py -Arguments plan"
+      - 'pwsh -NoProfile -File ./scripts/invoke-python.ps1 -ScriptPath ./scripts/ai-atlassian-backfill.py -Arguments plan'
 
   ai:atlassian:backfill:plan:linux:
     desc: Linux/WSL - gera o plano declarativo de backfill Atlassian
@@ -1066,21 +1066,21 @@ tasks:
     cmds:
       - task: ai:atlassian:migration:bundle:{{if or (eq .OS "Windows_NT") (eq .OS "windows")}}windows{{else}}linux{{end}}
         vars:
-          OUTPUT_ROOT: "{{.OUTPUT_ROOT}}"
+          OUTPUT_ROOT: '{{.OUTPUT_ROOT}}'
 
   ai:atlassian:migration:bundle:windows:
     desc: Windows - gera o bundle auditavel da migracao Atlassian
     platforms: [windows]
     dir: '{{.TASKFILE_DIR}}'
     cmds:
-      - "pwsh -NoProfile -File ./scripts/run-ai-atlassian-migration-bundle.ps1 -OutputRoot '{{default \"\" .OUTPUT_ROOT}}'"
+      - 'pwsh -NoProfile -File ./scripts/run-ai-atlassian-migration-bundle.ps1 -OutputRoot ''{{default "" .OUTPUT_ROOT}}'''
 
   ai:atlassian:migration:bundle:linux:
     desc: Linux/WSL - gera o bundle auditavel da migracao Atlassian
     platforms: [linux]
     dir: '{{.TASKFILE_DIR}}'
     cmds:
-      - "bash -lc 'bash ./scripts/run-python.sh ./scripts/ai-atlassian-migration-bundle.py bundle --output-root \"{{default \"\" .OUTPUT_ROOT}}\"'"
+      - 'bash -lc ''bash ./scripts/run-python.sh ./scripts/ai-atlassian-migration-bundle.py bundle --output-root "{{default "" .OUTPUT_ROOT}}"'''
 
   ai:atlassian:seed:plan:
     desc: Gera o plano declarativo de semeadura Jira + Confluence
@@ -1092,7 +1092,7 @@ tasks:
     platforms: [windows]
     dir: '{{.TASKFILE_DIR}}'
     cmds:
-      - "pwsh -NoProfile -File ./scripts/invoke-python.ps1 -ScriptPath ./scripts/ai-atlassian-seed.py -Arguments plan"
+      - 'pwsh -NoProfile -File ./scripts/invoke-python.ps1 -ScriptPath ./scripts/ai-atlassian-seed.py -Arguments plan'
 
   ai:atlassian:seed:plan:linux:
     desc: Linux/WSL - gera o plano declarativo da semeadura Atlassian
@@ -1106,42 +1106,42 @@ tasks:
     cmds:
       - task: ai:atlassian:seed:apply:{{if or (eq .OS "Windows_NT") (eq .OS "windows")}}windows{{else}}linux{{end}}
         vars:
-          ALLOW_VISUAL_BOARD_GAP: "{{default \"0\" .ALLOW_VISUAL_BOARD_GAP}}"
+          ALLOW_VISUAL_BOARD_GAP: '{{default "0" .ALLOW_VISUAL_BOARD_GAP}}'
 
   ai:atlassian:seed:apply:windows:
     desc: Windows - executa a semeadura retroativa Atlassian
     platforms: [windows]
     dir: '{{.TASKFILE_DIR}}'
     cmds:
-      - "pwsh -NoProfile -File ./scripts/run-ai-atlassian-seed.ps1{{if eq .ALLOW_VISUAL_BOARD_GAP \"1\"}} -AllowVisualBoardGap{{end}}"
+      - 'pwsh -NoProfile -File ./scripts/run-ai-atlassian-seed.ps1{{if eq .ALLOW_VISUAL_BOARD_GAP "1"}} -AllowVisualBoardGap{{end}}'
 
   ai:atlassian:seed:apply:linux:
     desc: Linux/WSL - executa a semeadura retroativa Atlassian
     platforms: [linux]
     dir: '{{.TASKFILE_DIR}}'
     cmds:
-      - "bash -lc 'bash ./scripts/run-python.sh ./scripts/ai-atlassian-seed.py apply{{if eq .ALLOW_VISUAL_BOARD_GAP \"1\"}} --allow-visual-board-gap{{end}}'"
+      - 'bash -lc ''bash ./scripts/run-python.sh ./scripts/ai-atlassian-seed.py apply{{if eq .ALLOW_VISUAL_BOARD_GAP "1"}} --allow-visual-board-gap{{end}}'''
 
   ai:atlassian:docs:sync:
     desc: Sincroniza a documentacao oficial do control plane no Confluence
     cmds:
       - task: ai:atlassian:docs:sync:{{if or (eq .OS "Windows_NT") (eq .OS "windows")}}windows{{else}}linux{{end}}
         vars:
-          ISSUE_KEYS: "{{default \"\" .ISSUE_KEYS}}"
+          ISSUE_KEYS: '{{default "" .ISSUE_KEYS}}'
 
   ai:atlassian:docs:sync:windows:
     desc: Windows - sincroniza a documentacao oficial no Confluence
     platforms: [windows]
     dir: '{{.TASKFILE_DIR}}'
     cmds:
-      - "pwsh -NoProfile -File ./scripts/run-ai-atlassian-docs-sync.ps1 -IssueKeys \"{{default \"\" .ISSUE_KEYS}}\""
+      - 'pwsh -NoProfile -File ./scripts/run-ai-atlassian-docs-sync.ps1 -IssueKeys "{{default "" .ISSUE_KEYS}}"'
 
   ai:atlassian:docs:sync:linux:
     desc: Linux/WSL - sincroniza a documentacao oficial no Confluence
     platforms: [linux]
     dir: '{{.TASKFILE_DIR}}'
     cmds:
-      - "bash -lc 'bash ./scripts/run-python.sh ./scripts/ai-atlassian-docs-sync.py --issue-keys \"{{default \"\" .ISSUE_KEYS}}\"'"
+      - 'bash -lc ''bash ./scripts/run-python.sh ./scripts/ai-atlassian-docs-sync.py --issue-keys "{{default "" .ISSUE_KEYS}}"'''
 
   ai:review:ensure:
     desc: Garante o ledger de revisao especializada do repo
@@ -1153,37 +1153,37 @@ tasks:
     platforms: [windows]
     dir: '{{.TASKFILE_DIR}}'
     cmds:
-      - "pwsh -NoProfile -File ./scripts/invoke-python.ps1 -ScriptPath ./scripts/ai-review.py ensure --review-file \"{{default \"docs/AI-REVIEW-LEDGER.md\" .REVIEW_FILE}}\""
+      - 'pwsh -NoProfile -File ./scripts/invoke-python.ps1 -ScriptPath ./scripts/ai-review.py ensure --review-file "{{default "docs/AI-REVIEW-LEDGER.md" .REVIEW_FILE}}"'
 
   ai:review:ensure:linux:
     desc: Linux/WSL - garante o ledger de revisao especializada
     platforms: [linux]
     dir: '{{.TASKFILE_DIR}}'
     cmds:
-      - "bash -lc 'bash ./scripts/run-python.sh ./scripts/ai-review.py ensure --review-file \"{{default \"docs/AI-REVIEW-LEDGER.md\" .REVIEW_FILE}}\"'"
+      - 'bash -lc ''bash ./scripts/run-python.sh ./scripts/ai-review.py ensure --review-file "{{default "docs/AI-REVIEW-LEDGER.md" .REVIEW_FILE}}"'''
 
   ai:review:required:
     desc: Lista revisores especializados obrigatorios para o escopo informado
     cmds:
       - task: ai:review:required:{{if or (eq .OS \"Windows_NT\") (eq .OS \"windows\")}}windows{{else}}linux{{end}}
         vars:
-          PATHS: "{{.PATHS}}"
-          INTENT: "{{.INTENT}}"
-          RISK: "{{.RISK}}"
+          PATHS: '{{.PATHS}}'
+          INTENT: '{{.INTENT}}'
+          RISK: '{{.RISK}}'
 
   ai:review:required:windows:
     desc: Windows - lista revisores especializados obrigatorios
     platforms: [windows]
     dir: '{{.TASKFILE_DIR}}'
     cmds:
-      - "pwsh -NoProfile -File ./scripts/invoke-python.ps1 -ScriptPath ./scripts/ai-review.py required --repo-root \"{{.TASKFILE_DIR}}\" --paths \"{{default \"\" .PATHS}}\" --intent \"{{default \"Revisao especializada obrigatoria\" .INTENT}}\" --risk \"{{default \"medium\" .RISK}}\""
+      - 'pwsh -NoProfile -File ./scripts/invoke-python.ps1 -ScriptPath ./scripts/ai-review.py required --repo-root "{{.TASKFILE_DIR}}" --paths "{{default "" .PATHS}}" --intent "{{default "Revisao especializada obrigatoria" .INTENT}}" --risk "{{default "medium" .RISK}}"'
 
   ai:review:required:linux:
     desc: Linux/WSL - lista revisores especializados obrigatorios
     platforms: [linux]
     dir: '{{.TASKFILE_DIR}}'
     cmds:
-      - "bash -lc 'bash ./scripts/run-python.sh ./scripts/ai-review.py required --repo-root \"{{.TASKFILE_DIR}}\" --paths \"{{default \"\" .PATHS}}\" --intent \"{{default \"Revisao especializada obrigatoria\" .INTENT}}\" --risk \"{{default \"medium\" .RISK}}\"'"
+      - 'bash -lc ''bash ./scripts/run-python.sh ./scripts/ai-review.py required --repo-root "{{.TASKFILE_DIR}}" --paths "{{default "" .PATHS}}" --intent "{{default "Revisao especializada obrigatoria" .INTENT}}" --risk "{{default "medium" .RISK}}"'''
 
   ai:review:record:
     desc: Registra parecer especializado aprovado ou reprovado para um worklog
@@ -1192,13 +1192,13 @@ tasks:
     cmds:
       - task: ai:review:record:{{if or (eq .OS "Windows_NT") (eq .OS "windows")}}windows{{else}}linux{{end}}
         vars:
-          WORKLOG_ID: "{{.WORKLOG_ID}}"
-          REVIEWER: "{{.REVIEWER}}"
-          STATUS: "{{.STATUS}}"
-          SUMMARY: "{{.SUMMARY}}"
-          PATHS: "{{.PATHS}}"
-          EVIDENCE: "{{.EVIDENCE}}"
-          REVIEW_FILE: "{{.REVIEW_FILE}}"
+          WORKLOG_ID: '{{.WORKLOG_ID}}'
+          REVIEWER: '{{.REVIEWER}}'
+          STATUS: '{{.STATUS}}'
+          SUMMARY: '{{.SUMMARY}}'
+          PATHS: '{{.PATHS}}'
+          EVIDENCE: '{{.EVIDENCE}}'
+          REVIEW_FILE: '{{.REVIEW_FILE}}'
 
   ai:review:record:windows:
     desc: Windows - registra parecer especializado
@@ -1207,7 +1207,7 @@ tasks:
     requires:
       vars: [WORKLOG_ID, REVIEWER, STATUS, SUMMARY]
     cmds:
-      - "pwsh -NoProfile -File ./scripts/invoke-python.ps1 -ScriptPath ./scripts/ai-review.py record --review-file \"{{default \"docs/AI-REVIEW-LEDGER.md\" .REVIEW_FILE}}\" --worklog-id \"{{.WORKLOG_ID}}\" --reviewer \"{{.REVIEWER}}\" --status \"{{.STATUS}}\" --summary \"{{.SUMMARY}}\" --paths \"{{default \"\" .PATHS}}\" --evidence \"{{default \"\" .EVIDENCE}}\""
+      - 'pwsh -NoProfile -File ./scripts/invoke-python.ps1 -ScriptPath ./scripts/ai-review.py record --review-file "{{default "docs/AI-REVIEW-LEDGER.md" .REVIEW_FILE}}" --worklog-id "{{.WORKLOG_ID}}" --reviewer "{{.REVIEWER}}" --status "{{.STATUS}}" --summary "{{.SUMMARY}}" --paths "{{default "" .PATHS}}" --evidence "{{default "" .EVIDENCE}}"'
 
   ai:review:record:linux:
     desc: Linux/WSL - registra parecer especializado
@@ -1216,7 +1216,7 @@ tasks:
     requires:
       vars: [WORKLOG_ID, REVIEWER, STATUS, SUMMARY]
     cmds:
-      - "bash -lc 'bash ./scripts/run-python.sh ./scripts/ai-review.py record --review-file \"{{default \"docs/AI-REVIEW-LEDGER.md\" .REVIEW_FILE}}\" --worklog-id \"{{.WORKLOG_ID}}\" --reviewer \"{{.REVIEWER}}\" --status \"{{.STATUS}}\" --summary \"{{.SUMMARY}}\" --paths \"{{default \"\" .PATHS}}\" --evidence \"{{default \"\" .EVIDENCE}}\"'"
+      - 'bash -lc ''bash ./scripts/run-python.sh ./scripts/ai-review.py record --review-file "{{default "docs/AI-REVIEW-LEDGER.md" .REVIEW_FILE}}" --worklog-id "{{.WORKLOG_ID}}" --reviewer "{{.REVIEWER}}" --status "{{.STATUS}}" --summary "{{.SUMMARY}}" --paths "{{default "" .PATHS}}" --evidence "{{default "" .EVIDENCE}}"'''
 
   ai:review:check:
     desc: Valida se os revisores especializados obrigatorios aprovaram o worklog
@@ -1225,11 +1225,11 @@ tasks:
     cmds:
       - task: ai:review:check:{{if or (eq .OS "Windows_NT") (eq .OS "windows")}}windows{{else}}linux{{end}}
         vars:
-          WORKLOG_ID: "{{.WORKLOG_ID}}"
-          PATHS: "{{.PATHS}}"
-          INTENT: "{{.INTENT}}"
-          RISK: "{{.RISK}}"
-          REVIEW_FILE: "{{.REVIEW_FILE}}"
+          WORKLOG_ID: '{{.WORKLOG_ID}}'
+          PATHS: '{{.PATHS}}'
+          INTENT: '{{.INTENT}}'
+          RISK: '{{.RISK}}'
+          REVIEW_FILE: '{{.REVIEW_FILE}}'
 
   ai:review:check:windows:
     desc: Windows - valida aprovacao dos revisores especializados
@@ -1238,7 +1238,7 @@ tasks:
     requires:
       vars: [WORKLOG_ID]
     cmds:
-      - "pwsh -NoProfile -File ./scripts/invoke-python.ps1 -ScriptPath ./scripts/ai-review.py check --review-file \"{{default \"docs/AI-REVIEW-LEDGER.md\" .REVIEW_FILE}}\" --worklog-id \"{{.WORKLOG_ID}}\" --repo-root \"{{.TASKFILE_DIR}}\" --paths \"{{default \"\" .PATHS}}\" --intent \"{{default \"Revisao especializada obrigatoria\" .INTENT}}\" --risk \"{{default \"medium\" .RISK}}\""
+      - 'pwsh -NoProfile -File ./scripts/invoke-python.ps1 -ScriptPath ./scripts/ai-review.py check --review-file "{{default "docs/AI-REVIEW-LEDGER.md" .REVIEW_FILE}}" --worklog-id "{{.WORKLOG_ID}}" --repo-root "{{.TASKFILE_DIR}}" --paths "{{default "" .PATHS}}" --intent "{{default "Revisao especializada obrigatoria" .INTENT}}" --risk "{{default "medium" .RISK}}"'
 
   ai:review:check:linux:
     desc: Linux/WSL - valida aprovacao dos revisores especializados
@@ -1247,7 +1247,7 @@ tasks:
     requires:
       vars: [WORKLOG_ID]
     cmds:
-      - "bash -lc 'bash ./scripts/run-python.sh ./scripts/ai-review.py check --review-file \"{{default \"docs/AI-REVIEW-LEDGER.md\" .REVIEW_FILE}}\" --worklog-id \"{{.WORKLOG_ID}}\" --repo-root \"{{.TASKFILE_DIR}}\" --paths \"{{default \"\" .PATHS}}\" --intent \"{{default \"Revisao especializada obrigatoria\" .INTENT}}\" --risk \"{{default \"medium\" .RISK}}\"'"
+      - 'bash -lc ''bash ./scripts/run-python.sh ./scripts/ai-review.py check --review-file "{{default "docs/AI-REVIEW-LEDGER.md" .REVIEW_FILE}}" --worklog-id "{{.WORKLOG_ID}}" --repo-root "{{.TASKFILE_DIR}}" --paths "{{default "" .PATHS}}" --intent "{{default "Revisao especializada obrigatoria" .INTENT}}" --risk "{{default "medium" .RISK}}"'''
 
   ai:fallback:status:
     desc: Exibe o modo operacional do fallback local entre Jira primario e trackers contingenciais
@@ -1259,14 +1259,14 @@ tasks:
     platforms: [windows]
     dir: '{{.TASKFILE_DIR}}'
     cmds:
-      - "pwsh -NoProfile -File ./scripts/invoke-python.ps1 -ScriptPath ./scripts/ai-fallback.py status --repo-root \"{{.TASKFILE_DIR}}\" --ledger-file \"{{default \"docs/AI-FALLBACK-LEDGER.md\" .LEDGER_FILE}}\" --tracker-file \"{{default \"docs/AI-WIP-TRACKER.md\" .TRACKER_FILE}}\""
+      - 'pwsh -NoProfile -File ./scripts/invoke-python.ps1 -ScriptPath ./scripts/ai-fallback.py status --repo-root "{{.TASKFILE_DIR}}" --ledger-file "{{default "docs/AI-FALLBACK-LEDGER.md" .LEDGER_FILE}}" --tracker-file "{{default "docs/AI-WIP-TRACKER.md" .TRACKER_FILE}}"'
 
   ai:fallback:status:linux:
     desc: Linux/WSL - exibe o modo operacional do fallback local
     platforms: [linux]
     dir: '{{.TASKFILE_DIR}}'
     cmds:
-      - "bash -lc 'bash ./scripts/run-python.sh ./scripts/ai-fallback.py status --repo-root \"{{.TASKFILE_DIR}}\" --ledger-file \"{{default \"docs/AI-FALLBACK-LEDGER.md\" .LEDGER_FILE}}\" --tracker-file \"{{default \"docs/AI-WIP-TRACKER.md\" .TRACKER_FILE}}\"'"
+      - 'bash -lc ''bash ./scripts/run-python.sh ./scripts/ai-fallback.py status --repo-root "{{.TASKFILE_DIR}}" --ledger-file "{{default "docs/AI-FALLBACK-LEDGER.md" .LEDGER_FILE}}" --tracker-file "{{default "docs/AI-WIP-TRACKER.md" .TRACKER_FILE}}"'''
 
   ai:fallback:capture:
     desc: Registra um uso excepcional do fallback local enquanto o Jira nao sustenta o fluxo primario
@@ -1275,13 +1275,13 @@ tasks:
     cmds:
       - task: ai:fallback:capture:{{if or (eq .OS "Windows_NT") (eq .OS "windows")}}windows{{else}}linux{{end}}
         vars:
-          TRACKER: "{{.TRACKER}}"
-          LOCAL_REFERENCE: "{{.LOCAL_REFERENCE}}"
-          SUMMARY: "{{.SUMMARY}}"
-          NEXT_STEP: "{{.NEXT_STEP}}"
-          JIRA_ISSUE: "{{default \"\" .JIRA_ISSUE}}"
-          ALLOW_WHILE_JIRA_UP: "{{default \"0\" .ALLOW_WHILE_JIRA_UP}}"
-          LEDGER_FILE: "{{default \"docs/AI-FALLBACK-LEDGER.md\" .LEDGER_FILE}}"
+          TRACKER: '{{.TRACKER}}'
+          LOCAL_REFERENCE: '{{.LOCAL_REFERENCE}}'
+          SUMMARY: '{{.SUMMARY}}'
+          NEXT_STEP: '{{.NEXT_STEP}}'
+          JIRA_ISSUE: '{{default "" .JIRA_ISSUE}}'
+          ALLOW_WHILE_JIRA_UP: '{{default "0" .ALLOW_WHILE_JIRA_UP}}'
+          LEDGER_FILE: '{{default "docs/AI-FALLBACK-LEDGER.md" .LEDGER_FILE}}'
 
   ai:fallback:capture:windows:
     desc: Windows - registra uso excepcional do fallback local
@@ -1290,7 +1290,7 @@ tasks:
     requires:
       vars: [TRACKER, LOCAL_REFERENCE, SUMMARY, NEXT_STEP]
     cmds:
-      - "pwsh -NoProfile -Command \"& './scripts/invoke-python.ps1' -ScriptPath './scripts/ai-fallback.py' -Arguments @('capture','--repo-root','{{.TASKFILE_DIR}}','--ledger-file','{{default \"docs/AI-FALLBACK-LEDGER.md\" .LEDGER_FILE}}','--tracker','{{.TRACKER}}','--local-reference','{{.LOCAL_REFERENCE}}','--summary','{{.SUMMARY}}','--next-step','{{.NEXT_STEP}}','--jira-issue','{{default \"\" .JIRA_ISSUE}}','--allow-while-jira-up','{{default \"0\" .ALLOW_WHILE_JIRA_UP}}')\""
+      - 'pwsh -NoProfile -Command "& ''./scripts/invoke-python.ps1'' -ScriptPath ''./scripts/ai-fallback.py'' -Arguments @(''capture'',''--repo-root'',''{{.TASKFILE_DIR}}'',''--ledger-file'',''{{default "docs/AI-FALLBACK-LEDGER.md" .LEDGER_FILE}}'',''--tracker'',''{{.TRACKER}}'',''--local-reference'',''{{.LOCAL_REFERENCE}}'',''--summary'',''{{.SUMMARY}}'',''--next-step'',''{{.NEXT_STEP}}'',''--jira-issue'',''{{default "" .JIRA_ISSUE}}'',''--allow-while-jira-up'',''{{default "0" .ALLOW_WHILE_JIRA_UP}}'')"'
 
   ai:fallback:capture:linux:
     desc: Linux/WSL - registra uso excepcional do fallback local
@@ -1299,7 +1299,7 @@ tasks:
     requires:
       vars: [TRACKER, LOCAL_REFERENCE, SUMMARY, NEXT_STEP]
     cmds:
-      - "bash -lc 'bash ./scripts/run-python.sh ./scripts/ai-fallback.py capture --repo-root \"{{.TASKFILE_DIR}}\" --ledger-file \"{{default \"docs/AI-FALLBACK-LEDGER.md\" .LEDGER_FILE}}\" --tracker \"{{.TRACKER}}\" --local-reference \"{{.LOCAL_REFERENCE}}\" --summary \"{{.SUMMARY}}\" --next-step \"{{.NEXT_STEP}}\" --jira-issue \"{{default \"\" .JIRA_ISSUE}}\" --allow-while-jira-up \"{{default \"0\" .ALLOW_WHILE_JIRA_UP}}\"'"
+      - 'bash -lc ''bash ./scripts/run-python.sh ./scripts/ai-fallback.py capture --repo-root "{{.TASKFILE_DIR}}" --ledger-file "{{default "docs/AI-FALLBACK-LEDGER.md" .LEDGER_FILE}}" --tracker "{{.TRACKER}}" --local-reference "{{.LOCAL_REFERENCE}}" --summary "{{.SUMMARY}}" --next-step "{{.NEXT_STEP}}" --jira-issue "{{default "" .JIRA_ISSUE}}" --allow-while-jira-up "{{default "0" .ALLOW_WHILE_JIRA_UP}}"'''
 
   ai:fallback:resolve:
     desc: Drena, reconcilia ou marca obsoleto um registro ativo do fallback local
@@ -1308,15 +1308,15 @@ tasks:
     cmds:
       - task: ai:fallback:resolve:{{if or (eq .OS "Windows_NT") (eq .OS "windows")}}windows{{else}}linux{{end}}
         vars:
-          TRACKER: "{{.TRACKER}}"
-          LOCAL_REFERENCE: "{{.LOCAL_REFERENCE}}"
-          OUTCOME: "{{.OUTCOME}}"
-          RESULT: "{{default \"\" .RESULT}}"
-          SUMMARY: "{{default \"\" .SUMMARY}}"
-          JIRA_ISSUE: "{{default \"\" .JIRA_ISSUE}}"
-          AGENT: "{{default \"ai-product-owner\" .AGENT}}"
-          SYNC_JIRA: "{{default \"1\" .SYNC_JIRA}}"
-          LEDGER_FILE: "{{default \"docs/AI-FALLBACK-LEDGER.md\" .LEDGER_FILE}}"
+          TRACKER: '{{.TRACKER}}'
+          LOCAL_REFERENCE: '{{.LOCAL_REFERENCE}}'
+          OUTCOME: '{{.OUTCOME}}'
+          RESULT: '{{default "" .RESULT}}'
+          SUMMARY: '{{default "" .SUMMARY}}'
+          JIRA_ISSUE: '{{default "" .JIRA_ISSUE}}'
+          AGENT: '{{default "ai-product-owner" .AGENT}}'
+          SYNC_JIRA: '{{default "1" .SYNC_JIRA}}'
+          LEDGER_FILE: '{{default "docs/AI-FALLBACK-LEDGER.md" .LEDGER_FILE}}'
 
   ai:fallback:resolve:windows:
     desc: Windows - resolve um registro ativo do fallback local
@@ -1325,7 +1325,7 @@ tasks:
     requires:
       vars: [TRACKER, LOCAL_REFERENCE, OUTCOME]
     cmds:
-      - "pwsh -NoProfile -Command \"& './scripts/invoke-python.ps1' -ScriptPath './scripts/ai-fallback.py' -Arguments @('resolve','--repo-root','{{.TASKFILE_DIR}}','--ledger-file','{{default \"docs/AI-FALLBACK-LEDGER.md\" .LEDGER_FILE}}','--tracker','{{.TRACKER}}','--local-reference','{{.LOCAL_REFERENCE}}','--outcome','{{.OUTCOME}}','--result','{{default \"\" .RESULT}}','--summary','{{default \"\" .SUMMARY}}','--jira-issue','{{default \"\" .JIRA_ISSUE}}','--agent','{{default \"ai-product-owner\" .AGENT}}','--sync-jira','{{default \"1\" .SYNC_JIRA}}')\""
+      - 'pwsh -NoProfile -Command "& ''./scripts/invoke-python.ps1'' -ScriptPath ''./scripts/ai-fallback.py'' -Arguments @(''resolve'',''--repo-root'',''{{.TASKFILE_DIR}}'',''--ledger-file'',''{{default "docs/AI-FALLBACK-LEDGER.md" .LEDGER_FILE}}'',''--tracker'',''{{.TRACKER}}'',''--local-reference'',''{{.LOCAL_REFERENCE}}'',''--outcome'',''{{.OUTCOME}}'',''--result'',''{{default "" .RESULT}}'',''--summary'',''{{default "" .SUMMARY}}'',''--jira-issue'',''{{default "" .JIRA_ISSUE}}'',''--agent'',''{{default "ai-product-owner" .AGENT}}'',''--sync-jira'',''{{default "1" .SYNC_JIRA}}'')"'
 
   ai:fallback:resolve:linux:
     desc: Linux/WSL - resolve um registro ativo do fallback local
@@ -1334,7 +1334,7 @@ tasks:
     requires:
       vars: [TRACKER, LOCAL_REFERENCE, OUTCOME]
     cmds:
-      - "bash -lc 'bash ./scripts/run-python.sh ./scripts/ai-fallback.py resolve --repo-root \"{{.TASKFILE_DIR}}\" --ledger-file \"{{default \"docs/AI-FALLBACK-LEDGER.md\" .LEDGER_FILE}}\" --tracker \"{{.TRACKER}}\" --local-reference \"{{.LOCAL_REFERENCE}}\" --outcome \"{{.OUTCOME}}\" --result \"{{default \"\" .RESULT}}\" --summary \"{{default \"\" .SUMMARY}}\" --jira-issue \"{{default \"\" .JIRA_ISSUE}}\" --agent \"{{default \"ai-product-owner\" .AGENT}}\" --sync-jira \"{{default \"1\" .SYNC_JIRA}}\"'"
+      - 'bash -lc ''bash ./scripts/run-python.sh ./scripts/ai-fallback.py resolve --repo-root "{{.TASKFILE_DIR}}" --ledger-file "{{default "docs/AI-FALLBACK-LEDGER.md" .LEDGER_FILE}}" --tracker "{{.TRACKER}}" --local-reference "{{.LOCAL_REFERENCE}}" --outcome "{{.OUTCOME}}" --result "{{default "" .RESULT}}" --summary "{{default "" .SUMMARY}}" --jira-issue "{{default "" .JIRA_ISSUE}}" --agent "{{default "ai-product-owner" .AGENT}}" --sync-jira "{{default "1" .SYNC_JIRA}}"'''
 
   ai:agent:execution:status:
     desc: Exibe o contexto local ativo por agente/issue
@@ -1346,14 +1346,14 @@ tasks:
     platforms: [windows]
     dir: '{{.TASKFILE_DIR}}'
     cmds:
-      - "pwsh -NoProfile -File ./scripts/invoke-python.ps1 -ScriptPath ./scripts/ai-agent-execution.py status --repo-root \"{{.TASKFILE_DIR}}\""
+      - 'pwsh -NoProfile -File ./scripts/invoke-python.ps1 -ScriptPath ./scripts/ai-agent-execution.py status --repo-root "{{.TASKFILE_DIR}}"'
 
   ai:agent:execution:status:linux:
     desc: Linux/WSL - exibe o contexto local ativo por agente/issue
     platforms: [linux]
     dir: '{{.TASKFILE_DIR}}'
     cmds:
-      - "bash -lc 'bash ./scripts/run-python.sh ./scripts/ai-agent-execution.py status --repo-root \"{{.TASKFILE_DIR}}\"'"
+      - 'bash -lc ''bash ./scripts/run-python.sh ./scripts/ai-agent-execution.py status --repo-root "{{.TASKFILE_DIR}}"'''
 
   ai:agent:execution:start:
     desc: Inicia contexto local ativo de agente/issue e sincroniza comentario/ownership no Jira
@@ -1362,15 +1362,15 @@ tasks:
     cmds:
       - task: ai:agent:execution:start:{{if or (eq .OS "Windows_NT") (eq .OS "windows")}}windows{{else}}linux{{end}}
         vars:
-          ISSUE_KEY: "{{.ISSUE_KEY}}"
-          AGENT: "{{.AGENT}}"
-          STATUS: "{{default \"doing\" .STATUS}}"
-          CONTEXTO: "{{default \"\" .CONTEXTO}}"
-          EVIDENCIAS: "{{default \"\" .EVIDENCIAS}}"
-          PROXIMO_PASSO: "{{default \"\" .PROXIMO_PASSO}}"
-          NEXT_REQUIRED_ROLE: "{{default \"\" .NEXT_REQUIRED_ROLE}}"
-          TRANSITION: "{{default \"1\" .TRANSITION}}"
-          INTERACTION_TYPE: "{{default \"progress-update\" .INTERACTION_TYPE}}"
+          ISSUE_KEY: '{{.ISSUE_KEY}}'
+          AGENT: '{{.AGENT}}'
+          STATUS: '{{default "doing" .STATUS}}'
+          CONTEXTO: '{{default "" .CONTEXTO}}'
+          EVIDENCIAS: '{{default "" .EVIDENCIAS}}'
+          PROXIMO_PASSO: '{{default "" .PROXIMO_PASSO}}'
+          NEXT_REQUIRED_ROLE: '{{default "" .NEXT_REQUIRED_ROLE}}'
+          TRANSITION: '{{default "1" .TRANSITION}}'
+          INTERACTION_TYPE: '{{default "progress-update" .INTERACTION_TYPE}}'
 
   ai:agent:execution:start:windows:
     desc: Windows - inicia contexto local ativo de agente/issue
@@ -1379,7 +1379,7 @@ tasks:
     requires:
       vars: [ISSUE_KEY, AGENT]
     cmds:
-      - "pwsh -NoProfile -Command \"& './scripts/invoke-python.ps1' -ScriptPath './scripts/ai-agent-execution.py' -Arguments @('start','--repo-root','{{.TASKFILE_DIR}}','--issue-key','{{.ISSUE_KEY}}','--agent','{{.AGENT}}','--status','{{default \"doing\" .STATUS}}','--contexto','{{default \"\" .CONTEXTO}}','--evidencias','{{default \"\" .EVIDENCIAS}}','--proximo-passo','{{default \"\" .PROXIMO_PASSO}}','--next-required-role','{{default \"\" .NEXT_REQUIRED_ROLE}}','--transition','{{default \"1\" .TRANSITION}}','--interaction-type','{{default \"progress-update\" .INTERACTION_TYPE}}')\""
+      - 'pwsh -NoProfile -Command "& ''./scripts/invoke-python.ps1'' -ScriptPath ''./scripts/ai-agent-execution.py'' -Arguments @(''start'',''--repo-root'',''{{.TASKFILE_DIR}}'',''--issue-key'',''{{.ISSUE_KEY}}'',''--agent'',''{{.AGENT}}'',''--status'',''{{default "doing" .STATUS}}'',''--contexto'',''{{default "" .CONTEXTO}}'',''--evidencias'',''{{default "" .EVIDENCIAS}}'',''--proximo-passo'',''{{default "" .PROXIMO_PASSO}}'',''--next-required-role'',''{{default "" .NEXT_REQUIRED_ROLE}}'',''--transition'',''{{default "1" .TRANSITION}}'',''--interaction-type'',''{{default "progress-update" .INTERACTION_TYPE}}'')"'
 
   ai:agent:execution:start:linux:
     desc: Linux/WSL - inicia contexto local ativo de agente/issue
@@ -1388,7 +1388,7 @@ tasks:
     requires:
       vars: [ISSUE_KEY, AGENT]
     cmds:
-      - "bash -lc 'bash ./scripts/run-python.sh ./scripts/ai-agent-execution.py start --repo-root \"{{.TASKFILE_DIR}}\" --issue-key \"{{.ISSUE_KEY}}\" --agent \"{{.AGENT}}\" --status \"{{default \"doing\" .STATUS}}\" --contexto \"{{default \"\" .CONTEXTO}}\" --evidencias \"{{default \"\" .EVIDENCIAS}}\" --proximo-passo \"{{default \"\" .PROXIMO_PASSO}}\" --next-required-role \"{{default \"\" .NEXT_REQUIRED_ROLE}}\" --transition \"{{default \"1\" .TRANSITION}}\" --interaction-type \"{{default \"progress-update\" .INTERACTION_TYPE}}\"'"
+      - 'bash -lc ''bash ./scripts/run-python.sh ./scripts/ai-agent-execution.py start --repo-root "{{.TASKFILE_DIR}}" --issue-key "{{.ISSUE_KEY}}" --agent "{{.AGENT}}" --status "{{default "doing" .STATUS}}" --contexto "{{default "" .CONTEXTO}}" --evidencias "{{default "" .EVIDENCIAS}}" --proximo-passo "{{default "" .PROXIMO_PASSO}}" --next-required-role "{{default "" .NEXT_REQUIRED_ROLE}}" --transition "{{default "1" .TRANSITION}}" --interaction-type "{{default "progress-update" .INTERACTION_TYPE}}"'''
 
   ai:agent:execution:progress:
     desc: Atualiza contexto local ativo e adiciona progresso estruturado no Jira
@@ -1397,15 +1397,15 @@ tasks:
     cmds:
       - task: ai:agent:execution:progress:{{if or (eq .OS "Windows_NT") (eq .OS "windows")}}windows{{else}}linux{{end}}
         vars:
-          ISSUE_KEY: "{{.ISSUE_KEY}}"
-          AGENT: "{{.AGENT}}"
-          STATUS: "{{default \"doing\" .STATUS}}"
-          CONTEXTO: "{{default \"\" .CONTEXTO}}"
-          EVIDENCIAS: "{{default \"\" .EVIDENCIAS}}"
-          PROXIMO_PASSO: "{{default \"\" .PROXIMO_PASSO}}"
-          NEXT_REQUIRED_ROLE: "{{default \"\" .NEXT_REQUIRED_ROLE}}"
-          TRANSITION: "{{default \"1\" .TRANSITION}}"
-          INTERACTION_TYPE: "{{default \"progress-update\" .INTERACTION_TYPE}}"
+          ISSUE_KEY: '{{.ISSUE_KEY}}'
+          AGENT: '{{.AGENT}}'
+          STATUS: '{{default "doing" .STATUS}}'
+          CONTEXTO: '{{default "" .CONTEXTO}}'
+          EVIDENCIAS: '{{default "" .EVIDENCIAS}}'
+          PROXIMO_PASSO: '{{default "" .PROXIMO_PASSO}}'
+          NEXT_REQUIRED_ROLE: '{{default "" .NEXT_REQUIRED_ROLE}}'
+          TRANSITION: '{{default "1" .TRANSITION}}'
+          INTERACTION_TYPE: '{{default "progress-update" .INTERACTION_TYPE}}'
 
   ai:agent:execution:progress:windows:
     desc: Windows - atualiza contexto local ativo e adiciona progresso estruturado no Jira
@@ -1414,7 +1414,7 @@ tasks:
     requires:
       vars: [AGENT]
     cmds:
-      - "pwsh -NoProfile -Command \"& './scripts/invoke-python.ps1' -ScriptPath './scripts/ai-agent-execution.py' -Arguments @('progress','--repo-root','{{.TASKFILE_DIR}}','--issue-key','{{default \"\" .ISSUE_KEY}}','--agent','{{.AGENT}}','--status','{{default \"doing\" .STATUS}}','--contexto','{{default \"\" .CONTEXTO}}','--evidencias','{{default \"\" .EVIDENCIAS}}','--proximo-passo','{{default \"\" .PROXIMO_PASSO}}','--next-required-role','{{default \"\" .NEXT_REQUIRED_ROLE}}','--transition','{{default \"1\" .TRANSITION}}','--interaction-type','{{default \"progress-update\" .INTERACTION_TYPE}}')\""
+      - 'pwsh -NoProfile -Command "& ''./scripts/invoke-python.ps1'' -ScriptPath ''./scripts/ai-agent-execution.py'' -Arguments @(''progress'',''--repo-root'',''{{.TASKFILE_DIR}}'',''--issue-key'',''{{default "" .ISSUE_KEY}}'',''--agent'',''{{.AGENT}}'',''--status'',''{{default "doing" .STATUS}}'',''--contexto'',''{{default "" .CONTEXTO}}'',''--evidencias'',''{{default "" .EVIDENCIAS}}'',''--proximo-passo'',''{{default "" .PROXIMO_PASSO}}'',''--next-required-role'',''{{default "" .NEXT_REQUIRED_ROLE}}'',''--transition'',''{{default "1" .TRANSITION}}'',''--interaction-type'',''{{default "progress-update" .INTERACTION_TYPE}}'')"'
 
   ai:agent:execution:progress:linux:
     desc: Linux/WSL - atualiza contexto local ativo e adiciona progresso estruturado no Jira
@@ -1423,7 +1423,7 @@ tasks:
     requires:
       vars: [AGENT]
     cmds:
-      - "bash -lc 'bash ./scripts/run-python.sh ./scripts/ai-agent-execution.py progress --repo-root \"{{.TASKFILE_DIR}}\" --issue-key \"{{default \"\" .ISSUE_KEY}}\" --agent \"{{.AGENT}}\" --status \"{{default \"doing\" .STATUS}}\" --contexto \"{{default \"\" .CONTEXTO}}\" --evidencias \"{{default \"\" .EVIDENCIAS}}\" --proximo-passo \"{{default \"\" .PROXIMO_PASSO}}\" --next-required-role \"{{default \"\" .NEXT_REQUIRED_ROLE}}\" --transition \"{{default \"1\" .TRANSITION}}\" --interaction-type \"{{default \"progress-update\" .INTERACTION_TYPE}}\"'"
+      - 'bash -lc ''bash ./scripts/run-python.sh ./scripts/ai-agent-execution.py progress --repo-root "{{.TASKFILE_DIR}}" --issue-key "{{default "" .ISSUE_KEY}}" --agent "{{.AGENT}}" --status "{{default "doing" .STATUS}}" --contexto "{{default "" .CONTEXTO}}" --evidencias "{{default "" .EVIDENCIAS}}" --proximo-passo "{{default "" .PROXIMO_PASSO}}" --next-required-role "{{default "" .NEXT_REQUIRED_ROLE}}" --transition "{{default "1" .TRANSITION}}" --interaction-type "{{default "progress-update" .INTERACTION_TYPE}}"'''
 
   ai:agent:execution:handoff:
     desc: Registra handoff no Jira e limpa o contexto local ativo
@@ -1432,14 +1432,14 @@ tasks:
     cmds:
       - task: ai:agent:execution:handoff:{{if or (eq .OS "Windows_NT") (eq .OS "windows")}}windows{{else}}linux{{end}}
         vars:
-          ISSUE_KEY: "{{.ISSUE_KEY}}"
-          AGENT: "{{.AGENT}}"
-          STATUS: "{{default \"doing\" .STATUS}}"
-          CONTEXTO: "{{default \"\" .CONTEXTO}}"
-          EVIDENCIAS: "{{default \"\" .EVIDENCIAS}}"
-          PROXIMO_PASSO: "{{default \"\" .PROXIMO_PASSO}}"
-          NEXT_REQUIRED_ROLE: "{{.NEXT_REQUIRED_ROLE}}"
-          TRANSITION: "{{default \"1\" .TRANSITION}}"
+          ISSUE_KEY: '{{.ISSUE_KEY}}'
+          AGENT: '{{.AGENT}}'
+          STATUS: '{{default "doing" .STATUS}}'
+          CONTEXTO: '{{default "" .CONTEXTO}}'
+          EVIDENCIAS: '{{default "" .EVIDENCIAS}}'
+          PROXIMO_PASSO: '{{default "" .PROXIMO_PASSO}}'
+          NEXT_REQUIRED_ROLE: '{{.NEXT_REQUIRED_ROLE}}'
+          TRANSITION: '{{default "1" .TRANSITION}}'
 
   ai:agent:execution:handoff:windows:
     desc: Windows - registra handoff no Jira e limpa o contexto local ativo
@@ -1448,7 +1448,7 @@ tasks:
     requires:
       vars: [AGENT, NEXT_REQUIRED_ROLE]
     cmds:
-      - "pwsh -NoProfile -Command \"& './scripts/invoke-python.ps1' -ScriptPath './scripts/ai-agent-execution.py' -Arguments @('handoff','--repo-root','{{.TASKFILE_DIR}}','--issue-key','{{default \"\" .ISSUE_KEY}}','--agent','{{.AGENT}}','--status','{{default \"doing\" .STATUS}}','--contexto','{{default \"\" .CONTEXTO}}','--evidencias','{{default \"\" .EVIDENCIAS}}','--proximo-passo','{{default \"\" .PROXIMO_PASSO}}','--next-required-role','{{.NEXT_REQUIRED_ROLE}}','--transition','{{default \"1\" .TRANSITION}}')\""
+      - 'pwsh -NoProfile -Command "& ''./scripts/invoke-python.ps1'' -ScriptPath ''./scripts/ai-agent-execution.py'' -Arguments @(''handoff'',''--repo-root'',''{{.TASKFILE_DIR}}'',''--issue-key'',''{{default "" .ISSUE_KEY}}'',''--agent'',''{{.AGENT}}'',''--status'',''{{default "doing" .STATUS}}'',''--contexto'',''{{default "" .CONTEXTO}}'',''--evidencias'',''{{default "" .EVIDENCIAS}}'',''--proximo-passo'',''{{default "" .PROXIMO_PASSO}}'',''--next-required-role'',''{{.NEXT_REQUIRED_ROLE}}'',''--transition'',''{{default "1" .TRANSITION}}'')"'
 
   ai:agent:execution:handoff:linux:
     desc: Linux/WSL - registra handoff no Jira e limpa o contexto local ativo
@@ -1457,7 +1457,7 @@ tasks:
     requires:
       vars: [AGENT, NEXT_REQUIRED_ROLE]
     cmds:
-      - "bash -lc 'bash ./scripts/run-python.sh ./scripts/ai-agent-execution.py handoff --repo-root \"{{.TASKFILE_DIR}}\" --issue-key \"{{default \"\" .ISSUE_KEY}}\" --agent \"{{.AGENT}}\" --status \"{{default \"doing\" .STATUS}}\" --contexto \"{{default \"\" .CONTEXTO}}\" --evidencias \"{{default \"\" .EVIDENCIAS}}\" --proximo-passo \"{{default \"\" .PROXIMO_PASSO}}\" --next-required-role \"{{.NEXT_REQUIRED_ROLE}}\" --transition \"{{default \"1\" .TRANSITION}}\"'"
+      - 'bash -lc ''bash ./scripts/run-python.sh ./scripts/ai-agent-execution.py handoff --repo-root "{{.TASKFILE_DIR}}" --issue-key "{{default "" .ISSUE_KEY}}" --agent "{{.AGENT}}" --status "{{default "doing" .STATUS}}" --contexto "{{default "" .CONTEXTO}}" --evidencias "{{default "" .EVIDENCIAS}}" --proximo-passo "{{default "" .PROXIMO_PASSO}}" --next-required-role "{{.NEXT_REQUIRED_ROLE}}" --transition "{{default "1" .TRANSITION}}"'''
 
   ai:agent:execution:pause:
     desc: Registra pausa no Jira e limpa o contexto local ativo
@@ -1466,14 +1466,14 @@ tasks:
     cmds:
       - task: ai:agent:execution:pause:{{if or (eq .OS "Windows_NT") (eq .OS "windows")}}windows{{else}}linux{{end}}
         vars:
-          ISSUE_KEY: "{{.ISSUE_KEY}}"
-          AGENT: "{{.AGENT}}"
-          CONTEXTO: "{{default \"\" .CONTEXTO}}"
-          EVIDENCIAS: "{{default \"\" .EVIDENCIAS}}"
-          PROXIMO_PASSO: "{{default \"\" .PROXIMO_PASSO}}"
-          NEXT_REQUIRED_ROLE: "{{default \"\" .NEXT_REQUIRED_ROLE}}"
-          TRANSITION: "{{default \"1\" .TRANSITION}}"
-          BLOCKER: "{{default \"1\" .BLOCKER}}"
+          ISSUE_KEY: '{{.ISSUE_KEY}}'
+          AGENT: '{{.AGENT}}'
+          CONTEXTO: '{{default "" .CONTEXTO}}'
+          EVIDENCIAS: '{{default "" .EVIDENCIAS}}'
+          PROXIMO_PASSO: '{{default "" .PROXIMO_PASSO}}'
+          NEXT_REQUIRED_ROLE: '{{default "" .NEXT_REQUIRED_ROLE}}'
+          TRANSITION: '{{default "1" .TRANSITION}}'
+          BLOCKER: '{{default "1" .BLOCKER}}'
 
   ai:agent:execution:pause:windows:
     desc: Windows - registra pausa no Jira e limpa o contexto local ativo
@@ -1482,7 +1482,7 @@ tasks:
     requires:
       vars: [AGENT]
     cmds:
-      - "pwsh -NoProfile -Command \"& './scripts/invoke-python.ps1' -ScriptPath './scripts/ai-agent-execution.py' -Arguments @('pause','--repo-root','{{.TASKFILE_DIR}}','--issue-key','{{default \"\" .ISSUE_KEY}}','--agent','{{.AGENT}}','--contexto','{{default \"\" .CONTEXTO}}','--evidencias','{{default \"\" .EVIDENCIAS}}','--proximo-passo','{{default \"\" .PROXIMO_PASSO}}','--next-required-role','{{default \"\" .NEXT_REQUIRED_ROLE}}','--transition','{{default \"1\" .TRANSITION}}','--blocker','{{default \"1\" .BLOCKER}}')\""
+      - 'pwsh -NoProfile -Command "& ''./scripts/invoke-python.ps1'' -ScriptPath ''./scripts/ai-agent-execution.py'' -Arguments @(''pause'',''--repo-root'',''{{.TASKFILE_DIR}}'',''--issue-key'',''{{default "" .ISSUE_KEY}}'',''--agent'',''{{.AGENT}}'',''--contexto'',''{{default "" .CONTEXTO}}'',''--evidencias'',''{{default "" .EVIDENCIAS}}'',''--proximo-passo'',''{{default "" .PROXIMO_PASSO}}'',''--next-required-role'',''{{default "" .NEXT_REQUIRED_ROLE}}'',''--transition'',''{{default "1" .TRANSITION}}'',''--blocker'',''{{default "1" .BLOCKER}}'')"'
 
   ai:agent:execution:pause:linux:
     desc: Linux/WSL - registra pausa no Jira e limpa o contexto local ativo
@@ -1491,7 +1491,7 @@ tasks:
     requires:
       vars: [AGENT]
     cmds:
-      - "bash -lc 'bash ./scripts/run-python.sh ./scripts/ai-agent-execution.py pause --repo-root \"{{.TASKFILE_DIR}}\" --issue-key \"{{default \"\" .ISSUE_KEY}}\" --agent \"{{.AGENT}}\" --contexto \"{{default \"\" .CONTEXTO}}\" --evidencias \"{{default \"\" .EVIDENCIAS}}\" --proximo-passo \"{{default \"\" .PROXIMO_PASSO}}\" --next-required-role \"{{default \"\" .NEXT_REQUIRED_ROLE}}\" --transition \"{{default \"1\" .TRANSITION}}\" --blocker \"{{default \"1\" .BLOCKER}}\"'"
+      - 'bash -lc ''bash ./scripts/run-python.sh ./scripts/ai-agent-execution.py pause --repo-root "{{.TASKFILE_DIR}}" --issue-key "{{default "" .ISSUE_KEY}}" --agent "{{.AGENT}}" --contexto "{{default "" .CONTEXTO}}" --evidencias "{{default "" .EVIDENCIAS}}" --proximo-passo "{{default "" .PROXIMO_PASSO}}" --next-required-role "{{default "" .NEXT_REQUIRED_ROLE}}" --transition "{{default "1" .TRANSITION}}" --blocker "{{default "1" .BLOCKER}}"'''
 
   ai:agent:execution:done:
     desc: Registra fechamento no Jira e limpa o contexto local ativo
@@ -1500,12 +1500,12 @@ tasks:
     cmds:
       - task: ai:agent:execution:done:{{if or (eq .OS "Windows_NT") (eq .OS "windows")}}windows{{else}}linux{{end}}
         vars:
-          ISSUE_KEY: "{{.ISSUE_KEY}}"
-          AGENT: "{{.AGENT}}"
-          CONTEXTO: "{{default \"\" .CONTEXTO}}"
-          EVIDENCIAS: "{{default \"\" .EVIDENCIAS}}"
-          PROXIMO_PASSO: "{{default \"\" .PROXIMO_PASSO}}"
-          TRANSITION: "{{default \"1\" .TRANSITION}}"
+          ISSUE_KEY: '{{.ISSUE_KEY}}'
+          AGENT: '{{.AGENT}}'
+          CONTEXTO: '{{default "" .CONTEXTO}}'
+          EVIDENCIAS: '{{default "" .EVIDENCIAS}}'
+          PROXIMO_PASSO: '{{default "" .PROXIMO_PASSO}}'
+          TRANSITION: '{{default "1" .TRANSITION}}'
 
   ai:agent:execution:done:windows:
     desc: Windows - registra fechamento no Jira e limpa o contexto local ativo
@@ -1514,7 +1514,7 @@ tasks:
     requires:
       vars: [AGENT]
     cmds:
-      - "pwsh -NoProfile -Command \"& './scripts/invoke-python.ps1' -ScriptPath './scripts/ai-agent-execution.py' -Arguments @('done','--repo-root','{{.TASKFILE_DIR}}','--issue-key','{{default \"\" .ISSUE_KEY}}','--agent','{{.AGENT}}','--contexto','{{default \"\" .CONTEXTO}}','--evidencias','{{default \"\" .EVIDENCIAS}}','--proximo-passo','{{default \"\" .PROXIMO_PASSO}}','--transition','{{default \"1\" .TRANSITION}}')\""
+      - 'pwsh -NoProfile -Command "& ''./scripts/invoke-python.ps1'' -ScriptPath ''./scripts/ai-agent-execution.py'' -Arguments @(''done'',''--repo-root'',''{{.TASKFILE_DIR}}'',''--issue-key'',''{{default "" .ISSUE_KEY}}'',''--agent'',''{{.AGENT}}'',''--contexto'',''{{default "" .CONTEXTO}}'',''--evidencias'',''{{default "" .EVIDENCIAS}}'',''--proximo-passo'',''{{default "" .PROXIMO_PASSO}}'',''--transition'',''{{default "1" .TRANSITION}}'')"'
 
   ai:agent:execution:done:linux:
     desc: Linux/WSL - registra fechamento no Jira e limpa o contexto local ativo
@@ -1523,7 +1523,7 @@ tasks:
     requires:
       vars: [AGENT]
     cmds:
-      - "bash -lc 'bash ./scripts/run-python.sh ./scripts/ai-agent-execution.py done --repo-root \"{{.TASKFILE_DIR}}\" --issue-key \"{{default \"\" .ISSUE_KEY}}\" --agent \"{{.AGENT}}\" --contexto \"{{default \"\" .CONTEXTO}}\" --evidencias \"{{default \"\" .EVIDENCIAS}}\" --proximo-passo \"{{default \"\" .PROXIMO_PASSO}}\" --transition \"{{default \"1\" .TRANSITION}}\"'"
+      - 'bash -lc ''bash ./scripts/run-python.sh ./scripts/ai-agent-execution.py done --repo-root "{{.TASKFILE_DIR}}" --issue-key "{{default "" .ISSUE_KEY}}" --agent "{{.AGENT}}" --contexto "{{default "" .CONTEXTO}}" --evidencias "{{default "" .EVIDENCIAS}}" --proximo-passo "{{default "" .PROXIMO_PASSO}}" --transition "{{default "1" .TRANSITION}}"'''
 
   ai:install:codex:
     desc: Materializa as skills canonicas de .agents/skills no catalogo local do Codex
@@ -1531,7 +1531,7 @@ tasks:
     deps:
       - ai:validate
     cmds:
-      - "pwsh -NoProfile -File ./scripts/install-repo-skills.ps1"
+      - 'pwsh -NoProfile -File ./scripts/install-repo-skills.ps1'
 
   ai:skills:check:
     desc: Alias para ai:validate
@@ -1550,16 +1550,16 @@ tasks:
     cmds:
       - task: ai:chat:intake:{{if or (eq .OS "Windows_NT") (eq .OS "windows")}}windows{{else}}linux{{end}}
         vars:
-          MESSAGE: "{{.MESSAGE}}"
-          PATHS: "{{.PATHS}}"
-          RISK: "{{.RISK}}"
-          ROUTE: "{{.ROUTE}}"
-          PENDING_ACTION: "{{.PENDING_ACTION}}"
-          WORKLOG_FILE: "{{.WORKLOG_FILE}}"
-          WORKLOG_ID: "{{.WORKLOG_ID}}"
-          DECISIONS_FILE: "{{.DECISIONS_FILE}}"
-          OUT: "{{.OUT}}"
-          ROUTE_OUT: "{{.ROUTE_OUT}}"
+          MESSAGE: '{{.MESSAGE}}'
+          PATHS: '{{.PATHS}}'
+          RISK: '{{.RISK}}'
+          ROUTE: '{{.ROUTE}}'
+          PENDING_ACTION: '{{.PENDING_ACTION}}'
+          WORKLOG_FILE: '{{.WORKLOG_FILE}}'
+          WORKLOG_ID: '{{.WORKLOG_ID}}'
+          DECISIONS_FILE: '{{.DECISIONS_FILE}}'
+          OUT: '{{.OUT}}'
+          ROUTE_OUT: '{{.ROUTE_OUT}}'
 
   ai:chat:intake:windows:
     desc: Windows - registra intake de IA com preflight de pendencias
@@ -1568,7 +1568,7 @@ tasks:
     requires:
       vars: [MESSAGE]
     cmds:
-      - "pwsh -NoProfile -File ./scripts/invoke-python.ps1 -ScriptPath ./scripts/ai-chat-intake.py --message \"{{.MESSAGE}}\" --paths \"{{default \"\" .PATHS}}\" --risk \"{{default \"medium\" .RISK}}\" --route \"{{default \"0\" .ROUTE}}\" --pending-action \"{{default \"\" .PENDING_ACTION}}\" --worklog-file \"{{default \"docs/AI-WIP-TRACKER.md\" .WORKLOG_FILE}}\" --worklog-id \"{{default \"\" .WORKLOG_ID}}\" --decisions-file \"{{default \"docs/ROADMAP-DECISIONS.md\" .DECISIONS_FILE}}\" --out \"{{default \".cache/ai/chat-intake.json\" .OUT}}\" --route-out \"{{default \".cache/ai/route-output.json\" .ROUTE_OUT}}\""
+      - 'pwsh -NoProfile -File ./scripts/invoke-python.ps1 -ScriptPath ./scripts/ai-chat-intake.py --message "{{.MESSAGE}}" --paths "{{default "" .PATHS}}" --risk "{{default "medium" .RISK}}" --route "{{default "0" .ROUTE}}" --pending-action "{{default "" .PENDING_ACTION}}" --worklog-file "{{default "docs/AI-WIP-TRACKER.md" .WORKLOG_FILE}}" --worklog-id "{{default "" .WORKLOG_ID}}" --decisions-file "{{default "docs/ROADMAP-DECISIONS.md" .DECISIONS_FILE}}" --out "{{default ".cache/ai/chat-intake.json" .OUT}}" --route-out "{{default ".cache/ai/route-output.json" .ROUTE_OUT}}"'
 
   ai:chat:intake:linux:
     desc: Linux/WSL - registra intake de IA com preflight de pendencias
@@ -1577,7 +1577,7 @@ tasks:
     requires:
       vars: [MESSAGE]
     cmds:
-      - "bash -lc 'bash ./scripts/run-python.sh ./scripts/ai-chat-intake.py --message \"{{.MESSAGE}}\" --paths \"{{default \"\" .PATHS}}\" --risk \"{{default \"medium\" .RISK}}\" --route \"{{default \"0\" .ROUTE}}\" --pending-action \"{{default \"\" .PENDING_ACTION}}\" --worklog-file \"{{default \"docs/AI-WIP-TRACKER.md\" .WORKLOG_FILE}}\" --worklog-id \"{{default \"\" .WORKLOG_ID}}\" --decisions-file \"{{default \"docs/ROADMAP-DECISIONS.md\" .DECISIONS_FILE}}\" --out \"{{default \".cache/ai/chat-intake.json\" .OUT}}\" --route-out \"{{default \".cache/ai/route-output.json\" .ROUTE_OUT}}\"'"
+      - 'bash -lc ''bash ./scripts/run-python.sh ./scripts/ai-chat-intake.py --message "{{.MESSAGE}}" --paths "{{default "" .PATHS}}" --risk "{{default "medium" .RISK}}" --route "{{default "0" .ROUTE}}" --pending-action "{{default "" .PENDING_ACTION}}" --worklog-file "{{default "docs/AI-WIP-TRACKER.md" .WORKLOG_FILE}}" --worklog-id "{{default "" .WORKLOG_ID}}" --decisions-file "{{default "docs/ROADMAP-DECISIONS.md" .DECISIONS_FILE}}" --out "{{default ".cache/ai/chat-intake.json" .OUT}}" --route-out "{{default ".cache/ai/route-output.json" .ROUTE_OUT}}"'''
 
   ai:route:
     desc: Gera task card e delegation plan declarativos para a demanda informada
@@ -1586,10 +1586,10 @@ tasks:
     cmds:
       - task: ai:route:{{if or (eq .OS "Windows_NT") (eq .OS "windows")}}windows{{else}}linux{{end}}
         vars:
-          INTENT: "{{.INTENT}}"
-          PATHS: "{{.PATHS}}"
-          RISK: "{{.RISK}}"
-          OUT: "{{.OUT}}"
+          INTENT: '{{.INTENT}}'
+          PATHS: '{{.PATHS}}'
+          RISK: '{{.RISK}}'
+          OUT: '{{.OUT}}'
 
   ai:route:windows:
     desc: Windows - gera roteamento declarativo
@@ -1598,7 +1598,7 @@ tasks:
     requires:
       vars: [INTENT]
     cmds:
-      - "pwsh -NoProfile -File ./scripts/invoke-python.ps1 -ScriptPath ./scripts/ai-route.py --intent \"{{.INTENT}}\" --paths \"{{default \"\" .PATHS}}\" --risk \"{{default \"medium\" .RISK}}\" --out \"{{default \".cache/ai/route-output.json\" .OUT}}\""
+      - 'pwsh -NoProfile -File ./scripts/invoke-python.ps1 -ScriptPath ./scripts/ai-route.py --intent "{{.INTENT}}" --paths "{{default "" .PATHS}}" --risk "{{default "medium" .RISK}}" --out "{{default ".cache/ai/route-output.json" .OUT}}"'
 
   ai:route:linux:
     desc: Linux/WSL - gera roteamento declarativo
@@ -1607,7 +1607,7 @@ tasks:
     requires:
       vars: [INTENT]
     cmds:
-      - "bash -lc 'bash ./scripts/run-python.sh ./scripts/ai-route.py --intent \"{{.INTENT}}\" --paths \"{{default \"\" .PATHS}}\" --risk \"{{default \"medium\" .RISK}}\" --out \"{{default \".cache/ai/route-output.json\" .OUT}}\"'"
+      - 'bash -lc ''bash ./scripts/run-python.sh ./scripts/ai-route.py --intent "{{.INTENT}}" --paths "{{default "" .PATHS}}" --risk "{{default "medium" .RISK}}" --out "{{default ".cache/ai/route-output.json" .OUT}}"'''
 
   ai:delegate:
     desc: Gera plano de delegacao em Markdown para revisao humana
@@ -1616,14 +1616,14 @@ tasks:
     cmds:
       - task: ai:delegate:{{if or (eq .OS "Windows_NT") (eq .OS "windows")}}windows{{else}}linux{{end}}
         vars:
-          INTENT: "{{.INTENT}}"
-          PATHS: "{{.PATHS}}"
-          RISK: "{{.RISK}}"
-          PENDING_ACTION: "{{.PENDING_ACTION}}"
-          WORKLOG_FILE: "{{.WORKLOG_FILE}}"
-          WORKLOG_ID: "{{.WORKLOG_ID}}"
-          DECISIONS_FILE: "{{.DECISIONS_FILE}}"
-          OUT: "{{.OUT}}"
+          INTENT: '{{.INTENT}}'
+          PATHS: '{{.PATHS}}'
+          RISK: '{{.RISK}}'
+          PENDING_ACTION: '{{.PENDING_ACTION}}'
+          WORKLOG_FILE: '{{.WORKLOG_FILE}}'
+          WORKLOG_ID: '{{.WORKLOG_ID}}'
+          DECISIONS_FILE: '{{.DECISIONS_FILE}}'
+          OUT: '{{.OUT}}'
 
   ai:delegate:windows:
     desc: Windows - gera plano de delegacao em Markdown
@@ -1632,7 +1632,7 @@ tasks:
     requires:
       vars: [INTENT]
     cmds:
-      - "pwsh -NoProfile -File ./scripts/invoke-python.ps1 -ScriptPath ./scripts/ai-delegate.py --intent \"{{.INTENT}}\" --paths \"{{default \"\" .PATHS}}\" --risk \"{{default \"medium\" .RISK}}\" --pending-action \"{{default \"\" .PENDING_ACTION}}\" --worklog-file \"{{default \"docs/AI-WIP-TRACKER.md\" .WORKLOG_FILE}}\" --worklog-id \"{{default \"\" .WORKLOG_ID}}\" --decisions-file \"{{default \"docs/ROADMAP-DECISIONS.md\" .DECISIONS_FILE}}\" --out \"{{default \".cache/ai/delegation-plan.md\" .OUT}}\""
+      - 'pwsh -NoProfile -File ./scripts/invoke-python.ps1 -ScriptPath ./scripts/ai-delegate.py --intent "{{.INTENT}}" --paths "{{default "" .PATHS}}" --risk "{{default "medium" .RISK}}" --pending-action "{{default "" .PENDING_ACTION}}" --worklog-file "{{default "docs/AI-WIP-TRACKER.md" .WORKLOG_FILE}}" --worklog-id "{{default "" .WORKLOG_ID}}" --decisions-file "{{default "docs/ROADMAP-DECISIONS.md" .DECISIONS_FILE}}" --out "{{default ".cache/ai/delegation-plan.md" .OUT}}"'
 
   ai:delegate:linux:
     desc: Linux/WSL - gera plano de delegacao em Markdown
@@ -1641,7 +1641,7 @@ tasks:
     requires:
       vars: [INTENT]
     cmds:
-      - "bash -lc 'bash ./scripts/run-python.sh ./scripts/ai-delegate.py --intent \"{{.INTENT}}\" --paths \"{{default \"\" .PATHS}}\" --risk \"{{default \"medium\" .RISK}}\" --pending-action \"{{default \"\" .PENDING_ACTION}}\" --worklog-file \"{{default \"docs/AI-WIP-TRACKER.md\" .WORKLOG_FILE}}\" --worklog-id \"{{default \"\" .WORKLOG_ID}}\" --decisions-file \"{{default \"docs/ROADMAP-DECISIONS.md\" .DECISIONS_FILE}}\" --out \"{{default \".cache/ai/delegation-plan.md\" .OUT}}\"'"
+      - 'bash -lc ''bash ./scripts/run-python.sh ./scripts/ai-delegate.py --intent "{{.INTENT}}" --paths "{{default "" .PATHS}}" --risk "{{default "medium" .RISK}}" --pending-action "{{default "" .PENDING_ACTION}}" --worklog-file "{{default "docs/AI-WIP-TRACKER.md" .WORKLOG_FILE}}" --worklog-id "{{default "" .WORKLOG_ID}}" --decisions-file "{{default "docs/ROADMAP-DECISIONS.md" .DECISIONS_FILE}}" --out "{{default ".cache/ai/delegation-plan.md" .OUT}}"'''
 
   ai:eval:smoke:
     desc: Executa smoke eval de roteamento e governanca declarativa
@@ -1653,7 +1653,7 @@ tasks:
     platforms: [windows]
     dir: '{{.TASKFILE_DIR}}'
     cmds:
-      - "pwsh -NoProfile -File ./scripts/invoke-python.ps1 -ScriptPath ./scripts/ai-eval-smoke.py"
+      - 'pwsh -NoProfile -File ./scripts/invoke-python.ps1 -ScriptPath ./scripts/ai-eval-smoke.py'
 
   ai:eval:smoke:linux:
     desc: Linux/WSL - executa smoke eval de roteamento e governanca declarativa
@@ -1672,7 +1672,7 @@ tasks:
     platforms: [windows]
     dir: '{{.TASKFILE_DIR}}'
     cmds:
-      - "pwsh -NoProfile -File ./scripts/invoke-python.ps1 -ScriptPath ./scripts/ai-lessons.py ensure"
+      - 'pwsh -NoProfile -File ./scripts/invoke-python.ps1 -ScriptPath ./scripts/ai-lessons.py ensure'
 
   ai:lessons:ensure:linux:
     desc: Linux/WSL - garante estrutura minima de LICOES-APRENDIDAS.md
@@ -1688,15 +1688,15 @@ tasks:
     cmds:
       - task: ai:lessons:add:{{if or (eq .OS "Windows_NT") (eq .OS "windows")}}windows{{else}}linux{{end}}
         vars:
-          LESSON_ID: "{{.LESSON_ID}}"
-          TITLE: "{{.TITLE}}"
-          CONTEXT: "{{.CONTEXT}}"
-          RULE: "{{.RULE}}"
-          VALIDATED_SOLUTION: "{{.VALIDATED_SOLUTION}}"
-          PREVENTION: "{{.PREVENTION}}"
-          VALIDATION: "{{.VALIDATION}}"
-          WORKLOG_ID: "{{.WORKLOG_ID}}"
-          SOURCE_REPOS: "{{.SOURCE_REPOS}}"
+          LESSON_ID: '{{.LESSON_ID}}'
+          TITLE: '{{.TITLE}}'
+          CONTEXT: '{{.CONTEXT}}'
+          RULE: '{{.RULE}}'
+          VALIDATED_SOLUTION: '{{.VALIDATED_SOLUTION}}'
+          PREVENTION: '{{.PREVENTION}}'
+          VALIDATION: '{{.VALIDATION}}'
+          WORKLOG_ID: '{{.WORKLOG_ID}}'
+          SOURCE_REPOS: '{{.SOURCE_REPOS}}'
 
   ai:lessons:add:windows:
     desc: Windows - registra uma nova licao aprendida
@@ -1705,7 +1705,7 @@ tasks:
     requires:
       vars: [TITLE, CONTEXT, RULE, VALIDATED_SOLUTION, PREVENTION, VALIDATION]
     cmds:
-      - "pwsh -NoProfile -File ./scripts/invoke-python.ps1 -ScriptPath ./scripts/ai-lessons.py add --lesson-id \"{{default \"\" .LESSON_ID}}\" --title \"{{.TITLE}}\" --context \"{{.CONTEXT}}\" --rule \"{{.RULE}}\" --validated-solution \"{{.VALIDATED_SOLUTION}}\" --prevention \"{{.PREVENTION}}\" --validation \"{{.VALIDATION}}\" --worklog-id \"{{default \"\" .WORKLOG_ID}}\" --source-repos \"{{default \"\" .SOURCE_REPOS}}\""
+      - 'pwsh -NoProfile -File ./scripts/invoke-python.ps1 -ScriptPath ./scripts/ai-lessons.py add --lesson-id "{{default "" .LESSON_ID}}" --title "{{.TITLE}}" --context "{{.CONTEXT}}" --rule "{{.RULE}}" --validated-solution "{{.VALIDATED_SOLUTION}}" --prevention "{{.PREVENTION}}" --validation "{{.VALIDATION}}" --worklog-id "{{default "" .WORKLOG_ID}}" --source-repos "{{default "" .SOURCE_REPOS}}"'
 
   ai:lessons:add:linux:
     desc: Linux/WSL - registra uma nova licao aprendida
@@ -1714,7 +1714,7 @@ tasks:
     requires:
       vars: [TITLE, CONTEXT, RULE, VALIDATED_SOLUTION, PREVENTION, VALIDATION]
     cmds:
-      - "bash -lc 'bash ./scripts/run-python.sh ./scripts/ai-lessons.py add --lesson-id \"{{default \"\" .LESSON_ID}}\" --title \"{{.TITLE}}\" --context \"{{.CONTEXT}}\" --rule \"{{.RULE}}\" --validated-solution \"{{.VALIDATED_SOLUTION}}\" --prevention \"{{.PREVENTION}}\" --validation \"{{.VALIDATION}}\" --worklog-id \"{{default \"\" .WORKLOG_ID}}\" --source-repos \"{{default \"\" .SOURCE_REPOS}}\"'"
+      - 'bash -lc ''bash ./scripts/run-python.sh ./scripts/ai-lessons.py add --lesson-id "{{default "" .LESSON_ID}}" --title "{{.TITLE}}" --context "{{.CONTEXT}}" --rule "{{.RULE}}" --validated-solution "{{.VALIDATED_SOLUTION}}" --prevention "{{.PREVENTION}}" --validation "{{.VALIDATION}}" --worklog-id "{{default "" .WORKLOG_ID}}" --source-repos "{{default "" .SOURCE_REPOS}}"'''
 
   ai:lessons:review:
     desc: Registra a revisao de licoes de um worklog concluido
@@ -1723,11 +1723,11 @@ tasks:
     cmds:
       - task: ai:lessons:review:{{if or (eq .OS "Windows_NT") (eq .OS "windows")}}windows{{else}}linux{{end}}
         vars:
-          WORKLOG_ID: "{{.WORKLOG_ID}}"
-          DECISION: "{{.DECISION}}"
-          SUMMARY: "{{.SUMMARY}}"
-          LESSON_IDS: "{{.LESSON_IDS}}"
-          EVIDENCE: "{{.EVIDENCE}}"
+          WORKLOG_ID: '{{.WORKLOG_ID}}'
+          DECISION: '{{.DECISION}}'
+          SUMMARY: '{{.SUMMARY}}'
+          LESSON_IDS: '{{.LESSON_IDS}}'
+          EVIDENCE: '{{.EVIDENCE}}'
 
   ai:lessons:review:windows:
     desc: Windows - registra a revisao de licoes de um worklog
@@ -1736,7 +1736,7 @@ tasks:
     requires:
       vars: [WORKLOG_ID, DECISION, SUMMARY]
     cmds:
-      - "pwsh -NoProfile -File ./scripts/invoke-python.ps1 -ScriptPath ./scripts/ai-lessons.py review --worklog-id \"{{.WORKLOG_ID}}\" --decision \"{{.DECISION}}\" --summary \"{{.SUMMARY}}\" --lesson-ids \"{{default \"\" .LESSON_IDS}}\" --evidence \"{{default \"\" .EVIDENCE}}\""
+      - 'pwsh -NoProfile -File ./scripts/invoke-python.ps1 -ScriptPath ./scripts/ai-lessons.py review --worklog-id "{{.WORKLOG_ID}}" --decision "{{.DECISION}}" --summary "{{.SUMMARY}}" --lesson-ids "{{default "" .LESSON_IDS}}" --evidence "{{default "" .EVIDENCE}}"'
 
   ai:lessons:review:linux:
     desc: Linux/WSL - registra a revisao de licoes de um worklog
@@ -1745,7 +1745,7 @@ tasks:
     requires:
       vars: [WORKLOG_ID, DECISION, SUMMARY]
     cmds:
-      - "bash -lc 'bash ./scripts/run-python.sh ./scripts/ai-lessons.py review --worklog-id \"{{.WORKLOG_ID}}\" --decision \"{{.DECISION}}\" --summary \"{{.SUMMARY}}\" --lesson-ids \"{{default \"\" .LESSON_IDS}}\" --evidence \"{{default \"\" .EVIDENCE}}\"'"
+      - 'bash -lc ''bash ./scripts/run-python.sh ./scripts/ai-lessons.py review --worklog-id "{{.WORKLOG_ID}}" --decision "{{.DECISION}}" --summary "{{.SUMMARY}}" --lesson-ids "{{default "" .LESSON_IDS}}" --evidence "{{default "" .EVIDENCE}}"'''
 
   ai:lessons:check:
     desc: Falha se houver worklog concluido sem revisao de licoes
@@ -1757,7 +1757,7 @@ tasks:
     platforms: [windows]
     dir: '{{.TASKFILE_DIR}}'
     cmds:
-      - "pwsh -NoProfile -File ./scripts/invoke-python.ps1 -ScriptPath ./scripts/ai-lessons.py check"
+      - 'pwsh -NoProfile -File ./scripts/invoke-python.ps1 -ScriptPath ./scripts/ai-lessons.py check'
 
   ai:lessons:check:linux:
     desc: Linux/WSL - valida revisoes de licoes
@@ -1776,7 +1776,7 @@ tasks:
     platforms: [windows]
     dir: '{{.TASKFILE_DIR}}'
     cmds:
-      - "pwsh -NoProfile -File ./scripts/invoke-python.ps1 -ScriptPath ./scripts/ai-lessons.py sync"
+      - 'pwsh -NoProfile -File ./scripts/invoke-python.ps1 -ScriptPath ./scripts/ai-lessons.py sync'
 
   ai:lessons:sync:linux:
     desc: Linux/WSL - normaliza revisoes de licoes
@@ -1795,7 +1795,7 @@ tasks:
     platforms: [windows]
     dir: '{{.TASKFILE_DIR}}'
     cmds:
-      - "pwsh -NoProfile -File ./scripts/invoke-python.ps1 -ScriptPath ./scripts/ai-roadmap.py ensure"
+      - 'pwsh -NoProfile -File ./scripts/invoke-python.ps1 -ScriptPath ./scripts/ai-roadmap.py ensure'
 
   ai:roadmap:ensure:linux:
     desc: Linux/WSL - garante estrutura minima de roadmap e decisions
@@ -1809,21 +1809,21 @@ tasks:
     cmds:
       - task: ai:roadmap:refresh:{{if or (eq .OS "Windows_NT") (eq .OS "windows")}}windows{{else}}linux{{end}}
         vars:
-          CYCLE: "{{.CYCLE}}"
+          CYCLE: '{{.CYCLE}}'
 
   ai:roadmap:refresh:windows:
     desc: Windows - recalcula priorizacao e historico de ciclo do roadmap
     platforms: [windows]
     dir: '{{.TASKFILE_DIR}}'
     cmds:
-      - "pwsh -NoProfile -File ./scripts/invoke-python.ps1 -ScriptPath ./scripts/ai-roadmap.py refresh --cycle \"{{default \"\" .CYCLE}}\""
+      - 'pwsh -NoProfile -File ./scripts/invoke-python.ps1 -ScriptPath ./scripts/ai-roadmap.py refresh --cycle "{{default "" .CYCLE}}"'
 
   ai:roadmap:refresh:linux:
     desc: Linux/WSL - recalcula priorizacao e historico de ciclo do roadmap
     platforms: [linux]
     dir: '{{.TASKFILE_DIR}}'
     cmds:
-      - "bash -lc 'bash ./scripts/run-python.sh ./scripts/ai-roadmap.py refresh --cycle \"{{default \"\" .CYCLE}}\"'"
+      - 'bash -lc ''bash ./scripts/run-python.sh ./scripts/ai-roadmap.py refresh --cycle "{{default "" .CYCLE}}"'''
 
   ai:roadmap:register:
     desc: Registra decisao de roadmap e sincroniza roadmap + decisions
@@ -1832,14 +1832,14 @@ tasks:
     cmds:
       - task: ai:roadmap:register:{{if or (eq .OS "Windows_NT") (eq .OS "windows")}}windows{{else}}linux{{end}}
         vars:
-          DECISION: "{{.DECISION}}"
-          SUGGESTION: "{{.SUGGESTION}}"
-          HORIZON: "{{.HORIZON}}"
-          CHANGE_TYPE: "{{.CHANGE_TYPE}}"
-          NOTES: "{{.NOTES}}"
-          SUGGESTION_ID: "{{.SUGGESTION_ID}}"
-          ROADMAP_ID: "{{.ROADMAP_ID}}"
-          CYCLE: "{{.CYCLE}}"
+          DECISION: '{{.DECISION}}'
+          SUGGESTION: '{{.SUGGESTION}}'
+          HORIZON: '{{.HORIZON}}'
+          CHANGE_TYPE: '{{.CHANGE_TYPE}}'
+          NOTES: '{{.NOTES}}'
+          SUGGESTION_ID: '{{.SUGGESTION_ID}}'
+          ROADMAP_ID: '{{.ROADMAP_ID}}'
+          CYCLE: '{{.CYCLE}}'
 
   ai:roadmap:register:windows:
     desc: Windows - registra decisao de roadmap
@@ -1848,7 +1848,7 @@ tasks:
     requires:
       vars: [DECISION, SUGGESTION]
     cmds:
-      - "pwsh -NoProfile -File ./scripts/invoke-python.ps1 -ScriptPath ./scripts/ai-roadmap.py register --decision \"{{.DECISION}}\" --suggestion \"{{.SUGGESTION}}\" --horizon \"{{default \"next\" .HORIZON}}\" --change-type \"{{default \"improvement\" .CHANGE_TYPE}}\" --notes \"{{default \"\" .NOTES}}\" --suggestion-id \"{{default \"\" .SUGGESTION_ID}}\" --roadmap-id \"{{default \"\" .ROADMAP_ID}}\" --cycle \"{{default \"\" .CYCLE}}\""
+      - 'pwsh -NoProfile -File ./scripts/invoke-python.ps1 -ScriptPath ./scripts/ai-roadmap.py register --decision "{{.DECISION}}" --suggestion "{{.SUGGESTION}}" --horizon "{{default "next" .HORIZON}}" --change-type "{{default "improvement" .CHANGE_TYPE}}" --notes "{{default "" .NOTES}}" --suggestion-id "{{default "" .SUGGESTION_ID}}" --roadmap-id "{{default "" .ROADMAP_ID}}" --cycle "{{default "" .CYCLE}}"'
 
   ai:roadmap:register:linux:
     desc: Linux/WSL - registra decisao de roadmap
@@ -1857,7 +1857,7 @@ tasks:
     requires:
       vars: [DECISION, SUGGESTION]
     cmds:
-      - "bash -lc 'bash ./scripts/run-python.sh ./scripts/ai-roadmap.py register --decision \"{{.DECISION}}\" --suggestion \"{{.SUGGESTION}}\" --horizon \"{{default \"next\" .HORIZON}}\" --change-type \"{{default \"improvement\" .CHANGE_TYPE}}\" --notes \"{{default \"\" .NOTES}}\" --suggestion-id \"{{default \"\" .SUGGESTION_ID}}\" --roadmap-id \"{{default \"\" .ROADMAP_ID}}\" --cycle \"{{default \"\" .CYCLE}}\"'"
+      - 'bash -lc ''bash ./scripts/run-python.sh ./scripts/ai-roadmap.py register --decision "{{.DECISION}}" --suggestion "{{.SUGGESTION}}" --horizon "{{default "next" .HORIZON}}" --change-type "{{default "improvement" .CHANGE_TYPE}}" --notes "{{default "" .NOTES}}" --suggestion-id "{{default "" .SUGGESTION_ID}}" --roadmap-id "{{default "" .ROADMAP_ID}}" --cycle "{{default "" .CYCLE}}"'''
 
   ai:worklog:ensure:
     desc: Garante estrutura minima do tracker de WIP de IA
@@ -1869,7 +1869,7 @@ tasks:
     platforms: [windows]
     dir: '{{.TASKFILE_DIR}}'
     cmds:
-      - "pwsh -NoProfile -File ./scripts/invoke-python.ps1 -ScriptPath ./scripts/ai-worklog.py ensure"
+      - 'pwsh -NoProfile -File ./scripts/invoke-python.ps1 -ScriptPath ./scripts/ai-worklog.py ensure'
 
   ai:worklog:ensure:linux:
     desc: Linux/WSL - garante estrutura minima do tracker de WIP de IA
@@ -1888,7 +1888,7 @@ tasks:
     platforms: [windows]
     dir: '{{.TASKFILE_DIR}}'
     cmds:
-      - "pwsh -NoProfile -File ./scripts/invoke-python.ps1 -ScriptPath ./scripts/ai-worklog.py list"
+      - 'pwsh -NoProfile -File ./scripts/invoke-python.ps1 -ScriptPath ./scripts/ai-worklog.py list'
 
   ai:worklog:list:linux:
     desc: Linux/WSL - lista tarefas ativas em Doing no tracker de WIP de IA
@@ -1902,28 +1902,28 @@ tasks:
     cmds:
       - task: ai:worklog:preflight:{{if or (eq .OS "Windows_NT") (eq .OS "windows")}}windows{{else}}linux{{end}}
         vars:
-          MESSAGE: "{{.MESSAGE}}"
+          MESSAGE: '{{.MESSAGE}}'
 
   ai:worklog:preflight:windows:
     desc: Windows - resume pendencias e sinaliza se decisao humana e obrigatoria
     platforms: [windows]
     dir: '{{.TASKFILE_DIR}}'
     cmds:
-      - "pwsh -NoProfile -File ./scripts/invoke-python.ps1 -ScriptPath ./scripts/ai-worklog.py preflight --message \"{{default \"\" .MESSAGE}}\""
+      - 'pwsh -NoProfile -File ./scripts/invoke-python.ps1 -ScriptPath ./scripts/ai-worklog.py preflight --message "{{default "" .MESSAGE}}"'
 
   ai:worklog:preflight:linux:
     desc: Linux/WSL - resume pendencias e sinaliza se decisao humana e obrigatoria
     platforms: [linux]
     dir: '{{.TASKFILE_DIR}}'
     cmds:
-      - "bash -lc 'bash ./scripts/run-python.sh ./scripts/ai-worklog.py preflight --message \"{{default \"\" .MESSAGE}}\"'"
+      - 'bash -lc ''bash ./scripts/run-python.sh ./scripts/ai-worklog.py preflight --message "{{default "" .MESSAGE}}"'''
 
   ai:worklog:check:
     desc: Valida pendencias do tracker de WIP de IA com semantica de concluir ou destravar primeiro
     cmds:
       - task: ai:worklog:check:{{if or (eq .OS "Windows_NT") (eq .OS "windows")}}windows{{else}}linux{{end}}
         vars:
-          PENDING_ACTION: "{{.PENDING_ACTION}}"
+          PENDING_ACTION: '{{.PENDING_ACTION}}'
 
   ai:worklog:check:windows:
     desc: Windows - valida pendencias do tracker de WIP de IA
@@ -1931,7 +1931,7 @@ tasks:
     dir: '{{.TASKFILE_DIR}}'
     cmds:
       - task: git:governance:check:windows
-      - "pwsh -NoProfile -File ./scripts/invoke-python.ps1 -ScriptPath ./scripts/ai-worklog.py check --pending-action \"{{default \"\" .PENDING_ACTION}}\" --repo-root \"{{.TASKFILE_DIR}}\""
+      - 'pwsh -NoProfile -File ./scripts/invoke-python.ps1 -ScriptPath ./scripts/ai-worklog.py check --pending-action "{{default "" .PENDING_ACTION}}" --repo-root "{{.TASKFILE_DIR}}"'
 
   ai:worklog:check:linux:
     desc: Linux/WSL - valida pendencias do tracker de WIP de IA
@@ -1939,7 +1939,7 @@ tasks:
     dir: '{{.TASKFILE_DIR}}'
     cmds:
       - task: git:governance:check:linux
-      - "bash -lc 'bash ./scripts/run-python.sh ./scripts/ai-worklog.py check --pending-action \"{{default \"\" .PENDING_ACTION}}\" --repo-root \"{{.TASKFILE_DIR}}\"'"
+      - 'bash -lc ''bash ./scripts/run-python.sh ./scripts/ai-worklog.py check --pending-action "{{default "" .PENDING_ACTION}}" --repo-root "{{.TASKFILE_DIR}}"'''
 
   ai:worklog:close:gate:
     desc: Bloqueia encerramento quando ainda existem itens em Doing
@@ -1951,7 +1951,7 @@ tasks:
     platforms: [windows]
     dir: '{{.TASKFILE_DIR}}'
     cmds:
-      - "pwsh -NoProfile -File ./scripts/invoke-python.ps1 -ScriptPath ./scripts/ai-worklog.py close-gate"
+      - 'pwsh -NoProfile -File ./scripts/invoke-python.ps1 -ScriptPath ./scripts/ai-worklog.py close-gate'
 
   ai:worklog:close:gate:linux:
     desc: Linux/WSL - bloqueia encerramento quando ainda existem itens em Doing
@@ -1965,22 +1965,22 @@ tasks:
     cmds:
       - task: ai:worklog:branch:check:{{if or (eq .OS "Windows_NT") (eq .OS "windows")}}windows{{else}}linux{{end}}
         vars:
-          BRANCH: "{{.BRANCH}}"
-          OWNER: "{{.OWNER}}"
+          BRANCH: '{{.BRANCH}}'
+          OWNER: '{{.OWNER}}'
 
   ai:worklog:branch:check:windows:
     desc: Windows - falha se houver item em Doing para a branch atual ou BRANCH informado
     platforms: [windows]
     dir: '{{.TASKFILE_DIR}}'
     cmds:
-      - "pwsh -NoProfile -File ./scripts/invoke-python.ps1 -ScriptPath ./scripts/ai-worklog.py branch-check --branch \"{{default \"\" .BRANCH}}\" --owner \"{{default \"\" .OWNER}}\""
+      - 'pwsh -NoProfile -File ./scripts/invoke-python.ps1 -ScriptPath ./scripts/ai-worklog.py branch-check --branch "{{default "" .BRANCH}}" --owner "{{default "" .OWNER}}"'
 
   ai:worklog:branch:check:linux:
     desc: Linux/WSL - falha se houver item em Doing para a branch atual ou BRANCH informado
     platforms: [linux]
     dir: '{{.TASKFILE_DIR}}'
     cmds:
-      - "bash -lc 'bash ./scripts/run-python.sh ./scripts/ai-worklog.py branch-check --branch \"{{default \"\" .BRANCH}}\" --owner \"{{default \"\" .OWNER}}\"'"
+      - 'bash -lc ''bash ./scripts/run-python.sh ./scripts/ai-worklog.py branch-check --branch "{{default "" .BRANCH}}" --owner "{{default "" .OWNER}}"'''
 
   ai:worklog:start:
     desc: Registra nova tarefa em Doing no tracker de WIP de IA
@@ -1989,13 +1989,13 @@ tasks:
     cmds:
       - task: ai:worklog:start:{{if or (eq .OS "Windows_NT") (eq .OS "windows")}}windows{{else}}linux{{end}}
         vars:
-          MESSAGE: "{{.MESSAGE}}"
-          SCOPE: "{{.SCOPE}}"
-          BRANCH: "{{.BRANCH}}"
-          OWNER: "{{.OWNER}}"
-          NEXT_STEP: "{{.NEXT_STEP}}"
-          BLOCKERS: "{{.BLOCKERS}}"
-          WORKLOG_ID: "{{.WORKLOG_ID}}"
+          MESSAGE: '{{.MESSAGE}}'
+          SCOPE: '{{.SCOPE}}'
+          BRANCH: '{{.BRANCH}}'
+          OWNER: '{{.OWNER}}'
+          NEXT_STEP: '{{.NEXT_STEP}}'
+          BLOCKERS: '{{.BLOCKERS}}'
+          WORKLOG_ID: '{{.WORKLOG_ID}}'
 
   ai:worklog:start:windows:
     desc: Windows - registra nova tarefa em Doing no tracker de WIP de IA
@@ -2004,7 +2004,7 @@ tasks:
     requires:
       vars: [MESSAGE]
     cmds:
-      - "pwsh -NoProfile -File ./scripts/invoke-python.ps1 -ScriptPath ./scripts/ai-worklog.py start --message \"{{.MESSAGE}}\" --scope \"{{default \"\" .SCOPE}}\" --branch \"{{default \"\" .BRANCH}}\" --owner \"{{default \"ai-agent\" .OWNER}}\" --next-step \"{{default \"\" .NEXT_STEP}}\" --blockers \"{{default \"-\" .BLOCKERS}}\" --worklog-id \"{{default \"\" .WORKLOG_ID}}\""
+      - 'pwsh -NoProfile -File ./scripts/invoke-python.ps1 -ScriptPath ./scripts/ai-worklog.py start --message "{{.MESSAGE}}" --scope "{{default "" .SCOPE}}" --branch "{{default "" .BRANCH}}" --owner "{{default "ai-agent" .OWNER}}" --next-step "{{default "" .NEXT_STEP}}" --blockers "{{default "-" .BLOCKERS}}" --worklog-id "{{default "" .WORKLOG_ID}}"'
 
   ai:worklog:start:linux:
     desc: Linux/WSL - registra nova tarefa em Doing no tracker de WIP de IA
@@ -2013,7 +2013,7 @@ tasks:
     requires:
       vars: [MESSAGE]
     cmds:
-      - "bash -lc 'bash ./scripts/run-python.sh ./scripts/ai-worklog.py start --message \"{{.MESSAGE}}\" --scope \"{{default \"\" .SCOPE}}\" --branch \"{{default \"\" .BRANCH}}\" --owner \"{{default \"ai-agent\" .OWNER}}\" --next-step \"{{default \"\" .NEXT_STEP}}\" --blockers \"{{default \"-\" .BLOCKERS}}\" --worklog-id \"{{default \"\" .WORKLOG_ID}}\"'"
+      - 'bash -lc ''bash ./scripts/run-python.sh ./scripts/ai-worklog.py start --message "{{.MESSAGE}}" --scope "{{default "" .SCOPE}}" --branch "{{default "" .BRANCH}}" --owner "{{default "ai-agent" .OWNER}}" --next-step "{{default "" .NEXT_STEP}}" --blockers "{{default "-" .BLOCKERS}}" --worklog-id "{{default "" .WORKLOG_ID}}"'''
 
   ai:worklog:update:
     desc: Atualiza tarefa em Doing no tracker de WIP de IA
@@ -2022,14 +2022,14 @@ tasks:
     cmds:
       - task: ai:worklog:update:{{if or (eq .OS "Windows_NT") (eq .OS "windows")}}windows{{else}}linux{{end}}
         vars:
-          WORKLOG_ID: "{{.WORKLOG_ID}}"
-          PROGRESS: "{{.PROGRESS}}"
-          NEXT_STEP: "{{.NEXT_STEP}}"
-          BLOCKERS: "{{.BLOCKERS}}"
-          MESSAGE: "{{.MESSAGE}}"
-          SCOPE: "{{.SCOPE}}"
-          BRANCH: "{{.BRANCH}}"
-          OWNER: "{{.OWNER}}"
+          WORKLOG_ID: '{{.WORKLOG_ID}}'
+          PROGRESS: '{{.PROGRESS}}'
+          NEXT_STEP: '{{.NEXT_STEP}}'
+          BLOCKERS: '{{.BLOCKERS}}'
+          MESSAGE: '{{.MESSAGE}}'
+          SCOPE: '{{.SCOPE}}'
+          BRANCH: '{{.BRANCH}}'
+          OWNER: '{{.OWNER}}'
 
   ai:worklog:update:windows:
     desc: Windows - atualiza tarefa em Doing no tracker de WIP de IA
@@ -2038,7 +2038,7 @@ tasks:
     requires:
       vars: [WORKLOG_ID, PROGRESS]
     cmds:
-      - "pwsh -NoProfile -File ./scripts/run-ai-worklog-update.ps1 -WorklogId \"{{.WORKLOG_ID}}\" -ProgressText \"{{.PROGRESS}}\" -NextStep \"{{default \"\" .NEXT_STEP}}\" -Blockers \"{{default \"-\" .BLOCKERS}}\" -TaskMessage \"{{default \"\" .MESSAGE}}\" -ScopeText \"{{default \"\" .SCOPE}}\" -BranchName \"{{default \"\" .BRANCH}}\" -OwnerName \"{{default \"\" .OWNER}}\""
+      - 'pwsh -NoProfile -File ./scripts/run-ai-worklog-update.ps1 -WorklogId "{{.WORKLOG_ID}}" -ProgressText "{{.PROGRESS}}" -NextStep "{{default "" .NEXT_STEP}}" -Blockers "{{default "-" .BLOCKERS}}" -TaskMessage "{{default "" .MESSAGE}}" -ScopeText "{{default "" .SCOPE}}" -BranchName "{{default "" .BRANCH}}" -OwnerName "{{default "" .OWNER}}"'
 
   ai:worklog:update:linux:
     desc: Linux/WSL - atualiza tarefa em Doing no tracker de WIP de IA
@@ -2047,7 +2047,7 @@ tasks:
     requires:
       vars: [WORKLOG_ID, PROGRESS]
     cmds:
-      - "bash -lc 'bash ./scripts/run-python.sh ./scripts/ai-worklog.py update --worklog-id \"{{.WORKLOG_ID}}\" --progress \"{{.PROGRESS}}\" --next-step \"{{default \"\" .NEXT_STEP}}\" --blockers \"{{default \"-\" .BLOCKERS}}\" --message \"{{default \"\" .MESSAGE}}\" --scope \"{{default \"\" .SCOPE}}\" --branch \"{{default \"\" .BRANCH}}\" --owner \"{{default \"\" .OWNER}}\"'"
+      - 'bash -lc ''bash ./scripts/run-python.sh ./scripts/ai-worklog.py update --worklog-id "{{.WORKLOG_ID}}" --progress "{{.PROGRESS}}" --next-step "{{default "" .NEXT_STEP}}" --blockers "{{default "-" .BLOCKERS}}" --message "{{default "" .MESSAGE}}" --scope "{{default "" .SCOPE}}" --branch "{{default "" .BRANCH}}" --owner "{{default "" .OWNER}}"'''
 
   ai:worklog:done:
     desc: Move tarefa de Doing para Done no tracker de WIP de IA
@@ -2056,17 +2056,17 @@ tasks:
     cmds:
       - task: ai:worklog:done:{{if or (eq .OS "Windows_NT") (eq .OS "windows")}}windows{{else}}linux{{end}}
         vars:
-          WORKLOG_ID: "{{.WORKLOG_ID}}"
-          DELIVERY: "{{.DELIVERY}}"
-          EVIDENCE: "{{.EVIDENCE}}"
-          REVIEW_FILE: "{{.REVIEW_FILE}}"
-          REVIEW_PATHS: "{{.REVIEW_PATHS}}"
-          REVIEW_INTENT: "{{.REVIEW_INTENT}}"
-          REVIEW_RISK: "{{.REVIEW_RISK}}"
-          LESSONS_DECISION: "{{.LESSONS_DECISION}}"
-          LESSONS_SUMMARY: "{{.LESSONS_SUMMARY}}"
-          LESSONS_IDS: "{{.LESSONS_IDS}}"
-          LESSONS_EVIDENCE: "{{.LESSONS_EVIDENCE}}"
+          WORKLOG_ID: '{{.WORKLOG_ID}}'
+          DELIVERY: '{{.DELIVERY}}'
+          EVIDENCE: '{{.EVIDENCE}}'
+          REVIEW_FILE: '{{.REVIEW_FILE}}'
+          REVIEW_PATHS: '{{.REVIEW_PATHS}}'
+          REVIEW_INTENT: '{{.REVIEW_INTENT}}'
+          REVIEW_RISK: '{{.REVIEW_RISK}}'
+          LESSONS_DECISION: '{{.LESSONS_DECISION}}'
+          LESSONS_SUMMARY: '{{.LESSONS_SUMMARY}}'
+          LESSONS_IDS: '{{.LESSONS_IDS}}'
+          LESSONS_EVIDENCE: '{{.LESSONS_EVIDENCE}}'
 
   ai:worklog:done:windows:
     desc: Windows - move tarefa de Doing para Done no tracker de WIP de IA
@@ -2075,7 +2075,7 @@ tasks:
     requires:
       vars: [WORKLOG_ID, DELIVERY, LESSONS_DECISION, LESSONS_SUMMARY]
     cmds:
-      - "pwsh -NoProfile -File ./scripts/invoke-python.ps1 -ScriptPath ./scripts/ai-worklog.py done --review-file \"{{default \"docs/AI-REVIEW-LEDGER.md\" .REVIEW_FILE}}\" --repo-root \"{{.TASKFILE_DIR}}\" --review-paths \"{{default \"\" .REVIEW_PATHS}}\" --review-intent \"{{default \"\" .REVIEW_INTENT}}\" --review-risk \"{{default \"medium\" .REVIEW_RISK}}\" --worklog-id \"{{.WORKLOG_ID}}\" --delivery \"{{.DELIVERY}}\" --evidence \"{{default \"\" .EVIDENCE}}\" --lessons-decision \"{{.LESSONS_DECISION}}\" --lessons-summary \"{{.LESSONS_SUMMARY}}\" --lessons-ids \"{{default \"\" .LESSONS_IDS}}\" --lessons-evidence \"{{default \"\" .LESSONS_EVIDENCE}}\""
+      - 'pwsh -NoProfile -File ./scripts/invoke-python.ps1 -ScriptPath ./scripts/ai-worklog.py done --review-file "{{default "docs/AI-REVIEW-LEDGER.md" .REVIEW_FILE}}" --repo-root "{{.TASKFILE_DIR}}" --review-paths "{{default "" .REVIEW_PATHS}}" --review-intent "{{default "" .REVIEW_INTENT}}" --review-risk "{{default "medium" .REVIEW_RISK}}" --worklog-id "{{.WORKLOG_ID}}" --delivery "{{.DELIVERY}}" --evidence "{{default "" .EVIDENCE}}" --lessons-decision "{{.LESSONS_DECISION}}" --lessons-summary "{{.LESSONS_SUMMARY}}" --lessons-ids "{{default "" .LESSONS_IDS}}" --lessons-evidence "{{default "" .LESSONS_EVIDENCE}}"'
 
   ai:worklog:done:linux:
     desc: Linux/WSL - move tarefa de Doing para Done no tracker de WIP de IA
@@ -2084,7 +2084,7 @@ tasks:
     requires:
       vars: [WORKLOG_ID, DELIVERY, LESSONS_DECISION, LESSONS_SUMMARY]
     cmds:
-      - "bash -lc 'bash ./scripts/run-python.sh ./scripts/ai-worklog.py done --review-file \"{{default \"docs/AI-REVIEW-LEDGER.md\" .REVIEW_FILE}}\" --repo-root \"{{.TASKFILE_DIR}}\" --review-paths \"{{default \"\" .REVIEW_PATHS}}\" --review-intent \"{{default \"\" .REVIEW_INTENT}}\" --review-risk \"{{default \"medium\" .REVIEW_RISK}}\" --worklog-id \"{{.WORKLOG_ID}}\" --delivery \"{{.DELIVERY}}\" --evidence \"{{default \"\" .EVIDENCE}}\" --lessons-decision \"{{.LESSONS_DECISION}}\" --lessons-summary \"{{.LESSONS_SUMMARY}}\" --lessons-ids \"{{default \"\" .LESSONS_IDS}}\" --lessons-evidence \"{{default \"\" .LESSONS_EVIDENCE}}\"'"
+      - 'bash -lc ''bash ./scripts/run-python.sh ./scripts/ai-worklog.py done --review-file "{{default "docs/AI-REVIEW-LEDGER.md" .REVIEW_FILE}}" --repo-root "{{.TASKFILE_DIR}}" --review-paths "{{default "" .REVIEW_PATHS}}" --review-intent "{{default "" .REVIEW_INTENT}}" --review-risk "{{default "medium" .REVIEW_RISK}}" --worklog-id "{{.WORKLOG_ID}}" --delivery "{{.DELIVERY}}" --evidence "{{default "" .EVIDENCE}}" --lessons-decision "{{.LESSONS_DECISION}}" --lessons-summary "{{.LESSONS_SUMMARY}}" --lessons-ids "{{default "" .LESSONS_IDS}}" --lessons-evidence "{{default "" .LESSONS_EVIDENCE}}"'''
 
   ai:worklog:roadmap:pendente:
     desc: Mantem item em Doing e registra sugestao pendente no roadmap
@@ -2093,12 +2093,12 @@ tasks:
     cmds:
       - task: ai:worklog:roadmap:pendente:{{if or (eq .OS "Windows_NT") (eq .OS "windows")}}windows{{else}}linux{{end}}
         vars:
-          WORKLOG_ID: "{{.WORKLOG_ID}}"
-          SUGGESTION: "{{.SUGGESTION}}"
-          NEXT_STEP: "{{.NEXT_STEP}}"
-          BLOCKERS: "{{.BLOCKERS}}"
-          CONTEXT: "{{.CONTEXT}}"
-          NOTES: "{{.NOTES}}"
+          WORKLOG_ID: '{{.WORKLOG_ID}}'
+          SUGGESTION: '{{.SUGGESTION}}'
+          NEXT_STEP: '{{.NEXT_STEP}}'
+          BLOCKERS: '{{.BLOCKERS}}'
+          CONTEXT: '{{.CONTEXT}}'
+          NOTES: '{{.NOTES}}'
 
   ai:worklog:roadmap:pendente:windows:
     desc: Windows - mantem item em Doing e registra sugestao pendente no roadmap
@@ -2107,7 +2107,7 @@ tasks:
     requires:
       vars: [WORKLOG_ID]
     cmds:
-      - "pwsh -NoProfile -File ./scripts/invoke-python.ps1 -ScriptPath ./scripts/ai-worklog.py roadmap-pending --worklog-id \"{{.WORKLOG_ID}}\" --suggestion \"{{default \"\" .SUGGESTION}}\" --next-step \"{{default \"Aguardar priorizacao no roadmap para retomada.\" .NEXT_STEP}}\" --blockers \"{{default \"-\" .BLOCKERS}}\" --context \"{{default \"resolucao roadmap_pendente\" .CONTEXT}}\" --notes \"{{default \"opcao=roadmap_pendente\" .NOTES}}\""
+      - 'pwsh -NoProfile -File ./scripts/invoke-python.ps1 -ScriptPath ./scripts/ai-worklog.py roadmap-pending --worklog-id "{{.WORKLOG_ID}}" --suggestion "{{default "" .SUGGESTION}}" --next-step "{{default "Aguardar priorizacao no roadmap para retomada." .NEXT_STEP}}" --blockers "{{default "-" .BLOCKERS}}" --context "{{default "resolucao roadmap_pendente" .CONTEXT}}" --notes "{{default "opcao=roadmap_pendente" .NOTES}}"'
 
   ai:worklog:roadmap:pendente:linux:
     desc: Linux/WSL - mantem item em Doing e registra sugestao pendente no roadmap
@@ -2116,36 +2116,36 @@ tasks:
     requires:
       vars: [WORKLOG_ID]
     cmds:
-      - "bash -lc 'bash ./scripts/run-python.sh ./scripts/ai-worklog.py roadmap-pending --worklog-id \"{{.WORKLOG_ID}}\" --suggestion \"{{default \"\" .SUGGESTION}}\" --next-step \"{{default \"Aguardar priorizacao no roadmap para retomada.\" .NEXT_STEP}}\" --blockers \"{{default \"-\" .BLOCKERS}}\" --context \"{{default \"resolucao roadmap_pendente\" .CONTEXT}}\" --notes \"{{default \"opcao=roadmap_pendente\" .NOTES}}\"'"
+      - 'bash -lc ''bash ./scripts/run-python.sh ./scripts/ai-worklog.py roadmap-pending --worklog-id "{{.WORKLOG_ID}}" --suggestion "{{default "" .SUGGESTION}}" --next-step "{{default "Aguardar priorizacao no roadmap para retomada." .NEXT_STEP}}" --blockers "{{default "-" .BLOCKERS}}" --context "{{default "resolucao roadmap_pendente" .CONTEXT}}" --notes "{{default "opcao=roadmap_pendente" .NOTES}}"'''
 
   ai:worklog:sync:roadmap:
     desc: Sincroniza itens ativos do tracker para o roadmap
     cmds:
       - task: ai:worklog:sync:roadmap:{{if or (eq .OS "Windows_NT") (eq .OS "windows")}}windows{{else}}linux{{end}}
         vars:
-          WORKLOG_ID: "{{.WORKLOG_ID}}"
-          LIMIT: "{{.LIMIT}}"
+          WORKLOG_ID: '{{.WORKLOG_ID}}'
+          LIMIT: '{{.LIMIT}}'
 
   ai:worklog:sync:roadmap:windows:
     desc: Windows - sincroniza itens ativos do tracker para o roadmap
     platforms: [windows]
     dir: '{{.TASKFILE_DIR}}'
     cmds:
-      - "pwsh -NoProfile -File ./scripts/invoke-python.ps1 -ScriptPath ./scripts/ai-worklog.py sync-roadmap --worklog-id \"{{default \"\" .WORKLOG_ID}}\" --limit {{default \"0\" .LIMIT}}"
+      - 'pwsh -NoProfile -File ./scripts/invoke-python.ps1 -ScriptPath ./scripts/ai-worklog.py sync-roadmap --worklog-id "{{default "" .WORKLOG_ID}}" --limit {{default "0" .LIMIT}}'
 
   ai:worklog:sync:roadmap:linux:
     desc: Linux/WSL - sincroniza itens ativos do tracker para o roadmap
     platforms: [linux]
     dir: '{{.TASKFILE_DIR}}'
     cmds:
-      - "bash -lc 'bash ./scripts/run-python.sh ./scripts/ai-worklog.py sync-roadmap --worklog-id \"{{default \"\" .WORKLOG_ID}}\" --limit {{default \"0\" .LIMIT}}'"
+      - 'bash -lc ''bash ./scripts/run-python.sh ./scripts/ai-worklog.py sync-roadmap --worklog-id "{{default "" .WORKLOG_ID}}" --limit {{default "0" .LIMIT}}'''
 
   ai:wip:check:
     desc: Alias para ai:worklog:check
     cmds:
       - task: ai:worklog:check
         vars:
-          PENDING_ACTION: "{{.PENDING_ACTION}}"
+          PENDING_ACTION: '{{.PENDING_ACTION}}'
 
   ai:wip:start:
     desc: Alias para ai:worklog:start
@@ -2154,13 +2154,13 @@ tasks:
     cmds:
       - task: ai:worklog:start
         vars:
-          MESSAGE: "{{.MESSAGE}}"
-          SCOPE: "{{.SCOPE}}"
-          BRANCH: "{{.BRANCH}}"
-          OWNER: "{{.OWNER}}"
-          NEXT_STEP: "{{.NEXT_STEP}}"
-          BLOCKERS: "{{.BLOCKERS}}"
-          WORKLOG_ID: "{{.WORKLOG_ID}}"
+          MESSAGE: '{{.MESSAGE}}'
+          SCOPE: '{{.SCOPE}}'
+          BRANCH: '{{.BRANCH}}'
+          OWNER: '{{.OWNER}}'
+          NEXT_STEP: '{{.NEXT_STEP}}'
+          BLOCKERS: '{{.BLOCKERS}}'
+          WORKLOG_ID: '{{.WORKLOG_ID}}'
 
   ai:wip:update:
     desc: Alias para ai:worklog:update
@@ -2169,14 +2169,14 @@ tasks:
     cmds:
       - task: ai:worklog:update
         vars:
-          WORKLOG_ID: "{{.WORKLOG_ID}}"
-          PROGRESS: "{{.PROGRESS}}"
-          NEXT_STEP: "{{.NEXT_STEP}}"
-          BLOCKERS: "{{.BLOCKERS}}"
-          MESSAGE: "{{.MESSAGE}}"
-          SCOPE: "{{.SCOPE}}"
-          BRANCH: "{{.BRANCH}}"
-          OWNER: "{{.OWNER}}"
+          WORKLOG_ID: '{{.WORKLOG_ID}}'
+          PROGRESS: '{{.PROGRESS}}'
+          NEXT_STEP: '{{.NEXT_STEP}}'
+          BLOCKERS: '{{.BLOCKERS}}'
+          MESSAGE: '{{.MESSAGE}}'
+          SCOPE: '{{.SCOPE}}'
+          BRANCH: '{{.BRANCH}}'
+          OWNER: '{{.OWNER}}'
 
   ai:wip:done:
     desc: Alias para ai:worklog:done
@@ -2185,28 +2185,28 @@ tasks:
     cmds:
       - task: ai:worklog:done
         vars:
-          WORKLOG_ID: "{{.WORKLOG_ID}}"
-          DELIVERY: "{{.DELIVERY}}"
-          EVIDENCE: "{{.EVIDENCE}}"
-          LESSONS_DECISION: "{{.LESSONS_DECISION}}"
-          LESSONS_SUMMARY: "{{.LESSONS_SUMMARY}}"
-          LESSONS_IDS: "{{.LESSONS_IDS}}"
-          LESSONS_EVIDENCE: "{{.LESSONS_EVIDENCE}}"
+          WORKLOG_ID: '{{.WORKLOG_ID}}'
+          DELIVERY: '{{.DELIVERY}}'
+          EVIDENCE: '{{.EVIDENCE}}'
+          LESSONS_DECISION: '{{.LESSONS_DECISION}}'
+          LESSONS_SUMMARY: '{{.LESSONS_SUMMARY}}'
+          LESSONS_IDS: '{{.LESSONS_IDS}}'
+          LESSONS_EVIDENCE: '{{.LESSONS_EVIDENCE}}'
 
   ai:wip:branch:check:
     desc: Alias para ai:worklog:branch:check
     cmds:
       - task: ai:worklog:branch:check
         vars:
-          BRANCH: "{{.BRANCH}}"
-          OWNER: "{{.OWNER}}"
+          BRANCH: '{{.BRANCH}}'
+          OWNER: '{{.OWNER}}'
 
   conventions:check:pr-title:
     desc: Valida um titulo de PR no padrao emoji + conventional commits
     cmds:
       - task: conventions:check:pr-title:{{if or (eq .OS "Windows_NT") (eq .OS "windows")}}windows{{else}}linux{{end}}
         vars:
-          BRANCH: "{{.BRANCH}}"
+          BRANCH: '{{.BRANCH}}'
 
   conventions:check:pr-title:windows:
     desc: Windows - valida titulo de PR (emoji + conventional + max 72)
@@ -2215,7 +2215,7 @@ tasks:
     requires:
       vars: [TITLE]
     cmds:
-      - "pwsh -NoProfile -File ./scripts/validate-conventional-title.ps1 -Title \"{{.TITLE}}\" -Branch \"{{default \"\" .BRANCH}}\""
+      - 'pwsh -NoProfile -File ./scripts/validate-conventional-title.ps1 -Title "{{.TITLE}}" -Branch "{{default "" .BRANCH}}"'
 
   conventions:check:pr-title:linux:
     desc: Linux/WSL - valida titulo de PR (emoji + conventional + max 72)
@@ -2224,81 +2224,81 @@ tasks:
     requires:
       vars: [TITLE]
     cmds:
-      - "bash -lc 'branch=\"{{default \"\" .BRANCH}}\"; if [ -z \"$branch\" ]; then branch=\"$(git rev-parse --abbrev-ref HEAD)\"; fi; bash ./scripts/run-python.sh ./.githooks/ci/validate_message.py \"{{.TITLE}}\" --context \"PR title\" --branch \"$branch\"'"
+      - 'bash -lc ''branch="{{default "" .BRANCH}}"; if [ -z "$branch" ]; then branch="$(git rev-parse --abbrev-ref HEAD)"; fi; bash ./scripts/run-python.sh ./.githooks/ci/validate_message.py "{{.TITLE}}" --context "PR title" --branch "$branch"'''
 
   conventions:check:branch:
     desc: Valida nome da branch atual ou da branch informada
     cmds:
       - task: conventions:check:branch:{{if or (eq .OS "Windows_NT") (eq .OS "windows")}}windows{{else}}linux{{end}}
         vars:
-          BRANCH: "{{.BRANCH}}"
-          RANGE: "{{.RANGE}}"
+          BRANCH: '{{.BRANCH}}'
+          RANGE: '{{.RANGE}}'
 
   conventions:check:branch:windows:
     desc: Windows - valida branch atual ou BRANCH
     platforms: [windows]
     dir: '{{.TASKFILE_DIR}}'
     cmds:
-      - "pwsh -NoProfile -File ./scripts/validate-branch-name.ps1 -Branch \"{{default \"\" .BRANCH}}\" -Range \"{{default \"\" .RANGE}}\""
+      - 'pwsh -NoProfile -File ./scripts/validate-branch-name.ps1 -Branch "{{default "" .BRANCH}}" -Range "{{default "" .RANGE}}"'
 
   conventions:check:branch:linux:
     desc: Linux/WSL - valida branch atual ou BRANCH
     platforms: [linux]
     dir: '{{.TASKFILE_DIR}}'
     cmds:
-      - "bash -lc 'branch=\"{{default \"\" .BRANCH}}\"; range=\"{{default \"\" .RANGE}}\"; paths_json=\"[]\"; if [ -z \"$branch\" ]; then branch=\"$(git rev-parse --abbrev-ref HEAD)\"; fi; if [ -n \"$range\" ]; then payload=\"$(bash ./scripts/run-python.sh ./scripts/git-commit-subjects.py --repo-root \"{{.TASKFILE_DIR}}\" --range \"$range\" --include-files)\"; paths_json=\"$(printf '%s' \"$payload\" | bash ./scripts/run-python.sh -c \"import json,sys; payload=json.load(sys.stdin); seen=[]; [seen.append(path) for entry in payload for path in entry.get('paths', []) if path not in seen]; print(json.dumps(seen))\")\"; fi; bash ./scripts/run-python.sh ./.githooks/conventional_emoji.py --validate-branch \"$branch\" --paths-json \"$paths_json\"'"
+      - 'bash -lc ''branch="{{default "" .BRANCH}}"; range="{{default "" .RANGE}}"; paths_json="[]"; if [ -z "$branch" ]; then branch="$(git rev-parse --abbrev-ref HEAD)"; fi; if [ -n "$range" ]; then payload="$(bash ./scripts/run-python.sh ./scripts/git-commit-subjects.py --repo-root "{{.TASKFILE_DIR}}" --range "$range" --include-files)"; paths_json="$(printf ''%s'' "$payload" | bash ./scripts/run-python.sh -c "import json,sys; payload=json.load(sys.stdin); seen=[]; [seen.append(path) for entry in payload for path in entry.get(''paths'', []) if path not in seen]; print(json.dumps(seen))")"; fi; bash ./scripts/run-python.sh ./.githooks/conventional_emoji.py --validate-branch "$branch" --paths-json "$paths_json"'''
 
   conventions:check:commit:
     desc: Valida o ultimo commit subject ou o SUBJECT informado
     cmds:
       - task: conventions:check:commit:{{if or (eq .OS "Windows_NT") (eq .OS "windows")}}windows{{else}}linux{{end}}
         vars:
-          SUBJECT: "{{.SUBJECT}}"
-          BRANCH: "{{.BRANCH}}"
+          SUBJECT: '{{.SUBJECT}}'
+          BRANCH: '{{.BRANCH}}'
 
   conventions:check:commit:windows:
     desc: Windows - valida commit subject atual ou SUBJECT
     platforms: [windows]
     dir: '{{.TASKFILE_DIR}}'
     cmds:
-      - "pwsh -NoProfile -File ./scripts/validate-commit-subject.ps1 -Subject \"{{default \"\" .SUBJECT}}\" -Branch \"{{default \"\" .BRANCH}}\""
+      - 'pwsh -NoProfile -File ./scripts/validate-commit-subject.ps1 -Subject "{{default "" .SUBJECT}}" -Branch "{{default "" .BRANCH}}"'
 
   conventions:check:commit:linux:
     desc: Linux/WSL - valida commit subject atual ou SUBJECT
     platforms: [linux]
     dir: '{{.TASKFILE_DIR}}'
     cmds:
-      - "bash -lc 'subject=\"{{default \"\" .SUBJECT}}\"; branch=\"{{default \"\" .BRANCH}}\"; if [ -z \"$subject\" ]; then subject=\"$(git log -1 --format=%s)\"; fi; if [ -z \"$branch\" ]; then branch=\"$(git rev-parse --abbrev-ref HEAD)\"; fi; bash ./scripts/run-python.sh ./.githooks/ci/validate_message.py \"$subject\" --context \"commit subject\" --branch \"$branch\"'"
+      - 'bash -lc ''subject="{{default "" .SUBJECT}}"; branch="{{default "" .BRANCH}}"; if [ -z "$subject" ]; then subject="$(git log -1 --format=%s)"; fi; if [ -z "$branch" ]; then branch="$(git rev-parse --abbrev-ref HEAD)"; fi; bash ./scripts/run-python.sh ./.githooks/ci/validate_message.py "$subject" --context "commit subject" --branch "$branch"'''
 
   conventions:check:commits:
     desc: Valida subjects de commits no range informado ou origin/main..HEAD
     cmds:
       - task: conventions:check:commits:{{if or (eq .OS "Windows_NT") (eq .OS "windows")}}windows{{else}}linux{{end}}
         vars:
-          RANGE: "{{.RANGE}}"
-          BRANCH: "{{.BRANCH}}"
+          RANGE: '{{.RANGE}}'
+          BRANCH: '{{.BRANCH}}'
 
   conventions:check:commits:windows:
     desc: Windows - valida commits do range RANGE ou origin/main..HEAD
     platforms: [windows]
     dir: '{{.TASKFILE_DIR}}'
     cmds:
-      - "pwsh -NoProfile -File ./scripts/validate-commit-range.ps1 -Range \"{{default \"\" .RANGE}}\" -Branch \"{{default \"\" .BRANCH}}\""
+      - 'pwsh -NoProfile -File ./scripts/validate-commit-range.ps1 -Range "{{default "" .RANGE}}" -Branch "{{default "" .BRANCH}}"'
 
   conventions:check:commits:linux:
     desc: Linux/WSL - valida commits do range RANGE ou origin/main..HEAD
     platforms: [linux]
     dir: '{{.TASKFILE_DIR}}'
     cmds:
-      - "bash -lc 'range=\"{{default \"\" .RANGE}}\"; branch=\"{{default \"\" .BRANCH}}\"; if [ -z \"$range\" ]; then range=\"origin/main..HEAD\"; fi; if [ -z \"$branch\" ]; then branch=\"$(git rev-parse --abbrev-ref HEAD)\"; fi; payload=\"$(bash ./scripts/run-python.sh ./scripts/git-commit-subjects.py --repo-root \"{{.TASKFILE_DIR}}\" --range \"$range\" --include-files)\"; bash ./scripts/run-python.sh ./.githooks/conventional_emoji.py --validate-many-json \"$payload\" --require-emoji --require-issue-key --branch \"$branch\"'"
+      - 'bash -lc ''range="{{default "" .RANGE}}"; branch="{{default "" .BRANCH}}"; if [ -z "$range" ]; then range="origin/main..HEAD"; fi; if [ -z "$branch" ]; then branch="$(git rev-parse --abbrev-ref HEAD)"; fi; payload="$(bash ./scripts/run-python.sh ./scripts/git-commit-subjects.py --repo-root "{{.TASKFILE_DIR}}" --range "$range" --include-files)"; bash ./scripts/run-python.sh ./.githooks/conventional_emoji.py --validate-many-json "$payload" --require-emoji --require-issue-key --branch "$branch"'''
 
   conventions:check:pr-commits:
     desc: Valida todos os commits de um PR no GitHub via API
     cmds:
       - task: conventions:check:pr-commits:{{if or (eq .OS "Windows_NT") (eq .OS "windows")}}windows{{else}}linux{{end}}
         vars:
-          REPO: "{{.REPO}}"
-          PR: "{{.PR}}"
+          REPO: '{{.REPO}}'
+          PR: '{{.PR}}'
 
   conventions:check:pr-commits:windows:
     desc: Windows - valida commits do PR informado via API do GitHub
@@ -2307,7 +2307,7 @@ tasks:
     requires:
       vars: [REPO, PR]
     cmds:
-      - "pwsh -NoProfile -File ./scripts/validate-pr-commits.ps1 -Repo \"{{.REPO}}\" -PrNumber {{.PR}}"
+      - 'pwsh -NoProfile -File ./scripts/validate-pr-commits.ps1 -Repo "{{.REPO}}" -PrNumber {{.PR}}'
 
   conventions:check:pr-commits:linux:
     desc: Linux/WSL - valida commits do PR informado via API do GitHub
@@ -2316,7 +2316,7 @@ tasks:
     requires:
       vars: [REPO, PR]
     cmds:
-      - "bash -lc 'bash ./scripts/run-python.sh ./.githooks/ci/validate_pr_commits.py \"{{.REPO}}\" \"{{.PR}}\"'"
+      - 'bash -lc ''bash ./scripts/run-python.sh ./.githooks/ci/validate_pr_commits.py "{{.REPO}}" "{{.PR}}"'''
 
   conventions:hooks:install:
     desc: Configura este repo para usar hooks locais em .githooks
@@ -2337,8 +2337,8 @@ tasks:
     cmds:
       - task: conventions:check:pr-title
         vars:
-          TITLE: "{{.TITLE}}"
-          BRANCH: "{{.BRANCH}}"
+          TITLE: '{{.TITLE}}'
+          BRANCH: '{{.BRANCH}}'
 
   ci:pr:title:check:
     desc: Alias CI para conventions:check:pr-title
@@ -2347,24 +2347,24 @@ tasks:
     cmds:
       - task: conventions:check:pr-title
         vars:
-          TITLE: "{{.PR_TITLE}}"
-          BRANCH: "{{.BRANCH}}"
+          TITLE: '{{.PR_TITLE}}'
+          BRANCH: '{{.BRANCH}}'
 
   ci:branch:check:
     desc: Alias CI para conventions:check:branch
     cmds:
       - task: conventions:check:branch
         vars:
-          BRANCH: "{{.BRANCH}}"
-          RANGE: "{{.RANGE}}"
+          BRANCH: '{{.BRANCH}}'
+          RANGE: '{{.RANGE}}'
 
   ci:commits:check:
     desc: Alias CI para conventions:check:commits
     cmds:
       - task: conventions:check:commits
         vars:
-          RANGE: "{{.RANGE}}"
-          BRANCH: "{{.BRANCH}}"
+          RANGE: '{{.RANGE}}'
+          BRANCH: '{{.BRANCH}}'
 
   ci:workflow:sync:check:
     desc: Valida sincronismo entre workflows, tasks e catalogos do repo
@@ -2376,7 +2376,7 @@ tasks:
     platforms: [windows]
     dir: '{{.TASKFILE_DIR}}'
     cmds:
-      - "pwsh -NoProfile -File ./scripts/invoke-python.ps1 -ScriptPath ./scripts/validate_workflow_task_sync.py"
+      - 'pwsh -NoProfile -File ./scripts/invoke-python.ps1 -ScriptPath ./scripts/validate_workflow_task_sync.py'
 
   ci:workflow:sync:check:linux:
     desc: Linux/WSL - valida sincronismo entre workflows, tasks e catalogos

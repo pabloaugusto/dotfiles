@@ -4,25 +4,23 @@ import json
 import pathlib
 import unittest
 
-import yaml
+from scripts.config_context_lib import load_toml_map
 
 REPO_ROOT = pathlib.Path(__file__).resolve().parents[2]
 
 
 class AiReviewerPoliciesTests(unittest.TestCase):
     def setUp(self) -> None:
-        self.operations = yaml.safe_load(
-            (REPO_ROOT / "config" / "ai" / "agent-operations.yaml").read_text(encoding="utf-8")
-        )
-        self.policies = yaml.safe_load(
-            (REPO_ROOT / "config" / "ai" / "reviewer-policies.yaml").read_text(encoding="utf-8")
-        )
+        self.operations = load_toml_map(REPO_ROOT / ".agents" / "config" / "orchestration.toml")
+        self.reviews = load_toml_map(REPO_ROOT / ".agents" / "config" / "reviews.toml")
         self.review_output_schema = json.loads(
-            (REPO_ROOT / "config" / "ai" / "review-output.schema.json").read_text(encoding="utf-8")
+            (
+                REPO_ROOT / ".agents" / "config" / "review-output.schema.json"
+            ).read_text(encoding="utf-8")
         )
 
     def test_common_policy_has_structured_output_contract(self) -> None:
-        common = self.policies.get("common") or {}
+        common = ((self.reviews.get("policies") or {}).get("common")) or {}
         required_output = common.get("required_output") or []
         for field in (
             "decision",
@@ -34,7 +32,7 @@ class AiReviewerPoliciesTests(unittest.TestCase):
             self.assertIn(field, required_output)
 
     def test_python_policy_covers_expected_result_questions(self) -> None:
-        profiles = self.policies.get("profiles") or {}
+        profiles = ((self.reviews.get("policies") or {}).get("profiles")) or {}
         python_policy = profiles.get("python-review-policy") or {}
         expected = python_policy.get("expected_result") or []
         self.assertIn("o-que-esta-correto", expected)
@@ -56,9 +54,9 @@ class AiReviewerPoliciesTests(unittest.TestCase):
                 self.assertEqual((roles.get(role_name) or {}).get("decision_policy"), policy_name)
 
     def test_common_policy_declares_schema_and_posture(self) -> None:
-        metadata = self.policies.get("metadata") or {}
-        self.assertEqual(metadata.get("review_output_schema"), "config/ai/review-output.schema.json")
-        common = self.policies.get("common") or {}
+        metadata = ((self.reviews.get("policies") or {}).get("metadata")) or {}
+        self.assertEqual(metadata.get("review_output_schema"), ".agents/config/review-output.schema.json")
+        common = ((self.reviews.get("policies") or {}).get("common")) or {}
         posture_rules = common.get("posture_rules") or []
         self.assertIn("nunca-aprovar-por-omissao", posture_rules)
         precedence = common.get("sources_of_truth_precedence") or []
@@ -80,7 +78,7 @@ class AiReviewerPoliciesTests(unittest.TestCase):
             self.assertIn(field, required)
 
     def test_python_policy_covers_workflow_steps_and_scope(self) -> None:
-        profiles = self.policies.get("profiles") or {}
+        profiles = ((self.reviews.get("policies") or {}).get("profiles")) or {}
         python_policy = profiles.get("python-review-policy") or {}
         workflow_steps = python_policy.get("workflow_steps") or []
         self.assertIn("decisao-formal", workflow_steps)
@@ -88,7 +86,7 @@ class AiReviewerPoliciesTests(unittest.TestCase):
         self.assertIn("module", review_scope)
 
     def test_tech_lead_policy_requires_pr_scope_and_specialist_inputs(self) -> None:
-        profiles = self.policies.get("profiles") or {}
+        profiles = ((self.reviews.get("policies") or {}).get("profiles")) or {}
         tech_lead_policy = profiles.get("tech-lead-review-policy") or {}
         validation_layers = tech_lead_policy.get("validation_layers") or []
         self.assertIn("specialist-reviews", validation_layers)

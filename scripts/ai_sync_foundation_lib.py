@@ -24,7 +24,7 @@ from scripts.ai_control_plane_lib import (
 )
 from scripts.atlassian_platform_lib import AtlassianHttpClient, ConfluenceAdapter
 
-SYNC_TARGETS_PATH = Path("config/ai/sync-targets.yaml")
+SYNC_TARGETS_PATH = Path("config/sync-targets.yaml")
 WORKSPACE_ID_RE = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
 LEDGER_START_MARKER = "<!-- ai-sync-ledger:start -->"
 LEDGER_END_MARKER = "<!-- ai-sync-ledger:end -->"
@@ -126,59 +126,59 @@ def load_sync_manifest(repo_root: str | Path | None = None) -> SyncManifest:
     manifest_path = resolved_repo_root / SYNC_TARGETS_PATH
     payload = load_yaml_map(manifest_path)
 
-    workspace = _ensure_mapping(payload.get("workspace"), "config/ai/sync-targets.yaml workspace")
+    workspace = _ensure_mapping(payload.get("workspace"), "config/sync-targets.yaml workspace")
     workspace_id = str(workspace.get("id", "")).strip()
     if not WORKSPACE_ID_RE.fullmatch(workspace_id):
         raise AiControlPlaneError(
-            "config/ai/sync-targets.yaml workspace.id precisa ser kebab-case ASCII estavel."
+            "config/sync-targets.yaml workspace.id precisa ser kebab-case ASCII estavel."
         )
     raw_state_root = str(workspace.get("state_root", "")).strip()
     if not raw_state_root:
-        raise AiControlPlaneError("config/ai/sync-targets.yaml workspace.state_root e obrigatorio.")
+        raise AiControlPlaneError("config/sync-targets.yaml workspace.state_root e obrigatorio.")
     workspace_dir_template = str(
         workspace.get("workspace_dir", "workspaces/{workspace_id}")
     ).strip()
     if not workspace_dir_template or Path(workspace_dir_template).is_absolute():
         raise AiControlPlaneError(
-            "config/ai/sync-targets.yaml workspace.workspace_dir precisa ser relativo ao state_root."
+            "config/sync-targets.yaml workspace.workspace_dir precisa ser relativo ao state_root."
         )
 
     runtime_identity = _ensure_mapping(
         payload.get("runtime_identity"),
-        "config/ai/sync-targets.yaml runtime_identity",
+        "config/sync-targets.yaml runtime_identity",
     )
     runtime_fields_raw = runtime_identity.get("fields")
     if not isinstance(runtime_fields_raw, list) or not runtime_fields_raw:
         raise AiControlPlaneError(
-            "config/ai/sync-targets.yaml runtime_identity.fields precisa ser lista nao vazia."
+            "config/sync-targets.yaml runtime_identity.fields precisa ser lista nao vazia."
         )
     runtime_fields = [str(field).strip() for field in runtime_fields_raw if str(field).strip()]
     runtime_kinds_raw = runtime_identity.get("runtime_kinds") or []
     if not isinstance(runtime_kinds_raw, list):
         raise AiControlPlaneError(
-            "config/ai/sync-targets.yaml runtime_identity.runtime_kinds precisa ser lista."
+            "config/sync-targets.yaml runtime_identity.runtime_kinds precisa ser lista."
         )
     runtime_kinds = [str(kind).strip() for kind in runtime_kinds_raw if str(kind).strip()]
 
     artifacts_payload = _ensure_mapping(
         payload.get("artifacts"),
-        "config/ai/sync-targets.yaml artifacts",
+        "config/sync-targets.yaml artifacts",
     )
     artifacts: dict[str, SyncArtifact] = {}
     for artifact_key, raw_definition in artifacts_payload.items():
         normalized_key = str(artifact_key).strip()
         definition = _ensure_mapping(
             raw_definition,
-            f"config/ai/sync-targets.yaml artifacts.{normalized_key}",
+            f"config/sync-targets.yaml artifacts.{normalized_key}",
         )
         local_outbox = _ensure_mapping(
             definition.get("local_outbox"),
-            f"config/ai/sync-targets.yaml artifacts.{normalized_key}.local_outbox",
+            f"config/sync-targets.yaml artifacts.{normalized_key}.local_outbox",
         )
         local_outbox_path = Path(str(local_outbox.get("path", "")).strip())
         if not str(local_outbox_path) or local_outbox_path.is_absolute():
             raise AiControlPlaneError(
-                f"config/ai/sync-targets.yaml artifacts.{normalized_key}.local_outbox.path precisa ser relativo."
+                f"config/sync-targets.yaml artifacts.{normalized_key}.local_outbox.path precisa ser relativo."
             )
         artifacts[normalized_key] = SyncArtifact(
             key=normalized_key,
@@ -188,32 +188,32 @@ def load_sync_manifest(repo_root: str | Path | None = None) -> SyncManifest:
             source_of_truth=str(definition.get("source_of_truth", "")).strip(),
             remote_target=_ensure_mapping(
                 definition.get("remote_target"),
-                f"config/ai/sync-targets.yaml artifacts.{normalized_key}.remote_target",
+                f"config/sync-targets.yaml artifacts.{normalized_key}.remote_target",
             ),
             local_outbox_path=local_outbox_path,
             retention_policy=_ensure_mapping(
                 definition.get("retention_policy"),
-                f"config/ai/sync-targets.yaml artifacts.{normalized_key}.retention_policy",
+                f"config/sync-targets.yaml artifacts.{normalized_key}.retention_policy",
             ),
         )
 
     inventory_payload = payload.get("artifact_inventory") or {}
     if not isinstance(inventory_payload, dict):
         raise AiControlPlaneError(
-            "config/ai/sync-targets.yaml artifact_inventory precisa ser mapa."
+            "config/sync-targets.yaml artifact_inventory precisa ser mapa."
         )
     artifact_inventory: dict[str, list[dict[str, Any]]] = {}
     for bucket_name, entries in inventory_payload.items():
         if not isinstance(entries, list):
             raise AiControlPlaneError(
-                f"config/ai/sync-targets.yaml artifact_inventory.{bucket_name} precisa ser lista."
+                f"config/sync-targets.yaml artifact_inventory.{bucket_name} precisa ser lista."
             )
         normalized_entries: list[dict[str, Any]] = []
         for entry in entries:
             normalized_entries.append(
                 _ensure_mapping(
                     entry,
-                    f"config/ai/sync-targets.yaml artifact_inventory.{bucket_name}",
+                    f"config/sync-targets.yaml artifact_inventory.{bucket_name}",
                 )
             )
         artifact_inventory[str(bucket_name).strip()] = normalized_entries

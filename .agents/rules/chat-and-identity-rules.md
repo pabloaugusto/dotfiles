@@ -20,10 +20,8 @@ agentes.
 - [`../../.agents/config/agents.toml`](../../.agents/config/agents.toml)
 - [`../../.agents/config/communication.toml`](../../.agents/config/communication.toml)
 - [`../../.agents/config/startup.toml`](../../.agents/config/startup.toml)
-- [`../../config/ai/contracts.yaml`](../../config/ai/contracts.yaml) como ponte legada
-- [`../../config/ai/agent-operations.yaml`](../../config/ai/agent-operations.yaml) como ponte legada
-- [`../../config/ai/agent-enablement.yaml`](../../config/ai/agent-enablement.yaml) como ponte legada
-- [`../../config/ai/agent-runtime.yaml`](../../config/ai/agent-runtime.yaml) como ponte legada
+- [`../../.agents/config/orchestration.toml`](../../.agents/config/orchestration.toml)
+- [`../../.agents/config.toml`](../../.agents/config.toml)
 - [`../../docs/AI-CHAT-CONTRACTS-REGISTER.md`](../../docs/AI-CHAT-CONTRACTS-REGISTER.md)
 - [`../../.agents/registry/`](../../.agents/registry/)
 

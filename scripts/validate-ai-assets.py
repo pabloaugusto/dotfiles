@@ -93,15 +93,13 @@ REQUIRED_FILES = [
     "docs/ROADMAP-DECISIONS.md",
     "docs/TASKS.md",
     "docs/WORKFLOWS.md",
-    "config/ai/platforms.yaml",
-    "config/ai/platforms.local.yaml.tpl",
-    "config/ai/agents.yaml",
-    "config/ai/agent-enablement.yaml",
-    "config/ai/agent-operations.yaml",
-    "config/ai/agent-runtime.yaml",
-    "config/ai/contracts.yaml",
-    "config/ai/sync-targets.yaml",
+    "config/confluence-model.yaml",
+    "config/jira-model.yaml",
+    "config/platforms.yaml",
+    "config/platforms.local.yaml.tpl",
+    "config/sync-targets.yaml",
     "app/df/secrets/secrets-ref.yaml",
+    ".agents/config/review-output.schema.json",
     ".agents/README.md",
     ".agents/prompts/README.md",
     ".agents/prompts/CATALOG.md",
@@ -395,15 +393,15 @@ STARTUP_AND_RESTART_REQUIRED_SNIPPETS = [
 ]
 
 STARTUP_GOVERNANCE_REQUIRED_SNIPPETS = {
-    "config/ai/agent-enablement.yaml": [
-        "version: 1",
-        "registry_agents:",
-        "roles:",
-        "ai-startup-governor:",
-        "ai-linguistic-reviewer:",
-        "pascoalete:",
+    ".agents/config/agents.toml": [
+        'version = 1',
+        '[roles.ai-startup-governor]',
+        '[roles.ai-linguistic-reviewer]',
+        '[enablement.registry_agents.pascoalete]',
+        '[runtime.roles.ai-startup-governor]',
+        '[runtime.registry_agents.pascoalete]',
     ],
-    "config/ai/contracts.yaml": [
+    ".agents/config/startup.toml": [
         "load-chat-communication-contract-before-first-user-facing-message",
         "load-display-name-layer-before-chat-jira-or-confluence-visible-communication",
         "load-git-governance-contracts-before-changing-worktree-state",
@@ -418,9 +416,9 @@ STARTUP_GOVERNANCE_REQUIRED_SNIPPETS = {
         "subagent-context-pack-must-carry-owner-issue-startup-artifacts-and-applicable-rules",
         "startup-must-load-prompts-catalog-and-applicable-formal-pea-pack",
         "startup-report-must-expose-pea-status",
-        "startup_readiness:",
-        "owner_role: ai-startup-governor",
-        "readiness_artifact: .cache/ai/startup-ready.json",
+        "[startup_readiness]",
+        'owner_role = "ai-startup-governor"',
+        'readiness_artifact = ".cache/ai/startup-ready.json"',
         "startup-must-materialize-startup-ready-artifact-before-operational-handoff",
         "startup-governor-must-own-the-first-user-facing-message-until-ready-for-work",
         "startup-governor-must-block-operational-output-when-clearance-is-not-ready",
@@ -455,7 +453,7 @@ STARTUP_GOVERNANCE_REQUIRED_SNIPPETS = {
         "pacote minimo de contexto antes de delegar para subagentes",
         "rejeitavel ate a remediacao do contexto",
     ],
-    "config/ai/agent-operations.yaml": [
+    ".agents/config/orchestration.toml": [
         "zero-context-startup-must-load-chat-contract-before-first-user-message",
         "first-operational-chat-message-belongs-to-ai-startup-governor-until-ready-for-work",
         "startup-governor-must-materialize-startup-ready-artifact-before-handoff",
@@ -581,7 +579,7 @@ SYNC_FOUNDATION_REQUIRED_SNIPPETS = {
         "workspace_id",
         "runtime_environment_id",
         "~/.ai-control-plane/workspaces/<workspace_id>/",
-        "config/ai/sync-targets.yaml",
+        "config/sync-targets.yaml",
         "ack",
         "dead-letter",
         "runtime ledger candidate",
@@ -595,12 +593,12 @@ SYNC_FOUNDATION_REQUIRED_SNIPPETS = {
         "docs/ai-sync-foundation.md",
     ],
     "docs/README.md": [
-        "config/ai/sync-targets.yaml",
+        "config/sync-targets.yaml",
         "docs/ai-sync-foundation.md",
     ],
-    "config/ai/contracts.yaml": [
-        "sync_foundation:",
-        "manifest: config/ai/sync-targets.yaml",
+    ".agents/config/startup.toml": [
+        "[sync_foundation]",
+        'manifest = "config/sync-targets.yaml"',
         "no-domain-may-create-a-parallel-outbox-contract",
     ],
 }
@@ -641,18 +639,18 @@ AGENT_IDENTITY_REQUIRED_SNIPPETS = {
         'display_name_field = "display_name"',
         'fallback_display = "technical-id"',
     ],
-    "config/ai/contracts.yaml": [
-        "agent_identity:",
-        "source_of_truth: .agents/registry/*.toml::display_name",
+    ".agents/config/startup.toml": [
+        "[agent_identity]",
+        'source_of_truth = ".agents/registry/*.toml::display_name"',
         "startup-and-restart-must-load-display-name-layer",
         "chat-must-prefer-chat-alias-then-display-name-then-technical-id",
         "jira-current-and-next-role-fields-must-prefer-chat-alias-then-display-name-then-technical-id",
     ],
-    "config/ai/agents.yaml": [
-        "display_name: Guardiao de Startup",
-        "display_name: PO",
-        "display_name: Scrum Master",
-        "display_name: Engenheiro Agentes IA",
+    ".agents/config/agents.toml": [
+        'display_name = "Guardiao de Startup"',
+        'display_name = "PO"',
+        'display_name = "Scrum Master"',
+        'display_name = "Engenheiro Agentes IA"',
     ],
     "docs/AI-AGENTS-CATALOG.md": [
         "| Guardiao de Startup |",
@@ -706,17 +704,18 @@ RULES_LAYER_REQUIRED_SNIPPETS = {
 }
 
 BOARD_OPERATION_REQUIRED_SNIPPETS = {
-    "config/ai/contracts.yaml": [
+    ".agents/config/startup.toml": [
         "board-must-be-read-right-to-left",
         "finish-before-start-is-mandatory",
-        "reading_order: right-to-left",
-        "pull_strategy: finish-before-start",
+        '[workflow.board_operation]',
+        'reading_order = "right-to-left"',
+        'pull_strategy = "finish-before-start"',
         "delegate-idle-agents-to-finishable-work",
         "verify-existing-open-issue-before-any-new-issue",
         "verify-existing-open-epic-before-any-non-epic-demand",
         "verify-existing-open-epic-before-any-new-epic-for-the-same-theme",
     ],
-    "config/ai/jira-model.yaml": [
+    "config/jira-model.yaml": [
         "reading_order: right-to-left",
         "dispatch_owner_role: ai-scrum-master",
         "idle_agent_policy: assign-rightmost-finishable-item-first",
@@ -724,7 +723,7 @@ BOARD_OPERATION_REQUIRED_SNIPPETS = {
         "verify-existing-open-epic-before-creating-any-non-epic-demand",
         "new-epic-creation-requires-proof-of-no-open-epic-match",
     ],
-    "config/ai/agent-operations.yaml": [
+    ".agents/config/orchestration.toml": [
         "ler o board da direita para a esquerda",
         "priorizar agentes ociosos para o item mais a direita com avanco real possivel",
         "tentar fazer a equipe comecar a terminar antes de autorizar nova puxada",
@@ -773,23 +772,23 @@ GIT_GOVERNANCE_REQUIRED_SNIPPETS = {
         "docs/AI-FALLBACK-LEDGER.md",
         "Commit de fechamento obrigatorio antes de nova rodada",
     ],
-    "config/ai/agent-operations.yaml": [
+    ".agents/config/orchestration.toml": [
         "versioned-prompt-pack-work-must-declare-task-id-as-prompt-slug",
         "versioned-prompt-pack-work-must-use-prompt-branch-type",
         "versioned-prompt-pack-work-must-use-prompt-scope-in-commit-and-pr-title",
         "versioned-prompt-pack-owner-issues-must-use-prompt-summary-prefix",
         "versioned-prompt-pack-owner-issues-must-carry-prompt-label",
     ],
-    "config/ai/contracts.yaml": [
-        "git_governance:",
-        "source_of_truth: jira",
-        "fallback_operation:",
-        "recovery_ledger: docs/AI-FALLBACK-LEDGER.md",
-        "branch_pattern: <type>/<jira-key>-<slug>",
-        "branch_pattern: prompt/<jira-key>-<slug>",
-        "task_id_pattern: prompt/<slug>",
-        'jira_summary_prefix: "PROMPT:"',
-        "jira_required_labels:",
+    ".agents/config/startup.toml": [
+        "[git_governance]",
+        'source_of_truth = "jira"',
+        "[fallback_operation]",
+        'recovery_ledger = "docs/AI-FALLBACK-LEDGER.md"',
+        'branch_pattern = "<type>/<jira-key>-<slug>"',
+        'branch_pattern = "prompt/<jira-key>-<slug>"',
+        'task_id_pattern = "prompt/<slug>"',
+        'jira_summary_prefix = "PROMPT:"',
+        'jira_required_labels = ["prompt"]',
         "changes-touching-agents-prompts-must-use-prompt-branch-type",
         "changes-touching-agents-prompts-must-use-prompt-scope-in-commit-title",
         "changes-touching-agents-prompts-must-use-prompt-scope-in-pr-title",
@@ -891,32 +890,32 @@ CATALOG_REQUIRED_SNIPPETS = {
 }
 
 DOCUMENTATION_LAYER_REQUIRED_SNIPPETS = {
-    "config/ai/contracts.yaml": [
-        "foundation_dependency:",
-        "role_boundaries:",
+    ".agents/config/startup.toml": [
+        "[documentation.foundation_dependency]",
+        "[documentation.role_boundaries]",
         "ai-linguistic-reviewer",
         "ai-documentation-writer",
         "ai-documentation-reviewer",
         "ai-documentation-manager",
         "ai-documentation-sync",
-        "ownership_by_surface:",
+        "[documentation.ownership_by_surface.documentation_links]",
         "documentation-link-belongs-to-documentation-sync",
     ],
-    "config/ai/jira-model.yaml": [
+    "config/jira-model.yaml": [
         "documentation: repo-first-then-confluence",
     ],
-    "config/ai/confluence-model.yaml": [
+    "config/confluence-model.yaml": [
         "owner_role: ai-documentation-manager",
         "documentation: repo-first-then-confluence",
         "delivery_role: ai-documentation-sync",
     ],
-    "config/ai/agent-operations.yaml": [
-        "ai-linguistic-reviewer:",
-        "ai-documentation-writer:",
-        "ai-documentation-reviewer:",
-        "ai-documentation-manager:",
-        "ai-documentation-sync:",
-        "publication pertence ao ai-documentation-sync",
+    ".agents/config/orchestration.toml": [
+        '[roles.ai-linguistic-reviewer]',
+        '[roles.ai-documentation-writer]',
+        '[roles.ai-documentation-reviewer]',
+        '[roles.ai-documentation-manager]',
+        '[roles.ai-documentation-sync]',
+        "documentation-link",
     ],
     "docs/config-reference.md": [
         "ai-linguistic-reviewer",
@@ -963,13 +962,11 @@ REQUIRED_ROOT_CONFIG_SECTIONS = [
 REQUIRED_APP_CONFIG_SECTIONS = [
     "context",
     "domains",
-    "compatibility",
 ]
 
 REQUIRED_AI_CONTEXT_SECTIONS = [
     "context",
     "domains",
-    "compatibility",
 ]
 
 CONFIG_REFERENCE_ALLOWED_EXTENSIONS = {
@@ -1271,15 +1268,15 @@ def validate_agent_runtime_contracts(repo_root: Path, failures: list[str]) -> No
 
     for role_id in control_plane.roles_missing_runtime_contracts():
         failures.append(
-            f"Role declarada sem contrato de runtime operacional em config/ai/agent-runtime.yaml: {role_id}"
+            f"Role declarada sem contrato de runtime operacional em .agents/config/agents.toml: {role_id}"
         )
     for role_id in control_plane.runtime_contracts_without_roles():
         failures.append(
-            f"Contrato de runtime sem role declarada em config/ai/agents.yaml: {role_id}"
+            f"Contrato de runtime sem role declarada em .agents/config/agents.toml: {role_id}"
         )
     for agent_id in control_plane.registry_agents_missing_runtime_contracts():
         failures.append(
-            f"Agente declarativo sem contrato de runtime operacional em config/ai/agent-runtime.yaml: {agent_id}"
+            f"Agente declarativo sem contrato de runtime operacional em .agents/config/agents.toml: {agent_id}"
         )
     for agent_id in control_plane.runtime_contracts_without_registry_agents():
         failures.append(f"Contrato de runtime sem agente declarativo correspondente: {agent_id}")
@@ -1763,8 +1760,13 @@ def validate_migration_matrix(repo_root: Path, failures: list[str]) -> None:
             )
         origin = str(entry.get("origin", "")).strip()
         destination = str(entry.get("destination", "")).strip()
+        status = str(entry.get("status", "")).strip()
         entry_type = str(entry.get("type", "")).strip()
-        if origin and "*" not in origin and not (repo_root / origin).exists():
+        origin_must_exist = status not in {
+            "source-of-truth-drained",
+            "operational-manifest",
+        } and entry_type not in {"deprecated", "historical"}
+        if origin and "*" not in origin and origin_must_exist and not (repo_root / origin).exists():
             failures.append(
                 f".agents/config/migration-matrix.yaml referencia origem inexistente: {origin}"
             )

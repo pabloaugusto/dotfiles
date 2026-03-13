@@ -76,7 +76,7 @@ def active_custom_fields(model: dict[str, Any], *, role_ids: set[str]) -> list[d
     fields = (model.get("fields") or {}).get("custom_fields") or []
     if not isinstance(fields, list):
         raise AiControlPlaneError(
-            "config/ai/jira-model.yaml fields.custom_fields precisa ser lista."
+            "config/jira-model.yaml fields.custom_fields precisa ser lista."
         )
     result: list[dict[str, Any]] = []
     for entry in fields:
@@ -123,7 +123,7 @@ def workflow_status_entries(
     workflow = model.get("workflow") or {}
     workflow_name = str(workflow.get("name", "")).strip()
     if not workflow_name:
-        raise AiControlPlaneError("workflow.name e obrigatorio em config/ai/jira-model.yaml.")
+        raise AiControlPlaneError("workflow.name e obrigatorio em config/jira-model.yaml.")
     statuses = workflow.get("statuses") or []
     payload: list[dict[str, Any]] = []
     status_references: dict[str, str] = {}
@@ -287,7 +287,7 @@ def workflow_create_payload(
     workflow = model.get("workflow") or {}
     workflow_name = str(workflow.get("name", "")).strip()
     if not workflow_name:
-        raise AiControlPlaneError("workflow.name e obrigatorio em config/ai/jira-model.yaml.")
+        raise AiControlPlaneError("workflow.name e obrigatorio em config/jira-model.yaml.")
     status_entries, status_references = workflow_status_entries(model, current_statuses)
     transitions = [
         {

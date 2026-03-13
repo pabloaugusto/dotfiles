@@ -29,11 +29,11 @@ Nem todo ref do repo pertence ao runtime do bootstrap.
 
 - [`app/df/secrets/secrets-ref.yaml`](../app/df/secrets/secrets-ref.yaml): runtime do
   ambiente materializado na maquina
-- [`config/ai/platforms.yaml`](../config/ai/platforms.yaml): control plane
+- [`config/platforms.yaml`](../config/platforms.yaml): control plane
   dev-time da camada de IA, desacoplada de [`app/bootstrap/`](../app/bootstrap/) e de
   [`app/df/`](../app/df/)
 - o overlay local derivado de
-  [`config/ai/platforms.local.yaml.tpl`](../config/ai/platforms.local.yaml.tpl)
+  [`config/platforms.local.yaml.tpl`](../config/platforms.local.yaml.tpl)
   fica ignorado no Git e guarda refs reais de `Jira`/`Confluence` sem acoplar
   o contrato base do repo
 
@@ -52,7 +52,7 @@ agente. A camada declarativa canonica passa a ser descoberta por
 [`.agents/config/config.toml`](../.agents/config/config.toml); enquanto a
 drenagem nao termina, os detalhes operacionais de `atlassian_actor` continuam
 materializados em
-[`config/ai/agent-runtime.yaml`](../config/ai/agent-runtime.yaml) como ponte
+[`.agents/config/agents.toml`](../.agents/config/agents.toml) como ponte
 legada.
 
 Regra canonica:
@@ -60,7 +60,7 @@ Regra canonica:
 1. se o agente tiver `atlassian_actor.enabled=true` para a surface pedida, usar
    a service account propria dele
 2. se nao tiver service account propria para a surface, usar a service account
-   global definida em [`config/ai/platforms.yaml`](../config/ai/platforms.yaml)
+   global definida em [`config/platforms.yaml`](../config/platforms.yaml)
 3. se a service account propria falhar por identidade, permissao ou escrita, o
    runtime pode cair para a conta global quando
    `fallback_to_global_on_error=true`

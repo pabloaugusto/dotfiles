@@ -27,7 +27,7 @@ class ConfigReference:
 ROOT_CONFIG_PATH = Path("config/config.toml")
 APP_CONFIG_PATH = Path("app/config/config.toml")
 AI_CONFIG_PATH = Path(".agents/config/config.toml")
-AI_BRIDGE_PATH = Path(".agents/config.toml")
+AI_OPERATION_MANIFEST_PATH = Path(".agents/config.toml")
 
 
 def resolve_repo_root(repo_root: str | Path | None = None) -> Path:
@@ -48,8 +48,8 @@ def ai_config_path(repo_root: str | Path | None = None) -> Path:
     return (resolve_repo_root(repo_root) / AI_CONFIG_PATH).resolve()
 
 
-def ai_bridge_path(repo_root: str | Path | None = None) -> Path:
-    return (resolve_repo_root(repo_root) / AI_BRIDGE_PATH).resolve()
+def ai_operation_manifest_path(repo_root: str | Path | None = None) -> Path:
+    return (resolve_repo_root(repo_root) / AI_OPERATION_MANIFEST_PATH).resolve()
 
 
 def overlay_path_for(base_path: Path) -> Path:

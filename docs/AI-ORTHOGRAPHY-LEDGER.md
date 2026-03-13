@@ -65,12 +65,12 @@ Registro consultivo do agente Pascoalete para ortografia e higiene vocabular.
 | 2026-03-12 04:51 UTC | WIP-20260312-033649 | pascoalete | reprovado | docs/AI-GOVERNANCE-AND-REGRESSION.md | Principios, licoes, importacao, concluido, revisao, LICOES, ausencia, catalogos (+26) | task spell:check |
 | 2026-03-12 04:51 UTC | WIP-20260312-033649 | pascoalete | reprovado | docs/AI-DELEGATION-FLOW.md | canonico, LICOES, sessao, confiavel, relatorio, importacao, aderencia, decomposicao (+54) | task spell:check |
 | 2026-03-12 04:51 UTC | WIP-20260312-033649 | pascoalete | reprovado | docs/AI-AGENTS-CATALOG.md | obrigatorios, comunicacao, obrigatorio, mudanca, obrigatorio, mudanca, expiracao, revogacao (+47) | task spell:check |
-| 2026-03-12 04:51 UTC | WIP-20260312-033649 | pascoalete | reprovado | config/ai/sync-targets.yaml | Pascoalete, integracao, backlinks, efemero, proibe, duravel, relatorio, sessao (+10) | task spell:check |
-| 2026-03-12 04:51 UTC | WIP-20260312-033649 | pascoalete | reprovado | config/ai/jira-model.yaml | finishable, tecnica, reducao, decomposicao, Recomendacao, Criterios, Criterios, Criterios (+11) | task spell:check |
-| 2026-03-12 04:51 UTC | WIP-20260312-033649 | pascoalete | reprovado | config/ai/contracts.yaml | worktrees, worktree, worktree, worktree, condicao, worktrees, worktrees, docstrings (+5) | task spell:check |
-| 2026-03-12 04:51 UTC | WIP-20260312-033649 | pascoalete | reprovado | config/ai/confluence-model.yaml | navegacao, onepassword, onepassword, onepassword, onepassword, onepassword, fundacao, Evolucao (+1) | task spell:check |
-| 2026-03-12 04:51 UTC | WIP-20260312-033649 | pascoalete | reprovado | config/ai/agents.yaml | Pascoalete, Escrivao, backlinks, Escrivao, figma | task spell:check |
-| 2026-03-12 04:51 UTC | WIP-20260312-033649 | pascoalete | reprovado | config/ai/agent-operations.yaml | atuacao, decisao, decisao, linkar, implementacao, mudanca, atualizacao, necessario (+149) | task spell:check |
+| 2026-03-12 04:51 UTC | WIP-20260312-033649 | pascoalete | reprovado | config/sync-targets.yaml | Pascoalete, integracao, backlinks, efemero, proibe, duravel, relatorio, sessao (+10) | task spell:check |
+| 2026-03-12 04:51 UTC | WIP-20260312-033649 | pascoalete | reprovado | config/jira-model.yaml | finishable, tecnica, reducao, decomposicao, Recomendacao, Criterios, Criterios, Criterios (+11) | task spell:check |
+| 2026-03-12 04:51 UTC | WIP-20260312-033649 | pascoalete | reprovado | .agents/config/startup.toml | worktrees, worktree, worktree, worktree, condicao, worktrees, worktrees, docstrings (+5) | task spell:check |
+| 2026-03-12 04:51 UTC | WIP-20260312-033649 | pascoalete | reprovado | config/confluence-model.yaml | navegacao, onepassword, onepassword, onepassword, onepassword, onepassword, fundacao, Evolucao (+1) | task spell:check |
+| 2026-03-12 04:51 UTC | WIP-20260312-033649 | pascoalete | reprovado | .agents/config/agents.toml | Pascoalete, Escrivao, backlinks, Escrivao, figma | task spell:check |
+| 2026-03-12 04:51 UTC | WIP-20260312-033649 | pascoalete | reprovado | .agents/config/orchestration.toml | atuacao, decisao, decisao, linkar, implementacao, mudanca, atualizacao, necessario (+149) | task spell:check |
 | 2026-03-12 04:51 UTC | WIP-20260312-033649 | pascoalete | aprovado | .agents/registry/ai-reviewer.toml | sem achados | task spell:check |
 | 2026-03-12 04:51 UTC | WIP-20260312-033649 | pascoalete | reprovado | .agents/registry/ai-reviewer-python.toml | mudancas, decisao, tecnica, mypy | task spell:check |
 | 2026-03-12 04:51 UTC | WIP-20260312-033649 | pascoalete | reprovado | .agents/registry/ai-reviewer-powershell.toml | mudancas, idempotencia, seguranca | task spell:check |
@@ -104,8 +104,8 @@ Registro consultivo do agente Pascoalete para ortografia e higiene vocabular.
 | 2026-03-11 23:03 UTC | WIP-20260311-220259 | pascoalete | reprovado | docs/ai-operating-model.md | reutilizavel, testavel, worktree, Principios, Instrucoes, instrucoes, estaveis, sessao (+194) | task spell:check |
 | 2026-03-11 23:03 UTC | WIP-20260311-220259 | pascoalete | reprovado | docs/TASKS.md | repositorio, diaria, diaria, sincronizacao, worktree, alteracoes, canonico, Observacao (+96) | task spell:check |
 | 2026-03-11 23:03 UTC | WIP-20260311-220259 | pascoalete | reprovado | docs/README.md | fundacao, duravel, elegiveis, duravel, canonico, canonico, remediacoes, excecoes | task spell:check |
-| 2026-03-11 23:03 UTC | WIP-20260311-220259 | pascoalete | reprovado | config/ai/sync-targets.yaml | Pascoalete, integracao, efemero, proibe, duravel, relatorio, sessao, transitario (+9) | task spell:check |
-| 2026-03-11 23:03 UTC | WIP-20260311-220259 | pascoalete | reprovado | config/ai/contracts.yaml | worktrees, worktree, worktree, worktree, condicao, worktrees, worktrees, criterios (+3) | task spell:check |
+| 2026-03-11 23:03 UTC | WIP-20260311-220259 | pascoalete | reprovado | config/sync-targets.yaml | Pascoalete, integracao, efemero, proibe, duravel, relatorio, sessao, transitario (+9) | task spell:check |
+| 2026-03-11 23:03 UTC | WIP-20260311-220259 | pascoalete | reprovado | .agents/config/startup.toml | worktrees, worktree, worktree, worktree, condicao, worktrees, worktrees, criterios (+3) | task spell:check |
 | 2026-03-11 23:03 UTC | WIP-20260311-220259 | pascoalete | reprovado | Taskfile.yml | PYTHONDONTWRITEBYTECODE, PYTHONPYCACHEPREFIX, venv, venv, disponiveis, worktree, alteracoes, alteracoes (+124) | task spell:check |
 | 2026-03-11 21:58 UTC | WIP-20260311-212032 | pascoalete | reprovado | tests/python/conventional_emoji_test.py | obrigatorio, Maximo, obrigatorio | task spell:check |
 | 2026-03-11 21:58 UTC | WIP-20260311-212032 | pascoalete | reprovado | tests/python/ai_session_startup_test.py | worktrees, pablo, absorcao, worktree, pablo, primario, sessao, pabloaugusto (+18) | task spell:check |
@@ -115,7 +115,7 @@ Registro consultivo do agente Pascoalete para ortografia e higiene vocabular.
 | 2026-03-11 21:58 UTC | WIP-20260311-212032 | pascoalete | reprovado | scripts/ai_session_startup_lib.py | Responsavel, atualizacao, sessao, portugues, canonicos, tambem, aplicaveis, assuncoes (+39) | task spell:check |
 | 2026-03-11 21:58 UTC | WIP-20260311-212032 | pascoalete | reprovado | LICOES-APRENDIDAS.md | Licoes, usuario, LICOES, licao, Criterio, licoes, eficiencia, resiliencia (+191) | task spell:check |
 | 2026-03-11 21:58 UTC | WIP-20260311-212032 | pascoalete | reprovado | docs/git-conventions.md | titulos, validacoes, tecnica, obrigatorio, obrigatorias, semantico, obrigatorio, obrigatorio (+37) | task spell:check |
-| 2026-03-11 21:58 UTC | WIP-20260311-212032 | pascoalete | reprovado | config/ai/contracts.yaml | worktrees, worktree, worktree, worktree, condicao, worktrees, worktrees, criterios (+3) | task spell:check |
+| 2026-03-11 21:58 UTC | WIP-20260311-212032 | pascoalete | reprovado | .agents/config/startup.toml | worktrees, worktree, worktree, worktree, condicao, worktrees, worktrees, criterios (+3) | task spell:check |
 | 2026-03-11 21:58 UTC | WIP-20260311-212032 | pascoalete | reprovado | .agents/prompts/formal/documentation-layer-governance/prompt.md | OBRIGATORIOS, padrao, canonico, DEPENDENCIAS, sessao, composicao, dominio, fundacao (+321) | task spell:check |
 | 2026-03-11 21:58 UTC | WIP-20260311-212032 | pascoalete | reprovado | .agents/prompts/formal/documentation-layer-governance/fragments/composition.md | Composicao, dominio, fundacao, persistencia, publicacao | task spell:check |
 | 2026-03-11 21:58 UTC | WIP-20260311-212032 | pascoalete | aprovado | .agents/prompts/formal/documentation-layer-governance/meta.yaml | sem achados | task spell:check |
@@ -151,22 +151,22 @@ Registro consultivo do agente Pascoalete para ortografia e higiene vocabular.
 | 2026-03-11 14:31 UTC | WIP-DOT-177 | pascoalete | reprovado | docs/ai-operating-model.md | reutilizavel, testavel, worktree, Principios, Instrucoes, instrucoes, estaveis, sessao (+175) | task spell:check |
 | 2026-03-11 14:31 UTC | WIP-DOT-177 | pascoalete | reprovado | docs/TASKS.md | repositorio, diaria, diaria, sincronizacao, worktree, alteracoes, canonico, Observacao (+88) | task spell:check |
 | 2026-03-11 14:31 UTC | WIP-DOT-177 | pascoalete | reprovado | docs/AI-STARTUP-AND-RESTART.md | sessao, confiavel, sessao, sessoes, worktree, worktree, alteracoes, sessao (+42) | task spell:check |
-| 2026-03-11 14:31 UTC | WIP-DOT-177 | pascoalete | reprovado | config/ai/contracts.yaml | worktrees, worktree, worktree, worktree, worktrees, worktrees, criterios, aceitacao (+2) | task spell:check |
+| 2026-03-11 14:31 UTC | WIP-DOT-177 | pascoalete | reprovado | .agents/config/startup.toml | worktrees, worktree, worktree, worktree, worktrees, worktrees, criterios, aceitacao (+2) | task spell:check |
 | 2026-03-11 14:31 UTC | WIP-DOT-177 | pascoalete | reprovado | AGENTS.md | Missao, confiavel, testavel, reproduzivel, precedencia, LICOES, instrucoes, usuario (+109) | task spell:check |
 | 2026-03-11 14:08 UTC | WIP-DOT-177 | pascoalete | reprovado | docs/AI-WIP-TRACKER.md | solicitacao, acionavel, indisponivel, degradacao, primario, obrigatorio, Responsavel, atualizacao (+99) | task spell:check |
 | 2026-03-11 14:08 UTC | WIP-DOT-177 | pascoalete | reprovado | docs/AI-STARTUP-GOVERNANCE-MANIFEST.md | sessao, confiavel, confiavel, sessoes, worktree, verificavel, suposicao, presuncao (+9) | task spell:check |
 | 2026-03-11 14:08 UTC | WIP-DOT-177 | pascoalete | reprovado | docs/AI-DELEGATION-FLOW.md | canonico, LICOES, sessao, confiavel, relatorio, importacao, aderencia, decomposicao (+41) | task spell:check |
 | 2026-03-11 14:08 UTC | WIP-DOT-177 | pascoalete | reprovado | docs/AI-CHAT-CONTRACTS-REGISTER.md | definicoes, sessao, usuario, promocao, promocao, promocoes, ausencia, agil (+23) | task spell:check |
-| 2026-03-11 14:08 UTC | WIP-DOT-177 | pascoalete | reprovado | config/ai/agent-operations.yaml | atuacao, decisao, decisao, linkar, implementacao, mudanca, atualizacao, necessario (+125) | task spell:check |
+| 2026-03-11 14:08 UTC | WIP-DOT-177 | pascoalete | reprovado | .agents/config/orchestration.toml | atuacao, decisao, decisao, linkar, implementacao, mudanca, atualizacao, necessario (+125) | task spell:check |
 | 2026-03-11 14:08 UTC | WIP-DOT-177 | pascoalete | reprovado | LICOES-APRENDIDAS.md | Licoes, usuario, LICOES, licao, Criterio, licoes, eficiencia, resiliencia (+189) | task spell:check |
 | 2026-03-11 12:32 UTC | WIP-DOT-175 | pascoalete | reprovado | tests/python/ai_assets_validator_test.py | possivel, LICOES, Validacao, LICOES, comecar, Orquestracao, evals, criacao (+4) | task spell:check |
 | 2026-03-11 12:32 UTC | WIP-DOT-175 | pascoalete | reprovado | scripts/validate-ai-assets.py | evals, LICOES, evals, evals, evals, evals, autolog, autolog (+56) | task spell:check |
 | 2026-03-11 12:32 UTC | WIP-DOT-175 | pascoalete | reprovado | docs/AI-CHAT-CONTRACTS-REGISTER.md | definicoes, sessao, usuario, promocao, promocao, promocoes, ausencia, agil (+21) | task spell:check |
 | 2026-03-11 12:32 UTC | WIP-DOT-175 | pascoalete | reprovado | .agents/cards/ai-scrum-master.md | agil, aderencia, comunicacao, fiscalizacao, comunicacao, escalacao, worktrees, definicoes (+43) | task spell:check |
 | 2026-03-11 12:32 UTC | WIP-DOT-175 | pascoalete | reprovado | .agents/cards/ai-product-owner.md | repositorio, agil, repriorizacao, epicos, usuario, decisao, orientacoes, urgencia (+23) | task spell:check |
-| 2026-03-11 12:32 UTC | WIP-DOT-175 | pascoalete | reprovado | config/ai/agent-operations.yaml | atuacao, decisao, decisao, linkar, implementacao, mudanca, atualizacao, necessario (+125) | task spell:check |
-| 2026-03-11 12:32 UTC | WIP-DOT-175 | pascoalete | reprovado | config/ai/jira-model.yaml | finishable, tecnica, reducao, decomposicao, Recomendacao, Criterios, Criterios, Criterios (+11) | task spell:check |
-| 2026-03-11 12:32 UTC | WIP-DOT-175 | pascoalete | reprovado | config/ai/contracts.yaml | worktrees, worktree, worktrees, worktrees, criterios, aceitacao, finishable, finishable | task spell:check |
+| 2026-03-11 12:32 UTC | WIP-DOT-175 | pascoalete | reprovado | .agents/config/orchestration.toml | atuacao, decisao, decisao, linkar, implementacao, mudanca, atualizacao, necessario (+125) | task spell:check |
+| 2026-03-11 12:32 UTC | WIP-DOT-175 | pascoalete | reprovado | config/jira-model.yaml | finishable, tecnica, reducao, decomposicao, Recomendacao, Criterios, Criterios, Criterios (+11) | task spell:check |
+| 2026-03-11 12:32 UTC | WIP-DOT-175 | pascoalete | reprovado | .agents/config/startup.toml | worktrees, worktree, worktrees, worktrees, criterios, aceitacao, finishable, finishable | task spell:check |
 | 2026-03-11 12:32 UTC | WIP-DOT-175 | pascoalete | reprovado | docs/ai-operating-model.md | reutilizavel, testavel, worktree, Principios, Instrucoes, instrucoes, estaveis, sessao (+161) | task spell:check |
 | 2026-03-11 12:32 UTC | WIP-DOT-175 | pascoalete | reprovado | AGENTS.md | Missao, confiavel, testavel, reproduzivel, precedencia, LICOES, instrucoes, usuario (+102) | task spell:check |
 | 2026-03-11 12:03 UTC | WIP-DOT-37 | pascoalete | aprovado | docs/AI-PAUSED-ISSUES-AUDIT.md | sem achados | task spell:check |
@@ -182,7 +182,7 @@ Registro consultivo do agente Pascoalete para ortografia e higiene vocabular.
 | 2026-03-11 09:15 UTC | WIP-DOT-106 | pascoalete | reprovado | docs/TASKS.md | repositorio, diaria, diaria, sincronizacao, worktree, alteracoes, canonico, Observacao (+81) | task spell:check |
 | 2026-03-11 09:15 UTC | WIP-DOT-106 | pascoalete | reprovado | docs/README.md | canonico, canonico, remediacoes, excecoes | task spell:check |
 | 2026-03-11 09:15 UTC | WIP-DOT-106 | pascoalete | reprovado | docs/AI-STARTUP-AND-RESTART.md | sessao, confiavel, sessao, sessoes, worktree, worktree, alteracoes, sessao (+19) | task spell:check |
-| 2026-03-11 09:15 UTC | WIP-DOT-106 | pascoalete | reprovado | config/ai/contracts.yaml | worktrees, worktree, worktrees, worktrees, criterios, aceitacao, finishable, finishable | task spell:check |
+| 2026-03-11 09:15 UTC | WIP-DOT-106 | pascoalete | reprovado | .agents/config/startup.toml | worktrees, worktree, worktrees, worktrees, criterios, aceitacao, finishable, finishable | task spell:check |
 | 2026-03-11 09:15 UTC | WIP-DOT-106 | pascoalete | reprovado | Taskfile.yml | PYTHONDONTWRITEBYTECODE, PYTHONPYCACHEPREFIX, venv, venv, disponiveis, worktree, alteracoes, alteracoes (+114) | task spell:check |
 | 2026-03-11 09:15 UTC | WIP-DOT-106 | pascoalete | reprovado | AGENTS.md | Missao, confiavel, testavel, reproduzivel, precedencia, LICOES, instrucoes, usuario (+100) | task spell:check |
 | 2026-03-11 07:53 UTC | WIP-DOT-109-RETRO | pascoalete | reprovado | docs/AI-SCRUM-MASTER-LEDGER.md | canonico, indice, especificos, testavel, indice, historica, testavel, atuacao (+38) | task spell:check |
@@ -228,7 +228,7 @@ Registro consultivo do agente Pascoalete para ortografia e higiene vocabular.
 | 2026-03-11 00:31 UTC | WIP-DOT-131 | pascoalete | reprovado | LICOES-APRENDIDAS.md | Licoes, Historico, obrigatoria, usuario, LICOES, licao, Criterio, licoes (+239) | task spell:check |
 | 2026-03-11 00:31 UTC | WIP-DOT-131 | pascoalete | reprovado | tests/python/ai_assets_validator_test.py | possivel, LICOES, atlassian, Validacao, minimo, LICOES, comecar, obrigatoria (+9) | task spell:check |
 | 2026-03-11 00:31 UTC | WIP-DOT-131 | pascoalete | reprovado | scripts/validate-ai-assets.py | execucao, evals, LICOES, evals, evals, evals, evals, atlassian (+73) | task spell:check |
-| 2026-03-11 00:31 UTC | WIP-DOT-131 | pascoalete | reprovado | config/ai/agent-operations.yaml | atlassian, comentario, atuacao, comentario, decisao, comentario, transicao, decisao (+167) | task spell:check |
+| 2026-03-11 00:31 UTC | WIP-DOT-131 | pascoalete | reprovado | .agents/config/orchestration.toml | atlassian, comentario, atuacao, comentario, decisao, comentario, transicao, decisao (+167) | task spell:check |
 | 2026-03-11 00:31 UTC | WIP-DOT-131 | pascoalete | reprovado | docs/ai-operating-model.md | reutilizavel, testavel, worktree, Principios, Instrucoes, instrucoes, estaveis, governanca (+191) | task spell:check |
 | 2026-03-11 00:31 UTC | WIP-DOT-131 | pascoalete | reprovado | .agents/cerimonias/logs/retrospectiva-template.md | acao, acao, responsavel, acao, acao, Responsavel | task spell:check |
 | 2026-03-11 00:31 UTC | WIP-DOT-131 | pascoalete | reprovado | .agents/cerimonias/retrospectiva.yaml | acao, execucao, acao, responsavel, acao, responsavel, historico | task spell:check |
@@ -241,7 +241,7 @@ Registro consultivo do agente Pascoalete para ortografia e higiene vocabular.
 | 2026-03-10 23:57 UTC | WIP-DOT-130 | pascoalete | reprovado | scripts/validate-ai-assets.py | execucao, evals, LICOES, evals, evals, evals, evals, atlassian (+69) | task spell:check |
 | 2026-03-10 23:57 UTC | WIP-DOT-130 | pascoalete | reprovado | scripts/ai-worklog.py | execucao, Responsavel, atualizacao, Responsavel, Concluido, Descricao, Atualizacao, minimo (+42) | task spell:check |
 | 2026-03-10 23:57 UTC | WIP-DOT-130 | pascoalete | reprovado | docs/AI-WIP-TRACKER.md | solicitacao, acionavel, minimo, execucao, execucao, obrigatorio, Responsavel, atualizacao (+123) | task spell:check |
-| 2026-03-10 23:57 UTC | WIP-DOT-130 | pascoalete | reprovado | config/ai/contracts.yaml | worktrees, worktree, minimo, worktrees, worktrees, descricao, tecnico, criterios (+6) | task spell:check |
+| 2026-03-10 23:57 UTC | WIP-DOT-130 | pascoalete | reprovado | .agents/config/startup.toml | worktrees, worktree, minimo, worktrees, worktrees, descricao, tecnico, criterios (+6) | task spell:check |
 | 2026-03-10 23:57 UTC | WIP-DOT-130 | pascoalete | reprovado | docs/git-conventions.md | governanca, obrigatoria, titulos, validacoes, tecnica, obrigatorio, descricao, obrigatorias (+48) | task spell:check |
 | 2026-03-10 23:57 UTC | WIP-DOT-130 | pascoalete | reprovado | docs/ai-operating-model.md | reutilizavel, testavel, worktree, Principios, Instrucoes, instrucoes, estaveis, governanca (+187) | task spell:check |
 | 2026-03-10 23:57 UTC | WIP-DOT-130 | pascoalete | reprovado | docs/TASKS.md | canonicas, repositorio, operacao, diaria, governanca, Operacao, diaria, sincronizacao (+113) | task spell:check |
@@ -249,16 +249,16 @@ Registro consultivo do agente Pascoalete para ortografia e higiene vocabular.
 | 2026-03-10 23:57 UTC | WIP-DOT-130 | pascoalete | reprovado | AGENTS.md | Missao, confiavel, testavel, reproduzivel, precedencia, LICOES, instrucoes, usuario (+126) | task spell:check |
 | 2026-03-09 21:44 UTC | DOT-122 | pascoalete | reprovado | docs/atlassian-ia/artifacts/agent-operations.md | canonica, Sincronizacao, governanca, comentarios, tecnicos, atuacao, documentacao, tambem (+61) | task spell:check |
 | 2026-03-09 21:44 UTC | DOT-122 | pascoalete | reprovado | docs/AI-AGENTS-CATALOG.md | obrigatorios, comunicacao, obrigatorio, mudanca, obrigatorio, mudanca, rotacao, expiracao (+58) | task spell:check |
-| 2026-03-09 21:44 UTC | DOT-122 | pascoalete | reprovado | config/ai/agents.yaml | figma | task spell:check |
-| 2026-03-09 21:44 UTC | DOT-122 | pascoalete | reprovado | config/ai/agent-operations.yaml | atlassian, decisao, documentacao, linkar, mudanca, atualizacao, necessario, linkar (+115) | task spell:check |
+| 2026-03-09 21:44 UTC | DOT-122 | pascoalete | reprovado | .agents/config/agents.toml | figma | task spell:check |
+| 2026-03-09 21:44 UTC | DOT-122 | pascoalete | reprovado | .agents/config/orchestration.toml | atlassian, decisao, documentacao, linkar, mudanca, atualizacao, necessario, linkar (+115) | task spell:check |
 | 2026-03-09 21:44 UTC | DOT-122 | pascoalete | aprovado | .agents/registry/ai-product-owner.toml | sem achados | task spell:check |
 | 2026-03-09 21:44 UTC | DOT-122 | pascoalete | reprovado | .agents/cards/ai-product-owner.md | repositorio, agil, repriorizacao, epicos, manutencao, usuario, decisao, orientacoes (+23) | task spell:check |
 | 2026-03-09 23:24 UTC | DOT-118 | pascoalete | reprovado | tests/python/ai_assets_validator_test.py | possivel, LICOES, atlassian, Validacao, LICOES, Orquestracao, evals, Integracoes (+4) | task spell:check |
 | 2026-03-09 23:24 UTC | DOT-118 | pascoalete | reprovado | scripts/validate-ai-assets.py | execucao, evals, LICOES, evals, evals, evals, evals, atlassian (+59) | task spell:check |
 | 2026-03-09 23:24 UTC | DOT-118 | pascoalete | reprovado | docs/ai-operating-model.md | reutilizavel, testavel, worktree, Principios, Instrucoes, instrucoes, estaveis, Especializacao (+149) | task spell:check |
 | 2026-03-09 23:24 UTC | DOT-118 | pascoalete | reprovado | docs/AI-AGENTS-CATALOG.md | obrigatorios, comunicacao, obrigatorio, mudanca, obrigatorio, mudanca, rotacao, expiracao (+58) | task spell:check |
-| 2026-03-09 23:24 UTC | DOT-118 | pascoalete | reprovado | config/ai/contracts.yaml | descricao, tecnico, criterios, aceitacao, documentacao, finishable, finishable, Acao (+1) | task spell:check |
-| 2026-03-09 23:24 UTC | DOT-118 | pascoalete | reprovado | config/ai/agents.yaml | figma | task spell:check |
+| 2026-03-09 23:24 UTC | DOT-118 | pascoalete | reprovado | .agents/config/startup.toml | descricao, tecnico, criterios, aceitacao, documentacao, finishable, finishable, Acao (+1) | task spell:check |
+| 2026-03-09 23:24 UTC | DOT-118 | pascoalete | reprovado | .agents/config/agents.toml | figma | task spell:check |
 | 2026-03-09 23:24 UTC | DOT-118 | pascoalete | reprovado | .agents/registry/pascoalete.toml | pascoalete, Pascoalete, tecnica, comentario | task spell:check |
 | 2026-03-09 23:24 UTC | DOT-118 | pascoalete | reprovado | .agents/registry/ai-tech-lead.toml | execucao, tecnica, tecnico | task spell:check |
 | 2026-03-09 23:24 UTC | DOT-118 | pascoalete | reprovado | .agents/registry/ai-scrum-master.toml | comunicacao | task spell:check |
@@ -278,9 +278,9 @@ Registro consultivo do agente Pascoalete para ortografia e higiene vocabular.
 | 2026-03-09 22:58 UTC | DOT-119 | pascoalete | reprovado | tests/python/ai_assets_validator_test.py | possivel, LICOES, atlassian, Validacao, LICOES, Orquestracao, evals, Integracoes (+4) | task spell:check |
 | 2026-03-09 22:58 UTC | DOT-119 | pascoalete | reprovado | scripts/validate-ai-assets.py | execucao, evals, LICOES, evals, evals, evals, evals, atlassian (+57) | task spell:check |
 | 2026-03-09 22:58 UTC | DOT-119 | pascoalete | reprovado | docs/ai-operating-model.md | reutilizavel, testavel, worktree, Principios, Instrucoes, instrucoes, estaveis, Especializacao (+138) | task spell:check |
-| 2026-03-09 22:58 UTC | DOT-119 | pascoalete | reprovado | config/ai/jira-model.yaml | atlassian, finishable, tecnica, governanca, regressao, decomposicao, canonico, autonomo (+5) | task spell:check |
-| 2026-03-09 22:58 UTC | DOT-119 | pascoalete | reprovado | config/ai/contracts.yaml | descricao, tecnico, criterios, aceitacao, documentacao, finishable, finishable, Acao (+1) | task spell:check |
-| 2026-03-09 22:58 UTC | DOT-119 | pascoalete | reprovado | config/ai/agent-operations.yaml | atlassian, decisao, documentacao, linkar, mudanca, atualizacao, necessario, linkar (+117) | task spell:check |
+| 2026-03-09 22:58 UTC | DOT-119 | pascoalete | reprovado | config/jira-model.yaml | atlassian, finishable, tecnica, governanca, regressao, decomposicao, canonico, autonomo (+5) | task spell:check |
+| 2026-03-09 22:58 UTC | DOT-119 | pascoalete | reprovado | .agents/config/startup.toml | descricao, tecnico, criterios, aceitacao, documentacao, finishable, finishable, Acao (+1) | task spell:check |
+| 2026-03-09 22:58 UTC | DOT-119 | pascoalete | reprovado | .agents/config/orchestration.toml | atlassian, decisao, documentacao, linkar, mudanca, atualizacao, necessario, linkar (+117) | task spell:check |
 | 2026-03-09 22:58 UTC | DOT-119 | pascoalete | reprovado | .agents/cards/ai-scrum-master.md | agil, aderencia, comunicacao, fiscalizacao, comunicacao, escalacao, governanca, worktrees (+51) | task spell:check |
 | 2026-03-09 22:58 UTC | DOT-119 | pascoalete | reprovado | .agents/cards/ai-engineering-manager.md | escalacoes, colaboracao, avanco, possivel, saturacao, escalacao, usuario, Saidas (+21) | task spell:check |
 | 2026-03-10 17:10 UTC | DOT-121 | pascoalete | reprovado | docs/AI-REVIEW-LEDGER.md | revisao, mudanca, codigo, automacao, LICOES, regressao, governanca, atlassian (+30) | task spell:check |
@@ -289,8 +289,8 @@ Registro consultivo do agente Pascoalete para ortografia e higiene vocabular.
 | 2026-03-09 22:26 UTC | DOT-121 | pascoalete | reprovado | docs/ai-operating-model.md | reutilizavel, testavel, worktree, Principios, Instrucoes, instrucoes, estaveis, Especializacao (+131) | task spell:check |
 | 2026-03-09 22:26 UTC | DOT-121 | pascoalete | reprovado | docs/AI-SCRUM-MASTER-LEDGER.md | canonico, correcao, indice, especificos, governanca, atuacao, tambem, inconformities (+9) | task spell:check |
 | 2026-03-09 22:26 UTC | DOT-121 | pascoalete | reprovado | docs/AI-GOVERNANCE-AND-REGRESSION.md | Principios, governanca, licoes, importacao, minimo, concluido, revisao, LICOES (+30) | task spell:check |
-| 2026-03-09 22:26 UTC | DOT-121 | pascoalete | reprovado | config/ai/contracts.yaml | descricao, tecnico, criterios, aceitacao, documentacao, Acao, historico | task spell:check |
-| 2026-03-09 22:26 UTC | DOT-121 | pascoalete | reprovado | config/ai/agent-operations.yaml | atlassian, decisao, documentacao, linkar, mudanca, atualizacao, necessario, linkar (+112) | task spell:check |
+| 2026-03-09 22:26 UTC | DOT-121 | pascoalete | reprovado | .agents/config/startup.toml | descricao, tecnico, criterios, aceitacao, documentacao, Acao, historico | task spell:check |
+| 2026-03-09 22:26 UTC | DOT-121 | pascoalete | reprovado | .agents/config/orchestration.toml | atlassian, decisao, documentacao, linkar, mudanca, atualizacao, necessario, linkar (+112) | task spell:check |
 | 2026-03-09 22:26 UTC | DOT-121 | pascoalete | reprovado | .agents/cerimonias/logs/retrospectiva/2026-03-09-2223-feat-DOT-124-scrum-master-log.md | Pascoalete, testavel, auditavel, canonico, escalacao, obrigatoria, acao, rastreavel (+8) | task spell:check |
 | 2026-03-09 22:26 UTC | DOT-121 | pascoalete | reprovado | .agents/cerimonias/logs/retrospectiva/README.md | padrao | task spell:check |
 | 2026-03-09 22:26 UTC | DOT-121 | pascoalete | reprovado | .agents/cerimonias/logs/retrospectiva-template.md | acao, acao, responsavel, acao, aplicavel, Responsavel | task spell:check |
@@ -308,9 +308,9 @@ Registro consultivo do agente Pascoalete para ortografia e higiene vocabular.
 | 2026-03-09 22:11 UTC | DOT-124 | pascoalete | reprovado | docs/README.md | documentacoes, Operacao, migracao, canonicas, automacao, tecnico, manutencao, Governanca (+19) | task spell:check |
 | 2026-03-09 22:11 UTC | DOT-124 | pascoalete | reprovado | docs/AI-GOVERNANCE-AND-REGRESSION.md | Principios, governanca, licoes, importacao, minimo, concluido, revisao, LICOES (+27) | task spell:check |
 | 2026-03-09 22:11 UTC | DOT-124 | pascoalete | reprovado | docs/AI-AGENTS-CATALOG.md | obrigatorios, comunicacao, obrigatorio, mudanca, obrigatorio, mudanca, rotacao, expiracao (+58) | task spell:check |
-| 2026-03-09 22:11 UTC | DOT-124 | pascoalete | reprovado | config/ai/contracts.yaml | descricao, tecnico, criterios, aceitacao, documentacao, Acao | task spell:check |
-| 2026-03-09 22:11 UTC | DOT-124 | pascoalete | reprovado | config/ai/agents.yaml | figma | task spell:check |
-| 2026-03-09 22:11 UTC | DOT-124 | pascoalete | reprovado | config/ai/agent-operations.yaml | atlassian, decisao, documentacao, linkar, mudanca, atualizacao, necessario, linkar (+111) | task spell:check |
+| 2026-03-09 22:11 UTC | DOT-124 | pascoalete | reprovado | .agents/config/startup.toml | descricao, tecnico, criterios, aceitacao, documentacao, Acao | task spell:check |
+| 2026-03-09 22:11 UTC | DOT-124 | pascoalete | reprovado | .agents/config/agents.toml | figma | task spell:check |
+| 2026-03-09 22:11 UTC | DOT-124 | pascoalete | reprovado | .agents/config/orchestration.toml | atlassian, decisao, documentacao, linkar, mudanca, atualizacao, necessario, linkar (+111) | task spell:check |
 | 2026-03-09 22:11 UTC | DOT-124 | pascoalete | reprovado | .agents/registry/ai-scrum-master.toml | comunicacao | task spell:check |
 | 2026-03-09 22:11 UTC | DOT-124 | pascoalete | reprovado | .agents/cards/ai-scrum-master.md | agil, aderencia, comunicacao, fiscalizacao, comunicacao, escalacao, governanca, worktrees (+41) | task spell:check |
 | 2026-03-10 16:12 UTC | DOT-115 | pascoalete | reprovado | scripts/ai_dispatch_lib.py | execucao, minimo, Secao, condicoes, Acao, Semantica, acao | task spell:check |
@@ -323,10 +323,10 @@ Registro consultivo do agente Pascoalete para ortografia e higiene vocabular.
 | 2026-03-09 21:21 UTC | DOT-115 | pascoalete | reprovado | docs/AI-GOVERNANCE-AND-REGRESSION.md | Principios, governanca, licoes, importacao, minimo, concluido, revisao, LICOES (+25) | task spell:check |
 | 2026-03-09 21:21 UTC | DOT-115 | pascoalete | reprovado | docs/AI-DELEGATION-FLOW.md | canonico, LICOES, minimo, importacao, comunicacao, decomposicao, delegacao, rotacao (+47) | task spell:check |
 | 2026-03-09 21:21 UTC | DOT-115 | pascoalete | reprovado | docs/AI-AGENTS-CATALOG.md | obrigatorios, comunicacao, obrigatorio, mudanca, obrigatorio, mudanca, rotacao, expiracao (+58) | task spell:check |
-| 2026-03-09 21:21 UTC | DOT-115 | pascoalete | reprovado | config/ai/jira-model.yaml | atlassian, tecnica, governanca, regressao, decomposicao, canonico, autonomo, Workstream (+4) | task spell:check |
-| 2026-03-09 21:21 UTC | DOT-115 | pascoalete | reprovado | config/ai/contracts.yaml | descricao, tecnico, criterios, aceitacao, documentacao | task spell:check |
-| 2026-03-09 21:21 UTC | DOT-115 | pascoalete | reprovado | config/ai/agent-operations.yaml | atlassian, decisao, documentacao, linkar, mudanca, atualizacao, necessario, linkar (+110) | task spell:check |
-| 2026-03-09 21:21 UTC | DOT-115 | pascoalete | reprovado | config/ai/agents.yaml | figma | task spell:check |
+| 2026-03-09 21:21 UTC | DOT-115 | pascoalete | reprovado | config/jira-model.yaml | atlassian, tecnica, governanca, regressao, decomposicao, canonico, autonomo, Workstream (+4) | task spell:check |
+| 2026-03-09 21:21 UTC | DOT-115 | pascoalete | reprovado | .agents/config/startup.toml | descricao, tecnico, criterios, aceitacao, documentacao | task spell:check |
+| 2026-03-09 21:21 UTC | DOT-115 | pascoalete | reprovado | .agents/config/orchestration.toml | atlassian, decisao, documentacao, linkar, mudanca, atualizacao, necessario, linkar (+110) | task spell:check |
+| 2026-03-09 21:21 UTC | DOT-115 | pascoalete | reprovado | .agents/config/agents.toml | figma | task spell:check |
 | 2026-03-09 21:21 UTC | DOT-115 | pascoalete | reprovado | .agents/orchestration/capability-matrix.yaml | pascoalete | task spell:check |
 | 2026-03-09 21:21 UTC | DOT-115 | pascoalete | reprovado | .agents/config.toml | pascoalete, evals, evals, evals, evals, evals | task spell:check |
 | 2026-03-09 21:21 UTC | DOT-115 | pascoalete | reprovado | .agents/registry/ai-engineering-manager.toml | escalacoes | task spell:check |
@@ -358,9 +358,9 @@ Registro consultivo do agente Pascoalete para ortografia e higiene vocabular.
 | 2026-03-10 12:40 UTC | DOT-127 | pascoalete | reprovado | docs/AI-WIP-TRACKER.md | solicitacao, acionavel, minimo, execucao, execucao, obrigatorio, Responsavel, atualizacao (+253) | task spell:check |
 | 2026-03-10 12:40 UTC | DOT-127 | pascoalete | reprovado | docs/AI-STARTUP-AND-RESTART.md | sessao, confiavel, sessao, sessoes, worktree, worktree, alteracoes, sessao (+24) | task spell:check |
 | 2026-03-10 12:40 UTC | DOT-127 | pascoalete | reprovado | docs/AI-CHAT-CONTRACTS-REGISTER.md | definicoes, governanca, obrigatoria, sessao, usuario, promocao, promocao, governanca (+35) | task spell:check |
-| 2026-03-10 12:40 UTC | DOT-127 | pascoalete | reprovado | config/ai/jira-model.yaml | atlassian, tecnica, governanca, regressao, reducao, decomposicao, Recomendacao, Criterios (+19) | task spell:check |
-| 2026-03-10 12:40 UTC | DOT-127 | pascoalete | reprovado | config/ai/contracts.yaml | worktrees, worktree, minimo, descricao, tecnico, criterios, aceitacao, documentacao | task spell:check |
-| 2026-03-10 12:40 UTC | DOT-127 | pascoalete | reprovado | config/ai/agent-operations.yaml | atlassian, comentario, atuacao, comentario, decisao, comentario, transicao, decisao (+138) | task spell:check |
+| 2026-03-10 12:40 UTC | DOT-127 | pascoalete | reprovado | config/jira-model.yaml | atlassian, tecnica, governanca, regressao, reducao, decomposicao, Recomendacao, Criterios (+19) | task spell:check |
+| 2026-03-10 12:40 UTC | DOT-127 | pascoalete | reprovado | .agents/config/startup.toml | worktrees, worktree, minimo, descricao, tecnico, criterios, aceitacao, documentacao | task spell:check |
+| 2026-03-10 12:40 UTC | DOT-127 | pascoalete | reprovado | .agents/config/orchestration.toml | atlassian, comentario, atuacao, comentario, decisao, comentario, transicao, decisao (+138) | task spell:check |
 | 2026-03-10 12:40 UTC | DOT-127 | pascoalete | reprovado | Taskfile.yml | PYTHONDONTWRITEBYTECODE, PYTHONPYCACHEPREFIX, venv, venv, disponiveis, worktree, alteracoes, alteracoes (+152) | task spell:check |
 | 2026-03-10 12:40 UTC | DOT-127 | pascoalete | reprovado | AGENTS.md | Missao, confiavel, testavel, reproduzivel, precedencia, LICOES, instrucoes, usuario (+116) | task spell:check |
 | 2026-03-10 03:33 UTC | DOT-117 | pascoalete | aprovado | tests/python/ai_tech_lead_review_contract_test.py | sem achados | task spell:check |
@@ -369,10 +369,10 @@ Registro consultivo do agente Pascoalete para ortografia e higiene vocabular.
 | 2026-03-10 03:33 UTC | DOT-117 | pascoalete | reprovado | docs/atlassian-ia/artifacts/agent-operations.md | canonica, Sincronizacao, governanca, comentarios, tecnicos, atuacao, documentacao, tambem (+112) | task spell:check |
 | 2026-03-10 03:33 UTC | DOT-117 | pascoalete | reprovado | docs/atlassian-ia/2026-03-08-spike-cobertura-agentes-e-review-especializado.md | priorizacao, generico, unico, revisao, tecnica, revisao, codigo, autonomo (+78) | task spell:check |
 | 2026-03-10 03:33 UTC | DOT-117 | pascoalete | reprovado | docs/atlassian-ia/2026-03-08-manual-agilidade-control-plane.md | atlassian, agil, classicos, operacao, documentacao, codigo, operacao, Fundacao (+125) | task spell:check |
-| 2026-03-10 03:33 UTC | DOT-117 | pascoalete | reprovado | config/ai/jira-model.yaml | atlassian, tecnica, governanca, regressao, reducao, decomposicao, Recomendacao, Criterios (+19) | task spell:check |
-| 2026-03-10 03:33 UTC | DOT-117 | pascoalete | reprovado | config/ai/reviewer-policies.yaml | atlassian, decisao, tecnica, opiniao, decisao, corretude, seguranca, eficiencia (+61) | task spell:check |
-| 2026-03-10 03:33 UTC | DOT-117 | pascoalete | reprovado | config/ai/agent-operations.yaml | atlassian, comentario, atuacao, comentario, decisao, comentario, transicao, decisao (+136) | task spell:check |
-| 2026-03-10 03:33 UTC | DOT-117 | pascoalete | reprovado | config/ai/agents.yaml | figma | task spell:check |
+| 2026-03-10 03:33 UTC | DOT-117 | pascoalete | reprovado | config/jira-model.yaml | atlassian, tecnica, governanca, regressao, reducao, decomposicao, Recomendacao, Criterios (+19) | task spell:check |
+| 2026-03-10 03:33 UTC | DOT-117 | pascoalete | reprovado | .agents/config/reviews.toml | atlassian, decisao, tecnica, opiniao, decisao, corretude, seguranca, eficiencia (+61) | task spell:check |
+| 2026-03-10 03:33 UTC | DOT-117 | pascoalete | reprovado | .agents/config/orchestration.toml | atlassian, comentario, atuacao, comentario, decisao, comentario, transicao, decisao (+136) | task spell:check |
+| 2026-03-10 03:33 UTC | DOT-117 | pascoalete | reprovado | .agents/config/agents.toml | figma | task spell:check |
 | 2026-03-09 23:54 UTC | DOT-114 | pascoalete | reprovado | tests/python/validate_docs_test.py | repoish | task spell:check |
 | 2026-03-09 23:54 UTC | DOT-114 | pascoalete | reprovado | tests/python/atlassian_platform_test.py | atlassian, atlassian, atlassian, atlassian, linkifies, linkify, regressao, interacao (+12) | task spell:check |
 | 2026-03-09 23:54 UTC | DOT-114 | pascoalete | reprovado | tests/python/ai_jira_apply_test.py | canonico, canonico, canonico, atlassian, atlassian | task spell:check |
@@ -399,8 +399,8 @@ Registro consultivo do agente Pascoalete para ortografia e higiene vocabular.
 | 2026-03-08 04:38 UTC | WIP-20260307-ATLASSIAN-ADAPTERS | pascoalete | reprovado | docs/atlassian-ia/artifacts/agent-operations.md | canonica, Sincronizacao, governanca, comentarios, tecnicos, atuacao, documentacao, tambem (+50) | task spell:check |
 | 2026-03-08 04:38 UTC | WIP-20260307-ATLASSIAN-ADAPTERS | pascoalete | reprovado | docs/TASKS.md | canonicas, repositorio, operacao, diaria, governanca, Operacao, diaria, sincronizacao (+96) | task spell:check |
 | 2026-03-08 03:56 UTC | WIP-20260307-ATLASSIAN-ADAPTERS | pascoalete | reprovado | docs/AI-WIP-TRACKER.md | solicitacao, acionavel, usuario, execucao, execucao, obrigatorio, Responsavel, atualizacao (+224) | task spell:check |
-| 2026-03-08 03:35 UTC | WIP-20260307-ATLASSIAN-ADAPTERS | pascoalete | reprovado | config/ai/jira-model.yaml | atlassian, tecnica, governanca, regressao, decomposicao, canonico, autonomo, Workstream (+4) | task spell:check |
-| 2026-03-08 03:35 UTC | WIP-20260307-ATLASSIAN-ADAPTERS | pascoalete | reprovado | config/ai/confluence-model.yaml | atlassian, navegacao, atlassian, atlassian, atlassian, atlassian, Operacao, Governanca | task spell:check |
+| 2026-03-08 03:35 UTC | WIP-20260307-ATLASSIAN-ADAPTERS | pascoalete | reprovado | config/jira-model.yaml | atlassian, tecnica, governanca, regressao, decomposicao, canonico, autonomo, Workstream (+4) | task spell:check |
+| 2026-03-08 03:35 UTC | WIP-20260307-ATLASSIAN-ADAPTERS | pascoalete | reprovado | config/confluence-model.yaml | atlassian, navegacao, atlassian, atlassian, atlassian, atlassian, Operacao, Governanca | task spell:check |
 | 2026-03-08 03:35 UTC | WIP-20260307-ATLASSIAN-ADAPTERS | pascoalete | reprovado | docs/atlassian-ia/artifacts/jira-board-layout.md | canonica, automacao, documentacao, expone, mutar, correcao, governanca, validacao (+2) | task spell:check |
 | 2026-03-08 03:35 UTC | WIP-20260307-ATLASSIAN-ADAPTERS | pascoalete | reprovado | docs/atlassian-ia/artifacts/atlassian-endpoints.md | usuario, aplicacao, reutilizaveis, obrigatorio, aplicavel, obrigatorio, criacao, validacao (+23) | task spell:check |
 | 2026-03-08 03:35 UTC | WIP-20260307-ATLASSIAN-ADAPTERS | pascoalete | reprovado | docs/atlassian-ia/2026-03-07-atlassian-auth-scopes-and-permissions.md | Permissoes, canonico, rotacao, atlassian, canonica, especificos, necessario, usuario (+44) | task spell:check |
@@ -430,12 +430,12 @@ Registro consultivo do agente Pascoalete para ortografia e higiene vocabular.
 | 2026-03-08 02:00 UTC | WIP-20260307-ATLASSIAN-ADAPTERS | pascoalete | reprovado | docs/atlassian-ia/artifacts/README.md | canonica, sincronizacao, aplicacao, sincronizacao, informacao, publicacao, atlassian, documentacao (+4) | task spell:check |
 | 2026-03-08 02:00 UTC | WIP-20260307-ATLASSIAN-ADAPTERS | pascoalete | reprovado | docs/atlassian-ia/README.md | migracao, governanca, usuario, implicita, cutover, proprio, decisoes, tambem (+38) | task spell:check |
 | 2026-03-08 02:00 UTC | WIP-20260307-ATLASSIAN-ADAPTERS | pascoalete | reprovado | docs/README.md | documentacoes, Operacao, migracao, canonicas, automacao, tecnico, manutencao, Governanca (+19) | task spell:check |
-| 2026-03-08 02:00 UTC | WIP-20260307-ATLASSIAN-ADAPTERS | pascoalete | reprovado | config/ai/contracts.yaml | descricao, tecnico, criterios, aceitacao, documentacao | task spell:check |
-| 2026-03-08 02:00 UTC | WIP-20260307-ATLASSIAN-ADAPTERS | pascoalete | reprovado | config/ai/agent-operations.yaml | atlassian, decisao, documentacao, linkar, mudanca, atualizacao, necessario, linkar (+92) | task spell:check |
+| 2026-03-08 02:00 UTC | WIP-20260307-ATLASSIAN-ADAPTERS | pascoalete | reprovado | .agents/config/startup.toml | descricao, tecnico, criterios, aceitacao, documentacao | task spell:check |
+| 2026-03-08 02:00 UTC | WIP-20260307-ATLASSIAN-ADAPTERS | pascoalete | reprovado | .agents/config/orchestration.toml | atlassian, decisao, documentacao, linkar, mudanca, atualizacao, necessario, linkar (+92) | task spell:check |
 | 2026-03-07 23:02 UTC | WIP-20260307-ATLASSIAN-ADAPTERS | pascoalete | reprovado | tests/python/ai_jira_model_test.py | atlassian | task spell:check |
 | 2026-03-07 23:02 UTC | WIP-20260307-ATLASSIAN-ADAPTERS | pascoalete | reprovado | scripts/ai-jira-model.py | execucao | task spell:check |
 | 2026-03-07 23:02 UTC | WIP-20260307-ATLASSIAN-ADAPTERS | pascoalete | reprovado | scripts/ai_jira_model_lib.py | atlassian, atlassian, atlassian, atlassian | task spell:check |
-| 2026-03-07 23:02 UTC | WIP-20260307-ATLASSIAN-ADAPTERS | pascoalete | reprovado | config/ai/agents.yaml | figma | task spell:check |
+| 2026-03-07 23:02 UTC | WIP-20260307-ATLASSIAN-ADAPTERS | pascoalete | reprovado | .agents/config/agents.toml | figma | task spell:check |
 | 2026-03-07 21:35 UTC | WIP-20260307-ATLASSIAN-ADAPTERS | pascoalete | reprovado | docs/atlassian-ia/2026-03-07-atlassian-product-discovery.md | Decisao, hipoteses, proprio, canonica, executavel, executavel, avaliacao, consolidacao (+20) | task spell:check |
 | 2026-03-07 18:19 UTC | WIP-20260307-ATLASSIAN-IA-CONTEXT | pascoalete | reprovado | docs/atlassian-ia/2026-03-07-parecer-e-plano-inicial.md | operacao, direcao, documentacao, viavel, migracao, viavel, transicao, LICOES (+122) | task spell:check |
 | 2026-03-07 18:19 UTC | WIP-20260307-ATLASSIAN-IA-CONTEXT | pascoalete | reprovado | docs/atlassian-ia/2026-03-07-modelo-operacional-completo-figma-seo.md | usuario, rastreavel, atlassian, atlassian, agil, execucao, documentacao, repositorio (+52) | task spell:check |

@@ -3,7 +3,7 @@
 - Status: `schema-e-seed-aplicados-com-gap-em-board`
 - Data-base: `2026-03-07`
 - Relacionados:
-  - [`../../config/ai/jira-model.yaml`](../../config/ai/jira-model.yaml)
+  - [`../../config/jira-model.yaml`](../../config/jira-model.yaml)
   - [`2026-03-07-diagnostico-auth-e-acesso-atlassian.md`](2026-03-07-diagnostico-auth-e-acesso-atlassian.md)
   - [`2026-03-07-atlassian-auth-scopes-and-permissions.md`](2026-03-07-atlassian-auth-scopes-and-permissions.md)
 

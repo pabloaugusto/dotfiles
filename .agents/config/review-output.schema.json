@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://github.com/pabloaugusto/dotfiles/blob/main/config/ai/review-output.schema.json",
+  "$id": "https://github.com/pabloaugusto/dotfiles/blob/main/.agents/config/review-output.schema.json",
   "title": "AI Reviewer Output",
   "description": "Contrato estruturado minimo para pareceres dos reviewers especializados da control plane.",
   "type": "object",

@@ -738,7 +738,7 @@ class AiJiraApplyTests(unittest.TestCase):
             ),
             mock.patch(
                 "scripts.ai_jira_apply_lib.load_jira_model",
-                return_value=("config/ai/jira-model.yaml", model),
+                return_value=("config/jira-model.yaml", model),
             ),
             mock.patch("scripts.ai_jira_apply_lib.AtlassianHttpClient", return_value=mock.Mock()),
             mock.patch(

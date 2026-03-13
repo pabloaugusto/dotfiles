@@ -39,8 +39,8 @@ from scripts.atlassian_platform_lib import (
     render_structured_comment,
 )
 
-DEFAULT_CONFLUENCE_MODEL_PATH = Path("config/ai/confluence-model.yaml")
-DEFAULT_JIRA_MODEL_PATH = Path("config/ai/jira-model.yaml")
+DEFAULT_CONFLUENCE_MODEL_PATH = Path("config/confluence-model.yaml")
+DEFAULT_JIRA_MODEL_PATH = Path("config/jira-model.yaml")
 MIGRATION_ISSUE_SUMMARY = "Migrar backlog e documentacao para Jira e Confluence"
 MIGRATION_ISSUE_LABELS = [
     "atlassian-ia",
@@ -168,11 +168,11 @@ def load_jira_model(repo_root: str | Path | None = None) -> tuple[Path, dict[str
 def jira_board_layout_confirmed(model: dict[str, Any]) -> bool:
     project = model.get("project") or {}
     if not isinstance(project, dict):
-        raise AiControlPlaneError("config/ai/jira-model.yaml project precisa ser mapa.")
+        raise AiControlPlaneError("config/jira-model.yaml project precisa ser mapa.")
     target_board = project.get("target_board") or {}
     if not isinstance(target_board, dict):
         raise AiControlPlaneError(
-            "config/ai/jira-model.yaml project.target_board precisa ser mapa."
+            "config/jira-model.yaml project.target_board precisa ser mapa."
         )
     return bool(target_board.get("layout_confirmed", False))
 
@@ -496,7 +496,7 @@ def build_section_body(
 def flatten_page_tree(model: dict[str, Any]) -> list[dict[str, str]]:
     page_tree = model.get("page_tree") or []
     if not isinstance(page_tree, list):
-        raise AiControlPlaneError("config/ai/confluence-model.yaml page_tree precisa ser lista.")
+        raise AiControlPlaneError("config/confluence-model.yaml page_tree precisa ser lista.")
     entries: list[dict[str, str]] = []
     for root in page_tree:
         if not isinstance(root, dict):

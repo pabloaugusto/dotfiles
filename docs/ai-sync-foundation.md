@@ -22,7 +22,7 @@ A fundacao de sync deste repo segue o modelo:
 `repo declarativo -> outbox local duravel -> fonte perene remota`
 
 O contrato versionado fica em
-[`config/ai/sync-targets.yaml`](../config/ai/sync-targets.yaml).
+[`config/sync-targets.yaml`](../config/sync-targets.yaml).
 
 O state local duravel fica fora do repo, por padrao em:
 
@@ -45,7 +45,7 @@ Nenhum dominio pode:
 Identifica o workspace logico do repo dentro do state root duravel.
 
 No contrato atual, ele e definido em
-[`config/ai/sync-targets.yaml`](../config/ai/sync-targets.yaml) e nao deve ser
+[`config/sync-targets.yaml`](../config/sync-targets.yaml) e nao deve ser
 recalculado por dominio consumidor.
 
 ### `runtime_environment_id`
@@ -98,7 +98,7 @@ Eventos esgotados apos o numero maximo de tentativas configurado.
 ## Manifest declarativo
 
 O arquivo
-[`config/ai/sync-targets.yaml`](../config/ai/sync-targets.yaml) e a fonte
+[`config/sync-targets.yaml`](../config/sync-targets.yaml) e a fonte
 versionada do contrato de sync.
 
 Ele define:
@@ -152,7 +152,7 @@ Permanece canonico e versionado no Git.
 
 Exemplos:
 
-- [`config/ai/`](../config/ai/)
+- [`config/`](../config/) e [`.agents/config/`](../.agents/config/)
 - [`docs/AI-WIP-TRACKER.md`](AI-WIP-TRACKER.md)
 - [`docs/AI-REVIEW-LEDGER.md`](AI-REVIEW-LEDGER.md)
 - [`docs/AI-SCRUM-MASTER-LEDGER.md`](AI-SCRUM-MASTER-LEDGER.md)
@@ -275,7 +275,7 @@ Exemplo direto:
   [`documentation-layer-governance`](../.agents/prompts/formal/documentation-layer-governance/prompt.md)
   usa esta fundacao como base para o futuro `ai-documentation-sync`
 - o manifest
-  [`config/ai/sync-targets.yaml`](../config/ai/sync-targets.yaml) ja pode
+  [`config/sync-targets.yaml`](../config/sync-targets.yaml) ja pode
   carregar artefatos como `documentation_links` para `documentation-link`,
   backlinks e rastreabilidade cross-surface quando a policy documental os
   classificar como elegiveis

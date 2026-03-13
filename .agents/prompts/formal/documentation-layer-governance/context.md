@@ -31,8 +31,8 @@ sincronismo ja tratada pela fundacao oficial de sync.
 
 - [`AGENTS.md`](../../../../AGENTS.md)
 - [`docs/ai-operating-model.md`](../../../../docs/ai-operating-model.md)
-- [`config/ai/contracts.yaml`](../../../../config/ai/contracts.yaml)
-- `sync-targets.yaml` em [`config/ai/`](../../../../config/ai/)
+- [`.agents/config/startup.toml`](../../../../.agents/config/startup.toml)
+- `sync-targets.yaml` em [`config/`](../../../../config/) e [`.agents/config/`](../../../../.agents/config/)
 - [`scripts/validate-ai-assets.py`](../../../../scripts/validate-ai-assets.py)
 - [`scripts/ai-prompt-governance.py`](../../../../scripts/ai-prompt-governance.py)
 - [`scripts/ai_session_startup_lib.py`](../../../../scripts/ai_session_startup_lib.py)

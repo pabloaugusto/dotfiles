@@ -47,7 +47,7 @@ solucao ao nome atual do repositorio.
 - [`docs/AI-STARTUP-AND-RESTART.md`](../../../../docs/AI-STARTUP-AND-RESTART.md)
 - [`docs/AI-DELEGATION-FLOW.md`](../../../../docs/AI-DELEGATION-FLOW.md)
 - [`docs/TASKS.md`](../../../../docs/TASKS.md)
-- [`config/ai/`](../../../../config/ai/)
+- [`config/`](../../../../config/) e [`.agents/config/`](../../../../.agents/config/)
 - [`Taskfile.yml`](../../../../Taskfile.yml)
 
 ## Resultado esperado

@@ -3,7 +3,7 @@
 - Status: `artifact-first`
 - Data-base: `2026-03-07`
 - Fonte canonica:
-  [`../../../config/ai/confluence-model.yaml`](../../../config/ai/confluence-model.yaml)
+  [`../../../config/confluence-model.yaml`](../../../config/confluence-model.yaml)
 - Sincronizacao alvo:
   - pagina `DOT - AI Control Plane Hub`
   - paginas filhas de schema, operacao e migration plan

@@ -6,8 +6,8 @@
   - [`2026-03-07-operacao-agentes-jira-confluence.md`](2026-03-07-operacao-agentes-jira-confluence.md)
   - [`2026-03-07-parecer-e-plano-inicial.md`](2026-03-07-parecer-e-plano-inicial.md)
   - [`artifacts/agent-operations.md`](artifacts/agent-operations.md)
-  - [`../../config/ai/contracts.yaml`](../../config/ai/contracts.yaml)
-  - [`../../config/ai/agent-operations.yaml`](../../config/ai/agent-operations.yaml)
+  - [`../../.agents/config/startup.toml`](../../.agents/config/startup.toml)
+  - [`../../.agents/config/orchestration.toml`](../../.agents/config/orchestration.toml)
 
 ## Objetivo
 

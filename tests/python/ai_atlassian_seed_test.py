@@ -113,7 +113,7 @@ class AtlassianSeedPlanTests(unittest.TestCase):
             ),
             patch(
                 "scripts.ai_atlassian_seed_lib.load_confluence_model",
-                return_value=(Path("config/ai/confluence-model.yaml"), {}),
+                return_value=(Path("config/confluence-model.yaml"), {}),
             ),
             patch(
                 "scripts.ai_atlassian_seed_lib.confluence_adapter_for_role",
@@ -150,7 +150,7 @@ class AtlassianSeedPlanTests(unittest.TestCase):
         self.assertTrue(any("sync documental" in note for note in captured_notes))
 
     def test_flatten_page_tree_keeps_declared_titles(self) -> None:
-        model = load_yaml_map(Path("config/ai/confluence-model.yaml"))
+        model = load_yaml_map(Path("config/confluence-model.yaml"))
         titles = [entry["title"] for entry in flatten_page_tree(model)]
 
         self.assertIn("DOT - AI Control Plane Hub", titles)
@@ -170,7 +170,7 @@ class AtlassianSeedPlanTests(unittest.TestCase):
         self.assertEqual(logical_status_from_name("PAUSED"), "paused")
 
     def test_board_layout_confirmation_reflects_model(self) -> None:
-        model = load_yaml_map(Path("config/ai/jira-model.yaml"))
+        model = load_yaml_map(Path("config/jira-model.yaml"))
         self.assertTrue(jira_board_layout_confirmed(model))
 
     def test_markdown_to_storage_html_renders_markdown(self) -> None:

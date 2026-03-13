@@ -32,7 +32,7 @@ Arquivos alvo planejados:
 - este pack nao substitui [`AGENTS.md`](../../../../AGENTS.md),
   [`LICOES-APRENDIDAS.md`](../../../../LICOES-APRENDIDAS.md),
   [`docs/ai-operating-model.md`](../../../../docs/ai-operating-model.md) nem os
-  contratos declarativos em [`config/ai/`](../../../../config/ai/)
+  contratos declarativos em [`config/`](../../../../config/) e [`.agents/config/`](../../../../.agents/config/)
 - este pack formaliza a governanca temporal; ele nao executa a implementacao
 - a implementacao futura deve acontecer em task propria, apartada, com branch,
   worklog, review e validacao proprios
@@ -63,8 +63,8 @@ Arquivos alvo planejados:
 - [`docs/AI-REVIEW-LEDGER.md`](../../../../docs/AI-REVIEW-LEDGER.md)
 - [`docs/AI-ORTHOGRAPHY-LEDGER.md`](../../../../docs/AI-ORTHOGRAPHY-LEDGER.md)
 - [`docs/AI-SCRUM-MASTER-LEDGER.md`](../../../../docs/AI-SCRUM-MASTER-LEDGER.md)
-- [`config/ai/contracts.yaml`](../../../../config/ai/contracts.yaml)
-- [`config/ai/sync-targets.yaml`](../../../../config/ai/sync-targets.yaml)
+- [`.agents/config/startup.toml`](../../../../.agents/config/startup.toml)
+- [`config/sync-targets.yaml`](../../../../config/sync-targets.yaml)
 - [`scripts/ai_session_startup_lib.py`](../../../../scripts/ai_session_startup_lib.py)
 - [`scripts/ai_sync_foundation_lib.py`](../../../../scripts/ai_sync_foundation_lib.py)
 - [`scripts/ai-worklog.py`](../../../../scripts/ai-worklog.py)

@@ -2,7 +2,7 @@
 
 Politica canonica de severidade usada pelos reviewers especializados da control
 plane. Este artefato detalha a taxonomia declarada em
-[`../../../config/ai/reviewer-policies.yaml`](../../../config/ai/reviewer-policies.yaml)
+[`../../../.agents/config/reviews.toml`](../../../.agents/config/reviews.toml)
 e serve como base para comentarios, transicoes no Jira, evals e auditoria.
 
 ## Objetivo

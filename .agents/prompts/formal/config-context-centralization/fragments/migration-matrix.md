@@ -14,22 +14,21 @@ A matriz versionada deve conter, no minimo:
 
 ## Primeira drenagem obrigatoria
 
-- [config/ai/agents.yaml](../../../../../config/ai/agents.yaml) ->
+- [.agents/config/agents.toml](../../../../../.agents/config/agents.toml) ->
   futuro `agents.toml` na pasta `config` sob [`.agents/`](../../../../)
-- [config/ai/agent-enablement.yaml](../../../../../config/ai/agent-enablement.yaml)
+- [.agents/config/agents.toml](../../../../../.agents/config/agents.toml)
   -> futuro `agents.toml` na pasta `config` sob [`.agents/`](../../../../)
-- [config/ai/agent-runtime.yaml](../../../../../config/ai/agent-runtime.yaml) ->
+- [.agents/config/agents.toml](../../../../../.agents/config/agents.toml) ->
   futuro `agents.toml` na pasta `config` sob [`.agents/`](../../../../)
 - chat/startup/orchestration declarativos ->
   futuros `communication.toml`, `startup.toml` e `orchestration.toml` na pasta
   `config` sob [`.agents/`](../../../../)
 - reviewer policies ->
   futuro `reviews.toml` na pasta `config` sob [`.agents/`](../../../../)
-- [config/ai/platforms.yaml](../../../../../config/ai/platforms.yaml),
-  [config/ai/jira-model.yaml](../../../../../config/ai/jira-model.yaml),
-  [config/ai/confluence-model.yaml](../../../../../config/ai/confluence-model.yaml)
-  e [config/ai/sync-targets.yaml](../../../../../config/ai/sync-targets.yaml)
+- [config/platforms.yaml](../../../../../config/platforms.yaml),
+  [config/jira-model.yaml](../../../../../config/jira-model.yaml),
+  [config/confluence-model.yaml](../../../../../config/confluence-model.yaml)
+  e [config/sync-targets.yaml](../../../../../config/sync-targets.yaml)
   permanecem em [config/](../../../../../config/)
 - [`.agents/config.toml`](../../../../config.toml) ->
-  ponte temporaria para o futuro `config.toml` na pasta `config` sob
-  [`.agents/`](../../../../)
+  manifesto operacional complementar da camada IA

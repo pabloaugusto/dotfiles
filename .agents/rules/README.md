@@ -6,7 +6,7 @@ Fonte canonica humana das regras normativas por tema em [`.agents/rules/`](./).
 
 - centralizar a governanca humana por dominio em um unico lugar
 - reduzir drift entre [`AGENTS.md`](../../AGENTS.md), [`docs/`](../../docs/),
-  [`config/ai/`](../../config/ai/) e enforcement executavel
+  [`config/`](../../config/) e [`.agents/config/`](../../.agents/config/) e enforcement executavel
 - permitir que startup, delegacao, review e docs apontem para regras tematicas
   curtas e navegaveis
 - manter projecoes `.rules` curtas apenas quando um tema precisar de consumo
@@ -36,7 +36,7 @@ Fonte canonica humana das regras normativas por tema em [`.agents/rules/`](./).
   de verdade do tema
 - [`projections.yaml`](projections.yaml) declara a ligacao entre fonte humana e
   projecao executavel
-- [`config/ai/`](../../config/ai/) define contratos declarativos consumiveis
+- [`config/`](../../config/) e [`.agents/config/`](../../.agents/config/) define contratos declarativos consumiveis
 - [`Taskfile.yml`](../../Taskfile.yml), [`scripts/`](../../scripts/),
   [`tests/`](../../tests/) e [`.githooks/`](../../.githooks/) fazem o
   enforcement executavel

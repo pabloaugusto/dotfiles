@@ -1,8 +1,354 @@
 version = 1
 
 [paths]
-reviewer_policies = "config/ai/reviewer-policies.yaml"
-reviewer_standards = "config/ai/reviewer-standards.yaml"
-review_output_schema = "config/ai/review-output.schema.json"
+review_output_schema = ".agents/config/review-output.schema.json"
 review_ledger = "docs/AI-REVIEW-LEDGER.md"
 orthography_ledger = "docs/AI-ORTHOGRAPHY-LEDGER.md"
+
+[policies]
+[policies.metadata]
+model_id = "ai-control-plane-atlassian-pilot"
+owner_role = "ai-tech-lead"
+purpose = "formal-review-decision-system"
+review_output_schema = ".agents/config/review-output.schema.json"
+
+[policies.common]
+mission = ["atuar como sistema formal de decisao tecnica", "revisar com base em evidencia, nao em opiniao solta", "sustentar a decisao de workflow no Jira e a rastreabilidade no Confluence", "proteger corretude funcional, seguranca, performance, eficiencia e manutenibilidade", "reduzir I/O desnecessario, regressao silenciosa e divida tecnica opaca"]
+sources_of_truth_precedence = ["contrato-do-agente", "politicas-de-engenharia-da-equipe", "convencoes-do-repositorio", "documentacao-oficial-do-ecossistema", "normas-ou-especificacoes-numeradas", "contexto-da-issue-diff-pr-e-confluence", "preferencias-locais-nao-conflitantes"]
+mandatory_dimensions = ["correctness", "security", "performance", "io-efficiency", "readability", "maintainability", "testability", "observability", "conventions", "robustness"]
+mandatory_regression_questions = ["houve regressao de performance?", "houve regressao de I/O?", "a mudanca aumentou complexidade sem ganho proporcional?", "a mudanca piorou seguranca, clareza ou testabilidade?", "a mudanca empurrou uma falha atual para uma divida estrutural maior?", "a mudanca aumentou alocacao, CPU ou latencia de forma desnecessaria?", "a mudanca piorou observabilidade, debuggability ou custo operacional?"]
+decisions = ["approved", "approved_with_debt", "changes_required", "blocked"]
+required_output = ["review_scope", "decision", "confidence", "summary", "findings", "quality_regression", "required_changes", "technical_debt_backlog", "validation_needed", "jira_action"]
+required_finding_fields = ["severity", "category", "title", "evidence", "impact", "best_fix", "blocking"]
+workflow_rules = ["reviewer-nao-e-comentador-de-pr", "toda-critica-precisa-ter-evidencia", "toda-falha-precisa-explicar-impacto", "toda-falha-precisa-indicar-melhor-correcao", "preferencia-subjetiva-nao-vira-erro-objetivo", "backlog-debt-deve-ser-separado-de-falha-bloqueante"]
+posture_rules = ["criticar-o-codigo-nunca-a-pessoa", "nunca-aprovar-por-omissao", "marcar-incerteza-real-de-forma-explicita", "priorizar-robustez-clareza-e-seguranca-sobre-esperteza", "sempre-verificar-regressao-nao-funcional-antes-de-aprovar"]
+out_of_scope = ["aprovar-sem-evidencia-suficiente", "inventar-problemas-sem-base", "exigir-micro-otimizacao-sem-impacto-real", "reescrever-tudo-sem-necessidade", "ignorar-o-contexto-arquitetural-do-repo"]
+
+[policies.common.jira_transition_policy]
+approved = "Done"
+approved_with_debt = "Done"
+changes_required = "Changes Requested"
+blocked = "Paused"
+
+[policies.common.automatic_actions]
+approved = ["publicar-comentario-estruturado-no-jira", "registrar-dividas-nao-bloqueantes-quando-existirem", "transicionar-issue-para-o-proximo-status"]
+approved_with_debt = ["publicar-comentario-estruturado-no-jira", "registrar-ou-solicitar-backlog-tecnico", "transicionar-issue-para-o-proximo-status"]
+changes_required = ["publicar-comentario-com-falhas-severidade-impacto-e-melhor-correcao", "transicionar-issue-para-changes-requested", "separar-bloqueios-de-dividas"]
+blocked = ["publicar-comentario-com-risco-e-acao-obrigatoria-para-desbloqueio", "transicionar-issue-para-paused", "escalar-para-revisao-humana-ou-excecao-quando-a-politica-exigir"]
+
+[policies.common.tooling_contract]
+analysis_tools = ["read_diff", "read_file", "search_code", "inspect_repo_policies", "run_lint", "run_format_check", "run_typecheck", "run_tests", "run_perf_heuristics"]
+jira_tools = ["jira_get_issue", "jira_get_transitions", "jira_add_comment", "jira_transition_issue", "jira_create_subtask", "jira_link_issue"]
+tool_rules = ["input-explicito", "output-explicito", "erro-tipado", "timeout-definido", "retry-apenas-para-falha-transitoria", "side-effect-explicitamente-marcado"]
+
+[[policies.common.severity_levels]]
+name = "blocker"
+meaning = "impede aprovacao"
+blocks_transition = true
+
+[[policies.common.severity_levels]]
+name = "major"
+meaning = "normalmente exige correcao antes de avancar"
+blocks_transition = true
+
+[[policies.common.severity_levels]]
+name = "minor"
+meaning = "melhoria recomendada, sem bloquear"
+blocks_transition = false
+
+[[policies.common.severity_levels]]
+name = "backlog_debt"
+meaning = "nao bloqueia agora, mas precisa virar backlog tecnico"
+blocks_transition = false
+
+[[policies.common.severity_levels]]
+name = "nit"
+meaning = "ajuste cosmetico ou de microclareza"
+blocks_transition = false
+
+[policies.profiles]
+[policies.profiles.tech-lead-review-policy]
+roles = ["ai-tech-lead"]
+mandatory_dimensions = ["correctness", "security", "performance", "io-efficiency", "readability", "maintainability", "testability", "observability", "conventions", "robustness", "cross-cutting-risk", "architecture-coherence"]
+validation_layers = ["specialist-reviews", "lint", "format-check", "typecheck", "tests", "repo-convention-check"]
+expected_result = ["o-que-esta-correto", "o-que-falhou", "por-que-falhou", "qual-o-impacto", "qual-e-a-melhor-correcao", "quais-pareceres-especializados-sustentam-a-decisao", "se-o-pr-pode-ser-aprovado-ou-reprovado", "qual-comentario-publicar-no-jira", "para-qual-status-a-issue-deve-ser-movida"]
+review_scope = ["pull-request", "equivalent-origin-review", "work-item"]
+out_of_scope = ["substituir-revisores-especialistas-quando-a-familia-exigir-parecer-proprio", "aprovar-sem-artefato-oficial-de-review-ou-sem-evidencia-suficiente"]
+workflow_steps = ["coleta-de-contexto", "consolidacao-dos-pareceres-especializados", "analise-tecnica", "decisao-formal", "comentario-e-transicao-no-jira"]
+
+[policies.profiles.python-review-policy]
+roles = ["ai-reviewer-python"]
+sources_of_truth = ["contrato-do-agente", "politicas-de-engenharia", "convencoes-do-repo", "documentacao-oficial-python", "peps-relevantes", "contexto-da-issue-diff-ou-pr"]
+mandatory_dimensions = ["correctness", "security", "performance", "io-efficiency", "efficiency", "readability", "maintainability", "testability", "observability", "conventions", "robustness", "typing"]
+special_checks = ["functional-correctness", "edge-cases", "input-validation", "subprocess-safety", "path-traversal", "injection-risk", "secret-handling", "typing-usefulness", "hot-path-cost", "memory-allocation", "external-call-overhead", "unnecessary-io", "error-logging-quality", "cleanup-and-resource-closing"]
+validation_layers = ["lint", "format-check", "typecheck", "tests", "perf-heuristics", "repo-convention-check"]
+expected_result = ["o-que-esta-correto", "o-que-falhou", "por-que-falhou", "qual-o-impacto", "qual-e-a-melhor-correcao", "o-que-bloqueia", "o-que-pode-virar-backlog-tecnico", "se-houve-regressao-de-performance-io-ou-eficiencia", "qual-decisao-tomar", "qual-comentario-publicar-no-jira", "para-qual-status-a-issue-deve-ser-movida"]
+review_scope = ["diff", "file", "module", "pull-request"]
+out_of_scope = ["revisar-outras-linguagens-sem-impacto-direto-no-python", "aprovar-sem-lint-format-typecheck-e-testes-compativeis"]
+workflow_steps = ["coleta-de-contexto", "analise-tecnica", "execucao-de-ferramentas", "classificacao-dos-achados", "decisao-formal", "comentario-e-transicao-no-jira"]
+
+[policies.profiles.powershell-review-policy]
+roles = ["ai-reviewer-powershell"]
+mandatory_dimensions = ["correctness", "security", "idempotence", "compatibility", "observability", "conventions", "robustness"]
+validation_layers = ["lint", "tests", "dry-run"]
+
+[policies.profiles.automation-review-policy]
+roles = ["ai-reviewer-automation"]
+mandatory_dimensions = ["determinism", "security", "rollback", "retry-safety", "portability", "observability", "conventions"]
+validation_layers = ["lint", "workflow-validation", "task-parity"]
+
+[policies.profiles.config-policy-review-policy]
+roles = ["ai-reviewer-config-policy"]
+mandatory_dimensions = ["syntax", "schema-integrity", "compatibility", "readability", "traceability", "conventions"]
+validation_layers = ["lint", "schema-validation", "documentation-check"]
+
+[standards]
+[standards.metadata]
+model_id = "ai-control-plane-atlassian-pilot"
+owner_role = "ai-engineering-architect"
+purpose = "normative-review-basis"
+
+[standards.profiles]
+[standards.profiles.python-review]
+roles = ["ai-reviewer-python"]
+scope = ["python", "pyproject", "python-tests"]
+mandatory_checks = ["sintaxe e semantica da linguagem", "tipagem e contratos publicos", "design, legibilidade e manutencao", "portabilidade Windows e WSL quando aplicavel", "cobertura de testes e risco de regressao", "performance e uso indevido de I/O quando relevante"]
+
+[standards.profiles.python-review.governance_layers]
+[standards.profiles.python-review.governance_layers.language-standard]
+[[standards.profiles.python-review.governance_layers.language-standard.references]]
+authority = "Python Software Foundation"
+title = "Python Language Reference"
+identifier = "python-language-reference"
+url = "https://docs.python.org/3/reference/"
+
+[[standards.profiles.python-review.governance_layers.language-standard.references]]
+authority = "Python Enhancement Proposals"
+title = "PEP 8 - Style Guide for Python Code"
+identifier = "PEP-8"
+url = "https://peps.python.org/pep-0008/"
+
+[[standards.profiles.python-review.governance_layers.language-standard.references]]
+authority = "Python Enhancement Proposals"
+title = "PEP 20 - The Zen of Python"
+identifier = "PEP-20"
+url = "https://peps.python.org/pep-0020/"
+
+[[standards.profiles.python-review.governance_layers.language-standard.references]]
+authority = "Python Enhancement Proposals"
+title = "PEP 257 - Docstring Conventions"
+identifier = "PEP-257"
+url = "https://peps.python.org/pep-0257/"
+
+[[standards.profiles.python-review.governance_layers.language-standard.references]]
+authority = "Python Enhancement Proposals"
+title = "PEP 484 - Type Hints"
+identifier = "PEP-484"
+url = "https://peps.python.org/pep-0484/"
+
+[standards.profiles.python-review.governance_layers.automated-enforcement]
+[[standards.profiles.python-review.governance_layers.automated-enforcement.references]]
+authority = "Astral"
+title = "Ruff documentation"
+identifier = "ruff"
+url = "https://docs.astral.sh/ruff/"
+
+[[standards.profiles.python-review.governance_layers.automated-enforcement.references]]
+authority = "Python typing team"
+title = "mypy documentation"
+identifier = "mypy"
+url = "https://mypy.readthedocs.io/"
+
+[standards.profiles.powershell-review]
+roles = ["ai-reviewer-powershell"]
+scope = ["powershell", "ps1", "psm1", "psd1"]
+mandatory_checks = ["compatibilidade entre Windows PowerShell e pwsh quando aplicavel", "approved verbs e ergonomia de cmdlets e funcoes", "quoting, idempotencia e seguranca operacional", "integracao com host Windows e WSL quando relevante", "evidencias de teste ou dry-run quando o risco operacional for alto"]
+
+[standards.profiles.powershell-review.governance_layers]
+[standards.profiles.powershell-review.governance_layers.language-standard]
+[[standards.profiles.powershell-review.governance_layers.language-standard.references]]
+authority = "Microsoft"
+title = "Approved Verbs for PowerShell Commands"
+identifier = "approved-verbs"
+url = "https://learn.microsoft.com/powershell/scripting/developer/cmdlet/approved-verbs-for-windows-powershell-commands?view=powershell-7.5"
+
+[[standards.profiles.powershell-review.governance_layers.language-standard.references]]
+authority = "Microsoft"
+title = "about_Functions_Advanced"
+identifier = "about-functions-advanced"
+url = "https://learn.microsoft.com/powershell/module/microsoft.powershell.core/about/about_functions_advanced?view=powershell-7.5"
+
+[[standards.profiles.powershell-review.governance_layers.language-standard.references]]
+authority = "Microsoft"
+title = "about_Language_Modes"
+identifier = "about-language-modes"
+url = "https://learn.microsoft.com/powershell/module/microsoft.powershell.core/about/about_language_modes?view=powershell-7.5"
+
+[standards.profiles.powershell-review.governance_layers.automated-enforcement]
+[[standards.profiles.powershell-review.governance_layers.automated-enforcement.references]]
+authority = "Microsoft"
+title = "PSScriptAnalyzer rules"
+identifier = "psscriptanalyzer-rules"
+url = "https://learn.microsoft.com/powershell/utility-modules/psscriptanalyzer/rules/readme?view=ps-modules"
+
+[standards.profiles.automation-review]
+roles = ["ai-reviewer-automation"]
+scope = ["bash", "shell", "taskfile", "workflow", "dockerfile", "ci-cd"]
+mandatory_checks = ["portabilidade e quoting defensivo em shell", "determinismo de workflows e tasks", "seguranca de pipeline, segredos e artefatos", "rollback, retry e idempotencia operacional", "paridade entre task local e CI quando aplicavel"]
+
+[standards.profiles.automation-review.governance_layers]
+[standards.profiles.automation-review.governance_layers.language-standard]
+[[standards.profiles.automation-review.governance_layers.language-standard.references]]
+authority = "The Open Group"
+title = "POSIX Shell Command Language"
+identifier = "POSIX-Shell"
+url = "https://pubs.opengroup.org/onlinepubs/9699919799/utilities/V3_chap02.html"
+
+[[standards.profiles.automation-review.governance_layers.language-standard.references]]
+authority = "Docker"
+title = "Dockerfile reference"
+identifier = "dockerfile-reference"
+url = "https://docs.docker.com/reference/dockerfile/"
+
+[[standards.profiles.automation-review.governance_layers.language-standard.references]]
+authority = "GitHub"
+title = "Workflow syntax for GitHub Actions"
+identifier = "github-actions-workflow-syntax"
+url = "https://docs.github.com/actions/using-workflows/workflow-syntax-for-github-actions"
+
+[standards.profiles.automation-review.governance_layers.automated-enforcement]
+[[standards.profiles.automation-review.governance_layers.automated-enforcement.references]]
+authority = "ShellCheck"
+title = "ShellCheck documentation"
+identifier = "shellcheck"
+url = "https://www.shellcheck.net/"
+
+[[standards.profiles.automation-review.governance_layers.automated-enforcement.references]]
+authority = "actionlint"
+title = "actionlint documentation"
+identifier = "actionlint"
+url = "https://github.com/rhysd/actionlint"
+
+[[standards.profiles.automation-review.governance_layers.automated-enforcement.references]]
+authority = "Hadolint"
+title = "Hadolint documentation"
+identifier = "hadolint"
+url = "https://github.com/hadolint/hadolint"
+
+[standards.profiles.config-policy-review]
+roles = ["ai-reviewer-config-policy"]
+scope = ["yaml", "yml", "json", "json5", "toml", "markdown", "declarative-schema"]
+mandatory_checks = ["aderencia a especificacao sintatica do formato", "consistencia de schema e contratos declarativos", "backward compatibility explicitamente analisada quando aplicavel", "legibilidade humana e semantica dos campos versionados", "linkagem explicita e rastreabilidade documental em Markdown"]
+
+[standards.profiles.config-policy-review.governance_layers]
+[standards.profiles.config-policy-review.governance_layers.language-standard]
+[[standards.profiles.config-policy-review.governance_layers.language-standard.references]]
+authority = "YAML Language Development Team"
+title = "YAML 1.2.2 Specification"
+identifier = "YAML-1.2.2"
+url = "https://yaml.org/spec/1.2.2/"
+
+[[standards.profiles.config-policy-review.governance_layers.language-standard.references]]
+authority = "IETF"
+title = "RFC 8259 - The JavaScript Object Notation (JSON) Data Interchange Format"
+identifier = "RFC-8259"
+url = "https://www.rfc-editor.org/rfc/rfc8259"
+
+[[standards.profiles.config-policy-review.governance_layers.language-standard.references]]
+authority = "JSON Schema"
+title = "JSON Schema documentation"
+identifier = "JSON-Schema"
+url = "https://json-schema.org/"
+
+[[standards.profiles.config-policy-review.governance_layers.language-standard.references]]
+authority = "JSON5"
+title = "JSON5 specification"
+identifier = "JSON5"
+url = "https://spec.json5.org/"
+
+[[standards.profiles.config-policy-review.governance_layers.language-standard.references]]
+authority = "TOML"
+title = "TOML v1.0.0"
+identifier = "TOML-1.0.0"
+url = "https://toml.io/en/v1.0.0"
+
+[[standards.profiles.config-policy-review.governance_layers.language-standard.references]]
+authority = "CommonMark"
+title = "CommonMark Spec"
+identifier = "CommonMark"
+url = "https://spec.commonmark.org/"
+
+[standards.profiles.config-policy-review.governance_layers.automated-enforcement]
+[[standards.profiles.config-policy-review.governance_layers.automated-enforcement.references]]
+authority = "yamllint"
+title = "yamllint documentation"
+identifier = "yamllint"
+url = "https://yamllint.readthedocs.io/"
+
+[[standards.profiles.config-policy-review.governance_layers.automated-enforcement.references]]
+authority = "Spectral"
+title = "Spectral documentation"
+identifier = "spectral"
+url = "https://docs.stoplight.io/docs/spectral/674b27b261c3c-overview"
+
+[[standards.profiles.config-policy-review.governance_layers.automated-enforcement.references]]
+authority = "markdownlint"
+title = "markdownlint documentation"
+identifier = "markdownlint"
+url = "https://github.com/DavidAnson/markdownlint"
+
+[standards.future_profiles]
+[standards.future_profiles.javascript-review]
+intended_roles = ["ai-reviewer-javascript"]
+
+[standards.future_profiles.javascript-review.governance_layers]
+[standards.future_profiles.javascript-review.governance_layers.language-standard]
+[[standards.future_profiles.javascript-review.governance_layers.language-standard.references]]
+authority = "Ecma International"
+title = "ECMA-262 - ECMAScript Language Specification"
+identifier = "ECMA-262"
+url = "https://ecma-international.org/publications-and-standards/standards/ecma-262/"
+
+[[standards.future_profiles.javascript-review.governance_layers.language-standard.references]]
+authority = "Ecma International"
+title = "ECMA-402 - ECMAScript Internationalization API Specification"
+identifier = "ECMA-402"
+url = "https://ecma-international.org/publications-and-standards/standards/ecma-402/"
+
+[[standards.future_profiles.javascript-review.governance_layers.language-standard.references]]
+authority = "WHATWG"
+title = "HTML Living Standard"
+identifier = "WHATWG-HTML"
+url = "https://html.spec.whatwg.org/"
+
+[[standards.future_profiles.javascript-review.governance_layers.language-standard.references]]
+authority = "TC39"
+title = "TC39 Process"
+identifier = "TC39-Process"
+url = "https://tc39.es/process-document/"
+
+[standards.future_profiles.javascript-review.governance_layers.style-guide]
+[[standards.future_profiles.javascript-review.governance_layers.style-guide.references]]
+authority = "Airbnb"
+title = "Airbnb JavaScript Style Guide"
+identifier = "airbnb-js-style-guide"
+url = "https://github.com/airbnb/javascript"
+
+[[standards.future_profiles.javascript-review.governance_layers.style-guide.references]]
+authority = "Google"
+title = "Google JavaScript Style Guide"
+identifier = "google-js-style-guide"
+url = "https://google.github.io/styleguide/jsguide.html"
+
+[standards.future_profiles.javascript-review.governance_layers.automated-enforcement]
+[[standards.future_profiles.javascript-review.governance_layers.automated-enforcement.references]]
+authority = "ESLint"
+title = "ESLint documentation"
+identifier = "eslint"
+url = "https://eslint.org/docs/latest/"
+
+[[standards.future_profiles.javascript-review.governance_layers.automated-enforcement.references]]
+authority = "Prettier"
+title = "Prettier documentation"
+identifier = "prettier"
+url = "https://prettier.io/docs/"

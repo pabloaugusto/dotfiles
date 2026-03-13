@@ -7,7 +7,7 @@ pulverizacao atual da camada de IA.
 ## Contexto especifico do repo
 
 - o problema principal atual e a configuracao espalhada, sobretudo em
-  [config/ai/](../../../../config/ai/) e
+  [config/](../../../../config/) e [.agents/config/](../../../../.agents/config/) e
   [`.agents/config.toml`](../../../config.toml)
 - a realidade pos-migracao do repo agora e [app/](../../../../app/) como
   runtime do produto dotfiles

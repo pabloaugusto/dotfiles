@@ -15,11 +15,11 @@ from scripts.ai_jira_model_lib import (
     load_jira_model,
     model_summary_payload,
 )
-from scripts.ai_control_plane_lib import load_yaml_map
+from scripts.config_context_lib import load_toml_map
 
 
 def write_jira_model(repo_root: pathlib.Path) -> None:
-    config_dir = repo_root / "config" / "ai"
+    config_dir = repo_root / "config"
     config_dir.mkdir(parents=True)
     (config_dir / "jira-model.yaml").write_text(
         textwrap.dedent(
@@ -80,7 +80,7 @@ class AiJiraModelTests(unittest.TestCase):
             repo_root = pathlib.Path(tmp)
             write_jira_model(repo_root)
             model_path, model = load_jira_model(repo_root)
-        self.assertTrue(str(model_path).endswith("config\\ai\\jira-model.yaml"))
+        self.assertTrue(str(model_path).endswith("config\\jira-model.yaml"))
         self.assertEqual(model["project"]["key"], "DOT")
 
     def test_model_summary_payload_extracts_core_contract(self) -> None:
@@ -305,7 +305,7 @@ class AiJiraModelTests(unittest.TestCase):
             }
         }
         summary = {
-            "model_path": "config/ai/jira-model.yaml",
+            "model_path": "config/jira-model.yaml",
             "project": {"key": "DOT", "name": "dotfiles", "style": "company-managed-software"},
             "board": {
                 "name": "DOT - Autonomous Engineering",
@@ -370,8 +370,8 @@ class AiJiraModelTests(unittest.TestCase):
         self.assertIn("new-demand-must-enter-the-right-priority-position", execution_rules)
         self.assertIn("product-owner-must-maintain-start-and-due-dates-for-non-subtasks", execution_rules)
 
-        agent_operations = load_yaml_map(repo_root / "config" / "ai" / "agent-operations.yaml")
-        product_owner = ((agent_operations.get("roles") or {}).get("ai-product-owner")) or {}
+        orchestration = load_toml_map(repo_root / ".agents" / "config" / "orchestration.toml")
+        product_owner = ((orchestration.get("roles") or {}).get("ai-product-owner")) or {}
         jira_payload = product_owner.get("jira") or {}
         primary_actions = jira_payload.get("primary_issue_actions") or []
         operating_steps = product_owner.get("operating_steps") or []

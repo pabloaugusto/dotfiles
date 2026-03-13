@@ -3,7 +3,7 @@
 - Status: `artifact-first`
 - Data-base: `2026-03-08`
 - Fonte canonica:
-  [`../../../config/ai/jira-model.yaml`](../../../config/ai/jira-model.yaml)
+  [`../../../config/jira-model.yaml`](../../../config/jira-model.yaml)
 - Escopo:
   alinhar o `DOT board` ao workflow oficial e manter a evidência do estado real
   do tenant

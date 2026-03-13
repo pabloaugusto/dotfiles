@@ -84,9 +84,9 @@ Leia a skill mais proxima do escopo antes de editar arquivos relevantes.
 
 - Em governanca normativa humana por tema, [`.agents/rules/`](.agents/rules/)
   passa a ser a fonte canonica; [`AGENTS.md`](AGENTS.md), [`docs/`](docs/) e
-  [`config/ai/`](config/ai/) devem apontar para ela e permanecer em paridade.
+  [`config/`](config/) e [`.agents/config/`](.agents/config/) devem apontar para ela e permanecer em paridade.
 - O estado declarativo de habilitacao ou desabilitacao dos agentes deve vir de
-  [`config/ai/agent-enablement.yaml`](config/ai/agent-enablement.yaml), nunca
+  [`.agents/config/agents.toml`](.agents/config/agents.toml), nunca
   apenas de memoria de chat.
 - Preferir `task` e scripts existentes antes de criar fluxos paralelos.
 - Manter tasks e scripts worktree-friendly usando `{{.TASKFILE_DIR}}` quando aplicavel.

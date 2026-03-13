@@ -47,7 +47,7 @@ Atualizacao aprovada depois deste parecer:
 
 - a fundacao dev-time da migracao deve nascer fora de [`../../df/`](../../app/df/)
   e desacoplada de [`../../bootstrap/`](../../app/bootstrap/)
-- a control plane inicial passa a morar em [`../../config/ai/`](../../config/ai/)
+- a control plane inicial passa a morar em [`config/`](../../config/) e [`.agents/config/`](../../.agents/config/)
 - `Playwright` entra como capacidade opcional de evidencia, nao como
   dependencia do nucleo dos adapters
 - a operacao Atlassian deve depender apenas de secrets e da control plane
@@ -227,7 +227,7 @@ Todos esses papeis devem operar por contrato nas ferramentas:
 - o `Jira` recebe atividade estruturada, evidencias, handoffs e transicoes
 - o `Confluence` recebe paginas oficiais, ADRs, runbooks e backlinks
 - a fonte canonica do passo a passo por papel fica em
-  [`../../config/ai/agent-operations.yaml`](../../config/ai/agent-operations.yaml)
+  [`../../.agents/config/orchestration.toml`](../../.agents/config/orchestration.toml)
   e no artefato
   [`artifacts/agent-operations.md`](artifacts/agent-operations.md)
 - bloqueios que nenhum agente consiga destravar sozinho devem escalar o usuario
@@ -516,7 +516,7 @@ passar a usar adapters.
 
 ### Fase 1. Abstracao de plataformas
 
-- criar a control plane dev-time em [`../../config/ai/`](../../config/ai/) para
+- criar a control plane dev-time em [`config/`](../../config/) e [`.agents/config/`](../../.agents/config/) para
   plataformas, contratos e optionalidade dos agentes
 - criar interfaces `IssuePlatform`, `DocumentationPlatform` e, quando ativado,
   `DiscoveryPlatform`
@@ -574,10 +574,10 @@ passar a usar adapters.
 
 ## Estado atual da implementacao
 
-- [`../../config/ai/platforms.yaml`](../../config/ai/platforms.yaml) agora e
+- [`../../config/platforms.yaml`](../../config/platforms.yaml) agora e
   contrato generico por ambiente
 - o overlay local derivado de
-  [`../../config/ai/platforms.local.yaml.tpl`](../../config/ai/platforms.local.yaml.tpl)
+  [`../../config/platforms.local.yaml.tpl`](../../config/platforms.local.yaml.tpl)
   concentra refs reais fora do Git
 - o adapter REST ja suporta `service-account-api-token` no gateway oficial
 - a resolucao de secrets do control plane ja opera com batch via `op run`,

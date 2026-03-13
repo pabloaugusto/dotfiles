@@ -218,9 +218,9 @@ Ferramentas minimas:
 ## Contratos portaveis desta camada
 
 - policy declarativa:
-  [`../../../config/ai/reviewer-policies.yaml`](../../../config/ai/reviewer-policies.yaml)
+  [`../../../.agents/config/reviews.toml`](../../../.agents/config/reviews.toml)
 - schema de saida:
-  [`../../../config/ai/review-output.schema.json`](../../../config/ai/review-output.schema.json)
+  [`../../../.agents/config/review-output.schema.json`](../../../.agents/config/review-output.schema.json)
 - base normativa:
   [`reviewer-standards-catalog.md`](reviewer-standards-catalog.md)
 - workflow Jira:

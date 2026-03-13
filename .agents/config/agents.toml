@@ -2,11 +2,703 @@ version = 1
 
 [source_of_truth]
 display_name_registry = ".agents/registry/*.toml::display_name"
-legacy_roles = "config/ai/agents.yaml"
-legacy_enablement = "config/ai/agent-enablement.yaml"
-legacy_runtime = "config/ai/agent-runtime.yaml"
+roles = ".agents/config/agents.toml::roles"
+enablement = ".agents/config/agents.toml::enablement"
+runtime = ".agents/config/agents.toml::runtime"
 
 [identity]
 display_name_source = ".agents/registry/*.toml::display_name"
-chat_alias_source = "config/ai/agent-runtime.yaml::roles"
-enablement_source = "config/ai/agent-enablement.yaml::roles"
+chat_alias_source = ".agents/config/agents.toml::runtime.roles"
+enablement_source = ".agents/config/agents.toml::enablement.roles"
+
+[roles]
+[roles.defaults]
+execution_mode = "human-in-the-loop"
+require_jira_for_work = true
+require_confluence_for_docs = true
+default_pull_model = true
+
+[roles.ai-product-owner]
+enabled = true
+required = true
+category = "governance"
+display_name = "PO"
+responsibilities = ["product-value", "backlog", "prioritization", "backlog-clarity", "stakeholder-alignment", "product-goal-roadmap", "continuous-prioritization", "queue-ordering", "jira-issue-creation"]
+
+[roles.ai-scrum-master]
+enabled = true
+required = true
+category = "governance"
+display_name = "Scrum Master"
+responsibilities = ["scrum-enforcement", "board-governance", "wip-compliance", "ceremony-governance", "agent-compliance", "communication-governance", "governance-ledger", "jira-bug-escalation"]
+
+[roles.ai-startup-governor]
+enabled = true
+required = true
+category = "governance"
+display_name = "Guardiao de Startup"
+responsibilities = ["startup-gatekeeping", "startup-readiness", "first-response-clearance", "startup-drift-detection", "startup-handoff"]
+
+[roles.ai-engineering-architect]
+enabled = true
+required = true
+category = "governance"
+display_name = "Arquiteto"
+responsibilities = ["architecture", "adr", "confluence-architecture"]
+
+[roles.ai-engineering-manager]
+enabled = true
+required = true
+category = "governance"
+display_name = "Engenheiro"
+responsibilities = ["capacity-governance", "risk", "blockers", "escalation"]
+
+[roles.ai-tech-lead]
+enabled = true
+required = true
+category = "governance"
+display_name = "Tech Lead"
+responsibilities = ["decomposition", "handoff", "technical-direction", "mandatory-pr-review", "official-review-approval", "origin-review-equivalent"]
+
+[roles.ai-developer-python]
+enabled = true
+required = false
+category = "delivery"
+display_name = "Dev Python"
+specialization = "python"
+
+[roles.ai-developer-powershell]
+enabled = true
+required = false
+category = "delivery"
+display_name = "PowerShell Dev"
+specialization = "powershell"
+
+[roles.ai-developer-automation]
+enabled = true
+required = false
+category = "delivery"
+display_name = "Automation Dev"
+specialization = "automation"
+
+[roles.ai-developer-config-policy]
+enabled = true
+required = false
+category = "delivery"
+display_name = "Engenheiro Agentes IA"
+specialization = "config-policy"
+
+[roles.ai-qa]
+enabled = true
+required = true
+category = "quality"
+display_name = "Testador (QA)"
+responsibilities = ["tests", "validation", "evidence"]
+
+[roles.ai-reviewer-python]
+enabled = true
+required = false
+category = "quality"
+specialization = "python-review"
+
+[roles.ai-reviewer-powershell]
+enabled = true
+required = false
+category = "quality"
+specialization = "powershell-review"
+
+[roles.ai-reviewer-automation]
+enabled = true
+required = false
+category = "quality"
+specialization = "automation-review"
+
+[roles.ai-reviewer-config-policy]
+enabled = true
+required = false
+category = "quality"
+specialization = "config-policy-review"
+
+[roles.ai-reviewer]
+enabled = true
+required = true
+category = "quality"
+display_name = "Revisor"
+responsibilities = ["cross-cutting-review", "review-orchestration", "approval"]
+
+[roles.ai-devops]
+enabled = true
+required = true
+category = "delivery"
+display_name = "Devops"
+responsibilities = ["ci-cd", "infra", "automation"]
+
+[roles.ai-linguistic-reviewer]
+enabled = false
+required = false
+category = "knowledge"
+display_name = "Pascoalete"
+responsibilities = ["linguistic-review", "terminology", "cspell-governance", "microcopy", "local-ambiguity-detection"]
+
+[roles.ai-documentation-writer]
+enabled = true
+required = true
+category = "knowledge"
+display_name = "Escrivao"
+responsibilities = ["technical-writing", "documentation-drafting", "information-synthesis", "documentation-rewrite"]
+
+[roles.ai-documentation-reviewer]
+enabled = true
+required = true
+category = "knowledge"
+display_name = "Revisor Documental"
+responsibilities = ["documentation-review", "completeness-analysis", "documentation-severity", "operational-safety-review"]
+
+[roles.ai-documentation-manager]
+enabled = true
+required = true
+category = "knowledge"
+display_name = "Gestor Documental"
+responsibilities = ["source-of-truth-management", "documentation-placement", "lifecycle-governance", "documentation-deduplication", "sync-eligibility-classification"]
+
+[roles.ai-documentation-sync]
+enabled = true
+required = true
+category = "knowledge"
+display_name = "Sync Documental"
+responsibilities = ["confluence-publication", "documentation-link", "backlinks", "cross-surface-traceability", "sync-foundation-consumption"]
+
+[roles.ai-documentation-agent]
+enabled = false
+required = false
+category = "knowledge-legacy"
+display_name = "Escrivao (legado)"
+responsibilities = ["legacy-documentation-compatibility", "decomposition-handoff", "migration-compatibility"]
+
+[roles.ai-browser-validator]
+enabled = false
+required = false
+category = "quality"
+tool = "playwright"
+responsibilities = ["browser-evidence", "ui-smoke-validation"]
+
+[roles.ai-designer]
+enabled = false
+required = false
+category = "optional-domain"
+tool = "figma"
+
+[roles.ai-ux-cro-analyst]
+enabled = false
+required = false
+category = "optional-domain"
+
+[roles.ai-seo-specialist]
+enabled = false
+required = false
+category = "optional-domain"
+
+[enablement]
+[enablement.defaults]
+roles_source_of_truth = ".agents/config/agents.toml::roles"
+registry_agents_enabled_by_default = true
+unknown_override_policy = "fail"
+
+[enablement.roles]
+[enablement.roles.ai-product-owner]
+enabled = true
+
+[enablement.roles.ai-scrum-master]
+enabled = true
+
+[enablement.roles.ai-startup-governor]
+enabled = true
+
+[enablement.roles.ai-engineering-architect]
+enabled = true
+
+[enablement.roles.ai-engineering-manager]
+enabled = true
+
+[enablement.roles.ai-tech-lead]
+enabled = true
+
+[enablement.roles.ai-developer-python]
+enabled = true
+
+[enablement.roles.ai-developer-powershell]
+enabled = true
+
+[enablement.roles.ai-developer-automation]
+enabled = true
+
+[enablement.roles.ai-developer-config-policy]
+enabled = true
+
+[enablement.roles.ai-qa]
+enabled = true
+
+[enablement.roles.ai-reviewer-python]
+enabled = true
+
+[enablement.roles.ai-reviewer-powershell]
+enabled = true
+
+[enablement.roles.ai-reviewer-automation]
+enabled = true
+
+[enablement.roles.ai-reviewer-config-policy]
+enabled = true
+
+[enablement.roles.ai-reviewer]
+enabled = true
+
+[enablement.roles.ai-devops]
+enabled = true
+
+[enablement.roles.ai-linguistic-reviewer]
+enabled = false
+
+[enablement.roles.ai-documentation-writer]
+enabled = true
+
+[enablement.roles.ai-documentation-reviewer]
+enabled = true
+
+[enablement.roles.ai-documentation-manager]
+enabled = true
+
+[enablement.roles.ai-documentation-sync]
+enabled = true
+
+[enablement.roles.ai-documentation-agent]
+enabled = false
+
+[enablement.roles.ai-browser-validator]
+enabled = false
+
+[enablement.roles.ai-designer]
+enabled = false
+
+[enablement.roles.ai-ux-cro-analyst]
+enabled = false
+
+[enablement.roles.ai-seo-specialist]
+enabled = false
+
+[enablement.registry_agents]
+[enablement.registry_agents.bootstrap-operator]
+enabled = true
+
+[enablement.registry_agents.repo-governance-authority]
+enabled = true
+
+[enablement.registry_agents.execution-worklog-governance-owner]
+enabled = true
+
+[enablement.registry_agents.architecture-modernization-authority]
+enabled = true
+
+[enablement.registry_agents.critical-integrations-guardian]
+enabled = true
+
+[enablement.registry_agents.secrets-rotation-governor]
+enabled = true
+
+[enablement.registry_agents.lessons-governance-curator]
+enabled = true
+
+[enablement.registry_agents.orchestrator]
+enabled = true
+
+[enablement.registry_agents.python-reviewer]
+enabled = true
+
+[enablement.registry_agents.powershell-reviewer]
+enabled = true
+
+[enablement.registry_agents.automation-reviewer]
+enabled = true
+
+[enablement.registry_agents.pascoalete]
+enabled = false
+
+[runtime]
+[runtime.policies]
+enabled_role_statuses = ["operational", "consultive"]
+required_role_statuses = ["operational", "consultive"]
+enabled_registry_statuses = ["operational", "consultive"]
+chat_owner_statuses = ["operational", "consultive"]
+chat_name_fallback_order = ["chat_alias", "display_name", "technical_id"]
+
+[runtime.roles]
+[runtime.roles.ai-product-owner]
+status = "operational"
+chat_alias = "PO"
+chat_owner_supported = true
+owner_mode = "primary"
+surfaces = ["jira", "chat", "active-execution"]
+process_scopes = ["intake", "backlog", "prioritization", "refinement", "ready"]
+runtime_artifacts = [".agents/cards/ai-product-owner.md", "scripts/ai_atlassian_actor_lib.py", "scripts/ai-agent-execution.py", "scripts/ai_agent_execution_lib.py", ".agents/config/orchestration.toml"]
+
+[runtime.roles.ai-product-owner.atlassian_actor]
+enabled = true
+fallback_to_global_on_error = true
+email_secret_ref = "op://secrets/dotfiles/atlassian-service-accounts/ai-product-owner-email"
+token_secret_ref = "op://secrets/dotfiles/atlassian-service-accounts/ai-product-owner-api-token"
+account_id_secret_ref = "op://secrets/dotfiles/atlassian-service-accounts/ai-product-owner-id"
+
+[runtime.roles.ai-product-owner.atlassian_actor.search_fallback]
+enabled = true
+prefer_email_lookup = true
+query = "ia-product-owner"
+expected_display_name = "ia-product-owner"
+expected_email_secret_ref = "op://secrets/dotfiles/atlassian-service-accounts/ai-product-owner-email"
+expected_account_type = "app"
+require_active = true
+
+[runtime.roles.ai-product-owner.atlassian_actor.surfaces]
+[runtime.roles.ai-product-owner.atlassian_actor.surfaces.jira-comment]
+enabled = true
+
+[runtime.roles.ai-product-owner.atlassian_actor.surfaces.jira-assignee]
+enabled = true
+
+[runtime.roles.ai-product-owner.atlassian_actor.surfaces.confluence-comment]
+enabled = false
+
+[runtime.roles.ai-product-owner.atlassian_actor.surfaces.confluence-page]
+enabled = false
+
+[runtime.roles.ai-scrum-master]
+status = "operational"
+chat_alias = "Scrum Master"
+chat_owner_supported = true
+owner_mode = "primary"
+surfaces = ["jira", "chat", "active-execution", "scrum-ledger"]
+process_scopes = ["board", "wip", "ceremonies", "compliance"]
+runtime_artifacts = [".agents/cards/ai-scrum-master.md", "scripts/ai-agent-execution.py", "scripts/ai_agent_execution_lib.py", "docs/AI-SCRUM-MASTER-LEDGER.md"]
+
+[runtime.roles.ai-startup-governor]
+status = "operational"
+chat_alias = "Guardiao de Startup"
+chat_owner_supported = true
+owner_mode = "primary"
+surfaces = ["startup", "chat", "jira", "startup-report", "readiness-artifact"]
+process_scopes = ["startup", "restart", "clearance", "handoff"]
+runtime_artifacts = [".agents/cards/ai-startup-governor.md", "scripts/ai-session-startup.py", "scripts/ai_session_startup_lib.py", "docs/AI-STARTUP-AND-RESTART.md"]
+
+[runtime.roles.ai-engineering-architect]
+status = "operational"
+chat_alias = "Arquiteto"
+chat_owner_supported = true
+owner_mode = "primary"
+surfaces = ["jira", "chat", "active-execution"]
+process_scopes = ["architecture", "adr", "refinement"]
+runtime_artifacts = [".agents/cards/ai-engineering-architect.md", "scripts/ai-agent-execution.py", "scripts/ai_agent_execution_lib.py", ".agents/config/orchestration.toml"]
+
+[runtime.roles.ai-engineering-manager]
+status = "operational"
+chat_alias = "Engenheiro"
+chat_owner_supported = true
+owner_mode = "primary"
+surfaces = ["jira", "chat", "active-execution"]
+process_scopes = ["capacity", "blockers", "escalation"]
+runtime_artifacts = [".agents/cards/ai-engineering-manager.md", "scripts/ai-agent-execution.py", "scripts/ai_agent_execution_lib.py", ".agents/config/orchestration.toml"]
+
+[runtime.roles.ai-tech-lead]
+status = "operational"
+chat_alias = "Tech Lead"
+chat_owner_supported = true
+owner_mode = "primary"
+surfaces = ["jira", "chat", "active-execution", "review"]
+process_scopes = ["decomposition", "handoff", "technical-direction"]
+runtime_artifacts = [".agents/cards/ai-tech-lead.md", "scripts/ai-agent-execution.py", "scripts/ai_agent_execution_lib.py", ".agents/config/orchestration.toml"]
+
+[runtime.roles.ai-developer-python]
+status = "operational"
+chat_alias = "Dev Python"
+chat_owner_supported = true
+owner_mode = "primary"
+surfaces = ["jira", "chat", "active-execution"]
+process_scopes = ["python-delivery"]
+runtime_artifacts = [".agents/cards/ai-developer-python.md", "scripts/ai-agent-execution.py", "scripts/ai_agent_execution_lib.py", ".agents/skills/dotfiles-python-review/SKILL.md"]
+
+[runtime.roles.ai-developer-powershell]
+status = "operational"
+chat_alias = "PowerShell Dev"
+chat_owner_supported = true
+owner_mode = "primary"
+surfaces = ["jira", "chat", "active-execution"]
+process_scopes = ["powershell-delivery"]
+runtime_artifacts = [".agents/cards/ai-developer-powershell.md", "scripts/ai-agent-execution.py", "scripts/ai_agent_execution_lib.py", ".agents/skills/dotfiles-powershell-review/SKILL.md"]
+
+[runtime.roles.ai-developer-automation]
+status = "operational"
+chat_alias = "Automation Dev"
+chat_owner_supported = true
+owner_mode = "primary"
+surfaces = ["jira", "chat", "active-execution"]
+process_scopes = ["automation-delivery", "ci-cd"]
+runtime_artifacts = [".agents/cards/ai-developer-automation.md", "scripts/ai-agent-execution.py", "scripts/ai_agent_execution_lib.py", ".agents/skills/dotfiles-automation-review/SKILL.md"]
+
+[runtime.roles.ai-developer-config-policy]
+status = "operational"
+chat_alias = "Engenheiro Agentes IA"
+chat_owner_supported = true
+owner_mode = "primary"
+surfaces = ["jira", "chat", "active-execution", "validator"]
+process_scopes = ["config-policy", "schemas", "governance"]
+runtime_artifacts = [".agents/cards/ai-developer-config-policy.md", "scripts/ai-agent-execution.py", "scripts/ai_agent_execution_lib.py", "scripts/validate-ai-assets.py"]
+
+[runtime.roles.ai-qa]
+status = "operational"
+chat_alias = "Testador (QA)"
+chat_owner_supported = true
+owner_mode = "primary"
+surfaces = ["jira", "chat", "active-execution", "tests"]
+process_scopes = ["validation", "acceptance", "evidence"]
+runtime_artifacts = [".agents/cards/ai-qa.md", "scripts/ai-agent-execution.py", "scripts/ai_agent_execution_lib.py", ".agents/skills/dotfiles-test-harness/SKILL.md"]
+
+[runtime.roles.ai-reviewer-python]
+status = "consultive"
+chat_alias = "Revisor Python"
+chat_owner_supported = true
+owner_mode = "consultive"
+surfaces = ["jira", "chat", "review-ledger"]
+process_scopes = ["python-review"]
+runtime_artifacts = [".agents/cards/revisor-python.md", "scripts/ai-review.py", "docs/AI-REVIEW-LEDGER.md", ".agents/skills/dotfiles-python-review/SKILL.md"]
+
+[runtime.roles.ai-reviewer-powershell]
+status = "consultive"
+chat_alias = "Revisor PowerShell"
+chat_owner_supported = true
+owner_mode = "consultive"
+surfaces = ["jira", "chat", "review-ledger"]
+process_scopes = ["powershell-review"]
+runtime_artifacts = [".agents/cards/revisor-powershell.md", "scripts/ai-review.py", "docs/AI-REVIEW-LEDGER.md", ".agents/skills/dotfiles-powershell-review/SKILL.md"]
+
+[runtime.roles.ai-reviewer-automation]
+status = "consultive"
+chat_alias = "Revisor Automacao"
+chat_owner_supported = true
+owner_mode = "consultive"
+surfaces = ["jira", "chat", "review-ledger"]
+process_scopes = ["automation-review"]
+runtime_artifacts = [".agents/cards/revisor-automacao.md", "scripts/ai-review.py", "docs/AI-REVIEW-LEDGER.md", ".agents/skills/dotfiles-automation-review/SKILL.md"]
+
+[runtime.roles.ai-reviewer-config-policy]
+status = "consultive"
+chat_alias = "Revisor Config Policy"
+chat_owner_supported = true
+owner_mode = "consultive"
+surfaces = ["jira", "chat", "review-ledger"]
+process_scopes = ["config-policy-review"]
+runtime_artifacts = [".agents/cards/revisor-config-policy.md", "scripts/ai-review.py", "docs/AI-REVIEW-LEDGER.md", ".agents/skills/dotfiles-repo-governance/SKILL.md"]
+
+[runtime.roles.ai-reviewer]
+status = "operational"
+chat_alias = "Revisor"
+chat_owner_supported = true
+owner_mode = "primary"
+surfaces = ["jira", "chat", "review-ledger"]
+process_scopes = ["cross-review", "approval"]
+runtime_artifacts = [".agents/cards/ai-reviewer.md", "scripts/ai-review.py", "docs/AI-REVIEW-LEDGER.md", ".agents/config/orchestration.toml"]
+
+[runtime.roles.ai-devops]
+status = "operational"
+chat_alias = "Devops"
+chat_owner_supported = true
+owner_mode = "primary"
+surfaces = ["jira", "chat", "active-execution", "ci-cd"]
+process_scopes = ["infra", "release", "pipelines"]
+runtime_artifacts = [".agents/cards/ai-devops.md", "scripts/ai-agent-execution.py", "scripts/ai_agent_execution_lib.py", ".agents/skills/dotfiles-critical-integrations/SKILL.md"]
+
+[runtime.roles.ai-linguistic-reviewer]
+status = "disabled_stub"
+chat_alias = "Pascoalete"
+chat_owner_supported = false
+owner_mode = "consultive"
+surfaces = ["jira", "chat", "orthography-ledger"]
+process_scopes = ["linguistic-review", "terminology", "cspell"]
+runtime_artifacts = [".agents/cards/ai-linguistic-reviewer.md", "docs/AI-ORTHOGRAPHY-LEDGER.md", ".agents/skills/dotfiles-orthography-review/SKILL.md"]
+
+[runtime.roles.ai-documentation-writer]
+status = "operational"
+chat_alias = "Escrivao"
+chat_owner_supported = true
+owner_mode = "primary"
+surfaces = ["jira", "chat", "docs"]
+process_scopes = ["technical-writing", "documentation-drafting"]
+runtime_artifacts = [".agents/cards/ai-documentation-writer.md", "scripts/ai-agent-execution.py", "scripts/ai_agent_execution_lib.py", "docs/AI-AGENTS-CATALOG.md"]
+
+[runtime.roles.ai-documentation-reviewer]
+status = "consultive"
+chat_alias = "Revisor Documental"
+chat_owner_supported = true
+owner_mode = "consultive"
+surfaces = ["jira", "chat", "docs"]
+process_scopes = ["documentation-review", "completeness"]
+runtime_artifacts = [".agents/cards/ai-documentation-reviewer.md", "scripts/ai-agent-execution.py", "scripts/ai_agent_execution_lib.py", "docs/AI-AGENTS-CATALOG.md"]
+
+[runtime.roles.ai-documentation-manager]
+status = "operational"
+chat_alias = "Gestor Documental"
+chat_owner_supported = true
+owner_mode = "primary"
+surfaces = ["jira", "chat", "docs", "confluence"]
+process_scopes = ["source-of-truth", "placement", "lifecycle"]
+runtime_artifacts = [".agents/cards/ai-documentation-manager.md", "scripts/ai-agent-execution.py", "scripts/ai_agent_execution_lib.py", "docs/AI-AGENTS-CATALOG.md"]
+
+[runtime.roles.ai-documentation-sync]
+status = "operational"
+chat_alias = "Sync Documental"
+chat_owner_supported = true
+owner_mode = "primary"
+surfaces = ["jira", "chat", "confluence", "sync"]
+process_scopes = ["publication", "backlinks", "documentation-link"]
+runtime_artifacts = [".agents/cards/ai-documentation-sync.md", "scripts/ai-agent-execution.py", "scripts/ai_agent_execution_lib.py", "docs/ai-sync-foundation.md"]
+
+[runtime.roles.ai-documentation-agent]
+status = "disabled_legacy"
+chat_owner_supported = false
+owner_mode = "legacy"
+surfaces = ["compatibility"]
+process_scopes = ["legacy-documentation"]
+
+[runtime.roles.ai-browser-validator]
+status = "disabled_stub"
+chat_owner_supported = false
+owner_mode = "planned"
+surfaces = ["browser"]
+process_scopes = ["browser-validation"]
+
+[runtime.roles.ai-designer]
+status = "disabled_stub"
+chat_owner_supported = false
+owner_mode = "planned"
+surfaces = ["figma"]
+process_scopes = ["design"]
+
+[runtime.roles.ai-ux-cro-analyst]
+status = "disabled_stub"
+chat_owner_supported = false
+owner_mode = "planned"
+surfaces = ["analysis"]
+process_scopes = ["ux", "cro"]
+
+[runtime.roles.ai-seo-specialist]
+status = "disabled_stub"
+chat_owner_supported = false
+owner_mode = "planned"
+surfaces = ["analysis"]
+process_scopes = ["seo"]
+
+[runtime.registry_agents]
+[runtime.registry_agents.architecture-modernization-authority]
+status = "consultive"
+chat_alias = "Arquiteto Modernizacao"
+chat_owner_supported = true
+owner_mode = "consultive"
+surfaces = ["chat", "governance", "backlog"]
+process_scopes = ["architecture", "modernization"]
+runtime_artifacts = [".agents/cards/arquiteto-modernizacao.md", ".agents/skills/dotfiles-architecture-modernization/SKILL.md", "docs/AI-AGENTS-CATALOG.md"]
+
+[runtime.registry_agents.automation-reviewer]
+status = "consultive"
+chat_alias = "Revisor Automacao"
+chat_owner_supported = true
+owner_mode = "consultive"
+surfaces = ["chat", "review-ledger"]
+process_scopes = ["automation-review"]
+runtime_artifacts = [".agents/cards/revisor-automacao.md", ".agents/skills/dotfiles-automation-review/SKILL.md", "scripts/ai-review.py"]
+
+[runtime.registry_agents.bootstrap-operator]
+status = "operational"
+chat_alias = "Bootstrap Operador"
+chat_owner_supported = true
+owner_mode = "primary"
+surfaces = ["chat", "bootstrap", "jira"]
+process_scopes = ["bootstrap", "relink", "config"]
+runtime_artifacts = [".agents/cards/bootstrap-operador.md", ".agents/skills/dotfiles-bootstrap/SKILL.md", "docs/bootstrap-flow.md"]
+
+[runtime.registry_agents.critical-integrations-guardian]
+status = "consultive"
+chat_alias = "Guardiao Integracoes Criticas"
+chat_owner_supported = true
+owner_mode = "consultive"
+surfaces = ["chat", "jira", "governance"]
+process_scopes = ["auth", "secrets", "ci", "sync"]
+runtime_artifacts = [".agents/cards/guardiao-integracoes-criticas.md", ".agents/skills/dotfiles-critical-integrations/SKILL.md", "docs/secrets-and-auth.md"]
+
+[runtime.registry_agents.execution-worklog-governance-owner]
+status = "operational"
+chat_alias = "Governador Continuidade WIP"
+chat_owner_supported = true
+owner_mode = "primary"
+surfaces = ["chat", "jira", "worklog"]
+process_scopes = ["worklog", "doing", "done", "continuity"]
+runtime_artifacts = [".agents/cards/governador-continuidade-wip.md", ".agents/skills/wip-continuity-governance/SKILL.md", "scripts/ai-worklog.py"]
+
+[runtime.registry_agents.lessons-governance-curator]
+status = "consultive"
+chat_alias = "Curador Licoes Aprendidas"
+chat_owner_supported = true
+owner_mode = "consultive"
+surfaces = ["chat", "lessons", "jira"]
+process_scopes = ["lessons", "retrospective", "closeout"]
+runtime_artifacts = [".agents/cards/curador-licoes-aprendidas.md", ".agents/skills/dotfiles-lessons-governance/SKILL.md", "scripts/ai-lessons.py"]
+
+[runtime.registry_agents.orchestrator]
+status = "operational"
+chat_alias = "Orquestrador Delegacao"
+chat_owner_supported = true
+owner_mode = "primary"
+surfaces = ["chat", "jira", "delegation"]
+process_scopes = ["routing", "decomposition", "delegation"]
+runtime_artifacts = [".agents/cards/orquestrador-delegacao.md", ".agents/skills/task-routing-and-decomposition/SKILL.md", "docs/AI-DELEGATION-FLOW.md"]
+
+[runtime.registry_agents.pascoalete]
+status = "disabled_stub"
+chat_alias = "Pascoalete"
+chat_owner_supported = false
+owner_mode = "consultive"
+surfaces = ["chat", "orthography-ledger"]
+process_scopes = ["orthography", "terminology", "cspell"]
+runtime_artifacts = [".agents/cards/pascoalete.md", ".agents/skills/dotfiles-orthography-review/SKILL.md", "docs/AI-ORTHOGRAPHY-LEDGER.md"]
+
+[runtime.registry_agents.powershell-reviewer]
+status = "consultive"
+chat_alias = "Revisor PowerShell"
+chat_owner_supported = true
+owner_mode = "consultive"
+surfaces = ["chat", "review-ledger"]
+process_scopes = ["powershell-review"]
+runtime_artifacts = [".agents/cards/revisor-powershell.md", ".agents/skills/dotfiles-powershell-review/SKILL.md", "scripts/ai-review.py"]
+
+[runtime.registry_agents.python-reviewer]
+status = "consultive"
+chat_alias = "Revisor Python"
+chat_owner_supported = true
+owner_mode = "consultive"
+surfaces = ["chat", "review-ledger"]
+process_scopes = ["python-review"]
+runtime_artifacts = [".agents/cards/revisor-python.md", ".agents/skills/dotfiles-python-review/SKILL.md", "scripts/ai-review.py"]
+
+[runtime.registry_agents.repo-governance-authority]
+status = "operational"
+chat_alias = "Curador Repo"
+chat_owner_supported = true
+owner_mode = "primary"
+surfaces = ["chat", "governance", "validator"]
+process_scopes = ["repo-governance", "naming", "docs", "rules"]
+runtime_artifacts = [".agents/cards/curador-repo.md", ".agents/skills/dotfiles-repo-governance/SKILL.md", "scripts/validate-ai-assets.py"]
+
+[runtime.registry_agents.secrets-rotation-governor]
+status = "operational"
+chat_alias = "Guardiao Rotacao Secrets"
+chat_owner_supported = true
+owner_mode = "primary"
+surfaces = ["chat", "jira", "security"]
+process_scopes = ["secrets-rotation", "revocation", "inventory"]
+runtime_artifacts = [".agents/cards/guardiao-rotacao-secrets.md", ".agents/skills/dotfiles-secrets-rotation/SKILL.md", "scripts/secrets-rotation.py"]

@@ -26,5 +26,5 @@ composition:
   consumes_foundation:
     - sync-outbox-foundation
 integration:
-  sync_manifest: config/ai/sync-targets.yaml
+  sync_manifest: config/sync-targets.yaml
   source_of_truth_dependency: true

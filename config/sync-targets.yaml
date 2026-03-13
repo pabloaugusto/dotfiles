@@ -72,15 +72,17 @@ artifacts:
 
 artifact_inventory:
   repo_canonical:
-    - path: config/ai/
-      reason: contratos, manifests e control plane precisam permanecer versionados no Git
+    - path: config/
+      reason: defaults globais, integracoes dev-time, modelos e fundacao de sync precisam permanecer versionados no Git
+    - path: .agents/config/
+      reason: manifests, identidade, startup, orchestration, prompts e reviews da camada IA precisam permanecer versionados no Git
     - path: config/runtime-secrets-cache.yaml
       reason: contrato versionado de cache/runtime local
     - path: app/df/secrets/secrets-ref.yaml
       reason: inventario declarativo de refs de secrets
     - path: app/bootstrap/user-config.yaml.tpl
       reason: template declarativo do bootstrap
-    - path: config/ai/platforms.local.yaml.tpl
+    - path: config/platforms.local.yaml.tpl
       reason: template declarativo do overlay local
     - path: docs/AI-WIP-TRACKER.md
       reason: fallback contingencial versionado do fluxo vivo; nao deve perder papel local
@@ -123,7 +125,7 @@ artifact_inventory:
       reason: traces e storage state de validacao visual sao efemeros
     - path: .cache/worktree-backups/
       reason: backup tecnico local
-    - path: config/ai/platforms.local.yaml
+    - path: config/platforms.local.yaml
       reason: overlay local com refs reais e sensiveis
     - path: app/bootstrap/user-config.yaml
       reason: configuracao local materializada do bootstrap

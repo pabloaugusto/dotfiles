@@ -63,7 +63,7 @@ operacionais e o que ja esta absorvido na `main`.
   `Current Agent Role = Engenheiro` mesmo pausada. Isso conflita
   com o contrato de ownership ativo em
   [`docs/atlassian-ia/2026-03-08-manual-agilidade-control-plane.md`](atlassian-ia/2026-03-08-manual-agilidade-control-plane.md)
-  e em [`config/ai/agent-operations.yaml`](../config/ai/agent-operations.yaml):
+  e em [`.agents/config/orchestration.toml`](../.agents/config/orchestration.toml):
   item pausado nao deve manter agente atual preenchido sem execucao real.
 - [`docs/AI-WIP-TRACKER.md`](AI-WIP-TRACKER.md) ja registra que o worklog
   historico `WIP-20260307-ATLASSIAN-ADAPTERS` foi removido do fallback local e

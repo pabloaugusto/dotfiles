@@ -5,8 +5,8 @@
 - Contexto relacionado:
   - [`2026-03-07-atlassian-auth-scopes-and-permissions.md`](2026-03-07-atlassian-auth-scopes-and-permissions.md)
   - [`2026-03-07-parecer-e-plano-inicial.md`](2026-03-07-parecer-e-plano-inicial.md)
-  - [`../../config/ai/platforms.yaml`](../../config/ai/platforms.yaml)
-  - [`../../config/ai/platforms.local.yaml.tpl`](../../config/ai/platforms.local.yaml.tpl)
+  - [`../../config/platforms.yaml`](../../config/platforms.yaml)
+  - [`../../config/platforms.local.yaml.tpl`](../../config/platforms.local.yaml.tpl)
   - [`../../docs/secrets-and-auth.md`](../../docs/secrets-and-auth.md)
 
 ## Achados validados

@@ -49,7 +49,7 @@ Consolidar auth, secrets e tooling critica do workstation.
 ## Artefatos relacionados
 
 - [`../../app/df/secrets/secrets-ref.yaml`](../../app/df/secrets/secrets-ref.yaml)
-- [`../../config/ai/platforms.yaml`](../../config/ai/platforms.yaml)
+- [`../../config/platforms.yaml`](../../config/platforms.yaml)
 
 ## Temas vizinhos
 

@@ -14,9 +14,9 @@ Centralizar ownership, comentarios estruturados, evidencias e transicoes no
 
 ## Fonte canonica e precedencia
 
-- [`../../config/ai/contracts.yaml`](../../config/ai/contracts.yaml)
-- [`../../config/ai/agent-operations.yaml`](../../config/ai/agent-operations.yaml)
-- [`../../config/ai/jira-model.yaml`](../../config/ai/jira-model.yaml)
+- [`../../.agents/config/startup.toml`](../../.agents/config/startup.toml)
+- [`../../.agents/config/orchestration.toml`](../../.agents/config/orchestration.toml)
+- [`../../config/jira-model.yaml`](../../config/jira-model.yaml)
 - [`../../docs/ai-operating-model.md`](../../docs/ai-operating-model.md)
 
 ## Regras obrigatorias

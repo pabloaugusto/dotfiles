@@ -5,8 +5,8 @@
 - Relacionados:
   - [`2026-03-07-diagnostico-auth-e-acesso-atlassian.md`](2026-03-07-diagnostico-auth-e-acesso-atlassian.md)
   - [`artifacts/agent-operations.md`](artifacts/agent-operations.md)
-  - [`../../config/ai/contracts.yaml`](../../config/ai/contracts.yaml)
-  - [`../../config/ai/agents.yaml`](../../config/ai/agents.yaml)
+  - [`../../.agents/config/startup.toml`](../../.agents/config/startup.toml)
+  - [`../../.agents/config/agents.toml`](../../.agents/config/agents.toml)
 
 ## Decisao
 

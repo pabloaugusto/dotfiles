@@ -122,7 +122,7 @@ routes:
       keywords:
         ["documentation", "documentacao", "confluence", "documentation-link", "terminologia", "glossario", "cspell", "source of truth", "placement", "lifecycle", "logs vivos", "backlink"]
       paths:
-        ["docs/**", ".agents/cards/ai-documentation-*.md", ".agents/cards/pascoalete.md", ".agents/registry/ai-documentation-*.toml", ".agents/registry/pascoalete.toml", "config/ai/confluence-model.yaml", "config/ai/contracts.yaml", "config/ai/sync-targets.yaml"]
+        ["docs/**", ".agents/cards/ai-documentation-*.md", ".agents/cards/pascoalete.md", ".agents/registry/ai-documentation-*.toml", ".agents/registry/pascoalete.toml", "config/confluence-model.yaml", ".agents/config/startup.toml", "config/sync-targets.yaml"]
     primary: [ai-documentation-manager]
     support: [ai-documentation-reviewer, ai-documentation-writer, ai-documentation-sync, ai-linguistic-reviewer, repo-governance-authority, pascoalete]
   - id: route-scrum-master-scope
@@ -132,8 +132,8 @@ routes:
         [
           ".agents/cards/ai-scrum-master.md",
           ".agents/registry/ai-scrum-master.toml",
-          "config/ai/contracts.yaml",
-          "config/ai/jira-model.yaml",
+          ".agents/config/startup.toml",
+          "config/jira-model.yaml",
           "docs/AI-DELEGATION-FLOW.md",
           "docs/AI-GOVERNANCE-AND-REGRESSION.md",
         ]

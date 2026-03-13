@@ -24,8 +24,8 @@ justificativa sobretudo nas evidencias versionadas abaixo.
 
 O repositorio ja consolidou esses contratos em varias superficies:
 
-- [`config/ai/contracts.yaml`](../../../../config/ai/contracts.yaml)
-- [`config/ai/agent-operations.yaml`](../../../../config/ai/agent-operations.yaml)
+- [`.agents/config/startup.toml`](../../../../.agents/config/startup.toml)
+- [`.agents/config/orchestration.toml`](../../../../.agents/config/orchestration.toml)
 - [`docs/AI-STARTUP-AND-RESTART.md`](../../../../docs/AI-STARTUP-AND-RESTART.md)
 - [`docs/AI-CHAT-CONTRACTS-REGISTER.md`](../../../../docs/AI-CHAT-CONTRACTS-REGISTER.md)
 - [`scripts/ai_session_startup_lib.py`](../../../../scripts/ai_session_startup_lib.py)
@@ -35,16 +35,16 @@ O problema, portanto, nao e ausencia de regra. O problema e ausencia de
 
 ## Evidencias versionadas
 
-- [`config/ai/agent-operations.yaml`](../../../../config/ai/agent-operations.yaml)
+- [`.agents/config/orchestration.toml`](../../../../.agents/config/orchestration.toml)
   ja obriga o carregamento do contrato de chat antes da primeira mensagem ao
   usuario em retomadas sem contexto confiavel.
-- [`config/ai/contracts.yaml`](../../../../config/ai/contracts.yaml) ja marca
+- [`.agents/config/startup.toml`](../../../../.agents/config/startup.toml) ja marca
   trabalho sem startup completo como rejeitavel e mantem o `Scrum Master` como
   owner da visibilidade/auditoria do chat.
 - [`scripts/ai_session_startup_lib.py`](../../../../scripts/ai_session_startup_lib.py)
   ja produz o relatorio oficial de startup, carrega `display_name`, relembra a
   governanca Git e integra o pack `startup-alignment`.
-- [`config/ai/agents.yaml`](../../../../config/ai/agents.yaml) e
+- [`.agents/config/agents.toml`](../../../../.agents/config/agents.toml) e
   [`docs/AI-AGENTS-CATALOG.md`](../../../../docs/AI-AGENTS-CATALOG.md) nao
   declaram hoje um papel especializado em `startup gatekeeping`.
 - [`docs/AI-STARTUP-AND-RESTART.md`](../../../../docs/AI-STARTUP-AND-RESTART.md)
@@ -87,9 +87,9 @@ O problema, portanto, nao e ausencia de regra. O problema e ausencia de
 - [`docs/AI-CHAT-CONTRACTS-REGISTER.md`](../../../../docs/AI-CHAT-CONTRACTS-REGISTER.md)
 - [`docs/AI-AGENTS-CATALOG.md`](../../../../docs/AI-AGENTS-CATALOG.md)
 - [`docs/ai-operating-model.md`](../../../../docs/ai-operating-model.md)
-- [`config/ai/agents.yaml`](../../../../config/ai/agents.yaml)
-- [`config/ai/contracts.yaml`](../../../../config/ai/contracts.yaml)
-- [`config/ai/agent-operations.yaml`](../../../../config/ai/agent-operations.yaml)
+- [`.agents/config/agents.toml`](../../../../.agents/config/agents.toml)
+- [`.agents/config/startup.toml`](../../../../.agents/config/startup.toml)
+- [`.agents/config/orchestration.toml`](../../../../.agents/config/orchestration.toml)
 - [`scripts/ai_session_startup_lib.py`](../../../../scripts/ai_session_startup_lib.py)
 - [`scripts/validate-ai-assets.py`](../../../../scripts/validate-ai-assets.py)
 

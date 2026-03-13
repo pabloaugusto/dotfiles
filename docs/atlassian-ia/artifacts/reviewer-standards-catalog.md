@@ -2,7 +2,7 @@
 
 Artefato canonico da base normativa que orienta cada reviewer especializado da
 control plane. A fonte declarativa correspondente fica em
-[`../../../config/ai/reviewer-standards.yaml`](../../../config/ai/reviewer-standards.yaml).
+[`../../../.agents/config/reviews.toml`](../../../.agents/config/reviews.toml).
 
 ## Objetivo
 

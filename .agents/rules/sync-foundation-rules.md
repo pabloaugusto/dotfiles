@@ -13,8 +13,8 @@ Definir a fundacao de sync duravel entre repo, outbox local e fonte remota.
 ## Fonte canonica e precedencia
 
 - [`../../docs/ai-sync-foundation.md`](../../docs/ai-sync-foundation.md)
-- [`../../config/ai/sync-targets.yaml`](../../config/ai/sync-targets.yaml)
-- [`../../config/ai/contracts.yaml`](../../config/ai/contracts.yaml)
+- [`../../config/sync-targets.yaml`](../../config/sync-targets.yaml)
+- [`../../.agents/config/startup.toml`](../../.agents/config/startup.toml)
 
 ## Regras obrigatorias
 

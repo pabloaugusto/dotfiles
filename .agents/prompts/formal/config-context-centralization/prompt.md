@@ -62,7 +62,7 @@ O repo [`dotfiles`](../../../../README.md) hoje carrega configuracoes espalhadas
 entre varias superfices e formatos, com concentracao de drift principalmente na
 camada de IA:
 
-- [config/ai/](../../../../config/ai/)
+- [config/](../../../../config/) e [.agents/config/](../../../../.agents/config/)
 - [`.agents/config.toml`](../../../config.toml)
 - docs e contratos que repetem valores configuraveis
 - scripts e validadores que ainda podem depender de literals repetidos
@@ -150,7 +150,7 @@ Hoje o repo sofre com configuracao pulverizada por contexto e por superficie.
 Os sintomas mais evidentes sao:
 
 - valores configuraveis repetidos entre docs, rules, contracts e runtime
-- camada de IA espalhada entre [config/ai/](../../../../config/ai/) e
+- camada de IA espalhada entre [config/](../../../../config/) e [.agents/config/](../../../../.agents/config/) e
   [`.agents/config.toml`](../../../config.toml)
 - falta de uma convencao unica para apontar a source of truth de cada valor
 - risco de drift entre texto humano e valor configurado

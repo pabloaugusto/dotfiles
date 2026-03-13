@@ -32,11 +32,10 @@ perder continuidade confiavel.
    identidade em [`.agents/config/agents.toml`](../.agents/config/agents.toml)
    e contrato visivel de chat/Jira em
    [`.agents/config/communication.toml`](../.agents/config/communication.toml).
-   Enquanto a drenagem nao terminar, o runtime operacional legado em
-   [`config/ai/agent-runtime.yaml`](../config/ai/agent-runtime.yaml) continua
-   como ponte de compatibilidade para detalhes ainda nao drenados, e o
-   enablement declarativo segue em
-   [`config/ai/agent-enablement.yaml`](../config/ai/agent-enablement.yaml).
+   O manifesto operacional complementar
+   [`.agents/config.toml`](../.agents/config.toml) segue carregando contratos
+   transversais da camada IA, e o enablement declarativo + runtime visivel
+   permanecem em [`.agents/config/agents.toml`](../.agents/config/agents.toml).
    Esse estado precisa ser aplicado antes de decidir quais papeis podem falar,
    revisar, delegar ou permanecer desabilitados na rodada.
    Carregar tambem as projecoes `.rules` obrigatorias declaradas em

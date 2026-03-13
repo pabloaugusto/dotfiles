@@ -23,7 +23,7 @@ lifecycle.
 
 - decisao de placement e source of truth do `ai-documentation-manager`
 - conteudo aprovado pelo writer e reviewers aplicaveis
-- manifest [`config/ai/sync-targets.yaml`](../../config/ai/sync-targets.yaml)
+- manifest [`config/sync-targets.yaml`](../../config/sync-targets.yaml)
 - issue Jira e superficie remota alvo
 
 ## Saidas

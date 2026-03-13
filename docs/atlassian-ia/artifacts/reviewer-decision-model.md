@@ -7,9 +7,9 @@ um reviewer deixa de ser apenas um comentador e passa a operar como sistema
 formal de decisao tecnica.
 
 A fonte declarativa correspondente fica em
-[`../../../config/ai/reviewer-policies.yaml`](../../../config/ai/reviewer-policies.yaml).
+[`../../../.agents/config/reviews.toml`](../../../.agents/config/reviews.toml).
 O schema portavel da saida estruturada fica em
-[`../../../config/ai/review-output.schema.json`](../../../config/ai/review-output.schema.json).
+[`../../../.agents/config/review-output.schema.json`](../../../.agents/config/review-output.schema.json).
 
 ## Principio central
 
@@ -191,7 +191,7 @@ O payload minimo do parecer precisa conter:
 - `jira_action`
 
 O contrato completo e portavel fica em
-[`../../../config/ai/review-output.schema.json`](../../../config/ai/review-output.schema.json).
+[`../../../.agents/config/review-output.schema.json`](../../../.agents/config/review-output.schema.json).
 
 Cada finding precisa conter:
 
@@ -236,7 +236,7 @@ amarrado a:
 - workflow Jira:
   [`reviewer-jira-workflow-policy.md`](reviewer-jira-workflow-policy.md)
 - schema de saida:
-  [`../../../config/ai/review-output.schema.json`](../../../config/ai/review-output.schema.json)
+  [`../../../.agents/config/review-output.schema.json`](../../../.agents/config/review-output.schema.json)
 
 ## Relacionados
 

@@ -12,7 +12,7 @@ O repo deve concentrar configuracao por contexto em tres raizes canonicas:
   declarativa da IA
 
 O foco principal e drenar a pulverizacao atual da camada de IA, hoje espalhada
-entre [config/ai/](../../../../config/ai/) e
+entre [config/](../../../../config/) e [.agents/config/](../../../../.agents/config/) e
 [`.agents/config.toml`](../../../config.toml), e mover valores configuraveis
 que ainda vivem em prose para a config canonica.
 
@@ -115,10 +115,10 @@ devem migrar para config canonica.
 
 Primeira drenagem obrigatoria:
 
-- [config/ai/agents.yaml](../../../../config/ai/agents.yaml),
-  [config/ai/agent-enablement.yaml](../../../../config/ai/agent-enablement.yaml)
+- [.agents/config/agents.toml](../../../../.agents/config/agents.toml),
+  [.agents/config/agents.toml](../../../../.agents/config/agents.toml)
   e
-  [config/ai/agent-runtime.yaml](../../../../config/ai/agent-runtime.yaml)
+  [.agents/config/agents.toml](../../../../.agents/config/agents.toml)
   convergem para o futuro `agents.toml` na pasta `config` sob
   [`.agents/`](../../../)
 - contratos de chat, startup e orchestration migram para:
@@ -127,13 +127,13 @@ Primeira drenagem obrigatoria:
   - o futuro `orchestration.toml` na pasta `config` sob [`.agents/`](../../../)
 - reviewer policies migram para
   o futuro `reviews.toml` na pasta `config` sob [`.agents/`](../../../)
-- [config/ai/platforms.yaml](../../../../config/ai/platforms.yaml),
-  [config/ai/jira-model.yaml](../../../../config/ai/jira-model.yaml),
-  [config/ai/confluence-model.yaml](../../../../config/ai/confluence-model.yaml)
-  e [config/ai/sync-targets.yaml](../../../../config/ai/sync-targets.yaml)
+- [config/platforms.yaml](../../../../config/platforms.yaml),
+  [config/jira-model.yaml](../../../../config/jira-model.yaml),
+  [config/confluence-model.yaml](../../../../config/confluence-model.yaml)
+  e [config/sync-targets.yaml](../../../../config/sync-targets.yaml)
   permanecem no contexto dev em [config/](../../../../config/)
-- [`.agents/config.toml`](../../../config.toml) vira ponte temporaria para
-  o futuro `config.toml` na pasta `config` sob [`.agents/`](../../../)
+- [`.agents/config.toml`](../../../config.toml) permanece como manifesto
+  operacional complementar da camada IA
 
 ## Criterios de aceite
 

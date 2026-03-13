@@ -207,7 +207,7 @@ O pack `sync-outbox-foundation` continua sendo a camada responsavel por definir:
 - `ack`
 - retry
 - `retention_policy`
-- o manifest `sync-targets.yaml` em [`config/ai/`](../../../../config/ai/)
+- o manifest `sync-targets.yaml` em [`config/`](../../../../config/) e [`.agents/config/`](../../../../.agents/config/)
 - classificacao de artefatos elegiveis para sincronismo perene
 
 Este prompt documental continua sendo a camada responsavel por definir:
@@ -243,7 +243,7 @@ cross-surface ou trilha remota perene, ela deve:
 
 1. usar a arquitetura-base definida no prompt foundation
 2. escrever ou consumir entradas no manifest `sync-targets.yaml` em
-   [`config/ai/`](../../../../config/ai/)
+   [`config/`](../../../../config/) e [`.agents/config/`](../../../../.agents/config/)
 3. respeitar a classificacao de artefatos do foundation
 4. usar `ai-documentation-sync` como operador documental dessa fundacao
 5. nao criar atalhos locais ad hoc
@@ -753,7 +753,7 @@ segundo a fundacao oficial de sync?"
 - confirmar a materializacao da trilha documental cross-surface
 - gravar e consumir eventos conforme o foundation quando isso couber ao fluxo
   documental
-- respeitar o manifest `sync-targets.yaml` em [`config/ai/`](../../../../config/ai/)
+- respeitar o manifest `sync-targets.yaml` em [`config/`](../../../../config/) e [`.agents/config/`](../../../../.agents/config/)
   como manifest oficial
 
 ## 11.5. Skills esperadas
@@ -777,7 +777,7 @@ segundo a fundacao oficial de sync?"
 - policy documental de sync
 - requisitos de evidencias e backlinks
 - contratos da fundacao de sync
-- o manifest `sync-targets.yaml` em [`config/ai/`](../../../../config/ai/)
+- o manifest `sync-targets.yaml` em [`config/`](../../../../config/) e [`.agents/config/`](../../../../.agents/config/)
 
 ## 11.7. Outputs
 
@@ -1242,7 +1242,7 @@ Ownership:
 - revisao linguistica do conteudo associado, quando relevante:
   `ai-linguistic-reviewer`
 
-## 16.10. Manifest `sync-targets.yaml` em [`config/ai/`](../../../../config/ai/)
+## 16.10. Manifest `sync-targets.yaml` em [`config/`](../../../../config/) e [`.agents/config/`](../../../../.agents/config/)
 
 - infraestrutura-base e semantica geral: prompt foundation
 - classificacao e necessidades documentais que exijam entradas novas:
@@ -1477,7 +1477,7 @@ Subtasks minimas:
 20. Atualizar cards, registry, contracts e docs
 21. Ajustar tasks, validators, ledgers e testes
 22. Validar compatibilidade com o manifest `sync-targets.yaml` em
-    [`config/ai/`](../../../../config/ai/)
+    [`config/`](../../../../config/) e [`.agents/config/`](../../../../.agents/config/)
 23. Validar compatibilidade e fechar backlog residual
 
 ---
@@ -1506,7 +1506,7 @@ houver codigo.
 
 Quando a rodada tocar a integracao com a fundacao de sync, validar tambem:
 
-- coerencia com o manifest `sync-targets.yaml` em [`config/ai/`](../../../../config/ai/)
+- coerencia com o manifest `sync-targets.yaml` em [`config/`](../../../../config/) e [`.agents/config/`](../../../../.agents/config/)
 - nao duplicacao de contracts de sync
 - nao criacao de outbox paralelo
 - compatibilidade com o state root e semantica definidos pelo foundation
@@ -1531,7 +1531,7 @@ A implementacao deve refletir esta arquitetura em:
 - testes
 - comments types e docs operacionais relacionados
 - referencias formais ao prompt foundation de sync
-- o manifest `sync-targets.yaml` em [`config/ai/`](../../../../config/ai/)
+- o manifest `sync-targets.yaml` em [`config/`](../../../../config/) e [`.agents/config/`](../../../../.agents/config/)
   quando houver necessidade documental real de novas entradas
 
 ---

@@ -15,9 +15,9 @@ tema tecnico.
 
 - [`AGENTS.md`](../../AGENTS.md)
 - [`LICOES-APRENDIDAS.md`](../../LICOES-APRENDIDAS.md)
-- [`config/ai/contracts.yaml`](../../config/ai/contracts.yaml)
-- [`config/ai/agents.yaml`](../../config/ai/agents.yaml)
-- [`config/ai/agent-enablement.yaml`](../../config/ai/agent-enablement.yaml)
+- [`.agents/config/startup.toml`](../../.agents/config/startup.toml)
+- [`.agents/config/agents.toml`](../../.agents/config/agents.toml)
+- [`.agents/config/agents.toml`](../../.agents/config/agents.toml)
 
 ## Regras obrigatorias
 
@@ -31,7 +31,7 @@ tema tecnico.
 - [`README.md`](README.md)
 - [`CATALOG.md`](CATALOG.md)
 - tema aplicavel ao trabalho atual
-- [`config/ai/agent-enablement.yaml`](../../config/ai/agent-enablement.yaml)
+- [`.agents/config/agents.toml`](../../.agents/config/agents.toml)
 
 ## Delegacao: o que o subagente precisa receber
 

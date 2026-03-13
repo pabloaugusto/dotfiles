@@ -3,22 +3,16 @@ from __future__ import annotations
 import pathlib
 import unittest
 
-import yaml
+from scripts.config_context_lib import load_toml_map, load_yaml_map
 
 REPO_ROOT = pathlib.Path(__file__).resolve().parents[2]
 
 
 class AiTechLeadReviewContractTests(unittest.TestCase):
     def setUp(self) -> None:
-        self.agents = yaml.safe_load(
-            (REPO_ROOT / "config" / "ai" / "agents.yaml").read_text(encoding="utf-8")
-        )
-        self.operations = yaml.safe_load(
-            (REPO_ROOT / "config" / "ai" / "agent-operations.yaml").read_text(encoding="utf-8")
-        )
-        self.jira_model = yaml.safe_load(
-            (REPO_ROOT / "config" / "ai" / "jira-model.yaml").read_text(encoding="utf-8")
-        )
+        self.agents = load_toml_map(REPO_ROOT / ".agents" / "config" / "agents.toml")
+        self.operations = load_toml_map(REPO_ROOT / ".agents" / "config" / "orchestration.toml")
+        self.jira_model = load_yaml_map(REPO_ROOT / "config" / "jira-model.yaml")
 
     def test_ai_tech_lead_declares_mandatory_review_responsibilities(self) -> None:
         roles = self.agents.get("roles") or {}

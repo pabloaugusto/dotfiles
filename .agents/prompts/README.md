@@ -64,7 +64,7 @@ Quando a rodada tocar qualquer arquivo versionado em [`.agents/prompts/`](./):
 
 ## Regras
 
-- prompt pack formal nao substitui [`AGENTS.md`](../../AGENTS.md), [`LICOES-APRENDIDAS.md`](../../LICOES-APRENDIDAS.md), [`docs/ai-operating-model.md`](../../docs/ai-operating-model.md) nem os contratos em [`config/ai/`](../../config/ai/)
+- prompt pack formal nao substitui [`AGENTS.md`](../../AGENTS.md), [`LICOES-APRENDIDAS.md`](../../LICOES-APRENDIDAS.md), [`docs/ai-operating-model.md`](../../docs/ai-operating-model.md) nem os contratos em [`config/`](../../config/) e [`.agents/config/`](../../.agents/config/)
 - packs formais devem refletir o fluxo real do repo: `Jira` como fonte primaria,
   trackers locais como fallback contingencial, governanca Git, worklog, lessons,
   review e closeout

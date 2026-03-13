@@ -43,12 +43,11 @@ Nessas retomadas, a regra correta passa a ser:
   identidade em [`.agents/config/agents.toml`](../.agents/config/agents.toml)
   e contrato visivel em
   [`.agents/config/communication.toml`](../.agents/config/communication.toml)
-- enquanto a drenagem nao terminar, tratar
-  [`config/ai/agent-runtime.yaml`](../config/ai/agent-runtime.yaml) como ponte
-  legada para distinguir `habilitado` de `realmente operante`, carregar
-  `chat_alias` e saber qual papel pode assumir ownership visivel de chat/Jira
+- tratar [`.agents/config/agents.toml`](../.agents/config/agents.toml) como
+  manifesto declarativo canonico de identidade, enablement, `chat_alias`,
+  runtime visivel e ownership de chat/Jira
 - carregar o enablement declarativo de agentes a partir de
-  [`config/ai/agent-enablement.yaml`](../config/ai/agent-enablement.yaml)
+  [`.agents/config/agents.toml`](../.agents/config/agents.toml)
   antes de exigir ou acionar papeis opcionais ou consultivos
 - carregar explicitamente a governanca Git canonica da sessao, lembrando que o
   enforcement de commit atomico, higiene de branch/worktree e fechamento de
@@ -326,7 +325,7 @@ Os agentes tipados ficam em [`.agents/registry/`](.agents/registry/) e definem:
 - handoffs e gates obrigatorios
 
 O estado declarativo de enablement por agente fica em
-[`config/ai/agent-enablement.yaml`](../config/ai/agent-enablement.yaml), para
+[`.agents/config/agents.toml`](../.agents/config/agents.toml), para
 evitar que habilitacao ou desabilitacao de papeis dependa apenas de memoria de
 chat.
 
@@ -335,11 +334,11 @@ O manifesto canonico da camada de IA fica em
 e contrato visivel distribuidos em
 [`.agents/config/agents.toml`](../.agents/config/agents.toml) e
 [`.agents/config/communication.toml`](../.agents/config/communication.toml).
-Enquanto a drenagem nao terminar, o runtime operacional legado em
-[`config/ai/agent-runtime.yaml`](../config/ai/agent-runtime.yaml) continua como
-ponte para provar quais papeis estao codados e operantes de fato, qual alias
-precisa aparecer no chat e no `Jira`, e se existe principal Jira mapeado para
-sincronizar `Assignee`.
+[`.agents/config.toml`](../.agents/config.toml) permanece como manifesto
+operacional complementar para contratos transversais da camada IA, enquanto
+[`.agents/config/agents.toml`](../.agents/config/agents.toml) concentra
+identidade, enablement, runtime visivel, aliases e sync opcional de
+`Assignee`.
 
 ### Camada 2.2. Orquestracao, rules e evals
 
@@ -401,7 +400,7 @@ inventar um sincronismo ad hoc. A arquitetura-base obrigatoria passa a ser:
 - fonte perene remota elegivel
 
 O contrato versionado da fundacao fica em
-[`config/ai/sync-targets.yaml`](../config/ai/sync-targets.yaml) e o state local
+[`config/sync-targets.yaml`](../config/sync-targets.yaml) e o state local
 duravel vive sob `~/.ai-control-plane/workspaces/<workspace_id>/`.
 
 Regras minimas:
@@ -611,7 +610,7 @@ Como [`app/df/`](../app/df/) guarda apenas o que sera utilizado na maquina apos 
 - [`.codex/README.md`](.codex/README.md) deixa explicito que adaptadores de assistente nao sao fonte de verdade
 - [`AI-WIP-TRACKER.md`](AI-WIP-TRACKER.md) guarda o fallback local do estado incremental da IA
 - [`docs/AI-REVIEW-LEDGER.md`](docs/AI-REVIEW-LEDGER.md) guarda os pareceres vivos de revisao especializada por worklog
-- [`config/ai/`](../config/ai/) guarda a control plane dev-time de plataformas,
+- [`config/`](../config/) e [`.agents/config/`](../.agents/config/) guarda a control plane dev-time de plataformas,
   contratos, optionalidade e enablement declarativo dos agentes, desacoplada
   de [`app/bootstrap/`](../app/bootstrap/) e de [`app/df/`](../app/df/)
 - [`app/df/`](../app/df/) continua reservado aos dotfiles e assets materializados no ambiente

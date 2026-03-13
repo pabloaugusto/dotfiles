@@ -43,7 +43,7 @@ def config_manifest_path(repo_root: Path = ROOT) -> Path:
     return ai_root(repo_root) / "config" / "config.toml"
 
 
-def config_bridge_path(repo_root: Path = ROOT) -> Path:
+def operation_manifest_path(repo_root: Path = ROOT) -> Path:
     return config_path(repo_root)
 
 

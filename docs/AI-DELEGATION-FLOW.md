@@ -55,7 +55,7 @@
 - `architecture-modernization-authority` deve observar continuamente WIP, backlog, roadmap, decisions e outros artefatos vivos para nao sugerir trabalho fora de contexto.
 - nenhuma delegacao para subagente e valida sem startup carregado ou
   explicitamente linkado na rodada atual.
-- agente desabilitado em [`../config/ai/agent-enablement.yaml`](../config/ai/agent-enablement.yaml)
+- agente desabilitado em [`../.agents/config/agents.toml`](../.agents/config/agents.toml)
   nao pode ser delegado por memoria de chat, atalho manual ou habito legado.
 - nenhum agente operacional deve assumir o chat antes de `ready_for_work`; ate
   la o ownership visivel da sessao pertence ao `ai-startup-governor`.

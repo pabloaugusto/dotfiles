@@ -15,7 +15,7 @@ Consolidar branch, commit, PR, merge e higiene de worktree.
 
 - [`../../AGENTS.md`](../../AGENTS.md)
 - [`../../docs/git-conventions.md`](../../docs/git-conventions.md)
-- [`../../config/ai/contracts.yaml`](../../config/ai/contracts.yaml)
+- [`../../.agents/config/startup.toml`](../../.agents/config/startup.toml)
 - [`../../Taskfile.yml`](../../Taskfile.yml)
 
 ## Regras obrigatorias

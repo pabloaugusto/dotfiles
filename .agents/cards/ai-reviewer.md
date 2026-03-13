@@ -22,7 +22,7 @@ quando o escopo exigir consolidacao acima do reviewer especializado.
 
 - issue, subtasks, comentarios e evidencias especializadas
 - diffs, testes e artefatos relevantes
-- contratos vivos em [`../../config/ai/`](../../config/ai/)
+- contratos vivos em [`config/`](../../config/) e [`.agents/config/`](../../.agents/config/)
 
 ## Saidas
 

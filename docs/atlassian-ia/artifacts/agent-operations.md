@@ -3,7 +3,7 @@
 - Status: `artifact-first`
 - Data-base: `2026-03-07`
 - Fonte canonica:
-  [`../../../config/ai/agent-operations.yaml`](../../../config/ai/agent-operations.yaml)
+  [`../../../.agents/config/orchestration.toml`](../../../.agents/config/orchestration.toml)
 - Sincronizacao alvo:
   - pagina operacional dedicada no `Confluence`
   - issue de governanca e comentarios tecnicos no `Jira`

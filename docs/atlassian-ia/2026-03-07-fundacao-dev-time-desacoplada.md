@@ -25,7 +25,7 @@
 ## Implicacao arquitetural
 
 O primeiro corte de implementacao deixa de estender o runtime do bootstrap e
-passa a criar uma control plane propria em [`config/ai/`](../../config/ai/).
+passa a criar uma control plane propria em [`config/`](../../config/) e [`.agents/config/`](../../.agents/config/).
 
 Essa control plane passa a concentrar:
 

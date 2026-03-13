@@ -3,7 +3,7 @@
 Este pack existe para unificar e centralizar a governanca normativa do repo em
 [`.agents/rules/`](../../../rules/), reduzindo drift entre
 [`AGENTS.md`](../../../../AGENTS.md), [`docs/`](../../../../docs/), contratos
-declarativos em [`config/ai/`](../../../../config/ai/) e enforcement
+declarativos em [`config/`](../../../../config/) e [`.agents/config/`](../../../../.agents/config/) e enforcement
 executavel em [`Taskfile.yml`](../../../../Taskfile.yml),
 [`.githooks/`](../../../../.githooks/) e scripts.
 
@@ -27,10 +27,10 @@ executavel em [`Taskfile.yml`](../../../../Taskfile.yml),
 
 - este pack nao autoriza transformar Markdown em enforcement
 - [`AGENTS.md`](../../../../AGENTS.md), [`docs/`](../../../../docs/) e
-  [`config/ai/`](../../../../config/ai/) nao devem competir com a nova
+  [`config/`](../../../../config/) e [`.agents/config/`](../../../../.agents/config/) nao devem competir com a nova
   camada; eles devem apontar para ela e permanecer em paridade
 - toggles de agentes precisam nascer como configuracao declarativa em
-  [`config/ai/`](../../../../config/ai/), e nao como instrucao efemera de chat
+  [`config/`](../../../../config/) e [`.agents/config/`](../../../../.agents/config/), e nao como instrucao efemera de chat
 - `fallback` nao deve nascer como arquivo tematico principal neste primeiro
   corte; ele deve virar secao obrigatoria dentro de cada tema relevante
 - a migracao deve acontecer por ondas pequenas, com validacao real e sem
@@ -55,11 +55,11 @@ executavel em [`Taskfile.yml`](../../../../Taskfile.yml),
 - [`docs/git-conventions.md`](../../../../docs/git-conventions.md)
 - [`docs/ai-operating-model.md`](../../../../docs/ai-operating-model.md)
 - [`Taskfile.yml`](../../../../Taskfile.yml)
-- [`config/ai/agents.yaml`](../../../../config/ai/agents.yaml)
-- [`config/ai/agent-enablement.yaml`](../../../../config/ai/agent-enablement.yaml)
-- [`config/ai/contracts.yaml`](../../../../config/ai/contracts.yaml)
-- [`config/ai/agent-operations.yaml`](../../../../config/ai/agent-operations.yaml)
-- [`config/ai/jira-model.yaml`](../../../../config/ai/jira-model.yaml)
+- [`.agents/config/agents.toml`](../../../../.agents/config/agents.toml)
+- [`.agents/config/agents.toml`](../../../../.agents/config/agents.toml)
+- [`.agents/config/startup.toml`](../../../../.agents/config/startup.toml)
+- [`.agents/config/orchestration.toml`](../../../../.agents/config/orchestration.toml)
+- [`config/jira-model.yaml`](../../../../config/jira-model.yaml)
 - [`scripts/validate-ai-assets.py`](../../../../scripts/validate-ai-assets.py)
 - [`scripts/ai_session_startup_lib.py`](../../../../scripts/ai_session_startup_lib.py)
 

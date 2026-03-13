@@ -40,7 +40,7 @@ Fonte de verdade da camada declarativa e operacional de IA deste repo.
 
 ## Integracao com config
 
-- [`../config/ai/agents.yaml`](../config/ai/agents.yaml) continua descrevendo os
+- [`../.agents/config/agents.toml`](../.agents/config/agents.toml) continua descrevendo os
   papeis declarativos do repo.
-- [`../config/ai/agent-enablement.yaml`](../config/ai/agent-enablement.yaml)
+- [`../.agents/config/agents.toml`](../.agents/config/agents.toml)
   governa o enablement declarativo por agente, sem depender de memoria de chat.

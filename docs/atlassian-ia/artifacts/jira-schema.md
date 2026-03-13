@@ -3,7 +3,7 @@
 - Status: `artifact-first`
 - Data-base: `2026-03-07`
 - Fonte canonica:
-  [`../../../config/ai/jira-model.yaml`](../../../config/ai/jira-model.yaml)
+  [`../../../config/jira-model.yaml`](../../../config/jira-model.yaml)
 - Sincronizacao alvo:
   - comentario tecnico e/ou attachment na issue de schema do `Jira`
   - pagina `DOT - Jira Schema` no `Confluence`
@@ -34,7 +34,7 @@
 
 - `SEO Review`
   - habilitar apenas quando o papel `ai-seo-specialist` estiver ativo em
-    [`../../../config/ai/agents.yaml`](../../../config/ai/agents.yaml)
+    [`../../../.agents/config/agents.toml`](../../../.agents/config/agents.toml)
 
 ## Statuses alvo
 

@@ -15,8 +15,8 @@ Este pack existe porque o repo ja possui regras fortes para `startup/restart`,
 contrato de chat e `display_name`, mas ainda deixa uma lacuna entre:
 
 - o que a governanca exige em
-  [`config/ai/contracts.yaml`](../../../../config/ai/contracts.yaml),
-  [`config/ai/agent-operations.yaml`](../../../../config/ai/agent-operations.yaml)
+  [`.agents/config/startup.toml`](../../../../.agents/config/startup.toml),
+  [`.agents/config/orchestration.toml`](../../../../.agents/config/orchestration.toml)
   e [`docs/AI-STARTUP-AND-RESTART.md`](../../../../docs/AI-STARTUP-AND-RESTART.md)
 - e o que efetivamente impede a primeira resposta operacional fora de
   conformidade
@@ -63,14 +63,14 @@ Antes de abrir demanda nova:
 
 Use como evidencias minimas:
 
-- [`config/ai/agent-operations.yaml`](../../../../config/ai/agent-operations.yaml)
+- [`.agents/config/orchestration.toml`](../../../../.agents/config/orchestration.toml)
   ja exige `zero-context-startup-must-load-chat-contract-before-first-user-message`
-- [`config/ai/contracts.yaml`](../../../../config/ai/contracts.yaml) ja declara
+- [`.agents/config/startup.toml`](../../../../.agents/config/startup.toml) ja declara
   que trabalho sem startup completo e rejeitavel
 - [`scripts/ai_session_startup_lib.py`](../../../../scripts/ai_session_startup_lib.py)
   ja gera report, carrega `display_name` e expande `pea_status`, mas ainda nao
   modela `startup clearance` como artefato bloqueante
-- [`config/ai/agents.yaml`](../../../../config/ai/agents.yaml) e
+- [`.agents/config/agents.toml`](../../../../.agents/config/agents.toml) e
   [`docs/AI-AGENTS-CATALOG.md`](../../../../docs/AI-AGENTS-CATALOG.md) ainda
   nao expoem papel dedicado de `startup gatekeeper`
 - [`docs/AI-CHAT-CONTRACTS-REGISTER.md`](../../../../docs/AI-CHAT-CONTRACTS-REGISTER.md)
@@ -141,10 +141,10 @@ Regras:
 
 Criar, endurecer ou alinhar:
 
-- [`config/ai/agents.yaml`](../../../../config/ai/agents.yaml)
+- [`.agents/config/agents.toml`](../../../../.agents/config/agents.toml)
 - [`docs/AI-AGENTS-CATALOG.md`](../../../../docs/AI-AGENTS-CATALOG.md)
-- [`config/ai/contracts.yaml`](../../../../config/ai/contracts.yaml)
-- [`config/ai/agent-operations.yaml`](../../../../config/ai/agent-operations.yaml)
+- [`.agents/config/startup.toml`](../../../../.agents/config/startup.toml)
+- [`.agents/config/orchestration.toml`](../../../../.agents/config/orchestration.toml)
 - [`docs/AI-STARTUP-AND-RESTART.md`](../../../../docs/AI-STARTUP-AND-RESTART.md)
 - [`docs/ai-operating-model.md`](../../../../docs/ai-operating-model.md)
 - [`scripts/ai_session_startup_lib.py`](../../../../scripts/ai_session_startup_lib.py)

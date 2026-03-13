@@ -13,8 +13,8 @@ Garantir que nenhum subagente receba trabalho sem contexto suficiente.
 ## Fonte canonica e precedencia
 
 - [`../../docs/AI-DELEGATION-FLOW.md`](../../docs/AI-DELEGATION-FLOW.md)
-- [`../../config/ai/agent-operations.yaml`](../../config/ai/agent-operations.yaml)
-- [`../../config/ai/contracts.yaml`](../../config/ai/contracts.yaml)
+- [`../../.agents/config/orchestration.toml`](../../.agents/config/orchestration.toml)
+- [`../../.agents/config/startup.toml`](../../.agents/config/startup.toml)
 
 ## Regras obrigatorias
 
@@ -49,7 +49,7 @@ Garantir que nenhum subagente receba trabalho sem contexto suficiente.
 
 ## Artefatos relacionados
 
-- [`../../config/ai/agent-enablement.yaml`](../../config/ai/agent-enablement.yaml)
+- [`../../.agents/config/agents.toml`](../../.agents/config/agents.toml)
 - [`../../docs/AI-STARTUP-AND-RESTART.md`](../../docs/AI-STARTUP-AND-RESTART.md)
 
 ## Temas vizinhos

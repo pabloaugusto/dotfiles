@@ -18,8 +18,8 @@ __pycache__/
 !/app/bootstrap/secrets/.env.local.tpl
 app/bootstrap/user-config.yaml
 app/df/git/.gitconfig.local
-config/ai/*.local.yaml
-!config/ai/*.local.yaml.tpl
+config/*.local.yaml
+!config/*.local.yaml.tpl
 
 # sensitive key/certificate material
 *.pem

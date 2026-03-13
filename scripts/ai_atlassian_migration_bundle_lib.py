@@ -45,12 +45,12 @@ def bundle_source_paths(repo_root: Path) -> list[tuple[Path, str]]:
     add_file("docs/TASKS.md", "docs")
     add_file("docs/config-reference.md", "docs")
 
-    add_file("config/ai/platforms.yaml", "control-plane")
-    add_file("config/ai/platforms.local.yaml.tpl", "control-plane")
-    add_file("config/ai/agents.yaml", "control-plane")
-    add_file("config/ai/contracts.yaml", "control-plane")
-    add_file("config/ai/jira-model.yaml", "control-plane")
-    add_file("config/ai/confluence-model.yaml", "control-plane")
+    add_file("config/platforms.yaml", "control-plane")
+    add_file("config/platforms.local.yaml.tpl", "control-plane")
+    add_file(".agents/config/agents.toml", "control-plane")
+    add_file(".agents/config/startup.toml", "control-plane")
+    add_file("config/jira-model.yaml", "control-plane")
+    add_file("config/confluence-model.yaml", "control-plane")
 
     add_file("scripts/ai-atlassian-backfill.py", "logic")
     add_file("scripts/ai_atlassian_backfill_lib.py", "logic")

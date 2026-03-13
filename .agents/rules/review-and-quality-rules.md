@@ -14,7 +14,7 @@ Consolidar revisores especializados, QA e gates de qualidade.
 
 - [`../../AGENTS.md`](../../AGENTS.md)
 - [`../../docs/AI-REVIEW-LEDGER.md`](../../docs/AI-REVIEW-LEDGER.md)
-- [`../../config/ai/agent-operations.yaml`](../../config/ai/agent-operations.yaml)
+- [`../../.agents/config/orchestration.toml`](../../.agents/config/orchestration.toml)
 
 ## Regras obrigatorias
 
@@ -48,7 +48,7 @@ Consolidar revisores especializados, QA e gates de qualidade.
 ## Artefatos relacionados
 
 - [`../../docs/AI-ORTHOGRAPHY-LEDGER.md`](../../docs/AI-ORTHOGRAPHY-LEDGER.md)
-- [`../../config/ai/agent-enablement.yaml`](../../config/ai/agent-enablement.yaml)
+- [`../../.agents/config/agents.toml`](../../.agents/config/agents.toml)
 
 ## Temas vizinhos
 

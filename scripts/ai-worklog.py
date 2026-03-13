@@ -392,7 +392,11 @@ def resolve_branch() -> str:
 def repo_root_for_document(path: Path) -> Path:
     candidate = path.resolve()
     for base in (candidate.parent, *candidate.parents):
-        if (base / "config" / "ai").is_dir():
+        if (
+            (base / "config" / "config.toml").is_file()
+            and (base / "app" / "config" / "config.toml").is_file()
+            and (base / ".agents" / "config" / "config.toml").is_file()
+        ):
             return base
     return candidate.parent.resolve()
 

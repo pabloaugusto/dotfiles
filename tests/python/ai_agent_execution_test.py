@@ -18,13 +18,14 @@ from scripts.ai_agent_execution_lib import (
 
 
 def write_runtime(repo_root: Path) -> None:
-    config_dir = repo_root / "config" / "ai"
     root_config_dir = repo_root / "config"
     app_config_dir = repo_root / "app" / "config"
     agents_config_dir = repo_root / ".agents" / "config"
-    config_dir.mkdir(parents=True, exist_ok=True)
+    registry_dir = repo_root / ".agents" / "registry"
+    root_config_dir.mkdir(parents=True, exist_ok=True)
     app_config_dir.mkdir(parents=True, exist_ok=True)
     agents_config_dir.mkdir(parents=True, exist_ok=True)
+    registry_dir.mkdir(parents=True, exist_ok=True)
     (root_config_dir / "config.toml").write_text(
         """version = 1
 
@@ -58,7 +59,14 @@ schema = "config/schema.json"
         encoding="utf-8",
     )
     (root_config_dir / "dev.toml").write_text("version = 1\n", encoding="utf-8")
-    (root_config_dir / "integrations.toml").write_text("version = 1\n", encoding="utf-8")
+    (root_config_dir / "integrations.toml").write_text(
+        """version = 1
+
+[atlassian]
+platforms = "config/platforms.yaml"
+""",
+        encoding="utf-8",
+    )
     (root_config_dir / "quality.toml").write_text("version = 1\n", encoding="utf-8")
     (root_config_dir / "schema.json").write_text("{}", encoding="utf-8")
     (root_config_dir / "time-surfaces.yaml").write_text("surfaces: {}\n", encoding="utf-8")
@@ -99,15 +107,7 @@ reviews = ".agents/config/reviews.toml"
 prompts = ".agents/config/prompts.toml"
 schema = ".agents/config/schema.json"
 
-[compatibility]
-bridge_manifest = ".agents/config.toml"
-legacy_control_plane_root = "config/ai"
-legacy_agents = "config/ai/agents.yaml"
-legacy_agent_enablement = "config/ai/agent-enablement.yaml"
-legacy_agent_runtime = "config/ai/agent-runtime.yaml"
-legacy_agent_operations = "config/ai/agent-operations.yaml"
-legacy_contracts = "config/ai/contracts.yaml"
-""",
+            """,
         encoding="utf-8",
     )
     (agents_config_dir / "agents.toml").write_text(
@@ -115,11 +115,124 @@ legacy_contracts = "config/ai/contracts.yaml"
 
 [source_of_truth]
 display_name_registry = ".agents/registry/*.toml::display_name"
+roles = ".agents/config/agents.toml::roles"
+enablement = ".agents/config/agents.toml::enablement"
+runtime = ".agents/config/agents.toml::runtime"
 
 [identity]
 display_name_source = ".agents/registry/*.toml::display_name"
-chat_alias_source = "config/ai/agent-runtime.yaml::roles"
-enablement_source = "config/ai/agent-enablement.yaml::roles"
+chat_alias_source = ".agents/config/agents.toml::runtime.roles"
+enablement_source = ".agents/config/agents.toml::enablement.roles"
+
+[roles]
+[roles.ai-developer-automation]
+enabled = true
+required = false
+category = "delivery"
+display_name = "Automation Dev"
+
+[roles.ai-tech-lead]
+enabled = true
+required = false
+category = "governance"
+display_name = "Tech Lead"
+
+[roles.ai-qa]
+enabled = true
+required = false
+category = "quality"
+display_name = "Testador (QA)"
+
+[roles.ai-reviewer-automation]
+enabled = true
+required = false
+category = "quality"
+display_name = "Revisor Automacao"
+
+[roles.ai-engineering-manager]
+enabled = true
+required = false
+category = "governance"
+display_name = "Engenheiro"
+
+[enablement]
+[enablement.defaults]
+registry_agents_enabled_by_default = true
+
+[enablement.roles]
+[enablement.roles."ai-developer-automation"]
+enabled = true
+
+[enablement.roles."ai-tech-lead"]
+enabled = true
+
+[enablement.roles."ai-qa"]
+enabled = true
+
+[enablement.roles."ai-reviewer-automation"]
+enabled = true
+
+[enablement.roles."ai-engineering-manager"]
+enabled = true
+
+[enablement.registry_agents]
+
+[runtime]
+[runtime.policies]
+enabled_role_statuses = ["operational", "consultive"]
+required_role_statuses = ["operational", "consultive"]
+enabled_registry_statuses = ["operational", "consultive"]
+chat_owner_statuses = ["operational", "consultive"]
+chat_name_fallback_order = ["chat_alias", "display_name", "technical_id"]
+
+[runtime.roles]
+[runtime.roles."ai-developer-automation"]
+status = "operational"
+chat_alias = "Automation Dev"
+chat_owner_supported = true
+owner_mode = "primary"
+surfaces = ["jira", "chat"]
+process_scopes = ["automation"]
+runtime_artifacts = [".agents/config/agents.toml"]
+
+[runtime.roles."ai-developer-automation".jira_assignee]
+account_id = "account-automation"
+
+[runtime.roles."ai-tech-lead"]
+status = "operational"
+chat_alias = "Tech Lead"
+chat_owner_supported = true
+owner_mode = "primary"
+surfaces = ["jira", "chat"]
+process_scopes = ["handoff"]
+runtime_artifacts = [".agents/config/agents.toml"]
+
+[runtime.roles."ai-qa"]
+status = "operational"
+chat_alias = "Testador (QA)"
+chat_owner_supported = true
+owner_mode = "primary"
+surfaces = ["jira", "chat"]
+process_scopes = ["tests"]
+runtime_artifacts = [".agents/config/agents.toml"]
+
+[runtime.roles."ai-reviewer-automation"]
+status = "consultive"
+chat_alias = "Revisor Automacao"
+chat_owner_supported = true
+owner_mode = "consultive"
+surfaces = ["jira", "chat"]
+process_scopes = ["review"]
+runtime_artifacts = [".agents/config/agents.toml"]
+
+[runtime.roles."ai-engineering-manager"]
+status = "operational"
+chat_alias = "Engenheiro"
+chat_owner_supported = true
+owner_mode = "primary"
+surfaces = ["jira", "chat"]
+process_scopes = ["capacity"]
+runtime_artifacts = [".agents/config/agents.toml"]
 """,
         encoding="utf-8",
     )
@@ -144,8 +257,38 @@ managed_literals = ["[{timestamp}] **{visible_name}**", "dd-mm hh:mm"]
 """,
         encoding="utf-8",
     )
-    (agents_config_dir / "startup.toml").write_text("version = 1\n", encoding="utf-8")
-    (agents_config_dir / "orchestration.toml").write_text("version = 1\n", encoding="utf-8")
+    (agents_config_dir / "startup.toml").write_text(
+        """version = 1
+
+[startup]
+owner_role = "ai-startup-governor"
+readiness_artifact = ".cache/ai/startup-ready.json"
+
+[handoff]
+chat_contract_ref = ".agents/config/communication.toml::chat"
+
+[workflow]
+always_enabled_columns = ["Backlog", "Doing", "Review", "Done"]
+""",
+        encoding="utf-8",
+    )
+    (agents_config_dir / "orchestration.toml").write_text(
+        """version = 1
+
+[paths]
+capability_matrix = ".agents/orchestration/capability-matrix.yaml"
+routing_policy = ".agents/orchestration/routing-policy.yaml"
+task_card_schema = ".agents/orchestration/task-card.schema.json"
+delegation_plan_schema = ".agents/orchestration/delegation-plan.schema.json"
+
+[delegation]
+require_owner_issue = true
+require_startup_artifact = true
+require_applicable_rules = true
+config_ref_convention = "arquivo::chave"
+""",
+        encoding="utf-8",
+    )
     (agents_config_dir / "reviews.toml").write_text("version = 1\n", encoding="utf-8")
     (agents_config_dir / "prompts.toml").write_text("version = 1\n", encoding="utf-8")
     (agents_config_dir / "schema.json").write_text("{}", encoding="utf-8")
@@ -154,148 +297,50 @@ managed_literals = ["[{timestamp}] **{visible_name}**", "dd-mm hh:mm"]
 
 [config_context]
 manifest = ".agents/config/config.toml"
-bridge_mode = "legacy-rules-and-identity-contracts"
+mode = "repo-canonical"
 """,
         encoding="utf-8",
     )
-    (config_dir / "agents.yaml").write_text(
-        """version: 1
-roles:
-  ai-developer-automation:
-    enabled: true
-    required: false
-    category: delivery
-    display_name: Automation Dev
-  ai-tech-lead:
-    enabled: true
-    required: false
-    category: governance
-    display_name: Tech Lead
-  ai-qa:
-    enabled: true
-    required: false
-    category: quality
-    display_name: Testador (QA)
-  ai-reviewer-automation:
-    enabled: true
-    required: false
-    category: quality
-    display_name: Revisor Automacao
-  ai-engineering-manager:
-    enabled: true
-    required: false
-    category: governance
-    display_name: Engenheiro
-""",
-        encoding="utf-8",
-    )
-    (config_dir / "agent-enablement.yaml").write_text(
-        """version: 1
-defaults:
-  registry_agents_enabled_by_default: true
-roles:
-  ai-developer-automation:
-    enabled: true
-  ai-tech-lead:
-    enabled: true
-  ai-qa:
-    enabled: true
-  ai-reviewer-automation:
-    enabled: true
-  ai-engineering-manager:
-    enabled: true
-registry_agents: {}
-""",
-        encoding="utf-8",
-    )
-    (config_dir / "agent-operations.yaml").write_text(
-        """version: 1
-roles:
-  ai-developer-automation: {}
-  ai-tech-lead: {}
-  ai-qa: {}
-  ai-reviewer-automation: {}
-  ai-engineering-manager: {}
-""",
-        encoding="utf-8",
-    )
-    (config_dir / "contracts.yaml").write_text(
-        """version: 1
-workflow:
-  always_enabled_columns:
-    - Backlog
-    - Doing
-    - Review
-    - Done
-""",
-        encoding="utf-8",
-    )
-    (config_dir / "platforms.yaml").write_text(
+    (root_config_dir / "platforms.yaml").write_text(
         """version: 1
 platforms:
   atlassian:
     enabled: false
+    provider: none
+    auth:
+      mode: disabled
+      site_url: ""
+      email: ""
+      token: ""
+      service_account: ""
+      cloud_id: ""
+    jira:
+      enabled: false
+      project_key: ""
+    confluence:
+      enabled: false
+      space_key: ""
 """,
         encoding="utf-8",
     )
-    (config_dir / "agent-runtime.yaml").write_text(
-        """version: 1
-policies:
-  enabled_role_statuses: [operational, consultive]
-  required_role_statuses: [operational, consultive]
-  enabled_registry_statuses: [operational, consultive]
-  chat_owner_statuses: [operational, consultive]
-  chat_name_fallback_order: [chat_alias, display_name, technical_id]
-roles:
-  ai-developer-automation:
-    status: operational
-    chat_alias: Automation Dev
-    chat_owner_supported: true
-    owner_mode: primary
-    surfaces: [jira, chat]
-    process_scopes: [automation]
-    jira_assignee:
-      account_id: account-automation
-    runtime_artifacts:
-      - config/ai/agent-runtime.yaml
-  ai-tech-lead:
-    status: operational
-    chat_alias: Tech Lead
-    chat_owner_supported: true
-    owner_mode: primary
-    surfaces: [jira, chat]
-    process_scopes: [handoff]
-    runtime_artifacts:
-      - config/ai/agent-runtime.yaml
-  ai-qa:
-    status: operational
-    chat_alias: Testador (QA)
-    chat_owner_supported: true
-    owner_mode: primary
-    surfaces: [jira, chat]
-    process_scopes: [tests]
-    runtime_artifacts:
-      - config/ai/agent-runtime.yaml
-  ai-reviewer-automation:
-    status: consultive
-    chat_alias: Revisor Automacao
-    chat_owner_supported: true
-    owner_mode: consultive
-    surfaces: [jira, chat]
-    process_scopes: [review]
-    runtime_artifacts:
-      - config/ai/agent-runtime.yaml
-  ai-engineering-manager:
-    status: operational
-    chat_alias: Engenheiro
-    chat_owner_supported: true
-    owner_mode: primary
-    surfaces: [jira, chat]
-    process_scopes: [capacity]
-    runtime_artifacts:
-      - config/ai/agent-runtime.yaml
-registry_agents: {}
-""",
+    (registry_dir / "ai-developer-automation.toml").write_text(
+        'id = "ai-developer-automation"\ndisplay_name = "Automation Dev"\n',
+        encoding="utf-8",
+    )
+    (registry_dir / "ai-tech-lead.toml").write_text(
+        'id = "ai-tech-lead"\ndisplay_name = "Tech Lead"\n',
+        encoding="utf-8",
+    )
+    (registry_dir / "ai-qa.toml").write_text(
+        'id = "ai-qa"\ndisplay_name = "Testador (QA)"\n',
+        encoding="utf-8",
+    )
+    (registry_dir / "ai-reviewer-automation.toml").write_text(
+        'id = "ai-reviewer-automation"\ndisplay_name = "Revisor Automacao"\n',
+        encoding="utf-8",
+    )
+    (registry_dir / "ai-engineering-manager.toml").write_text(
+        'id = "ai-engineering-manager"\ndisplay_name = "Engenheiro"\n',
         encoding="utf-8",
     )
 

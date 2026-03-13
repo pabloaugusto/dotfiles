@@ -10,7 +10,7 @@ try:
 except ModuleNotFoundError:  # pragma: no cover - fallback para Python < 3.11
     tomllib = None  # type: ignore[assignment]
 
-from scripts.ai_contract_paths import config_bridge_path, config_manifest_path, rules_root
+from scripts.ai_contract_paths import config_manifest_path, operation_manifest_path, rules_root
 from scripts.config_context_lib import ConfigContextError, load_toml_map
 
 
@@ -38,15 +38,9 @@ def _load_yaml_map(path: Path) -> dict[str, Any]:
 
 def rules_contract_paths(repo_root: str | Path | None = None) -> dict[str, str]:
     resolved_root = Path(repo_root).resolve() if repo_root else Path.cwd().resolve()
-    manifest_payload = _load_toml_map(config_manifest_path(resolved_root))
-    compatibility = manifest_payload.get("compatibility") or {}
-    if not isinstance(compatibility, dict):
-        raise AiRulesError(".agents/config/config.toml precisa conter [compatibility] como mapa.")
-    bridge_relative = str(
-        compatibility.get("bridge_manifest", config_bridge_path(resolved_root).relative_to(resolved_root).as_posix())
-    ).strip()
-    bridge_path = (resolved_root / bridge_relative).resolve()
-    payload = _load_toml_map(bridge_path)
+    _load_toml_map(config_manifest_path(resolved_root))
+    operation_path = operation_manifest_path(resolved_root)
+    payload = _load_toml_map(operation_path)
     rules = payload.get("rules") or {}
     if not isinstance(rules, dict):
         raise AiRulesError(".agents/config.toml precisa conter [rules] como mapa.")

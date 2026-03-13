@@ -46,10 +46,10 @@ Antes de editar:
    - [`docs/AI-DELEGATION-FLOW.md`](../../../../docs/AI-DELEGATION-FLOW.md)
    - [`docs/git-conventions.md`](../../../../docs/git-conventions.md)
    - [`Taskfile.yml`](../../../../Taskfile.yml)
-   - [`config/ai/agents.yaml`](../../../../config/ai/agents.yaml)
-   - [`config/ai/contracts.yaml`](../../../../config/ai/contracts.yaml)
-   - [`config/ai/agent-operations.yaml`](../../../../config/ai/agent-operations.yaml)
-   - [`config/ai/jira-model.yaml`](../../../../config/ai/jira-model.yaml)
+   - [`.agents/config/agents.toml`](../../../../.agents/config/agents.toml)
+   - [`.agents/config/startup.toml`](../../../../.agents/config/startup.toml)
+   - [`.agents/config/orchestration.toml`](../../../../.agents/config/orchestration.toml)
+   - [`config/jira-model.yaml`](../../../../config/jira-model.yaml)
 
 ## Skills obrigatorias desta frente
 
@@ -81,7 +81,7 @@ Implementar esta decisao arquitetural no repo:
   temas
 - [`Taskfile.yml`](../../../../Taskfile.yml), [`.githooks/`](../../../../.githooks/),
   scripts e testes continuam como **enforcement executavel**
-- [`config/ai/agent-enablement.yaml`](../../../../config/ai/agent-enablement.yaml)
+- [`.agents/config/agents.toml`](../../../../.agents/config/agents.toml)
   passa a ser a fonte declarativa para habilitar ou desabilitar agentes por
   papel, sem depender de memoria de chat
 - [`docs/`](../../../../docs/) passa a conter guias, explicacoes, runbooks e
@@ -212,8 +212,8 @@ Migrar regras hoje espalhadas em:
 
 - [`docs/AI-STARTUP-GOVERNANCE-MANIFEST.md`](../../../../docs/AI-STARTUP-GOVERNANCE-MANIFEST.md)
 - [`docs/AI-STARTUP-AND-RESTART.md`](../../../../docs/AI-STARTUP-AND-RESTART.md)
-- [`config/ai/contracts.yaml`](../../../../config/ai/contracts.yaml)
-- [`config/ai/agent-enablement.yaml`](../../../../config/ai/agent-enablement.yaml)
+- [`.agents/config/startup.toml`](../../../../.agents/config/startup.toml)
+- [`.agents/config/agents.toml`](../../../../.agents/config/agents.toml)
 - camada `display_name`
 - contratos de comunicacao no chat
 - toggles declarativos de agentes carregados antes da primeira resposta
@@ -228,9 +228,9 @@ Criar:
 
 Migrar regras hoje espalhadas em:
 
-- [`config/ai/contracts.yaml`](../../../../config/ai/contracts.yaml)
-- [`config/ai/jira-model.yaml`](../../../../config/ai/jira-model.yaml)
-- [`config/ai/agent-operations.yaml`](../../../../config/ai/agent-operations.yaml)
+- [`.agents/config/startup.toml`](../../../../.agents/config/startup.toml)
+- [`config/jira-model.yaml`](../../../../config/jira-model.yaml)
+- [`.agents/config/orchestration.toml`](../../../../.agents/config/orchestration.toml)
 - [`docs/ai-operating-model.md`](../../../../docs/ai-operating-model.md)
 - [`docs/AI-DELEGATION-FLOW.md`](../../../../docs/AI-DELEGATION-FLOW.md)
 
@@ -249,12 +249,12 @@ Migrar regras hoje espalhadas em:
 - [`LICOES-APRENDIDAS.md`](../../../../LICOES-APRENDIDAS.md)
 - [`docs/AI-SCRUM-MASTER-LEDGER.md`](../../../../docs/AI-SCRUM-MASTER-LEDGER.md)
 - [`.agents/cerimonias/`](../../../../.agents/cerimonias/)
-- [`config/ai/agent-operations.yaml`](../../../../config/ai/agent-operations.yaml)
-- [`config/ai/agent-enablement.yaml`](../../../../config/ai/agent-enablement.yaml)
+- [`.agents/config/orchestration.toml`](../../../../.agents/config/orchestration.toml)
+- [`.agents/config/agents.toml`](../../../../.agents/config/agents.toml)
 
 Nesta onda, implementar tambem:
 
-- o arquivo [`config/ai/agent-enablement.yaml`](../../../../config/ai/agent-enablement.yaml)
+- o arquivo [`.agents/config/agents.toml`](../../../../.agents/config/agents.toml)
   com toggle por agente
 - semantica minima de `enabled`, `disabled_by_default`, `motivo` e `owner`
 - enforcement para que agentes desabilitados nao sejam acionados por memoria
@@ -271,7 +271,7 @@ Criar:
 
 Migrar regras hoje espalhadas em:
 
-- [`config/ai/contracts.yaml`](../../../../config/ai/contracts.yaml)
+- [`.agents/config/startup.toml`](../../../../.agents/config/startup.toml)
 - [`docs/ai-operating-model.md`](../../../../docs/ai-operating-model.md)
 - [`docs/secrets-and-auth.md`](../../../../docs/secrets-and-auth.md)
 - [`docs/ai-sync-foundation.md`](../../../../docs/ai-sync-foundation.md)
@@ -297,7 +297,7 @@ Atualizar:
 
 - startup para carregar a nova camada
 - startup, roteamento e delegacao para carregar e respeitar
-  [`config/ai/agent-enablement.yaml`](../../../../config/ai/agent-enablement.yaml)
+  [`.agents/config/agents.toml`](../../../../.agents/config/agents.toml)
 - manifest para incluir [`.agents/rules/`](../../../rules/)
 - validadores para exigir catalogacao e linkagem
 - testes de startup e validacao

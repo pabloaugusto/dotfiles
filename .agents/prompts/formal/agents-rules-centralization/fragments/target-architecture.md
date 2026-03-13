@@ -10,7 +10,7 @@ tema**.
 - [`AGENTS.md`](../../../../../AGENTS.md): contrato global curto, precedencia,
   leitura obrigatoria e ponte para os temas
 - [`.agents/rules/`](../../../../rules/): regra humana canonica por tema
-- [`config/ai/agent-enablement.yaml`](../../../../../config/ai/agent-enablement.yaml):
+- [`.agents/config/agents.toml`](../../../../../.agents/config/agents.toml):
   controle declarativo para habilitar ou desabilitar agentes por papel
 - [`docs/`](../../../../../docs/): guias, runbooks, explicacoes e material
   derivado
@@ -60,7 +60,7 @@ nao como arquivo principal separado neste primeiro corte.
 ## Controle declarativo de agentes
 
 - o repo deve materializar
-  [`config/ai/agent-enablement.yaml`](../../../../../config/ai/agent-enablement.yaml)
+  [`.agents/config/agents.toml`](../../../../../.agents/config/agents.toml)
   como fonte de verdade para enablement por agente
 - startup, roteamento, delegacao, review e validadores devem consultar esse
   arquivo antes de exigir ou acionar um papel

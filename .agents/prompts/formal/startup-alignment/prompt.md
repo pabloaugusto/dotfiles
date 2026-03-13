@@ -98,8 +98,8 @@ A camada de startup/restart deve:
 - [`docs/AI-DELEGATION-FLOW.md`](../../../../docs/AI-DELEGATION-FLOW.md)
 - [`docs/TASKS.md`](../../../../docs/TASKS.md)
 - [`docs/ai-operating-model.md`](../../../../docs/ai-operating-model.md)
-- [`config/ai/contracts.yaml`](../../../../config/ai/contracts.yaml)
-- [`config/ai/agent-operations.yaml`](../../../../config/ai/agent-operations.yaml)
+- [`.agents/config/startup.toml`](../../../../.agents/config/startup.toml)
+- [`.agents/config/orchestration.toml`](../../../../.agents/config/orchestration.toml)
 - [`scripts/ai_session_startup_lib.py`](../../../../scripts/ai_session_startup_lib.py)
 - [`scripts/validate-ai-assets.py`](../../../../scripts/validate-ai-assets.py)
 - testes Python correlatos

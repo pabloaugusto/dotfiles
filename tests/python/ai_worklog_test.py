@@ -7,6 +7,8 @@ import sys
 import tempfile
 import unittest
 
+from tests.python.control_plane_fixture import write_test_control_plane
+
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 SCRIPT = ROOT / "scripts" / "ai-worklog.py"
 REVIEW_SCRIPT = ROOT / "scripts" / "ai-review.py"
@@ -78,79 +80,83 @@ def init_git_repo(path: pathlib.Path) -> None:
 
 
 def write_ai_runtime(repo_root: pathlib.Path) -> None:
-    config_dir = repo_root / "config" / "ai"
-    config_dir.mkdir(parents=True, exist_ok=True)
-    (config_dir / "agents.yaml").write_text(
-        """version: 1
-roles:
-  ai-developer-config-policy:
-    enabled: true
-    required: false
-    category: governance
-    display_name: Engenheiro Agentes IA
-  python-reviewer:
-    enabled: true
-    required: false
-    category: quality
-    display_name: Revisor Python
+    write_test_control_plane(
+        repo_root,
+        agents_toml="""\
+version = 1
+
+[source_of_truth]
+display_name_registry = ".agents/registry/*.toml::display_name"
+roles = ".agents/config/agents.toml::roles"
+enablement = ".agents/config/agents.toml::enablement"
+runtime = ".agents/config/agents.toml::runtime"
+
+[identity]
+display_name_source = ".agents/registry/*.toml::display_name"
+chat_alias_source = ".agents/config/agents.toml::runtime.roles"
+enablement_source = ".agents/config/agents.toml::enablement.roles"
+
+[roles."ai-developer-config-policy"]
+enabled = true
+required = false
+display_name = "Engenheiro Agentes IA"
+
+[roles."python-reviewer"]
+enabled = true
+required = false
+display_name = "Revisor Python"
+
+[enablement]
+[enablement.defaults]
+registry_agents_enabled_by_default = true
+
+[enablement.roles]
+[enablement.roles."ai-developer-config-policy"]
+enabled = true
+[enablement.roles."python-reviewer"]
+enabled = true
+
+[enablement.registry_agents]
+
+[runtime]
+[runtime.policies]
+enabled_role_statuses = ["operational", "consultive"]
+required_role_statuses = ["operational", "consultive"]
+enabled_registry_statuses = ["operational", "consultive"]
+chat_owner_statuses = ["operational", "consultive"]
+chat_name_fallback_order = ["chat_alias", "display_name", "technical_id"]
+
+[runtime.roles]
+[runtime.roles."ai-developer-config-policy"]
+status = "operational"
+chat_alias = "Engenheiro Agentes IA"
+chat_owner_supported = true
+owner_mode = "primary"
+surfaces = ["jira", "chat", "active-execution"]
+process_scopes = ["governance"]
+runtime_artifacts = [".agents/config/agents.toml"]
+
+[runtime.roles."python-reviewer"]
+status = "consultive"
+chat_alias = "Revisor Python"
+chat_owner_supported = true
+owner_mode = "consultive"
+surfaces = ["jira", "chat", "review"]
+process_scopes = ["review"]
+runtime_artifacts = [".agents/config/agents.toml"]
+
+[runtime.registry_agents]
 """,
-        encoding="utf-8",
-    )
-    (config_dir / "agent-enablement.yaml").write_text(
-        """version: 1
-defaults:
-  registry_agents_enabled_by_default: true
-roles:
-  ai-developer-config-policy:
-    enabled: true
-  python-reviewer:
-    enabled: true
-registry_agents: {}
+        platforms_yaml="""\
+version: 1
+platforms:
+  atlassian:
+    enabled: false
 """,
-        encoding="utf-8",
-    )
-    (config_dir / "agent-operations.yaml").write_text(
-        "version: 1\nroles:\n  ai-developer-config-policy: {}\n  python-reviewer: {}\n",
-        encoding="utf-8",
-    )
-    (config_dir / "contracts.yaml").write_text(
-        "version: 1\nworkflow:\n  always_enabled_columns: [Backlog, Doing, Review, Done]\n",
-        encoding="utf-8",
-    )
-    (config_dir / "platforms.yaml").write_text(
-        "version: 1\nplatforms:\n  atlassian:\n    enabled: false\n",
-        encoding="utf-8",
-    )
-    (config_dir / "agent-runtime.yaml").write_text(
-        """version: 1
-policies:
-  enabled_role_statuses: [operational, consultive]
-  required_role_statuses: [operational, consultive]
-  enabled_registry_statuses: [operational, consultive]
-  chat_owner_statuses: [operational, consultive]
-  chat_name_fallback_order: [chat_alias, display_name, technical_id]
-roles:
-  ai-developer-config-policy:
-    status: operational
-    chat_alias: Engenheiro Agentes IA
-    chat_owner_supported: true
-    owner_mode: primary
-    surfaces: [jira, chat, active-execution]
-    process_scopes: [governance]
-    runtime_artifacts:
-      - config/ai/agent-runtime.yaml
-  python-reviewer:
-    status: consultive
-    chat_alias: Revisor Python
-    chat_owner_supported: true
-    owner_mode: consultive
-    surfaces: [jira, chat, review]
-    process_scopes: [review]
-    runtime_artifacts:
-      - config/ai/agent-runtime.yaml
-registry_agents: {}
-""",
-        encoding="utf-8",
+        registry_display_names={
+            "ai-developer-config-policy": "Engenheiro Agentes IA",
+            "python-reviewer": "Revisor Python",
+        },
     )
 
 

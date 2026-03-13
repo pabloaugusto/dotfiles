@@ -12,7 +12,7 @@ Definir source of truth, placement, lifecycle e publication documental.
 
 ## Fonte canonica e precedencia
 
-- [`../../config/ai/contracts.yaml`](../../config/ai/contracts.yaml)
+- [`../../.agents/config/startup.toml`](../../.agents/config/startup.toml)
 - [`../../docs/ai-operating-model.md`](../../docs/ai-operating-model.md)
 - [`../../docs/AI-DELEGATION-FLOW.md`](../../docs/AI-DELEGATION-FLOW.md)
 

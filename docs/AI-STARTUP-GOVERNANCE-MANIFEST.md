@@ -30,7 +30,7 @@ precise retomar o trabalho sem continuidade confiavel de contexto.
 
 ### Control plane e contratos
 
-- todos os arquivos em [`config/ai/`](../config/ai/)
+- todos os arquivos em [`config/`](../config/) e [`.agents/config/`](../.agents/config/)
 - [`.jira/config.yml`](../.jira/config.yml)
 
 ### Agents, cards, registry e orquestracao

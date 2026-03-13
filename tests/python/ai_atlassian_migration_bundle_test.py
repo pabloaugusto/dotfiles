@@ -24,15 +24,15 @@ class AtlassianMigrationBundleTests(unittest.TestCase):
             source_paths = {entry["path"] for entry in manifest["source_files"]}
             generated_paths = {entry["path"] for entry in manifest["generated_files"]}
 
-            self.assertIn("config/ai/jira-model.yaml", source_paths)
-            self.assertIn("config/ai/confluence-model.yaml", source_paths)
+            self.assertIn("config/jira-model.yaml", source_paths)
+            self.assertIn("config/confluence-model.yaml", source_paths)
             self.assertIn("generated/backfill-plan.json", generated_paths)
 
             with zipfile.ZipFile(zip_path) as archive:
                 names = set(archive.namelist())
             self.assertIn("manifest.json", names)
             self.assertIn("generated/backfill-plan.json", names)
-            self.assertIn("repo/config/ai/jira-model.yaml", names)
+            self.assertIn("repo/config/jira-model.yaml", names)
 
 
 if __name__ == "__main__":

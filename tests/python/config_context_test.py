@@ -108,7 +108,7 @@ class ConfigContextTests(unittest.TestCase):
         self.assertTrue(ai_path.as_posix().endswith(".agents/config/config.toml"))
         self.assertIn("regionalization", root_payload)
         self.assertIn("domains", app_payload)
-        self.assertIn("compatibility", ai_payload)
+        self.assertIn("domains", ai_payload)
 
 
 if __name__ == "__main__":

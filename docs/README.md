@@ -40,13 +40,13 @@ Mapa das documentacoes versionadas do projeto e ordem recomendada de leitura.
 ## Governanca e IA
 
 - [`docs/ai-operating-model.md`](ai-operating-model.md): contrato da camada de IA.
-- [`config/ai/platforms.yaml`](../config/ai/platforms.yaml): configuracao dev-time das plataformas externas da camada de IA.
-- [`config/ai/platforms.local.yaml.tpl`](../config/ai/platforms.local.yaml.tpl): template do overlay local ignorado no Git para refs reais de plataformas.
-- [`config/ai/agents.yaml`](../config/ai/agents.yaml): optionalidade e papeis operacionais do modelo multiagente.
-- [`config/ai/agent-operations.yaml`](../config/ai/agent-operations.yaml): contrato operacional por papel para `Jira` e `Confluence`, com passo a passo, handoffs e evidencia obrigatoria.
-- [`config/ai/contracts.yaml`](../config/ai/contracts.yaml): contratos Jira + Confluence do fluxo-alvo.
-- [`config/ai/sync-targets.yaml`](../config/ai/sync-targets.yaml): manifest declarativo da fundacao de sync, com classificacao de artefatos, outbox local duravel e destinos remotos elegiveis.
-- [`config/ai/confluence-model.yaml`](../config/ai/confluence-model.yaml): arquitetura de informacao alvo do space, com governanca `repo-first -> Confluence`, ownership de `source of truth` no `ai-documentation-manager` e publication no `ai-documentation-sync`.
+- [`config/platforms.yaml`](../config/platforms.yaml): configuracao dev-time das plataformas externas da camada de IA.
+- [`config/platforms.local.yaml.tpl`](../config/platforms.local.yaml.tpl): template do overlay local ignorado no Git para refs reais de plataformas.
+- [`.agents/config/agents.toml`](../.agents/config/agents.toml): optionalidade e papeis operacionais do modelo multiagente.
+- [`.agents/config/orchestration.toml`](../.agents/config/orchestration.toml): contrato operacional por papel para `Jira` e `Confluence`, com passo a passo, handoffs e evidencia obrigatoria.
+- [`.agents/config/startup.toml`](../.agents/config/startup.toml): contratos Jira + Confluence do fluxo-alvo.
+- [`config/sync-targets.yaml`](../config/sync-targets.yaml): manifest declarativo da fundacao de sync, com classificacao de artefatos, outbox local duravel e destinos remotos elegiveis.
+- [`config/confluence-model.yaml`](../config/confluence-model.yaml): arquitetura de informacao alvo do space, com governanca `repo-first -> Confluence`, ownership de `source of truth` no `ai-documentation-manager` e publication no `ai-documentation-sync`.
 - [`docs/ai-sync-foundation.md`](ai-sync-foundation.md): arquitetura-base do fluxo `repo declarativo -> outbox local duravel -> fonte perene remota`.
 - [`vendor/atlassian/README.md`](../vendor/atlassian/README.md): specs OpenAPI vendorizados da Atlassian para codegen e auditoria.
 - [`docs/atlassian-ia/README.md`](atlassian-ia/README.md): trilha versionada de contexto,

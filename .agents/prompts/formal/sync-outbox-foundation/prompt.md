@@ -27,7 +27,7 @@ Estas decisoes ja foram tomadas e NAO devem ser reabertas nesta rodada:
 7. `Confluence` e o destino principal para os runtime ledgers elegiveis
 8. o estado local deve funcionar como outbox duravel ate confirmacao remota
 9. o repo deve versionar um manifest declarativo de sincronizacao em
-   `sync-targets.yaml` dentro de [`config/ai/`](../../../../config/ai/)
+   `sync-targets.yaml` dentro de [`config/`](../../../../config/) e [`.agents/config/`](../../../../.agents/config/)
 
 ## Objetivo tecnico
 
@@ -137,7 +137,7 @@ Implementar suporte conceitual, no minimo, para:
 
 Implementar o contrato versionado em:
 
-[`config/ai/sync-targets.yaml`](../../../../config/ai/)
+[`config/sync-targets.yaml`](../../../../config/sync-targets.yaml)
 
 O manifest deve declarar, no minimo, por artefato:
 
@@ -331,7 +331,7 @@ Descobrir no repo real e adaptar a implementacao ao backend existente.
 Ao final, entregar:
 
 1. codigo implementado
-2. `sync-targets.yaml` em [`config/ai/`](../../../../config/ai/)
+2. `sync-targets.yaml` em [`config/`](../../../../config/) e [`.agents/config/`](../../../../.agents/config/)
 3. documentacao da arquitetura
 4. classificacao inicial dos artefatos vivos atuais
 5. testes e validacoes da nova camada

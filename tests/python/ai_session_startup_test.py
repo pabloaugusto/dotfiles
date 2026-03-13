@@ -24,6 +24,344 @@ from scripts.ai_session_startup_lib import (
 )
 
 
+def write_minimal_config_context_manifests(repo_root: Path) -> None:
+    root_config_dir = repo_root / "config"
+    app_config_dir = repo_root / "app" / "config"
+    agents_config_dir = repo_root / ".agents" / "config"
+    registry_dir = repo_root / ".agents" / "registry"
+    root_config_dir.mkdir(parents=True, exist_ok=True)
+    app_config_dir.mkdir(parents=True, exist_ok=True)
+    agents_config_dir.mkdir(parents=True, exist_ok=True)
+    registry_dir.mkdir(parents=True, exist_ok=True)
+    (root_config_dir / "config.toml").write_text(
+        textwrap.dedent(
+            """\
+            version = 1
+
+            [project]
+            id = "dotfiles"
+            source_of_truth = "config/config.toml"
+            default_config_ref_convention = "arquivo::chave"
+
+            [contexts]
+            dev_root = "config"
+            dev_manifest = "config/config.toml"
+            runtime_root = "app/config"
+            runtime_manifest = "app/config/config.toml"
+            ai_root = ".agents/config"
+            ai_manifest = ".agents/config/config.toml"
+
+            [resolution]
+            precedence = ["defaults", "context_config", "domain_files", "local_overlay", "environment", "cli"]
+            literal_lint_enabled = true
+            generated_tables_enabled = true
+            single_resolution_library_required = true
+
+            [regionalization]
+            timezone_name = "America/Sao_Paulo"
+            locale = "pt-BR"
+            language = "pt-BR"
+            currency = "BRL"
+            calendar_system = "gregorian"
+
+            [domains]
+            dev = "config/dev.toml"
+            integrations = "config/integrations.toml"
+            quality = "config/quality.toml"
+            time_surfaces = "config/time-surfaces.yaml"
+            schema = "config/schema.json"
+            """
+        ),
+        encoding="utf-8",
+    )
+    (root_config_dir / "dev.toml").write_text("version = 1\n", encoding="utf-8")
+    (root_config_dir / "integrations.toml").write_text(
+        textwrap.dedent(
+            """\
+            version = 1
+
+            [atlassian]
+            platforms = "config/platforms.yaml"
+            """
+        ),
+        encoding="utf-8",
+    )
+    (root_config_dir / "quality.toml").write_text("version = 1\n", encoding="utf-8")
+    (root_config_dir / "schema.json").write_text("{}\n", encoding="utf-8")
+    (root_config_dir / "time-surfaces.yaml").write_text(
+        "version: 1\nsurfaces: {}\n", encoding="utf-8"
+    )
+    (app_config_dir / "config.toml").write_text(
+        textwrap.dedent(
+            """\
+            version = 1
+
+            [context]
+            kind = "runtime"
+            source_of_truth = "app/config/config.toml"
+            inherits_regionalization = "config/config.toml::regionalization"
+
+            [domains]
+            runtime = "app/config/runtime.toml"
+            bootstrap = "app/config/bootstrap.toml"
+            links = "app/config/links.toml"
+            schema = "app/config/schema.json"
+            """
+        ),
+        encoding="utf-8",
+    )
+    (app_config_dir / "runtime.toml").write_text("version = 1\n", encoding="utf-8")
+    (app_config_dir / "bootstrap.toml").write_text("version = 1\n", encoding="utf-8")
+    (app_config_dir / "links.toml").write_text("version = 1\n", encoding="utf-8")
+    (app_config_dir / "schema.json").write_text("{}\n", encoding="utf-8")
+    (repo_root / ".agents" / "config.toml").write_text(
+        textwrap.dedent(
+            """\
+            version = 1
+
+            [skills]
+            required = []
+            mandatory_parallel = []
+
+            [agents]
+            required = []
+            mandatory_global = []
+            mandatory_platform = []
+
+            [orchestration]
+            capability_matrix = ".agents/orchestration/capability-matrix.yaml"
+            routing_policy = ".agents/orchestration/routing-policy.yaml"
+            task_card_schema = ".agents/orchestration/task-card.schema.json"
+            delegation_plan_schema = ".agents/orchestration/delegation-plan.schema.json"
+
+            [rules]
+            default = ".agents/rules/default.rules"
+            ci = ".agents/rules/ci.rules"
+            security = ".agents/rules/security.rules"
+            startup = ".agents/rules/startup.rules"
+            chat = ".agents/rules/chat.rules"
+            git = ".agents/rules/git.rules"
+            projections = ".agents/rules/projections.yaml"
+
+            [evals]
+            smoke = ".agents/evals/scenarios/smoke.md"
+            regression = ".agents/evals/scenarios/regression.md"
+            security = ".agents/evals/scenarios/security.md"
+            routing_dataset = ".agents/evals/datasets/routing.jsonl"
+            governance_dataset = ".agents/evals/datasets/governance.jsonl"
+
+            [ceremonies]
+            root = ".agents/cerimonias"
+            schema = ".agents/cerimonias/ceremony.schema.json"
+            default_log_root = ".agents/cerimonias/logs"
+
+            [identity]
+            registry_root = ".agents/registry"
+            display_name_field = "display_name"
+            card_title_mirror_required = true
+            fallback_display = "technical-id"
+            """
+        ),
+        encoding="utf-8",
+    )
+    (agents_config_dir / "config.toml").write_text(
+        textwrap.dedent(
+            """\
+            version = 1
+
+            [context]
+            kind = "ai"
+            source_of_truth = ".agents/config/config.toml"
+            inherits_regionalization = "config/config.toml::regionalization"
+
+            [domains]
+            agents = ".agents/config/agents.toml"
+            communication = ".agents/config/communication.toml"
+            startup = ".agents/config/startup.toml"
+            orchestration = ".agents/config/orchestration.toml"
+            reviews = ".agents/config/reviews.toml"
+            prompts = ".agents/config/prompts.toml"
+            migration_matrix = ".agents/config/migration-matrix.yaml"
+            schema = ".agents/config/schema.json"
+
+            """
+        ),
+        encoding="utf-8",
+    )
+    (agents_config_dir / "agents.toml").write_text(
+        textwrap.dedent(
+            """\
+            version = 1
+
+            [source_of_truth]
+            display_name_registry = ".agents/registry/*.toml::display_name"
+            roles = ".agents/config/agents.toml::roles"
+            enablement = ".agents/config/agents.toml::enablement"
+            runtime = ".agents/config/agents.toml::runtime"
+
+            [identity]
+            display_name_source = ".agents/registry/*.toml::display_name"
+            chat_alias_source = ".agents/config/agents.toml::runtime.roles"
+            enablement_source = ".agents/config/agents.toml::enablement.roles"
+
+            [roles]
+            [roles.ai-startup-governor]
+            enabled = true
+            required = true
+            category = "governance"
+            display_name = "Guardiao de Startup"
+
+            [roles.ai-linguistic-reviewer]
+            enabled = true
+            required = true
+            category = "knowledge"
+            display_name = "Pascoalete"
+
+            [enablement]
+            [enablement.defaults]
+            registry_agents_enabled_by_default = true
+
+            [enablement.roles]
+            [enablement.roles."ai-startup-governor"]
+            enabled = true
+
+            [enablement.roles."ai-linguistic-reviewer"]
+            enabled = true
+
+            [enablement.registry_agents]
+            [enablement.registry_agents.pascoalete]
+            enabled = true
+
+            [runtime]
+            [runtime.policies]
+            enabled_role_statuses = ["operational", "consultive"]
+            required_role_statuses = ["operational", "consultive"]
+            enabled_registry_statuses = ["operational", "consultive"]
+            chat_owner_statuses = ["operational", "consultive"]
+            chat_name_fallback_order = ["chat_alias", "display_name", "technical_id"]
+
+            [runtime.roles]
+            [runtime.roles."ai-startup-governor"]
+            status = "operational"
+            chat_alias = "Guardiao de Startup"
+            chat_owner_supported = true
+            owner_mode = "primary"
+            surfaces = ["startup", "chat"]
+            process_scopes = ["startup"]
+            runtime_artifacts = [".agents/config/agents.toml"]
+
+            [runtime.roles."ai-linguistic-reviewer"]
+            status = "consultive"
+            chat_alias = "Pascoalete"
+            chat_owner_supported = false
+            owner_mode = "consultive"
+            surfaces = ["chat"]
+            process_scopes = ["linguistic-review"]
+            runtime_artifacts = [".agents/config/agents.toml"]
+
+            [runtime.registry_agents]
+            [runtime.registry_agents.pascoalete]
+            status = "consultive"
+            chat_alias = "Pascoalete"
+            chat_owner_supported = false
+            owner_mode = "consultive"
+            surfaces = ["chat"]
+            process_scopes = ["linguistic-review"]
+            runtime_artifacts = [".agents/registry/pascoalete.toml"]
+            """
+        ),
+        encoding="utf-8",
+    )
+    (agents_config_dir / "communication.toml").write_text("version = 1\n", encoding="utf-8")
+    (agents_config_dir / "startup.toml").write_text(
+        textwrap.dedent(
+            """\
+            version = 1
+
+            [startup]
+            owner_role = "ai-startup-governor"
+            readiness_artifact = ".cache/ai/startup-ready.json"
+
+            [handoff]
+            chat_contract_ref = ".agents/config/communication.toml::chat"
+
+            [workflow]
+            always_enabled_columns = ["Backlog"]
+            """
+        ),
+        encoding="utf-8",
+    )
+    (agents_config_dir / "orchestration.toml").write_text(
+        textwrap.dedent(
+            """\
+            version = 1
+
+            [paths]
+            capability_matrix = ".agents/orchestration/capability-matrix.yaml"
+            routing_policy = ".agents/orchestration/routing-policy.yaml"
+            task_card_schema = ".agents/orchestration/task-card.schema.json"
+            delegation_plan_schema = ".agents/orchestration/delegation-plan.schema.json"
+
+            [delegation]
+            require_owner_issue = true
+            require_startup_artifact = true
+            require_applicable_rules = true
+            config_ref_convention = "arquivo::chave"
+            """
+        ),
+        encoding="utf-8",
+    )
+    (agents_config_dir / "reviews.toml").write_text(
+        textwrap.dedent(
+            """\
+            version = 1
+
+            [paths]
+            review_output_schema = ".agents/config/review-output.schema.json"
+            review_ledger = "docs/AI-REVIEW-LEDGER.md"
+            orthography_ledger = "docs/AI-ORTHOGRAPHY-LEDGER.md"
+            """
+        ),
+        encoding="utf-8",
+    )
+    (agents_config_dir / "prompts.toml").write_text("version = 1\n", encoding="utf-8")
+    (agents_config_dir / "migration-matrix.yaml").write_text("version: 1\n", encoding="utf-8")
+    (agents_config_dir / "schema.json").write_text("{}\n", encoding="utf-8")
+    (root_config_dir / "platforms.yaml").write_text(
+        textwrap.dedent(
+            """\
+            version: 1
+            platforms:
+              atlassian:
+                enabled: false
+                provider: none
+                auth:
+                  mode: disabled
+                  site_url: ""
+                  email: ""
+                  token: ""
+                  service_account: ""
+                  cloud_id: ""
+                jira:
+                  enabled: false
+                  project_key: ""
+                confluence:
+                  enabled: false
+                  space_key: ""
+            """
+        ),
+        encoding="utf-8",
+    )
+    (registry_dir / "ai-startup-governor.toml").write_text(
+        'id = "ai-startup-governor"\ndisplay_name = "Guardiao de Startup"\n',
+        encoding="utf-8",
+    )
+    (registry_dir / "pascoalete.toml").write_text(
+        'id = "pascoalete"\ndisplay_name = "Pascoalete"\n',
+        encoding="utf-8",
+    )
+
+
 class AiSessionStartupTests(unittest.TestCase):
     @staticmethod
     def _fake_git_inventory() -> dict[str, object]:
@@ -165,9 +503,9 @@ class AiSessionStartupTests(unittest.TestCase):
     def _fake_agent_enablement() -> dict[str, object]:
         return {
             "status": "ok",
-            "agents_path": "config/ai/agents.yaml",
-            "overlay_path": "config/ai/agent-enablement.yaml",
-            "overlay_local_path": "config/ai/agent-enablement.local.yaml",
+            "agents_path": ".agents/config/agents.toml",
+            "overlay_path": ".agents/config/agents.toml",
+            "overlay_local_path": ".agents/config/agents.local.toml",
             "overlay_local_active": False,
             "declared_roles": [
                 "ai-developer-config-policy",
@@ -186,8 +524,8 @@ class AiSessionStartupTests(unittest.TestCase):
     def _fake_agent_runtime() -> dict[str, object]:
         return {
             "status": "ok",
-            "runtime_path": "config/ai/agent-runtime.yaml",
-            "runtime_local_path": "config/ai/agent-runtime.local.yaml",
+            "runtime_path": ".agents/config/agents.toml",
+            "runtime_local_path": ".agents/config/agents.local.toml",
             "runtime_local_active": False,
             "covered_roles": [
                 "ai-developer-config-policy",
@@ -378,107 +716,126 @@ class AiSessionStartupTests(unittest.TestCase):
     def test_agent_enablement_payload_reads_effective_overlay(self) -> None:
         with tempfile.TemporaryDirectory() as tmp_dir:
             repo_root = Path(tmp_dir)
-            config_dir = repo_root / "config" / "ai"
+            write_minimal_config_context_manifests(repo_root)
+            agents_config_dir = repo_root / ".agents" / "config"
             registry_dir = repo_root / ".agents" / "registry"
-            config_dir.mkdir(parents=True)
-            registry_dir.mkdir(parents=True)
+            agents_config_dir.mkdir(parents=True, exist_ok=True)
+            registry_dir.mkdir(parents=True, exist_ok=True)
             (registry_dir / "pascoalete.toml").write_text(
                 'id = "pascoalete"\ndisplay_name = "Pascoalete"\n',
                 encoding="utf-8",
             )
-            (config_dir / "agents.yaml").write_text(
+            (agents_config_dir / "agents.toml").write_text(
                 textwrap.dedent(
                     """\
-                    version: 1
-                    defaults:
-                      registry_agents_enabled_by_default: true
-                    roles:
-                      ai-startup-governor:
-                        enabled: true
-                        required: true
-                      ai-linguistic-reviewer:
-                        enabled: true
-                        required: true
+                    version = 1
+
+                    [source_of_truth]
+                    display_name_registry = ".agents/registry/*.toml::display_name"
+                    roles = ".agents/config/agents.toml::roles"
+                    enablement = ".agents/config/agents.toml::enablement"
+                    runtime = ".agents/config/agents.toml::runtime"
+
+                    [identity]
+                    display_name_source = ".agents/registry/*.toml::display_name"
+                    chat_alias_source = ".agents/config/agents.toml::runtime.roles"
+                    enablement_source = ".agents/config/agents.toml::enablement.roles"
+
+                    [roles]
+                    [roles.ai-startup-governor]
+                    enabled = true
+                    required = true
+                    category = "governance"
+                    display_name = "Guardiao de Startup"
+
+                    [roles.ai-linguistic-reviewer]
+                    enabled = true
+                    required = true
+                    category = "knowledge"
+                    display_name = "Pascoalete"
+
+                    [enablement]
+                    [enablement.defaults]
+                    registry_agents_enabled_by_default = true
+
+                    [enablement.roles]
+                    [enablement.roles."ai-startup-governor"]
+                    enabled = true
+
+                    [enablement.roles."ai-linguistic-reviewer"]
+                    enabled = true
+
+                    [enablement.registry_agents]
+                    [enablement.registry_agents.pascoalete]
+                    enabled = true
+
+                    [runtime]
+                    [runtime.policies]
+                    enabled_role_statuses = ["operational", "consultive"]
+                    required_role_statuses = ["operational", "consultive"]
+                    enabled_registry_statuses = ["operational", "consultive"]
+                    chat_owner_statuses = ["operational", "consultive"]
+                    chat_name_fallback_order = ["chat_alias", "display_name", "technical_id"]
+
+                    [runtime.roles]
+                    [runtime.roles."ai-startup-governor"]
+                    status = "operational"
+                    chat_alias = "Guardiao de Startup"
+                    chat_owner_supported = true
+                    owner_mode = "primary"
+                    surfaces = ["startup", "chat"]
+                    process_scopes = ["startup"]
+                    runtime_artifacts = [".agents/config/agents.toml"]
+
+                    [runtime.roles."ai-linguistic-reviewer"]
+                    status = "consultive"
+                    chat_alias = "Pascoalete"
+                    chat_owner_supported = false
+                    owner_mode = "consultive"
+                    surfaces = ["chat"]
+                    process_scopes = ["linguistic-review"]
+                    runtime_artifacts = [".agents/config/agents.toml"]
+
+                    [runtime.registry_agents]
+                    [runtime.registry_agents.pascoalete]
+                    status = "consultive"
+                    chat_alias = "Pascoalete"
+                    chat_owner_supported = false
+                    owner_mode = "consultive"
+                    surfaces = ["chat"]
+                    process_scopes = ["linguistic-review"]
+                    runtime_artifacts = [".agents/registry/pascoalete.toml"]
                     """
                 ),
                 encoding="utf-8",
             )
-            (config_dir / "agent-enablement.yaml").write_text(
+            (agents_config_dir / "agents.local.toml").write_text(
                 textwrap.dedent(
                     """\
-                    version: 1
-                    roles:
-                      ai-startup-governor:
-                        enabled: true
-                      ai-linguistic-reviewer:
-                        enabled: false
-                    registry_agents:
-                      pascoalete:
-                        enabled: false
+                    version = 1
+
+                    [enablement.roles."ai-linguistic-reviewer"]
+                    enabled = false
+
+                    [runtime.roles."ai-linguistic-reviewer"]
+                    status = "disabled_stub"
+
+                    [enablement.registry_agents.pascoalete]
+                    enabled = false
+
+                    [runtime.registry_agents.pascoalete]
+                    status = "disabled_stub"
                     """
                 ),
-                encoding="utf-8",
-            )
-            (config_dir / "agent-operations.yaml").write_text(
-                "version: 1\nroles: {}\n",
-                encoding="utf-8",
-            )
-            (config_dir / "agent-runtime.yaml").write_text(
-                textwrap.dedent(
-                    """\
-                    version: 1
-                    policies:
-                      enabled_role_statuses: [operational, consultive]
-                      required_role_statuses: [operational, consultive]
-                      enabled_registry_statuses: [operational, consultive]
-                      chat_owner_statuses: [operational, consultive]
-                      chat_name_fallback_order: [chat_alias, display_name, technical_id]
-                    roles:
-                      ai-startup-governor:
-                        status: operational
-                        chat_alias: Guardiao de Startup
-                        chat_owner_supported: true
-                        owner_mode: primary
-                        surfaces: [startup, chat]
-                        process_scopes: [startup]
-                        runtime_artifacts:
-                          - config/ai/agents.yaml
-                      ai-linguistic-reviewer:
-                        status: disabled_stub
-                        chat_alias: Pascoalete
-                        chat_owner_supported: false
-                        owner_mode: consultive
-                        surfaces: [chat]
-                        process_scopes: [linguistic-review]
-                        runtime_artifacts:
-                          - config/ai/agents.yaml
-                    registry_agents:
-                      pascoalete:
-                        status: disabled_stub
-                        chat_alias: Pascoalete
-                        chat_owner_supported: false
-                        owner_mode: consultive
-                        surfaces: [chat]
-                        process_scopes: [linguistic-review]
-                        runtime_artifacts:
-                          - .agents/registry/pascoalete.toml
-                    """
-                ),
-                encoding="utf-8",
-            )
-            (config_dir / "contracts.yaml").write_text(
-                "version: 1\nworkflow:\n  always_enabled_columns:\n    - Backlog\n",
-                encoding="utf-8",
-            )
-            (config_dir / "platforms.yaml").write_text(
-                'version: 1\nplatforms:\n  atlassian:\n    enabled: false\n    provider: none\n    auth:\n      mode: disabled\n      site_url: ""\n      email: ""\n      token: ""\n      service_account: ""\n      cloud_id: ""\n    jira:\n      enabled: false\n      project_key: ""\n    confluence:\n      enabled: false\n      space_key: ""\n',
                 encoding="utf-8",
             )
 
             payload = agent_enablement_payload(repo_root)
 
         self.assertEqual(payload["status"], "ok")
-        self.assertEqual(payload["overlay_path"], "config/ai/agent-enablement.yaml")
+        self.assertEqual(payload["overlay_path"], ".agents/config/agents.toml")
+        self.assertEqual(payload["overlay_local_path"], ".agents/config/agents.local.toml")
+        self.assertTrue(payload["overlay_local_active"])
         self.assertEqual(payload["enabled_roles"], ["ai-startup-governor"])
         self.assertEqual(payload["disabled_roles"], ["ai-linguistic-reviewer"])
         self.assertEqual(payload["required_roles_disabled"], ["ai-linguistic-reviewer"])
@@ -487,6 +844,7 @@ class AiSessionStartupTests(unittest.TestCase):
     def test_rules_projections_payload_reads_catalog_and_required_layers(self) -> None:
         with tempfile.TemporaryDirectory() as tmp_dir:
             repo_root = Path(tmp_dir)
+            write_minimal_config_context_manifests(repo_root)
             rules_dir = repo_root / ".agents" / "rules"
             rules_dir.mkdir(parents=True)
             (repo_root / ".agents" / "config.toml").write_text(
@@ -713,6 +1071,71 @@ class AiSessionStartupTests(unittest.TestCase):
                 for item in status["blocking_findings"]
             )
         )
+
+    def test_startup_governor_status_resolves_worklog_owner_display_name_to_role_id(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            repo_root = Path(tmp_dir)
+            registry_dir = repo_root / ".agents" / "registry"
+            registry_dir.mkdir(parents=True)
+            (registry_dir / "ai-startup-governor.toml").write_text(
+                'id = "ai-startup-governor"\ndisplay_name = "Guardiao de Startup"\n',
+                encoding="utf-8",
+            )
+            (registry_dir / "ai-developer-config-policy.toml").write_text(
+                'id = "ai-developer-config-policy"\ndisplay_name = "Engenheiro Agentes IA"\n',
+                encoding="utf-8",
+            )
+            manifest_evidence = {"status": "ok", "sha256": "fixture-manifest"}
+
+            status = startup_governor_status_payload(
+                repo_root,
+                manifest_evidence=manifest_evidence,
+                pending_contracts=[],
+                git_inventory=self._fake_git_inventory(),
+                active_worklog_items=[
+                    {
+                        "ID": "WIP-DOT-219",
+                        "Tarefa": "Corrigir ownership do startup",
+                        "Branch": "codex/fix-DOT-219-config-context-finalization",
+                        "Responsavel": "Engenheiro Agentes IA",
+                    }
+                ],
+                active_execution={"status": "missing"},
+                agent_identity={
+                    "status": "ok",
+                    "registry_count": 2,
+                    "active_agent": "",
+                    "active_display_name": "desconhecido",
+                    "active_chat_name": "desconhecido",
+                    "fallback_display": "technical-id",
+                    "chat_name_fallback_order": [
+                        "chat_alias",
+                        "display_name",
+                        "technical_id",
+                    ],
+                },
+                agent_enablement=self._fake_agent_enablement(),
+                agent_runtime=self._fake_agent_runtime(),
+                rules_projections=self._fake_rules_projections(),
+                chat_communication={"status": "ok", "rules": ["usar portugues"]},
+                git_governance={"status": "ok", "sources": [], "rules": [], "enforcement_note": ""},
+                pea_status=self._fake_pea_status(),
+                startup_drift={"status": "clean", "findings": []},
+                fallback_status=self._fake_fallback_status(),
+                github_auth=self._fake_github_auth(),
+                atlassian_connectivity=self._fake_atlassian(),
+                prioritized_work_item={
+                    "source": "worklog-doing",
+                    "identifier": "DOT-219",
+                    "summary": "Corrigir ownership do startup",
+                },
+                pending_action="concluir_primeiro",
+            )
+
+        self.assertEqual(status["state"], "ready_for_work")
+        self.assertTrue(status["clearance_granted"])
+        self.assertEqual(status["handoff"]["next_owner_role"], "ai-developer-config-policy")
+        self.assertEqual(status["handoff"]["next_owner_display_name"], "Engenheiro Agentes IA")
 
     def test_write_startup_session_report_persists_markdown_report(self) -> None:
         with tempfile.TemporaryDirectory() as tmp_dir:
@@ -965,7 +1388,7 @@ class AiSessionStartupTests(unittest.TestCase):
         self.assertIn("## Runtime operacional de agentes", markdown)
         self.assertIn("## Governanca Git carregada no startup", markdown)
         self.assertIn("## PEA carregado no startup", markdown)
-        self.assertIn("config/ai/agent-enablement.yaml", markdown)
+        self.assertIn(".agents/config/agents.toml", markdown)
         self.assertIn(".agents/rules/projections.yaml", markdown)
         self.assertIn("pascoalete", markdown)
         self.assertIn("docs/git-conventions.md", markdown)
@@ -1082,10 +1505,8 @@ class AiSessionStartupTests(unittest.TestCase):
 
         self.assertEqual(payload["pending_chat_contract_count"], 2)
         self.assertEqual(payload["agent_identity"]["active_display_name"], "Engenheiro Agentes IA")
-        self.assertEqual(
-            payload["agent_enablement"]["overlay_path"], "config/ai/agent-enablement.yaml"
-        )
-        self.assertEqual(payload["agent_runtime"]["runtime_path"], "config/ai/agent-runtime.yaml")
+        self.assertEqual(payload["agent_enablement"]["overlay_path"], ".agents/config/agents.toml")
+        self.assertEqual(payload["agent_runtime"]["runtime_path"], ".agents/config/agents.toml")
         self.assertEqual(
             payload["rules_projections"]["catalog_path"], ".agents/rules/projections.yaml"
         )

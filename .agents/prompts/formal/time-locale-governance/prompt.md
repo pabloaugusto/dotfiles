@@ -382,7 +382,7 @@ surfaces:
   - surface_id: sync-outbox-events
     path_pattern:
       - "scripts/ai_sync_foundation_lib.py"
-      - "config/ai/sync-targets.yaml"
+      - "config/sync-targets.yaml"
     surface_kind: sync_event
     class: explicit_utc
     human_visible: false

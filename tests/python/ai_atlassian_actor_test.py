@@ -16,6 +16,7 @@ from scripts.ai_atlassian_actor_lib import (
     with_jira_actor,
 )
 from scripts.atlassian_platform_lib import AtlassianPlatformError
+from tests.python.control_plane_fixture import write_test_control_plane
 
 
 def write_actor_runtime(
@@ -23,57 +24,90 @@ def write_actor_runtime(
     *,
     include_account_id_secret: bool = True,
 ) -> None:
-    config_dir = repo_root / "config" / "ai"
-    config_dir.mkdir(parents=True, exist_ok=True)
-    (config_dir / "agents.yaml").write_text(
-        textwrap.dedent(
-            """\
-            version: 1
-            roles:
-              ai-product-owner:
-                enabled: true
-                required: true
-                display_name: Product Owner
+    account_id_block = ""
+    if include_account_id_secret:
+        account_id_block = 'account_id_secret_ref = "account-po"\n'
+    write_test_control_plane(
+        repo_root,
+        agents_toml=textwrap.dedent(
+            f"""\
+            version = 1
+
+            [source_of_truth]
+            display_name_registry = ".agents/registry/*.toml::display_name"
+            roles = ".agents/config/agents.toml::roles"
+            enablement = ".agents/config/agents.toml::enablement"
+            runtime = ".agents/config/agents.toml::runtime"
+
+            [identity]
+            display_name_source = ".agents/registry/*.toml::display_name"
+            chat_alias_source = ".agents/config/agents.toml::runtime.roles"
+            enablement_source = ".agents/config/agents.toml::enablement.roles"
+
+            [roles."ai-product-owner"]
+            enabled = true
+            required = true
+            display_name = "Product Owner"
+
+            [enablement]
+            [enablement.defaults]
+            registry_agents_enabled_by_default = true
+
+            [enablement.roles]
+            [enablement.roles."ai-product-owner"]
+            enabled = true
+
+            [enablement.registry_agents]
+
+            [runtime]
+            [runtime.policies]
+            enabled_role_statuses = ["operational", "consultive"]
+            required_role_statuses = ["operational", "consultive"]
+            enabled_registry_statuses = ["operational", "consultive"]
+            chat_owner_statuses = ["operational", "consultive"]
+            chat_name_fallback_order = ["chat_alias", "display_name", "technical_id"]
+
+            [runtime.roles]
+            [runtime.roles."ai-product-owner"]
+            status = "operational"
+            chat_alias = "PO"
+            chat_owner_supported = true
+            owner_mode = "primary"
+            surfaces = ["jira", "chat"]
+            process_scopes = ["backlog"]
+            runtime_artifacts = [".agents/config/agents.toml"]
+
+            [runtime.roles."ai-product-owner".atlassian_actor]
+            enabled = true
+            fallback_to_global_on_error = true
+            email_secret_ref = "ia-product-owner@example.com"
+            token_secret_ref = "token-po"
+            {account_id_block}
+
+            [runtime.roles."ai-product-owner".atlassian_actor.search_fallback]
+            enabled = true
+            prefer_email_lookup = true
+            query = "ia-product-owner"
+            expected_display_name = "ia-product-owner"
+            expected_account_type = "app"
+            require_active = true
+
+            [runtime.roles."ai-product-owner".atlassian_actor.surfaces."jira-comment"]
+            enabled = true
+
+            [runtime.roles."ai-product-owner".atlassian_actor.surfaces."jira-assignee"]
+            enabled = true
+
+            [runtime.roles."ai-product-owner".atlassian_actor.surfaces."confluence-comment"]
+            enabled = false
+
+            [runtime.roles."ai-product-owner".atlassian_actor.surfaces."confluence-page"]
+            enabled = false
+
+            [runtime.registry_agents]
             """
         ),
-        encoding="utf-8",
-    )
-    (config_dir / "agent-enablement.yaml").write_text(
-        textwrap.dedent(
-            """\
-            version: 1
-            defaults:
-              registry_agents_enabled_by_default: true
-            roles:
-              ai-product-owner:
-                enabled: true
-            registry_agents: {}
-            """
-        ),
-        encoding="utf-8",
-    )
-    (config_dir / "agent-operations.yaml").write_text(
-        textwrap.dedent(
-            """\
-            version: 1
-            roles:
-              ai-product-owner: {}
-            """
-        ),
-        encoding="utf-8",
-    )
-    (config_dir / "contracts.yaml").write_text(
-        textwrap.dedent(
-            """\
-            version: 1
-            workflow:
-              always_enabled_columns: [Backlog, Doing, Done]
-            """
-        ),
-        encoding="utf-8",
-    )
-    (config_dir / "platforms.yaml").write_text(
-        textwrap.dedent(
+        platforms_yaml=textwrap.dedent(
             """\
             version: 1
             platforms:
@@ -95,56 +129,7 @@ def write_actor_runtime(
                   space_key: DOT
             """
         ),
-        encoding="utf-8",
-    )
-    account_id_block = ""
-    if include_account_id_secret:
-        account_id_block = "                  account_id_secret_ref: account-po\n"
-    (config_dir / "agent-runtime.yaml").write_text(
-        textwrap.dedent(
-            f"""\
-            version: 1
-            policies:
-              enabled_role_statuses: [operational, consultive]
-              required_role_statuses: [operational, consultive]
-              enabled_registry_statuses: [operational, consultive]
-              chat_owner_statuses: [operational, consultive]
-              chat_name_fallback_order: [chat_alias, display_name, technical_id]
-            roles:
-              ai-product-owner:
-                status: operational
-                chat_alias: PO
-                chat_owner_supported: true
-                owner_mode: primary
-                surfaces: [jira, chat]
-                process_scopes: [backlog]
-                runtime_artifacts:
-                  - config/ai/agent-runtime.yaml
-                atlassian_actor:
-                  enabled: true
-                  fallback_to_global_on_error: true
-                  email_secret_ref: ia-product-owner@example.com
-                  token_secret_ref: token-po
-{account_id_block}                  search_fallback:
-                    enabled: true
-                    prefer_email_lookup: true
-                    query: ia-product-owner
-                    expected_display_name: ia-product-owner
-                    expected_account_type: app
-                    require_active: true
-                  surfaces:
-                    jira-comment:
-                      enabled: true
-                    jira-assignee:
-                      enabled: true
-                    confluence-comment:
-                      enabled: false
-                    confluence-page:
-                      enabled: false
-            registry_agents: {{}}
-            """
-        ),
-        encoding="utf-8",
+        registry_display_names={"ai-product-owner": "Product Owner"},
     )
     startup_dir = repo_root / ".cache" / "ai"
     startup_dir.mkdir(parents=True, exist_ok=True)

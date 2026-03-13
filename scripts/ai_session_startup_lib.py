@@ -260,9 +260,10 @@ def load_agent_display_names(repo_root: Path) -> dict[str, str]:
 
 
 def agent_identity_payload(repo_root: Path, active_execution: dict[str, Any]) -> dict[str, Any]:
-    active_agent = str(active_execution.get("agent_id", "")).strip() or str(
-        active_execution.get("agent", "")
-    ).strip()
+    active_agent = (
+        str(active_execution.get("agent_id", "")).strip()
+        or str(active_execution.get("agent", "")).strip()
+    )
     try:
         control_plane = load_ai_control_plane(repo_root)
     except Exception:
@@ -412,6 +413,43 @@ def _projection_rules(
         str(projection.get("machine_projection", "")).strip(),
         rules or list(fallback_rules),
     )
+
+
+def _resolve_startup_role_reference(
+    repo_root: Path,
+    raw_value: str,
+    *,
+    role_visible_names: dict[str, Any],
+    display_names: dict[str, str],
+) -> str:
+    normalized = str(raw_value or "").strip()
+    if not normalized:
+        return ""
+    normalized_folded = normalized.casefold()
+    for role_id, visible_name in role_visible_names.items():
+        candidate_role = str(role_id).strip()
+        candidate_visible = str(visible_name or "").strip()
+        if normalized_folded in {
+            candidate_role.casefold(),
+            candidate_visible.casefold(),
+        }:
+            return candidate_role
+    for role_id, display_name in display_names.items():
+        candidate_role = str(role_id).strip()
+        candidate_display = str(display_name or "").strip()
+        if normalized_folded in {
+            candidate_role.casefold(),
+            candidate_display.casefold(),
+        }:
+            return candidate_role
+    try:
+        control_plane = load_ai_control_plane(repo_root)
+        resolved = control_plane.resolve_role_reference(normalized)
+        if resolved:
+            return resolved
+    except Exception:
+        pass
+    return normalized
 
 
 def chat_communication_payload(
@@ -605,7 +643,9 @@ def delegation_context_payload(
         "current_branch": current_branch,
         "required_paths": [
             "AGENTS.md",
-            "config/ai/agent-enablement.yaml",
+            ".agents/config/agents.toml",
+            ".agents/config/startup.toml",
+            ".agents/config/orchestration.toml",
             "docs/AI-STARTUP-AND-RESTART.md",
             "docs/AI-DELEGATION-FLOW.md",
             "docs/ai-operating-model.md",
@@ -924,9 +964,10 @@ def startup_governor_status_payload(
     normalized_pending_action = _normalize_pending_action(pending_action)
     display_names = load_agent_display_names(repo_root)
     role_visible_names = agent_runtime.get("role_visible_names", {})
-    governor_display_name = str(
-        role_visible_names.get(STARTUP_GOVERNOR_AGENT, STARTUP_GOVERNOR_DISPLAY_NAME)
-    ).strip() or STARTUP_GOVERNOR_DISPLAY_NAME
+    governor_display_name = (
+        str(role_visible_names.get(STARTUP_GOVERNOR_AGENT, STARTUP_GOVERNOR_DISPLAY_NAME)).strip()
+        or STARTUP_GOVERNOR_DISPLAY_NAME
+    )
     blockers: list[str] = []
     warnings: list[str] = []
     progression = ["not_started"]
@@ -965,7 +1006,7 @@ def startup_governor_status_payload(
         blockers.append("overlay declarativo de enablement de agentes nao ficou carregado")
     elif agent_enablement.get("required_roles_disabled"):
         blockers.append(
-            "existem agentes marcados como required em config/ai/agents.yaml e desabilitados no overlay declarativo"
+            "existem roles marcadas como required em .agents/config/agents.toml e desabilitadas no overlay declarativo"
         )
 
     if agent_runtime.get("status") != "ok":
@@ -974,12 +1015,14 @@ def startup_governor_status_payload(
         if agent_runtime.get("missing_roles"):
             blockers.append("existem papeis declarados sem contrato de runtime operacional")
         if agent_runtime.get("orphan_role_contracts"):
-            blockers.append("config/ai/agent-runtime.yaml contem papeis sem declaracao em agents.yaml")
+            blockers.append(
+                ".agents/config/agents.toml runtime.roles contem papeis sem declaracao correspondente em roles"
+            )
         if agent_runtime.get("missing_registry_agents"):
             blockers.append("existem agentes declarativos sem contrato de runtime operacional")
         if agent_runtime.get("orphan_registry_contracts"):
             blockers.append(
-                "config/ai/agent-runtime.yaml contem contratos de registry sem agente declarativo correspondente"
+                ".agents/config/agents.toml runtime.registry_agents contem contratos sem agente declarativo correspondente"
             )
         if agent_runtime.get("required_roles_without_operational_runtime"):
             blockers.append(
@@ -1085,13 +1128,20 @@ def startup_governor_status_payload(
         json.dumps(snapshot, ensure_ascii=False, sort_keys=True).encode("utf-8")
     ).hexdigest()
 
-    next_owner_role = str(active_execution.get("agent_id", "")).strip() or str(
-        active_execution.get("agent", "")
-    ).strip()
-    if not next_owner_role and active_worklog_items:
-        next_owner_role = str(active_worklog_items[0].get("Responsavel", "")).strip()
-    if not next_owner_role and prioritized_work_item.get("identifier"):
-        next_owner_role = "ai-product-owner"
+    next_owner_reference = (
+        str(active_execution.get("agent_id", "")).strip()
+        or str(active_execution.get("agent", "")).strip()
+    )
+    if not next_owner_reference and active_worklog_items:
+        next_owner_reference = str(active_worklog_items[0].get("Responsavel", "")).strip()
+    if not next_owner_reference and prioritized_work_item.get("identifier"):
+        next_owner_reference = "ai-product-owner"
+    next_owner_role = _resolve_startup_role_reference(
+        repo_root,
+        next_owner_reference,
+        role_visible_names=role_visible_names,
+        display_names=display_names,
+    )
     next_owner_display_name = str(role_visible_names.get(next_owner_role, "")).strip()
     if not next_owner_display_name:
         next_owner_display_name = display_names.get(next_owner_role, next_owner_role or "a definir")
@@ -1425,9 +1475,7 @@ def render_startup_session_markdown(payload: dict[str, Any]) -> str:
         "- fallback visivel de chat/Jira: "
         f"`{', '.join(agent_runtime.get('chat_name_fallback_order', [])) or 'technical-id'}`"
     )
-    lines.append(
-        f"- roles cobertos por runtime: `{len(agent_runtime.get('covered_roles', []))}`"
-    )
+    lines.append(f"- roles cobertos por runtime: `{len(agent_runtime.get('covered_roles', []))}`")
     lines.append(
         f"- agentes declarativos cobertos por runtime: `{len(agent_runtime.get('covered_registry_agents', []))}`"
     )
@@ -1466,10 +1514,7 @@ def render_startup_session_markdown(payload: dict[str, Any]) -> str:
             f"`{', '.join(actor_state.get('search_fallback_resolutions', [])) or 'nenhuma'}`"
         )
     if agent_runtime.get("missing_roles"):
-        lines.append(
-            "- roles sem runtime: "
-            f"`{', '.join(agent_runtime.get('missing_roles', []))}`"
-        )
+        lines.append(f"- roles sem runtime: `{', '.join(agent_runtime.get('missing_roles', []))}`")
     if agent_runtime.get("missing_registry_agents"):
         lines.append(
             "- agentes declarativos sem runtime: "

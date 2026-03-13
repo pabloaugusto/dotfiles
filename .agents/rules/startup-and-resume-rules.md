@@ -16,7 +16,7 @@ Definir o startup do zero, o restart confiavel e a liberacao de
 
 - [`../../docs/AI-STARTUP-GOVERNANCE-MANIFEST.md`](../../docs/AI-STARTUP-GOVERNANCE-MANIFEST.md)
 - [`../../docs/AI-STARTUP-AND-RESTART.md`](../../docs/AI-STARTUP-AND-RESTART.md)
-- [`../../config/ai/contracts.yaml`](../../config/ai/contracts.yaml)
+- [`../../.agents/config/startup.toml`](../../.agents/config/startup.toml)
 - [`../../scripts/ai_session_startup_lib.py`](../../scripts/ai_session_startup_lib.py)
 
 ## Regras obrigatorias
@@ -32,7 +32,7 @@ Definir o startup do zero, o restart confiavel e a liberacao de
 - manifest resolvido
 - [`README.md`](README.md) e [`CATALOG.md`](CATALOG.md)
 - regras tematicas aplicaveis
-- [`../../config/ai/agent-enablement.yaml`](../../config/ai/agent-enablement.yaml)
+- [`../../.agents/config/agents.toml`](../../.agents/config/agents.toml)
 - contrato de chat e `display_name`
 
 ## Delegacao: o que o subagente precisa receber

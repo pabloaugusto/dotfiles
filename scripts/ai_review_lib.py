@@ -4,8 +4,8 @@ import subprocess
 from pathlib import Path
 from typing import Any
 
-from scripts.ai_control_plane_lib import load_ai_control_plane
 from scripts.ai_contract_paths import ROOT
+from scripts.ai_control_plane_lib import load_ai_control_plane
 from scripts.ai_dispatch_lib import build_route_payload
 from scripts.ai_lessons_lib import (
     extract_between,
@@ -39,7 +39,11 @@ SPECIALIST_REVIEWERS = {
 def _repo_root_for_document(path: Path) -> Path:
     candidate = path.resolve()
     for base in (candidate.parent, *candidate.parents):
-        if (base / "config" / "ai").is_dir():
+        if (
+            (base / "config" / "config.toml").is_file()
+            and (base / "app" / "config" / "config.toml").is_file()
+            and (base / ".agents" / "config" / "config.toml").is_file()
+        ):
             return base
     return candidate.parent.resolve()
 
@@ -67,9 +71,9 @@ def normalize_reviewer_reference(review_path: Path, reviewer: str) -> str:
 
 
 def review_template() -> str:
-    return """# AI Review Ledger
+    return f"""# AI Review Ledger
 
-Atualizado em: {updated_at}
+Atualizado em: {now_human_utc()}
 
 Registro operacional dos pareceres de revisao especializada por `worklog`.
 
@@ -106,7 +110,7 @@ Registro operacional dos pareceres de revisao especializada por `worklog`.
 | --- | --- | --- | --- | --- | --- | --- |
 | (sem itens) | - | - | - | - | - | - |
 <!-- ai-review:records:end -->
-""".format(updated_at=now_human_utc())
+"""
 
 
 def ensure_review_file(path: Path) -> None:

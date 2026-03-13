@@ -87,14 +87,14 @@ class ValidateAiAssetsTests(unittest.TestCase):
         self.assertIn("docs/TASKS.md", module.REQUIRED_FILES)
         self.assertIn("docs/WORKFLOWS.md", module.REQUIRED_FILES)
         self.assertIn("docs/secrets-and-auth.md", module.REQUIRED_FILES)
-        self.assertIn("config/ai/platforms.yaml", module.REQUIRED_FILES)
-        self.assertIn("config/ai/platforms.local.yaml.tpl", module.REQUIRED_FILES)
-        self.assertIn("config/ai/agents.yaml", module.REQUIRED_FILES)
-        self.assertIn("config/ai/agent-enablement.yaml", module.REQUIRED_FILES)
-        self.assertIn("config/ai/agent-operations.yaml", module.REQUIRED_FILES)
-        self.assertIn("config/ai/agent-runtime.yaml", module.REQUIRED_FILES)
-        self.assertIn("config/ai/contracts.yaml", module.REQUIRED_FILES)
-        self.assertIn("config/ai/sync-targets.yaml", module.REQUIRED_FILES)
+        self.assertIn("config/platforms.yaml", module.REQUIRED_FILES)
+        self.assertIn("config/platforms.local.yaml.tpl", module.REQUIRED_FILES)
+        self.assertIn(".agents/config/agents.toml", module.REQUIRED_FILES)
+        self.assertIn(".agents/config/agents.toml", module.REQUIRED_FILES)
+        self.assertIn(".agents/config/orchestration.toml", module.REQUIRED_FILES)
+        self.assertIn(".agents/config/agents.toml", module.REQUIRED_FILES)
+        self.assertIn(".agents/config/startup.toml", module.REQUIRED_FILES)
+        self.assertIn("config/sync-targets.yaml", module.REQUIRED_FILES)
         self.assertIn("app/df/secrets/secrets-ref.yaml", module.REQUIRED_FILES)
         self.assertIn("scripts/ai-prompt-governance.py", module.REQUIRED_FILES)
         self.assertIn("scripts/ai-route.py", module.REQUIRED_FILES)
@@ -220,8 +220,8 @@ class ValidateAiAssetsTests(unittest.TestCase):
         )
         self.assertIn(".agents/config.toml", module.AGENT_IDENTITY_REQUIRED_SNIPPETS)
         self.assertIn(
-            "display_name: Guardiao de Startup",
-            module.AGENT_IDENTITY_REQUIRED_SNIPPETS["config/ai/agents.yaml"],
+            'display_name = "Guardiao de Startup"',
+            module.AGENT_IDENTITY_REQUIRED_SNIPPETS[".agents/config/agents.toml"],
         )
         self.assertIn(
             "| Guardiao de Startup |",
@@ -244,46 +244,46 @@ class ValidateAiAssetsTests(unittest.TestCase):
             "## Projecoes executaveis",
             module.RULES_LAYER_REQUIRED_SNIPPETS[".agents/rules/CATALOG.md"],
         )
-        self.assertIn("config/ai/contracts.yaml", module.BOARD_OPERATION_REQUIRED_SNIPPETS)
+        self.assertIn(".agents/config/startup.toml", module.BOARD_OPERATION_REQUIRED_SNIPPETS)
         self.assertIn(
-            "reading_order: right-to-left",
-            module.BOARD_OPERATION_REQUIRED_SNIPPETS["config/ai/contracts.yaml"],
+            'reading_order = "right-to-left"',
+            module.BOARD_OPERATION_REQUIRED_SNIPPETS[".agents/config/startup.toml"],
         )
         self.assertIn(
             "verify-existing-open-issue-before-any-new-issue",
-            module.BOARD_OPERATION_REQUIRED_SNIPPETS["config/ai/contracts.yaml"],
+            module.BOARD_OPERATION_REQUIRED_SNIPPETS[".agents/config/startup.toml"],
         )
         self.assertIn(
             "verify-existing-open-epic-before-any-non-epic-demand",
-            module.BOARD_OPERATION_REQUIRED_SNIPPETS["config/ai/contracts.yaml"],
+            module.BOARD_OPERATION_REQUIRED_SNIPPETS[".agents/config/startup.toml"],
         )
         self.assertIn(
             "verify-existing-open-epic-before-any-new-epic-for-the-same-theme",
-            module.BOARD_OPERATION_REQUIRED_SNIPPETS["config/ai/contracts.yaml"],
+            module.BOARD_OPERATION_REQUIRED_SNIPPETS[".agents/config/startup.toml"],
         )
         self.assertIn(
             "verify-existing-open-issue-before-creating-any-new-issue",
-            module.BOARD_OPERATION_REQUIRED_SNIPPETS["config/ai/jira-model.yaml"],
+            module.BOARD_OPERATION_REQUIRED_SNIPPETS["config/jira-model.yaml"],
         )
         self.assertIn(
             "verify-existing-open-epic-before-creating-any-non-epic-demand",
-            module.BOARD_OPERATION_REQUIRED_SNIPPETS["config/ai/jira-model.yaml"],
+            module.BOARD_OPERATION_REQUIRED_SNIPPETS["config/jira-model.yaml"],
         )
         self.assertIn(
             "new-epic-creation-requires-proof-of-no-open-epic-match",
-            module.BOARD_OPERATION_REQUIRED_SNIPPETS["config/ai/jira-model.yaml"],
+            module.BOARD_OPERATION_REQUIRED_SNIPPETS["config/jira-model.yaml"],
         )
         self.assertIn(
             "verificar se a demanda ja nao existe antes de criar issue",
-            module.BOARD_OPERATION_REQUIRED_SNIPPETS["config/ai/agent-operations.yaml"],
+            module.BOARD_OPERATION_REQUIRED_SNIPPETS[".agents/config/orchestration.toml"],
         )
         self.assertIn(
             "assegurar que nao existe epic aberto cobrindo o tema antes de criar novo epic",
-            module.BOARD_OPERATION_REQUIRED_SNIPPETS["config/ai/agent-operations.yaml"],
+            module.BOARD_OPERATION_REQUIRED_SNIPPETS[".agents/config/orchestration.toml"],
         )
         self.assertIn(
             "auditar se toda criacao de issue ou epic passou pelo preflight de deduplicacao e reuse de epic",
-            module.BOARD_OPERATION_REQUIRED_SNIPPETS["config/ai/agent-operations.yaml"],
+            module.BOARD_OPERATION_REQUIRED_SNIPPETS[".agents/config/orchestration.toml"],
         )
         self.assertIn(
             "verificar se a issue ja existe",
@@ -307,36 +307,36 @@ class ValidateAiAssetsTests(unittest.TestCase):
         )
         self.assertIn("docs/git-conventions.md", module.GIT_GOVERNANCE_REQUIRED_SNIPPETS)
         self.assertIn(
-            "branch_pattern: <type>/<jira-key>-<slug>",
-            module.GIT_GOVERNANCE_REQUIRED_SNIPPETS["config/ai/contracts.yaml"],
+            'branch_pattern = "<type>/<jira-key>-<slug>"',
+            module.GIT_GOVERNANCE_REQUIRED_SNIPPETS[".agents/config/startup.toml"],
         )
         self.assertIn(
-            "branch_pattern: prompt/<jira-key>-<slug>",
-            module.GIT_GOVERNANCE_REQUIRED_SNIPPETS["config/ai/contracts.yaml"],
+            'branch_pattern = "prompt/<jira-key>-<slug>"',
+            module.GIT_GOVERNANCE_REQUIRED_SNIPPETS[".agents/config/startup.toml"],
         )
         self.assertIn(
             "changes-touching-agents-prompts-must-use-prompt-branch-type",
-            module.GIT_GOVERNANCE_REQUIRED_SNIPPETS["config/ai/contracts.yaml"],
+            module.GIT_GOVERNANCE_REQUIRED_SNIPPETS[".agents/config/startup.toml"],
         )
         self.assertIn(
-            'jira_summary_prefix: "PROMPT:"',
-            module.GIT_GOVERNANCE_REQUIRED_SNIPPETS["config/ai/contracts.yaml"],
+            'jira_summary_prefix = "PROMPT:"',
+            module.GIT_GOVERNANCE_REQUIRED_SNIPPETS[".agents/config/startup.toml"],
         )
         self.assertIn(
             "prompt-related-jira-issues-must-carry-prompt-label",
-            module.GIT_GOVERNANCE_REQUIRED_SNIPPETS["config/ai/contracts.yaml"],
+            module.GIT_GOVERNANCE_REQUIRED_SNIPPETS[".agents/config/startup.toml"],
         )
         self.assertIn(
             "versioned-prompt-pack-work-must-use-prompt-branch-type",
-            module.GIT_GOVERNANCE_REQUIRED_SNIPPETS["config/ai/agent-operations.yaml"],
+            module.GIT_GOVERNANCE_REQUIRED_SNIPPETS[".agents/config/orchestration.toml"],
         )
         self.assertIn(
             "versioned-prompt-pack-owner-issues-must-carry-prompt-label",
-            module.GIT_GOVERNANCE_REQUIRED_SNIPPETS["config/ai/agent-operations.yaml"],
+            module.GIT_GOVERNANCE_REQUIRED_SNIPPETS[".agents/config/orchestration.toml"],
         )
         self.assertIn(
-            "recovery_ledger: docs/AI-FALLBACK-LEDGER.md",
-            module.GIT_GOVERNANCE_REQUIRED_SNIPPETS["config/ai/contracts.yaml"],
+            'recovery_ledger = "docs/AI-FALLBACK-LEDGER.md"',
+            module.GIT_GOVERNANCE_REQUIRED_SNIPPETS[".agents/config/startup.toml"],
         )
         self.assertIn(
             "ledger_entry_required: true",
@@ -444,59 +444,59 @@ class ValidateAiAssetsTests(unittest.TestCase):
         )
         self.assertIn(
             "validate-gh-auth-and-graphql-before-github-pr-or-merge-operations",
-            module.STARTUP_GOVERNANCE_REQUIRED_SNIPPETS["config/ai/contracts.yaml"],
+            module.STARTUP_GOVERNANCE_REQUIRED_SNIPPETS[".agents/config/startup.toml"],
         )
         self.assertIn(
-            "version: 1",
-            module.STARTUP_GOVERNANCE_REQUIRED_SNIPPETS["config/ai/agent-enablement.yaml"],
+            "version = 1",
+            module.STARTUP_GOVERNANCE_REQUIRED_SNIPPETS[".agents/config/agents.toml"],
         )
         self.assertIn(
-            "registry_agents:",
-            module.STARTUP_GOVERNANCE_REQUIRED_SNIPPETS["config/ai/agent-enablement.yaml"],
+            "[enablement.registry_agents.pascoalete]",
+            module.STARTUP_GOVERNANCE_REQUIRED_SNIPPETS[".agents/config/agents.toml"],
         )
         self.assertIn(
-            "ai-startup-governor:",
-            module.STARTUP_GOVERNANCE_REQUIRED_SNIPPETS["config/ai/agent-enablement.yaml"],
+            "[roles.ai-startup-governor]",
+            module.STARTUP_GOVERNANCE_REQUIRED_SNIPPETS[".agents/config/agents.toml"],
         )
         self.assertIn(
-            "ai-linguistic-reviewer:",
-            module.STARTUP_GOVERNANCE_REQUIRED_SNIPPETS["config/ai/agent-enablement.yaml"],
+            "[roles.ai-linguistic-reviewer]",
+            module.STARTUP_GOVERNANCE_REQUIRED_SNIPPETS[".agents/config/agents.toml"],
         )
         self.assertIn(
-            "pascoalete:",
-            module.STARTUP_GOVERNANCE_REQUIRED_SNIPPETS["config/ai/agent-enablement.yaml"],
+            "[runtime.registry_agents.pascoalete]",
+            module.STARTUP_GOVERNANCE_REQUIRED_SNIPPETS[".agents/config/agents.toml"],
         )
         self.assertIn(
             "load-chat-communication-contract-before-first-user-facing-message",
-            module.STARTUP_GOVERNANCE_REQUIRED_SNIPPETS["config/ai/contracts.yaml"],
+            module.STARTUP_GOVERNANCE_REQUIRED_SNIPPETS[".agents/config/startup.toml"],
         )
         self.assertIn(
-            "startup_readiness:",
-            module.STARTUP_GOVERNANCE_REQUIRED_SNIPPETS["config/ai/contracts.yaml"],
+            "[startup_readiness]",
+            module.STARTUP_GOVERNANCE_REQUIRED_SNIPPETS[".agents/config/startup.toml"],
         )
         self.assertIn(
-            "owner_role: ai-startup-governor",
-            module.STARTUP_GOVERNANCE_REQUIRED_SNIPPETS["config/ai/contracts.yaml"],
+            'owner_role = "ai-startup-governor"',
+            module.STARTUP_GOVERNANCE_REQUIRED_SNIPPETS[".agents/config/startup.toml"],
         )
         self.assertIn(
-            "readiness_artifact: .cache/ai/startup-ready.json",
-            module.STARTUP_GOVERNANCE_REQUIRED_SNIPPETS["config/ai/contracts.yaml"],
+            'readiness_artifact = ".cache/ai/startup-ready.json"',
+            module.STARTUP_GOVERNANCE_REQUIRED_SNIPPETS[".agents/config/startup.toml"],
         )
         self.assertIn(
             "capture-current-branch-lifecycle-upstream-and-main-absorption-state",
-            module.STARTUP_GOVERNANCE_REQUIRED_SNIPPETS["config/ai/contracts.yaml"],
+            module.STARTUP_GOVERNANCE_REQUIRED_SNIPPETS[".agents/config/startup.toml"],
         )
         self.assertIn(
             "startup-governor-must-own-the-first-user-facing-message-until-ready-for-work",
-            module.STARTUP_GOVERNANCE_REQUIRED_SNIPPETS["config/ai/contracts.yaml"],
+            module.STARTUP_GOVERNANCE_REQUIRED_SNIPPETS[".agents/config/startup.toml"],
         )
         self.assertIn(
             "startup-governor-must-block-operational-output-when-clearance-is-not-ready",
-            module.STARTUP_GOVERNANCE_REQUIRED_SNIPPETS["config/ai/contracts.yaml"],
+            module.STARTUP_GOVERNANCE_REQUIRED_SNIPPETS[".agents/config/startup.toml"],
         )
         self.assertIn(
             "startup-report-must-expose-pea-status",
-            module.STARTUP_GOVERNANCE_REQUIRED_SNIPPETS["config/ai/contracts.yaml"],
+            module.STARTUP_GOVERNANCE_REQUIRED_SNIPPETS[".agents/config/startup.toml"],
         )
         self.assertIn(
             "startup_governor_status",
@@ -516,15 +516,15 @@ class ValidateAiAssetsTests(unittest.TestCase):
         )
         self.assertIn(
             "first-operational-chat-message-belongs-to-ai-startup-governor-until-ready-for-work",
-            module.STARTUP_GOVERNANCE_REQUIRED_SNIPPETS["config/ai/agent-operations.yaml"],
+            module.STARTUP_GOVERNANCE_REQUIRED_SNIPPETS[".agents/config/orchestration.toml"],
         )
         self.assertIn(
             "startup-governor-must-materialize-startup-ready-artifact-before-handoff",
-            module.STARTUP_GOVERNANCE_REQUIRED_SNIPPETS["config/ai/agent-operations.yaml"],
+            module.STARTUP_GOVERNANCE_REQUIRED_SNIPPETS[".agents/config/orchestration.toml"],
         )
         self.assertIn(
             "startup-governor-must-block-operational-output-when-clearance-is-not-ready",
-            module.STARTUP_GOVERNANCE_REQUIRED_SNIPPETS["config/ai/agent-operations.yaml"],
+            module.STARTUP_GOVERNANCE_REQUIRED_SNIPPETS[".agents/config/orchestration.toml"],
         )
         self.assertIn(
             "startup-ready.json",
@@ -544,7 +544,7 @@ class ValidateAiAssetsTests(unittest.TestCase):
         )
         self.assertIn(
             "zero-context-startup-must-load-chat-contract-before-first-user-message",
-            module.STARTUP_GOVERNANCE_REQUIRED_SNIPPETS["config/ai/agent-operations.yaml"],
+            module.STARTUP_GOVERNANCE_REQUIRED_SNIPPETS[".agents/config/orchestration.toml"],
         )
         self.assertIn(
             ".agents/prompts/CATALOG.md",
@@ -608,8 +608,8 @@ class ValidateAiAssetsTests(unittest.TestCase):
             module.SYNC_FOUNDATION_REQUIRED_SNIPPETS["docs/TASKS.md"],
         )
         self.assertIn(
-            "sync_foundation:",
-            module.SYNC_FOUNDATION_REQUIRED_SNIPPETS["config/ai/contracts.yaml"],
+            "[sync_foundation]",
+            module.SYNC_FOUNDATION_REQUIRED_SNIPPETS[".agents/config/startup.toml"],
         )
         self.assertIn(
             "DEPENDENCIAS DE PACKS E ORDEM SEGURA DE EXECUCAO",
@@ -666,24 +666,24 @@ class ValidateAiAssetsTests(unittest.TestCase):
             module.CATALOG_REQUIRED_SNIPPETS["docs/AI-GOVERNANCE-AND-REGRESSION.md"],
         )
         self.assertIn(
-            "config/ai/contracts.yaml",
+            ".agents/config/startup.toml",
             module.DOCUMENTATION_LAYER_REQUIRED_SNIPPETS,
         )
         self.assertIn(
-            "ownership_by_surface:",
-            module.DOCUMENTATION_LAYER_REQUIRED_SNIPPETS["config/ai/contracts.yaml"],
+            "[documentation.ownership_by_surface.documentation_links]",
+            module.DOCUMENTATION_LAYER_REQUIRED_SNIPPETS[".agents/config/startup.toml"],
         )
         self.assertIn(
             "documentation: repo-first-then-confluence",
-            module.DOCUMENTATION_LAYER_REQUIRED_SNIPPETS["config/ai/jira-model.yaml"],
+            module.DOCUMENTATION_LAYER_REQUIRED_SNIPPETS["config/jira-model.yaml"],
         )
         self.assertIn(
             "delivery_role: ai-documentation-sync",
-            module.DOCUMENTATION_LAYER_REQUIRED_SNIPPETS["config/ai/confluence-model.yaml"],
+            module.DOCUMENTATION_LAYER_REQUIRED_SNIPPETS["config/confluence-model.yaml"],
         )
         self.assertIn(
-            "ai-documentation-writer:",
-            module.DOCUMENTATION_LAYER_REQUIRED_SNIPPETS["config/ai/agent-operations.yaml"],
+            "[roles.ai-documentation-writer]",
+            module.DOCUMENTATION_LAYER_REQUIRED_SNIPPETS[".agents/config/orchestration.toml"],
         )
         self.assertIn(
             "Camada documental opera por competencia dominante",

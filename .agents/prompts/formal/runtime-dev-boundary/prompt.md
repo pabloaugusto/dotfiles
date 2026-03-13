@@ -152,7 +152,7 @@ Resultado esperado da fronteira:
 
 - centralizar a configuracao da camada de desenvolvimento em um arquivo
   principal dentro de [`config/`](../../../../config/)
-- redesenhar toda a arvore [`config/ai/`](../../../../config/ai/)
+- redesenhar toda a arvore [`config/`](../../../../config/) e [`.agents/config/`](../../../../.agents/config/)
 - mover segredos reais para Git
 - reescrever a toolchain de qualidade do repo
 - deslocar para [`pyproject.toml`](../../../../pyproject.toml) algo que hoje ja

@@ -38,7 +38,7 @@ tipagem e aderencia aos contratos do repositorio.
 - validacoes Python obrigatorias ou adicionais
 - recomendacao explicita de comentario e transicao no Jira
 - payload estruturado aderente ao schema
-  [`../../config/ai/review-output.schema.json`](../../config/ai/review-output.schema.json)
+  [`../../.agents/config/review-output.schema.json`](../../.agents/config/review-output.schema.json)
 
 ## Fluxo
 

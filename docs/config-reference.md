@@ -19,9 +19,8 @@ canonicas por contexto:
   produto dotfiles
 - [`../.agents/config/config.toml`](../.agents/config/config.toml) para startup,
   identidade, prompts, orchestration e demais contratos declarativos da IA
-
-Os arquivos legados em [`../config/ai/`](../config/ai/) permanecem apenas como
-ponte de compatibilidade durante a drenagem.
+- [`../.agents/config.toml`](../.agents/config.toml) como manifesto operacional
+  complementar da camada IA, sem papel de retrocompatibilidade
 
 Config canonica gerada:
 
@@ -76,8 +75,6 @@ Uso:
 Pontos criticos:
 
 - `domains.*`: entrypoints dos arquivos canonicos por dominio na camada IA
-- `compatibility.*`: ponte explicita para os artefatos legados que ainda nao
-  foram drenados
 - `inherits_regionalization`: referencia obrigatoria para
   [`../config/config.toml`](../config/config.toml)`::regionalization`
 
@@ -122,7 +119,7 @@ Pontos criticos:
 - `startup.readiness_artifact`: artefato obrigatorio de readiness
 - `handoff.chat_contract_ref`: referencia oficial do contrato de chat
 
-## [`config/ai/platforms.yaml`](../config/ai/platforms.yaml)
+## [`config/platforms.yaml`](../config/platforms.yaml)
 
 Uso:
 
@@ -136,7 +133,7 @@ Uso:
 
 Overlay local opcional:
 
-- [`config/ai/platforms.local.yaml.tpl`](../config/ai/platforms.local.yaml.tpl):
+- [`config/platforms.local.yaml.tpl`](../config/platforms.local.yaml.tpl):
   template versionado para materializacao local ignorada no Git
 - o arquivo local derivado desse template funciona como override dev-time
   opcional, pensado para refs `op://...` ou ajustes por projeto sem acoplar o
@@ -161,13 +158,12 @@ Pontos criticos:
 - referencia de rotacao e escopos:
   [`docs/atlassian-ia/2026-03-07-atlassian-auth-scopes-and-permissions.md`](atlassian-ia/2026-03-07-atlassian-auth-scopes-and-permissions.md)
 
-## [`config/ai/agents.yaml`](../config/ai/agents.yaml)
+## [`.agents/config/agents.toml`](../.agents/config/agents.toml)
 
 Uso:
 
 - liga/desliga papeis operacionais e capacidades opcionais do modelo multiagente
-- permanece como ponte legada ate a identidade declarativa migrar por completo
-  para [`.agents/config/agents.toml`](../.agents/config/agents.toml)
+- concentra identidade declarativa, enablement e runtime efetivo dos papeis
 
 Pontos criticos:
 
@@ -188,15 +184,12 @@ Pontos criticos:
 - `ai-documentation-agent`: papel legado de compatibilidade, sem ownership
   dominante da camada documental
 
-## [`config/ai/agent-runtime.yaml`](../config/ai/agent-runtime.yaml)
+## [`.agents/config/agents.toml`](../.agents/config/agents.toml)
 
 Uso:
 
 - concentra o runtime declarativo dos agentes e os contratos operacionais que
   precisam ser resolvidos em tempo de execucao
-- permanece como ponte legada durante a migracao para
-  [`.agents/config/agents.toml`](../.agents/config/agents.toml) e
-  [`.agents/config/communication.toml`](../.agents/config/communication.toml)
 - fica acima de naming, alias, ownership de chat, `Jira assignee` e service
   accounts proprias por agente
 
@@ -219,17 +212,17 @@ Regra perene:
 
 - se o agente tiver service account propria para a surface, usar ela
 - se nao tiver, usar a service account global de
-  [`config/ai/platforms.yaml`](../config/ai/platforms.yaml)
+  [`config/platforms.yaml`](../config/platforms.yaml)
 - se o fallback por busca ou por conta global precisar ser usado, o runtime
   abre incidente deduplicado no Jira
 
-## [`config/ai/agent-operations.yaml`](../config/ai/agent-operations.yaml)
+## [`.agents/config/orchestration.toml`](../.agents/config/orchestration.toml)
 
 Uso:
 
 - define o passo a passo operacional de cada papel do time em `Jira` e
   `Confluence`
-- separa identidade de papel em [`config/ai/agents.yaml`](../config/ai/agents.yaml)
+- separa identidade de papel em [`.agents/config/agents.toml`](../.agents/config/agents.toml)
   do contrato de atuacao efetiva nas ferramentas Atlassian
 
 Pontos criticos:
@@ -244,7 +237,7 @@ Pontos criticos:
 - `roles.*.operating_steps`: passo a passo humano-legivel que sera a base dos
   futuros agentes operacionais
 
-## [`config/ai/contracts.yaml`](../config/ai/contracts.yaml)
+## [`.agents/config/startup.toml`](../.agents/config/startup.toml)
 
 Uso:
 
@@ -278,7 +271,7 @@ Pontos criticos:
   criacao/atualizacao de pagina vinculada
 - `testing.optional_layers`: malhas adicionais de evidencia, como browser validation
 
-## [`config/ai/jira-model.yaml`](../config/ai/jira-model.yaml)
+## [`config/jira-model.yaml`](../config/jira-model.yaml)
 
 Uso:
 
@@ -301,7 +294,7 @@ Pontos criticos:
 - use [`docs/atlassian-ia/2026-03-07-jira-configuration-export.md`](atlassian-ia/2026-03-07-jira-configuration-export.md)
   para ver o delta ao vivo do tenant
 
-## [`config/ai/confluence-model.yaml`](../config/ai/confluence-model.yaml)
+## [`config/confluence-model.yaml`](../config/confluence-model.yaml)
 
 Uso:
 

@@ -5,8 +5,7 @@
   "required": [
     "version",
     "context",
-    "domains",
-    "compatibility"
+    "domains"
   ],
   "properties": {
     "version": {
@@ -28,13 +27,6 @@
         "bootstrap",
         "links",
         "schema"
-      ]
-    },
-    "compatibility": {
-      "type": "object",
-      "required": [
-        "legacy_df_root",
-        "legacy_bootstrap_root"
       ]
     }
   }

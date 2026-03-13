@@ -113,7 +113,7 @@ def render_agent_identity_table(repo_root: str | Path | None = None) -> str:
             "- manifesto da camada IA: [`.agents/config/config.toml`](../.agents/config/config.toml)",
             "- identidade declarativa: [`.agents/config/agents.toml`](../.agents/config/agents.toml)",
             "- runtime visivel de chat/Jira: [`.agents/config/communication.toml`](../.agents/config/communication.toml)",
-            "- ponte legada temporaria: [`.agents/config.toml`](../.agents/config.toml)",
+            "- manifesto operacional da camada IA: [`.agents/config.toml`](../.agents/config.toml)",
         ]
     )
     return "\n".join(lines).strip()

@@ -5,7 +5,7 @@
 - Relacionados:
   - [`2026-03-07-diagnostico-auth-e-acesso-atlassian.md`](2026-03-07-diagnostico-auth-e-acesso-atlassian.md)
   - [`2026-03-07-parecer-e-plano-inicial.md`](2026-03-07-parecer-e-plano-inicial.md)
-  - [`../../config/ai/platforms.yaml`](../../config/ai/platforms.yaml)
+  - [`../../config/platforms.yaml`](../../config/platforms.yaml)
   - [`../../docs/secrets-and-auth.md`](../../docs/secrets-and-auth.md)
 
 ## Regra canonica por produto
@@ -189,10 +189,10 @@ conta global.
 Contrato operacional:
 
 - se o agente tiver `atlassian_actor.enabled=true` na propria entrada de
-  [`../../config/ai/agent-runtime.yaml`](../../config/ai/agent-runtime.yaml),
+  [`../../.agents/config/agents.toml`](../../.agents/config/agents.toml),
   usar a conta dele nas surfaces habilitadas
 - se nao tiver bloco proprio, usar a conta global de
-  [`../../config/ai/platforms.yaml`](../../config/ai/platforms.yaml)
+  [`../../config/platforms.yaml`](../../config/platforms.yaml)
 - capacidades sao separadas por surface; uma conta pode comentar sem
   necessariamente poder atribuir issue
 - divergencia de permissao por surface deve aparecer como incidente especifico,
@@ -249,7 +249,7 @@ Se o item ja existir aberto, o runtime comenta nele; nao abre ruido novo.
 ## Observacoes do tenant atual
 
 - o secret configurado no overlay local derivado de
-  [`../../config/ai/platforms.local.yaml.tpl`](../../config/ai/platforms.local.yaml.tpl)
+  [`../../config/platforms.local.yaml.tpl`](../../config/platforms.local.yaml.tpl)
   resolve `space_key = DOT`
 - no tenant real, o `space` devolvido pela API v2 possui:
   - `key = DO`
@@ -286,7 +286,7 @@ tenant atual.
    - alinhar o layout visual do board
    - confirmar mapeamento das colunas
    - marcar `project.target_board.layout_confirmed=true` em
-     [`../../config/ai/jira-model.yaml`](../../config/ai/jira-model.yaml)
+     [`../../config/jira-model.yaml`](../../config/jira-model.yaml)
 
 Diagnostico tecnico que embasa esse checklist:
 
@@ -305,7 +305,7 @@ Conclusao operacional:
 
 1. Rotacionar o token no `1Password` mantendo o mesmo ref consumido pelo
    overlay local derivado de
-   [`../../config/ai/platforms.local.yaml.tpl`](../../config/ai/platforms.local.yaml.tpl).
+   [`../../config/platforms.local.yaml.tpl`](../../config/platforms.local.yaml.tpl).
 2. Garantir os scopes de `Jira core`, `Jira administracao`, `Jira Software
    board` e `Confluence core`.
 3. Confirmar que a service account continua com acesso aos tres produtos:

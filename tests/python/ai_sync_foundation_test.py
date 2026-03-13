@@ -20,7 +20,7 @@ from scripts.ai_sync_foundation_lib import (
 
 
 def write_sync_manifest(repo_root: pathlib.Path) -> None:
-    config_dir = repo_root / "config" / "ai"
+    config_dir = repo_root / "config"
     config_dir.mkdir(parents=True, exist_ok=True)
     (config_dir / "sync-targets.yaml").write_text(
         textwrap.dedent(
@@ -77,7 +77,7 @@ def write_sync_manifest(repo_root: pathlib.Path) -> None:
                   max_attempts_before_dead_letter: 5
             artifact_inventory:
               repo_canonical:
-                - path: config/ai/
+                - path: config/
                   reason: contratos
               runtime_ledger_candidates:
                 - path: prompt-runs

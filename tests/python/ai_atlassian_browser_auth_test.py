@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import pathlib
 import tempfile
-import textwrap
 import unittest
 
 from scripts.ai_atlassian_browser_auth_lib import (
@@ -11,112 +10,82 @@ from scripts.ai_atlassian_browser_auth_lib import (
     default_target_url,
     needs_reauthentication,
 )
+from tests.python.control_plane_fixture import write_test_control_plane
 
 
 def write_control_plane(repo_root: pathlib.Path) -> None:
-    config_dir = repo_root / "config" / "ai"
-    config_dir.mkdir(parents=True)
-    (config_dir / "agents.yaml").write_text(
-        textwrap.dedent(
-            """\
-            version: 1
-            roles:
-              ai-product-owner:
-                enabled: true
-                required: true
-            """
-        ),
-        encoding="utf-8",
-    )
-    (config_dir / "agent-enablement.yaml").write_text(
-        textwrap.dedent(
-            """\
-            version: 1
-            defaults:
-              registry_agents_enabled_by_default: true
-            roles:
-              ai-product-owner:
-                enabled: true
-            registry_agents: {}
-            """
-        ),
-        encoding="utf-8",
-    )
-    (config_dir / "agent-operations.yaml").write_text(
-        textwrap.dedent(
-            """\
-            version: 1
-            roles:
-              ai-product-owner:
-                jira:
-                  primary_issue_actions:
-                    - create-top-level-issue
-            """
-        ),
-        encoding="utf-8",
-    )
-    (config_dir / "agent-runtime.yaml").write_text(
-        textwrap.dedent(
-            """\
-            version: 1
-            policies:
-              enabled_role_statuses: [operational, consultive]
-              required_role_statuses: [operational, consultive]
-              enabled_registry_statuses: [operational, consultive]
-              chat_owner_statuses: [operational, consultive]
-              chat_name_fallback_order: [chat_alias, display_name, technical_id]
-            roles:
-              ai-product-owner:
-                status: operational
-                chat_alias: PO
-                chat_owner_supported: true
-                owner_mode: primary
-                surfaces: [jira, chat]
-                process_scopes: [backlog]
-                runtime_artifacts:
-                  - config/ai/agents.yaml
-            registry_agents: {}
-            """
-        ),
-        encoding="utf-8",
-    )
-    (config_dir / "contracts.yaml").write_text(
-        textwrap.dedent(
-            """\
-            version: 1
-            workflow:
-              always_enabled_columns:
-                - Backlog
-                - Doing
-                - Done
-            """
-        ),
-        encoding="utf-8",
-    )
-    (config_dir / "platforms.yaml").write_text(
-        textwrap.dedent(
-            """\
-            version: 1
-            platforms:
-              atlassian:
-                enabled: true
-                provider: atlassian-cloud
-                auth:
-                  mode: basic-api-token
-                  site_url: "https://example.atlassian.net"
-                  email: "bot@example.com"
-                  token: "token-123"
-                  service_account: "svc"
-                  cloud_id: "cloud-123"
-                jira:
-                  enabled: true
-                  project_key: "DOT"
-                confluence:
-                  enabled: true
-                  space_key: "DOT"
-            """
-        ),
-        encoding="utf-8",
+    write_test_control_plane(
+        repo_root,
+        agents_toml="""\
+version = 1
+
+[source_of_truth]
+display_name_registry = ".agents/registry/*.toml::display_name"
+roles = ".agents/config/agents.toml::roles"
+enablement = ".agents/config/agents.toml::enablement"
+runtime = ".agents/config/agents.toml::runtime"
+
+[identity]
+display_name_source = ".agents/registry/*.toml::display_name"
+chat_alias_source = ".agents/config/agents.toml::runtime.roles"
+enablement_source = ".agents/config/agents.toml::enablement.roles"
+
+[roles."ai-product-owner"]
+enabled = true
+required = true
+display_name = "Product Owner"
+
+[enablement]
+[enablement.defaults]
+registry_agents_enabled_by_default = true
+
+[enablement.roles]
+[enablement.roles."ai-product-owner"]
+enabled = true
+
+[enablement.registry_agents]
+
+[runtime]
+[runtime.policies]
+enabled_role_statuses = ["operational", "consultive"]
+required_role_statuses = ["operational", "consultive"]
+enabled_registry_statuses = ["operational", "consultive"]
+chat_owner_statuses = ["operational", "consultive"]
+chat_name_fallback_order = ["chat_alias", "display_name", "technical_id"]
+
+[runtime.roles]
+[runtime.roles."ai-product-owner"]
+status = "operational"
+chat_alias = "PO"
+chat_owner_supported = true
+owner_mode = "primary"
+surfaces = ["jira", "chat"]
+process_scopes = ["backlog"]
+runtime_artifacts = [".agents/config/agents.toml"]
+
+[runtime.registry_agents]
+""",
+        platforms_yaml="""\
+version: 1
+platforms:
+  atlassian:
+    enabled: true
+    provider: atlassian-cloud
+    auth:
+      mode: basic-api-token
+      site_url: "https://example.atlassian.net"
+      email: "bot@example.com"
+      token: "token-123"
+      service_account: "svc"
+      cloud_id: "cloud-123"
+    jira:
+      enabled: true
+      project_key: "DOT"
+    confluence:
+      enabled: true
+      space_key: "DOT"
+""",
+        registry_display_names={"ai-product-owner": "Product Owner"},
     )
 
 

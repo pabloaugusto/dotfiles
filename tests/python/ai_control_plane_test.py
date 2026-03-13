@@ -35,12 +35,10 @@ def write_control_plane(
     enable_po_actor: bool = False,
     include_po_jira_assignee: bool = True,
 ) -> None:
-    config_dir = repo_root / "config" / "ai"
     root_config_dir = repo_root / "config"
     app_config_dir = repo_root / "app" / "config"
     agents_config_dir = repo_root / ".agents" / "config"
     registry_dir = repo_root / ".agents" / "registry"
-    config_dir.mkdir(parents=True)
     root_config_dir.mkdir(parents=True, exist_ok=True)
     app_config_dir.mkdir(parents=True, exist_ok=True)
     agents_config_dir.mkdir(parents=True, exist_ok=True)
@@ -104,6 +102,9 @@ def write_control_plane(
 
             [context]
             kind = "dev-integrations"
+
+            [atlassian]
+            platforms = "config/platforms.yaml"
             """
         ),
         encoding="utf-8",
@@ -140,10 +141,6 @@ def write_control_plane(
             bootstrap = "app/config/bootstrap.toml"
             links = "app/config/links.toml"
             schema = "app/config/schema.json"
-
-            [compatibility]
-            legacy_df_root = "app/df"
-            legacy_bootstrap_root = "app/bootstrap"
             """
         ),
         encoding="utf-8",
@@ -183,30 +180,142 @@ def write_control_plane(
             migration_matrix = ".agents/config/migration-matrix.yaml"
             schema = ".agents/config/schema.json"
 
-            [compatibility]
-            bridge_manifest = ".agents/config.toml"
-            legacy_control_plane_root = "config/ai"
-            legacy_agents = "config/ai/agents.yaml"
-            legacy_agent_enablement = "config/ai/agent-enablement.yaml"
-            legacy_agent_runtime = "config/ai/agent-runtime.yaml"
-            legacy_agent_operations = "config/ai/agent-operations.yaml"
-            legacy_contracts = "config/ai/contracts.yaml"
             """
         ),
         encoding="utf-8",
     )
+    toml_po_actor_block = ""
+    if enable_po_actor:
+        toml_po_actor_block = textwrap.dedent(
+            """\
+
+            [runtime.roles."ai-product-owner".atlassian_actor]
+            enabled = true
+            fallback_to_global_on_error = true
+            email_secret_ref = "op://secrets/dotfiles/atlassian-service-accounts/ai-product-owner-email"
+            token_secret_ref = "op://secrets/dotfiles/atlassian-service-accounts/ai-product-owner-api-token"
+            account_id_secret_ref = "op://secrets/dotfiles/atlassian-service-accounts/ai-product-owner-id"
+
+            [runtime.roles."ai-product-owner".atlassian_actor.search_fallback]
+            enabled = true
+            query = "ia-product-owner"
+            expected_display_name = "ia-product-owner"
+
+            [runtime.roles."ai-product-owner".atlassian_actor.surfaces."jira-comment"]
+            enabled = true
+
+            [runtime.roles."ai-product-owner".atlassian_actor.surfaces."jira-assignee"]
+            enabled = true
+
+            [runtime.roles."ai-product-owner".atlassian_actor.surfaces."confluence-comment"]
+            enabled = false
+
+            [runtime.roles."ai-product-owner".atlassian_actor.surfaces."confluence-page"]
+            enabled = false
+            """
+        )
+    toml_po_jira_assignee_block = ""
+    if include_po_jira_assignee:
+        toml_po_jira_assignee_block = textwrap.dedent(
+            """\
+
+            [runtime.roles."ai-product-owner".jira_assignee]
+            account_id = "account-po"
+            """
+        )
     (agents_config_dir / "agents.toml").write_text(
         textwrap.dedent(
-            """\
+            f"""\
             version = 1
 
             [source_of_truth]
             display_name_registry = ".agents/registry/*.toml::display_name"
+            roles = ".agents/config/agents.toml::roles"
+            enablement = ".agents/config/agents.toml::enablement"
+            runtime = ".agents/config/agents.toml::runtime"
 
             [identity]
             display_name_source = ".agents/registry/*.toml::display_name"
-            chat_alias_source = "config/ai/agent-runtime.yaml::roles"
-            enablement_source = "config/ai/agent-enablement.yaml::roles"
+            chat_alias_source = ".agents/config/agents.toml::runtime.roles"
+            enablement_source = ".agents/config/agents.toml::enablement.roles"
+
+            [roles."ai-product-owner"]
+            enabled = true
+            required = true
+            display_name = "PO"
+
+            [roles."ai-browser-validator"]
+            enabled = false
+            required = false
+            display_name = "Browser Validator"
+
+            [roles."ai-seo-specialist"]
+            enabled = {"true" if enable_seo else "false"}
+            required = false
+            display_name = "SEO Specialist"
+
+            [enablement.defaults]
+            roles_source_of_truth = ".agents/config/agents.toml::roles"
+            registry_agents_enabled_by_default = true
+
+            [enablement.roles."ai-product-owner"]
+            enabled = true
+
+            [enablement.roles."ai-browser-validator"]
+            enabled = false
+
+            [enablement.roles."ai-seo-specialist"]
+            enabled = {"true" if enable_seo else "false"}
+
+            [enablement.registry_agents.pascoalete]
+            enabled = true
+
+            [runtime.policies]
+            enabled_role_statuses = ["operational", "consultive"]
+            required_role_statuses = ["operational", "consultive"]
+            enabled_registry_statuses = ["operational", "consultive"]
+            chat_owner_statuses = ["operational", "consultive"]
+            chat_name_fallback_order = ["chat_alias", "display_name", "technical_id"]
+
+            [runtime.roles."ai-product-owner"]
+            status = "operational"
+            chat_alias = "PO"
+            chat_owner_supported = true
+            owner_mode = "primary"
+            surfaces = ["jira", "chat"]
+            process_scopes = ["backlog"]
+            runtime_artifacts = [".agents/config/agents.toml"]
+            {toml_po_jira_assignee_block}{toml_po_actor_block}
+
+            [runtime.roles."ai-browser-validator"]
+            status = "disabled_stub"
+            chat_alias = "Browser Validator"
+            chat_owner_supported = false
+            owner_mode = "optional"
+            surfaces = ["browser"]
+            process_scopes = ["browser-validation"]
+            runtime_artifacts = [".agents/config/agents.toml"]
+
+            [runtime.roles."ai-seo-specialist"]
+            status = {"\"operational\"" if enable_seo else "\"disabled_stub\""}
+            chat_alias = "SEO Specialist"
+            chat_owner_supported = {"true" if enable_seo else "false"}
+            owner_mode = "optional"
+            surfaces = ["jira", "chat"]
+            process_scopes = ["seo-review"]
+            runtime_artifacts = [".agents/config/agents.toml"]
+
+            [runtime.roles."ai-seo-specialist".jira_assignee]
+            account_id = {"\"account-seo\"" if enable_seo else "\"\""}
+
+            [runtime.registry_agents.pascoalete]
+            status = "operational"
+            chat_alias = "Pascoalete"
+            chat_owner_supported = true
+            owner_mode = "consultive"
+            surfaces = ["chat", "docs"]
+            process_scopes = ["linguistic-review"]
+            runtime_artifacts = [".agents/registry/pascoalete.toml"]
             """
         ),
         encoding="utf-8",
@@ -253,6 +362,13 @@ def write_control_plane(
             blocked_before_ready = true
             next_owner_resolution = "active_execution_agent"
             chat_contract_ref = ".agents/config/communication.toml::chat"
+
+            [workflow]
+            always_enabled_columns = ["Backlog", "Ready"]
+
+            [[workflow.optional_columns]]
+            name = "SEO Review"
+            enabled_when_role = "ai-seo-specialist"
             """
         ),
         encoding="utf-8",
@@ -267,11 +383,38 @@ def write_control_plane(
             routing_policy = ".agents/orchestration/routing-policy.yaml"
             task_card_schema = ".agents/orchestration/task-card.schema.json"
             delegation_plan_schema = ".agents/orchestration/delegation-plan.schema.json"
+
+            [delegation]
+            require_owner_issue = true
+            require_startup_artifact = true
+            require_applicable_rules = true
+            config_ref_convention = "arquivo::chave"
+
+            [roles."ai-product-owner".jira]
+            primary_issue_actions = ["create-top-level-issue"]
+
+            [roles."ai-browser-validator".jira]
+            primary_issue_actions = ["browser-validation"]
+
+            [roles."ai-seo-specialist".jira]
+            primary_issue_actions = ["seo-review"]
             """
         ),
         encoding="utf-8",
     )
-    (agents_config_dir / "reviews.toml").write_text("version = 1\n", encoding="utf-8")
+    (agents_config_dir / "reviews.toml").write_text(
+        textwrap.dedent(
+            """\
+            version = 1
+
+            [paths]
+            review_output_schema = ".agents/config/review-output.schema.json"
+            review_ledger = "docs/AI-REVIEW-LEDGER.md"
+            orthography_ledger = "docs/AI-ORTHOGRAPHY-LEDGER.md"
+            """
+        ),
+        encoding="utf-8",
+    )
     (agents_config_dir / "prompts.toml").write_text("version = 1\n", encoding="utf-8")
     (agents_config_dir / "migration-matrix.yaml").write_text(
         "version: 1\nentries: []\n", encoding="utf-8"
@@ -331,165 +474,7 @@ def write_control_plane(
         'id = "pascoalete"\ndisplay_name = "Pascoalete"\n',
         encoding="utf-8",
     )
-    (config_dir / "agents.yaml").write_text(
-        textwrap.dedent(
-            f"""\
-            version: 1
-            roles:
-              ai-product-owner:
-                enabled: true
-                required: true
-              ai-browser-validator:
-                enabled: false
-                required: false
-              ai-seo-specialist:
-                enabled: {"true" if enable_seo else "false"}
-                required: false
-            """
-        ),
-        encoding="utf-8",
-    )
-    (config_dir / "agent-enablement.yaml").write_text(
-        textwrap.dedent(
-            f"""\
-            version: 1
-            defaults:
-              registry_agents_enabled_by_default: true
-            roles:
-              ai-product-owner:
-                enabled: true
-              ai-browser-validator:
-                enabled: false
-              ai-seo-specialist:
-                enabled: {"true" if enable_seo else "false"}
-            registry_agents:
-              pascoalete:
-                enabled: true
-            """
-        ),
-        encoding="utf-8",
-    )
-    (config_dir / "agent-operations.yaml").write_text(
-        textwrap.dedent(
-            """\
-            version: 1
-            roles:
-              ai-product-owner:
-                jira:
-                  primary_issue_actions:
-                    - create-top-level-issue
-              ai-browser-validator:
-                jira:
-                  primary_issue_actions:
-                    - browser-validation
-              ai-seo-specialist:
-                jira:
-                  primary_issue_actions:
-                    - seo-review
-            """
-        ),
-        encoding="utf-8",
-    )
-    po_actor_block = ""
-    if enable_po_actor:
-        po_actor_block = (
-            "                atlassian_actor:\n"
-            "                  enabled: true\n"
-            "                  fallback_to_global_on_error: true\n"
-            "                  email_secret_ref: op://secrets/dotfiles/atlassian-service-accounts/ai-product-owner-email\n"
-            "                  token_secret_ref: op://secrets/dotfiles/atlassian-service-accounts/ai-product-owner-api-token\n"
-            "                  account_id_secret_ref: op://secrets/dotfiles/atlassian-service-accounts/ai-product-owner-id\n"
-            "                  search_fallback:\n"
-            "                    enabled: true\n"
-            "                    query: ia-product-owner\n"
-            "                    expected_display_name: ia-product-owner\n"
-            "                  surfaces:\n"
-            "                    jira-comment:\n"
-            "                      enabled: true\n"
-            "                    jira-assignee:\n"
-            "                      enabled: true\n"
-            "                    confluence-comment:\n"
-            "                      enabled: false\n"
-            "                    confluence-page:\n"
-            "                      enabled: false\n"
-        )
-
-    po_jira_assignee_block = ""
-    if include_po_jira_assignee:
-        po_jira_assignee_block = (
-            "                jira_assignee:\n                  account_id: account-po\n"
-        )
-
-    (config_dir / "agent-runtime.yaml").write_text(
-        textwrap.dedent(
-            f"""\
-            version: 1
-            policies:
-              enabled_role_statuses: [operational, consultive]
-              required_role_statuses: [operational, consultive]
-              enabled_registry_statuses: [operational, consultive]
-              chat_owner_statuses: [operational, consultive]
-              chat_name_fallback_order: [chat_alias, display_name, technical_id]
-            roles:
-              ai-product-owner:
-                status: operational
-                chat_alias: PO
-                chat_owner_supported: true
-                owner_mode: primary
-                surfaces: [jira, chat]
-                process_scopes: [backlog]
-{po_jira_assignee_block}{po_actor_block}                runtime_artifacts:
-                  - config/ai/agents.yaml
-              ai-browser-validator:
-                status: disabled_stub
-                chat_alias: Browser Validator
-                chat_owner_supported: false
-                owner_mode: optional
-                surfaces: [browser]
-                process_scopes: [browser-validation]
-                runtime_artifacts:
-                  - config/ai/agents.yaml
-              ai-seo-specialist:
-                status: {"operational" if enable_seo else "disabled_stub"}
-                chat_alias: SEO Specialist
-                chat_owner_supported: {"true" if enable_seo else "false"}
-                owner_mode: optional
-                surfaces: [jira, chat]
-                process_scopes: [seo-review]
-                jira_assignee:
-                  account_id: {"account-seo" if enable_seo else '""'}
-                runtime_artifacts:
-                  - config/ai/agents.yaml
-            registry_agents:
-              pascoalete:
-                status: operational
-                chat_alias: Pascoalete
-                chat_owner_supported: true
-                owner_mode: consultive
-                surfaces: [chat, docs]
-                process_scopes: [linguistic-review]
-                runtime_artifacts:
-                  - .agents/registry/pascoalete.toml
-            """
-        ),
-        encoding="utf-8",
-    )
-    (config_dir / "contracts.yaml").write_text(
-        textwrap.dedent(
-            """\
-            version: 1
-            workflow:
-              always_enabled_columns:
-                - Backlog
-                - Ready
-              optional_columns:
-                - name: SEO Review
-                  enabled_when_role: ai-seo-specialist
-            """
-        ),
-        encoding="utf-8",
-    )
-    (config_dir / "platforms.yaml").write_text(
+    (root_config_dir / "platforms.yaml").write_text(
         textwrap.dedent(
             f"""\
             version: 1
@@ -641,7 +626,7 @@ class AiControlPlaneTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             repo_root = pathlib.Path(tmp)
             write_control_plane(repo_root)
-            (repo_root / "config" / "ai" / "platforms.local.yaml").write_text(
+            (repo_root / "config" / "platforms.local.yaml").write_text(
                 textwrap.dedent(
                     """\
                     version: 1
@@ -654,13 +639,13 @@ class AiControlPlaneTests(unittest.TestCase):
                 ),
                 encoding="utf-8",
             )
-            (repo_root / "config" / "ai" / "agent-enablement.local.yaml").write_text(
+            (repo_root / ".agents" / "config" / "agents.local.toml").write_text(
                 textwrap.dedent(
                     """\
-                    version: 1
-                    roles:
-                      ai-browser-validator:
-                        enabled: true
+                    version = 1
+
+                    [enablement.roles."ai-browser-validator"]
+                    enabled = true
                     """
                 ),
                 encoding="utf-8",
@@ -680,13 +665,13 @@ class AiControlPlaneTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             repo_root = pathlib.Path(tmp)
             write_control_plane(repo_root)
-            (repo_root / "config" / "ai" / "agent-enablement.local.yaml").write_text(
+            (repo_root / ".agents" / "config" / "agents.local.toml").write_text(
                 textwrap.dedent(
                     """\
-                    version: 1
-                    registry_agents:
-                      pascoalete:
-                        enabled: false
+                    version = 1
+
+                    [enablement.registry_agents.pascoalete]
+                    enabled = false
                     """
                 ),
                 encoding="utf-8",
@@ -700,15 +685,25 @@ class AiControlPlaneTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             repo_root = pathlib.Path(tmp)
             write_control_plane(repo_root)
-            (repo_root / "config" / "ai" / "agent-operations.yaml").write_text(
+            (repo_root / ".agents" / "config" / "orchestration.toml").write_text(
                 textwrap.dedent(
                     """\
-                    version: 1
-                    roles:
-                      ai-product-owner:
-                        jira:
-                          primary_issue_actions:
-                            - create-top-level-issue
+                    version = 1
+
+                    [paths]
+                    capability_matrix = ".agents/orchestration/capability-matrix.yaml"
+                    routing_policy = ".agents/orchestration/routing-policy.yaml"
+                    task_card_schema = ".agents/orchestration/task-card.schema.json"
+                    delegation_plan_schema = ".agents/orchestration/delegation-plan.schema.json"
+
+                    [delegation]
+                    require_owner_issue = true
+                    require_startup_artifact = true
+                    require_applicable_rules = true
+                    config_ref_convention = "arquivo::chave"
+
+                    [roles."ai-product-owner".jira]
+                    primary_issue_actions = ["create-top-level-issue"]
                     """
                 ),
                 encoding="utf-8",
@@ -722,13 +717,13 @@ class AiControlPlaneTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             repo_root = pathlib.Path(tmp)
             write_control_plane(repo_root)
-            (repo_root / "config" / "ai" / "agent-enablement.local.yaml").write_text(
+            (repo_root / ".agents" / "config" / "agents.local.toml").write_text(
                 textwrap.dedent(
                     """\
-                    version: 1
-                    roles:
-                      ai-product-owner:
-                        enabled: false
+                    version = 1
+
+                    [enablement.roles."ai-product-owner"]
+                    enabled = false
                     """
                 ),
                 encoding="utf-8",
@@ -745,13 +740,13 @@ class AiControlPlaneTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             repo_root = pathlib.Path(tmp)
             write_control_plane(repo_root)
-            (repo_root / "config" / "ai" / "agent-enablement.local.yaml").write_text(
+            (repo_root / ".agents" / "config" / "agents.local.toml").write_text(
                 textwrap.dedent(
                     """\
-                    version: 1
-                    roles:
-                      ai-agente-fantasma:
-                        enabled: false
+                    version = 1
+
+                    [enablement.roles."ai-agente-fantasma"]
+                    enabled = false
                     """
                 ),
                 encoding="utf-8",
@@ -766,13 +761,13 @@ class AiControlPlaneTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             repo_root = pathlib.Path(tmp)
             write_control_plane(repo_root)
-            (repo_root / "config" / "ai" / "agent-enablement.local.yaml").write_text(
+            (repo_root / ".agents" / "config" / "agents.local.toml").write_text(
                 textwrap.dedent(
                     """\
-                    version: 1
-                    registry_agents:
-                      agente-fantasma:
-                        enabled: false
+                    version = 1
+
+                    [enablement.registry_agents."agente-fantasma"]
+                    enabled = false
                     """
                 ),
                 encoding="utf-8",
@@ -969,7 +964,7 @@ class AiControlPlaneTests(unittest.TestCase):
                 site_url_spec="op://secrets/dotfiles/site-url",
                 token_spec="op://secrets/dotfiles/api-token",
             )
-            (repo_root / "config" / "ai" / "platforms.local.yaml").write_text(
+            (repo_root / "config" / "platforms.local.yaml").write_text(
                 textwrap.dedent(
                     """\
                     version: 1
@@ -1121,7 +1116,7 @@ class AiControlPlaneTests(unittest.TestCase):
                 site_url_spec="op://secrets/dotfiles/site-url",
                 token_spec="op://secrets/dotfiles/api-token",
             )
-            (repo_root / "config" / "ai" / "platforms.local.yaml").write_text(
+            (repo_root / "config" / "platforms.local.yaml").write_text(
                 textwrap.dedent(
                     """\
                     version: 1

@@ -17,7 +17,7 @@
 - Como garantir paridade entre `dev especializado` e `reviewer especializado`?
 - Quais papeis ainda faltam na malha declarativa de [`.agents/`](../../.agents/)?
 - Quando `Markdown`, `Confluence` e artefatos documentais devem ser tratados como
-  escopo do [`ai-documentation-agent`](../../config/ai/agents.yaml)?
+  escopo do [`ai-documentation-agent`](../../.agents/config/agents.toml)?
 
 ## Fontes oficiais consultadas
 
@@ -44,11 +44,11 @@
 - [`artifacts/reviewer-decision-model.md`](artifacts/reviewer-decision-model.md)
 - [`artifacts/python-quality-review-agent.md`](artifacts/python-quality-review-agent.md)
 - [`artifacts/universal-engineering-standards-stack.md`](artifacts/universal-engineering-standards-stack.md)
-- [`../../config/ai/agents.yaml`](../../config/ai/agents.yaml)
-- [`../../config/ai/agent-operations.yaml`](../../config/ai/agent-operations.yaml)
-- [`../../config/ai/jira-model.yaml`](../../config/ai/jira-model.yaml)
-- [`../../config/ai/reviewer-policies.yaml`](../../config/ai/reviewer-policies.yaml)
-- [`../../config/ai/reviewer-standards.yaml`](../../config/ai/reviewer-standards.yaml)
+- [`../../.agents/config/agents.toml`](../../.agents/config/agents.toml)
+- [`../../.agents/config/orchestration.toml`](../../.agents/config/orchestration.toml)
+- [`../../config/jira-model.yaml`](../../config/jira-model.yaml)
+- [`../../.agents/config/reviews.toml`](../../.agents/config/reviews.toml)
+- [`../../.agents/config/reviews.toml`](../../.agents/config/reviews.toml)
 - [`../../.agents/config.toml`](../../.agents/config.toml)
 - [`../../.agents/orchestration/capability-matrix.yaml`](../../.agents/orchestration/capability-matrix.yaml)
 - [`../../.agents/orchestration/routing-policy.yaml`](../../.agents/orchestration/routing-policy.yaml)
@@ -180,7 +180,7 @@ Como o fluxo agora depende muito de:
 
 o `ai-reviewer-config-policy` deixa de ser opcional e passa a ser gate real para
 esse tipo de mudanca. Sem ele, qualquer issue que altere
-[`../../config/ai/`](../../config/ai/), documentacao governada ou contracts
+[`config/`](../../config/) e [`.agents/config/`](../../.agents/config/), documentacao governada ou contracts
 declarativos tende a ficar com review incompleto.
 
 ## Evidencias
@@ -188,7 +188,7 @@ declarativos tende a ficar com review incompleto.
 - Inventario de lacunas operacionais em [`DOT-97`](https://pabloaugusto.atlassian.net/browse/DOT-97)
 - Spike ativa em [`DOT-105`](https://pabloaugusto.atlassian.net/browse/DOT-105)
 - Modelo atual da control plane ja descreve pares especializados em
-  [`../../config/ai/agents.yaml`](../../config/ai/agents.yaml), mas a camada de
+  [`../../.agents/config/agents.toml`](../../.agents/config/agents.toml), mas a camada de
   [`.agents/registry/`](../../.agents/registry/) e [`.agents/cards/`](../../.agents/cards/)
   ainda nao esta em paridade total com esse catalogo
 - O repo ja possuia revisores especialistas fora da camada Jira/Confluence em

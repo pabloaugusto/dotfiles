@@ -28,4 +28,4 @@ runtime:
   separates_workspace_and_runtime_identity: true
 implementation:
   requires_repo_discovery: true
-  source_of_truth_manifest: config/ai/sync-targets.yaml
+  source_of_truth_manifest: config/sync-targets.yaml
