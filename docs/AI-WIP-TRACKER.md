@@ -1,6 +1,6 @@
 # AI WIP Tracker
 
-Atualizado em: 2026-03-13 04:44 UTC
+Atualizado em: 2026-03-13 13:54 UTC
 
 Fallback local de continuidade. O Jira e a fonte primaria do fluxo vivo.
 
@@ -27,7 +27,7 @@ Fallback local de continuidade. O Jira e a fonte primaria do fluxo vivo.
 <!-- ai-worklog:doing:start -->
 | ID | Tarefa | Branch | Responsavel | Inicio UTC | Ultima atualizacao UTC | Proximo passo | Bloqueios |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| (sem itens) | - | - | - | - | - | - | - |
+| WIP-DOT-140 | DOT-140 alinhar comentario gerado de secrets-ref ao bootstrap canonico | fix/DOT-140-secrets-ref-comment | Devops | 2026-03-13 13:40 UTC | 2026-03-13 13:54 UTC | criar commit canônico, publicar branch e abrir PR | - |
 <!-- ai-worklog:doing:end -->
 
 ## Done
@@ -105,5 +105,7 @@ Fallback local de continuidade. O Jira e a fonte primaria do fluxo vivo.
 <!-- ai-worklog:log:start -->
 | Data/Hora UTC | ID | Status | Resumo | Proximo passo | Bloqueios | Contexto | Notas |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| (sem itens) | - | - | - | - | - | - | - |
+| 2026-03-13 13:54 UTC | WIP-DOT-140 | doing | DOT-140 alinhar comentario gerado de secrets-ref ao bootstrap canonico | ressincronizar app/df/secrets/secrets-ref.yaml pelo bootstrap-config e validar diff minimo | - | - | inicio da tarefa |
+| 2026-03-13 13:54 UTC | WIP-DOT-140 | doing | derivado de secrets-ref validado; validacoes principais verdes; pronto para review ortografico e commit | executar spell review consultivo e criar commit DOT-140 | - | - | checkpoint incremental |
+| 2026-03-13 13:54 UTC | WIP-DOT-140 | doing | review ortografico consultivo registrado com backlog SG-ORTHO-WIP-DOT-140; diff pronto para commit | criar commit canônico, publicar branch e abrir PR | - | - | checkpoint incremental |
 <!-- ai-worklog:log:end -->

@@ -20,6 +20,8 @@ Registro consultivo do agente Pascoalete para ortografia e higiene vocabular.
 <!-- ai-orthography:records:start -->
 | Data/Hora UTC | Worklog ID | Revisor | Status | Arquivo | Achados | Evidencia |
 | --- | --- | --- | --- | --- | --- | --- |
+| 2026-03-13 13:53 UTC | WIP-DOT-140 | pascoalete | reprovado | docs/AI-WIP-TRACKER.md | solicitacao, acionavel, indisponivel, degradacao, primario, obrigatorio, Responsavel, atualizacao (+136) | task spell:check |
+| 2026-03-13 13:53 UTC | WIP-DOT-140 | pascoalete | aprovado | app/df/secrets/secrets-ref.yaml | sem achados | task spell:check |
 | 2026-03-12 13:40 UTC | WIP-20260312-DOT-205 | pascoalete | reprovado | docs/AI-WIP-TRACKER.md | solicitacao, acionavel, indisponivel, degradacao, primario, obrigatorio, Responsavel, atualizacao (+115) | task spell:check |
 | 2026-03-12 13:40 UTC | WIP-20260312-DOT-205 | pascoalete | reprovado | .agents/prompts/formal/agents-rules-centralization/prompt.md | Missao, unificacao, centralizacao, dominio, duplicacao, aderencia, criacao, obrigatorio (+72) | task spell:check |
 | 2026-03-12 13:40 UTC | WIP-20260312-DOT-205 | pascoalete | reprovado | .agents/prompts/formal/agents-rules-centralization/fragments/target-architecture.md | Separacao, precedencia, explicacoes, executavel, obrigatorio, tematico, precedencia, obrigatorias (+3) | task spell:check |

@@ -1,6 +1,6 @@
 # Roadmap do Repositorio
 
-Atualizado em: 2026-03-12 13:40 UTC
+Atualizado em: 2026-03-13 13:53 UTC
 Ciclo ativo: 2026-Q1
 
 Planejamento incremental para qualidade, testes, bootstrap e governanca do repo.
@@ -28,7 +28,7 @@ Edite apenas a tabela entre os marcadores abaixo.
 Atualizada por `task ai:roadmap:refresh`.
 
 <!-- roadmap:priority:start -->
-Atualizado em: 2026-03-12 13:40 UTC
+Atualizado em: 2026-03-13 13:53 UTC
 
 ### Ranking RICE
 
@@ -76,6 +76,7 @@ Sem sugestoes pendentes neste ciclo; itens aceitos ja estao rastreaveis.
 ### Next
 
 <!-- roadmap:next:start -->
+- [fix] Corrigir pendencias ortograficas remanescentes do worklog `WIP-DOT-140` em docs/AI-WIP-TRACKER.md | notas=Pendencia automatica criada por Pascoalete apos review consultivo reprovado sem correcao automatica.
 - [fix] Corrigir pendencias ortograficas remanescentes do worklog `WIP-20260312-DOT-205` em .agents/prompts/CATALOG.md, .agents/prompts/formal/agents-rules-centralization/context.md, .a... | notas=Pendencia automatica criada por Pascoalete apos review consultivo reprovado sem correcao automatica.
 - [fix] Corrigir pendencias ortograficas remanescentes do worklog `WIP-20260312-033649` em .agents/cards/ai-documentation-agent.md, .agents/cards/ai-documentation-manager.md, .agents/ca... | notas=Pendencia automatica criada por Pascoalete apos review consultivo reprovado sem correcao automatica.
 - [fix] Corrigir pendencias ortograficas remanescentes do worklog `WIP-20260311-220259` em Taskfile.yml, config/ai/contracts.yaml, config/ai/sync-targets.yaml, docs/README.md, docs/TASK... | notas=Pendencia automatica criada por Pascoalete apos review consultivo reprovado sem correcao automatica.
