@@ -16,7 +16,11 @@
 Set-ItemProperty -Path HKCU:\Environment -Name 'PWSH_SKIP_ENV_CHECK' -Value "$Env:USERPROFILE\clients"
 
 #run profile modules
-$PWSconfDir = $PSScriptRoot
+# Quando o profile e executado via symlink em Documents\PowerShell, o
+# PSScriptRoot resolve para a pasta linkada no HOME, nao para a runtime canonica
+# do repo. Por isso o runtime deve ser carregado a partir do caminho canonico.
+$DotFilesDirectory = "$Env:USERPROFILE\dotfiles"
+$PWSconfDir = "${DotFilesDirectory}\app\df\powershell"
 
 . $PWSconfDir\_functions.ps1	-WarningAction SilentlyContinue
 
