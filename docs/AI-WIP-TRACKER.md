@@ -1,6 +1,6 @@
 # AI WIP Tracker
 
-Atualizado em: 2026-03-13 02:50 UTC
+Atualizado em: 2026-03-13 04:44 UTC
 
 Fallback local de continuidade. O Jira e a fonte primaria do fluxo vivo.
 
@@ -27,7 +27,7 @@ Fallback local de continuidade. O Jira e a fonte primaria do fluxo vivo.
 <!-- ai-worklog:doing:start -->
 | ID | Tarefa | Branch | Responsavel | Inicio UTC | Ultima atualizacao UTC | Proximo passo | Bloqueios |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| WIP-DOT-216 | DOT-216 implementar service accounts por agente com fallback seguro e drift controlado | codex/feat-DOT-216-agent-service-accounts | Engenheiro Agentes IA | 2026-03-13 02:50 UTC | 2026-03-13 02:50 UTC | Implementar resolvedor central de actor Atlassian por agente e preparar o piloto do PO. | - |
+| (sem itens) | - | - | - | - | - | - | - |
 <!-- ai-worklog:doing:end -->
 
 ## Done
@@ -35,6 +35,7 @@ Fallback local de continuidade. O Jira e a fonte primaria do fluxo vivo.
 <!-- ai-worklog:done:start -->
 | ID | Tarefa | Branch | Responsavel | Inicio UTC | Concluido UTC | Resultado |
 | --- | --- | --- | --- | --- | --- | --- |
+| WIP-DOT-216 | DOT-216 implementar service accounts por agente com fallback seguro e drift controlado | codex/feat-DOT-216-agent-service-accounts | Engenheiro Agentes IA | 2026-03-13 02:50 UTC | 2026-03-13 04:44 UTC | Service accounts por agente entregues com piloto real do Product Owner, resolvedor central, fallback global seguro, visibilidade no startup e backfill Jira zerado. / evidencias: PR #62 mergeado em main; merge commit a... |
 | WIP-DOT-214 | Restaurar symlinks do bootstrap Windows para ~/.ssh com paths em app/ | fix/DOT-214-ssh-symlink-restore | Devops | 2026-03-13 01:18 UTC | 2026-03-13 01:49 UTC | Modelo canonico de symlink do bootstrap Windows restaurado para `~/.ssh`, `config.local` e malha de links associada, com contrato incorreto de materializacao drenado dos artefatos vivos e runtime local revalidado. / evidencias: sudo task bootstrap:windows:relink; task test:unit:powershell; task test:integration:windows; task docs:check; task ai:validate; task ai:lessons:check; task ai:eval:smoke; task env:check:windows; SYMLINK_AUDIT_OK count=25 |
 | WIP-20260312-DOT-212 | DOT-212 separar runtime em app e ajustar consumidores | feat/DOT-212-runtime-app-boundary | Engenheiro Agentes IA | 2026-03-12 21:04 UTC | 2026-03-12 21:39 UTC | Camada runtime separada da camada de desenvolvimento com migracao de bootstrap/ e df/ para app/, consumidores ajustados e paridade Windows/WSL preservada. / evidencias: task ai:validate; task docs:check; task ai:eval:... |
 | WIP-DOT-211-LEDGER-ALIAS | Normalizar alias-first em worklog, review ledger e historico local visivel | fix/DOT-211-agent-alias-first-drift | Engenheiro Agentes IA | 2026-03-12 20:08 UTC | 2026-03-12 20:13 UTC | Emissores locais de worklog/review agora normalizam alias-first, e os ledgers humanos mais visiveis foram drenados dos ids tecnicos remanescentes nos campos de ownership. / evidencias: task test:unit:python=ok; task a... |
@@ -104,5 +105,5 @@ Fallback local de continuidade. O Jira e a fonte primaria do fluxo vivo.
 <!-- ai-worklog:log:start -->
 | Data/Hora UTC | ID | Status | Resumo | Proximo passo | Bloqueios | Contexto | Notas |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| 2026-03-13 02:50 UTC | WIP-DOT-216 | doing | DOT-216 implementar service accounts por agente com fallback seguro e drift controlado | Implementar resolvedor central de actor Atlassian por agente e preparar o piloto do PO. | - | atlassian-runtime | inicio da tarefa |
+| (sem itens) | - | - | - | - | - | - | - |
 <!-- ai-worklog:log:end -->
