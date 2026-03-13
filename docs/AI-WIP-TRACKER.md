@@ -1,6 +1,6 @@
 # AI WIP Tracker
 
-Atualizado em: 2026-03-13 13:54 UTC
+Atualizado em: 2026-03-13 14:00 UTC
 
 Fallback local de continuidade. O Jira e a fonte primaria do fluxo vivo.
 
@@ -27,7 +27,7 @@ Fallback local de continuidade. O Jira e a fonte primaria do fluxo vivo.
 <!-- ai-worklog:doing:start -->
 | ID | Tarefa | Branch | Responsavel | Inicio UTC | Ultima atualizacao UTC | Proximo passo | Bloqueios |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| WIP-DOT-140 | DOT-140 alinhar comentario gerado de secrets-ref ao bootstrap canonico | fix/DOT-140-secrets-ref-comment | Devops | 2026-03-13 13:40 UTC | 2026-03-13 13:54 UTC | criar commit canônico, publicar branch e abrir PR | - |
+| (sem itens) | - | - | - | - | - | - | - |
 <!-- ai-worklog:doing:end -->
 
 ## Done
@@ -35,6 +35,7 @@ Fallback local de continuidade. O Jira e a fonte primaria do fluxo vivo.
 <!-- ai-worklog:done:start -->
 | ID | Tarefa | Branch | Responsavel | Inicio UTC | Concluido UTC | Resultado |
 | --- | --- | --- | --- | --- | --- | --- |
+| WIP-DOT-140 | DOT-140 alinhar comentario gerado de secrets-ref ao bootstrap canonico | fix/DOT-140-secrets-ref-comment | Devops | 2026-03-13 13:40 UTC | 2026-03-13 14:00 UTC | DOT-140 publicado via PR #64 e merge commit f1909ed, alinhando o comentario canonico de app/df/secrets/secrets-ref.yaml ao bootstrap e registrando backlog consultivo SG-ORTHO-WI... / evidencias: PR #64; merge commit f... |
 | WIP-DOT-216 | DOT-216 implementar service accounts por agente com fallback seguro e drift controlado | codex/feat-DOT-216-agent-service-accounts | Engenheiro Agentes IA | 2026-03-13 02:50 UTC | 2026-03-13 04:44 UTC | Service accounts por agente entregues com piloto real do Product Owner, resolvedor central, fallback global seguro, visibilidade no startup e backfill Jira zerado. / evidencias: PR #62 mergeado em main; merge commit a... |
 | WIP-DOT-214 | Restaurar symlinks do bootstrap Windows para ~/.ssh com paths em app/ | fix/DOT-214-ssh-symlink-restore | Devops | 2026-03-13 01:18 UTC | 2026-03-13 01:49 UTC | Modelo canonico de symlink do bootstrap Windows restaurado para `~/.ssh`, `config.local` e malha de links associada, com contrato incorreto de materializacao drenado dos artefatos vivos e runtime local revalidado. / evidencias: sudo task bootstrap:windows:relink; task test:unit:powershell; task test:integration:windows; task docs:check; task ai:validate; task ai:lessons:check; task ai:eval:smoke; task env:check:windows; SYMLINK_AUDIT_OK count=25 |
 | WIP-20260312-DOT-212 | DOT-212 separar runtime em app e ajustar consumidores | feat/DOT-212-runtime-app-boundary | Engenheiro Agentes IA | 2026-03-12 21:04 UTC | 2026-03-12 21:39 UTC | Camada runtime separada da camada de desenvolvimento com migracao de bootstrap/ e df/ para app/, consumidores ajustados e paridade Windows/WSL preservada. / evidencias: task ai:validate; task docs:check; task ai:eval:... |
@@ -105,7 +106,5 @@ Fallback local de continuidade. O Jira e a fonte primaria do fluxo vivo.
 <!-- ai-worklog:log:start -->
 | Data/Hora UTC | ID | Status | Resumo | Proximo passo | Bloqueios | Contexto | Notas |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| 2026-03-13 13:54 UTC | WIP-DOT-140 | doing | DOT-140 alinhar comentario gerado de secrets-ref ao bootstrap canonico | ressincronizar app/df/secrets/secrets-ref.yaml pelo bootstrap-config e validar diff minimo | - | - | inicio da tarefa |
-| 2026-03-13 13:54 UTC | WIP-DOT-140 | doing | derivado de secrets-ref validado; validacoes principais verdes; pronto para review ortografico e commit | executar spell review consultivo e criar commit DOT-140 | - | - | checkpoint incremental |
-| 2026-03-13 13:54 UTC | WIP-DOT-140 | doing | review ortografico consultivo registrado com backlog SG-ORTHO-WIP-DOT-140; diff pronto para commit | criar commit canônico, publicar branch e abrir PR | - | - | checkpoint incremental |
+| (sem itens) | - | - | - | - | - | - | - |
 <!-- ai-worklog:log:end -->
