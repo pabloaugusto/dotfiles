@@ -316,4 +316,5 @@ Toda finalizacao de worklog deve registrar se houve nova licao.
 | 2026-03-07 04:05 UTC | WIP-20260307-LIVE-DOING | capturada | Backfill retroativo: esta rodada consolidou a licao de manter Doing vivo ate o fechamento real. | LA-003 | - |
 | 2026-03-07 04:05 UTC | WIP-20260307-ROADMAP-CYCLE-FIX | sem_nova_licao | Backfill retroativo: a correcao do ciclo duplicado virou regressao coberta por teste, sem demandar nova licao permanente. | - | - |
 | 2026-03-07 04:05 UTC | WIP-20260307-BACKLOG-ADVANCE | sem_nova_licao | Backfill retroativo: a rodada consolidou backlog e harnesses sem introduzir licao nova alem das regras ja catalogadas. | - | - |
+| 2026-03-13 02:06 UTC | WIP-DOT-215 | sem_nova_licao | A rodada corrigiu um residual da DOT-212 restaurando apenas o ponteiro canonico do runtime PowerShell via [`app/df/`](app/df/), sem introduzir regra nova alem do contrato ja vigente de symlinks. | - | task test:unit:powershell; task test:integration:windows; task env:check:windows (success=31 fail=1; residual fora do escopo em op://Personal/github/token-full-access); SYMLINK_AUDIT_OK count=25 expected=25 |
 <!-- ai-lessons:reviews:end -->
