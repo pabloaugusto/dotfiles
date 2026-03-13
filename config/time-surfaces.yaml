@@ -1,0 +1,41 @@
+version: 1
+
+defaults:
+  surface_class: default_regionalized
+  timezone_policy: project_default
+  locale_policy: project_default
+
+surface_classes:
+  default_regionalized:
+    description: usa locale e timezone canonicos do projeto
+  explicit_utc:
+    description: usa UTC explicito por contrato tecnico
+  stable_machine_token:
+    description: token tecnico estavel e nao localizado
+
+surfaces:
+  chat:
+    class: default_regionalized
+    timezone_policy: project_default
+    locale_policy: project_default
+    notes: "Chat humano do repo usa timezone e locale efetivos do projeto."
+  startup-report:
+    class: default_regionalized
+    timezone_policy: project_default
+    locale_policy: project_default
+    notes: "Startup e restart devem expor timezone e locale efetivos."
+  jira-structured-comment:
+    class: default_regionalized
+    timezone_policy: project_default
+    locale_policy: project_default
+    notes: "Comentarios estruturados para humanos seguem a policy do projeto."
+  worklog-ledger:
+    class: explicit_utc
+    timezone_policy: explicit_utc
+    locale_policy: not_applicable
+    notes: "Ledgers tecnicos historicos preservam UTC por rastreabilidade."
+  machine-token:
+    class: stable_machine_token
+    timezone_policy: explicit_utc
+    locale_policy: not_applicable
+    notes: "Tokens tecnicos e slugs nunca devem depender de locale."

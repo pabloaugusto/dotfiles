@@ -1,0 +1,8 @@
+version = 1
+
+[paths]
+reviewer_policies = "config/ai/reviewer-policies.yaml"
+reviewer_standards = "config/ai/reviewer-standards.yaml"
+review_output_schema = "config/ai/review-output.schema.json"
+review_ledger = "docs/AI-REVIEW-LEDGER.md"
+orthography_ledger = "docs/AI-ORTHOGRAPHY-LEDGER.md"

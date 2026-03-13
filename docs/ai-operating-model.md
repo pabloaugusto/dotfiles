@@ -38,9 +38,15 @@ Nessas retomadas, a regra correta passa a ser:
   papel autorizado a emitir a primeira resposta operacional
 - carregar a camada de `display_name` antes de exibir agente, papel ou owner em
   chat, `Jira` ou artefato visivel
-- carregar tambem [`config/ai/agent-runtime.yaml`](../config/ai/agent-runtime.yaml)
-  para distinguir `habilitado` de `realmente operante`, carregar `chat_alias`
-  e saber qual papel pode assumir ownership visivel de chat/Jira
+- carregar primeiro o manifesto canonico da IA em
+  [`.agents/config/config.toml`](../.agents/config/config.toml), com
+  identidade em [`.agents/config/agents.toml`](../.agents/config/agents.toml)
+  e contrato visivel em
+  [`.agents/config/communication.toml`](../.agents/config/communication.toml)
+- enquanto a drenagem nao terminar, tratar
+  [`config/ai/agent-runtime.yaml`](../config/ai/agent-runtime.yaml) como ponte
+  legada para distinguir `habilitado` de `realmente operante`, carregar
+  `chat_alias` e saber qual papel pode assumir ownership visivel de chat/Jira
 - carregar o enablement declarativo de agentes a partir de
   [`config/ai/agent-enablement.yaml`](../config/ai/agent-enablement.yaml)
   antes de exigir ou acionar papeis opcionais ou consultivos
@@ -324,11 +330,16 @@ O estado declarativo de enablement por agente fica em
 evitar que habilitacao ou desabilitacao de papeis dependa apenas de memoria de
 chat.
 
-O runtime operacional visivel fica em
-[`config/ai/agent-runtime.yaml`](../config/ai/agent-runtime.yaml), para provar
-quais papeis estao codados e operantes de fato, qual alias precisa aparecer no
-chat e no `Jira`, e se existe principal Jira mapeado para sincronizar
-`Assignee`.
+O manifesto canonico da camada de IA fica em
+[`.agents/config/config.toml`](../.agents/config/config.toml), com identidade
+e contrato visivel distribuidos em
+[`.agents/config/agents.toml`](../.agents/config/agents.toml) e
+[`.agents/config/communication.toml`](../.agents/config/communication.toml).
+Enquanto a drenagem nao terminar, o runtime operacional legado em
+[`config/ai/agent-runtime.yaml`](../config/ai/agent-runtime.yaml) continua como
+ponte para provar quais papeis estao codados e operantes de fato, qual alias
+precisa aparecer no chat e no `Jira`, e se existe principal Jira mapeado para
+sincronizar `Assignee`.
 
 ### Camada 2.2. Orquestracao, rules e evals
 

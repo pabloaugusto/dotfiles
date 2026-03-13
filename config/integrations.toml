@@ -1,0 +1,17 @@
+version = 1
+
+[context]
+kind = "dev-integrations"
+
+[atlassian]
+platforms = "config/ai/platforms.yaml"
+jira_model = "config/ai/jira-model.yaml"
+confluence_model = "config/ai/confluence-model.yaml"
+sync_targets = "config/ai/sync-targets.yaml"
+
+[github]
+git_governance = "config/ai/contracts.yaml::git_governance"
+
+[compatibility]
+platforms_local_template = "config/ai/platforms.local.yaml.tpl"
+platforms_local_overlay = "config/ai/platforms.local.yaml"

@@ -1,0 +1,15 @@
+version = 1
+
+[startup]
+owner_role = "ai-startup-governor"
+audit_owner_role = "ai-scrum-master"
+report_path = ".cache/ai/startup-session.md"
+readiness_artifact = ".cache/ai/startup-ready.json"
+clearance_required = true
+report_key = "startup_governor_status"
+
+[handoff]
+current_chat_owner_role = "ai-startup-governor"
+blocked_before_ready = true
+next_owner_resolution = "active_execution_agent"
+chat_contract_ref = ".agents/config/communication.toml::chat"

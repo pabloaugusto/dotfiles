@@ -1,0 +1,50 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "dotfiles-ai-config",
+  "type": "object",
+  "required": [
+    "version",
+    "context",
+    "domains",
+    "compatibility"
+  ],
+  "properties": {
+    "version": {
+      "type": "integer",
+      "const": 1
+    },
+    "context": {
+      "type": "object",
+      "required": [
+        "kind",
+        "source_of_truth",
+        "inherits_regionalization"
+      ]
+    },
+    "domains": {
+      "type": "object",
+      "required": [
+        "agents",
+        "communication",
+        "startup",
+        "orchestration",
+        "reviews",
+        "prompts",
+        "migration_matrix",
+        "schema"
+      ]
+    },
+    "compatibility": {
+      "type": "object",
+      "required": [
+        "bridge_manifest",
+        "legacy_control_plane_root",
+        "legacy_agents",
+        "legacy_agent_enablement",
+        "legacy_agent_runtime",
+        "legacy_agent_operations",
+        "legacy_contracts"
+      ]
+    }
+  }
+}

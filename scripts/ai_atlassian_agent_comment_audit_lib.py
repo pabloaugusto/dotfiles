@@ -9,7 +9,6 @@ from typing import Any
 from scripts.ai_atlassian_actor_lib import global_jira_adapter
 from scripts.ai_control_plane_lib import load_ai_control_plane
 from scripts.atlassian_platform_lib import (
-    JiraAdapter,
     adf_to_text,
     canonicalize_workflow_status,
 )
@@ -157,6 +156,8 @@ def evaluate_issue_comment_contract(
     *,
     current_agent_field_id: str,
     next_required_field_id: str,
+    current_agent_field_name: str = "Current Agent Role",
+    next_required_field_name: str = "Next Required Role",
     role_reference_map: dict[str, str],
 ) -> dict[str, Any]:
     fields = issue.get("fields") or {}
@@ -214,7 +215,10 @@ def evaluate_issue_comment_contract(
             {
                 "code": "missing_current_agent_comment",
                 "severity": "high",
-                "message": f'O campo "Current Agent Role" aponta para {current_agent}, mas nao existe comentario estruturado desse agente.',
+                "message": (
+                    f'O campo "{current_agent_field_name}" aponta para {current_agent}, '
+                    "mas nao existe comentario estruturado desse agente."
+                ),
             }
         )
     if uses_technical_role_id(current_agent, current_agent_id):
@@ -222,7 +226,10 @@ def evaluate_issue_comment_contract(
             {
                 "code": "current_agent_role_uses_technical_id",
                 "severity": "medium",
-                "message": f'O campo "Current Agent Role" ainda usa o identificador tecnico "{current_agent}" em vez do apelido visivel.',
+                "message": (
+                    f'O campo "{current_agent_field_name}" ainda usa o identificador tecnico '
+                    f'"{current_agent}" em vez do apelido visivel.'
+                ),
             }
         )
     if uses_technical_role_id(next_required_role, next_required_role_id):
@@ -230,7 +237,10 @@ def evaluate_issue_comment_contract(
             {
                 "code": "next_required_role_uses_technical_id",
                 "severity": "medium",
-                "message": f'O campo "Next Required Role" ainda usa o identificador tecnico "{next_required_role}" em vez do apelido visivel.',
+                "message": (
+                    f'O campo "{next_required_field_name}" ainda usa o identificador tecnico '
+                    f'"{next_required_role}" em vez do apelido visivel.'
+                ),
             }
         )
     if latest_status and normalize_status_name(latest_status) != status_normalized:
@@ -255,7 +265,9 @@ def evaluate_issue_comment_contract(
             }
         )
     if any(
-        uses_technical_role_id(entry["agent"], role_reference_map.get(entry["agent"].casefold(), ""))
+        uses_technical_role_id(
+            entry["agent"], role_reference_map.get(entry["agent"].casefold(), "")
+        )
         for entry in structured_comments
     ):
         findings.append(
@@ -360,6 +372,8 @@ def audit_issue_comments(
 ) -> dict[str, Any]:
     control = load_ai_control_plane(repo_root)
     jira = global_jira_adapter(control.repo_root)
+    current_agent_field_name = control.jira_field_name("current_agent_role")
+    next_required_field_name = control.jira_field_name("next_required_role")
     role_reference_map: dict[str, str] = {}
     for role_id in control.roles_payload():
         for candidate in (
@@ -371,11 +385,10 @@ def audit_issue_comments(
             if normalized_candidate:
                 role_reference_map[normalized_candidate] = role_id
 
-    current_agent_field_id = jira.field_id_by_name("Current Agent Role")
-    next_required_field_id = jira.field_id_by_name("Next Required Role")
+    current_agent_field_id = jira.field_id_by_name(current_agent_field_name)
+    next_required_field_id = jira.field_id_by_name(next_required_field_name)
     effective_jql = (
-        jql.strip()
-        or f'project = "{jira.client.resolved.jira_project_key}" ORDER BY updated DESC'
+        jql.strip() or f'project = "{jira.client.resolved.jira_project_key}" ORDER BY updated DESC'
     )
     issues = jira.search_issues(
         effective_jql,
@@ -398,6 +411,8 @@ def audit_issue_comments(
                 comments,
                 current_agent_field_id=current_agent_field_id,
                 next_required_field_id=next_required_field_id,
+                current_agent_field_name=current_agent_field_name,
+                next_required_field_name=next_required_field_name,
                 role_reference_map=role_reference_map,
             )
         )

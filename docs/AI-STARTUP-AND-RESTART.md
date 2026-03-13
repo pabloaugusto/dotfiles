@@ -27,11 +27,15 @@ perder continuidade confiavel.
    comunicacao no chat e a identidade humana oficial dos agentes
    (`display_name`), lembrando idioma, tom, formato de links e demais regras
    vivas da sessao.
-   Carregar tambem o runtime operacional dos agentes em
-   [`config/ai/agent-runtime.yaml`](../config/ai/agent-runtime.yaml), porque e
-   ele que declara quem esta realmente operante, qual alias deve aparecer no
-   chat/Jira e quais papeis podem assumir ownership visivel de superficie.
-   Carregar tambem o enablement declarativo de agentes em
+   A fonte canonica da camada declarativa da IA passa a ser o manifesto
+   [`.agents/config/config.toml`](../.agents/config/config.toml), com
+   identidade em [`.agents/config/agents.toml`](../.agents/config/agents.toml)
+   e contrato visivel de chat/Jira em
+   [`.agents/config/communication.toml`](../.agents/config/communication.toml).
+   Enquanto a drenagem nao terminar, o runtime operacional legado em
+   [`config/ai/agent-runtime.yaml`](../config/ai/agent-runtime.yaml) continua
+   como ponte de compatibilidade para detalhes ainda nao drenados, e o
+   enablement declarativo segue em
    [`config/ai/agent-enablement.yaml`](../config/ai/agent-enablement.yaml).
    Esse estado precisa ser aplicado antes de decidir quais papeis podem falar,
    revisar, delegar ou permanecer desabilitados na rodada.

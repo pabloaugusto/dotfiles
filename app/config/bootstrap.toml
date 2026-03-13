@@ -1,0 +1,7 @@
+version = 1
+
+[scripts]
+windows = "app/bootstrap/bootstrap-windows.ps1"
+wsl = "app/bootstrap/bootstrap-ubuntu-wsl.sh"
+user_config_template = "app/bootstrap/user-config.yaml.tpl"
+flow_doc = "docs/bootstrap-flow.md"

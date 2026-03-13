@@ -66,6 +66,20 @@ WORKFLOW_STATUS_ALIASES = {
 }
 
 
+def configured_jira_agent_role_field_names() -> tuple[str, str]:
+    try:
+        control_plane = load_ai_control_plane()
+        current_name = control_plane.jira_field_name("current_agent_role").strip()
+        next_name = control_plane.jira_field_name("next_required_role").strip()
+    except Exception:
+        current_name = ""
+        next_name = ""
+    return (
+        current_name or "Current Agent Role",
+        next_name or "Next Required Role",
+    )
+
+
 def build_basic_auth_header(email: str, token: str) -> str:
     payload = f"{email}:{token}".encode()
     encoded = base64.b64encode(payload).decode("ascii")
@@ -693,8 +707,9 @@ class JiraAdapter:
         next_required_role: str = "",
         assignee_account_id: str = "",
     ) -> dict[str, Any]:
-        current_field_id = self.field_id_by_name("Current Agent Role")
-        next_field_id = self.field_id_by_name("Next Required Role")
+        current_field_name, next_field_name = configured_jira_agent_role_field_names()
+        current_field_id = self.field_id_by_name(current_field_name)
+        next_field_id = self.field_id_by_name(next_field_name)
         fields: dict[str, Any] = {}
         if current_field_id:
             fields[current_field_id] = (

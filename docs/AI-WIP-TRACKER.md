@@ -1,6 +1,6 @@
 # AI WIP Tracker
 
-Atualizado em: 2026-03-13 14:00 UTC
+Atualizado em: 2026-03-13 18:33 UTC
 
 Fallback local de continuidade. O Jira e a fonte primaria do fluxo vivo.
 
@@ -35,6 +35,7 @@ Fallback local de continuidade. O Jira e a fonte primaria do fluxo vivo.
 <!-- ai-worklog:done:start -->
 | ID | Tarefa | Branch | Responsavel | Inicio UTC | Concluido UTC | Resultado |
 | --- | --- | --- | --- | --- | --- | --- |
+| WIP-DOT-218 | DOT-218 concentrar configuracoes por contexto em config/, app/config e .agents/config | feat/DOT-218-config-context-centralization | Engenheiro Agentes IA | 2026-03-13 16:35 UTC | 2026-03-13 18:33 UTC | Configuracoes por contexto concentradas com manifests em config/, app/config e .agents/config, resolvedor unico inicial, docs geradas e consumidores centrais da camada de IA aju... / evidencias: task ai:validate; task... |
 | WIP-DOT-140 | DOT-140 alinhar comentario gerado de secrets-ref ao bootstrap canonico | fix/DOT-140-secrets-ref-comment | Devops | 2026-03-13 13:40 UTC | 2026-03-13 14:00 UTC | DOT-140 publicado via PR #64 e merge commit f1909ed, alinhando o comentario canonico de app/df/secrets/secrets-ref.yaml ao bootstrap e registrando backlog consultivo SG-ORTHO-WI... / evidencias: PR #64; merge commit f... |
 | WIP-DOT-216 | DOT-216 implementar service accounts por agente com fallback seguro e drift controlado | codex/feat-DOT-216-agent-service-accounts | Engenheiro Agentes IA | 2026-03-13 02:50 UTC | 2026-03-13 04:44 UTC | Service accounts por agente entregues com piloto real do Product Owner, resolvedor central, fallback global seguro, visibilidade no startup e backfill Jira zerado. / evidencias: PR #62 mergeado em main; merge commit a... |
 | WIP-DOT-214 | Restaurar symlinks do bootstrap Windows para ~/.ssh com paths em app/ | fix/DOT-214-ssh-symlink-restore | Devops | 2026-03-13 01:18 UTC | 2026-03-13 01:49 UTC | Modelo canonico de symlink do bootstrap Windows restaurado para `~/.ssh`, `config.local` e malha de links associada, com contrato incorreto de materializacao drenado dos artefatos vivos e runtime local revalidado. / evidencias: sudo task bootstrap:windows:relink; task test:unit:powershell; task test:integration:windows; task docs:check; task ai:validate; task ai:lessons:check; task ai:eval:smoke; task env:check:windows; SYMLINK_AUDIT_OK count=25 |

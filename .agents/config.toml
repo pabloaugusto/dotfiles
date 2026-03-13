@@ -1,5 +1,9 @@
 version = 1
 
+[config_context]
+manifest = ".agents/config/config.toml"
+bridge_mode = "legacy-rules-and-identity-contracts"
+
 [skills]
 required = [
   "dotfiles-bootstrap",

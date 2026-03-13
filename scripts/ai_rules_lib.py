@@ -10,7 +10,8 @@ try:
 except ModuleNotFoundError:  # pragma: no cover - fallback para Python < 3.11
     tomllib = None  # type: ignore[assignment]
 
-from scripts.ai_contract_paths import config_path, rules_root
+from scripts.ai_contract_paths import config_bridge_path, config_manifest_path, rules_root
+from scripts.config_context_lib import ConfigContextError, load_toml_map
 
 
 class AiRulesError(RuntimeError):
@@ -19,14 +20,11 @@ class AiRulesError(RuntimeError):
 
 def _load_toml_map(path: Path) -> dict[str, Any]:
     if tomllib is None:
-        raise AiRulesError("Python sem suporte a tomllib para ler .agents/config.toml.")
-    if not path.is_file():
-        raise AiRulesError(f"Arquivo TOML ausente: {path.as_posix()}")
-    with path.open("rb") as handle:
-        payload = tomllib.load(handle)
-    if not isinstance(payload, dict):
-        raise AiRulesError(f"TOML invalido em {path.as_posix()}: payload nao e mapa.")
-    return payload
+        raise AiRulesError("Python sem suporte a tomllib para ler arquivos TOML da camada IA.")
+    try:
+        return load_toml_map(path)
+    except ConfigContextError as exc:
+        raise AiRulesError(str(exc)) from exc
 
 
 def _load_yaml_map(path: Path) -> dict[str, Any]:
@@ -40,7 +38,15 @@ def _load_yaml_map(path: Path) -> dict[str, Any]:
 
 def rules_contract_paths(repo_root: str | Path | None = None) -> dict[str, str]:
     resolved_root = Path(repo_root).resolve() if repo_root else Path.cwd().resolve()
-    payload = _load_toml_map(config_path(resolved_root))
+    manifest_payload = _load_toml_map(config_manifest_path(resolved_root))
+    compatibility = manifest_payload.get("compatibility") or {}
+    if not isinstance(compatibility, dict):
+        raise AiRulesError(".agents/config/config.toml precisa conter [compatibility] como mapa.")
+    bridge_relative = str(
+        compatibility.get("bridge_manifest", config_bridge_path(resolved_root).relative_to(resolved_root).as_posix())
+    ).strip()
+    bridge_path = (resolved_root / bridge_relative).resolve()
+    payload = _load_toml_map(bridge_path)
     rules = payload.get("rules") or {}
     if not isinstance(rules, dict):
         raise AiRulesError(".agents/config.toml precisa conter [rules] como mapa.")

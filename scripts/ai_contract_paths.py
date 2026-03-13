@@ -39,6 +39,14 @@ def config_path(repo_root: Path = ROOT) -> Path:
     return ai_root(repo_root) / "config.toml"
 
 
+def config_manifest_path(repo_root: Path = ROOT) -> Path:
+    return ai_root(repo_root) / "config" / "config.toml"
+
+
+def config_bridge_path(repo_root: Path = ROOT) -> Path:
+    return config_path(repo_root)
+
+
 def legacy_codex_root(repo_root: Path = ROOT) -> Path:
     return repo_root / LEGACY_CODEX_ROOT_NAME
 

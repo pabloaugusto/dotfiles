@@ -48,7 +48,12 @@ Referencia canonica de scopes/permissoes e rotacao Atlassian:
 ## Service accounts Atlassian por agente
 
 O runtime Atlassian da camada de IA agora aceita service account propria por
-agente, declarada em [`config/ai/agent-runtime.yaml`](../config/ai/agent-runtime.yaml).
+agente. A camada declarativa canonica passa a ser descoberta por
+[`.agents/config/config.toml`](../.agents/config/config.toml); enquanto a
+drenagem nao termina, os detalhes operacionais de `atlassian_actor` continuam
+materializados em
+[`config/ai/agent-runtime.yaml`](../config/ai/agent-runtime.yaml) como ponte
+legada.
 
 Regra canonica:
 

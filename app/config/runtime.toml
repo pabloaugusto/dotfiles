@@ -1,0 +1,12 @@
+version = 1
+
+[paths]
+df_root = "app/df"
+bash_root = "app/df/bash"
+powershell_root = "app/df/powershell"
+git_root = "app/df/git"
+secrets_root = "app/df/secrets"
+
+[regionalization]
+defaults = "config/config.toml::regionalization"
+surfaces = "config/time-surfaces.yaml::surfaces"

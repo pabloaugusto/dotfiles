@@ -1,0 +1,17 @@
+version = 1
+
+[chat]
+prefix_template = "[{timestamp}] **{visible_name}**"
+timestamp_display_pattern = "dd-mm hh:mm"
+timestamp_surface = "chat"
+timestamp_source = "local_system_clock"
+body_starts_on_next_line = true
+visible_name_fallback_order = ["chat_alias", "display_name", "technical_id"]
+display_name_source = ".agents/config/agents.toml::source_of_truth.display_name_registry"
+
+[jira.fields]
+current_agent_role = "Current Agent Role"
+next_required_role = "Next Required Role"
+
+[literal_lint]
+managed_literals = ["[{timestamp}] **{visible_name}**", "dd-mm hh:mm"]

@@ -1,0 +1,12 @@
+version = 1
+
+[source_of_truth]
+display_name_registry = ".agents/registry/*.toml::display_name"
+legacy_roles = "config/ai/agents.yaml"
+legacy_enablement = "config/ai/agent-enablement.yaml"
+legacy_runtime = "config/ai/agent-runtime.yaml"
+
+[identity]
+display_name_source = ".agents/registry/*.toml::display_name"
+chat_alias_source = "config/ai/agent-runtime.yaml::roles"
+enablement_source = "config/ai/agent-enablement.yaml::roles"

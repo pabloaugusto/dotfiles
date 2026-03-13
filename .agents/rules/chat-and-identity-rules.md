@@ -16,12 +16,27 @@ agentes.
 
 ## Fonte canonica e precedencia
 
-- [`../../config/ai/contracts.yaml`](../../config/ai/contracts.yaml)
-- [`../../config/ai/agent-operations.yaml`](../../config/ai/agent-operations.yaml)
-- [`../../config/ai/agent-enablement.yaml`](../../config/ai/agent-enablement.yaml)
-- [`../../config/ai/agent-runtime.yaml`](../../config/ai/agent-runtime.yaml)
+- [`../../.agents/config/config.toml`](../../.agents/config/config.toml)
+- [`../../.agents/config/agents.toml`](../../.agents/config/agents.toml)
+- [`../../.agents/config/communication.toml`](../../.agents/config/communication.toml)
+- [`../../.agents/config/startup.toml`](../../.agents/config/startup.toml)
+- [`../../config/ai/contracts.yaml`](../../config/ai/contracts.yaml) como ponte legada
+- [`../../config/ai/agent-operations.yaml`](../../config/ai/agent-operations.yaml) como ponte legada
+- [`../../config/ai/agent-enablement.yaml`](../../config/ai/agent-enablement.yaml) como ponte legada
+- [`../../config/ai/agent-runtime.yaml`](../../config/ai/agent-runtime.yaml) como ponte legada
 - [`../../docs/AI-CHAT-CONTRACTS-REGISTER.md`](../../docs/AI-CHAT-CONTRACTS-REGISTER.md)
 - [`../../.agents/registry/`](../../.agents/registry/)
+
+Config canonica:
+
+- manifesto raiz da IA: [`../../.agents/config/config.toml`](../../.agents/config/config.toml)
+- identidade humana declarativa: [`../../.agents/config/agents.toml`](../../.agents/config/agents.toml)
+- formato do chat e fallback alias-first:
+  [`../../.agents/config/communication.toml`](../../.agents/config/communication.toml)
+- ownership e handoff do startup:
+  [`../../.agents/config/startup.toml`](../../.agents/config/startup.toml)
+- quando um valor for configuravel, consultar a chave canonica nesses arquivos
+  em vez de repetir o literal neste documento
 
 ## Regras obrigatorias
 
