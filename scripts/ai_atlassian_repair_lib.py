@@ -4,6 +4,7 @@ import re
 from pathlib import Path
 from typing import Any
 
+from scripts.ai_atlassian_actor_lib import global_confluence_adapter, global_jira_adapter
 from scripts.ai_atlassian_backfill_lib import build_backfill_plan
 from scripts.ai_atlassian_seed_lib import (
     MIGRATION_ISSUE_SUMMARY,
@@ -16,11 +17,8 @@ from scripts.ai_atlassian_seed_lib import (
 from scripts.ai_control_plane_lib import (
     linkify_repo_relative_paths,
     load_ai_control_plane,
-    resolve_atlassian_platform,
 )
 from scripts.atlassian_platform_lib import (
-    AtlassianHttpClient,
-    ConfluenceAdapter,
     JiraAdapter,
     adf_text_document,
     adf_to_text,
@@ -252,13 +250,9 @@ def prune_redundant_migration_links(
 
 def repair_generated_atlassian(repo_root: str | Path | None = None) -> dict[str, Any]:
     control_plane = load_ai_control_plane(repo_root)
-    resolved = resolve_atlassian_platform(
-        control_plane.atlassian_definition(),
-        repo_root=control_plane.repo_root,
-    )
-    client = AtlassianHttpClient(resolved)
-    jira = JiraAdapter(client)
-    confluence = ConfluenceAdapter(client)
+    jira = global_jira_adapter(control_plane.repo_root)
+    confluence = global_confluence_adapter(control_plane.repo_root)
+    resolved = jira.client.resolved
     current_user = jira.current_user()
     author_account_id = str(current_user.get("accountId", "")).strip()
     space = confluence.get_space(resolved.confluence_space_key)

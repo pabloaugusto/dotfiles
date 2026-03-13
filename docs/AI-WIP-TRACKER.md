@@ -1,6 +1,6 @@
 # AI WIP Tracker
 
-Atualizado em: 2026-03-13 01:49 UTC
+Atualizado em: 2026-03-13 02:50 UTC
 
 Fallback local de continuidade. O Jira e a fonte primaria do fluxo vivo.
 
@@ -27,7 +27,7 @@ Fallback local de continuidade. O Jira e a fonte primaria do fluxo vivo.
 <!-- ai-worklog:doing:start -->
 | ID | Tarefa | Branch | Responsavel | Inicio UTC | Ultima atualizacao UTC | Proximo passo | Bloqueios |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| (sem itens) | - | - | - | - | - | - | - |
+| WIP-DOT-216 | DOT-216 implementar service accounts por agente com fallback seguro e drift controlado | codex/feat-DOT-216-agent-service-accounts | Engenheiro Agentes IA | 2026-03-13 02:50 UTC | 2026-03-13 02:50 UTC | Implementar resolvedor central de actor Atlassian por agente e preparar o piloto do PO. | - |
 <!-- ai-worklog:doing:end -->
 
 ## Done
@@ -104,5 +104,5 @@ Fallback local de continuidade. O Jira e a fonte primaria do fluxo vivo.
 <!-- ai-worklog:log:start -->
 | Data/Hora UTC | ID | Status | Resumo | Proximo passo | Bloqueios | Contexto | Notas |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| (sem itens) | - | - | - | - | - | - | - |
+| 2026-03-13 02:50 UTC | WIP-DOT-216 | doing | DOT-216 implementar service accounts por agente com fallback seguro e drift controlado | Implementar resolvedor central de actor Atlassian por agente e preparar o piloto do PO. | - | atlassian-runtime | inicio da tarefa |
 <!-- ai-worklog:log:end -->

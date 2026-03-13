@@ -32,6 +32,8 @@ def write_control_plane(
     enable_seo: bool = False,
     site_url_spec: str = "env://ATLASSIAN_SITE_URL",
     token_spec: str = "env://ATLASSIAN_API_TOKEN",
+    enable_po_actor: bool = False,
+    include_po_jira_assignee: bool = True,
 ) -> None:
     config_dir = repo_root / "config" / "ai"
     registry_dir = repo_root / ".agents" / "registry"
@@ -100,6 +102,37 @@ def write_control_plane(
         ),
         encoding="utf-8",
     )
+    po_actor_block = ""
+    if enable_po_actor:
+        po_actor_block = (
+            "                atlassian_actor:\n"
+            "                  enabled: true\n"
+            "                  fallback_to_global_on_error: true\n"
+            "                  email_secret_ref: op://secrets/dotfiles/atlassian-service-accounts/ai-product-owner-email\n"
+            "                  token_secret_ref: op://secrets/dotfiles/atlassian-service-accounts/ai-product-owner-api-token\n"
+            "                  account_id_secret_ref: op://secrets/dotfiles/atlassian-service-accounts/ai-product-owner-id\n"
+            "                  search_fallback:\n"
+            "                    enabled: true\n"
+            "                    query: ia-product-owner\n"
+            "                    expected_display_name: ia-product-owner\n"
+            "                  surfaces:\n"
+            "                    jira-comment:\n"
+            "                      enabled: true\n"
+            "                    jira-assignee:\n"
+            "                      enabled: true\n"
+            "                    confluence-comment:\n"
+            "                      enabled: false\n"
+            "                    confluence-page:\n"
+            "                      enabled: false\n"
+        )
+
+    po_jira_assignee_block = ""
+    if include_po_jira_assignee:
+        po_jira_assignee_block = (
+            "                jira_assignee:\n"
+            "                  account_id: account-po\n"
+        )
+
     (config_dir / "agent-runtime.yaml").write_text(
         textwrap.dedent(
             f"""\
@@ -118,9 +151,7 @@ def write_control_plane(
                 owner_mode: primary
                 surfaces: [jira, chat]
                 process_scopes: [backlog]
-                jira_assignee:
-                  account_id: account-po
-                runtime_artifacts:
+{po_jira_assignee_block}{po_actor_block}                runtime_artifacts:
                   - config/ai/agents.yaml
               ai-browser-validator:
                 status: disabled_stub
@@ -250,6 +281,38 @@ class AiControlPlaneTests(unittest.TestCase):
             control_plane = load_ai_control_plane(repo_root)
             self.assertEqual(control_plane.visible_name_for_reference("ai-product-owner"), "PO")
             self.assertEqual(control_plane.visible_name_for_reference("PO"), "PO")
+
+    def test_summary_payload_reports_roles_with_own_atlassian_actor(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            repo_root = pathlib.Path(tmp)
+            write_control_plane(repo_root, enable_po_actor=True)
+            payload = summary_payload(repo_root)
+
+        self.assertEqual(
+            payload["runtime_operability"]["enabled_roles_with_atlassian_actor"],
+            ["ai-product-owner"],
+        )
+        self.assertEqual(
+            payload["runtime_operability"]["atlassian_actor_surface_matrix"]["ai-product-owner"],
+            ["jira-assignee", "jira-comment"],
+        )
+
+    def test_actor_assignee_surface_counts_as_mapping_without_legacy_account_id(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            repo_root = pathlib.Path(tmp)
+            write_control_plane(
+                repo_root,
+                enable_po_actor=True,
+                include_po_jira_assignee=False,
+            )
+            control_plane = load_ai_control_plane(repo_root)
+
+        self.assertTrue(control_plane.role_has_jira_assignee_mapping("ai-product-owner"))
+        self.assertIn("ai-product-owner", control_plane.jira_assignable_roles())
+        self.assertNotIn(
+            "ai-product-owner",
+            control_plane.enabled_roles_missing_jira_assignee_mapping(),
+        )
 
     def test_local_overlay_overrides_base_specs(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:

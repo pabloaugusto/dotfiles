@@ -6,9 +6,18 @@ from html import escape
 from pathlib import Path
 from typing import Any
 
-import markdown as markdown_lib
+try:
+    import markdown as markdown_lib
+except ModuleNotFoundError:  # pragma: no cover - fallback local para unit tests sem dependencia opcional
+    markdown_lib = None
 
 from scripts.ai_atlassian_backfill_lib import build_backfill_plan
+from scripts.ai_atlassian_actor_lib import (
+    confluence_adapter_for_role,
+    global_confluence_adapter,
+    global_jira_adapter,
+    with_jira_actor,
+)
 from scripts.ai_atlassian_migration_bundle_lib import build_migration_bundle
 from scripts.ai_control_plane_lib import (
     AiControlPlaneError,
@@ -348,12 +357,51 @@ def build_list_html(items: list[tuple[str, str]]) -> str:
     return f"<ul>{rendered}</ul>"
 
 
+def render_inline_markdown_html(text: str) -> str:
+    rendered: list[str] = []
+    last_index = 0
+    for match in MARKDOWN_LINK_TARGET_RE.finditer(text):
+        rendered.append(escape(text[last_index : match.start()]))
+        rendered.append(
+            f'<a href="{escape(match.group(2), quote=True)}">{escape(match.group(1))}</a>'
+        )
+        last_index = match.end()
+    rendered.append(escape(text[last_index:]))
+    return "".join(rendered)
+
+
 def markdown_to_storage_html(source_body: str) -> str:
-    rendered = markdown_lib.markdown(
-        source_body,
-        extensions=["extra", "sane_lists"],
-        output_format="xhtml",
-    ).strip()
+    if markdown_lib is None:
+        blocks: list[str] = []
+        bullets: list[str] = []
+
+        def flush_bullets() -> None:
+            nonlocal bullets
+            if bullets:
+                blocks.append(f"<ul>{''.join(bullets)}</ul>")
+                bullets = []
+
+        for raw_line in source_body.splitlines():
+            stripped = raw_line.strip()
+            if not stripped:
+                flush_bullets()
+                continue
+            if stripped.startswith("- "):
+                bullets.append(f"<li>{render_inline_markdown_html(stripped[2:].strip())}</li>")
+                continue
+            flush_bullets()
+            if stripped.startswith("# "):
+                blocks.append(f"<h1>{render_inline_markdown_html(stripped[2:].strip())}</h1>")
+                continue
+            blocks.append(f"<p>{render_inline_markdown_html(stripped)}</p>")
+        flush_bullets()
+        rendered = "".join(blocks).strip()
+    else:
+        rendered = markdown_lib.markdown(
+            source_body,
+            extensions=["extra", "sane_lists"],
+            output_format="xhtml",
+        ).strip()
     return rendered or "<p>Sem conteudo renderizavel.</p>"
 
 
@@ -699,14 +747,14 @@ def sync_confluence_docs(
     issue_keys: list[str] | None = None,
 ) -> dict[str, Any]:
     control_plane = load_ai_control_plane(repo_root)
-    resolved = resolve_atlassian_platform(
-        control_plane.atlassian_definition(),
-        repo_root=control_plane.repo_root,
-    )
     _, confluence_model = load_confluence_model(control_plane.repo_root)
-    client = AtlassianHttpClient(resolved)
-    confluence = ConfluenceAdapter(client)
-    jira = JiraAdapter(client)
+    confluence, documentation_actor = confluence_adapter_for_role(
+        control_plane.repo_root,
+        "ai-documentation-sync",
+        "confluence-page",
+    )
+    resolved = documentation_actor.as_platform()
+    jira = global_jira_adapter(control_plane.repo_root)
 
     related_links: list[tuple[str, str]] = []
     seen_issue_keys: set[str] = set()
@@ -746,21 +794,27 @@ def sync_confluence_docs(
     )
 
     if migration_issue_key:
-        jira.ensure_comment(
-            migration_issue_key,
-            render_structured_comment(
-                {
-                    "agent": control_plane.visible_name_for_reference("ai-documentation-sync"),
-                    "interaction_type": "documentation-sync",
-                    "status": canonicalize_workflow_status("Doing"),
-                    "contexto": [
-                        "Confluence resincronizado por task dedicada, sem depender da semeadura completa.",
-                        "O objetivo e manter a superficie cross-surface oficial viva sem substituir o repo como fonte canonica quando aplicavel.",
-                    ],
-                    "evidencias": [page["url"] for page in page_lookup.values()],
-                    "proximo_passo": "Continuar refletindo no Confluence qualquer atualizacao aprovada do control plane e dos artefatos de migracao.",
-                }
+        with_jira_actor(
+            control_plane.repo_root,
+            "ai-documentation-sync",
+            "jira-comment",
+            lambda comment_jira, _actor: comment_jira.ensure_comment(
+                migration_issue_key,
+                render_structured_comment(
+                    {
+                        "agent": control_plane.visible_name_for_reference("ai-documentation-sync"),
+                        "interaction_type": "documentation-sync",
+                        "status": canonicalize_workflow_status("Doing"),
+                        "contexto": [
+                            "Confluence resincronizado por task dedicada, sem depender da semeadura completa.",
+                            "O objetivo e manter a superficie cross-surface oficial viva sem substituir o repo como fonte canonica quando aplicavel.",
+                        ],
+                        "evidencias": [page["url"] for page in page_lookup.values()],
+                        "proximo_passo": "Continuar refletindo no Confluence qualquer atualizacao aprovada do control plane e dos artefatos de migracao.",
+                    }
+                ),
             ),
+            context_issue_key=migration_issue_key,
         )
 
     return {
@@ -813,9 +867,8 @@ def seed_atlassian(
             "explicito desta rodada quando aprovado pelo usuario."
         )
     _, confluence_model = load_confluence_model(control_plane.repo_root)
-    client = AtlassianHttpClient(resolved)
-    jira = JiraAdapter(client)
-    confluence = ConfluenceAdapter(client)
+    jira = global_jira_adapter(control_plane.repo_root)
+    confluence = global_confluence_adapter(control_plane.repo_root)
 
     bundle = build_migration_bundle(control_plane.repo_root)
     backfill = build_backfill_plan(control_plane.repo_root)
@@ -921,21 +974,27 @@ def seed_atlassian(
         page_lookup["DOT - Migration Plan"]["url"],
         *bundle_attachment_urls,
     ]
-    jira.ensure_comment(
-        migration_issue_key,
-        render_structured_comment(
-            {
-                "agent": control_plane.visible_name_for_reference("ai-documentation-sync"),
-                "interaction_type": "schema-artifact",
-                "status": canonicalize_workflow_status("Doing"),
-                "contexto": [
-                    "Schema Jira aplicado e bundle auditavel gerado antes da semeadura.",
-                    "Confluence sincronizado como superficie cross-surface oficial da documentacao viva, preservando o repo como fonte canonica quando aplicavel.",
-                ],
-                "evidencias": migration_evidences,
-                "proximo_passo": "Concluir a semeadura retroativa e manter a operacao nativa em Jira/Confluence.",
-            }
+    with_jira_actor(
+        control_plane.repo_root,
+        "ai-documentation-sync",
+        "jira-comment",
+        lambda comment_jira, _actor: comment_jira.ensure_comment(
+            migration_issue_key,
+            render_structured_comment(
+                {
+                    "agent": control_plane.visible_name_for_reference("ai-documentation-sync"),
+                    "interaction_type": "schema-artifact",
+                    "status": canonicalize_workflow_status("Doing"),
+                    "contexto": [
+                        "Schema Jira aplicado e bundle auditavel gerado antes da semeadura.",
+                        "Confluence sincronizado como superficie cross-surface oficial da documentacao viva, preservando o repo como fonte canonica quando aplicavel.",
+                    ],
+                    "evidencias": migration_evidences,
+                    "proximo_passo": "Concluir a semeadura retroativa e manter a operacao nativa em Jira/Confluence.",
+                }
+            ),
         ),
+        context_issue_key=migration_issue_key,
     )
 
     for record in jira_records:
@@ -952,20 +1011,26 @@ def seed_atlassian(
         evidencias = list(record["seed_activity"]["evidencias"])
         evidencias.extend(related_pages)
         evidencias.append(migration_issue_url)
-        jira.ensure_comment(
-            issue_key,
-            render_structured_comment(
-                {
-                    "agent": control_plane.visible_name_for_reference(
-                        str(record["seed_activity"]["agent"]).strip()
-                    ),
-                    "interaction_type": record["seed_activity"]["interaction_type"],
-                    "status": record["seed_activity"]["status"],
-                    "contexto": record["seed_activity"]["contexto"],
-                    "evidencias": evidencias,
-                    "proximo_passo": record["seed_activity"]["proximo_passo"],
-                }
+        with_jira_actor(
+            control_plane.repo_root,
+            str(record["seed_activity"]["agent"]).strip(),
+            "jira-comment",
+            lambda comment_jira, _actor: comment_jira.ensure_comment(
+                issue_key,
+                render_structured_comment(
+                    {
+                        "agent": control_plane.visible_name_for_reference(
+                            str(record["seed_activity"]["agent"]).strip()
+                        ),
+                        "interaction_type": record["seed_activity"]["interaction_type"],
+                        "status": record["seed_activity"]["status"],
+                        "contexto": record["seed_activity"]["contexto"],
+                        "evidencias": evidencias,
+                        "proximo_passo": record["seed_activity"]["proximo_passo"],
+                    }
+                ),
             ),
+            context_issue_key=issue_key,
         )
 
     return {

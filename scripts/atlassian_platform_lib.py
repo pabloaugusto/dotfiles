@@ -550,6 +550,25 @@ class JiraAdapter:
             raise AtlassianPlatformError("Jira search retornou issues em formato inesperado.")
         return [entry for entry in issues if isinstance(entry, dict)]
 
+    def search_users(
+        self,
+        query: str,
+        *,
+        max_results: int = 50,
+    ) -> list[dict[str, Any]]:
+        params = {
+            "query": query.strip(),
+            "maxResults": str(max_results),
+        }
+        payload = self.client.request_json(
+            "jira",
+            "/rest/api/3/user/search",
+            params=params,
+        )
+        if not isinstance(payload, list):
+            raise AtlassianPlatformError("Jira user search retornou payload inesperado.")
+        return [entry for entry in payload if isinstance(entry, dict)]
+
     def find_issue_by_summary(
         self,
         *,
