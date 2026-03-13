@@ -18,6 +18,10 @@ Cada pack formal em [`formal/`](formal/) deve expor:
 - um arquivo de contexto, como [`context.md`](formal/startup-alignment/context.md)
 - metadados declarativos, como [`meta.yaml`](formal/startup-alignment/meta.yaml)
 - uma pasta de fragmentos reutilizaveis, como [`fragments/`](formal/startup-alignment/fragments/)
+- opcionalmente, um artefato de plano aprovado, como
+  [`approved-plan.md`](formal/config-context-centralization/approved-plan.md),
+  quando a rodada precisar preservar o plano aprovado pelo usuario de forma
+  perene e objetiva
 - `task_id` estavel em [`meta.yaml`](formal/startup-alignment/meta.yaml),
   sempre no formato `prompt/<slug>`
 - um bloco `dependencies` em [`meta.yaml`](formal/startup-alignment/meta.yaml)
@@ -25,6 +29,17 @@ Cada pack formal em [`formal/`](formal/) deve expor:
 - quando houver `owner_issue`, um bloco `jira` em
   [`meta.yaml`](formal/startup-alignment/meta.yaml) com
   `summary_prefix: "PROMPT:"` e `required_labels` contendo `prompt`
+
+## Artefato opcional `approved-plan.md`
+
+- `approved-plan.md` e opcional
+- nao e entrypoint de execucao
+- existe para guardar um plano aprovado pelo usuario de forma perene e objetiva
+- nao substitui [`prompt.md`](formal/startup-alignment/prompt.md),
+  [`context.md`](formal/startup-alignment/context.md) nem
+  [`meta.yaml`](formal/startup-alignment/meta.yaml)
+- quando existir, deve refletir o plano aprovado vigente daquela trilha, sem
+  virar dump solto de conversas
 
 ## Naming operacional obrigatorio
 

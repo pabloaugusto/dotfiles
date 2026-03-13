@@ -20,6 +20,16 @@ Registro consultivo do agente Pascoalete para ortografia e higiene vocabular.
 <!-- ai-orthography:records:start -->
 | Data/Hora UTC | Worklog ID | Revisor | Status | Arquivo | Achados | Evidencia |
 | --- | --- | --- | --- | --- | --- | --- |
+| 2026-03-13 15:09 UTC | WIP-DOT-217 | pascoalete | reprovado | LICOES-APRENDIDAS.md | Licoes, usuario, LICOES, licao, Criterio, licoes, eficiencia, resiliencia (+237) | task spell:check |
+| 2026-03-13 15:09 UTC | WIP-DOT-217 | pascoalete | reprovado | .agents/prompts/formal/config-context-centralization/fragments/migration-matrix.md | obrigatorio, temporaria | task spell:check |
+| 2026-03-13 15:09 UTC | WIP-DOT-217 | pascoalete | reprovado | .agents/prompts/formal/config-context-centralization/fragments/validation-and-drift-control.md | Validacao, obrigatorios, unica, unico, excecao | task spell:check |
+| 2026-03-13 15:09 UTC | WIP-DOT-217 | pascoalete | reprovado | .agents/prompts/formal/config-context-centralization/fragments/config-managed-values.md | visiveis, configuraveis, configuraveis, heranca, configuraveis, obrigacoes, proibicoes, configuravel (+1) | task spell:check |
+| 2026-03-13 15:09 UTC | WIP-DOT-217 | pascoalete | reprovado | .agents/prompts/formal/config-context-centralization/fragments/target-topology.md | Raizes, integracoes, dependencias, regionalizacao | task spell:check |
+| 2026-03-13 15:09 UTC | WIP-DOT-217 | pascoalete | reprovado | .agents/prompts/formal/config-context-centralization/approved-plan.md | Concentracao, raizes, integracoes, pulverizacao, configuraveis, integracoes, integracoes, regionalization (+23) | task spell:check |
+| 2026-03-13 15:09 UTC | WIP-DOT-217 | pascoalete | reprovado | .agents/prompts/formal/config-context-centralization/context.md | concentracao, configuracoes, pulverizacao, calendario, generico, Dependencias, concentracao | task spell:check |
+| 2026-03-13 15:09 UTC | WIP-DOT-217 | pascoalete | reprovado | .agents/prompts/formal/config-context-centralization/prompt.md | CONCENTRACAO, generico, validacao, proprios, concentracao, Observacao, implementacao, comecar (+83) | task spell:check |
+| 2026-03-13 15:09 UTC | WIP-DOT-217 | pascoalete | reprovado | .agents/prompts/CATALOG.md | Dependencias, obrigatorio, verificavel, sessao, unificacao, tematico, superficie, dependencia (+11) | task spell:check |
+| 2026-03-13 15:09 UTC | WIP-DOT-217 | pascoalete | reprovado | .agents/prompts/README.md | disponiveis, executaveis, legivel, reutilizaveis, usuario, estavel, usuario, obrigatorio (+11) | task spell:check |
 | 2026-03-13 13:53 UTC | WIP-DOT-140 | pascoalete | reprovado | docs/AI-WIP-TRACKER.md | solicitacao, acionavel, indisponivel, degradacao, primario, obrigatorio, Responsavel, atualizacao (+136) | task spell:check |
 | 2026-03-13 13:53 UTC | WIP-DOT-140 | pascoalete | aprovado | app/df/secrets/secrets-ref.yaml | sem achados | task spell:check |
 | 2026-03-12 13:40 UTC | WIP-20260312-DOT-205 | pascoalete | reprovado | docs/AI-WIP-TRACKER.md | solicitacao, acionavel, indisponivel, degradacao, primario, obrigatorio, Responsavel, atualizacao (+115) | task spell:check |

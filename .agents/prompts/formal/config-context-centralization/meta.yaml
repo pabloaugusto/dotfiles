@@ -1,0 +1,44 @@
+id: config-context-centralization
+task_id: prompt/config-context-centralization
+title: Pack formal para concentracao de configs por contexto com drenagem de literais
+status: active
+owner_epic: DOT-71
+owner_issue: DOT-217
+jira:
+  summary_prefix: "PROMPT:"
+  required_labels:
+    - prompt
+entrypoints:
+  prompt: prompt.md
+  context: context.md
+fragments:
+  - fragments/target-topology.md
+  - fragments/config-managed-values.md
+  - fragments/validation-and-drift-control.md
+  - fragments/migration-matrix.md
+dependencies:
+  prerequisite_packs: []
+  preflight_packs:
+    - startup-alignment
+    - runtime-dev-boundary
+    - agents-rules-centralization
+    - documentation-layer-governance
+    - time-locale-governance
+startup:
+  mandatory_load: false
+  report_key: config_context_centralization_pack
+  requires_manifest_integration: false
+governance:
+  root_config: config/config.toml
+  app_config_root: app/config
+  agents_config_root: .agents/config
+  global_regionalization_hub: config/config.toml
+  config_ref_convention: arquivo::chave
+  approved_plan_artifact: approved-plan.md
+validation:
+  requires_generated_doc_tables: true
+  requires_literal_lint: true
+  requires_context_schemas: true
+  requires_single_config_resolution_lib: true
+  requires_migration_matrix: true
+  requires_anti_drift_validators: true
