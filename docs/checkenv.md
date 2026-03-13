@@ -54,10 +54,6 @@ checkEnv
 9. commit assinado de teste em repo temporário
 10. (Windows) conformidade de OneDrive/profile links quando `paths.windows.onedrive_enabled=true`
 
-No Windows, o contrato assume `~/.ssh` como runtime materializado no perfil do
-usuario, com ACL segura para o OpenSSH. O bootstrap nao deve mais depender de
-symlink/junction do diretorio inteiro `~/.ssh` para dentro do repo.
-
 ## Modos de assinatura Git
 
 `checkEnv` entende três modos:
@@ -98,11 +94,6 @@ As implementações tentam reautenticar uma vez quando possível:
 
 - `op` (via token já disponível no contexto)
 - `gh` (via `GH_TOKEN`/`GITHUB_TOKEN` ou refs de 1Password na ordem: projeto, full-access, contingencia final)
-
-A ref `op://Personal/github/token-full-access` permanece documentada como
-contingencia humana final e nao deve ser tratada como falha obrigatoria no
-`checkEnv`; ela so precisa ser validada em sessao humana interativa quando esse
-fallback realmente entrar em uso.
 
 ## Comportamento no bootstrap
 

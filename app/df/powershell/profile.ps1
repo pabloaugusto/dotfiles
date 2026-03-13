@@ -39,9 +39,7 @@ if (-not $Env:GH_TOKEN -and $Env:GITHUB_TOKEN) {
 . $PWSconfDir\plugins.ps1		-WarningAction SilentlyContinue
 . $PWSconfDir\aliases.ps1		-WarningAction SilentlyContinue
 . $PWSconfDir\hotkeys.ps1		-WarningAction SilentlyContinue
-if (Test-Path "$PWSconfDir\.inc\kubectl-autocomplete.ps1" -PathType Leaf) {
-	. $PWSconfDir\.inc\kubectl-autocomplete.ps1 -WarningAction SilentlyContinue
-}
+. $PWSconfDir\.inc\kubectl-autocomplete.ps1 -WarningAction SilentlyContinue
 . $PWSconfDir\wsl.ps1
 
 #Attempting to load extras

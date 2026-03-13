@@ -1,6 +1,6 @@
 # AI Review Ledger
 
-Atualizado em: 2026-03-12 20:07 UTC
+Atualizado em: 2026-03-13 01:49 UTC
 
 Registro operacional dos pareceres de revisao especializada por `worklog`.
 
@@ -35,7 +35,7 @@ Registro operacional dos pareceres de revisao especializada por `worklog`.
 <!-- ai-review:records:start -->
 | Data/Hora UTC | Worklog ID | Revisor | Status | Arquivos | Resumo | Evidencia |
 | --- | --- | --- | --- | --- | --- | --- |
-| 2026-03-12 22:58 UTC | WIP-20260312-223235 | powershell-reviewer | aprovado | app/bootstrap/bootstrap-windows.ps1, app/df/powershell/_functions.ps1, app/df/powershell/profile.ps1, scripts/run-windows-bootstrap-integration.ps1, tests/powershell/WindowsSshLayout.Tests.ps1 | Bootstrap e runtime PowerShell aprovados; ~/.ssh Windows agora e materializado em HOME com ACL segura, checkEnv classifica o fallback Personal como contingencia humana e o profile nao falha sem kubectl-autocomplete op... | task test:unit:powershell; task test:integration:windows; task ci:lint:windows; task env:check:windows |
+| 2026-03-13 01:49 UTC | WIP-DOT-214 | powershell-reviewer | aprovado | app/bootstrap/bootstrap-windows.ps1, app/df/powershell/_functions.ps1, app/df/powershell/profile.ps1, scripts/run-windows-bootstrap-integration.ps1, tests/powershell/WindowsSshLayout.Tests.ps1, app/bootstrap/README.md, docs/checkenv.md, docs/secrets-and-auth.md | Reversao aprovada: o bootstrap Windows voltou ao contrato canonico de symlinks para `~/.ssh`, a camada de copia/materializacao foi removida e os artefatos vivos foram drenados do contrato incorreto sem regressao nos gates da trilha. | sudo task bootstrap:windows:relink; task test:unit:powershell; task test:integration:windows; task docs:check; task ai:validate; task ai:eval:smoke; task env:check:windows; SYMLINK_AUDIT_OK count=25 |
 | 2026-03-12 21:31 UTC | WIP-20260312-DOT-212 | python-reviewer | aprovado | scripts/secrets_rotation_lib.py, scripts/validate-ai-assets.py, scripts/ai_dispatch_lib.py, tests/python/ai_assets_validator_test.py, tests/python/ai_dispatch_test.py, tests/python/ai_session_startup_test.py, tests/python/secrets_rotation_test.py, tests/python/validate_docs_test.py | Python da migracao app/ validado sem regressao funcional nos consumidores e fixtures atualizados. | python -m unittest tests.python.ai_session_startup_test tests.python.secrets_rotation_test tests.python.validate_docs_test; task test:unit:python |
 | 2026-03-12 21:30 UTC | WIP-20260312-DOT-212 | automation-reviewer | aprovado | Taskfile.yml, app/bootstrap/**/*.sh, tests/bash/bootstrap_relink_integration.bats | Taskfile, shell e harnesses de bootstrap/relink aprovados para a nova topologia app/. | bash -n app/bootstrap/bootstrap-ubuntu-wsl.sh; task test:integration:linux; task docs:check; task ai:eval:smoke |
 | 2026-03-12 21:30 UTC | WIP-20260312-DOT-212 | powershell-reviewer | aprovado | app/bootstrap/**, app/df/powershell/**, scripts/run-windows-bootstrap-integration.ps1, tests/powershell/AddSymlink.Tests.ps1, tests/powershell/BootstrapConfig.Tests.ps1 | Bootstrap e runtime PowerShell aprovados com descoberta de raiz via script e relink Windows validado. | task test:unit:powershell; task test:integration:windows |
