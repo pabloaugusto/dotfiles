@@ -43,65 +43,81 @@ print_status() {
 ################################################################################
 # installPKG
 #
-# Instala ou atualiza um pacote em gerenciadores suportados.
+# Instala um pacote em gerenciadores suportados, de forma idempotente.
+#
+# O pacote (2o argumento) e o nome usado pelo gerenciador e frequentemente NAO
+# e o nome do binario: "1password-cli@beta", "node@22" e taps como
+# "fluxcd/tap/flux" nunca existem como comando, entao testar `command -v "$pkg"`
+# sempre dava "nao instalado" e re-instalava/atualizava a cada execucao. O 3o
+# argumento permite informar o binario real a testar.
+#
 # Inputs:
 #   $1 -> package manager (brew|apt)
-#   $2 -> package name
+#   $2 -> package name (nome usado pelo gerenciador)
+#   $3 -> (opcional) binario a testar como sinal de "ja instalado"
+#         default: $2 sem "@versao" e sem prefixo de tap
+#
+# Output markers: SKIP (ja instalado) | DONE (instalado) | FAIL <pacote>
+# Retorno: 0 em SKIP/DONE, != 0 em falha (com as ultimas linhas do erro).
 ################################################################################
 installPKG() {
 	local pkg_manager="$1"
 	local pkg="$2"
+	local bin="${3:-}"
 
-	[[ -z "$pkg_manager" ]] && echo "Not specified: Package manager" && exit 1
-	[[ -z "$pkg" ]] && echo "Not specified: Package to install" && exit 1
+	[[ -z "$pkg_manager" ]] && echo "Not specified: Package manager" && return 1
+	[[ -z "$pkg" ]] && echo "Not specified: Package to install" && return 1
 
+	# Default do binario: nome do pacote sem prefixo de tap e sem "@versao"
+	# ("fluxcd/tap/flux" -> "flux"; "node@22" -> "node").
+	if [[ -z "$bin" ]]; then
+		bin="${pkg##*/}"
+		bin="${bin%%@*}"
+	fi
+
+	if [[ -n "$(command -v "$bin" 2>/dev/null)" ]]; then
+		printf "SKIP %s (%s ja instalado)\n" "$pkg" "$bin"
+		return 0
+	fi
+
+	local err_log
+	err_log="$(mktemp)" || return 1
+
+	local -a install_cmd=()
 	case "$pkg_manager" in
 		brew)
-			if [[ -z "$(command -v "$pkg")" ]]; then
-				printf "Instaling %s with %s" "$pkg" "$pkg_manager "
-				export NONINTERACTIVE=1
-				export HOMEBREW_NO_AUTO_UPDATE=1
-				export HOMEBREW_NO_ENV_HINTS=1
-				export HOMEBREW_NO_ANALYTICS=1
-				export HOMEBREW_NO_INSTALL_CLEANUP=1
-				export HOMEBREW_NO_INSTALL_UPGRADE=1
-				export HOMEBREW_NO_UPDATE_REPORT_NEW=1
-				export HOMEBREW_VERBOSE=0
-				export HOMEBREW_VERBOSE_USING_DOTS=1
-				brew install "$pkg" --quiet >/dev/null 2>&1
-				print_status "DONE"
-			else
-				printf "Upgrading %s with %s" "$pkg" "$pkg_manager "
-				export NONINTERACTIVE=1
-				export HOMEBREW_NO_AUTO_UPDATE=1
-				export HOMEBREW_NO_ENV_HINTS=1
-				export HOMEBREW_NO_ANALYTICS=1
-				export HOMEBREW_NO_INSTALL_CLEANUP=1
-				export HOMEBREW_NO_INSTALL_UPGRADE=1
-				export HOMEBREW_NO_UPDATE_REPORT_NEW=1
-				export HOMEBREW_VERBOSE=0
-				export HOMEBREW_VERBOSE_USING_DOTS=0
-				brew upgrade "$pkg" --quiet >/dev/null 2>&1
-				print_status "DONE"
-			fi
+			export NONINTERACTIVE=1
+			export HOMEBREW_NO_AUTO_UPDATE=1
+			export HOMEBREW_NO_ENV_HINTS=1
+			export HOMEBREW_NO_ANALYTICS=1
+			export HOMEBREW_NO_INSTALL_CLEANUP=1
+			export HOMEBREW_NO_INSTALL_UPGRADE=1
+			export HOMEBREW_NO_UPDATE_REPORT_NEW=1
+			export HOMEBREW_VERBOSE=0
+			export HOMEBREW_VERBOSE_USING_DOTS=0
+			install_cmd=(brew install "$pkg" --quiet)
 			;;
 		apt)
-			if [[ -z "$(command -v "$pkg")" ]]; then
-				printf "Instaling %s with %s" "$pkg" "$pkg_manager "
-				export NONINTERACTIVE=1
-				apt install "$pkg" -y -qqq >/dev/null 2>&1
-				print_status "DONE"
-			else
-				printf "Upgrading %s with %s" "$pkg" "$pkg_manager "
-				export NONINTERACTIVE=1
-				apt upgrade "$pkg" -y -qqq >/dev/null 2>&1
-				print_status "DONE"
-			fi
+			install_cmd=(sudo DEBIAN_FRONTEND=noninteractive apt-get install -y -qq "$pkg")
 			;;
 		*)
 			echo "don't found package-manager: '$pkg_manager'"
+			rm -f "$err_log"
+			return 1
 			;;
 	esac
+
+	printf "Installing %s with %s " "$pkg" "$pkg_manager"
+	if "${install_cmd[@]}" >/dev/null 2>"$err_log"; then
+		print_status "DONE"
+		rm -f "$err_log"
+		return 0
+	fi
+
+	printf "FAIL %s\n" "$pkg" >&2
+	tail -n 5 "$err_log" >&2
+	rm -f "$err_log"
+	return 1
 }
 
 ######################################################
