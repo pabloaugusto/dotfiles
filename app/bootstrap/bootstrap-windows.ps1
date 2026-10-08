@@ -1144,11 +1144,15 @@ catch {
 			Remove-Item -Path $legacyPlainEnvPath -Force -ErrorAction SilentlyContinue
 		}
 
-		# Persist only age material for next terminals.
-		if (-not [string]::IsNullOrWhiteSpace($Env:SOPS_AGE_KEY)) {
-			[Environment]::SetEnvironmentVariable('SOPS_AGE_KEY', $Env:SOPS_AGE_KEY, 'User')
+		# Materializa a chave age em arquivo com ACL restrita ao usuario atual e
+		# persiste APENAS o caminho (SOPS_AGE_KEY_FILE) para os proximos terminais.
+		if (!(Ensure-SopsAgeKeyFile)) {
+			throw "Failed to materialize the SOPS age key file."
 		}
-		[Environment]::SetEnvironmentVariable('SOPS_AGE_KEY_FILE', '', 'User')
+		[Environment]::SetEnvironmentVariable('SOPS_AGE_KEY_FILE', $Env:SOPS_AGE_KEY_FILE, 'User')
+		# Migracao: remove conteudo da chave persistido por versoes anteriores.
+		$Env:SOPS_AGE_KEY = $null
+		[Environment]::SetEnvironmentVariable('SOPS_AGE_KEY', $null, 'User')
 		# Clear plaintext token persistence from previous bootstrap versions.
 		[Environment]::SetEnvironmentVariable('OP_SERVICE_ACCOUNT_TOKEN', '', 'User')
 		[Environment]::SetEnvironmentVariable('GITHUB_TOKEN', '', 'User')

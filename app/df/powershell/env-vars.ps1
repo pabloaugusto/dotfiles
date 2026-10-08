@@ -15,8 +15,9 @@ Set-ItemProperty -Path HKCU:\Environment -Name 'MYDOCS' -Value " $Env:USERPROFIL
 Set-ItemProperty -Path HKCU:\Environment -Name 'PROJECTS' -Value "$Env:USERPROFILE\projects"
 Set-ItemProperty -Path HKCU:\Environment -Name 'DOTFILES' -Value (Get-DotfilesRepoPath)
 Set-ItemProperty -Path HKCU:\Environment -Name 'CLIENTS' -Value "$Env:USERPROFILE\clients"
-# Env-only mode by default: do not force a materialized age key file path.
-Set-ItemProperty -Path HKCU:\Environment -Name 'SOPS_AGE_KEY_FILE' -Value ""
+# A chave age vive apenas em arquivo com ACL restrita; nunca no ambiente.
+# Remove conteudo de chave persistido por versoes anteriores do bootstrap.
+Remove-ItemProperty -Path HKCU:\Environment -Name 'SOPS_AGE_KEY' -ErrorAction SilentlyContinue
 Set-ItemProperty -Path HKCU:\Environment -Name 'HOME_OPS' -Value "$Env:USERPROFILE\projects\home-ops"
 
 # direnv (set env vars needed due a bug https://github.com/direnv/direnv/issues/1105)

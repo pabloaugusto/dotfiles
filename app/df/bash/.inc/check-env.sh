@@ -53,6 +53,7 @@ checkEnv() {
     case "$status" in
       success) tag="[SUCCESS]" ;;
       fail) tag="[FAIL]" ;;
+      warning) tag="[WARNING]" ;;
       *) tag="[INCONCLUSIVE]" ;;
     esac
     printf '%s %s - %s\n' "$tag" "$item" "$detail"
@@ -315,13 +316,16 @@ checkEnv() {
 
   fi
 
-  # SOPS/age readiness.
+  # SOPS/age readiness. O conteudo da chave vive so em arquivo 600.
   if [ -n "${SOPS_AGE_KEY_FILE:-}" ] && [ -f "${SOPS_AGE_KEY_FILE}" ]; then
     _add_result "success" "SOPS age key file" "SOPS_AGE_KEY_FILE definido e arquivo existe." ""
-  elif [ -n "${SOPS_AGE_KEY:-}" ]; then
-    _add_result "success" "SOPS age key file" "SOPS_AGE_KEY existe no ambiente (modo env-only)." ""
   else
-    _add_result "fail" "SOPS age key file" "Nenhuma chave age detectada no ambiente." "Defina SOPS_AGE_KEY (recomendado) ou configure SOPS_AGE_KEY_FILE."
+    _add_result "fail" "SOPS age key file" "Nenhum arquivo de chave age valido (SOPS_AGE_KEY_FILE)." "Configure SOPS_AGE_KEY_FILE apontando para o arquivo 600 da chave (ex.: ~/.config/sops/age/keys.txt)."
+  fi
+
+  # Vazamento: conteudo da chave no ambiente.
+  if [ -n "${SOPS_AGE_KEY:-}" ]; then
+    _add_result "warning" "SOPS age key leaked in env" "SOPS_AGE_KEY presente no ambiente (vazamento)." "Remova SOPS_AGE_KEY do ambiente/runtime.env e use apenas SOPS_AGE_KEY_FILE."
   fi
 
   # SSH identity policy + github handshake checks.
