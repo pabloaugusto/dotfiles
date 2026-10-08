@@ -36,6 +36,18 @@ dotfiles_automation_allowed_signers() {
   printf '%s/dotfiles/git/allowed_signers' "${XDG_STATE_HOME:-$HOME/.local/state}"
 }
 
+# Identidade do robo: le automation.<campo> do user-config.yaml (SSOT) e cai no
+# fallback quando o YAML/leitor nao estao disponiveis (ex.: shell sem o repo).
+_dotfiles_automation_git_identity() {
+  local key="$1" fallback="$2"
+  local cfg="${DOTFILES_REPO_ROOT:-$HOME/dotfiles}/app/bootstrap/user-config.yaml"
+  local value=""
+  if [ -f "$cfg" ] && command -v _yaml_get >/dev/null 2>&1; then
+    value="$(_yaml_get "$cfg" "$key")"
+  fi
+  printf '%s' "${value:-$fallback}"
+}
+
 # Ponto unico de resolucao do modo de assinatura.
 # Ordem: TARS_ACTOR=agent > DOTFILES_GIT_SIGN_MODE > worktree > human.
 dotfiles_resolve_signing_mode() {
@@ -71,9 +83,12 @@ dotfiles_apply_automation_signing_env() {
 
   allowed_signers="$(dotfiles_automation_allowed_signers)"
 
-  # Identidade git do robo (SSOT: automation.git_name/git_email na config).
-  local git_name="${TARS_AUTOMATION_GIT_NAME:-Daneel}"
-  local git_email="${TARS_AUTOMATION_GIT_EMAIL:-daneel-bot@pabloaugusto.com}"
+  # Identidade git do robo. SSOT: automation.git_name/git_email em
+  # app/bootstrap/user-config.yaml; TARS_AUTOMATION_GIT_* e os defaults sao
+  # apenas fallback (editar o YAML muda o autor dos commits do agente).
+  local git_name git_email
+  git_name="$(_dotfiles_automation_git_identity "automation.git_name" "${TARS_AUTOMATION_GIT_NAME:-Daneel}")"
+  git_email="$(_dotfiles_automation_git_identity "automation.git_email" "${TARS_AUTOMATION_GIT_EMAIL:-daneel-bot@pabloaugusto.com}")"
 
   local -a pairs=(
     "user.signingkey=$pub_path"

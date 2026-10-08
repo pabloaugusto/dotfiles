@@ -574,13 +574,15 @@ function setLocalEnvFile {
 	if ! op inject -i "$template" -o "$tmp_plain" -f >/dev/null 2>&1; then
 		echo "Falha ao gerar env temporario com 1Password (op inject). Refs do template:"
 		local ref
-		for ref in $(grep -o 'op://[^}"]*' "$template" | sort -u); do
+		# read -r preserva espacos: refs do item SSH Key do 1Password tem espaco
+		# no nome do campo (ex.: "private key"); word-splitting as quebraria.
+		while IFS= read -r ref; do
 			if op read "$ref" >/dev/null 2>&1; then
 				echo "  OK     $ref"
 			else
 				echo "  FALHA  $ref  (item/campo inexistente ou service account sem acesso ao vault)"
 			fi
-		done
+		done < <(grep -o 'op://[^}"]*' "$template" | sort -u)
 		rm -f "$tmp_plain" "$tmp_age"
 		return 1
 	fi
@@ -906,6 +908,19 @@ _daneel_config_value() {
 	printf '%s' "$value"
 }
 
+# Compara o conteudo de dois arquivos tolerando diferenca de newline(s) final(is).
+# A chave privada do daneel e' normalizada (ganha \n) logo apos ser materializada;
+# comparar cru com `cmp` acusaria diferenca a cada execucao e regravaria sempre.
+_daneel_content_equal() {
+	local a="$1" b="$2"
+	[[ -f "$a" && -f "$b" ]] || return 1
+	cmp -s "$a" "$b" && return 0
+	local ca cb
+	ca="$(cat "$a")"
+	cb="$(cat "$b")"
+	[[ "$ca" = "$cb" ]]
+}
+
 # Materializa um item do 1Password em arquivo. $1=ref $2=destino $3=rotulo $4=mode
 # Retorna 0 quando o arquivo ja estava atualizado (no-op idempotente).
 _daneel_materialize_ref() {
@@ -937,8 +952,8 @@ _daneel_materialize_ref() {
 		return 1
 	fi
 
-	# Idempotencia: so regrava quando o conteudo difere.
-	if [[ -f "$dest" ]] && cmp -s "$tmp" "$dest"; then
+	# Idempotencia: so regrava quando o conteudo difere (comparacao normalizada).
+	if _daneel_content_equal "$tmp" "$dest"; then
 		rm -f "$tmp"
 		chmod "$mode" "$dest" 2>/dev/null || true
 		return 0
@@ -1050,8 +1065,10 @@ ensureUnixSshConfigLocalLink() {
 
 # --------------------------------------------------------------------
 # Pre-checagem WSL: ferramentas do lado Windows que o bootstrap consome.
-# Falha alta e cedo (antes de instalar/alterar qualquer coisa) porque sem elas
-# o assinador SSH e o relay do ssh-agent quebram tarde e em silencio.
+# AVISA e SEGUE: esses .exe sao do lado Windows (o bootstrap do WSL nao instala
+# nada la), entao abortar aqui exigiria um gate manual antes do primeiro `full`
+# numa maquina do zero. O aviso nomeia o que falta e onde obter; os passos que
+# dependem delas falham depois com mensagem propria.
 # --------------------------------------------------------------------
 ensureWslWindowsTools() {
 	# Nao e WSL: nada a checar.
@@ -1068,12 +1085,11 @@ ensureWslWindowsTools() {
 	done
 
 	if (( ${#missing[@]} > 0 )); then
-		echo "Pre-checagem WSL: ferramenta(s) do Windows ausente(s) no PATH: ${missing[*]}" >&2
+		echo "AVISO (pre-checagem WSL): ferramenta(s) do Windows ausente(s) no PATH: ${missing[*]}" >&2
 		echo "Instale no Windows e exponha no PATH do WSL (ex.: /mnt/c/.../bin):" >&2
 		echo "  op-ssh-sign-wsl.exe -> cliente 1Password para Windows (assinatura SSH do git)" >&2
 		echo "  npiperelay.exe      -> https://github.com/albertony/npiperelay (relay do ssh-agent)" >&2
-		echo "Sem elas o bootstrap falharia depois, ao configurar op-ssh-sign/ssh-agent." >&2
-		return 1
+		echo "O bootstrap continua; a configuracao de op-ssh-sign/ssh-agent pode falhar sem elas." >&2
 	fi
 
 	return 0

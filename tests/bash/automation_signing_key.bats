@@ -97,6 +97,7 @@ load_daneel_fns() {
     extract_fn daneel_default_op_token_ref
     extract_fn daneel_default_allowed_signers_ref
     extract_fn _daneel_config_value
+    extract_fn _daneel_content_equal
     extract_fn _daneel_materialize_ref
     extract_fn _daneel_normalize_key_newline
     extract_fn ensureDaneelIdentity
@@ -151,6 +152,11 @@ publish_all_refs() {
     *allowed_signers) ;;
     *) false ;;
   esac
+
+  # B2: fora do repo. ~/.config/git e' o app/df/git versionado (symlink do
+  # bootstrap), entao materializar ali deixaria a working tree suja.
+  [ "$ALLOWED_SIGNERS" != "$XDG_CONFIG_HOME/git/allowed_signers" ]
+  [ ! -e "$XDG_CONFIG_HOME/git/allowed_signers" ]
 }
 
 @test "ensureDaneelIdentity e' idempotente (2a execucao nao regrava)" {
@@ -165,6 +171,31 @@ publish_all_refs() {
   run ensureDaneelIdentity
   [ "$status" -eq 0 ]
   [ "$(cat "$AUTO_KEY")" = "$before" ]
+  [ "$(stat -c '%Y' "$AUTO_KEY")" = "$mtime" ]
+}
+
+@test "ensureDaneelIdentity e' idempotente com fixture SEM newline final" {
+  load_daneel_fns
+  # Fixture cru do 1Password: `op read` devolve o campo sem \n. A chave e'
+  # normalizada depois (ganha \n), entao comparar o conteudo cru regravaria o
+  # arquivo a cada bootstrap.
+  publish_all_refs
+  printf '%s' "$(cat "$BATS_TEST_TMPDIR/daneel_fixture")" >"$BATS_TEST_TMPDIR/daneel_fixture.no_nl"
+  mv "$BATS_TEST_TMPDIR/daneel_fixture.no_nl" "$BATS_TEST_TMPDIR/daneel_fixture"
+  op_publish 'op://secrets/daneel-bot/private key?ssh-format=openssh' "$BATS_TEST_TMPDIR/daneel_fixture"
+
+  run ensureDaneelIdentity
+  [ "$status" -eq 0 ]
+  [ -f "$AUTO_KEY" ]
+
+  local before="" mtime=""
+  before="$(cat "$AUTO_KEY")"
+  mtime="$(stat -c '%Y' "$AUTO_KEY")"
+
+  run ensureDaneelIdentity
+  [ "$status" -eq 0 ]
+  [ "$(cat "$AUTO_KEY")" = "$before" ]
+  # 2a execucao nao regrava (mesmo mtime) => idempotente.
   [ "$(stat -c '%Y' "$AUTO_KEY")" = "$mtime" ]
 }
 

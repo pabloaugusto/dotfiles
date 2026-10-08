@@ -349,9 +349,11 @@ checkEnv() {
     local has_automation_private_key=0
     # Modo automation: a chave efetiva e' a publica do daneel, nao a humana da
     # config. Sem isto o check de SSOT abaixo compararia chaves diferentes.
+    # user.signingkey guarda a PUBLICA (o ssh-keygen deriva a privada do mesmo
+    # diretorio), entao e' ela que reportamos aqui.
     if [ "$resolved_mode" = "automation" ] && [ -n "${_auto_pub:-}" ] && [ "$signing_key" = "${_auto_pub:-}" ]; then
       has_automation_private_key=1
-      automation_private_key_path="${_auto_pub%.pub}"
+      automation_private_key_path="$_auto_pub"
     fi
 
     # SSOT da chave PUBLICA de assinatura: git.signing_key em user-config.yaml.
@@ -365,7 +367,7 @@ checkEnv() {
     fi
 
     if [ $has_automation_private_key -eq 1 ]; then
-      _add_result "success" "Git signing key" "user.signingkey aponta para a chave tecnica local: $automation_private_key_path." ""
+      _add_result "success" "Git signing key" "user.signingkey aponta para a chave PUBLICA do daneel: $automation_private_key_path (privada correspondente: ${automation_private_key_path%.pub})." ""
     elif [ -z "$config_signing_key" ]; then
       _add_result "warning" "Git signing key" "git.signing_key vazio na config: sem SSOT para validar user.signingkey." "Preencha 'git.signing_key' em app/bootstrap/user-config.yaml e rode o bootstrap/checkEnv novamente."
     elif [ -z "$signing_key" ]; then
@@ -401,7 +403,9 @@ checkEnv() {
         _add_result "fail" "Automation SA token file" "op-sa.token ausente ou vazio em $_sa_token." "Rode o bootstrap (ensureDaneelIdentity) apos criar o item no 1Password."
       fi
 
-      local _allowed_signers="${_auto_allowed_signers:-}"
+      # Sempre resolvido pelo helper (SSOT do caminho): a variavel antiga
+      # _auto_allowed_signers nunca era atribuida em lugar nenhum (codigo morto).
+      local _allowed_signers=""
       if [ -z "$_allowed_signers" ] && command -v dotfiles_automation_allowed_signers >/dev/null 2>&1; then
         _allowed_signers="$(dotfiles_automation_allowed_signers)"
       fi
