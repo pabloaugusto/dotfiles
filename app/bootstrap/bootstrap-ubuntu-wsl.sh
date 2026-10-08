@@ -939,7 +939,7 @@ _daneel_materialize_ref() {
 	}
 	chmod 600 "$tmp" 2>/dev/null || true
 
-	if ! op read --out-file "$tmp" "$ref" >/dev/null 2>&1; then
+	if ! op read --force --out-file "$tmp" "$ref" >/dev/null 2>&1; then
 		rm -f "$tmp"
 		echo "FALHA: nao foi possivel ler $ref do 1Password ($label)." >&2
 		echo "Instrucao: crie/atualize o item e o campo em $ref e garanta que a" >&2
