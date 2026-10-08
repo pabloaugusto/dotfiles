@@ -253,39 +253,55 @@ Políticas:
 - `commit.gpgsign=true`
 - `gpg.ssh.program=op-ssh-sign`
 
-## Modo humano vs automação
+## Modo humano vs automação: a identidade `daneel`
 
-O repo passa a operar com dois perfis de assinatura:
+O repo opera com dois perfis de assinatura, selecionados **pelo ator** — nunca
+por hostname:
 
-- Humano: chave pública padrão em `~/.config/git/.gitconfig.local`.
-- Automação: chave pública técnica aplicada só na worktree atual via
-  `config.worktree`, sem exportar chave privada.
+- Humano: `user.signingkey` global = `git.signing_key` da config, resolvido via
+  1Password (`op-ssh-sign`), como antes.
+- Automação: identidade única `daneel`, a **mesma para todas as máquinas**.
+  `TARS_ACTOR=agent` faz o Git usar a chave e a identidade da `daneel` via
+  `GIT_CONFIG_COUNT`/`GIT_CONFIG_KEY_n`/`GIT_CONFIG_VALUE_n`, que são herdados
+  por qualquer `git` do shell (inclusive `task sync`). O global continua
+  intocado — sem `TARS_ACTOR`, nada muda para o humano.
 
-Fluxo recomendado para automação local:
+SSOT única, na seção `automation` de
+[`app/bootstrap/user-config.yaml`](../app/bootstrap/user-config.yaml):
 
-1. guardar a chave privada técnica no 1Password SSH Agent
-2. registrar a ref da chave pública em `git.automation_signing_key_ref` no
-   bootstrap local
-3. sincronizar os derivados do bootstrap
-4. aplicar `task git:signing:mode:automation`
-5. validar com `task env:check SIGN_MODE=automation`
+| campo | default |
+| --- | --- |
+| `automation.signing_key_ref` | `op://secrets/daneel/signing/private_key` |
+| `automation.signing_public_key_ref` | `op://secrets/daneel/signing/public_key` |
+| `automation.op_token_ref` | `op://secrets/daneel/1password/service-account` |
+| `automation.allowed_signers_ref` | `op://secrets/dotfiles/git/allowed_signers` |
+| `automation.git_name` / `automation.git_email` | `Daneel` / `daneel@pabloaugusto.com` |
 
-No modo de automação, a worktree também pode materializar um `core.sshCommand`
-scoped para o próprio checkout, apontando para a chave técnica local derivada
-no diretório Git comum da worktree. Nesse mesmo modo, `user.signingkey` passa
-a referenciar a chave privada técnica local e `gpg.ssh.program` e sobrescrito
-para `ssh-keygen`, permitindo assinatura Git sem depender do prompt biométrico
-do 1Password fora do fluxo humano padrão. A resolução desses caminhos fica
-centralizada em [`scripts/git_signing_lib.py`](../scripts/git_signing_lib.py),
-evitando drift entre o contrato documental e a implementação real.
+Materialização (bootstrap, idempotente):
+
+1. `op read --out-file` para `${XDG_CONFIG_HOME:-~/.config}/tars/automation/`
+   (Windows: `%APPDATA%\tars\automation\`), com `daneel_ed25519` 600 (ACL só do
+   usuário), `daneel_ed25519.pub` 644 e `op-sa.token` 600. O valor **nunca**
+   passa por stdout nem por variável.
+2. só regrava quando o conteúdo difere (lê para um temporário e compara).
+3. `allowed_signers` (SSOT no 1Password) vai para
+   `~/.config/git/allowed_signers` e o bootstrap grava
+   `gpg.ssh.allowedSignersFile` de forma idempotente. Não existe mais
+   `allowed_signers` gerado localmente.
+4. se o item não existir no 1Password: falha clara com a instrução. O bootstrap
+   **não** gera chave sozinho.
+
+Trailer: commits do agente ganham `Machine: <hostname>` via
+[`.githooks/prepare-commit-msg`](../.githooks/prepare-commit-msg), apenas
+quando `TARS_ACTOR=agent` e de forma idempotente.
 
 Observações:
 
-- a chave pública técnica não é segredo; a rotação continua simples porque a
-  ref no 1Password é a fonte de verdade
-- o GitHub é sincronizado via `gh`, sem manter material em plaintext no repo
-- o `op` só resolve a chave pública e os tokens; a chave privada continua no
-  1Password SSH Agent
+- a chave pública não é segredo; a rotação continua simples porque a ref no
+  1Password é a fonte de verdade
+- o GitHub é sincronizado via `gh` (auth próprio), sem material em plaintext
+- o `op` da automação usa a service account cujo token vive só em
+  `~/.config/tars/automation/op-sa.token` (600); o shell não exporta token
 
 ## `user.signingkey` é segredo?
 
