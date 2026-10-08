@@ -460,7 +460,7 @@ function add_user {
 			sudo groupadd "$ADD_USER" >/dev/null 2>&1 || true
 		fi
 		sudo useradd -m -d /home/"$ADD_USER" -s /bin/bash -p "$ADD_USER_PASS" -g "$ADD_USER" -G sudo "$ADD_USER"
-		# TEMP_USER nao existe aqui: e desatribuido por clean_setup_vars e por
+		# A variavel de usuario temporario nao existe aqui: e desatribuido por clean_setup_vars e por
 		# setProfileSymlinks, e nunca e definido no call site deste passo. O `cp`
 		# apontava para /home//dotfiles e falhava. A fonte e o clone do usuario
 		# atual (~/dotfiles), com fallback para o root real do repo.
