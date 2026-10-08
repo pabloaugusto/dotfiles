@@ -79,6 +79,42 @@ Describe 'helpers da identidade daneel' {
 	}
 }
 
+Describe 'higiene de ambiente do PowerShell' {
+	It 'nao exporta GH_TOKEN em nenhum ponto do modulo' {
+		# O token do GitHub vai por stdin para o `gh auth login`; se virasse
+		# $Env:GH_TOKEN o gate de vazamento do checkEnv quebraria na 2a execucao.
+		$source = Get-Content -Raw (Join-Path $repoRoot 'app\df\powershell\_functions.ps1')
+		$source | Should Not Match '\$Env:GH_TOKEN\s*='
+	}
+
+	It 'restaura o ambiente emprestado do .env.sops (finally)' {
+		$source = Get-Content -Raw (Join-Path $repoRoot 'app\df\powershell\_functions.ps1')
+		$source | Should Match 'Get-DotfilesForbiddenEnvNames'
+		$source | Should Match 'SetEnvironmentVariable\(\$borrowedName'
+	}
+
+	It 'honra DOTFILES_GIT_SIGN_MODE como o bash (hook x checkEnv nao divergem)' {
+		$original = $env:DOTFILES_GIT_SIGN_MODE
+		try {
+			$env:DOTFILES_GIT_SIGN_MODE = 'automation'
+			(Get-CheckEnvGitProbeContext).ResolvedMode | Should Be 'automation'
+			$env:DOTFILES_GIT_SIGN_MODE = 'human'
+			(Get-CheckEnvGitProbeContext).ResolvedMode | Should Be 'human'
+		}
+		finally {
+			$env:DOTFILES_GIT_SIGN_MODE = $original
+		}
+	}
+
+	It 'checkEnv nao adiciona segredo ao ambiente (2 execucoes idempotentes)' {
+		$before = @(Get-ForbiddenEnvLeaks) -join ','
+		$null = checkEnv 6>$null | Out-Null
+		$null = checkEnv 6>$null | Out-Null
+		$after = @(Get-ForbiddenEnvLeaks) -join ','
+		$after | Should Be $before
+	}
+}
+
 Describe 'Get-ForbiddenEnvLeaks' {
 	It 'reporta NOMES dos segredos presentes no processo, nunca valores' {
 		$marker = 'segredo-nao-deve-vazar-123'

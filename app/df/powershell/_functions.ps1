@@ -1280,10 +1280,9 @@ function Set-LocalEnvFrom1Password {
 			return $false
 		}
 
+		# O token do GitHub fica so no hashtable $loaded (o `gh` alimentado por
+		# stdin em Ensure-GitHubCliAuthFrom1Password); nunca no ambiente.
 		$loaded = Import-DotEnvFile -Path $tmpPlain
-		if ($loaded.ContainsKey('GITHUB_TOKEN') -and [string]::IsNullOrWhiteSpace($Env:GH_TOKEN)) {
-			$Env:GH_TOKEN = $loaded['GITHUB_TOKEN']
-		}
 
 		# A chave vive em arquivo com ACL restrita; o conteudo nunca fica no ambiente.
 		$keyFileReady = Ensure-SopsAgeKeyFile
@@ -1483,8 +1482,9 @@ function Ensure-GitHubCliAuthFrom1Password {
 		Write-Warning "GitHub token not found in GH_TOKEN/GITHUB_TOKEN/op://secrets/dotfiles/github/token/op://secrets/github/api/token."
 		return $false
 	}
-	$Env:GH_TOKEN = $token
-
+	# O token vai por STDIN para o `gh auth login`; nunca vira variavel de
+	# ambiente do processo (o shell nao exporta segredo e o gate de vazamento do
+	# checkEnv tem que continuar passando na 2a execucao).
 	$token | & gh auth login --hostname github.com --git-protocol ssh --with-token *> $null
 	if ($LASTEXITCODE -ne 0) {
 		$authStatusOutput = & gh auth status --hostname github.com 2>&1
@@ -1504,6 +1504,25 @@ function Ensure-GitHubCliAuthFrom1Password {
 ######################################################################################
 # Internal helpers: git signing mode / config SSOT for checkEnv
 ######################################################################################
+function Get-DotfilesForbiddenEnvNames {
+	<#
+	.SYNOPSIS
+	SSOT da lista de segredos que NUNCA podem viver no ambiente do processo.
+
+	.DESCRIPTION
+	A automacao le arquivos com ACL (op-sa.token, daneel_ed25519) e o 1Password
+	em vez de variaveis de ambiente. Usada tanto pelo gate de vazamento quanto
+	pelo snapshot/restore de emprestimos temporarios (checkEnv).
+	#>
+	[CmdletBinding()]
+	param ()
+
+	return @(
+		'OP_SERVICE_ACCOUNT_TOKEN', 'OP_CONNECT_HOST', 'OP_CONNECT_TOKEN',
+		'GH_TOKEN', 'GITHUB_TOKEN', 'SOPS_AGE_KEY'
+	)
+}
+
 function Get-ForbiddenEnvLeaks {
 	<#
 	.SYNOPSIS
@@ -1517,10 +1536,7 @@ function Get-ForbiddenEnvLeaks {
 	param ([string[]]$Names)
 
 	if (-not $PSBoundParameters.ContainsKey('Names') -or $null -eq $Names -or $Names.Count -eq 0) {
-		$Names = @(
-			'OP_SERVICE_ACCOUNT_TOKEN', 'OP_CONNECT_HOST', 'OP_CONNECT_TOKEN',
-			'GH_TOKEN', 'GITHUB_TOKEN', 'SOPS_AGE_KEY'
-		)
+		$Names = Get-DotfilesForbiddenEnvNames
 	}
 
 	$found = New-Object System.Collections.Generic.List[string]
@@ -1628,9 +1644,15 @@ function Get-CheckEnvGitProbeContext {
 	$worktreeMode = (& git -C $repoPath config --worktree --get dotfiles.signing.mode 2>$null | Out-String).Trim()
 	$resolvedMode = $GitSigningMode
 	if ($resolvedMode -eq 'auto') {
-		# Ponto unico de resolucao: TARS_ACTOR=agent > worktree > human.
+		# Ponto unico de resolucao, MESMA ordem do bash (dotfiles_resolve_signing_mode):
+		# TARS_ACTOR=agent > DOTFILES_GIT_SIGN_MODE > worktree > human. Sem o
+		# DOTFILES_GIT_SIGN_MODE o hook poria o trailer de automacao e o checkEnv
+		# reportaria mode=human (divergencia bash x PowerShell).
 		if ($env:TARS_ACTOR -eq 'agent') {
 			$resolvedMode = 'automation'
+		}
+		elseif ($env:DOTFILES_GIT_SIGN_MODE -eq 'human' -or $env:DOTFILES_GIT_SIGN_MODE -eq 'automation') {
+			$resolvedMode = $env:DOTFILES_GIT_SIGN_MODE
 		}
 		else {
 			$resolvedMode = if ($worktreeMode -eq 'automation') { 'automation' } else { 'human' }
@@ -1959,11 +1981,25 @@ function checkEnv {
 		else {
 			$envSopsPath = Join-Path $Env:USERPROFILE '.env.local.sops'
 			if (Test-Path -Path $envSopsPath -PathType Leaf) {
-				$loadedEnv = Import-DotEnvFromSops -EncryptedPath $envSopsPath
-				if ($loadedEnv.ContainsKey('OP_SERVICE_ACCOUNT_TOKEN')) {
-					& op whoami *> $null
-					if ($LASTEXITCODE -eq 0) {
-						$opHealthy = $true
+				# Emprestimo temporario do .env.sops: o import escreve no Env do
+				# processo, entao o estado anterior e' restaurado no finally. Sem
+				# isso a 2a chamada de checkEnv acusaria vazamento (nao-idempotente).
+				$envBeforeBorrow = @{}
+				foreach ($borrowedName in @(Get-DotfilesForbiddenEnvNames)) {
+					$envBeforeBorrow[$borrowedName] = [Environment]::GetEnvironmentVariable($borrowedName, 'Process')
+				}
+				try {
+					$loadedEnv = Import-DotEnvFromSops -EncryptedPath $envSopsPath
+					if ($loadedEnv.ContainsKey('OP_SERVICE_ACCOUNT_TOKEN')) {
+						& op whoami *> $null
+						if ($LASTEXITCODE -eq 0) {
+							$opHealthy = $true
+						}
+					}
+				}
+				finally {
+					foreach ($borrowedName in $envBeforeBorrow.Keys) {
+						[Environment]::SetEnvironmentVariable($borrowedName, $envBeforeBorrow[$borrowedName], 'Process')
 					}
 				}
 			}
