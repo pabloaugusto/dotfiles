@@ -32,11 +32,18 @@ setup() {
 # Comparacao literal (index), sem regex: o nome pode conter "_" e as duas
 # formas de declaracao ("nome() {" e "function nome {") precisam casar.
 extract_fn() {
+  # _yaml_get deixou de viver no bootstrap: o SSOT agora e' o .inc compartilhado
+  # com o check-env.sh (app/df/bash/.inc/yaml-get.sh). Se a funcao nao estiver
+  # no script, extrai de la.
+  local from="$SCRIPT"
+  if ! awk -v n="$1" 'index($0, n "() {") == 1 { f = 1 } END { exit !f }' "$from"; then
+    from="$REPO_ROOT/app/df/bash/.inc/yaml-get.sh"
+  fi
   awk -v n="$1" '
     index($0, n "() {") == 1 || $0 == "function " n " {" { f = 1 }
     f { print }
     f && /^\}$/ { exit }
-  ' "$SCRIPT"
+  ' "$from"
 }
 
 # ---------------------------------------------------------------- _yaml_get

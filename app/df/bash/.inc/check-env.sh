@@ -1,5 +1,14 @@
 #!/usr/bin/env bash
 
+# Leitor YAML compartilhado (SSOT: app/df/bash/.inc/yaml-get.sh). Necessario para
+# validar user.signingkey contra git.signing_key de app/bootstrap/user-config.yaml.
+if ! command -v _yaml_get >/dev/null 2>&1; then
+  _checkenv_inc_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
+  # shellcheck source=yaml-get.sh
+  [ -f "$_checkenv_inc_dir/yaml-get.sh" ] && source "$_checkenv_inc_dir/yaml-get.sh"
+  unset _checkenv_inc_dir
+fi
+
 # checkEnv
 # Health check for dotfiles auth/signing stack:
 # - 1Password CLI/session
@@ -180,7 +189,7 @@ checkEnv() {
     if ! _run_with_timeout 8 "$gh_bin" auth status --hostname github.com >"$_tmp_out" 2>&1; then
       local github_token="${GH_TOKEN:-${GITHUB_TOKEN:-}}"
       if [ -z "$github_token" ] && command -v op >/dev/null 2>&1; then
-        for ref in "op://secrets/dotfiles/github/token" "op://secrets/github/api/token" "op://Personal/github/token-full-access"; do
+        for ref in "op://secrets/dotfiles/github/token" "op://secrets/github/api/token"; do
           github_token="$(op read "$ref" 2>/dev/null || true)"
           [ -n "$github_token" ] && break
         done
@@ -195,7 +204,7 @@ checkEnv() {
     if grep -q "Logged in to github.com" "$_tmp_out" || _run_with_timeout 8 "$gh_bin" auth status --hostname github.com >/dev/null 2>&1; then
       _add_result "success" "GitHub CLI auth" "gh autenticado no host github.com." ""
     else
-      _add_result "fail" "GitHub CLI auth" "gh nao autenticado no host github.com." "Rode 'gh auth login --hostname github.com --git-protocol ssh --with-token' com token do 1Password (preferencial: op://secrets/dotfiles/github/token; contingencia final: op://Personal/github/token-full-access)."
+      _add_result "fail" "GitHub CLI auth" "gh nao autenticado no host github.com." "Rode 'gh auth login --hostname github.com --git-protocol ssh --with-token' com token do 1Password (preferencial: op://secrets/dotfiles/github/token; fallback: op://secrets/github/api/token)."
     fi
 
     "$gh_bin" config set git_protocol ssh --host github.com >/dev/null 2>&1 || true
@@ -266,15 +275,30 @@ checkEnv() {
       has_automation_private_key=1
     fi
 
-    if printf '%s' "$signing_key" | grep -q '^ssh-'; then
-      _add_result "success" "Git signing key" "user.signingkey em formato SSH." ""
-    elif [ $has_automation_private_key -eq 1 ]; then
+    # SSOT da chave PUBLICA de assinatura: git.signing_key em user-config.yaml.
+    # Nao vem de `op read` (chave publica nao e' segredo).
+    local config_signing_key="" config_file=""
+    if [ -n "$git_probe" ] && [ -f "$git_probe/app/bootstrap/user-config.yaml" ]; then
+      config_file="$git_probe/app/bootstrap/user-config.yaml"
+    fi
+    if [ -n "$config_file" ] && command -v _yaml_get >/dev/null 2>&1; then
+      config_signing_key="$(_yaml_get "$config_file" "git.signing_key")"
+    fi
+
+    if [ $has_automation_private_key -eq 1 ]; then
       _add_result "success" "Git signing key" "user.signingkey aponta para a chave tecnica local: $automation_private_key_path." ""
+    elif [ -z "$config_signing_key" ]; then
+      _add_result "warning" "Git signing key" "git.signing_key vazio na config: sem SSOT para validar user.signingkey." "Preencha 'git.signing_key' em app/bootstrap/user-config.yaml e rode o bootstrap/checkEnv novamente."
+    elif [ -z "$signing_key" ]; then
+      _add_result "fail" "Git signing key" "user.signingkey ausente (git.signing_key definido na config)." "Rode o bootstrap (configureGitSigningKey) ou 'git config --global user.signingkey \"<valor de git.signing_key>\"'."
     else
-      if [ "$resolved_mode" = "automation" ]; then
-        _add_result "fail" "Git signing key" "user.signingkey ausente ou invalida." "Execute task git:signing:mode:automation para sincronizar a chave tecnica local e o signer da worktree."
+      local _cfg_key_norm _skey_norm
+      _cfg_key_norm="$(printf '%s' "$config_signing_key" | awk 'NF {print; exit}' | tr -s '[:space:]' ' ' | sed 's/^ //; s/ $//')"
+      _skey_norm="$(printf '%s' "$signing_key" | awk 'NF {print; exit}' | tr -s '[:space:]' ' ' | sed 's/^ //; s/ $//')"
+      if [ "$_cfg_key_norm" = "$_skey_norm" ]; then
+        _add_result "success" "Git signing key" "user.signingkey confere com git.signing_key da config." ""
       else
-        _add_result "fail" "Git signing key" "user.signingkey ausente ou invalida." "Defina 'git config --global user.signingkey \"ssh-ed25519 ...\"'."
+        _add_result "fail" "Git signing key" "user.signingkey difere de git.signing_key da config." "Sincronize com 'git config --global user.signingkey' usando o valor de 'git.signing_key' em app/bootstrap/user-config.yaml."
       fi
     fi
 

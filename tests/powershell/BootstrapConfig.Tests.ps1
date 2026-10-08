@@ -61,6 +61,8 @@ Describe 'bootstrap-config path helpers' {
 		$secretsRef = Get-Content -Raw -Path (Join-Path $repo 'app\df\secrets\secrets-ref.yaml')
 		$secretsRef | Should Match 'git-signing:'
 		$secretsRef | Should Match 'automation-public-key: "op://secrets/dotfiles/git-automation/public key"'
-		$secretsRef | Should Match 'full-access-token-fallback: "op://Personal/github/token-full-access"'
+		# Nada de cofre Personal no derivado: a service account do bootstrap so
+		# enxerga o cofre `secrets`.
+		$secretsRef | Should Not Match 'op://Personal/'
 	}
 }

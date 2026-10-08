@@ -18,7 +18,9 @@ function Get-BootstrapConfigDefaults {
 	$defaults['git.name'] = 'CHANGE_ME'
 	$defaults['git.email'] = 'you@example.com'
 	$defaults['git.username'] = 'your-github-user'
-	$defaults['git.signing_key'] = 'ssh-ed25519 AAAA_REPLACE_WITH_YOUR_PUBLIC_SSH_SIGNING_KEY'
+	# Default VAZIO de proposito: a chave PUBLICA de assinatura nao e' segredo,
+	# mas tambem nao deve vir chumbada no repo. O dono preenche no wizard/arquivo.
+	$defaults['git.signing_key'] = ''
 	$defaults['git.automation_signing_key_ref'] = ''
 
 	$defaults['paths.windows.onedrive_enabled'] = 'true'
@@ -66,7 +68,6 @@ function Get-BootstrapConfigDefaults {
 	$defaults['secrets.onepassword_service_account_ref'] = 'op://secrets/dotfiles/1password/service-account'
 	$defaults['secrets.github_project_pat_ref'] = 'op://secrets/dotfiles/github/token'
 	$defaults['secrets.github_full_access_ref'] = 'op://secrets/github/api/token'
-	$defaults['secrets.github_full_access_fallback_ref'] = 'op://Personal/github/token-full-access'
 	$defaults['secrets.age_key_ref'] = 'op://secrets/dotfiles/age/age.key'
 	return $defaults
 }
@@ -568,7 +569,6 @@ function Write-BootstrapConfigYaml {
 		'@@SECRETS_ONEPASSWORD_SERVICE_ACCOUNT_REF@@' = Escape-YamlDoubleQuotedValue $Config['secrets.onepassword_service_account_ref']
 		'@@SECRETS_GITHUB_PROJECT_PAT_REF@@' = Escape-YamlDoubleQuotedValue $Config['secrets.github_project_pat_ref']
 		'@@SECRETS_GITHUB_FULL_ACCESS_REF@@' = Escape-YamlDoubleQuotedValue $Config['secrets.github_full_access_ref']
-		'@@SECRETS_GITHUB_FULL_ACCESS_FALLBACK_REF@@' = Escape-YamlDoubleQuotedValue $Config['secrets.github_full_access_fallback_ref']
 		'@@SECRETS_AGE_KEY_REF@@' = Escape-YamlDoubleQuotedValue $Config['secrets.age_key_ref']
 	}
 
@@ -594,7 +594,6 @@ function Test-BootstrapConfigFilled {
 		'secrets.onepassword_service_account_ref',
 		'secrets.github_project_pat_ref',
 		'secrets.github_full_access_ref',
-		'secrets.github_full_access_fallback_ref',
 		'secrets.age_key_ref'
 	)
 
@@ -723,10 +722,39 @@ function Invoke-BootstrapConfigWizard {
 	$Config['secrets.onepassword_service_account_ref'] = Read-ConfigPrompt -Label 'Ref 1Password service account (op://.../service-account)' -CurrentValue $Config['secrets.onepassword_service_account_ref']
 	$Config['secrets.github_project_pat_ref'] = Read-ConfigPrompt -Label 'Ref GitHub token dedicado (project-pat, op://secrets/dotfiles/github/token)' -CurrentValue $Config['secrets.github_project_pat_ref']
 	$Config['secrets.github_full_access_ref'] = Read-ConfigPrompt -Label 'Ref GitHub full-access (fallback, pode ficar vazio)' -CurrentValue $Config['secrets.github_full_access_ref']
-	$Config['secrets.github_full_access_fallback_ref'] = Read-ConfigPrompt -Label 'Ref GitHub contingencia final (fallback forte, pode ficar vazio)' -CurrentValue $Config['secrets.github_full_access_fallback_ref']
 	$Config['secrets.age_key_ref'] = Read-ConfigPrompt -Label 'Ref SOPS age key (op://.../age.key)' -CurrentValue $Config['secrets.age_key_ref']
 
 	return $Config
+}
+
+function Set-GitGlobalSigningKey {
+	<#
+	.SYNOPSIS
+	Grava git config --global user.signingkey a partir de git.signing_key.
+	Idempotente: so escreve quando o valor atual difere. Nunca usa `op read`
+	(a chave PUBLICA nao e' segredo; o SSOT e' app/bootstrap/user-config.yaml).
+	#>
+	param ([string]$SigningKey = '')
+
+	if ([string]::IsNullOrWhiteSpace($SigningKey)) {
+		Write-Warning 'git.signing_key vazio: user.signingkey global preservado como esta. Preencha em app/bootstrap/user-config.yaml.'
+		return $false
+	}
+	if (-not (Get-Command git -ErrorAction SilentlyContinue)) {
+		Write-Warning 'git nao encontrado no PATH: user.signingkey global nao sincronizado.'
+		return $false
+	}
+
+	$current = (& git config --global --get user.signingkey 2>$null | Out-String).Trim()
+	if ($current -eq $SigningKey.Trim()) {
+		return $false
+	}
+	& git config --global user.signingkey $SigningKey.Trim()
+	if ($LASTEXITCODE -ne 0) {
+		Write-Warning 'Falha ao gravar git config --global user.signingkey.'
+		return $false
+	}
+	return $true
 }
 
 function Sync-BootstrapDerivedFiles {
@@ -747,7 +775,6 @@ function Sync-BootstrapDerivedFiles {
 		'github:'
 		("  project-pat: ""{0}""" -f $Config['secrets.github_project_pat_ref'])
 		("  full-access-token: ""{0}""" -f $Config['secrets.github_full_access_ref'])
-		("  full-access-token-fallback: ""{0}""" -f $Config['secrets.github_full_access_fallback_ref'])
 		'age:'
 		("  key: ""{0}""" -f $Config['secrets.age_key_ref'])
 	)
@@ -797,9 +824,17 @@ function Sync-BootstrapDerivedFiles {
 		''
 		'    # Chave PUBLICA SSH usada para identificar assinaturas de commit.'
 		'    # Formato esperado: ssh-ed25519 AAAA...'
-		("    signingkey = {0}" -f $Config['git.signing_key'])
 	)
+	$signingKeyValue = [string]$Config['git.signing_key']
+	if ([string]::IsNullOrWhiteSpace($signingKeyValue)) {
+		Write-Warning 'git.signing_key vazio em app/bootstrap/user-config.yaml: assinatura de commits ficara sem chave ate voce preencher.'
+	}
+	else {
+		$gitLocal += ("    signingkey = {0}" -f $signingKeyValue)
+	}
 	Set-Content -Path $gitLocalPath -Value $gitLocal
+
+	Set-GitGlobalSigningKey -SigningKey $signingKeyValue
 
 	# Export for current bootstrap process (consumed by windows/wsl bootstrap scripts).
 	# -------- Windows OneDrive envs --------

@@ -18,8 +18,7 @@ Refs principais:
 
 - `op://secrets/dotfiles/1password/service-account`
 - `op://secrets/dotfiles/github/token` (preferencial)
-- `op://secrets/github/api/token` (primeiro fallback)
-- `op://Personal/github/token-full-access` (contingencia final)
+- `op://secrets/github/api/token` (fallback)
 - `op://secrets/dotfiles/age/age.key`
 - `git-signing.automation-public-key` em [`app/df/secrets/secrets-ref.yaml`](../app/df/secrets/secrets-ref.yaml) quando o signer tecnico estiver configurado
 
@@ -292,7 +291,16 @@ Observações:
 
 Em modo humano, não. É material público (chave pública SSH).
 
-- Pode ficar em `~/.config/git/.gitconfig.local`
+- SSOT: campo `git.signing_key` em
+  [`app/bootstrap/user-config.yaml`](../app/bootstrap/user-config.yaml). O default no
+  repositório é vazio de propósito; o dono preenche no wizard do bootstrap.
+- O bootstrap (`configureGitSigningKey` no Bash, `Set-GitGlobalSigningKey` no
+  PowerShell) grava `git config --global user.signingkey` a partir desse campo,
+  de forma idempotente. Não usa `op read` — a chave pública não é segredo e a
+  service account do bootstrap não enxerga o cofre `Personal`.
+- Com o campo vazio, o bootstrap apenas avisa e preserva o
+  `user.signingkey` global existente; o restante do bootstrap não quebra.
+- Ainda pode ficar em `~/.config/git/.gitconfig.local`
 - A worktree de automação pode sobrescrevê-lo localmente com o caminho da
   chave privada técnica, sem tocar no perfil humano
 - Não precisa de `sops+age`
@@ -302,10 +310,9 @@ Em modo humano, não. É material público (chave pública SSH).
 ## Operação recomendada
 
 1. usar token dedicado do projeto como padrão
-2. usar `op://secrets/github/api/token` como primeiro fallback
-3. usar `op://Personal/github/token-full-access` como contingencia final
-4. rodar `checkEnv` após mudanças em auth/SSH/Git
-5. rotacionar imediatamente qualquer credencial exposta
+2. usar `op://secrets/github/api/token` como fallback
+3. rodar `checkEnv` após mudanças em auth/SSH/Git
+4. rotacionar imediatamente qualquer credencial exposta
 
 ## Rotacao canonica
 

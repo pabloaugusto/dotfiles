@@ -46,53 +46,12 @@ case "$BOOTSTRAP_MODE" in
 		;;
 esac
 
-_yaml_get() {
-	local file="$1"
-	local target="$2"
-	# POSIX awk apenas: `match(s, re, arr)` e extensao gawk; sob mawk (default do
-	# Ubuntu) o parse falha e a funcao retornava vazio sem avisar.
-	awk -v target="$target" '
-		function trim(v) {
-			sub(/^[[:space:]]+/, "", v)
-			sub(/[[:space:]]+$/, "", v)
-			return v
-		}
-		function leading_spaces(s,   n, c) {
-			n = 0
-			while (n < length(s)) {
-				c = substr(s, n + 1, 1)
-				if (c != " ") break
-				n++
-			}
-			return n
-		}
-		/^[[:space:]]*#/ || /^[[:space:]]*$/ { next }
-		{
-			line = $0
-			gsub(/\t/, "  ", line)
-			indent = leading_spaces(line)
-			rest = substr(line, indent + 1)
-			colon = index(rest, ":")
-			if (colon == 0) next
-			key = substr(rest, 1, colon - 1)
-			if (key !~ /^[A-Za-z0-9_-]+$/) next
-			level = int(indent / 2)
-			value = trim(substr(rest, colon + 1))
-			path[level] = key
-			for (i = level + 1; i < 20; i++) path[i] = ""
-			if (value != "") {
-				full = path[0]
-				for (i = 1; i <= level; i++) full = full "." path[i]
-				if (full == target) {
-					gsub(/^"/, "", value); gsub(/"$/, "", value)
-					gsub(/^'\''/, "", value); gsub(/'\''$/, "", value)
-					print value
-					exit
-				}
-			}
-		}
-	' "$file"
-}
+# Leitor YAML compartilhado com check-env.sh (SSOT em app/df/bash/.inc/yaml-get.sh).
+# shellcheck source=../df/bash/.inc/yaml-get.sh
+if ! source "$BASE_DIR/../df/bash/.inc/yaml-get.sh"; then
+	echo "Falha ao carregar helper: $BASE_DIR/../df/bash/.inc/yaml-get.sh"
+	bootstrap_exit 1
+fi
 
 resolve_unix_path_with_root() {
 	local root="$1"
@@ -799,8 +758,8 @@ ensureGitHubAuth() {
 
 	local github_token="${GH_TOKEN:-${GITHUB_TOKEN:-}}"
 	if [[ -z "$github_token" ]]; then
-		# Prefer least-privilege project token, then escalate through the full-access fallbacks.
-		for ref in "op://secrets/dotfiles/github/token" "op://secrets/github/api/token" "op://Personal/github/token-full-access"; do
+		# Prefer least-privilege project token, then the full-access fallback.
+		for ref in "op://secrets/dotfiles/github/token" "op://secrets/github/api/token"; do
 			github_token="$(op read "$ref" 2>/dev/null || true)"
 			if [[ -n "$github_token" ]]; then
 				break
@@ -815,7 +774,7 @@ ensureGitHubAuth() {
 	fi
 
 	if [[ -z "$github_token" ]]; then
-		echo "Token do GitHub nao encontrado (GITHUB_TOKEN/GH_TOKEN/op://secrets/dotfiles/github/token/op://secrets/github/api/token/op://Personal/github/token-full-access)."
+		echo "Token do GitHub nao encontrado (GITHUB_TOKEN/GH_TOKEN/op://secrets/dotfiles/github/token/op://secrets/github/api/token)."
 		return 1
 	fi
 	export GH_TOKEN="$github_token"
@@ -869,6 +828,41 @@ EOF
 # --------------------------------------------------------------------
 # Cleanup export vars
 # --------------------------------------------------------------------
+# SSOT da chave PUBLICA de assinatura: user-config.yaml -> git.signing_key.
+# Nunca vem de `op read` (chave publica nao e' segredo). Idempotente: so grava
+# user.signingkey global quando o valor atual difere. Campo vazio = aviso, sem
+# quebrar o restante do bootstrap.
+configureGitSigningKey() {
+	local cfg="$DOTFILES_REPO_ROOT/app/bootstrap/user-config.yaml"
+	local signing_key=""
+
+	if [[ -f "$cfg" ]]; then
+		signing_key="$(_yaml_get "$cfg" "git.signing_key")"
+	fi
+
+	if [[ -z "${signing_key//[[:space:]]/}" ]]; then
+		echo "AVISO: git.signing_key vazio em app/bootstrap/user-config.yaml; user.signingkey global preservado. Preencha para assinar commits."
+		return 0
+	fi
+	if ! command -v git >/dev/null 2>&1; then
+		echo "AVISO: git nao encontrado no PATH; user.signingkey global nao sincronizado."
+		return 0
+	fi
+
+	local current=""
+	current="$(git config --global --get user.signingkey 2>/dev/null || true)"
+	if [[ "$current" == "$signing_key" ]]; then
+		return 0
+	fi
+
+	if git config --global user.signingkey "$signing_key"; then
+		echo "user.signingkey global sincronizado a partir de git.signing_key."
+	else
+		echo "AVISO: falha ao gravar git config --global user.signingkey."
+	fi
+	return 0
+}
+
 function clean_setup_vars {
 
 	unset TEMP_USER
@@ -962,6 +956,7 @@ importLocalEnvFromSops || bootstrap_exit 1
 persistSopsAgeEnv || bootstrap_exit 1
 ensureOpSshSignAlias || bootstrap_exit 1
 ensureGitHubAuth || bootstrap_exit 1
+configureGitSigningKey
 
 
 # 6 - unset setup vars

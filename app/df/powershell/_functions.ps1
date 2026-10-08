@@ -1465,11 +1465,10 @@ function Ensure-GitHubCliAuthFrom1Password {
 	}
 
 	if ([string]::IsNullOrWhiteSpace($token) -and (Test-CommandExists op)) {
-		# Prefer least-privilege project token, then escalate through the full-access fallbacks.
+		# Prefer least-privilege project token, then the full-access fallback.
 		$tokenRefs = @(
 			'op://secrets/dotfiles/github/token',
-			'op://secrets/github/api/token',
-			'op://Personal/github/token-full-access'
+			'op://secrets/github/api/token'
 		)
 		foreach ($ref in $tokenRefs) {
 			$candidate = (& op read $ref 2>$null | Out-String).Trim()
@@ -1481,7 +1480,7 @@ function Ensure-GitHubCliAuthFrom1Password {
 	}
 
 	if ([string]::IsNullOrWhiteSpace($token)) {
-		Write-Warning "GitHub token not found in GH_TOKEN/GITHUB_TOKEN/op://secrets/dotfiles/github/token/op://secrets/github/api/token/op://Personal/github/token-full-access."
+		Write-Warning "GitHub token not found in GH_TOKEN/GITHUB_TOKEN/op://secrets/dotfiles/github/token/op://secrets/github/api/token."
 		return $false
 	}
 	$Env:GH_TOKEN = $token
@@ -1513,6 +1512,33 @@ function Normalize-SshPublicKeyValue {
 	$firstLine = (($Value -split "\r?\n") | Where-Object { -not [string]::IsNullOrWhiteSpace($_) } | Select-Object -First 1)
 	if ([string]::IsNullOrWhiteSpace($firstLine)) { return '' }
 	return (($firstLine -replace '\s+', ' ').Trim())
+}
+
+function Get-BootstrapConfigSigningKey {
+	<#
+	.SYNOPSIS
+	Le git.signing_key de app/bootstrap/user-config.yaml (SSOT da chave PUBLICA
+	de assinatura). Nunca usa `op read`: chave publica nao e' segredo.
+	#>
+	[CmdletBinding()]
+	param ([string]$RepoPath)
+
+	if ([string]::IsNullOrWhiteSpace($RepoPath)) { return '' }
+	$configPath = Join-Path $RepoPath 'app/bootstrap/user-config.yaml'
+	if (-not (Test-Path -Path $configPath -PathType Leaf)) { return '' }
+
+	$inGitBlock = $false
+	foreach ($line in Get-Content -Path $configPath) {
+		if ($inGitBlock -and $line -match '^\S') { break }
+		if ($line -match '^git:\s*(#.*)?$') { $inGitBlock = $true; continue }
+		if ($inGitBlock -and $line -match '^\s+signing_key:\s*(.*)$') {
+			$value = $Matches[1].Trim()
+			$value = $value -replace '^"(.*)"$', '$1'
+			$value = $value -replace "^'(.*)'$", '$1'
+			return $value.Trim()
+		}
+	}
+	return ''
 }
 
 function Get-CheckEnvGitProbeContext {
@@ -1908,7 +1934,7 @@ function checkEnv {
 			Add-CheckResult -Item 'GitHub CLI auth' -Status 'success' -Detail 'gh authenticated for github.com.' -Solution ''
 		}
 		else {
-			Add-CheckResult -Item 'GitHub CLI auth' -Status 'fail' -Detail (($statusOutput | Out-String).Trim()) -Solution 'Authenticate with gh using a token from 1Password (prefer op://secrets/dotfiles/github/token; contingencia final: op://Personal/github/token-full-access).'
+			Add-CheckResult -Item 'GitHub CLI auth' -Status 'fail' -Detail (($statusOutput | Out-String).Trim()) -Solution 'Authenticate with gh using a token from 1Password (prefer op://secrets/dotfiles/github/token; fallback: op://secrets/github/api/token).'
 		}
 
 		& gh config set git_protocol ssh --host github.com *> $null
@@ -1962,20 +1988,24 @@ function checkEnv {
 			$signingKey -eq $automationPrivateKeyPath
 		)
 
-		if ($signingKey -match '^ssh-') {
-			Add-CheckResult -Item 'Git signing key' -Status 'success' -Detail 'user.signingkey uses SSH key format.' -Solution ''
-		}
-		elseif ($hasAutomationPrivateKey) {
+		# SSOT da chave PUBLICA de assinatura: git.signing_key em user-config.yaml.
+		# Nunca via `op read` (chave publica nao e' segredo).
+		$configSigningKey = Get-BootstrapConfigSigningKey -RepoPath $repoPath
+
+		if ($hasAutomationPrivateKey) {
 			Add-CheckResult -Item 'Git signing key' -Status 'success' -Detail "user.signingkey aponta para a chave tecnica local: $automationPrivateKeyPath." -Solution ''
 		}
+		elseif ([string]::IsNullOrWhiteSpace($configSigningKey)) {
+			Add-CheckResult -Item 'Git signing key' -Status 'warning' -Detail 'git.signing_key vazio na config: sem SSOT para validar user.signingkey.' -Solution "Preencha 'git.signing_key' em app/bootstrap/user-config.yaml e rode o bootstrap/checkEnv novamente."
+		}
+		elseif ([string]::IsNullOrWhiteSpace($signingKey)) {
+			Add-CheckResult -Item 'Git signing key' -Status 'fail' -Detail 'user.signingkey ausente (git.signing_key definido na config).' -Solution 'Rode o bootstrap (Set-GitGlobalSigningKey) ou git config --global user.signingkey "<valor de git.signing_key>".'
+		}
+		elseif ($signingKey.Trim() -eq $configSigningKey.Trim()) {
+			Add-CheckResult -Item 'Git signing key' -Status 'success' -Detail 'user.signingkey confere com git.signing_key da config.' -Solution ''
+		}
 		else {
-			$signingKeySolution = if ($resolvedGitSigningMode -eq 'automation') {
-				'Rode task git:signing:mode:automation para sincronizar a chave tecnica local e o signer da worktree atual.'
-			}
-			else {
-				'Set user.signingkey to the SSH public key managed by 1Password.'
-			}
-			Add-CheckResult -Item 'Git signing key' -Status 'fail' -Detail 'user.signingkey is missing or invalid.' -Solution $signingKeySolution
+			Add-CheckResult -Item 'Git signing key' -Status 'fail' -Detail 'user.signingkey difere de git.signing_key da config.' -Solution "Sincronize com 'git config --global user.signingkey' usando o valor de 'git.signing_key' em app/bootstrap/user-config.yaml."
 		}
 
 		if ($resolvedGitSigningMode -eq 'automation') {
@@ -2888,7 +2918,7 @@ function Sync-DotfilesWindowsToWsl {
 
 			$pushRecovered = $false
 			if (-not [string]::IsNullOrWhiteSpace($repoPath) -and (Test-CommandExists op)) {
-				foreach ($ref in @('op://secrets/dotfiles/github/token', 'op://secrets/github/api/token', 'op://Personal/github/token-full-access')) {
+				foreach ($ref in @('op://secrets/dotfiles/github/token', 'op://secrets/github/api/token')) {
 					$token = (& op read $ref 2>$null | Out-String).Trim()
 					if ([string]::IsNullOrWhiteSpace($token)) { continue }
 

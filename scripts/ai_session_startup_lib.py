@@ -48,7 +48,6 @@ GITHUB_FALLBACK_CHAIN = [
     "GITHUB_TOKEN",
     "op://secrets/dotfiles/github/token",
     "op://secrets/github/api/token",
-    "op://Personal/github/token-full-access",
 ]
 STARTUP_GOVERNOR_AGENT = "ai-startup-governor"
 STARTUP_GOVERNOR_DISPLAY_NAME = "Guardiao de Startup"
