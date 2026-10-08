@@ -604,8 +604,18 @@ function setLocalEnvFile {
 		return 1
 	}
 
+	# Falha alta (R4): mostra QUAIS refs falharam, testando cada uma isolada com a
+	# saida descartada. Nunca imprime stdout do op (que e' o valor do segredo).
 	if ! op inject -i "$template" -o "$tmp_plain" -f >/dev/null 2>&1; then
-		echo "Falha ao gerar env temporario com 1Password (op inject)."
+		echo "Falha ao gerar env temporario com 1Password (op inject). Refs do template:"
+		local ref
+		for ref in $(grep -o 'op://[^}"]*' "$template" | sort -u); do
+			if op read "$ref" >/dev/null 2>&1; then
+				echo "  OK     $ref"
+			else
+				echo "  FALHA  $ref  (item/campo inexistente ou service account sem acesso ao vault)"
+			fi
+		done
 		rm -f "$tmp_plain" "$tmp_age"
 		return 1
 	fi
