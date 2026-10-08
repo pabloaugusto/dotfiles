@@ -1045,15 +1045,9 @@ catch {
 # bootstrap: symlink VsCode settings
 #################################################################################
 
-	# ---------------------------------------------------------------
-	# remove previous root dotfile dirs symlinks
-	# make this check/delete a functionality into add-symlink function
-	# ---------------------------------------------------------------
+	# Add-Symlink remove apenas links antigos; conteudo real (settings/snippets do
+	# usuario) e preservado em backup <pasta>.dotfiles-prelink-YYYYMMDDHHMMSS.
 	$codeUserPath = Resolve-WindowsCodeUserPath
-	if (Test-Path -Path $codeUserPath) {
-		Remove-Item -r $codeUserPath
-	}
-
 	Add-Symlink $codeUserPath "$DotFilesDirectory\app\df\vscode" > $null
 	#Add-Symlink "$Env:APPDATA\Code\User\settings.json" "$DotFilesDirectory\app\df\vscode\settings.json" > $null
 	#Add-Symlink "$Env:APPDATA\Code\User\keybindings.json" "$DotFilesDirectory\app\df\vscode\keybindings.json" > $null

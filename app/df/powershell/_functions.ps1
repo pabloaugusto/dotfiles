@@ -51,6 +51,23 @@ function updateAll {
 }
 
 ######################################################################################
+# Remove SOMENTE um link (symlink/junction/hardlink), preservando o alvo.
+# Nunca use Remove-Item -Recurse em um link: em algumas versoes do PowerShell ele
+# segue o link e apaga o conteudo real (ex.: ~/.ssh, VS Code User).
+######################################################################################
+function Remove-LinkOnly {
+	param ( [Parameter(Mandatory)] [string]$Path )
+
+	$item = Get-Item -LiteralPath $Path -Force -ErrorAction SilentlyContinue
+	if ($null -eq $item) { return }
+
+	switch ([string]$item.LinkType) {
+		'Junction' { [System.IO.Directory]::Delete($Path, $false) }
+		default    { Remove-Item -LiteralPath $Path -Force -Confirm:$false -ErrorAction SilentlyContinue }
+	}
+}
+
+######################################################################################
 # Create a symbolic link
 ######################################################################################
 function Add-Symlink {
@@ -65,18 +82,18 @@ function Add-Symlink {
 
 	$fromPath = $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($from)
 	$toPath = $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($to)
-	$targetExists = Test-Path -Path $toPath
-	$targetItem = if ($targetExists) { Get-Item -Path $toPath -Force -ErrorAction SilentlyContinue } else { $null }
+	$targetExists = Test-Path -LiteralPath $toPath
+	$targetItem = if ($targetExists) { Get-Item -LiteralPath $toPath -Force -ErrorAction SilentlyContinue } else { $null }
 	$targetIsDirectory = ($null -ne $targetItem -and $targetItem.PSIsContainer)
 
 	# Ensure parent folder exists before creating the link.
 	$parentPath = Split-Path -Path $fromPath -Parent
-	if ($parentPath -and !(Test-Path -Path $parentPath)) {
+	if ($parentPath -and !(Test-Path -LiteralPath $parentPath)) {
 		New-Item -ItemType Directory -Path $parentPath -Force | Out-Null
 	}
 
-	if (Test-Path -Path $fromPath) {
-		$currentItem = Get-Item -Path $fromPath -Force -ErrorAction SilentlyContinue
+	if (Test-Path -LiteralPath $fromPath) {
+		$currentItem = Get-Item -LiteralPath $fromPath -Force -ErrorAction SilentlyContinue
 		$isLink = $null -ne $currentItem -and ($currentItem.LinkType -eq 'SymbolicLink' -or $currentItem.LinkType -eq 'Junction')
 		$currentTarget = if ($isLink -and $null -ne $currentItem.Target) { [string]($currentItem.Target | Select-Object -First 1) } else { '' }
 		$resolvedCurrentTarget = if ($currentTarget) { $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($currentTarget) } else { '' }
@@ -86,18 +103,28 @@ function Add-Symlink {
 			return
 		}
 
-		Remove-Item -Path $fromPath -Recurse -Force -Confirm:$false -ErrorAction SilentlyContinue
+		if ($isLink) {
+			# Link apontando para outro alvo: remove APENAS o link, nunca o conteúdo apontado.
+			Remove-LinkOnly -Path $fromPath
+		}
+		else {
+			# Conteúdo real (ex.: ~/.ssh, VS Code User): preserva via backup antes de linkar.
+			$backupPath = "{0}.dotfiles-prelink-{1}" -f $fromPath, (Get-Date -Format 'yyyyMMddHHmmss')
+			Rename-Item -LiteralPath $fromPath -NewName (Split-Path -Path $backupPath -Leaf) -Force -ErrorAction Stop
+			Write-Warning "Add-Symlink: '$fromPath' já existia com conteúdo real; movido para '$backupPath' antes de criar o link."
+		}
 	}
 
 	New-Item -ItemType SymbolicLink -Path $fromPath -Target $toPath -Force -WarningAction SilentlyContinue -InformationAction Ignore -ErrorAction SilentlyContinue | Out-Null
-	$createdItem = Get-Item -Path $fromPath -Force -ErrorAction SilentlyContinue
+	$createdItem = Get-Item -LiteralPath $fromPath -Force -ErrorAction SilentlyContinue
 	$createdLinkType = if ($null -ne $createdItem) { [string]$createdItem.LinkType } else { '' }
 	if ($createdLinkType -eq 'SymbolicLink') {
 		return
 	}
 
-	if (Test-Path -Path $fromPath) {
-		Remove-Item -Path $fromPath -Recurse -Force -Confirm:$false -ErrorAction SilentlyContinue
+	if ($null -ne $createdItem -and ($createdItem.LinkType -eq 'SymbolicLink' -or $createdItem.LinkType -eq 'Junction' -or $createdItem.LinkType -eq 'HardLink')) {
+		# Somente um link parcial: pode ser removido sem risco para conteúdo real.
+		Remove-LinkOnly -Path $fromPath
 	}
 
 	if ($targetIsDirectory) {
