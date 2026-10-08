@@ -1740,7 +1740,7 @@ function Invoke-CheckEnvSignedCommitTest {
 			return [PSCustomObject]@{
 				Status   = 'fail'
 				Detail   = 'signer nao configurado: user.signingkey ausente, assinatura nao verificada.'
-				Solution = 'Defina ''git config --global user.signingkey "ssh-ed25519 ..."'' e rode checkEnv novamente.'
+				Solution = 'Defina user.signingkey no .gitconfig.local incluido pelo ~/.gitconfig e rode checkEnv novamente.'
 			}
 		}
 
@@ -2163,13 +2163,13 @@ function checkEnv {
 			Add-CheckResult -Item 'Git signing key' -Status 'warning' -Detail 'git.signing_key vazio na config: sem SSOT para validar user.signingkey.' -Solution "Preencha 'git.signing_key' em app/bootstrap/user-config.yaml e rode o bootstrap/checkEnv novamente."
 		}
 		elseif ([string]::IsNullOrWhiteSpace($signingKey)) {
-			Add-CheckResult -Item 'Git signing key' -Status 'fail' -Detail 'user.signingkey ausente (git.signing_key definido na config).' -Solution 'Rode o bootstrap (Set-GitGlobalSigningKey) ou git config --global user.signingkey "<valor de git.signing_key>".'
+			Add-CheckResult -Item 'Git signing key' -Status 'fail' -Detail 'user.signingkey ausente (git.signing_key definido na config).' -Solution 'Rode o bootstrap (Set-GitGlobalSigningKey) ou grave user.signingkey no .gitconfig.local incluido pelo ~/.gitconfig.'
 		}
 		elseif ($signingKey.Trim() -eq $configSigningKey.Trim()) {
 			Add-CheckResult -Item 'Git signing key' -Status 'success' -Detail 'user.signingkey confere com git.signing_key da config.' -Solution ''
 		}
 		else {
-			Add-CheckResult -Item 'Git signing key' -Status 'fail' -Detail 'user.signingkey difere de git.signing_key da config.' -Solution "Sincronize com 'git config --global user.signingkey' usando o valor de 'git.signing_key' em app/bootstrap/user-config.yaml."
+			Add-CheckResult -Item 'Git signing key' -Status 'fail' -Detail 'user.signingkey difere de git.signing_key da config.' -Solution "Sincronize user.signingkey (no .gitconfig.local incluido pelo ~/.gitconfig) com 'git.signing_key' de app/bootstrap/user-config.yaml."
 		}
 
 		# allowed_signers: SSOT no 1Password, materializado pelo bootstrap.
@@ -2680,6 +2680,19 @@ function Ensure-DotfilesGitSignerProgram {
 	$localProgram = (& git -C $RepoPath config --local --get gpg.ssh.program 2>$null | Out-String).Trim()
 	$isWindowsRuntime = ($Env:OS -eq 'Windows_NT')
 
+	# Destino dos ajustes: o `.gitconfig.local` incluido pelo ~/.gitconfig (dado
+	# da maquina). NUNCA `--global`: no Windows o ~/.gitconfig e' symlink para
+	# app/df/git/.gitconfig (versionado), entao escrever ali deixaria a working
+	# tree suja. Twin de Get-GitLocalConfigPath em app/bootstrap/bootstrap-config.ps1.
+	$gitLocalConfigPath = [Environment]::GetEnvironmentVariable('HOME')
+	if ([string]::IsNullOrWhiteSpace($gitLocalConfigPath)) {
+		$gitLocalConfigPath = [Environment]::GetEnvironmentVariable('USERPROFILE')
+	}
+	if ([string]::IsNullOrWhiteSpace($gitLocalConfigPath)) {
+		$gitLocalConfigPath = [Environment]::GetFolderPath('UserProfile')
+	}
+	$gitLocalConfigPath = Join-Path (Join-Path $gitLocalConfigPath '.config') 'git\.gitconfig.local'
+
 	# Resolve helper for a program token/path
 	$resolveProgramPath = {
 		param ([string]$ProgramValue)
@@ -2721,7 +2734,7 @@ function Ensure-DotfilesGitSignerProgram {
 			$effectiveProgramAfterLocalFix = (& git -C $RepoPath config --get gpg.ssh.program 2>$null | Out-String).Trim()
 			$resolvedAfterLocalFix = & $resolveProgramPath $effectiveProgramAfterLocalFix
 			if ([string]::IsNullOrWhiteSpace($resolvedAfterLocalFix) -and -not [string]::IsNullOrWhiteSpace($preferredWindowsProgram)) {
-				& git -C $RepoPath config --global gpg.ssh.program $preferredWindowsProgram *> $null
+				& git -C $RepoPath config --file $gitLocalConfigPath gpg.ssh.program $preferredWindowsProgram *> $null
 			}
 			elseif ([string]::IsNullOrWhiteSpace($resolvedAfterLocalFix) -and [string]::IsNullOrWhiteSpace($preferredWindowsProgram)) {
 				throw ("1Password signer not resolvable on Windows: op-ssh-sign.exe nao encontrado em " +
@@ -2741,7 +2754,7 @@ function Ensure-DotfilesGitSignerProgram {
 			$effectiveProgramAfterLocalFix = (& git -C $RepoPath config --get gpg.ssh.program 2>$null | Out-String).Trim()
 			$resolvedAfterLocalFix = & $resolveProgramPath $effectiveProgramAfterLocalFix
 			if ([string]::IsNullOrWhiteSpace($resolvedAfterLocalFix) -and -not [string]::IsNullOrWhiteSpace($preferredUnixProgram)) {
-				& git -C $RepoPath config --global gpg.ssh.program $preferredUnixProgram *> $null
+				& git -C $RepoPath config --file $gitLocalConfigPath gpg.ssh.program $preferredUnixProgram *> $null
 			}
 		}
 

@@ -28,8 +28,16 @@ Describe 'bootstrap-config path helpers' {
 		$script:OriginalGitConfigGlobal = $env:GIT_CONFIG_GLOBAL
 		$script:OriginalAppData = $env:APPDATA
 		$script:OriginalPath = $env:PATH
-		$env:GIT_CONFIG_GLOBAL = Join-Path $TestDrive 'gitconfig'
-		Set-Content -Path $env:GIT_CONFIG_GLOBAL -Value ''
+		$script:OriginalHome = $env:HOME
+		# HOME tambem e' falso: Set-GitGlobalSigningKey grava no
+		# ~/.config/git/.gitconfig.local (dado da maquina). Sem isto o teste
+		# sobrescreveria a chave REAL do dono.
+		$env:HOME = Join-Path $TestDrive 'home'
+		New-Item -ItemType Directory -Path (Join-Path $env:HOME '.config\git') -Force | Out-Null
+		$env:GIT_CONFIG_GLOBAL = Join-Path $env:HOME '.gitconfig'
+		# Mesma estrutura da maquina: o ~/.gitconfig (versionado) inclui o
+		# .gitconfig.local, onde vive o dado local (identidade/assinatura).
+		Set-Content -Path $env:GIT_CONFIG_GLOBAL -Value ("[include]`r`n`tpath = {0}" -f ((Join-Path $env:HOME '.config\git\.gitconfig.local').Replace('\', '/')))
 		# Mantem a identidade de automacao do teste fora do %APPDATA% real.
 		$env:APPDATA = Join-Path $TestDrive 'appdata'
 		New-Item -ItemType Directory -Path $env:APPDATA -Force | Out-Null
@@ -40,7 +48,26 @@ Describe 'bootstrap-config path helpers' {
 		$env:GIT_CONFIG_GLOBAL = $script:OriginalGitConfigGlobal
 		$env:APPDATA = $script:OriginalAppData
 		$env:PATH = $script:OriginalPath
+		$env:HOME = $script:OriginalHome
 		Remove-Item Env:STUB_OP_FAIL -ErrorAction SilentlyContinue
+	}
+
+	It 'Set-GitGlobalSigningKey grava no .gitconfig.local, nao no arquivo global' {
+		$key = 'ssh-ed25519 AAAATESTLOCAL machine@test'
+		$localPath = Join-Path $env:HOME '.config\git\.gitconfig.local'
+
+		Set-GitGlobalSigningKey -SigningKey $key | Out-Null
+
+		Test-Path -Path $localPath -PathType Leaf | Should Be $true
+		(Get-Content -Raw -Path $localPath) | Should Match 'AAAATESTLOCAL'
+		# O `global` (que na maquina real e' symlink do .gitconfig versionado)
+		# nunca e' escrito.
+		(Get-Content -Raw -Path $env:GIT_CONFIG_GLOBAL) | Should Not Match 'AAAATESTLOCAL'
+
+		# Idempotencia: 2a chamada nao altera o arquivo.
+		$before = (Get-Item -Path $localPath).LastWriteTimeUtc
+		(Set-GitGlobalSigningKey -SigningKey $key) | Should Be $false
+		(Get-Item -Path $localPath).LastWriteTimeUtc | Should Be $before
 	}
 
 	It 'joins windows relative paths against a root' {
@@ -136,12 +163,18 @@ Describe 'identidade de automacao daneel' {
 		$script:OriginalTarsActor = $env:TARS_ACTOR
 		$script:OriginalGitConfigGlobal = $env:GIT_CONFIG_GLOBAL
 		$script:OriginalPath = $env:PATH
+		$script:OriginalHome = $env:HOME
 
 		$env:APPDATA = Join-Path $TestDrive 'appdata'
 		New-Item -ItemType Directory -Path $env:APPDATA -Force | Out-Null
-		# Nunca tocar no global real: Sync-BootstrapDerivedFiles roda git config --global.
-		$env:GIT_CONFIG_GLOBAL = Join-Path $TestDrive 'gitconfig'
-		Set-Content -Path $env:GIT_CONFIG_GLOBAL -Value ''
+		# Nunca tocar no git config real: o bootstrap grava no
+		# ~/.config/git/.gitconfig.local (dado da maquina), entao HOME e' falso.
+		$env:HOME = Join-Path $TestDrive 'home'
+		New-Item -ItemType Directory -Path (Join-Path $env:HOME '.config\git') -Force | Out-Null
+		$env:GIT_CONFIG_GLOBAL = Join-Path $env:HOME '.gitconfig'
+		# Mesma estrutura da maquina: o ~/.gitconfig (versionado) inclui o
+		# .gitconfig.local, onde vive o dado local (identidade/assinatura).
+		Set-Content -Path $env:GIT_CONFIG_GLOBAL -Value ("[include]`r`n`tpath = {0}" -f ((Join-Path $env:HOME '.config\git\.gitconfig.local').Replace('\', '/')))
 		$env:PATH = (New-OpStub -Directory (Join-Path $TestDrive 'stub-bin')) + [IO.Path]::PathSeparator + $env:PATH
 		Remove-Item Env:STUB_OP_FAIL -ErrorAction SilentlyContinue
 	}
@@ -149,6 +182,7 @@ Describe 'identidade de automacao daneel' {
 		$env:APPDATA = $script:OriginalAppData
 		$env:GIT_CONFIG_GLOBAL = $script:OriginalGitConfigGlobal
 		$env:PATH = $script:OriginalPath
+		$env:HOME = $script:OriginalHome
 		if ($null -eq $script:OriginalTarsActor) { Remove-Item Env:TARS_ACTOR -ErrorAction SilentlyContinue }
 		else { $env:TARS_ACTOR = $script:OriginalTarsActor }
 		Remove-Item Env:STUB_OP_FAIL -ErrorAction SilentlyContinue

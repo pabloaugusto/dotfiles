@@ -748,31 +748,54 @@ function Invoke-BootstrapConfigWizard {
 	return $Config
 }
 
+function Get-GitLocalConfigPath {
+	<#
+	.SYNOPSIS
+	Caminho do `.gitconfig.local` (dado da maquina), que o ~/.gitconfig inclui
+	via [include]. NUNCA escrever em `git config --global`: no Windows o
+	~/.gitconfig e' symlink para app/df/git/.gitconfig (versionado), entao o
+	--global sujaria a working tree a cada bootstrap.
+	#>
+	$homeDir = [Environment]::GetEnvironmentVariable('HOME')
+	if ([string]::IsNullOrWhiteSpace($homeDir)) {
+		$homeDir = [Environment]::GetEnvironmentVariable('USERPROFILE')
+	}
+	if ([string]::IsNullOrWhiteSpace($homeDir)) {
+		$homeDir = [Environment]::GetFolderPath('UserProfile')
+	}
+	return (Join-Path (Join-Path $homeDir '.config') 'git\.gitconfig.local')
+}
+
 function Set-GitGlobalSigningKey {
 	<#
 	.SYNOPSIS
-	Grava git config --global user.signingkey a partir de git.signing_key.
-	Idempotente: so escreve quando o valor atual difere. Nunca usa `op read`
-	(a chave PUBLICA nao e' segredo; o SSOT e' app/bootstrap/user-config.yaml).
+	Grava user.signingkey a partir de git.signing_key.
+	Destino e' o `.gitconfig.local` incluido pelo ~/.gitconfig (nao o --global,
+	que aponta para o arquivo versionado). Idempotente: so escreve quando o
+	valor EFETIVO difere. Nunca usa `op read` (a chave PUBLICA nao e' segredo;
+	o SSOT e' app/bootstrap/user-config.yaml).
 	#>
 	param ([string]$SigningKey = '')
 
 	if ([string]::IsNullOrWhiteSpace($SigningKey)) {
-		Write-Warning 'git.signing_key vazio: user.signingkey global preservado como esta. Preencha em app/bootstrap/user-config.yaml.'
+		Write-Warning 'git.signing_key vazio: user.signingkey preservado como esta. Preencha em app/bootstrap/user-config.yaml.'
 		return $false
 	}
 	if (-not (Get-Command git -ErrorAction SilentlyContinue)) {
-		Write-Warning 'git nao encontrado no PATH: user.signingkey global nao sincronizado.'
+		Write-Warning 'git nao encontrado no PATH: user.signingkey nao sincronizado.'
 		return $false
 	}
 
-	$current = (& git config --global --get user.signingkey 2>$null | Out-String).Trim()
+	$localConfigPath = Get-GitLocalConfigPath
+
+	$current = (& git config --get user.signingkey 2>$null | Out-String).Trim()
 	if ($current -eq $SigningKey.Trim()) {
 		return $false
 	}
-	& git config --global user.signingkey $SigningKey.Trim()
+
+	& git config --file $localConfigPath user.signingkey $SigningKey.Trim()
 	if ($LASTEXITCODE -ne 0) {
-		Write-Warning 'Falha ao gravar git config --global user.signingkey.'
+		Write-Warning ("Falha ao gravar user.signingkey em {0}." -f $localConfigPath)
 		return $false
 	}
 	return $true
@@ -926,9 +949,10 @@ function Ensure-DaneelAutomationIdentity {
 	$null = Set-AutomationFileFromOnePassword -OpRef $tokenRef -Destination $tokenPath -RestrictAcl
 	$null = Set-AutomationFileFromOnePassword -OpRef $allowedSignersRef -Destination $allowedSignersPath
 
-	# allowed_signers (SSOT no 1Password) apontado pelo Git.
+	# allowed_signers (SSOT no 1Password) apontado pelo Git, no .gitconfig.local
+	# incluido pelo ~/.gitconfig (`--global` escreveria no arquivo versionado).
 	if ((Test-Path -Path $allowedSignersPath -PathType Leaf) -and (Get-Command git -ErrorAction SilentlyContinue)) {
-		& git config --global gpg.ssh.allowedSignersFile $allowedSignersPath *> $null
+		& git config --file (Get-GitLocalConfigPath) gpg.ssh.allowedSignersFile $allowedSignersPath *> $null
 	}
 
 	Write-Host "Identidade de automacao (daneel) pronta em: $dir"

@@ -35,7 +35,7 @@
     program = op-ssh-sign
     # allowedSignersFile NAO fica aqui: e' artefato materializado pelo bootstrap
     # (SSOT: automation.allowed_signers_ref) em %LOCALAPPDATA%\dotfiles\git\allowed_signers,
-    # gravado via `git config --global gpg.ssh.allowedSignersFile` em EnsureDaneelIdentity.
+    # gravado via `git config --file <~/.config/git/.gitconfig.local>` em EnsureDaneelIdentity.
 
 [commit]
     # gpgsign = VALOR ESPECIFICO DO AMBIENTE
