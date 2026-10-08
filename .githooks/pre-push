@@ -25,8 +25,14 @@ while read -r local_ref _local_sha _remote_ref _remote_sha; do
 done
 
 if [[ "${pushes_protected_branch}" == "1" ]]; then
-  print_error "Push bloqueado para branch protegida (${PROTECTED_BRANCHES[*]}). Use Pull Request."
-  exit 1
+  # PR obrigatorio so para automacao/IA. O operador humano (modo de assinatura `human`,
+  # o default da worktree) publica direto na main pelo `task sync`.
+  SIGNING_MODE="$(git config --worktree --get dotfiles.signing.mode 2>/dev/null || true)"
+  if [[ "${SIGNING_MODE}" == "automation" ]]; then
+    print_error "Push bloqueado para branch protegida (${PROTECTED_BRANCHES[*]}) no modo automation. Use Pull Request."
+    exit 1
+  fi
+  print_info "Push direto para branch protegida liberado (modo de assinatura: ${SIGNING_MODE:-human})."
 fi
 
 if command -v gh >/dev/null 2>&1 && gh auth status >/dev/null 2>&1; then

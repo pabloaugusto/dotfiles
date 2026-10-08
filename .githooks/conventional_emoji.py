@@ -135,6 +135,10 @@ def inject_emoji(commit_msg_text: str) -> str:
     if conventional:
         commit_type = (conventional.group("type") or "").lower()
         emoji = COMMIT_TYPE_EMOJI.get(commit_type)
+        # Idempotente (padrao thood/segtools): o TIPO e' a fonte da verdade; se o emoji ja'
+        # e' o certo, devolve a mensagem byte-identica; se esta errado, e' substituido.
+        if emoji and (conventional.group("emoji") or "").strip() == emoji:
+            return raw
         if emoji:
             scope = conventional.group("scope")
             breaking = conventional.group("breaking") or ""
@@ -286,9 +290,11 @@ def validate_branch_name(branch: str, *, require_prompt_type: bool = False) -> V
     branch_name = (branch or "").strip()
     if not branch_name:
         return ValidationResult(ok=False, error="Branch vazia.")
+    if branch_name in ("main", "master", "develop"):
+        return ValidationResult(ok=True)
     if branch_name.startswith(("dependabot/", "renovate/")):
         return ValidationResult(ok=True)
-    branch_label = "<type>/<jira-key>-<slug>"
+    branch_label = "<type>/<slug>"
 
     canonical_pattern = re.compile(
         r"^(?P<type>[a-z]+)(?:\([^\)]+\))?/"
@@ -305,7 +311,7 @@ def validate_branch_name(branch: str, *, require_prompt_type: bool = False) -> V
                 ok=False,
                 error=(
                     f"Branch deve seguir '{branch_label}' "
-                    "(ex: feat/DOT-81-git-traceability)."
+                    "(ex: feat/git-traceability)."
                 ),
             )
         match = legacy_match
@@ -327,14 +333,7 @@ def validate_branch_name(branch: str, *, require_prompt_type: bool = False) -> V
             ),
         )
 
-    if legacy_match and not canonical_pattern.match(branch_name):
-        return ValidationResult(
-            ok=True,
-            warning=(
-                "Branch legada aceita temporariamente sem chave Jira. Novo "
-                f"padrao canonico: '{branch_label}'."
-            ),
-        )
+    # Chave Jira na branch e' opcional (padrao thood/segtools): <type>/<slug> e' canonico.
     return ValidationResult(ok=True)
 
 
