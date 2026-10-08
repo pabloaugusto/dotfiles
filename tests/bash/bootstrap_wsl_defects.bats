@@ -10,7 +10,9 @@
 # - setup_fonts criava ~/.local/share/fonts como pasta real e o link caia
 #   dentro dela (~/.local/share/fonts/fonts);
 # - add_user referenciava $TEMP_USER, que nunca e definido no call site;
-# - a ausencia das ferramentas .exe do Windows so era detectada tarde.
+# - a ausencia das ferramentas .exe do Windows abortava o bootstrap, embora
+#   sejam do lado Windows e o passo do WSL nao possa instala-las: agora avisa
+#   com instrucao e segue.
 
 setup() {
   export REPO_ROOT="$PWD"
@@ -176,7 +178,7 @@ YAML
   [ "$status" -eq 0 ]
 }
 
-@test "ensureWslWindowsTools falha alto no WSL sem as ferramentas do Windows" {
+@test "ensureWslWindowsTools avisa e segue no WSL sem as ferramentas do Windows" {
   extract_fn ensureWslWindowsTools > "$FN_SRC"
   # shellcheck disable=SC1090
   source "$FN_SRC"
@@ -184,9 +186,14 @@ YAML
   grep() { return 0; } # simula WSL
   PATH="/usr/bin:/bin"
   run ensureWslWindowsTools
-  [ "$status" -eq 1 ]
+  # Ferramentas .exe sao do lado Windows: sem elas o bootstrap avisa e segue.
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"AVISO"* ]]
   [[ "$output" == *"op-ssh-sign-wsl.exe"* ]]
   [[ "$output" == *"npiperelay.exe"* ]]
+  # O aviso carrega a instrucao de remediacao, nao so o nome do que falta.
+  [[ "$output" == *"Instale no Windows"* ]]
+  [[ "$output" == *"bootstrap continua"* ]]
 }
 
 @test "ensureWslWindowsTools aceita WSL quando as ferramentas estao no PATH" {
