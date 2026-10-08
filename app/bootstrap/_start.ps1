@@ -299,6 +299,45 @@ function bootstrap {
 		"5" {
 			Invoke-WindowsBootstrapRelink
 		}
+		"3" {
+			# Linux: delega para o repo dentro do WSL (o bootstrap .sh roda la).
+			if (!(Get-Command -Name wsl -ErrorAction SilentlyContinue)) {
+				Write-Host "`nWSL nao encontrado neste Windows."
+				Write-Host "Instale com:  wsl --install -d Ubuntu-24.04"
+				Write-Host "Depois reinicie o terminal, rode este script de novo e escolha a opcao 3.`n"
+				return
+			}
+
+			$wslDistro = $Env:DOTFILES_WSL_DISTRO
+			if ([string]::IsNullOrWhiteSpace($wslDistro)) { $wslDistro = 'ubuntu-24.04' }
+			$wslRepoPath = $Env:DOTFILES_WSL_REPO_PATH
+			if ([string]::IsNullOrWhiteSpace($wslRepoPath)) { $wslRepoPath = '~/dotfiles' }
+
+			# URL HTTPS derivada do remoto 'origin' atual (mesmo repositorio).
+			$remoteHttps = $Env:DOTFILES_REMOTES_HTTPS
+			if ([string]::IsNullOrWhiteSpace($remoteHttps)) {
+				$originUrl = (& git -C $DotFilesDirectory remote get-url origin 2>$null | Out-String).Trim()
+				if ($originUrl -match '^git@github\.com:(?<repo>.+?)(?:\.git)?$') {
+					$remoteHttps = "https://github.com/{0}.git" -f $Matches.repo
+				}
+				elseif ($originUrl -match '^https://') {
+					$remoteHttps = $originUrl
+				}
+			}
+
+			Write-Host ("`nLinux/WSL: distro '{0}', repo '{1}'" -f $wslDistro, $wslRepoPath)
+
+			# Clona por HTTPS se a distro ainda nao tem o repo.
+			$cloneScript = 'mkdir -p "$(dirname {0})"; [ -d {0}/.git ] || git clone {1} {0}' -f $wslRepoPath, $remoteHttps
+			if (-not [string]::IsNullOrWhiteSpace($remoteHttps)) {
+				& wsl -d $wslDistro -- bash -lc $cloneScript
+			}
+
+			& wsl -d $wslDistro -- bash -lc ("cd {0} && task bootstrap" -f $wslRepoPath)
+			if ($LASTEXITCODE -ne 0) {
+				Write-Warning ("Bootstrap Linux falhou no WSL (exit {0})." -f $LASTEXITCODE)
+			}
+		}
 
 		default {
 			Write-Output "`nOnly WIN supportted at this momment. `n Other SOs comming Soon.."

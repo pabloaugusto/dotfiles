@@ -23,12 +23,30 @@ if ($IsWindows) { Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass }
 
 
 ######################################################################################
-# Remove a Item (file or folder) if exists (forced, recursive, without confirm)
+# Remove a Item (file or folder) if exists.
+#
+# Nunca apaga recursivamente um alvo cego. Mesmo contrato do Add-Symlink:
+# - link (symlink/junction/hardlink) -> remove SOMENTE o link, preservando o alvo;
+# - conteudo real     -> renomeia para <path>.dotfiles-prelink-<yyyyMMddHHmmss> + warning.
+# Nenhum chamador no repositorio depende de apagar conteudo real de proposito.
 ######################################################################################
 function Remove-ItemIfExists {
 	param ( [Parameter(Mandatory)] [string]$Path )
 
-	if ((Test-Path -Path $Path)) { Remove-Item $Path -Recurse -Force -Confirm:$false }
+	if (-not (Test-Path -LiteralPath $Path)) { return }
+
+	$item = Get-Item -LiteralPath $Path -Force -ErrorAction SilentlyContinue
+	$isLink = $null -ne $item -and ($item.LinkType -eq 'SymbolicLink' -or $item.LinkType -eq 'Junction' -or $item.LinkType -eq 'HardLink')
+	if ($isLink) {
+		# Remove apenas o link; o conteudo apontado nunca e tocado.
+		Remove-LinkOnly -Path $Path
+		return
+	}
+
+	# Conteudo real: preserva via backup antes de qualquer remocao destrutiva.
+	$backupPath = "{0}.dotfiles-prelink-{1}" -f $Path, (Get-Date -Format 'yyyyMMddHHmmss')
+	Rename-Item -LiteralPath $Path -NewName (Split-Path -Path $backupPath -Leaf) -Force -ErrorAction Stop
+	Write-Warning "Remove-ItemIfExists: '$Path' existia com conteúdo real; movido para '$backupPath' em vez de apagar."
 }
 
 ######################################################################################
@@ -2343,6 +2361,66 @@ function Push-DotfilesCurrentBranch {
 }
 
 ######################################################################################
+# Resolve the ABSOLUTE path of the 1Password op-ssh-sign.exe on Windows.
+#
+# Na primeira execucao o PATH do processo nao contem o diretorio do 1Password
+# recem-instalado, entao `Get-Command op-ssh-sign` falha. Procuramos nos locais
+# reais de instalacao (Store/WindowsApps, %LOCALAPPDATA%\1Password\app\*,
+# Program Files) e so depois caímos para o PATH.
+# Retorna '' quando nao encontra nada (o chamador trata como falha alta).
+######################################################################################
+function Find-OpSshSignWindows {
+	[CmdletBinding()]
+	param (
+		[string[]]$SearchRoots
+	)
+
+	if (-not $PSBoundParameters.ContainsKey('SearchRoots')) {
+		$roots = New-Object System.Collections.Generic.List[string]
+		if (-not [string]::IsNullOrWhiteSpace($Env:LOCALAPPDATA)) {
+			$roots.Add((Join-Path $Env:LOCALAPPDATA 'Microsoft\WindowsApps'))
+			$roots.Add((Join-Path $Env:LOCALAPPDATA '1Password\app'))
+			$roots.Add((Join-Path $Env:LOCALAPPDATA 'Programs\1Password\app'))
+		}
+		$programFiles = [Environment]::GetEnvironmentVariable('ProgramFiles')
+		if (-not [string]::IsNullOrWhiteSpace($programFiles)) {
+			$roots.Add((Join-Path $programFiles '1Password\app'))
+			$roots.Add((Join-Path $programFiles '1Password'))
+		}
+		$SearchRoots = $roots.ToArray()
+	}
+
+	$found = New-Object System.Collections.Generic.List[string]
+	foreach ($root in @($SearchRoots | Where-Object { -not [string]::IsNullOrWhiteSpace($_) } | Select-Object -Unique)) {
+		if (-not (Test-Path -LiteralPath $root -PathType Container)) { continue }
+
+		$direct = Join-Path $root 'op-ssh-sign.exe'
+		if (Test-Path -LiteralPath $direct -PathType Leaf) { $found.Add($direct); continue }
+
+		# Instalacoes versionadas (ex.: 1Password\app\8.10.0\op-ssh-sign.exe): mais recente primeiro.
+		$versionDirs = @(Get-ChildItem -LiteralPath $root -Directory -Force -ErrorAction SilentlyContinue |
+			Sort-Object -Property LastWriteTime -Descending)
+		foreach ($dir in $versionDirs) {
+			$exe = Join-Path $dir.FullName 'op-ssh-sign.exe'
+			if (Test-Path -LiteralPath $exe -PathType Leaf) { $found.Add($exe) }
+		}
+	}
+
+	foreach ($candidate in $found) {
+		$resolved = Resolve-Path -LiteralPath $candidate -ErrorAction SilentlyContinue | Select-Object -First 1 -ExpandProperty Path
+		if (-not [string]::IsNullOrWhiteSpace($resolved)) { return $resolved }
+	}
+
+	# Ultimo recurso: binario real no PATH (nunca alias/function).
+	foreach ($name in @('op-ssh-sign.exe', 'op-ssh-sign-wsl.exe')) {
+		$cmd = Get-Command -Name $name -CommandType Application -ErrorAction SilentlyContinue | Select-Object -First 1
+		if ($null -ne $cmd -and -not [string]::IsNullOrWhiteSpace($cmd.Source)) { return $cmd.Source }
+	}
+
+	return ''
+}
+
+######################################################################################
 # Ensure gpg.ssh.program is valid for the current runtime (Windows/Unix).
 # Auto-heals stale local overrides that point to the other platform signer.
 ######################################################################################
@@ -2392,21 +2470,18 @@ function Ensure-DotfilesGitSignerProgram {
 		}
 
 		if ($isWindowsRuntime) {
-			$preferredWindowsProgram = ''
-			if (Test-CommandExists op-ssh-sign) {
-				$preferredWindowsProgram = 'op-ssh-sign'
-			}
-			elseif (Test-CommandExists op-ssh-sign.exe) {
-				$preferredWindowsProgram = 'op-ssh-sign.exe'
-			}
-			elseif (Test-CommandExists op-ssh-sign-wsl.exe) {
-				$preferredWindowsProgram = 'op-ssh-sign-wsl.exe'
-			}
+			# Caminho ABSOLUTO: o PATH da 1a execucao nao tem o app do 1Password.
+			$preferredWindowsProgram = Find-OpSshSignWindows
 
 			$effectiveProgramAfterLocalFix = (& git -C $RepoPath config --get gpg.ssh.program 2>$null | Out-String).Trim()
 			$resolvedAfterLocalFix = & $resolveProgramPath $effectiveProgramAfterLocalFix
 			if ([string]::IsNullOrWhiteSpace($resolvedAfterLocalFix) -and -not [string]::IsNullOrWhiteSpace($preferredWindowsProgram)) {
 				& git -C $RepoPath config --global gpg.ssh.program $preferredWindowsProgram *> $null
+			}
+			elseif ([string]::IsNullOrWhiteSpace($resolvedAfterLocalFix) -and [string]::IsNullOrWhiteSpace($preferredWindowsProgram)) {
+				throw ("1Password signer not resolvable on Windows: op-ssh-sign.exe nao encontrado em " +
+					"WindowsApps, %LOCALAPPDATA%\1Password\app\*, Program Files ou PATH. " +
+					"Instale o 1Password (app desktop ou CLI) e rode o bootstrap novamente.")
 			}
 		}
 		else {
