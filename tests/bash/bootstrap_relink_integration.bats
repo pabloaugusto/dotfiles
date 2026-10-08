@@ -5,7 +5,6 @@ setup() {
   export HOME="$BATS_TEST_TMPDIR/home"
   export USER="tester"
   export DOTFILES_REPO_ROOT_UNIX="$REPO_ROOT"
-  export DOTFILES_BOOTSTRAP_ASSUME_POLO="1"
   export DOTFILES_ONEDRIVE_ROOT="$BATS_TEST_TMPDIR/onedrive"
   export DOTFILES_ONEDRIVE_CLIENTS_DIR="clients"
   export DOTFILES_ONEDRIVE_PROJECTS_DIR="clients/tester/projects"
@@ -44,3 +43,38 @@ setup() {
   [ -L "$HOME/.zshrc" ]
   [ "$(readlink -f "$HOME/.zshrc")" = "$REPO_ROOT/app/df/zsh/.zshrc" ]
 }
+
+@test "relink preserva pasta real do usuario com backup prelink" {
+  mkdir -p "$HOME/.ssh"
+  echo "minha-chave-real" > "$HOME/.ssh/id_rsa"
+
+  run bash "$REPO_ROOT/app/bootstrap/bootstrap-ubuntu-wsl.sh" relink
+  [ "$status" -eq 0 ]
+
+  # pasta original preservada num backup, nao destruida
+  backup="$(echo "$HOME"/.ssh.dotfiles-prelink-* )"
+  [ -d "$backup" ]
+  [ "$(cat "$backup/id_rsa")" = "minha-chave-real" ]
+  # e o link canonico foi criado
+  [ -L "$HOME/.ssh" ]
+  [ "$(readlink -f "$HOME/.ssh")" = "$REPO_ROOT/app/df/ssh" ]
+}
+
+@test "relink nao faz backup repetido de link ja correto" {
+  run bash "$REPO_ROOT/app/bootstrap/bootstrap-ubuntu-wsl.sh" relink
+  [ "$status" -eq 0 ]
+  run bash "$REPO_ROOT/app/bootstrap/bootstrap-ubuntu-wsl.sh" relink
+  [ "$status" -eq 0 ]
+
+  run bash -c "ls -d \"$HOME\"/*.dotfiles-prelink-* 2>/dev/null | wc -l"
+  [ "$output" = "0" ]
+}
+
+@test "relink nao quebra o symlink de .bashrc" {
+  run bash "$REPO_ROOT/app/bootstrap/bootstrap-ubuntu-wsl.sh" relink
+  [ "$status" -eq 0 ]
+
+  [ -L "$HOME/.bashrc" ]
+  [ -L "$HOME/.profile" ]
+}
+

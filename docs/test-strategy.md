@@ -112,7 +112,7 @@ Contrato inicial recomendado:
 
 Primeiros pontos de injecao efetivamente adotados nesta worktree:
 
-- Linux: `DOTFILES_REPO_ROOT_UNIX`, `DOTFILES_BOOTSTRAP_ASSUME_POLO`
+- Linux: `DOTFILES_REPO_ROOT_UNIX`
 - Windows: `DOTFILES_REPO_ROOT_WINDOWS`, `DOTFILES_WINDOWS_DOCUMENTS_PATH`, `DOTFILES_WINDOWS_CODE_USER_PATH`, `DOTFILES_WINDOWS_TERMINAL_SETTINGS_PATH`
 
 ## Requisitos formais
