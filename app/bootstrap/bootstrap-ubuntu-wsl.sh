@@ -146,10 +146,34 @@ function setup_prompt {
 # --------------------------------------------------------------------
 function install_software {
 
+	# Contadores para o resumo final (instalados/pulados/falhas).
+	local installed=0
+	local skipped=0
+	local failed=0
+
+	# installPKG ja imprime SKIP/DONE/FAIL; aqui apenas contabilizamos para o
+	# resumo e nao interrompemos no primeiro erro (queremos ver todas as falhas).
+	install_counted() {
+		local out rc
+		out="$(installPKG "$@" 2>&1)"
+		rc=$?
+		printf '%s\n' "$out"
+		if ((rc != 0)); then
+			failed=$((failed + 1))
+		elif [[ "$out" == SKIP* ]]; then
+			skipped=$((skipped + 1))
+		else
+			installed=$((installed + 1))
+		fi
+		return 0
+	}
 
 	# Default package installs
 	# --------------------------------------------------------------------
-	sudo apt-get install unzip build-essential procps curl file git fontconfig socat -y
+	# `apt-get install` sem `apt-get update` antes falha com "Unable to locate
+	# package" em imagem recem-criada; atualiza os indices uma vez.
+	sudo apt-get update
+	sudo DEBIAN_FRONTEND=noninteractive apt-get install -y unzip build-essential procps curl file git fontconfig socat
 
 	# Install or Update homebrew.sh
 	if [[ $(command -v brew) == "" ]]; then # can use also: "which brew" instead "command -v brew"
@@ -165,39 +189,40 @@ function install_software {
 
 	# software install
 	# --------------------------------------------------------------------
-	installPKG brew 1password-cli@beta
-	installPKG brew gh
-	installPKG brew oh-my-posh
-	installPKG brew zsh
-	installPKG brew fastfetch
-	installPKG brew ansible
-	installPKG brew terraform
-	installPKG brew cloudflared
-	installPKG brew uv
-	installPKG brew go-task/tap/go-task
-	installPKG brew direnv
-	installPKG brew age
-	installPKG brew sops
-	installPKG brew fluxcd/tap/flux
-	installPKG brew siderolabs/tap/talosctl
-	installPKG brew helm
-	installPKG brew helmfile
-	installPKG brew kubernetes-cli
-	installPKG brew kustomize
-	installPKG brew kubeconform
-	installPKG brew moreutils
-	installPKG brew talhelper
-	installPKG brew talosctl
-	installPKG brew stern
-	installPKG brew yq
-	installPKG brew jq
-	installPKG brew node@22
-	installPKG brew npm  	# package manager
-	installPKG brew yarn 	# package manager
-	installPKG brew pnpm 	# package manager
-	installPKG apt postgresql-client	#	pgsql - Postgre CLI
-	installPKG apt dos2unix	# tool to fix 'error in libcrypto' ssh key on windows wsl ubuntu
-	installPKG brew atuin	# shell hystory command sync database across computers
+	# 3o argumento = binario testado para detectar "ja instalado" quando ele
+	# difere do nome do pacote (versao pinada, tap, formula renomeada).
+	install_counted brew 1password-cli@beta op
+	install_counted brew gh
+	install_counted brew oh-my-posh
+	install_counted brew zsh
+	install_counted brew fastfetch
+	install_counted brew ansible
+	install_counted brew terraform
+	install_counted brew cloudflared
+	install_counted brew uv
+	install_counted brew go-task/tap/go-task task
+	install_counted brew direnv
+	install_counted brew age
+	install_counted brew sops
+	install_counted brew fluxcd/tap/flux flux
+	install_counted brew siderolabs/tap/talosctl talosctl
+	install_counted brew helm
+	install_counted brew helmfile
+	install_counted brew kubernetes-cli kubectl
+	install_counted brew kustomize
+	install_counted brew kubeconform
+	install_counted brew moreutils sponge
+	install_counted brew talhelper
+	install_counted brew stern
+	install_counted brew yq
+	install_counted brew jq
+	install_counted brew node@22 node
+	install_counted brew npm  	# package manager
+	install_counted brew yarn 	# package manager
+	install_counted brew pnpm 	# package manager
+	install_counted apt postgresql-client psql	#	pgsql - Postgre CLI
+	install_counted apt dos2unix	# tool to fix 'error in libcrypto' ssh key on windows wsl ubuntu
+	install_counted brew atuin	# shell hystory command sync database across computers
 
 
 
@@ -214,6 +239,15 @@ function install_software {
 		sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
 	fi
 
+	# --------------------------------------------------------------------
+	# Resumo: nao mentir sobre o resultado (ver `installPKG`)
+	# --------------------------------------------------------------------
+	echo "install_software: instalados=$installed pulados=$skipped falhas=$failed"
+	if ((failed > 0)); then
+		echo "install_software: $failed pacote(s) falharam" >&2
+		return 1
+	fi
+	return 0
 }
 
 
