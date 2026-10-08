@@ -155,9 +155,8 @@ Regras importantes:
 
 ```mermaid
 flowchart TD
-    A[Inicio bootstrap-ubuntu-wsl.sh] --> B{Prompt MARCO=POLO?}
-    B -- Nao --> B1[Aborta]
-    B -- Sim --> C[setup_fonts]
+    A[Inicio bootstrap-ubuntu-wsl.sh] --> B[setup_prompt: aviso informativo, sem prompt]
+    B --> C[setup_fonts]
     C --> D[install_software (apt + brew)]
     D --> E{DOTFILES_ADD_USER habilitado?}
     E -- Sim --> F[add_user]
