@@ -84,6 +84,12 @@ alias crw='cd "${CLIENTS:-$HOME/clients}/cr/projects/cr_net/cr.web"'
 df() {
 	local repo_root
 	repo_root="${DOTFILES:-$HOME/dotfiles}"
+	# `df sync` roda o fluxo canonico (task sync) de qualquer diretorio.
+	if [ "${1:-}" = "sync" ]; then
+		shift
+		(cd "$repo_root" && task sync "$@")
+		return
+	fi
 	git --git-dir="$repo_root/.git" --work-tree="$repo_root" "$@"
 }
 
