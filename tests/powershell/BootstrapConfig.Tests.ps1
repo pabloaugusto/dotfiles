@@ -82,3 +82,50 @@ Describe 'bootstrap-config path helpers' {
 		$secretsRef | Should Not Match 'op://Personal/'
 	}
 }
+
+Describe 'automation signing key' {
+	BeforeAll {
+		# Get-AutomationSigningKeyPath / Get-CheckEnvGitProbeContext vivem aqui.
+		. (Join-Path $repoRoot 'app\df\powershell\_functions.ps1')
+		$script:OriginalAppData = $env:APPDATA
+		$script:OriginalTarsActor = $env:TARS_ACTOR
+		$script:OriginalGitConfigGlobal = $env:GIT_CONFIG_GLOBAL
+
+		$env:APPDATA = Join-Path $TestDrive 'appdata'
+		New-Item -ItemType Directory -Path $env:APPDATA -Force | Out-Null
+		# Nunca tocar no global real: Sync-BootstrapDerivedFiles roda git config --global.
+		$env:GIT_CONFIG_GLOBAL = Join-Path $TestDrive 'gitconfig'
+		Set-Content -Path $env:GIT_CONFIG_GLOBAL -Value ''
+	}
+	AfterAll {
+		$env:APPDATA = $script:OriginalAppData
+		$env:GIT_CONFIG_GLOBAL = $script:OriginalGitConfigGlobal
+		if ($null -eq $script:OriginalTarsActor) { Remove-Item Env:TARS_ACTOR -ErrorAction SilentlyContinue }
+		else { $env:TARS_ACTOR = $script:OriginalTarsActor }
+	}
+
+	It 'gera a chave de automacao e e idempotente' {
+		if (-not (Get-Command ssh-keygen -ErrorAction SilentlyContinue)) { Set-ItResult -Skipped -Because 'ssh-keygen ausente'; return }
+
+		Ensure-AutomationSigningKey -HumanPublicKey 'ssh-ed25519 AAAATESTHUMAN human@host'
+		$keyPath = Get-AutomationSigningKeyPath
+		Test-Path -Path $keyPath -PathType Leaf | Should Be $true
+
+		$before = (Get-Content -Raw -Path "$keyPath.pub").Trim()
+		Ensure-AutomationSigningKey -HumanPublicKey 'ssh-ed25519 AAAATESTHUMAN human@host'
+		(Get-Content -Raw -Path "$keyPath.pub").Trim() | Should Be $before
+
+		# allowed_signers cobre a humana e a de automacao.
+		$allowed = Get-Content -Raw -Path (Join-Path (Split-Path -Parent $keyPath) 'allowed_signers')
+		$allowed | Should Match 'AAAATESTHUMAN'
+		$allowed | Should Match 'automation-'
+	}
+
+	It 'TARS_ACTOR=agent resolve o modo automation; sem ele, human' {
+		$env:TARS_ACTOR = 'agent'
+		(Get-CheckEnvGitProbeContext).ResolvedMode | Should Be 'automation'
+
+		Remove-Item Env:TARS_ACTOR -ErrorAction SilentlyContinue
+		(Get-CheckEnvGitProbeContext).ResolvedMode | Should Be 'human'
+	}
+}

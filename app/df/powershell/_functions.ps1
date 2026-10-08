@@ -1541,6 +1541,20 @@ function Get-BootstrapConfigSigningKey {
 	return ''
 }
 
+function Get-AutomationSigningKeyPath {
+	<#
+	.SYNOPSIS
+	Caminho do par ed25519 de assinatura de automacao desta maquina.
+
+	.DESCRIPTION
+	Gerado pelo bootstrap (Ensure-AutomationSigningKey) em
+	%APPDATA%\dotfiles\signing\automation_ed25519. Retorna '' quando o
+	%APPDATA% nao esta definido.
+	#>
+	if ([string]::IsNullOrWhiteSpace($env:APPDATA)) { return '' }
+	return (Join-Path $env:APPDATA 'dotfiles\signing\automation_ed25519')
+}
+
 function Get-CheckEnvGitProbeContext {
 	[CmdletBinding()]
 	param (
@@ -1566,7 +1580,13 @@ function Get-CheckEnvGitProbeContext {
 	$automationPrivateKeyPath = (& git -C $repoPath config --worktree --get dotfiles.signing.automationPrivateKeyPath 2>$null | Out-String).Trim()
 	$resolvedMode = $GitSigningMode
 	if ($resolvedMode -eq 'auto') {
-		$resolvedMode = if ($worktreeMode -eq 'automation') { 'automation' } else { 'human' }
+		# Ponto unico de resolucao: TARS_ACTOR=agent > worktree > human.
+		if ($env:TARS_ACTOR -eq 'agent') {
+			$resolvedMode = 'automation'
+		}
+		else {
+			$resolvedMode = if ($worktreeMode -eq 'automation') { 'automation' } else { 'human' }
+		}
 	}
 
 	return [PSCustomObject]@{
@@ -1574,6 +1594,7 @@ function Get-CheckEnvGitProbeContext {
 		TempRepoPath      = $tempRepo
 		ResolvedMode      = $resolvedMode
 		WorktreeMode      = $worktreeMode
+		AutomationKeyPath = Get-AutomationSigningKeyPath
 		AutomationKeyRef  = $automationKeyRef
 		AutomationPrivateKeyPath = $automationPrivateKeyPath
 		GpgFormat         = (& git -C $repoPath config --includes --get gpg.format 2>$null | Out-String).Trim()
@@ -1968,6 +1989,39 @@ function checkEnv {
 
 		Add-CheckResult -Item 'Git signing mode' -Status 'success' -Detail ("mode={0}." -f $resolvedGitSigningMode) -Solution ''
 
+		# Modo automation: par ed25519 por maquina (sem 1Password). Exige arquivo
+		# presente, ACL restrita ao usuario e assinatura de um blob de teste.
+		$automationSigningProbe = $null
+		if ($resolvedGitSigningMode -eq 'automation') {
+			$automationKeyPath = $gitProbe.AutomationKeyPath
+			if (-not [string]::IsNullOrWhiteSpace($automationKeyPath) -and (Test-Path -Path $automationKeyPath -PathType Leaf)) {
+				# ACL: a chave nao pode estar acessivel a outros usuarios.
+				$acl = Get-Acl -Path $automationKeyPath
+				$foreign = @($acl.Access | Where-Object {
+						$_.IdentityReference -notmatch [regex]::Escape($env:USERNAME) -and
+						$_.IdentityReference -notmatch 'SYSTEM|Administrators|Administradores'
+					})
+				if ($foreign.Count -eq 0) {
+					Add-CheckResult -Item 'Automation signing key file' -Status 'success' -Detail 'chave de automacao presente e com ACL restrita ao usuario.' -Solution ''
+				}
+				else {
+					Add-CheckResult -Item 'Automation signing key file' -Status 'fail' -Detail 'chave de automacao acessivel a outros usuarios.' -Solution "Rode: icacls `"$automationKeyPath`" /inheritance:r /grant:r `"`$env:USERNAME:(R,W)`""
+				}
+			}
+			else {
+				Add-CheckResult -Item 'Automation signing key file' -Status 'fail' -Detail 'chave de automacao ausente para esta maquina.' -Solution 'Rode o bootstrap (Ensure-AutomationSigningKey) para gerar o par por maquina.'
+			}
+
+			$automationPublicKeyPath = "$automationKeyPath.pub"
+			if ((Test-Path -Path $automationPublicKeyPath -PathType Leaf) -and (Test-CommandExists ssh-keygen)) {
+				$automationSigningProbe = Invoke-CheckEnvSignedCommitTest -SigningKey $automationPublicKeyPath -GpgFormat 'ssh' -GpgProgram 'ssh-keygen' -CommitSign 'true' -GitSigningMode 'automation'
+				Add-CheckResult -Item 'Automation signing probe' -Status $automationSigningProbe.Status -Detail $automationSigningProbe.Detail -Solution $automationSigningProbe.Solution
+				# Mantem coerentes os checks genericos abaixo (signer/assinatura).
+				$signingKey = $automationPublicKeyPath
+				$gpgProgram = 'ssh-keygen'
+			}
+		}
+
 		if ($gpgFormat -eq 'ssh') {
 			Add-CheckResult -Item 'Git signing format' -Status 'success' -Detail 'gpg.format=ssh.' -Solution ''
 		}
@@ -1988,6 +2042,14 @@ function checkEnv {
 			(Test-Path -Path $automationPrivateKeyPath -PathType Leaf) -and
 			$signingKey -eq $automationPrivateKeyPath
 		)
+
+		# Modo automation dirigido por TARS_ACTOR=agent: a chave efetiva e' a
+		# publica por maquina, nao a humana da config. Sem isto o check de SSOT
+		# abaixo compararia chaves diferentes e falharia indevidamente.
+		if ($resolvedGitSigningMode -eq 'automation' -and -not [string]::IsNullOrWhiteSpace($gitProbe.AutomationKeyPath) -and $signingKey -eq "$($gitProbe.AutomationKeyPath).pub") {
+			$hasAutomationPrivateKey = $true
+			$automationPrivateKeyPath = $gitProbe.AutomationKeyPath
+		}
 
 		# SSOT da chave PUBLICA de assinatura: git.signing_key em user-config.yaml.
 		# Nunca via `op read` (chave publica nao e' segredo).
