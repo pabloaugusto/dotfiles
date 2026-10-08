@@ -1129,13 +1129,20 @@ catch {
 	if (-not $RelinkOnly) {
 		$templatePath = Join-Path $DotFilesDirectory 'app\bootstrap\secrets\.env.local.tpl'
 		$envLocalPath = Join-Path $Env:USERPROFILE '.env.local.sops'
-		if (!(Set-LocalEnvFrom1Password -TemplatePath $templatePath -OutputPath $envLocalPath)) {
-			throw "Failed to initialize encrypted env (.env.local.sops) from 1Password."
-		}
+		# SSOT com o bootstrap do WSL: template sem refs `op://` nao gera nem exige
+		# o arquivo. Um ~/.env.local.sops legado do dono NAO e' removido aqui.
+		if (Test-EnvTemplateHasOpRefs -TemplatePath $templatePath) {
+			if (!(Set-LocalEnvFrom1Password -TemplatePath $templatePath -OutputPath $envLocalPath)) {
+				throw "Failed to initialize encrypted env (.env.local.sops) from 1Password."
+			}
 
-		$loadedEnv = Import-DotEnvFromSops -EncryptedPath $envLocalPath
-		if ($loadedEnv.Count -eq 0) {
-			throw "Failed to decrypt/import runtime env from .env.local.sops."
+			$loadedEnv = Import-DotEnvFromSops -EncryptedPath $envLocalPath
+			if ($loadedEnv.Count -eq 0) {
+				throw "Failed to decrypt/import runtime env from .env.local.sops."
+			}
+		}
+		else {
+			Write-Output "Template de env sem refs do 1Password; ~/.env.local.sops nao gerado."
 		}
 
 		# Legacy plaintext env file is removed when present.
