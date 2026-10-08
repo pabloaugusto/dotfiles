@@ -96,7 +96,8 @@ STUB
 @test "installPKG no apt usa sudo com DEBIAN_FRONTEND=noninteractive" {
   source "$REPO_ROOT/app/df/bash/.inc/_functions.sh"
 
-  run installPKG apt postgresql-client psql
+  # binario inexistente: o teste nao pode depender do que esta instalado no host
+  run installPKG apt dotfiles-pkg-inexistente dotfiles-bin-inexistente
 
   [ "$status" -ne 0 ]
   [[ "$(cat "$BATS_TEST_TMPDIR/sudo.log")" == *"DEBIAN_FRONTEND=noninteractive apt-get install"* ]]
