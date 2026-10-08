@@ -669,10 +669,18 @@ function RenameAllFoldersLowercase {
 # Set ou change computer Name (hostname)
 ######################################################################################
 function Set-ComputerName {
-	param ( [Parameter(Mandatory)] [string]$ComputerName )
+	param ( [string]$ComputerName = $Env:DOTFILES_COMPUTER_NAME )
+
+	# Empty/unset means "keep the current name": renaming is opt-in via env var.
+	if ([string]::IsNullOrWhiteSpace($ComputerName)) {
+		Write-Host "DOTFILES_COMPUTER_NAME not set: computer rename skipped (pulado)."
+		return
+	}
 
 	if ($ComputerName -ne (&Hostname)) {
-		Rename-computer -NewName $ComputerName -Restart -Force
+		# Deliberately without the restart flag: the user reboots when convenient.
+		Rename-computer -NewName $ComputerName -Force
+		Write-Host "Computer renamed to '$ComputerName'. Restart Windows to apply the new name." -ForegroundColor Yellow
 	}
 }
 
