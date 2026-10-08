@@ -757,6 +757,65 @@ function Set-GitGlobalSigningKey {
 	return $true
 }
 
+function Ensure-AutomationSigningKey {
+	<#
+	.SYNOPSIS
+	Gera (uma unica vez) o par ed25519 de assinatura de automacao desta maquina.
+
+	.DESCRIPTION
+	Mesmo desenho do lado Bash: par POR MAQUINA em
+	%APPDATA%\dotfiles\signing\automation_ed25519 (ACL so do usuario), idempotente
+	(existe -> nao regera). Imprime apenas a chave PUBLICA + a instrucao de
+	cadastro no GitHub como Signing key com o titulo `automation-<hostname>`.
+	Tambem (re)escreve `allowed_signers` com a publica humana (git.signing_key)
+	e a de automacao. A chave privada nunca e' impressa.
+	#>
+	param ([string]$HumanPublicKey = '')
+
+	if (-not (Get-Command ssh-keygen -ErrorAction SilentlyContinue)) {
+		Write-Warning 'ssh-keygen nao encontrado: chave de assinatura de automacao nao provisionada.'
+		return
+	}
+
+	$dir = Join-Path $env:APPDATA 'dotfiles\signing'
+	$keyPath = Join-Path $dir 'automation_ed25519'
+	$pubPath = "$keyPath.pub"
+	$hostName = if ([string]::IsNullOrWhiteSpace($env:COMPUTERNAME)) { 'unknown' } else { $env:COMPUTERNAME }
+
+	if (Test-Path $keyPath) {
+		Write-Host "Chave de assinatura de automacao ja existe (idempotente, nao regerada): $keyPath"
+	}
+	else {
+		New-Item -ItemType Directory -Path $dir -Force | Out-Null
+		& ssh-keygen -t ed25519 -N '' -C "automation-$hostName" -f $keyPath -q 2>$null
+		if ($LASTEXITCODE -ne 0 -or -not (Test-Path $keyPath)) {
+			Write-Warning "Falha ao gerar a chave de assinatura de automacao em $keyPath."
+			return
+		}
+		# ACL: remove heranca e da acesso apenas ao usuario atual (equivalente ao 600).
+		& icacls $keyPath /inheritance:r /grant:r "$($env:USERNAME):(R,W)" 2>$null | Out-Null
+		Write-Host 'Chave de assinatura de automacao gerada para esta maquina.'
+	}
+
+	if (-not (Test-Path $pubPath)) {
+		Write-Warning "Chave publica de automacao ausente em $pubPath."
+		return
+	}
+
+	$allowedSigners = @()
+	if (-not [string]::IsNullOrWhiteSpace($HumanPublicKey) -and $HumanPublicKey -match '^(ssh-|ecdsa-)') {
+		$humanPrincipal = ($HumanPublicKey.Trim() -split '\s+')[-1]
+		$allowedSigners += ("{0} {1}" -f $humanPrincipal, $HumanPublicKey.Trim())
+	}
+	$allowedSigners += ("automation-{0} {1}" -f $hostName, (Get-Content -Raw -Path $pubPath).Trim())
+	Set-Content -Path (Join-Path $dir 'allowed_signers') -Value $allowedSigners
+
+	$publicKey = (Get-Content -Raw -Path $pubPath).Trim()
+	Write-Host "Assinatura de automacao (TARS_ACTOR=agent) usa: $pubPath"
+	Write-Host "Instrucao: cadastre a chave PUBLICA abaixo no GitHub como Signing key com o titulo 'automation-$hostName'."
+	Write-Host "Publica: $publicKey"
+}
+
 function Sync-BootstrapDerivedFiles {
 	param (
 		[hashtable]$Config,
@@ -835,6 +894,9 @@ function Sync-BootstrapDerivedFiles {
 	Set-Content -Path $gitLocalPath -Value $gitLocal
 
 	Set-GitGlobalSigningKey -SigningKey $signingKeyValue
+
+	# Chave de assinatura de automacao (maquina/IA): gerada no 1o uso, idempotente.
+	Ensure-AutomationSigningKey -HumanPublicKey $signingKeyValue
 
 	# Export for current bootstrap process (consumed by windows/wsl bootstrap scripts).
 	# -------- Windows OneDrive envs --------

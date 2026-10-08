@@ -3,6 +3,22 @@ $repoRoot = (Resolve-Path (Join-Path $here '..\..')).Path
 . (Join-Path $repoRoot 'app\bootstrap\bootstrap-config.ps1')
 
 Describe 'bootstrap-config path helpers' {
+	# Isolamento: Sync-BootstrapDerivedFiles chama Set-GitGlobalSigningKey, que
+	# roda `git config --global`. Sem isto o teste sobrescreveria o
+	# user.signingkey REAL da maquina com a chave falsa AAAATESTLOCAL.
+	BeforeAll {
+		$script:OriginalGitConfigGlobal = $env:GIT_CONFIG_GLOBAL
+		$script:OriginalAppData = $env:APPDATA
+		$env:GIT_CONFIG_GLOBAL = Join-Path $TestDrive 'gitconfig'
+		Set-Content -Path $env:GIT_CONFIG_GLOBAL -Value ''
+		# Mantem a chave de automacao do teste fora do %APPDATA% real.
+		$env:APPDATA = Join-Path $TestDrive 'appdata'
+	}
+	AfterAll {
+		$env:GIT_CONFIG_GLOBAL = $script:OriginalGitConfigGlobal
+		$env:APPDATA = $script:OriginalAppData
+	}
+
 	It 'joins windows relative paths against a root' {
 		$result = Resolve-PathWithRoot -RootPath 'C:\Root' -PathValue 'clients\demo' -Style windows
 		$result | Should Be 'C:\Root\clients\demo'
