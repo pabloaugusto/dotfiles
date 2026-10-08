@@ -118,6 +118,13 @@ function dtw {
 
 function df {
 	$repoRoot = Get-DotfilesAliasRepoRoot
+	# `df sync` roda o fluxo canonico (task sync) de qualquer diretorio.
+	if ($args.Count -gt 0 -and $args[0] -eq 'sync') {
+		$rest = @($args | Select-Object -Skip 1)
+		Push-Location $repoRoot
+		try { & task sync @rest } finally { Pop-Location }
+		return
+	}
 	& git "--git-dir=$repoRoot/.git" "--work-tree=$repoRoot" @args
 }
 
