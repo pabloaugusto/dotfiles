@@ -31,12 +31,19 @@ if ($isInteractiveConsole -and (Get-Module -ListAvailable -Name 'PSReadLine')) {
 }
 
 # Optional UX modules.
-foreach ($moduleName in @('posh-docker', 'posh-git', 'Terminal-Icons')) {
+foreach ($moduleName in @('posh-docker', 'posh-git')) {
 	if (Get-Module -ListAvailable -Name $moduleName) {
 		if (-not (Get-Module -Name $moduleName)) {
 			Import-Module $moduleName -ErrorAction SilentlyContinue
 		}
 	}
+}
+
+# Terminal-Icons regrava o XML de cache a cada import; varias janelas do pwsh
+# abrindo juntas corrompem os arquivos. O helper serializa o import com um mutex
+# nomeado, isola o cache corrompido e nao deixa erro do modulo vazar no console.
+if (Get-Command -Name 'Import-TerminalIconsModule' -ErrorAction SilentlyContinue) {
+	Import-TerminalIconsModule | Out-Null
 }
 
 # Windows-only helper module.

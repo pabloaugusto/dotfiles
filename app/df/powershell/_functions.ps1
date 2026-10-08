@@ -1398,6 +1398,114 @@ function Import-DotEnvFromSops {
 
 
 ######################################################################################
+# Isola (move, nunca apaga) a pasta de cache XML de um modulo que a corrompeu
+######################################################################################
+function Move-ModuleCacheAside {
+	[CmdletBinding()]
+	param (
+		[string]$CacheRoot,
+		[string]$Suffix = 'corrompido'
+	)
+
+	if ([string]::IsNullOrWhiteSpace($CacheRoot) -or !(Test-Path -Path $CacheRoot -PathType Container)) {
+		return $null
+	}
+
+	$stamp = (Get-Date).ToString('yyyyMMdd-HHmmss')
+	$target = Join-Path (Split-Path -Path $CacheRoot -Parent) (
+		'{0}.{1}-{2}' -f (Split-Path -Path $CacheRoot -Leaf), $Suffix, $stamp)
+
+	try {
+		Move-Item -LiteralPath $CacheRoot -Destination $target -Force -ErrorAction Stop
+	}
+	catch {
+		# Pasta travada por outra janela: seguimos sem isolar (o chamador ainda
+		# tenta o reimport). Nunca propagamos o erro para o console do dono.
+		return $null
+	}
+
+	return $target
+}
+
+######################################################################################
+# Importa Terminal-Icons tolerando o cache XML corrompido por imports concorrentes
+######################################################################################
+function Import-TerminalIconsModule {
+	[CmdletBinding()]
+	param (
+		[string]$ModuleName = 'Terminal-Icons',
+		[string]$CacheRoot = (Join-Path $Env:APPDATA 'powershell\Community\Terminal-Icons'),
+		[int]$MaxAttempts = 2
+	)
+
+	if (Get-Module -Name $ModuleName) {
+		return $true
+	}
+	if (!(Get-Module -ListAvailable -Name $ModuleName)) {
+		return $false
+	}
+
+	# O modulo regrava o XML de cache a cada import; varias janelas do pwsh
+	# abrindo juntas corrompem os arquivos. O mutex serializa o import.
+	$mutex = $null
+	$ownsMutex = $false
+	try {
+		$mutex = New-Object System.Threading.Mutex($false, 'Local\DotfilesTerminalIconsImport')
+		$ownsMutex = $mutex.WaitOne([TimeSpan]::FromSeconds(20))
+	}
+	catch [System.Threading.AbandonedMutexException] {
+		# Dono anterior morreu: o mutex e' nosso agora.
+		$ownsMutex = $true
+	}
+	catch {
+		# Sem mutex seguimos mesmo assim: pior caso e' a corrida original.
+		$mutex = $null
+		$ownsMutex = $false
+	}
+
+	try {
+		for ($attempt = 1; $attempt -le [Math]::Max(1, $MaxAttempts); $attempt++) {
+			$errorsBefore = $global:Error.Count
+			$previousPreference = $global:ErrorActionPreference
+			$threw = $false
+			try {
+				# A preferencia precisa ser GLOBAL: o script module importado
+				# resolve $ErrorActionPreference no escopo global, entao um valor
+				# local nao silenciaria os erros dele.
+				$global:ErrorActionPreference = 'SilentlyContinue'
+				Import-Module $ModuleName *> $null
+			}
+			catch {
+				$threw = $true
+			}
+			finally {
+				$global:ErrorActionPreference = $previousPreference
+			}
+
+			# Import-Module nao reporta os erros do corpo do modulo nem por
+			# -ErrorVariable nem por redirecionamento: a unica pista e' o $Error.
+			$imported = !$threw -and $global:Error.Count -eq $errorsBefore -and (Get-Module -Name $ModuleName)
+			if ($imported) { return $true }
+
+			if ($attempt -ge $MaxAttempts) { break }
+
+			# Cache corrompido: isola a pasta e reimporta uma unica vez.
+			$null = Move-ModuleCacheAside -CacheRoot $CacheRoot -Suffix 'corrompido'
+			Remove-Module -Name $ModuleName -Force -ErrorAction SilentlyContinue
+		}
+
+		# Erros do modulo nunca vazam para o console: o perfil segue sem ele.
+		return $false
+	}
+	finally {
+		if ($mutex) {
+			if ($ownsMutex) { try { $null = $mutex.ReleaseMutex() } catch { } }
+			$mutex.Dispose()
+		}
+	}
+}
+
+######################################################################################
 # Materialize SOPS age key file from env when key content is available
 ######################################################################################
 function Ensure-SopsAgeKeyFile {
