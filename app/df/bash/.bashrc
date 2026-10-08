@@ -111,6 +111,10 @@ fi
 [ -f ~/.aliases ] && source ~/.aliases
 [ -f "$HOME/dotfiles/app/df/bash/.inc/secrets-manager.sh" ] && source "$HOME/dotfiles/app/df/bash/.inc/secrets-manager.sh"
 [ -f "$HOME/dotfiles/app/df/bash/.inc/check-env.sh" ] && source "$HOME/dotfiles/app/df/bash/.inc/check-env.sh"
+# Chave de assinatura de automacao: com TARS_ACTOR=agent o Git passa a assinar
+# com a chave por maquina via GIT_CONFIG_*, sem tocar no user.signingkey global.
+[ -f "$HOME/dotfiles/app/df/bash/.inc/signing-automation.sh" ] && source "$HOME/dotfiles/app/df/bash/.inc/signing-automation.sh"
+declare -f dotfiles_apply_automation_signing_env >/dev/null 2>&1 && dotfiles_apply_automation_signing_env
 
 # set PATH so it includes brew bin if exists
 [ -f "/home/linuxbrew/.linuxbrew/bin/brew" ] && eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
