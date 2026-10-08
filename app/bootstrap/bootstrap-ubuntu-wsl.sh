@@ -413,6 +413,113 @@ function add_user {
 }
 
 # --------------------------------------------------------------------
+# Age key materialization: o conteudo da chave mora SOMENTE num arquivo 600.
+# Nunca em variavel de ambiente persistida, runtime.env ou rc file.
+# --------------------------------------------------------------------
+# Fonte do recipient publico esperado (arquivo de config do sops, nao segredo).
+AGE_KEY_RECIPIENT_SOURCE="${DOTFILES_REPO_ROOT}/app/df/secrets/dotfiles.sops.yaml"
+
+# Caminho do arquivo da chave age (padrao do sops, sobrescrivivel por config).
+ageKeyFilePath() {
+	if [[ -n "${DOTFILES_AGE_KEY_FILE:-}" ]]; then
+		printf '%s' "$DOTFILES_AGE_KEY_FILE"
+		return 0
+	fi
+	printf '%s/sops/age/keys.txt' "${XDG_CONFIG_HOME:-$HOME/.config}"
+}
+
+ageKeyFileExpectedRecipient() {
+	[ -f "$AGE_KEY_RECIPIENT_SOURCE" ] || return 0
+	grep -o 'age1[0-9a-z]*' "$AGE_KEY_RECIPIENT_SOURCE" 2>/dev/null | head -n1 | tr -d '\r\n'
+}
+
+# Grava a chave (lida de SOPS_AGE_KEY em memoria) no arquivo 600/700.
+materializeAgeKeyFile() {
+	local target dir
+
+	target="$(ageKeyFilePath)"
+	dir="$(dirname "$target")"
+
+	( umask 077 && mkdir -p "$dir" ) || return 1
+	chmod 700 "$dir" 2>/dev/null || true
+
+	if [[ -n "${SOPS_AGE_KEY:-}" ]]; then
+		( umask 077 && printf '%s\n' "$SOPS_AGE_KEY" > "$target" ) || return 1
+		# Nao mantem o conteudo da chave no ambiente.
+		unset SOPS_AGE_KEY
+	elif [[ -n "${SOPS_AGE_KEY_REF:-}" ]] && command -v op >/dev/null 2>&1; then
+		( umask 077 && op read "$SOPS_AGE_KEY_REF" > "$target" ) || {
+			echo "Falha ao ler a chave age de SOPS_AGE_KEY_REF via 1Password."
+			rm -f "$target"
+			return 1
+		}
+	elif [[ ! -f "$target" ]]; then
+		echo "Chave age indisponivel: nem SOPS_AGE_KEY, nem SOPS_AGE_KEY_REF, nem $target."
+		return 1
+	fi
+
+	chmod 600 "$target" 2>/dev/null || true
+	export SOPS_AGE_KEY_FILE="$target"
+	return 0
+}
+
+# Detecta se o filesystem honra chmod (MSYS/DrvFs nao honram).
+chmodSupportsPosix() {
+	local probe rc
+	probe="$(mktemp)" || return 1
+	chmod 600 "$probe" 2>/dev/null || true
+	[[ "$(stat -c '%a' "$probe" 2>/dev/null || true)" == "600" ]]
+	rc=$?
+	rm -f "$probe"
+	return $rc
+}
+
+# Valida existencia, permissao 600 e identidade (recipient) do arquivo.
+# Nunca imprime o conteudo da chave.
+validateAgeKeyFile() {
+	local target recipient expected perm
+
+	target="$(ageKeyFilePath)"
+	expected="$(ageKeyFileExpectedRecipient)"
+
+	if [[ ! -f "$target" ]]; then
+		echo "Arquivo de chave age ausente: $target"
+		return 1
+	fi
+
+	# Permissao 600: falha clara apenas se o filesystem honra perms POSIX
+	# (chmod e no-op em MSYS/DrvFs, onde o aviso e o melhor possivel).
+	perm="$(stat -c '%a' "$target" 2>/dev/null || true)"
+	if [[ -n "$perm" && "$perm" != "600" ]]; then
+		chmod 600 "$target" 2>/dev/null || true
+		perm="$(stat -c '%a' "$target" 2>/dev/null || true)"
+	fi
+	if [[ -n "$perm" && "$perm" != "600" ]]; then
+		if chmodSupportsPosix; then
+			echo "Permissao incorreta em $target: $perm (esperado 600)."
+			return 1
+		fi
+		echo "aviso: nao foi possivel aplicar 600 em $target (filesystem sem perms POSIX)."
+	fi
+
+	if [[ -z "$expected" ]]; then
+		echo "Recipient de referencia nao encontrado em $AGE_KEY_RECIPIENT_SOURCE; identidade nao verificada."
+		return 0
+	fi
+
+	recipient="$(age-keygen -y "$target" 2>/dev/null | tr -d '\r\n')"
+	if [[ -z "$recipient" ]]; then
+		echo "Falha ao derivar recipient age de $target."
+		return 1
+	fi
+	if [[ "$recipient" != "$expected" ]]; then
+		echo "Recipient de $target diverge do esperado em $AGE_KEY_RECIPIENT_SOURCE."
+		return 1
+	fi
+	return 0
+}
+
+# --------------------------------------------------------------------
 # Generate encrypted runtime env (.env.local.sops) from 1Password template
 # --------------------------------------------------------------------
 function setLocalEnvFile {
@@ -443,8 +550,8 @@ function setLocalEnvFile {
 		export OP_SERVICE_ACCOUNT_TOKEN="$(printf '%s' "$OP_SERVICE_ACCOUNT_TOKEN" | tr -d '\r')"
 	fi
 
-	if [[ -z "${SOPS_AGE_KEY:-}" ]]; then
-		echo "SOPS_AGE_KEY nao foi resolvida via 1Password; nao e possivel criptografar .env.local.sops."
+	if ! materializeAgeKeyFile; then
+		echo "Chave age indisponivel; nao e possivel criptografar .env.local.sops."
 		rm -f "$tmp_plain" "$tmp_age"
 		return 1
 	fi
@@ -454,11 +561,18 @@ function setLocalEnvFile {
 		return 1
 	fi
 
-	printf '%s\n' "$SOPS_AGE_KEY" > "$tmp_age"
+	if [[ -f "$(ageKeyFilePath)" ]]; then
+		cp "$(ageKeyFilePath)" "$tmp_age" || {
+			rm -f "$tmp_plain" "$tmp_age"
+			return 1
+		}
+	else
+		printf '%s\n' "$SOPS_AGE_KEY" > "$tmp_age"
+	fi
 	chmod 600 "$tmp_age" 2>/dev/null || true
 	age_recipient="$(age-keygen -y "$tmp_age" 2>/dev/null | tr -d '\r\n')"
 	if [[ -z "$age_recipient" ]]; then
-		echo "Falha ao derivar recipient age a partir de SOPS_AGE_KEY."
+		echo "Falha ao derivar recipient age a partir do arquivo de chave."
 		rm -f "$tmp_plain" "$tmp_age"
 		return 1
 	fi
@@ -518,25 +632,29 @@ importLocalEnvFromSops() {
 persistSopsAgeEnv() {
 	local runtime_dir="$HOME/.config/dotfiles"
 	local runtime_file="$runtime_dir/runtime.env"
-	local escaped
+	local key_file
 
-	if [[ -z "${SOPS_AGE_KEY:-}" ]]; then
-		echo "SOPS_AGE_KEY nao definida; nao foi possivel persistir chave age para novos shells."
+	if ! materializeAgeKeyFile; then
 		return 1
 	fi
+	if ! validateAgeKeyFile; then
+		echo "Validacao do arquivo de chave age falhou; abortando persistencia."
+		return 1
+	fi
+	key_file="$(ageKeyFilePath)"
 
 	mkdir -p "$runtime_dir"
 	chmod 700 "$runtime_dir" 2>/dev/null || true
 
-	escaped="${SOPS_AGE_KEY//\\/\\\\}"
-	escaped="${escaped//\"/\\\"}"
-
+	# Apenas o CAMINHO e persistido. O conteudo da chave vive no arquivo 600.
 	cat > "$runtime_file" <<EOF
-export SOPS_AGE_KEY="$escaped"
-export SOPS_AGE_KEY_FILE=""
+export SOPS_AGE_KEY_FILE="$key_file"
 EOF
 	chmod 600 "$runtime_file" 2>/dev/null || true
 	export DOTFILES_RUNTIME_ENV_FILE="$runtime_file"
+
+	# Migracao: elimina qualquer residuo do conteudo da chave no ambiente.
+	unset SOPS_AGE_KEY
 
 	# Remove legacy plaintext exports from startup files.
 	# NUNCA usar sed -i em symlink: GNU sed substitui o link por arquivo regular

@@ -4,4 +4,6 @@
 export OP_SERVICE_ACCOUNT_TOKEN="{{op://secrets/dotfiles/1password/service-account}}"
 export GH_TOKEN="{{op://secrets/dotfiles/github/token}}"
 export GITHUB_TOKEN="{{op://secrets/dotfiles/github/token}}"
-export SOPS_AGE_KEY="{{op://secrets/dotfiles/age/age.key}}"
+# Referencia (nao o conteudo) da chave age: o bootstrap materializa o conteudo
+# em arquivo 600 e exporta apenas SOPS_AGE_KEY_FILE.
+export SOPS_AGE_KEY_REF="{{op://secrets/dotfiles/age/age.key}}"

@@ -1267,13 +1267,16 @@ function Set-LocalEnvFrom1Password {
 			$Env:GH_TOKEN = $loaded['GITHUB_TOKEN']
 		}
 
-		$ageKey = $Env:SOPS_AGE_KEY
-		$canEncrypt = $ageKey -and (Test-CommandExists sops) -and (Test-CommandExists age-keygen)
+		# A chave vive em arquivo com ACL restrita; o conteudo nunca fica no ambiente.
+		$keyFileReady = Ensure-SopsAgeKeyFile
+		$ageKeyFile = $Env:SOPS_AGE_KEY_FILE
+		$canEncrypt = $keyFileReady -and (-not [string]::IsNullOrWhiteSpace($ageKeyFile)) -and
+			(Test-Path -Path $ageKeyFile -PathType Leaf) -and
+			(Test-CommandExists sops) -and (Test-CommandExists age-keygen)
 		if ($canEncrypt) {
-			# Derive public recipient from private age key using a temp identity file.
-			$tmpKey = [System.IO.Path]::GetTempFileName()
-			Set-Content -Path $tmpKey -Value $ageKey -NoNewline
-			$recipient = (& age-keygen -y $tmpKey 2>$null | Out-String).Trim()
+			# Derive public recipient from the age key file (nunca apagado aqui:
+			# $tmpKey continua nulo para o finally nao remover o arquivo real).
+			$recipient = (& age-keygen -y $ageKeyFile 2>$null | Out-String).Trim()
 			if ([string]::IsNullOrWhiteSpace($recipient)) {
 				$canEncrypt = $false
 			}
@@ -1317,17 +1320,20 @@ function Import-DotEnvFromSops {
 		return @{}
 	}
 
-	if ([string]::IsNullOrWhiteSpace($Env:SOPS_AGE_KEY)) {
-		$userAgeKey = [Environment]::GetEnvironmentVariable('SOPS_AGE_KEY', 'User')
-		if (-not [string]::IsNullOrWhiteSpace($userAgeKey)) {
-			$Env:SOPS_AGE_KEY = $userAgeKey
-		}
+	# Migracao: SOPS_AGE_KEY residual no HKCU e removido; so o caminho e usado.
+	if (-not [string]::IsNullOrWhiteSpace([Environment]::GetEnvironmentVariable('SOPS_AGE_KEY', 'User'))) {
+		[Environment]::SetEnvironmentVariable('SOPS_AGE_KEY', $null, 'User')
 	}
+	$Env:SOPS_AGE_KEY = $null
+
 	if ([string]::IsNullOrWhiteSpace($Env:SOPS_AGE_KEY_FILE)) {
 		$userAgeKeyFile = [Environment]::GetEnvironmentVariable('SOPS_AGE_KEY_FILE', 'User')
 		if (-not [string]::IsNullOrWhiteSpace($userAgeKeyFile)) {
 			$Env:SOPS_AGE_KEY_FILE = $userAgeKeyFile
 		}
+	}
+	if ([string]::IsNullOrWhiteSpace($Env:SOPS_AGE_KEY_FILE)) {
+		$null = Ensure-SopsAgeKeyFile
 	}
 
 	$tmpPlain = [System.IO.Path]::GetTempFileName()
@@ -1351,33 +1357,63 @@ function Import-DotEnvFromSops {
 function Ensure-SopsAgeKeyFile {
 	[CmdletBinding()]
 	param (
-		[string]$DefaultPath = (Join-Path $Env:USERPROFILE '.config\sops\age\keys.txt'),
+		[string]$DefaultPath = (Join-Path $Env:APPDATA 'sops\age\keys.txt'),
+		[string]$KeyRef = $Env:SOPS_AGE_KEY_REF,
 		[switch]$ForceMaterialize
 	)
 
-	# If a key file is already present, we are done.
-	if (-not [string]::IsNullOrWhiteSpace($Env:SOPS_AGE_KEY_FILE) -and (Test-Path -Path $Env:SOPS_AGE_KEY_FILE -PathType Leaf)) {
+	# Caminho ja resolvido e valido: nada a materializar, mas garante que o
+	# conteudo da chave nao ficou para tras no ambiente/HKCU.
+	if ([string]::IsNullOrWhiteSpace($Env:DOTFILES_AGE_KEY_FILE) -and
+		-not [string]::IsNullOrWhiteSpace($Env:SOPS_AGE_KEY_FILE) -and
+		(Test-Path -Path $Env:SOPS_AGE_KEY_FILE -PathType Leaf)) {
+		$Env:SOPS_AGE_KEY = $null
+		[Environment]::SetEnvironmentVariable('SOPS_AGE_KEY', $null, 'User')
 		return $true
 	}
 
-	# If no key material is present, nothing to do.
-	if ([string]::IsNullOrWhiteSpace($Env:SOPS_AGE_KEY)) {
-		return $true
+	$targetPath = if (-not [string]::IsNullOrWhiteSpace($Env:DOTFILES_AGE_KEY_FILE)) {
+		$Env:DOTFILES_AGE_KEY_FILE
 	}
-
-	# Default behavior now is non-materializing (keep only in env).
-	if (-not $ForceMaterialize -and [string]::IsNullOrWhiteSpace($Env:SOPS_AGE_KEY_FILE)) {
-		return $true
+	elseif (-not [string]::IsNullOrWhiteSpace($Env:SOPS_AGE_KEY_FILE)) {
+		$Env:SOPS_AGE_KEY_FILE
 	}
-
-	$targetPath = if (-not [string]::IsNullOrWhiteSpace($Env:SOPS_AGE_KEY_FILE)) { $Env:SOPS_AGE_KEY_FILE } else { $DefaultPath }
+	else {
+		$DefaultPath
+	}
 	$targetDir = Split-Path -Path $targetPath -Parent
 	if ($targetDir -and !(Test-Path -Path $targetDir)) {
 		New-Item -Path $targetDir -ItemType Directory -Force | Out-Null
 	}
 
-	Set-Content -Path $targetPath -Value $Env:SOPS_AGE_KEY -NoNewline
+	if (-not [string]::IsNullOrWhiteSpace($Env:SOPS_AGE_KEY)) {
+		Set-Content -Path $targetPath -Value $Env:SOPS_AGE_KEY.Trim() -NoNewline -Encoding ascii
+	}
+	elseif (-not [string]::IsNullOrWhiteSpace($KeyRef) -and (Test-CommandExists op)) {
+		$keyContent = (& op read $KeyRef 2>$null | Out-String).Trim()
+		if ([string]::IsNullOrWhiteSpace($keyContent)) {
+			Write-Warning 'Unable to read the age key from the 1Password reference.'
+			return $false
+		}
+		Set-Content -Path $targetPath -Value $keyContent -NoNewline -Encoding ascii
+	}
+	elseif ((Test-Path -Path $targetPath -PathType Leaf) -and -not $ForceMaterialize) {
+		$Env:SOPS_AGE_KEY_FILE = $targetPath
+		$Env:SOPS_AGE_KEY = $null
+		return $true
+	}
+	else {
+		Write-Warning "No age key material available to materialize at $targetPath."
+		return $false
+	}
+
+	# ACL restrita ao usuario atual (equivalente ao 600 no Linux).
+	$null = & icacls $targetPath /inheritance:r /grant:r "$($Env:USERNAME):F" *> $null
+
 	$Env:SOPS_AGE_KEY_FILE = $targetPath
+	# A chave nunca deve viver no ambiente nem no HKCU: apenas o arquivo 600/ACL.
+	$Env:SOPS_AGE_KEY = $null
+	[Environment]::SetEnvironmentVariable('SOPS_AGE_KEY', $null, 'User')
 	return (Test-Path -Path $targetPath -PathType Leaf)
 }
 
@@ -1658,21 +1694,24 @@ function checkEnv {
 		Add-CheckResult -Item 'Command: age' -Status 'inconclusive' -Detail 'age not found in PATH.' -Solution 'Install age to support sops encryption/decryption flow.'
 	}
 
-	if ([string]::IsNullOrWhiteSpace($Env:SOPS_AGE_KEY)) {
-		$userAgeKey = [Environment]::GetEnvironmentVariable('SOPS_AGE_KEY', 'User')
-		if (-not [string]::IsNullOrWhiteSpace($userAgeKey)) {
-			$Env:SOPS_AGE_KEY = $userAgeKey
+	if ([string]::IsNullOrWhiteSpace($Env:SOPS_AGE_KEY_FILE)) {
+		$userAgeKeyFile = [Environment]::GetEnvironmentVariable('SOPS_AGE_KEY_FILE', 'User')
+		if (-not [string]::IsNullOrWhiteSpace($userAgeKeyFile)) {
+			$Env:SOPS_AGE_KEY_FILE = $userAgeKeyFile
 		}
 	}
 
 	if (-not [string]::IsNullOrWhiteSpace($Env:SOPS_AGE_KEY_FILE) -and (Test-Path -Path $Env:SOPS_AGE_KEY_FILE -PathType Leaf)) {
 		Add-CheckResult -Item 'SOPS age key file' -Status 'success' -Detail "SOPS_AGE_KEY_FILE points to an existing file: $Env:SOPS_AGE_KEY_FILE." -Solution ''
 	}
-	elseif (-not [string]::IsNullOrWhiteSpace($Env:SOPS_AGE_KEY)) {
-		Add-CheckResult -Item 'SOPS age key file' -Status 'success' -Detail 'SOPS_AGE_KEY is loaded in environment (env-only mode).' -Solution ''
-	}
 	else {
-		Add-CheckResult -Item 'SOPS age key file' -Status 'fail' -Detail 'No SOPS age key detected in environment.' -Solution 'Set SOPS_AGE_KEY (recommended) or configure SOPS_AGE_KEY_FILE.'
+		Add-CheckResult -Item 'SOPS age key file' -Status 'fail' -Detail 'No valid age key file detected (SOPS_AGE_KEY_FILE).' -Solution 'Set SOPS_AGE_KEY_FILE to the 600/ACL-restricted age key file (ex.: %APPDATA%\sops\age\keys.txt).'
+	}
+
+	# Leak signal: o conteudo da chave nunca deve estar no ambiente/HKCU.
+	if (-not [string]::IsNullOrWhiteSpace($Env:SOPS_AGE_KEY) -or
+		-not [string]::IsNullOrWhiteSpace([Environment]::GetEnvironmentVariable('SOPS_AGE_KEY', 'User'))) {
+		Add-CheckResult -Item 'SOPS age key leaked in env' -Status 'inconclusive' -Detail 'SOPS_AGE_KEY is present in the environment or HKCU (key content leak).' -Solution 'Remove SOPS_AGE_KEY from the environment/HKCU and use SOPS_AGE_KEY_FILE only.'
 	}
 
 	# 2.1) Windows OneDrive/profile path compliance (when enabled in bootstrap config)
