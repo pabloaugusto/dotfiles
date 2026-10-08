@@ -69,6 +69,14 @@ STUB
 
   command -v ssh-keygen >/dev/null 2>&1 || skip "ssh-keygen ausente"
   command -v git >/dev/null 2>&1 || skip "git ausente"
+
+  # Harness: o runner costuma rodar sobre uma COPIA do worktree, cujo .git e' um
+  # arquivo apontando para um caminho que nao existe no Linux (ex.: C:/...). O
+  # Git aborta com "not a git repository" em qualquer `git config`, mesmo com
+  # --global. Nenhum teste depende do repo do cwd (tudo usa paths absolutos),
+  # entao roda do tmpdir isolado, fora de qualquer descoberta de repo.
+  mkdir -p "$BATS_TEST_TMPDIR/cwd"
+  cd "$BATS_TEST_TMPDIR/cwd" || return 1
 }
 
 # Extrai uma funcao do script real, para testa-la isolada.
