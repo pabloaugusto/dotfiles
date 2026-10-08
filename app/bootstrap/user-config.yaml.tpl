@@ -51,11 +51,8 @@ git:
   # A chave privada deve ficar no 1Password.
   signing_key: "@@GIT_SIGNING_KEY@@"
 
-  # Ref opcional do 1Password para a chave PUBLICA SSH do signer tecnico
-  # de automacao usado por worktrees/agentes.
-  # Exemplo: "op://secrets/dotfiles/git-automation/public key"
-  # Isso facilita rotacao sem espalhar configuracao manual.
-  automation_signing_key_ref: "@@GIT_AUTOMATION_SIGNING_KEY_REF@@"
+  # Identidade de automacao (robo `daneel`) fica na secao `automation` abaixo.
+  # Nao use campos aqui: a SSOT e' unica para todas as maquinas.
 
 # =============================================================================
 # 3. Caminhos e links do Windows
@@ -217,3 +214,28 @@ secrets:
 
   # Chave age usada pelo sops.
   age_key_ref: "@@SECRETS_AGE_KEY_REF@@"
+
+# =============================================================================
+# 7. Automacao (identidade unica "daneel")
+# =============================================================================
+# Uma unica identidade de automacao para TODAS as maquinas. Nada aqui e'
+# especifico de hostname: o mesmo par de chaves e a mesma service account
+# valem em qualquer maquina. A chave privada NUNCA vive no repositorio nem no
+# disco do usuario de forma permanente sem controle: ela e' materializada pelo
+# bootstrap a partir do 1Password (`op read --out-file`), nunca por stdout.
+automation:
+  # Ref da chave PRIVADA ed25519 de assinatura da daneel.
+  signing_key_ref: "@@AUTOMATION_SIGNING_KEY_REF@@"
+
+  # Ref da chave PUBLICA correspondente (nao e' segredo, mas mantem SSOT unica).
+  signing_public_key_ref: "@@AUTOMATION_SIGNING_PUBLIC_KEY_REF@@"
+
+  # Ref do token da service account usada pela automacao (arquivo 600 local).
+  op_token_ref: "@@AUTOMATION_OP_TOKEN_REF@@"
+
+  # Ref do arquivo `allowed_signers` (SSOT compartilhada entre as maquinas).
+  allowed_signers_ref: "@@AUTOMATION_ALLOWED_SIGNERS_REF@@"
+
+  # Identidade Git usada quando TARS_ACTOR=agent.
+  git_name: "@@AUTOMATION_GIT_NAME@@"
+  git_email: "@@AUTOMATION_GIT_EMAIL@@"
