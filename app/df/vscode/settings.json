@@ -1,12 +1,9 @@
 {
-	//Appearance Settings -----------------------------------------------------------
-	"workbench.colorTheme": "GitHub Dark",
 	"workbench.preferredDarkColorTheme": "GitHub Dark",
 	"workbench.preferredHighContrastColorTheme": "GitHub Dark",
 	"window.title": "${folderName} - ${activeEditorShort}",
 	"window.commandCenter": true,
 	"workbench.statusBar.visible": true,
-	"workbench.activityBar.location": "left",
 	//Appearance Settings Extensions-----------------------------------------------
 	"indentRainbow.colorOnWhiteSpaceOnly": true,
 	"indentRainbow.indicatorStyle": "light",
@@ -70,12 +67,14 @@
 		"OMV",
 		"10.0.0.10",
 		"TRUENAS",
+		"wsl$"
 	],
 	//File Associations Settings -----------------------------------------------------------
 	"files.associations": {
 		"*.razor": "csharp",
 		"*.yml": "yaml",
 		"*.tom": "toml",
+		"*.toml": "ini"
 	},
 	//Project Manager Settings -----------------------------------------------------------
 	"projectManager.git.baseFolders": [
@@ -423,8 +422,6 @@
 	"[xml]": {
 		"editor.defaultFormatter": "redhat.vscode-xml",
 	},
-	"vscode-home-assistant.hostUrl": "http://10.0.0.10:8123",
-	"vscode-home-assistant.longLivedAccessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJlYWE2MjY0ODAxMzY0NWQ0OWYzNjJkYzBiMzhlOGQyZSIsImlhdCI6MTcxNzg5NTE1NCwiZXhwIjoyMDMzMjU1MTU0fQ.XHFEKpOGt_8nSwtwuX3nSgfRc8MgnfiU1vH4F9iefmE",
 	"vscode-home-assistant.ignoreCertificates": true,
 	"notebook.defaultFormatter": "esbenp.prettier-vscode",
 	"[home-assistant]": {
@@ -453,8 +450,6 @@
 	"remote.autoForwardPortsSource": "hybrid",
 	"github.copilot.nextEditSuggestions.enabled": true,
 	"chat.customAgentInSubagent.enabled": true,
-	"gitlens.ai.model": "vscode",
-	"gitlens.ai.vscode.model": "copilot:gpt-4.1",
 	"chat.tools.terminal.autoApprove": {
 		"cd": true,
 		"echo": true,
@@ -602,7 +597,7 @@
 		"markdown": true
 	},
 	"github.copilot.chat.copilotMemory.enabled": true,
-	"chat.agent.maxRequests": 40,
+	"chat.agent.maxRequests": 100,
 	"python.analysis.typeCheckingMode": "standard",
 	"githubPullRequests.showStatusBar": true,
 	"githubPullRequests.pullBranch": "never",
@@ -613,7 +608,6 @@
 	"deps-versions.npm.enableCodeLens": false,
 	"github-actions.workflows.pinned.refresh.enabled": true,
 	"chat.mcp.gallery.enabled": true,
-	"chat.viewSessions.orientation": "stacked",
 	"[jsonc]": {
 		"editor.defaultFormatter": "vscode.json-language-features"
 	},
@@ -636,7 +630,6 @@
 		"./venv"
 	],
 	"python-envs.pythonProjects": [],
-	"workbench.iconTheme": "material-icon-theme",
 	"githubPullRequests.showPullRequestNumberInTree": true,
 	"cSpell.dictionaries": [
 		"@cspell/dict-git/cspell-ext.json",
@@ -644,4 +637,10 @@
 	"cSpell.languageSettings": [],
 	"sops-edit.onlyUseButtons": true,
 	"sqltools.useNodeRuntime": true,
+	"workbench.iconTheme": "material-icon-theme",
+	"chat.permissions.default": "autoApprove",
+	"copilotScheduler.autoModeDefault": true,
+	"[html]": {
+		"editor.defaultFormatter": "vscode.html-language-features"
+	},
 }

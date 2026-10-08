@@ -1,0 +1,189 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/pabloaugusto/dotfiles/blob/main/config/ai/review-output.schema.json",
+  "title": "AI Reviewer Output",
+  "description": "Contrato estruturado minimo para pareceres dos reviewers especializados da control plane.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "review_scope",
+    "decision",
+    "confidence",
+    "summary",
+    "findings",
+    "quality_regression",
+    "required_changes",
+    "technical_debt_backlog",
+    "validation_needed",
+    "jira_action"
+  ],
+  "properties": {
+    "review_scope": {
+      "type": "string",
+      "enum": ["diff", "file", "module", "pr", "pull-request"]
+    },
+    "decision": {
+      "type": "string",
+      "enum": ["approved", "approved_with_debt", "changes_required", "blocked"]
+    },
+    "confidence": {
+      "type": "string",
+      "enum": ["low", "medium", "high"]
+    },
+    "summary": {
+      "type": "string",
+      "minLength": 1
+    },
+    "assumptions": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": []
+    },
+    "findings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "severity",
+          "category",
+          "title",
+          "evidence",
+          "impact",
+          "best_fix",
+          "blocking"
+        ],
+        "properties": {
+          "severity": {
+            "type": "string",
+            "enum": ["blocker", "major", "minor", "backlog_debt", "nit"]
+          },
+          "category": {
+            "type": "string",
+            "enum": [
+              "correctness",
+              "security",
+              "performance",
+              "io",
+              "efficiency",
+              "maintainability",
+              "readability",
+              "typing",
+              "testing",
+              "observability",
+              "conventions",
+              "robustness",
+              "compatibility"
+            ]
+          },
+          "title": {
+            "type": "string",
+            "minLength": 1
+          },
+          "evidence": {
+            "type": "string",
+            "minLength": 1
+          },
+          "impact": {
+            "type": "string",
+            "minLength": 1
+          },
+          "best_fix": {
+            "type": "string",
+            "minLength": 1
+          },
+          "blocking": {
+            "type": "boolean"
+          }
+        }
+      }
+    },
+    "quality_regression": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "performance_regression",
+        "io_regression",
+        "complexity_regression",
+        "memory_regression",
+        "notes"
+      ],
+      "properties": {
+        "performance_regression": {
+          "type": "boolean"
+        },
+        "io_regression": {
+          "type": "boolean"
+        },
+        "complexity_regression": {
+          "type": "boolean"
+        },
+        "memory_regression": {
+          "type": "boolean"
+        },
+        "notes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "required_changes": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "technical_debt_backlog": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "validation_needed": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["lint", "typecheck", "tests", "manual_checks", "benchmark_needed"],
+      "properties": {
+        "lint": {
+          "type": "boolean"
+        },
+        "typecheck": {
+          "type": "boolean"
+        },
+        "tests": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "manual_checks": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "benchmark_needed": {
+          "type": "boolean"
+        }
+      }
+    },
+    "jira_action": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["comment_required", "transition"],
+      "properties": {
+        "comment_required": {
+          "type": "boolean"
+        },
+        "transition": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    }
+  }
+}

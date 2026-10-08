@@ -22,7 +22,10 @@
 					"type": "path",
 					"style": "powerline",
 					"foreground": "#282828",
-					"background": "#458588",
+					"background_templates": [
+						"{{ if .Env.WSL_DISTRO_NAME }}#b65e12{{ end }}",
+						"#458588"
+					],
 					"powerline_symbol": "\ue0b0",
 					"template": " {{ .Path }} "
 				},

@@ -90,3 +90,32 @@ Host 10.30.4.9
     # Preferir caminho ~/<...> para compatibilidade.
     # No Windows OpenSSH, "~/.ssh/..." também funciona (expande para o perfil do usuário).
     IdentityFile ~/.ssh/infra-eastus2-cr_mevo.pem
+
+###########################
+# Fabber VM (Oracle Cloud)
+###########################
+Host fabber
+    HostName 163.176.198.47
+    User ubuntu
+    ForwardAgent yes
+    StrictHostKeyChecking accept-new
+    IdentitiesOnly yes
+
+    # Fixed 2026-09-06: "IdentitiesOnly yes" alone had no effect here — this
+    # main config's own top-of-file `Include ~/.ssh/1Password/config` (Match
+    # all) and `Include ~/.ssh/config.local` (Host *, sets IdentityAgent +
+    # IdentitiesOnly no) are parsed BEFORE this block, and OpenSSH's config
+    # semantics are first-obtained-value-wins per keyword — so "IdentitiesOnly"
+    # was already pinned to "no" by the time parsing reached this line,
+    # silently making this block's own "yes" a no-op. Real symptom: SSH
+    # offered all 8 keys the 1Password agent holds and the Oracle VM's
+    # MaxAuthTries disconnected the session ("Too many authentication
+    # failures") before ever reaching the correct key.
+    # `IdentityFile` was NOT pre-set by those earlier blocks, so — same
+    # working pattern already used above for the other VM hosts
+    # (54.234.244.188, 10.30.4.9) — pinning it here narrows what's offered
+    # regardless of the IdentitiesOnly override. Private key lives only in
+    # 1Password (op item "fabber-oracle-cloud-ssh-key-2026-08-31"); this
+    # file holds just the public half so OpenSSH can select the matching
+    # identity from the agent without it touching disk.
+    IdentityFile ~/.ssh/fabber-oracle-cloud.pub

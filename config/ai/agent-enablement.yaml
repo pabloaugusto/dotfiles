@@ -1,0 +1,88 @@
+version: 1
+
+defaults:
+  roles_source_of_truth: config/ai/agents.yaml
+  registry_agents_enabled_by_default: true
+  unknown_override_policy: fail
+
+roles:
+  ai-product-owner:
+    enabled: true
+  ai-scrum-master:
+    enabled: true
+  ai-startup-governor:
+    enabled: true
+  ai-engineering-architect:
+    enabled: true
+  ai-engineering-manager:
+    enabled: true
+  ai-tech-lead:
+    enabled: true
+  ai-developer-python:
+    enabled: true
+  ai-developer-powershell:
+    enabled: true
+  ai-developer-automation:
+    enabled: true
+  ai-developer-config-policy:
+    enabled: true
+  ai-qa:
+    enabled: true
+  ai-reviewer-python:
+    enabled: true
+  ai-reviewer-powershell:
+    enabled: true
+  ai-reviewer-automation:
+    enabled: true
+  ai-reviewer-config-policy:
+    enabled: true
+  ai-reviewer:
+    enabled: true
+  ai-devops:
+    enabled: true
+  ai-linguistic-reviewer:
+    enabled: true
+  ai-documentation-writer:
+    enabled: true
+  ai-documentation-reviewer:
+    enabled: true
+  ai-documentation-manager:
+    enabled: true
+  ai-documentation-sync:
+    enabled: true
+  ai-documentation-agent:
+    enabled: false
+  ai-browser-validator:
+    enabled: false
+  ai-designer:
+    enabled: false
+  ai-ux-cro-analyst:
+    enabled: false
+  ai-seo-specialist:
+    enabled: false
+
+registry_agents:
+  bootstrap-operator:
+    enabled: true
+  repo-governance-authority:
+    enabled: true
+  execution-worklog-governance-owner:
+    enabled: true
+  architecture-modernization-authority:
+    enabled: true
+  critical-integrations-guardian:
+    enabled: true
+  secrets-rotation-governor:
+    enabled: true
+  lessons-governance-curator:
+    enabled: true
+  orchestrator:
+    enabled: true
+  python-reviewer:
+    enabled: true
+  powershell-reviewer:
+    enabled: true
+  automation-reviewer:
+    enabled: true
+  pascoalete:
+    enabled: true

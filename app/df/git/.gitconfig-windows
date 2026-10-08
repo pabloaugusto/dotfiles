@@ -27,14 +27,14 @@
 # Assinatura via SSH (1Password) - Windows
 ################################################################################
 
-# [user]
-#     # signingkey = KEY ESPECIFICA DO AMBIENTE
-#     # (por padrão vem do ~/.gitconfig-base)
-#     # signingkey = ssh-ed25519 AAAA...
+[user]
+    signingkey = ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHXSYIIzUF2Tu173LQ554nnCBHINM9aw8+3p7oSUDiGu
 
 [gpg "ssh"]
     # Program from PATH to keep a single cross-platform reference.
     program = op-ssh-sign
+    # Caminho REAL do dotfiles (o verificador não atravessa symlinks).
+    allowedSignersFile = C:/Users/pablo/dotfiles/app/df/git/allowed_signers
 
 [commit]
     # gpgsign = VALOR ESPECIFICO DO AMBIENTE

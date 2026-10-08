@@ -30,23 +30,17 @@ class ConventionalEmojiTests(unittest.TestCase):
         self.assertFalse(result.ok)
         self.assertIn("Emoji obrigatorio", result.error)
 
-    def test_rejects_missing_issue_key_when_required(self) -> None:
+    def test_accepts_message_without_issue_key(self) -> None:
         result = MODULE.validate_message(
             "✨ feat(test-harness): add validator",
             require_emoji=True,
             require_issue_key=True,
         )
-        self.assertFalse(result.ok)
-        self.assertIn("Chave Jira obrigatoria", result.error)
+        self.assertTrue(result.ok)
 
-    def test_rejects_multiple_issue_keys_when_required(self) -> None:
-        result = MODULE.validate_message(
-            "✨ feat(test-harness): DOT-130 DOT-131 add validator",
-            require_emoji=True,
-            require_issue_key=True,
-        )
-        self.assertFalse(result.ok)
-        self.assertIn("exatamente uma chave Jira", result.error)
+    def test_ci_and_build_use_segtools_emoji(self) -> None:
+        self.assertEqual(MODULE.COMMIT_TYPE_EMOJI["build"], "📦")
+        self.assertEqual(MODULE.COMMIT_TYPE_EMOJI["ci"], "👷")
 
     def test_rejects_messages_longer_than_limit(self) -> None:
         description = "a" * 80

@@ -163,6 +163,21 @@
 [includeIf "gitdir:/workspaces-linux/"]
     path = ~/.config/git/.gitconfig-devcontainer-host-linux
 [credential "https://github.com"]
-	helper = !gh auth git-credential
+	helper = 
+	helper = !'C:\\Program Files\\GitHub CLI\\gh.exe' auth git-credential
 [credential "https://gist.github.com"]
-	helper = !gh auth git-credential
+	helper = 
+	helper = !'C:\\Program Files\\GitHub CLI\\gh.exe' auth git-credential
+[windows]
+	appendAtomically = false
+
+
+
+
+
+
+
+
+# Assinatura/identidade reais vivem em ~/.config/git/.gitconfig.local e nos
+# overlays por ambiente (.gitconfig-windows / -linux / -wsl-windowsfs).
+# O bloco "forçado manual" de 12/06/2026 (chave RSA antiga) foi migrado pra lá.

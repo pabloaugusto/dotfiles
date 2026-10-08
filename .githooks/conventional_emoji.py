@@ -24,8 +24,8 @@ COMMIT_TYPE_EMOJI = {
     "refactor": "♻️",
     "perf": "⚡",
     "test": "✅",
-    "build": "👷",
-    "ci": "💚",
+    "build": "📦",
+    "ci": "👷",
     "chore": "🔧",
     "revert": "⏪",
     "wip": "🚧",
@@ -230,25 +230,13 @@ def validate_message(
             ok=False,
             error=(
                 f"Scope obrigatorio: '{required_scope}'. Exemplo: "
-                f"'📝 docs({required_scope}): DOT-179 documentar regra'."
+                f"'📝 docs({required_scope}): documentar regra'."
             ),
         )
 
-    if require_issue_key:
-        jira_keys = JIRA_KEY_RE.findall(first_line)
-        if not jira_keys:
-            return ValidationResult(
-                ok=False,
-                error=(
-                    "Chave Jira obrigatoria. Inclua um work item no subject, por "
-                    "exemplo: '🔧 chore(git): DOT-81 endurecer convencoes'."
-                ),
-            )
-        if len(jira_keys) != 1:
-            return ValidationResult(
-                ok=False,
-                error="O subject deve carregar exatamente uma chave Jira real.",
-            )
+    # Chave Jira nao e' mais exigida (padrao thood/segtools). `require_issue_key` segue
+    # aceito para nao quebrar chamadores (hooks, Taskfile, CI), mas nao cobra nada.
+    del require_issue_key
 
     return ValidationResult(ok=True)
 
