@@ -136,18 +136,9 @@ fi
 
 # ----------------------------------------------------------------------------------------
 function setup_prompt {
-	if [[ "${DOTFILES_BOOTSTRAP_ASSUME_POLO:-}" == "1" ]]; then
-		return 0
-	fi
 	echo "Starting up dotfiles bootstrap (nix flavored)"
 	echo "This script will override some of your home files"
-	echo "If you are okay with that complete the sentence below, ALL CAPS please..."
-
-	read -r -p "MARCO " answer
-	if [ "$answer" != "polo" ]; then
-		echo "At least you have chicken 🐔"
-		return 1
-	fi
+	echo "Iniciar o bootstrap ja e a confirmacao; seguindo sem prompt."
 }
 
 # --------------------------------------------------------------------
@@ -238,6 +229,31 @@ function setup_fonts {
 # ====================================================================
 # General Function: Symlink Setup
 # ====================================================================
+# Cria/atualiza um link de forma segura: nunca sobrescreve nem apaga
+# um arquivo/pasta REAL do usuario sem antes preserva-lo num backup.
+#   _link_safe <alvo> <destino>
+_link_safe() {
+	local alvo="$1"
+	local destino="$2"
+	local backup
+
+	if [ -L "$destino" ]; then
+		if [ "$(readlink -f "$destino")" = "$(readlink -f "$alvo")" ]; then
+			return 0
+		fi
+		ln -sfn "$alvo" "$destino"
+		return 0
+	fi
+
+	if [ -e "$destino" ]; then
+		backup="${destino}.dotfiles-prelink-$(date +%Y%m%d%H%M%S)"
+		mv "$destino" "$backup" || return 1
+		echo "Aviso: '$destino' era um caminho real; movido para '$backup' antes de criar o link."
+	fi
+
+	ln -sfn "$alvo" "$destino"
+}
+
 function setProfileSymlinks {
 
 	# unset previous vars
@@ -254,66 +270,56 @@ function setProfileSymlinks {
 	export TEMP_USER_HOME
 
 	# ---------------------------------------------------------------
-	# remove previous root dotfile dirs symlinks
+	# cleanup de link legado do repo (nao apaga pasta real)
 	# ---------------------------------------------------------------
-	rm -rf ~/.ssh
-	rm -rf ~/.oh-my-posh
-	rm -rf ~/.assets
-	rm -rf ~/.sops
-	rm -rf ~/.config/Code/User
-	rm -rf ~/.config/git
-	rm -rf ~/.secrets
-	if [ -L ~/.git ] && [ "$(readlink ~/.git)" = "$DOTFILES_REPO_ROOT/app/df/git" ]; then
-		rm -f ~/.git
-	fi
 	if [ -L ~/.git ] && [ "$(readlink ~/.git)" = "$DOTFILES_REPO_ROOT/app/df/git" ]; then
 		rm -f ~/.git
 	fi
 
 	# ---------------------------------------------------------------
-	# symlink dotfiles
+	# symlink dotfiles (nunca destroi caminho real: faz backup antes)
 	# ---------------------------------------------------------------
 
 	# dotfiles root directories
-	ln -sfn "$DOTFILES_REPO_ROOT/app/df/ssh" ~/.ssh
-	ln -sfn "$DOTFILES_REPO_ROOT/app/df/assets" ~/.assets
-	ln -sfn "$DOTFILES_REPO_ROOT/app/df/config/atuin" ~/.config/atuin
-	ln -sfn "$DOTFILES_REPO_ROOT/app/df/secrets" ~/.secrets
-	ln -sfn "$DOTFILES_REPO_ROOT/app/df/git" ~/.config/git
+	_link_safe "$DOTFILES_REPO_ROOT/app/df/ssh" ~/.ssh
+	_link_safe "$DOTFILES_REPO_ROOT/app/df/assets" ~/.assets
+	_link_safe "$DOTFILES_REPO_ROOT/app/df/config/atuin" ~/.config/atuin
+	_link_safe "$DOTFILES_REPO_ROOT/app/df/secrets" ~/.secrets
+	_link_safe "$DOTFILES_REPO_ROOT/app/df/git" ~/.config/git
 
 	# vscode
 	mkdir -p ~/.config/Code
-	ln -sfn "$DOTFILES_REPO_ROOT/app/df/vscode" ~/.config/Code/User
+	_link_safe "$DOTFILES_REPO_ROOT/app/df/vscode" ~/.config/Code/User
 
 	# oh-my-posh
-	ln -sfn "$DOTFILES_REPO_ROOT/app/df/oh-my-posh" ~/.oh-my-posh
+	_link_safe "$DOTFILES_REPO_ROOT/app/df/oh-my-posh" ~/.oh-my-posh
 
 	# dotfile root files
-	ln -sf "$DOTFILES_REPO_ROOT/app/df/.editorconfig" ~/.editorconfig
-	ln -sf "$DOTFILES_REPO_ROOT/app/df/git/.gitconfig" ~/.gitconfig
+	_link_safe "$DOTFILES_REPO_ROOT/app/df/.editorconfig" ~/.editorconfig
+	_link_safe "$DOTFILES_REPO_ROOT/app/df/git/.gitconfig" ~/.gitconfig
 	#ln -f ~/dotfiles/app/df/git/.gitconfig.local.sample ~/.gitconfig.local.sample
 
 	# multi platform shell .aliases
-	ln -sf "$DOTFILES_REPO_ROOT/app/df/.aliases" ~/.aliases
+	_link_safe "$DOTFILES_REPO_ROOT/app/df/.aliases" ~/.aliases
 
 	# bash
-	ln -sf "$DOTFILES_REPO_ROOT/app/df/bash/.bash_logout" ~/.bash_logout
-	ln -sf "$DOTFILES_REPO_ROOT/app/df/bash/.bashrc" ~/.bashrc
-	ln -sf "$DOTFILES_REPO_ROOT/app/df/bash/.profile" ~/.profile
-	ln -sf "$DOTFILES_REPO_ROOT/app/df/bash/.blerc" ~/.blerc
+	_link_safe "$DOTFILES_REPO_ROOT/app/df/bash/.bash_logout" ~/.bash_logout
+	_link_safe "$DOTFILES_REPO_ROOT/app/df/bash/.bashrc" ~/.bashrc
+	_link_safe "$DOTFILES_REPO_ROOT/app/df/bash/.profile" ~/.profile
+	_link_safe "$DOTFILES_REPO_ROOT/app/df/bash/.blerc" ~/.blerc
 
 	# zsh
-	ln -sf "$DOTFILES_REPO_ROOT/app/df/zsh/.zshrc" ~/.zshrc
-	ln -sf "$DOTFILES_REPO_ROOT/app/df/zsh/.zprofile" ~/.zprofile
-	ln -sf "$DOTFILES_REPO_ROOT/app/df/zsh/.zshenv" ~/.zshenv
+	_link_safe "$DOTFILES_REPO_ROOT/app/df/zsh/.zshrc" ~/.zshrc
+	_link_safe "$DOTFILES_REPO_ROOT/app/df/zsh/.zprofile" ~/.zprofile
+	_link_safe "$DOTFILES_REPO_ROOT/app/df/zsh/.zshenv" ~/.zshenv
 
 	# If is Windows WSL and onedrive installed
 	# set useful profile aliases to common dirs
 	if [ -d "$ONEDRIVE_ROOT" ]; then
 		mkdir -p "$ONEDRIVE_CLIENTS_DIR" "$ONEDRIVE_PROJECTS_DIR" >/dev/null 2>&1 || true
-		ln -sf "$ONEDRIVE_ROOT" ~/onedrive
-		ln -sf "$ONEDRIVE_PROJECTS_DIR" ~/projects
-		ln -sf "$ONEDRIVE_CLIENTS_DIR" ~/clients
+		_link_safe "$ONEDRIVE_ROOT" ~/onedrive
+		_link_safe "$ONEDRIVE_PROJECTS_DIR" ~/projects
+		_link_safe "$ONEDRIVE_CLIENTS_DIR" ~/clients
 	else
 		echo "Aviso: OneDrive root nao encontrado em '$ONEDRIVE_ROOT'. Links ~/onedrive ~/clients ~/projects foram pulados."
 	fi
@@ -499,8 +505,11 @@ EOF
 	export DOTFILES_RUNTIME_ENV_FILE="$runtime_file"
 
 	# Remove legacy plaintext exports from startup files.
+	# NUNCA usar sed -i em symlink: GNU sed substitui o link por arquivo regular
+	# (quebrando o link para os dotfiles). Arquivo inexistente tambem e pulado.
 	for _f in "$HOME/.profile" "$HOME/.bashrc"; do
-		[ -f "$_f" ] || touch "$_f"
+		[ -L "$_f" ] && continue
+		[ -f "$_f" ] || continue
 		sed -i '/^export OP_SERVICE_ACCOUNT_TOKEN=/d' "$_f"
 		sed -i '/^export GH_TOKEN=/d' "$_f"
 		sed -i '/^export GITHUB_TOKEN=/d' "$_f"
