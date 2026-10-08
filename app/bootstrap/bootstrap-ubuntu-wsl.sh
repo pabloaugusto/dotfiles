@@ -499,7 +499,16 @@ ageKeyFileExpectedRecipient() {
 }
 
 # Grava a chave (lida de SOPS_AGE_KEY em memoria) no arquivo 600/700.
+# Ref (nunca o conteudo) da chave age: config > default. Nunca vem do template.
+_age_key_ref() {
+	local cfg="$DOTFILES_REPO_ROOT/app/bootstrap/user-config.yaml" ref=""
+	[[ -f "$cfg" ]] && ref="$(_yaml_get "$cfg" "secrets.age_key_ref")"
+	printf '%s' "${ref:-op://secrets/dotfiles/age/age.key}"
+}
+
 materializeAgeKeyFile() {
+	# Override explicito (testes/servidor) por DOTFILES_AGE_KEY_REF; nunca do cache.
+	SOPS_AGE_KEY_REF="${DOTFILES_AGE_KEY_REF:-$(_age_key_ref)}"
 	local target dir
 
 	target="$(ageKeyFilePath)"

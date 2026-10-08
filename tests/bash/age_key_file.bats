@@ -81,7 +81,7 @@ load_age_functions() {
 }
 
 @test "materializa a chave vinda do op read em arquivo 600 e exporta apenas SOPS_AGE_KEY_FILE" {
-	export SOPS_AGE_KEY_REF="op://vault/item/age-key"
+	export DOTFILES_AGE_KEY_REF="op://vault/item/age-key"
 	# Sem 'run': o bats executa 'run' em subshell, e as mutacoes de ambiente
 	# (export SOPS_AGE_KEY_FILE / unset SOPS_AGE_KEY) nao voltariam para ca.
 	rc=0
@@ -107,7 +107,7 @@ load_age_functions() {
 	[ "$DECOY_KEY" != "$TEST_KEY" ]
 
 	export SOPS_AGE_KEY="$DECOY_KEY"
-	export SOPS_AGE_KEY_REF="op://vault/item/age-key"
+	export DOTFILES_AGE_KEY_REF="op://vault/item/age-key"
 	run materializeAgeKeyFile
 	[ "$status" -eq 0 ]
 
@@ -123,7 +123,7 @@ load_age_functions() {
 
 @test "SOPS_AGE_KEY_REF sem op:// falha sem ecoar o valor" {
 	# Valor nao-ref: pode ser o proprio segredo; nao pode aparecer na saida.
-	export SOPS_AGE_KEY_REF="AGE-SECRET-KEY-1NAOEOUMAREF"
+	export DOTFILES_AGE_KEY_REF="AGE-SECRET-KEY-1NAOEOUMAREF"
 	run materializeAgeKeyFile
 	[ "$status" -ne 0 ]
 	[[ "$output" != *"AGE-SECRET-KEY-1NAOEOUMAREF"* ]]
@@ -132,7 +132,7 @@ load_age_functions() {
 
 @test "op read falhando nao ecoa o stderr do op nem a chave" {
 	use_op_fail
-	export SOPS_AGE_KEY_REF="op://vault/item/age-key"
+	export DOTFILES_AGE_KEY_REF="op://vault/item/age-key"
 	run materializeAgeKeyFile
 	[ "$status" -ne 0 ]
 	[[ "$output" != *"falha proposital ao ler a ref"* ]]
@@ -143,14 +143,14 @@ load_age_functions() {
 }
 
 @test "validateAgeKeyFile aceita o arquivo cuja chave casa com o recipient de referencia" {
-	export SOPS_AGE_KEY_REF="op://vault/item/age-key"
+	export DOTFILES_AGE_KEY_REF="op://vault/item/age-key"
 	materializeAgeKeyFile
 	run validateAgeKeyFile
 	[ "$status" -eq 0 ]
 }
 
 @test "validateAgeKeyFile falha quando o recipient diverge, sem imprimir a chave" {
-	export SOPS_AGE_KEY_REF="op://vault/item/age-key"
+	export DOTFILES_AGE_KEY_REF="op://vault/item/age-key"
 	materializeAgeKeyFile
 
 	# Referencia aponta para outro recipient (chave gerada na hora, distinta).
@@ -165,7 +165,7 @@ load_age_functions() {
 }
 
 @test "persistSopsAgeEnv grava apenas o caminho no runtime.env" {
-	export SOPS_AGE_KEY_REF="op://vault/item/age-key"
+	export DOTFILES_AGE_KEY_REF="op://vault/item/age-key"
 	run persistSopsAgeEnv
 	[ "$status" -eq 0 ]
 
@@ -181,7 +181,7 @@ load_age_functions() {
 }
 
 @test "persistSopsAgeEnv remove residuo de SOPS_AGE_KEY de arquivos de startup" {
-	export SOPS_AGE_KEY_REF="op://vault/item/age-key"
+	export DOTFILES_AGE_KEY_REF="op://vault/item/age-key"
 	printf 'export SOPS_AGE_KEY="AGE-SECRET-KEY-1RESIDUO"\n' > "$HOME/.bashrc"
 	printf 'export SOPS_AGE_KEY="AGE-SECRET-KEY-1RESIDUO"\n' > "$HOME/.profile"
 
