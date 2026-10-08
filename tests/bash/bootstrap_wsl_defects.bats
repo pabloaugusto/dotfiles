@@ -33,17 +33,15 @@ setup() {
 # formas de declaracao ("nome() {" e "function nome {") precisam casar.
 extract_fn() {
   # _yaml_get deixou de viver no bootstrap: o SSOT agora e' o .inc compartilhado
-  # com o check-env.sh (app/df/bash/.inc/yaml-get.sh). Se a funcao nao estiver
-  # no script, extrai de la.
-  local from="$SCRIPT"
-  if ! awk -v n="$1" 'index($0, n "() {") == 1 { f = 1 } END { exit !f }' "$from"; then
-    from="$REPO_ROOT/app/df/bash/.inc/yaml-get.sh"
-  fi
+  # com o check-env.sh (app/df/bash/.inc/yaml-get.sh). O awk varre os dois
+  # arquivos NA ORDEM e o `exit` no fim do corpo garante que o bootstrap vence:
+  # nada de pre-selecionar o arquivo com um predicado proprio (foi essa
+  # duplicacao que deixou `function setup_fonts {` de fora).
   awk -v n="$1" '
     index($0, n "() {") == 1 || $0 == "function " n " {" { f = 1 }
     f { print }
     f && /^\}$/ { exit }
-  ' "$from"
+  ' "$SCRIPT" "$REPO_ROOT/app/df/bash/.inc/yaml-get.sh"
 }
 
 # ---------------------------------------------------------------- _yaml_get
