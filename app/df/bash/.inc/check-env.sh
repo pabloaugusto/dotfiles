@@ -68,11 +68,26 @@ checkEnv() {
     printf '%s %s - %s\n' "$tag" "$item" "$detail"
   }
 
+  # Prefixo de caminho que representa "binario fornecido pelo Windows": o WSL
+  # monta os drives em /mnt/c, /mnt/d, ... e o PATH do Windows continua visivel
+  # no Linux (appendWindowsPath padrao). Um comando exigido que so resolve para
+  # /mnt/* existe apenas do lado Windows -- o bootstrap Linux nao o instalou.
+  # Variavel para permitir teste com PATH simulado.
+  local _windows_path_prefix="${DOTFILES_WINDOWS_PATH_PREFIX:-/mnt}"
+
   # Verifies command existence and appends check result.
   _expect_cmd() {
     local cmd="$1"
+    local cmd_path=""
     if command -v "$cmd" >/dev/null 2>&1; then
-      _add_result "success" "Command: $cmd" "Disponivel em $(command -v "$cmd")" ""
+      cmd_path="$(command -v "$cmd")"
+      case "$cmd_path" in
+        "$_windows_path_prefix"/*)
+          _add_result "fail" "Command: $cmd" "instalado so no Windows ($cmd_path); bootstrap nao instalou no Linux." "Rode 'bash app/bootstrap/bootstrap-ubuntu-wsl.sh' (install_software) para instalar $cmd no Linux."
+          return 1
+          ;;
+      esac
+      _add_result "success" "Command: $cmd" "Disponivel em $cmd_path" ""
       return 0
     fi
     _add_result "fail" "Command: $cmd" "Nao encontrado no PATH." "Rode 'bash app/bootstrap/bootstrap-ubuntu-wsl.sh' (install_software) ou instale via brew e recarregue o shell."
@@ -115,11 +130,13 @@ checkEnv() {
   # Base runtime commands expected by dotfiles bootstrap + auth flow.
   # Single source of truth per OS: mirrors the packages installed by
   # app/bootstrap/bootstrap-ubuntu-wsl.sh (install_software).
+  # Sem node/npm/yarn/pnpm: o dotfiles nao usa Node e o bootstrap nao instala
+  # esses gerenciadores no Linux.
   local _expected_cmds=(
     op gh git ssh sops age task uv oh-my-posh
     zsh fastfetch ansible terraform cloudflared direnv
     flux talosctl helm helmfile kubectl kustomize kubeconform
-    sponge talhelper stern yq jq node npm yarn pnpm psql
+    sponge talhelper stern yq jq psql bats
     dos2unix atuin
   )
   for _cmd in "${_expected_cmds[@]}"; do

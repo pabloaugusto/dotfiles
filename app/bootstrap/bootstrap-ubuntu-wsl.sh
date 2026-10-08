@@ -207,11 +207,8 @@ function install_software {
 	install_counted brew stern
 	install_counted brew yq
 	install_counted brew jq
-	install_counted brew node@22 node
-	install_counted brew npm  	# package manager
-	install_counted brew yarn 	# package manager
-	install_counted brew pnpm 	# package manager
 	install_counted apt postgresql-client psql	#	pgsql - Postgre CLI
+	install_counted apt bats	# harness de testes bash (tests/bash/*.bats)
 	install_counted apt dos2unix	# tool to fix 'error in libcrypto' ssh key on windows wsl ubuntu
 	install_counted brew atuin	# shell hystory command sync database across computers
 

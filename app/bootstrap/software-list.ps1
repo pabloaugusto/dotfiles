@@ -117,8 +117,6 @@ $softwareList = @(
 
 
 
-	# Yarn.Yarn
-
 	# 'git',
 	# 'gh', #github CLI
 	# 'vscode',
@@ -131,7 +129,6 @@ $softwareList = @(
 	# 'php',
 	# 'snoop', #windows wpf spy as tree (inspect/debug web browser render and actions as tree)
 	# 'postman',
-	# #'yarn',
 	# #'docker-desktop',
 	# #'terraform',
 	# #'kubernetes-helm',
@@ -139,7 +136,6 @@ $softwareList = @(
 	# #'azure-cli',
 	# #'tortoisegit',
 	# #'filezilla',
-	# #'nodejs',
 	# #'winmerge',
 	# #'graphviz', #needed for Terraform visualizer and VS Code Graphviz preview
 

@@ -22,9 +22,16 @@ Describe 'checkEnv' {
 		$source = Get-Content -Raw (Join-Path $repoRoot 'app\df\powershell\_functions.ps1')
 		foreach ($bin in 'op', 'gh', 'glab', 'git', 'ssh', 'sops', 'age', 'task', 'uv',
 			'oh-my-posh', 'jq', 'yq', 'kubectl', 'kustomize', 'kubeconform', 'terraform',
-			'helm', 'flux', 'cloudflared', 'direnv', 'node', 'python') {
+			'helm', 'flux', 'cloudflared', 'direnv', 'python') {
 			$source | Should Match ([regex]::Escape("'$bin'"))
 		}
+	}
+
+	It 'nao exige node na lista de binarios esperados' {
+		# O dotfiles nao usa Node: exigir node no check quebraria o bootstrap
+		# em maquinas sem Node instalado.
+		$source = Get-Content -Raw (Join-Path $repoRoot 'app\df\powershell\_functions.ps1')
+		$source | Should Not Match '''node'''
 	}
 
 	It 'tabela final usa OK/FALHA por item' {

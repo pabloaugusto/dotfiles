@@ -1786,14 +1786,15 @@ function checkEnv {
 
 	# 1) Expected binaries: single source of truth for Windows. Os nomes abaixo
 	# saem das entradas de CLI de app/bootstrap/software-list.ps1 (op = 1Password
-	# CLI, task = go-task, oh-my-posh, glab = GitLab cli, node = NodeJS,
-	# python = python 3.12, ssh = OpenSSH) + os do fluxo de auth/segredos.
+	# CLI, task = go-task, oh-my-posh, glab = GitLab cli, python = python 3.12,
+	# ssh = OpenSSH) + os do fluxo de auth/segredos.
+	# Sem node: o dotfiles nao usa Node e o bootstrap nao o instala.
 	# Ids winget de GUI (1Password, VsCode, Windows Terminal, Postman...) ficam
 	# de fora de proposito: nao sao binarios de PATH.
 	$expectedCommands = @(
 		'op', 'gh', 'glab', 'git', 'ssh', 'sops', 'age', 'task', 'uv', 'oh-my-posh',
 		'jq', 'yq', 'kubectl', 'kustomize', 'kubeconform', 'terraform', 'helm',
-		'flux', 'cloudflared', 'direnv', 'node', 'python'
+		'flux', 'cloudflared', 'direnv', 'python'
 	)
 	$expectedCommands | ForEach-Object { Add-CommandCheck $_ }
 

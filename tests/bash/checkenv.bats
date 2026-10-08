@@ -121,6 +121,66 @@ STUB
   [[ "$output" == *"Summary: ok="* ]]
 }
 
+# --- Ferramentas exigidas: caminho Linux, nao caminho do Windows -------------
+#
+# O PATH do Windows continua visivel no WSL (appendWindowsPath padrao). Se
+# `command -v` resolve um comando exigido para /mnt/*, o binario so existe do
+# lado Windows: o bootstrap Linux nao instalou nada. O mount /mnt e simulado
+# por DOTFILES_WINDOWS_PATH_PREFIX apontando para um diretorio temporario.
+
+# Cria um "mount do Windows" simulado com um stub de kubeconform.
+_fake_windows_mount() {
+  FAKE_MNT="$BATS_TEST_TMPDIR/win-mnt"
+  mkdir -p "$FAKE_MNT"
+  printf '#!/usr/bin/env bash\nexit 0\n' >"$FAKE_MNT/kubeconform"
+  chmod +x "$FAKE_MNT/kubeconform"
+  export FAKE_MNT
+  export PATH="$FAKE_MNT:$PATH"
+}
+
+@test "checkEnv marca FALHA quando comando exigido resolve so no Windows (/mnt)" {
+  cd "$PROBE_REPO"
+  _fake_windows_mount
+  export DOTFILES_WINDOWS_PATH_PREFIX="$FAKE_MNT"
+
+  source "$REPO_ROOT/app/df/bash/.inc/check-env.sh"
+  run checkEnv
+  [[ "$output" == *"[FALHA] Command: kubeconform"* ]]
+  [[ "$output" == *"instalado so no Windows"* ]]
+  [[ "$output" != *"[OK] Command: kubeconform"* ]]
+  [ "$status" -ne 0 ]
+}
+
+@test "checkEnv marca OK quando o mesmo comando resolve em caminho Linux" {
+  cd "$PROBE_REPO"
+  _fake_windows_mount
+  # Prefixo que nao casa: o binario esta em caminho Linux, nao no mount.
+  export DOTFILES_WINDOWS_PATH_PREFIX="$BATS_TEST_TMPDIR/nao-e-mount"
+
+  source "$REPO_ROOT/app/df/bash/.inc/check-env.sh"
+  run checkEnv
+  [[ "$output" == *"[OK] Command: kubeconform"* ]]
+  [[ "$output" != *"[FALHA] Command: kubeconform"* ]]
+}
+
+@test "checkEnv exige bats e nao exige node/npm/yarn/pnpm" {
+  local expected_block
+  expected_block="$(sed -n '/^  local _expected_cmds=(/,/^  )/p' "$REPO_ROOT/app/df/bash/.inc/check-env.sh")"
+  [ -n "$expected_block" ]
+
+  [[ "$expected_block" == *"bats"* ]]
+  [[ "$expected_block" != *"node"* ]]
+  [[ "$expected_block" != *"npm"* ]]
+  [[ "$expected_block" != *"yarn"* ]]
+  [[ "$expected_block" != *"pnpm"* ]]
+}
+
+@test "bootstrap-ubuntu-wsl.sh instala bats e nao instala node/npm/yarn/pnpm" {
+  local bootstrap="$REPO_ROOT/app/bootstrap/bootstrap-ubuntu-wsl.sh"
+  ! grep -E 'install_counted[^#]*\b(node|npm|yarn|pnpm)\b' "$bootstrap"
+  grep -E 'install_counted (apt|brew) bats' "$bootstrap"
+}
+
 # --- Gate do probe de assinatura (nao pode ser rebaixado para warning) --------
 #
 # Regra: `warning` SO quando o agente exige desbloqueio humano (agente sem
