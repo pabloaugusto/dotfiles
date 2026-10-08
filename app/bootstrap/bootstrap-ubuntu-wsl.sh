@@ -881,9 +881,17 @@ configureGitSigningKey() {
 
 # Default refs do robo. Ficam aqui (e nao espalhadas) para o bootstrap funcionar
 # em maquinas cujo user-config.yaml ainda nao tem a secao `automation`.
-daneel_default_signing_key_ref() { printf 'op://secrets/daneel/signing/private_key'; }
-daneel_default_op_token_ref() { printf 'op://secrets/daneel/1password/service-account'; }
-daneel_default_allowed_signers_ref() { printf 'op://secrets/dotfiles/git/allowed_signers'; }
+daneel_default_signing_key_ref() {
+	printf 'op://secrets/daneel/signing/private_key'
+}
+
+daneel_default_op_token_ref() {
+	printf 'op://secrets/daneel/1password/service-account'
+}
+
+daneel_default_allowed_signers_ref() {
+	printf 'op://secrets/dotfiles/git/allowed_signers'
+}
 
 _daneel_config_value() {
 	local cfg="$DOTFILES_REPO_ROOT/app/bootstrap/user-config.yaml"
