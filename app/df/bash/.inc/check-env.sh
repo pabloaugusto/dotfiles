@@ -146,35 +146,37 @@ checkEnv() {
   done
 
   # 1Password session + reference readability checks.
+  # Quando o shell nao tem sessao (correto: nao exportamos segredo), usamos o
+  # token da service account `daneel` do arquivo 600 SO para esta sessao de
+  # checagem e o removemos do ambiente antes do check de vazamento no final.
+  local _op_token_from_file=0
   if command -v op >/dev/null 2>&1; then
     local op_ok=0
     if _run_with_timeout 8 op whoami >/dev/null 2>&1; then
       op_ok=1
-    elif [ -f "$HOME/.env.local.sops" ] && command -v sops >/dev/null 2>&1; then
-      local _tmp_env token_line token_value
-      _tmp_env="$(mktemp)"
-      if sops -d "$HOME/.env.local.sops" >"$_tmp_env" 2>/dev/null; then
-        token_line="$(grep -E '^(export[[:space:]]+)?OP_SERVICE_ACCOUNT_TOKEN=' "$_tmp_env" | tail -n1 || true)"
-        token_value="${token_line#*=}"
-        token_value="${token_value%\"}"
-        token_value="${token_value#\"}"
-        token_value="${token_value%\'}"
-        token_value="${token_value#\'}"
-        token_value="$(printf '%s' "$token_value" | tr -d '\r')"
-        if [ -n "$token_value" ]; then
-          export OP_SERVICE_ACCOUNT_TOKEN="$token_value"
+    else
+      local _token_file="" _sa_token_value=""
+      if command -v dotfiles_automation_dir >/dev/null 2>&1; then
+        _token_file="$(dotfiles_automation_dir)/op-sa.token"
+      fi
+      [ -n "$_token_file" ] || _token_file="$HOME/.config/tars/automation/op-sa.token"
+      if [ -s "$_token_file" ]; then
+        _sa_token_value="$(tr -d '\r\n' <"$_token_file")"
+        if [ -n "$_sa_token_value" ]; then
+          export OP_SERVICE_ACCOUNT_TOKEN="$_sa_token_value"
+          _op_token_from_file=1
           if _run_with_timeout 8 op whoami >/dev/null 2>&1; then
             op_ok=1
           fi
         fi
+        unset _sa_token_value
       fi
-      rm -f "$_tmp_env"
     fi
 
     if [ "$op_ok" -eq 1 ]; then
       _add_result "success" "1Password CLI session" "op whoami executou com sucesso." ""
     else
-      _add_result "fail" "1Password CLI session" "op whoami falhou (inclusive apos 1 retry)." "Garanta OP_SERVICE_ACCOUNT_TOKEN valido e execute 'op whoami'."
+      _add_result "fail" "1Password CLI session" "op whoami falhou (inclusive apos 1 retry)." "Rode o bootstrap para materializar op-sa.token do daneel ou autentique o op com uma sessao valida."
     fi
 
     local refs_file=""
@@ -280,27 +282,31 @@ checkEnv() {
 
     _add_result "success" "Git signing mode" "mode=$resolved_mode." ""
 
-    # Modo automatizado por maquina: par ed25519 local (`automation-<host>`),
-    # sem 1Password. Exige arquivo presente, permissao 600 e assinatura de um
-    # blob de teste com `ssh-keygen -Y sign`. Quando o override de env ainda nao
-    # foi exportado (ex.: checkEnv fora do shell interativo), coerimos aqui as
-    # variaveis usadas pelos checks abaixo para refletir a chave de automacao.
-    if [ "$resolved_mode" = "automation" ]; then
-      local _auto_key="" _auto_pub="" _auto_perms=""
-      if command -v dotfiles_automation_signing_key >/dev/null 2>&1; then
-        _auto_key="$(dotfiles_automation_signing_key)"
-      fi
-      _auto_pub="${_auto_key}.pub"
+    # Modo automatizado: identidade UNICA `daneel`, materializada pelo bootstrap
+    # a partir do 1Password. Exige chave presente, permissao 600 e assinatura de
+    # um blob de teste com `ssh-keygen -Y sign`. Quando o override de env ainda
+    # nao foi exportado (ex.: checkEnv fora do shell interativo), coerimos aqui
+    # as variaveis usadas pelos checks abaixo para refletir a chave do daneel.
+    local _auto_dir="" _auto_key="" _auto_pub=""
+    if command -v dotfiles_automation_signing_key >/dev/null 2>&1; then
+      _auto_key="$(dotfiles_automation_signing_key)"
+    fi
+    if command -v dotfiles_automation_dir >/dev/null 2>&1; then
+      _auto_dir="$(dotfiles_automation_dir)"
+    fi
+    _auto_pub="${_auto_key}.pub"
 
+    if [ "$resolved_mode" = "automation" ]; then
+      local _auto_perms=""
       if [ -n "$_auto_key" ] && [ -f "$_auto_key" ]; then
         _auto_perms="$(stat -c '%a' "$_auto_key" 2>/dev/null || true)"
         if [ "$_auto_perms" = "600" ]; then
-          _add_result "success" "Automation signing key file" "chave de automacao presente e 600." ""
+          _add_result "success" "Automation signing key file" "chave do daneel presente e 600." ""
         else
-          _add_result "fail" "Automation signing key file" "chave de automacao com permissao '${_auto_perms:-?}' (esperado 600)." "Rode: chmod 600 $_auto_key"
+          _add_result "fail" "Automation signing key file" "chave do daneel com permissao '${_auto_perms:-?}' (esperado 600)." "Rode: chmod 600 $_auto_key"
         fi
       else
-        _add_result "fail" "Automation signing key file" "chave de automacao ausente em ${_auto_key:-<path desconhecido>}." "Rode o bootstrap (ensureAutomationSigningKey) para gerar o par por maquina."
+        _add_result "fail" "Automation signing key file" "chave do daneel ausente em ${_auto_key:-<path desconhecido>}." "Rode o bootstrap (ensureDaneelIdentity) com o item do 1Password criado."
       fi
 
       if [ -f "$_auto_pub" ] && command -v ssh-keygen >/dev/null 2>&1; then
@@ -315,11 +321,11 @@ checkEnv() {
             </dev/null >"$_auto_tmp/sign.out" 2>&1
           _auto_rc=$?
           if [ $_auto_rc -eq 0 ] && [ -f "$_auto_tmp/payload.sig" ]; then
-            _add_result "success" "Automation signing probe" "ssh-keygen -Y sign assinou o blob de teste com a chave de automacao." ""
+            _add_result "success" "Automation signing probe" "ssh-keygen -Y sign assinou o blob de teste com a chave do daneel." ""
           else
             local _auto_err=""
             _auto_err="$(head -n1 "$_auto_tmp/sign.out" 2>/dev/null | tr -d '\r')"
-            _add_result "fail" "Automation signing probe" "ssh-keygen -Y sign falhou (rc=$_auto_rc): ${_auto_err:-sem saida}." "Regenere o par com o bootstrap (remova $_auto_key e rode novamente)."
+            _add_result "fail" "Automation signing probe" "ssh-keygen -Y sign falhou (rc=$_auto_rc): ${_auto_err:-sem saida}." "Rode o bootstrap de novo para rematerializar a chave do 1Password."
           fi
           rm -rf "$_auto_tmp"
         fi
@@ -380,32 +386,34 @@ checkEnv() {
       fi
     fi
 
+    # Identidade de automacao `daneel` (unica): token da service account em
+    # arquivo 600 e allowed_signers materializado pelo bootstrap. Nada disso
+    # depende de env: o valor nunca vive no ambiente.
     if [ "$resolved_mode" = "automation" ]; then
-      local local_automation_public_key=""
-      if [ $has_automation_private_key -eq 1 ] && [ -f "${automation_private_key_path}.pub" ]; then
-        local_automation_public_key="$(awk 'NF {print; exit}' "${automation_private_key_path}.pub" | tr -s '[:space:]' ' ' | sed 's/^ //; s/ $//')"
+      local _sa_token="${_auto_dir:-}/op-sa.token"
+      if command -v dotfiles_automation_dir >/dev/null 2>&1; then
+        _sa_token="$(dotfiles_automation_dir)/op-sa.token"
+      fi
+      if [ -s "$_sa_token" ]; then
+        local _sa_perms=""
+        _sa_perms="$(stat -c '%a' "$_sa_token" 2>/dev/null || true)"
+        if [ -z "$_sa_perms" ] || [ "$_sa_perms" = "600" ]; then
+          _add_result "success" "Automation SA token file" "op-sa.token presente e nao vazio." ""
+        else
+          _add_result "fail" "Automation SA token file" "op-sa.token com permissao '${_sa_perms}' (esperado 600)." "Rode: chmod 600 $_sa_token"
+        fi
+      else
+        _add_result "fail" "Automation SA token file" "op-sa.token ausente ou vazio em $_sa_token." "Rode o bootstrap (ensureDaneelIdentity) apos criar o item no 1Password."
       fi
 
-      if [ -z "$automation_key_ref" ]; then
-        if [ -n "$local_automation_public_key" ] && printf '%s' "$local_automation_public_key" | grep -q '^ssh-'; then
-          _add_result "success" "Automation signing key ref" "A worktree esta usando o par de chaves tecnico local; a ref publica e opcional neste modo." ""
-        else
-          _add_result "fail" "Automation signing key ref" "Nem dotfiles.signing.automationPublicKeyRef nem a chave publica local da worktree foram encontrados." "Aplique task git:signing:mode:automation apos provisionar o par tecnico local ou configurar a ref publica."
-        fi
-      elif ! command -v op >/dev/null 2>&1; then
-        _add_result "fail" "Automation signing key ref" "op nao esta disponivel para resolver $automation_key_ref." "Instale/autentique o 1Password CLI antes de usar o signer tecnico."
+      local _allowed_signers="${_auto_allowed_signers:-}"
+      if [ -z "$_allowed_signers" ] && command -v dotfiles_automation_allowed_signers >/dev/null 2>&1; then
+        _allowed_signers="$(dotfiles_automation_allowed_signers)"
+      fi
+      if [ -n "$_allowed_signers" ] && [ -f "$_allowed_signers" ]; then
+        _add_result "success" "allowed_signers file" "presente em $_allowed_signers." ""
       else
-        local automation_key_value automation_key_normalized signing_key_normalized
-        automation_key_value="$(op read "$automation_key_ref" 2>/dev/null || true)"
-        automation_key_normalized="$(printf '%s' "$automation_key_value" | awk 'NF {print; exit}' | tr -s '[:space:]' ' ' | sed 's/^ //; s/ $//')"
-        signing_key_normalized="$(printf '%s' "$signing_key" | awk 'NF {print; exit}' | tr -s '[:space:]' ' ' | sed 's/^ //; s/ $//')"
-        if [ -z "$automation_key_normalized" ] || ! printf '%s' "$automation_key_normalized" | grep -q '^ssh-'; then
-          _add_result "fail" "Automation signing key ref" "$automation_key_ref nao retornou uma chave publica SSH valida." "Corrija a ref no 1Password ou rotacione a chave tecnica."
-        elif [ "$automation_key_normalized" = "$signing_key_normalized" ] || [ "$automation_key_normalized" = "$local_automation_public_key" ]; then
-          _add_result "success" "Automation signing key ref" "$automation_key_ref confere com user.signingkey da worktree." ""
-        else
-          _add_result "fail" "Automation signing key ref" "$automation_key_ref nao confere com user.signingkey atual." "Rode novamente task git:signing:mode:automation para sincronizar a worktree."
-        fi
+        _add_result "fail" "allowed_signers file" "allowed_signers ausente (${_allowed_signers:-<path desconhecido>})." "Rode o bootstrap (ensureDaneelIdentity) para materializar a ref do 1Password."
       fi
     fi
 
@@ -444,9 +452,25 @@ checkEnv() {
     _add_result "fail" "SOPS age key file" "Nenhum arquivo de chave age valido (SOPS_AGE_KEY_FILE)." "Configure SOPS_AGE_KEY_FILE apontando para o arquivo 600 da chave (ex.: ~/.config/sops/age/keys.txt)."
   fi
 
-  # Vazamento: conteudo da chave no ambiente.
-  if [ -n "${SOPS_AGE_KEY:-}" ]; then
-    _add_result "warning" "SOPS age key leaked in env" "SOPS_AGE_KEY presente no ambiente (vazamento)." "Remova SOPS_AGE_KEY do ambiente/runtime.env e use apenas SOPS_AGE_KEY_FILE."
+  # Encerra a sessao emprestada do token do daneel antes de medir vazamento.
+  if [ "${_op_token_from_file:-0}" = "1" ]; then
+    unset OP_SERVICE_ACCOUNT_TOKEN
+  fi
+
+  # Vazamento: NENHUM segredo deve viver no ambiente (so NOMES na mensagem). O
+  # shell nao exporta token de service account nem token do GitHub: o 1Password e'
+  # lido por arquivo/ref e o `gh` usa a sessao propria do `gh auth`.
+  local _leaked_vars=""
+  local _leak_var=""
+  for _leak_var in OP_SERVICE_ACCOUNT_TOKEN OP_CONNECT_HOST OP_CONNECT_TOKEN GH_TOKEN GITHUB_TOKEN SOPS_AGE_KEY; do
+    if [ -n "${!_leak_var:-}" ]; then
+      _leaked_vars="${_leaked_vars:+$_leaked_vars, }$_leak_var"
+    fi
+  done
+  if [ -n "$_leaked_vars" ]; then
+    _add_result "fail" "Secrets leaked in env" "variaveis de segredo presentes no ambiente: $_leaked_vars." "Remova-as do shell/perfil (o shell nao deve exportar segredo) e rode checkEnv novamente."
+  else
+    _add_result "success" "Secrets leaked in env" "nenhum token/chave de segredo no ambiente." ""
   fi
 
   # SSH identity policy + github handshake checks.

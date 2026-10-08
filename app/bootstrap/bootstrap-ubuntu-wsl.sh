@@ -1123,6 +1123,10 @@ clean_setup_vars
 # ----------------------------------------------------
 ensureUnixSshConfigLocalLink
 
+# O token do dono ficou so em memoria para as fases que precisavam do 1Password.
+# Nada de segredo no ambiente ao rodar o checkEnv final (que falha se existir).
+unset OP_SERVICE_ACCOUNT_TOKEN OP_CONNECT_HOST OP_CONNECT_TOKEN GH_TOKEN GITHUB_TOKEN
+
 echo "Running final environment health check (checkEnv)..."
 checkEnv || {
 	echo "checkEnv encontrou falhas de conformidade. Revise os itens acima."
