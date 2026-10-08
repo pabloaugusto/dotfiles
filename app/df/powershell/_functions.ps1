@@ -1573,7 +1573,16 @@ function Invoke-CheckEnvSignedCommitTest {
 	)
 
 	$tempRepo = Join-Path ([System.IO.Path]::GetTempPath()) ("checkenv-" + [guid]::NewGuid().ToString("N"))
-	$null = New-Item -Path $tempRepo -ItemType Directory -Force
+	try {
+		$null = New-Item -Path $tempRepo -ItemType Directory -Force -ErrorAction Stop
+	}
+	catch {
+		return [PSCustomObject]@{
+			Status   = 'fail'
+			Detail   = ("sem diretorio temporario para o probe de assinatura: {0}" -f $_.Exception.Message)
+			Solution = 'Verifique permissao de escrita na pasta temporaria do sistema.'
+		}
+	}
 
 	try {
 		Push-Location $tempRepo
@@ -1600,48 +1609,103 @@ function Invoke-CheckEnvSignedCommitTest {
 		Set-Content -Path '.checkenv' -Value ("checkenv {0}" -f (Get-Date -Format o)) -NoNewline
 		& git add .checkenv *> $null
 
-		$commitOutput = & git commit -S -m "checkEnv signed commit" 2>&1
-		if ($LASTEXITCODE -ne 0) {
-			$hint = if ($GitSigningMode -eq 'automation') {
-				'Corrija o gpg.ssh.program, a chave tecnica local da worktree e a configuracao do signer de automacao.'
-			}
-			else {
-				'Corrija gpg.ssh.program, user.signingkey e a disponibilidade do agent SSH do 1Password.'
-			}
+		# NUNCA rodar `git commit -S` aqui: com o signer do 1Password isso
+		# bloqueia num prompt de biometria. `ssh-keygen -Y sign` exercita o
+		# mesmo agent e falha rapido (sem tty/askpass) quando a chave precisa
+		# de desbloqueio.
+		# Gate (nao rebaixar): so e `warning` quando o agente exige desbloqueio
+		# humano (agente sem chaves listadas / 1Password bloqueado) ou timeout
+		# por prompt de aprovacao -- sempre com "requer desbloqueio" e o comando
+		# para validar. Signer ausente/irresolvivel, chave publica ilegivel, erro
+		# real de assinatura e ausencia de tmpdir sao `fail`.
+		if ([string]::IsNullOrWhiteSpace($SigningKey)) {
 			return [PSCustomObject]@{
 				Status   = 'fail'
-				Detail   = ("git commit -S failed: {0}" -f (($commitOutput | Out-String).Trim()))
-				Solution = $hint
+				Detail   = 'signer nao configurado: user.signingkey ausente, assinatura nao verificada.'
+				Solution = 'Defina ''git config --global user.signingkey "ssh-ed25519 ..."'' e rode checkEnv novamente.'
 			}
 		}
 
-		$sigOutput = (& git log --show-signature -1 2>&1 | Out-String).Trim()
-		if ($sigOutput -match 'Good "git" signature' -or $sigOutput -match 'Good SSH signature') {
+		$publicKeyPath = ''
+		if (Test-Path -Path $SigningKey -PathType Leaf) { $publicKeyPath = $SigningKey }
+		elseif (Test-Path -Path "$SigningKey.pub" -PathType Leaf) { $publicKeyPath = "$SigningKey.pub" }
+		elseif ($SigningKey -match '^ssh-') {
+			$publicKeyPath = Join-Path $tempRepo 'signing.pub'
+			Set-Content -Path $publicKeyPath -Value $SigningKey
+		}
+
+		if ([string]::IsNullOrWhiteSpace($publicKeyPath)) {
+			return [PSCustomObject]@{
+				Status   = 'fail'
+				Detail   = ("chave publica ilegivel: user.signingkey nao aponta para chave publica legivel nem para um valor ssh-ed25519 (valor: {0})." -f $SigningKey)
+				Solution = 'Ajuste user.signingkey para o caminho da chave publica ou o proprio valor ssh-ed25519 ...'
+			}
+		}
+
+		if (-not (Get-Command ssh-keygen -ErrorAction SilentlyContinue)) {
+			return [PSCustomObject]@{
+				Status   = 'fail'
+				Detail   = 'signer irresolvivel: ssh-keygen nao encontrado no PATH, assinatura nao verificada.'
+				Solution = 'Instale OpenSSH (ssh-keygen) e rode checkEnv novamente.'
+			}
+		}
+
+		$payload = Join-Path $tempRepo 'payload'
+		Set-Content -Path $payload -Value ("checkenv {0}" -f (Get-Date -Format o)) -NoNewline
+
+		$signJob = Start-Job -ScriptBlock {
+			param ($KeyPath, $PayloadPath)
+			$env:SSH_ASKPASS_REQUIRE = 'never'
+			$env:DISPLAY = ''
+			$env:SSH_ASKPASS = ''
+			& ssh-keygen -Y sign -n git -f $KeyPath $PayloadPath 2>&1
+			exit $LASTEXITCODE
+		} -ArgumentList $publicKeyPath, $payload
+
+		$signDone = Wait-Job -Job $signJob -Timeout 10
+		if ($null -eq $signDone) {
+			Stop-Job -Job $signJob -ErrorAction SilentlyContinue
+			Remove-Job -Job $signJob -Force -ErrorAction SilentlyContinue
+			return [PSCustomObject]@{
+				Status   = 'warning'
+				Detail   = ("assinatura nao verificada (requer desbloqueio): ssh-keygen -Y sign excedeu o tempo limite. | valide com: ssh-keygen -Y sign -n git -f '{0}' <arquivo>" -f $SigningKey)
+				Solution = 'Desbloqueie a chave no agent/1Password e rode checkEnv novamente.'
+			}
+		}
+
+		$signOutput = Receive-Job -Job $signJob
+		$signOk = $signJob.State -eq 'Completed' -and (Test-Path -Path "$payload.sig" -PathType Leaf)
+		Remove-Job -Job $signJob -Force -ErrorAction SilentlyContinue
+
+		if ($signOk) {
 			return [PSCustomObject]@{
 				Status   = 'success'
-				Detail   = 'git commit -S succeeded and signature validation output is good.'
+				Detail   = 'ssh-keygen -Y sign concluiu sem prompt; o agent assinou com a chave configurada.'
 				Solution = ''
 			}
 		}
 
-		$catOutput = (& git cat-file -p HEAD 2>&1 | Out-String)
-		if ($catOutput -match '(?m)^gpgsig ') {
+		$signErr = ($signOutput | Out-String).Trim()
+		if ([string]::IsNullOrWhiteSpace($signErr)) { $signErr = 'ssh-keygen -Y sign falhou.' }
+		$probeCmd = ("ssh-keygen -Y sign -n git -f '{0}' <arquivo>" -f $SigningKey)
+
+		if ($signErr -match 'no private key found for public key|agent refused operation|refused operation|could ?n?o?t? ?(find|open) key in agent|communication with agent failed|agent_contains_key|keys? not found|no keys? (found|available)|sign_and_send_pubkey|permission denied \(publickey\)|needs? (to be )?unlock|is locked|passphrase') {
 			return [PSCustomObject]@{
-				Status   = 'success'
-				Detail   = 'git commit -S created a signed commit (gpgsig block present).'
-				Solution = ''
+				Status   = 'warning'
+				Detail   = ("assinatura nao verificada (requer desbloqueio): {0} | valide com: {1}" -f $signErr, $probeCmd)
+				Solution = if ($GitSigningMode -eq 'automation') {
+					'Desbloqueie a chave tecnica no 1Password e rode checkEnv novamente.'
+				}
+				else {
+					'Desbloqueie a chave no agent do 1Password e rode checkEnv novamente.'
+				}
 			}
 		}
 
 		return [PSCustomObject]@{
 			Status   = 'fail'
-			Detail   = 'Commit created but signature block (gpgsig) was not found.'
-			Solution = if ($GitSigningMode -eq 'automation') {
-				'Corrija a chave tecnica local, o gpg.ssh.program e a configuracao do signer de automacao da worktree.'
-			}
-			else {
-				'Corrija gpg.ssh.program, user.signingkey e a disponibilidade do agent SSH do 1Password.'
-			}
+			Detail   = ("erro real de assinatura: {0}" -f $signErr)
+			Solution = 'Corrija gpg.format/gpg.ssh.program/user.signingkey e rode checkEnv novamente.'
 		}
 	}
 	finally {
@@ -1667,7 +1731,7 @@ function checkEnv {
 	function Add-CheckResult {
 		param (
 			[string]$Item,
-			[ValidateSet('success', 'fail', 'inconclusive')]
+			[ValidateSet('success', 'fail', 'warning', 'inconclusive')]
 			[string]$Status,
 			[string]$Detail,
 			[string]$Solution
@@ -1688,29 +1752,24 @@ function checkEnv {
 			Add-CheckResult -Item "Command: $Name" -Status 'success' -Detail "Available at $($cmd.Source)." -Solution ''
 		}
 		else {
-			Add-CheckResult -Item "Command: $Name" -Status 'fail' -Detail "Command not found in PATH." -Solution "Install '$Name' in bootstrap and reload the shell."
+			Add-CheckResult -Item "Command: $Name" -Status 'fail' -Detail "Command not found in PATH." -Solution "Rode o bootstrap (app/bootstrap/bootstrap-windows.ps1) ou instale '$Name' via winget/choco e recarregue o shell."
 		}
 	}
 
 	Write-Host "checkEnv: validating environment"
 
-	# 1) Baseline command availability
-	'op', 'gh', 'git', 'ssh' | ForEach-Object { Add-CommandCheck $_ }
-
-	# 2) Optional sops/age readiness checks (non-blocking for SSH auth flow)
-	if (Test-CommandExists sops) {
-		Add-CheckResult -Item 'Command: sops' -Status 'success' -Detail "Available at $((Get-Command sops).Source)." -Solution ''
-	}
-	else {
-		Add-CheckResult -Item 'Command: sops' -Status 'inconclusive' -Detail 'sops not found in PATH.' -Solution 'Install sops if you want encrypted local secret files with age.'
-	}
-
-	if (Test-CommandExists age) {
-		Add-CheckResult -Item 'Command: age' -Status 'success' -Detail "Available at $((Get-Command age).Source)." -Solution ''
-	}
-	else {
-		Add-CheckResult -Item 'Command: age' -Status 'inconclusive' -Detail 'age not found in PATH.' -Solution 'Install age to support sops encryption/decryption flow.'
-	}
+	# 1) Expected binaries: single source of truth for Windows. Os nomes abaixo
+	# saem das entradas de CLI de app/bootstrap/software-list.ps1 (op = 1Password
+	# CLI, task = go-task, oh-my-posh, glab = GitLab cli, node = NodeJS,
+	# python = python 3.12, ssh = OpenSSH) + os do fluxo de auth/segredos.
+	# Ids winget de GUI (1Password, VsCode, Windows Terminal, Postman...) ficam
+	# de fora de proposito: nao sao binarios de PATH.
+	$expectedCommands = @(
+		'op', 'gh', 'glab', 'git', 'ssh', 'sops', 'age', 'task', 'uv', 'oh-my-posh',
+		'jq', 'yq', 'kubectl', 'kustomize', 'kubeconform', 'terraform', 'helm',
+		'flux', 'cloudflared', 'direnv', 'node', 'python'
+	)
+	$expectedCommands | ForEach-Object { Add-CommandCheck $_ }
 
 	if ([string]::IsNullOrWhiteSpace($Env:SOPS_AGE_KEY_FILE)) {
 		$userAgeKeyFile = [Environment]::GetEnvironmentVariable('SOPS_AGE_KEY_FILE', 'User')
@@ -2094,9 +2153,10 @@ function checkEnv {
 	# 9) Render report + actionable remediation hints
 	foreach ($entry in $results) {
 		$label = switch ($entry.Status) {
-			'success' { '[SUCCESS]' }
-			'fail' { '[FAIL]' }
-			default { '[INCONCLUSIVE]' }
+			'success' { '[OK]' }
+			'fail' { '[FALHA]' }
+			'warning' { '[AVISO]' }
+			default { '[INCONCLUSIVO]' }
 		}
 		$color = switch ($entry.Status) {
 			'success' { 'Green' }
@@ -2108,9 +2168,25 @@ function checkEnv {
 
 	$successCount = ($results | Where-Object { $_.Status -eq 'success' }).Count
 	$failCount = ($results | Where-Object { $_.Status -eq 'fail' }).Count
+	$warningCount = ($results | Where-Object { $_.Status -eq 'warning' }).Count
 	$inconclusiveCount = ($results | Where-Object { $_.Status -eq 'inconclusive' }).Count
+
+	# Tabela final: uma linha por item, OK/FALHA/AVISO.
 	Write-Host ""
-	Write-Host ("Summary: success={0} fail={1} inconclusive={2}" -f $successCount, $failCount, $inconclusiveCount)
+	Write-Host ("{0,-14} | {1,-44} | {2}" -f 'RESULTADO', 'ITEM', 'DETALHE')
+	Write-Host ('---------------+----------------------------------------------+--------------------------------')
+	foreach ($entry in $results) {
+		$rowTag = switch ($entry.Status) {
+			'success' { 'OK' }
+			'fail' { 'FALHA' }
+			default { 'AVISO' }
+		}
+		Write-Host ("{0,-14} | {1,-44} | {2}" -f $rowTag, $entry.Item, $entry.Detail)
+	}
+	Write-Host ('---------------+----------------------------------------------+--------------------------------')
+
+	Write-Host ""
+	Write-Host ("Summary: ok={0} falha={1} aviso={2} inconclusivo={3}" -f $successCount, $failCount, $warningCount, $inconclusiveCount)
 
 	$fixes = $results | Where-Object { -not [string]::IsNullOrWhiteSpace($_.Solution) } | Select-Object -Unique Item, Solution
 	if ($fixes.Count -gt 0) {
