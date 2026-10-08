@@ -1321,6 +1321,29 @@ function Set-LocalEnvFrom1Password {
 	return $true
 }
 
+######################################################################################
+# Detecta refs do 1Password (op://) uteis no template de env local
+######################################################################################
+function Test-EnvTemplateHasOpRefs {
+	[CmdletBinding()]
+	param (
+		[string]$TemplatePath = (Join-Path $Env:USERPROFILE 'dotfiles\app\bootstrap\secrets\.env.local.tpl')
+	)
+
+	if ([string]::IsNullOrWhiteSpace($TemplatePath) -or !(Test-Path -Path $TemplatePath -PathType Leaf)) {
+		return $false
+	}
+
+	# Linhas comentadas nao contam: o template atual documenta em comentario a
+	# ausencia de refs e nao deve disparar `op inject` (SSOT com o WSL).
+	foreach ($line in @(Get-Content -Path $TemplatePath -ErrorAction SilentlyContinue)) {
+		if ($line -match '^\s*#') { continue }
+		if ($line -match 'op://') { return $true }
+	}
+
+	return $false
+}
+
 function Import-DotEnvFromSops {
 	[CmdletBinding()]
 	param (
@@ -1328,7 +1351,8 @@ function Import-DotEnvFromSops {
 	)
 
 	if (!(Test-Path -Path $EncryptedPath -PathType Leaf)) {
-		Write-Warning "Encrypted env file not found: $EncryptedPath"
+		# Ausencia e' o estado normal quando o template nao tem refs do
+		# 1Password: o perfil nao deve avisar nada nesse caso.
 		return @{}
 	}
 
@@ -1357,7 +1381,12 @@ function Import-DotEnvFromSops {
 	try {
 		& sops -d --output $tmpPlain $EncryptedPath *> $null
 		if ($LASTEXITCODE -ne 0) {
-			Write-Warning "Failed to decrypt $EncryptedPath"
+			# Arquivo legado (cifrado para um recipient age que nao temos mais):
+			# nunca removemos o arquivo do dono, so explicamos por que o aviso
+			# nao e' acionavel. O template atual so tem comentarios, entao nao
+			# existe ref do 1Password capaz de regerar o arquivo.
+			Write-Warning ("Failed to decrypt $EncryptedPath (arquivo legado: o template " +
+				"atual .env.local.tpl nao tem refs do 1Password, entao nada o regenera).")
 			return @{}
 		}
 		return Import-DotEnvFile -Path $tmpPlain
