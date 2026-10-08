@@ -49,8 +49,11 @@ load_age_functions() {
 
 @test "materializa a chave em arquivo 600 e exporta apenas SOPS_AGE_KEY_FILE" {
 	export SOPS_AGE_KEY="$TEST_KEY"
-	run materializeAgeKeyFile
-	[ "$status" -eq 0 ]
+	# Sem 'run': o bats executa 'run' em subshell, e as mutacoes de ambiente
+	# (export SOPS_AGE_KEY_FILE / unset SOPS_AGE_KEY) nao voltariam para ca.
+	rc=0
+	materializeAgeKeyFile || rc=$?
+	[ "$rc" -eq 0 ]
 
 	key_file="$XDG_CONFIG_HOME/sops/age/keys.txt"
 	[ -f "$key_file" ]
