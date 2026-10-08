@@ -508,13 +508,17 @@ materializeAgeKeyFile() {
 	( umask 077 && mkdir -p "$dir" ) || return 1
 	chmod 700 "$dir" 2>/dev/null || true
 
-	if [[ -n "${SOPS_AGE_KEY:-}" ]]; then
-		( umask 077 && printf '%s\n' "$SOPS_AGE_KEY" > "$target" ) || return 1
-		# Nao mantem o conteudo da chave no ambiente.
-		unset SOPS_AGE_KEY
-	elif [[ -n "${SOPS_AGE_KEY_REF:-}" ]] && command -v op >/dev/null 2>&1; then
-		( umask 077 && op read "$SOPS_AGE_KEY_REF" > "$target" ) || {
-			echo "Falha ao ler a chave age de SOPS_AGE_KEY_REF via 1Password."
+	# Fonte unica: a ref do 1Password. SOPS_AGE_KEY herdado (runtime.env antigo) e'
+	# descartado sem uso: pode ser a chave vazada/rotacionada.
+	unset SOPS_AGE_KEY
+	if [[ -n "${SOPS_AGE_KEY_REF:-}" ]] && command -v op >/dev/null 2>&1; then
+		if [[ "$SOPS_AGE_KEY_REF" != op://* ]]; then
+			# Nunca ecoar o valor: se nao e' ref, pode ser o proprio segredo.
+			echo "SOPS_AGE_KEY_REF invalida (nao comeca com op://); valor nao exibido. Confira .env.local.tpl."
+			return 1
+		fi
+		( umask 077 && op read "$SOPS_AGE_KEY_REF" > "$target" 2>/dev/null ) || {
+			echo "Falha ao ler a chave age de $SOPS_AGE_KEY_REF via 1Password (rode: op read \"$SOPS_AGE_KEY_REF\" >/dev/null para ver o erro)."
 			rm -f "$target"
 			return 1
 		}
