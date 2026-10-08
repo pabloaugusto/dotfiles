@@ -6,6 +6,8 @@ if ! command -v _yaml_get >/dev/null 2>&1; then
   _checkenv_inc_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
   # shellcheck source=yaml-get.sh
   [ -f "$_checkenv_inc_dir/yaml-get.sh" ] && source "$_checkenv_inc_dir/yaml-get.sh"
+  # shellcheck source=signing-automation.sh
+  [ -f "$_checkenv_inc_dir/signing-automation.sh" ] && source "$_checkenv_inc_dir/signing-automation.sh"
   unset _checkenv_inc_dir
 fi
 
@@ -264,7 +266,10 @@ checkEnv() {
     automation_key_ref="$(git -C "$git_probe" config --worktree --get dotfiles.signing.automationPublicKeyRef 2>/dev/null || true)"
     automation_private_key_path="$(git -C "$git_probe" config --worktree --get dotfiles.signing.automationPrivateKeyPath 2>/dev/null || true)"
     if [ "$requested_mode" = "auto" ]; then
-      if [ "$worktree_mode" = "automation" ]; then
+      if command -v dotfiles_resolve_signing_mode >/dev/null 2>&1; then
+        # Ponto unico de resolucao: TARS_ACTOR=agent > env > worktree > human.
+        resolved_mode="$(dotfiles_resolve_signing_mode "$git_probe")"
+      elif [ "$worktree_mode" = "automation" ]; then
         resolved_mode="automation"
       else
         resolved_mode="human"
@@ -274,6 +279,55 @@ checkEnv() {
     fi
 
     _add_result "success" "Git signing mode" "mode=$resolved_mode." ""
+
+    # Modo automatizado por maquina: par ed25519 local (`automation-<host>`),
+    # sem 1Password. Exige arquivo presente, permissao 600 e assinatura de um
+    # blob de teste com `ssh-keygen -Y sign`. Quando o override de env ainda nao
+    # foi exportado (ex.: checkEnv fora do shell interativo), coerimos aqui as
+    # variaveis usadas pelos checks abaixo para refletir a chave de automacao.
+    if [ "$resolved_mode" = "automation" ]; then
+      local _auto_key="" _auto_pub="" _auto_perms=""
+      if command -v dotfiles_automation_signing_key >/dev/null 2>&1; then
+        _auto_key="$(dotfiles_automation_signing_key)"
+      fi
+      _auto_pub="${_auto_key}.pub"
+
+      if [ -n "$_auto_key" ] && [ -f "$_auto_key" ]; then
+        _auto_perms="$(stat -c '%a' "$_auto_key" 2>/dev/null || true)"
+        if [ "$_auto_perms" = "600" ]; then
+          _add_result "success" "Automation signing key file" "chave de automacao presente e 600." ""
+        else
+          _add_result "fail" "Automation signing key file" "chave de automacao com permissao '${_auto_perms:-?}' (esperado 600)." "Rode: chmod 600 $_auto_key"
+        fi
+      else
+        _add_result "fail" "Automation signing key file" "chave de automacao ausente em ${_auto_key:-<path desconhecido>}." "Rode o bootstrap (ensureAutomationSigningKey) para gerar o par por maquina."
+      fi
+
+      if [ -f "$_auto_pub" ] && command -v ssh-keygen >/dev/null 2>&1; then
+        local _auto_tmp _auto_rc=0
+        _auto_tmp="$(mktemp -d "$HOME/checkenv-auto.XXXXXX" 2>/dev/null || mktemp -d 2>/dev/null || true)"
+        if [ -z "$_auto_tmp" ]; then
+          _add_result "fail" "Automation signing probe" "sem diretorio temporario para o probe de assinatura." "Verifique permissao de escrita em $HOME ou /tmp."
+        else
+          printf 'checkenv automation %s\n' "$(date +%s)" >"$_auto_tmp/payload"
+          SSH_ASKPASS_REQUIRE=never DISPLAY='' SSH_ASKPASS='' \
+            _run_with_timeout 10 ssh-keygen -Y sign -n git -f "$_auto_pub" "$_auto_tmp/payload" \
+            </dev/null >"$_auto_tmp/sign.out" 2>&1
+          _auto_rc=$?
+          if [ $_auto_rc -eq 0 ] && [ -f "$_auto_tmp/payload.sig" ]; then
+            _add_result "success" "Automation signing probe" "ssh-keygen -Y sign assinou o blob de teste com a chave de automacao." ""
+          else
+            local _auto_err=""
+            _auto_err="$(head -n1 "$_auto_tmp/sign.out" 2>/dev/null | tr -d '\r')"
+            _add_result "fail" "Automation signing probe" "ssh-keygen -Y sign falhou (rc=$_auto_rc): ${_auto_err:-sem saida}." "Regenere o par com o bootstrap (remova $_auto_key e rode novamente)."
+          fi
+          rm -rf "$_auto_tmp"
+        fi
+        # Mantem coerentes os checks genericos abaixo (format/signer/assinatura).
+        signing_key="$_auto_pub"
+        gpg_program="ssh-keygen"
+      fi
+    fi
 
     if [ "$gpg_format" = "ssh" ]; then
       _add_result "success" "Git signing format" "gpg.format=ssh." ""
@@ -290,6 +344,13 @@ checkEnv() {
     local has_automation_private_key=0
     if [ "$resolved_mode" = "automation" ] && [ -n "$automation_private_key_path" ] && [ -f "$automation_private_key_path" ] && [ "$signing_key" = "$automation_private_key_path" ]; then
       has_automation_private_key=1
+    fi
+    # Modo automation dirigido por env (TARS_ACTOR=agent): a chave efetiva e' a
+    # publica por maquina, nao a humana da config. Sem isto o check de SSOT
+    # abaixo compararia chaves diferentes e falharia indevidamente.
+    if [ "$resolved_mode" = "automation" ] && [ -n "${_auto_pub:-}" ] && [ "$signing_key" = "${_auto_pub:-}" ]; then
+      has_automation_private_key=1
+      automation_private_key_path="${_auto_pub%.pub}"
     fi
 
     # SSOT da chave PUBLICA de assinatura: git.signing_key em user-config.yaml.
