@@ -49,21 +49,35 @@ esac
 _yaml_get() {
 	local file="$1"
 	local target="$2"
+	# POSIX awk apenas: `match(s, re, arr)` e extensao gawk; sob mawk (default do
+	# Ubuntu) o parse falha e a funcao retornava vazio sem avisar.
 	awk -v target="$target" '
 		function trim(v) {
 			sub(/^[[:space:]]+/, "", v)
 			sub(/[[:space:]]+$/, "", v)
 			return v
 		}
+		function leading_spaces(s,   n, c) {
+			n = 0
+			while (n < length(s)) {
+				c = substr(s, n + 1, 1)
+				if (c != " ") break
+				n++
+			}
+			return n
+		}
 		/^[[:space:]]*#/ || /^[[:space:]]*$/ { next }
 		{
 			line = $0
 			gsub(/\t/, "  ", line)
-			if (match(line, /^([ ]*)([A-Za-z0-9_-]+):[ ]*(.*)$/, m) == 0) next
-			indent = length(m[1])
+			indent = leading_spaces(line)
+			rest = substr(line, indent + 1)
+			colon = index(rest, ":")
+			if (colon == 0) next
+			key = substr(rest, 1, colon - 1)
+			if (key !~ /^[A-Za-z0-9_-]+$/) next
 			level = int(indent / 2)
-			key = m[2]
-			value = trim(m[3])
+			value = trim(substr(rest, colon + 1))
 			path[level] = key
 			for (i = level + 1; i < 20; i++) path[i] = ""
 			if (value != "") {
@@ -180,12 +194,30 @@ function install_software {
 		echo "Installing Hombrew"
 		export NONINTERACTIVE=1
 		/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-		eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
 	else
 		echo "Updating Homebrew"
 		brew update >/dev/null
-		eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
 	fi
+
+	# O caminho /home/linuxbrew e fixo e nao existe quando o Homebrew foi
+	# instalado no $HOME (instalacao nao-root). Resolve na ordem:
+	# PATH -> $HOME/.linuxbrew -> /home/linuxbrew; nada encontrado = erro alto.
+	local brew_bin=""
+	brew_bin="$(command -v brew 2>/dev/null || true)"
+	if [[ -z "$brew_bin" ]]; then
+		local brew_candidate
+		for brew_candidate in "$HOME/.linuxbrew/bin/brew" "/home/linuxbrew/.linuxbrew/bin/brew"; do
+			if [[ -x "$brew_candidate" ]]; then
+				brew_bin="$brew_candidate"
+				break
+			fi
+		done
+	fi
+	if [[ -z "$brew_bin" ]]; then
+		echo "install_software: Homebrew nao encontrado no PATH, em $HOME/.linuxbrew/bin/brew nem em /home/linuxbrew/.linuxbrew/bin/brew." >&2
+		return 1
+	fi
+	eval "$("$brew_bin" shellenv)"
 
 	# software install
 	# --------------------------------------------------------------------
@@ -255,8 +287,29 @@ function install_software {
 # fonts setup
 # --------------------------------------------------------------------
 function setup_fonts {
-	mkdir -p ~/.local/share/fonts >/dev/null
-	ln -sfn "$DOTFILES_REPO_ROOT/app/df/assets/fonts" ~/.local/share/fonts
+	local font_src="$DOTFILES_REPO_ROOT/app/df/assets/fonts"
+	local font_dest="$HOME/.local/share/fonts"
+
+	if [[ ! -d "$font_src" ]]; then
+		echo "setup_fonts: origem de fontes nao encontrada: $font_src" >&2
+		return 1
+	fi
+
+	# So o diretorio PAI pode ser criado: criar o proprio $font_dest como pasta
+	# real fazia o `ln` cair dentro dele e gerar ~/.local/share/fonts/fonts.
+	mkdir -p "$HOME/.local/share" >/dev/null
+
+	# Repara o artefato do defeito antigo (link aninhado) antes de religar.
+	if [[ -L "$font_dest/fonts" ]]; then
+		rm -f "$font_dest/fonts"
+		if [[ -z "$(ls -A "$font_dest" 2>/dev/null)" ]]; then
+			rmdir "$font_dest" 2>/dev/null || true
+		fi
+	fi
+
+	# _link_safe preserva pasta real em backup em vez de sobrescrever (idempotente
+	# quando o destino ja e o link correto).
+	_link_safe "$font_src" "$font_dest" || return 1
 	fc-cache -f -v >/dev/null
 }
 
@@ -407,7 +460,13 @@ function add_user {
 			sudo groupadd "$ADD_USER" >/dev/null 2>&1 || true
 		fi
 		sudo useradd -m -d /home/"$ADD_USER" -s /bin/bash -p "$ADD_USER_PASS" -g "$ADD_USER" -G sudo "$ADD_USER"
-		cp -r /home/"$TEMP_USER"/dotfiles /home/"$ADD_USER"/dotfiles
+		# A variavel de usuario temporario nao existe aqui: e desatribuido por clean_setup_vars e por
+		# setProfileSymlinks, e nunca e definido no call site deste passo. O `cp`
+		# apontava para /home//dotfiles e falhava. A fonte e o clone do usuario
+		# atual (~/dotfiles), com fallback para o root real do repo.
+		local src_dotfiles="/home/${USER}/dotfiles"
+		[[ -d "$src_dotfiles" ]] || src_dotfiles="$DOTFILES_REPO_ROOT"
+		cp -r "$src_dotfiles" /home/"$ADD_USER"/dotfiles || return 1
 		setProfileSymlinks "$ADD_USER"
 	fi
 }
@@ -796,11 +855,45 @@ ensureUnixSshConfigLocalLink() {
 }
 
 # --------------------------------------------------------------------
+# Pre-checagem WSL: ferramentas do lado Windows que o bootstrap consome.
+# Falha alta e cedo (antes de instalar/alterar qualquer coisa) porque sem elas
+# o assinador SSH e o relay do ssh-agent quebram tarde e em silencio.
+# --------------------------------------------------------------------
+ensureWslWindowsTools() {
+	# Nao e WSL: nada a checar.
+	if ! grep -qi microsoft /proc/version 2>/dev/null; then
+		return 0
+	fi
+
+	local missing=()
+	local tool
+	for tool in op-ssh-sign-wsl.exe npiperelay.exe; do
+		if ! command -v "$tool" >/dev/null 2>&1; then
+			missing+=("$tool")
+		fi
+	done
+
+	if (( ${#missing[@]} > 0 )); then
+		echo "Pre-checagem WSL: ferramenta(s) do Windows ausente(s) no PATH: ${missing[*]}" >&2
+		echo "Instale no Windows e exponha no PATH do WSL (ex.: /mnt/c/.../bin):" >&2
+		echo "  op-ssh-sign-wsl.exe -> cliente 1Password para Windows (assinatura SSH do git)" >&2
+		echo "  npiperelay.exe      -> https://github.com/albertony/npiperelay (relay do ssh-agent)" >&2
+		echo "Sem elas o bootstrap falharia depois, ao configurar op-ssh-sign/ssh-agent." >&2
+		return 1
+	fi
+
+	return 0
+}
+
+# --------------------------------------------------------------------
 # BOOTSTRAP steps
 # --------------------------------------------------------------------
 
 # 00 - prompt
 setup_prompt || bootstrap_exit 1
+
+# 00b - pre-checagem WSL (antes de qualquer install/symlink)
+ensureWslWindowsTools || bootstrap_exit 1
 
 if [ "$BOOTSTRAP_MODE" = "relink" ]; then
 	setProfileSymlinks "$USER" || bootstrap_exit 1
