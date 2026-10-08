@@ -36,7 +36,6 @@ checkEnv() {
   local git_probe=""
   local git_probe_tmp=""
   local resolved_mode=""
-  local automation_key_ref=""
   local git_ssh_command=""
   local gpg_format=""
   local commit_sign=""
@@ -262,11 +261,11 @@ checkEnv() {
     signing_key="$(git -C "$git_probe" config --get user.signingkey 2>/dev/null)"
     gpg_program="$(git -C "$git_probe" config --get gpg.ssh.program 2>/dev/null)"
     git_ssh_command="$(git -C "$git_probe" config --get core.sshCommand 2>/dev/null || true)"
+    # Identidade de automacao: unica (`daneel`), materializada pelo bootstrap. A
+    # chave efetiva vem do helper, nao de ref por worktree (desenho antigo).
     local worktree_mode
-    local automation_private_key_path
+    local automation_private_key_path=""
     worktree_mode="$(git -C "$git_probe" config --worktree --get dotfiles.signing.mode 2>/dev/null || true)"
-    automation_key_ref="$(git -C "$git_probe" config --worktree --get dotfiles.signing.automationPublicKeyRef 2>/dev/null || true)"
-    automation_private_key_path="$(git -C "$git_probe" config --worktree --get dotfiles.signing.automationPrivateKeyPath 2>/dev/null || true)"
     if [ "$requested_mode" = "auto" ]; then
       if command -v dotfiles_resolve_signing_mode >/dev/null 2>&1; then
         # Ponto unico de resolucao: TARS_ACTOR=agent > env > worktree > human.
@@ -348,12 +347,8 @@ checkEnv() {
     fi
 
     local has_automation_private_key=0
-    if [ "$resolved_mode" = "automation" ] && [ -n "$automation_private_key_path" ] && [ -f "$automation_private_key_path" ] && [ "$signing_key" = "$automation_private_key_path" ]; then
-      has_automation_private_key=1
-    fi
-    # Modo automation dirigido por env (TARS_ACTOR=agent): a chave efetiva e' a
-    # publica por maquina, nao a humana da config. Sem isto o check de SSOT
-    # abaixo compararia chaves diferentes e falharia indevidamente.
+    # Modo automation: a chave efetiva e' a publica do daneel, nao a humana da
+    # config. Sem isto o check de SSOT abaixo compararia chaves diferentes.
     if [ "$resolved_mode" = "automation" ] && [ -n "${_auto_pub:-}" ] && [ "$signing_key" = "${_auto_pub:-}" ]; then
       has_automation_private_key=1
       automation_private_key_path="${_auto_pub%.pub}"
