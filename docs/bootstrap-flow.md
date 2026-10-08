@@ -59,6 +59,8 @@ flowchart TD
 Nota importante do modo `1` (Windows full):
 
 - apos o retorno de [`app/bootstrap/bootstrap-windows.ps1`](../app/bootstrap/bootstrap-windows.ps1), o `_start.ps1` ainda executa ajustes adicionais (`Set-ComputerName`, regionalizacao/explorer) e reinicia o Explorer.
+- `Set-ComputerName` so renomeia a maquina se `DOTFILES_COMPUTER_NAME` estiver definida (vazio/ausente = pula); ao renomear nao reinicia sozinho, apenas avisa para reiniciar.
+- O `bootstrap-windows.ps1` nao pede mais confirmacao interativa (MARCO/POLO): disparar o bootstrap ja e a confirmacao. O `_start.ps1` ajusta `ExecutionPolicy` com `-Scope Process`; o `bootstrap-windows.ps1` fixa `CurrentUser`.
 
 ## 4) Subfluxo Windows ([`app/bootstrap/bootstrap-windows.ps1`](../app/bootstrap/bootstrap-windows.ps1))
 
@@ -68,9 +70,7 @@ flowchart TD
     B -- Nao --> B1[Aborta]
     B -- Sim --> C{PowerShell elevado?}
     C -- Nao --> C1[Aborta]
-    C -- Sim --> D{MARCO == POLO?}
-    D -- Nao --> D1[Aborta]
-    D -- Sim --> E{onedrive_enabled?}
+    C -- Sim --> E{onedrive_enabled?}
 
     E -- Sim --> F[OneDrive prereq + Resolve-WindowsOneDriveLayout]
     F --> G[Ensure-OneDriveLayoutPaths]
