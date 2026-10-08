@@ -405,7 +405,13 @@ function setProfileSymlinks {
 	if [ -d "$ONEDRIVE_ROOT" ]; then
 		mkdir -p "$ONEDRIVE_CLIENTS_DIR" "$ONEDRIVE_PROJECTS_DIR" >/dev/null 2>&1 || true
 		_link_safe "$ONEDRIVE_ROOT" ~/onedrive
-		_link_safe "$ONEDRIVE_PROJECTS_DIR" ~/projects
+		# ~/projects real (repos no ext4 do WSL) nunca vira link: _link_safe o moveria
+		# para backup e esconderia os repos. So' linka quando nao existe ou ja e' link.
+		if [ -d ~/projects ] && [ ! -L ~/projects ]; then
+			echo "Aviso: ~/projects e' diretorio real; link para o OneDrive pulado."
+		else
+			_link_safe "$ONEDRIVE_PROJECTS_DIR" ~/projects
+		fi
 		_link_safe "$ONEDRIVE_CLIENTS_DIR" ~/clients
 	else
 		echo "Aviso: OneDrive root nao encontrado em '$ONEDRIVE_ROOT'. Links ~/onedrive ~/clients ~/projects foram pulados."
