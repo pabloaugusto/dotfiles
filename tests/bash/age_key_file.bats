@@ -30,6 +30,7 @@ teardown() {
 # Extrai apenas as funcoes de chave age do bootstrap, sem executar o script.
 load_age_functions() {
 	eval "$(sed -n \
+		-e '/^chmodSupportsPosix()/,/^}/p' \
 		-e '/^ageKeyFilePath()/,/^}/p' \
 		-e '/^ageKeyFileExpectedRecipient()/,/^}/p' \
 		-e '/^materializeAgeKeyFile()/,/^}/p' \
@@ -38,6 +39,12 @@ load_age_functions() {
 		"$BOOTSTRAP")"
 	AGE_KEY_RECIPIENT_SOURCE="$TMP_HOME/dotfiles.sops.yaml"
 	export AGE_KEY_RECIPIENT_SOURCE
+
+	# chmod e no-op em MSYS/DrvFs; as assercoes de permissao so valem onde o
+	# filesystem honra perms POSIX (Linux/WSL).
+	PERM_SUPPORTED=0
+	chmodSupportsPosix && PERM_SUPPORTED=1
+	export PERM_SUPPORTED
 }
 
 @test "materializa a chave em arquivo 600 e exporta apenas SOPS_AGE_KEY_FILE" {
@@ -47,9 +54,11 @@ load_age_functions() {
 
 	key_file="$XDG_CONFIG_HOME/sops/age/keys.txt"
 	[ -f "$key_file" ]
-	[ "$(stat -c '%a' "$key_file")" = "600" ]
 	[ "$SOPS_AGE_KEY_FILE" = "$key_file" ]
 	[ -z "${SOPS_AGE_KEY:-}" ]
+	if [ "$PERM_SUPPORTED" = "1" ]; then
+		[ "$(stat -c '%a' "$key_file")" = "600" ]
+	fi
 }
 
 @test "validateAgeKeyFile aceita o arquivo cuja chave casa com o recipient de referencia" {
@@ -85,7 +94,9 @@ load_age_functions() {
 	# Nenhuma linha grava o conteudo da chave.
 	! grep -q '^export SOPS_AGE_KEY=' "$runtime_file"
 	! grep -q 'AGE-SECRET-KEY' "$runtime_file"
-	[ "$(stat -c '%a' "$runtime_file")" = "600" ]
+	if [ "$PERM_SUPPORTED" = "1" ]; then
+		[ "$(stat -c '%a' "$runtime_file")" = "600" ]
+	fi
 }
 
 @test "persistSopsAgeEnv remove residuo de SOPS_AGE_KEY de arquivos de startup" {

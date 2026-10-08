@@ -105,7 +105,7 @@ Garantias atuais:
 2. cria symlinks de shell, Git, SSH e config
 3. resolve `OP_SERVICE_ACCOUNT_TOKEN`
 4. gera runtime env e cifra em `~/.env.local.sops`
-5. persiste `SOPS_AGE_KEY` no runtime local
+5. materializa a chave age em arquivo 600 (`~/.config/sops/age/keys.txt`) e persiste apenas `SOPS_AGE_KEY_FILE` no runtime local
 6. garante auth do `gh`
 7. roda `checkEnv`
 

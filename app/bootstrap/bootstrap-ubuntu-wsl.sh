@@ -561,14 +561,11 @@ function setLocalEnvFile {
 		return 1
 	fi
 
-	if [[ -f "$(ageKeyFilePath)" ]]; then
-		cp "$(ageKeyFilePath)" "$tmp_age" || {
-			rm -f "$tmp_plain" "$tmp_age"
-			return 1
-		}
-	else
-		printf '%s\n' "$SOPS_AGE_KEY" > "$tmp_age"
-	fi
+	# O recipient e derivado do arquivo 600 ja materializado (nunca de env).
+	cp "$(ageKeyFilePath)" "$tmp_age" || {
+		rm -f "$tmp_plain" "$tmp_age"
+		return 1
+	}
 	chmod 600 "$tmp_age" 2>/dev/null || true
 	age_recipient="$(age-keygen -y "$tmp_age" 2>/dev/null | tr -d '\r\n')"
 	if [[ -z "$age_recipient" ]]; then

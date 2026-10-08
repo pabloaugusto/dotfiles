@@ -1291,7 +1291,7 @@ function Set-LocalEnvFrom1Password {
 				Copy-Item -Path $tmpPlain -Destination $OutputPath -Force
 			}
 			else {
-				Write-Warning "SOPS_AGE_KEY/sops/age-keygen ausentes; criptografia .sops indisponível e fallback plaintext não permitido."
+				Write-Warning "Arquivo de chave age/sops/age-keygen ausentes; criptografia .sops indisponível e fallback plaintext não permitido."
 				return $false
 			}
 		}
