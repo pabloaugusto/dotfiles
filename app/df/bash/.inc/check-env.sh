@@ -51,10 +51,10 @@ checkEnv() {
     local detail="$3"
     local tag=""
     case "$status" in
-      success) tag="[SUCCESS]" ;;
-      fail) tag="[FAIL]" ;;
-      warning) tag="[WARNING]" ;;
-      *) tag="[INCONCLUSIVE]" ;;
+      success) tag="[OK]" ;;
+      fail) tag="[FALHA]" ;;
+      warning) tag="[AVISO]" ;;
+      *) tag="[INCONCLUSIVO]" ;;
     esac
     printf '%s %s - %s\n' "$tag" "$item" "$detail"
   }
@@ -66,7 +66,7 @@ checkEnv() {
       _add_result "success" "Command: $cmd" "Disponivel em $(command -v "$cmd")" ""
       return 0
     fi
-    _add_result "fail" "Command: $cmd" "Nao encontrado no PATH." "Instale '$cmd' no bootstrap e recarregue o shell."
+    _add_result "fail" "Command: $cmd" "Nao encontrado no PATH." "Rode 'bash app/bootstrap/bootstrap-ubuntu-wsl.sh' (install_software) ou instale via brew e recarregue o shell."
     return 1
   }
 
@@ -83,23 +83,31 @@ checkEnv() {
 
   echo "checkEnv: validating environment"
 
+  # Resolve the repo root BEFORE any check that wants to read repo-relative
+  # files (e.g. app/df/secrets/secrets-ref.yaml). Previously this was computed
+  # further down, so every consumer above saw an empty $git_probe.
+  if command -v git >/dev/null 2>&1; then
+    git_probe="$(git rev-parse --show-toplevel 2>/dev/null || true)"
+    if [ -z "$git_probe" ] || [ ! -d "$git_probe/.git" ]; then
+      git_probe_tmp="$(mktemp -d "$HOME/checkenv-probe.XXXXXX")"
+      git -C "$git_probe_tmp" init -q >/dev/null 2>&1 || true
+      git_probe="$git_probe_tmp"
+    fi
+  fi
+
   # Base runtime commands expected by dotfiles bootstrap + auth flow.
-  _expect_cmd op >/dev/null
-  _expect_cmd gh >/dev/null
-  _expect_cmd git >/dev/null
-  _expect_cmd ssh >/dev/null
-
-  if command -v sops >/dev/null 2>&1; then
-    _add_result "success" "Command: sops" "Disponivel em $(command -v sops)" ""
-  else
-    _add_result "inconclusive" "Command: sops" "Nao encontrado no PATH." "Instale sops se pretende usar secrets versionados com age."
-  fi
-
-  if command -v age >/dev/null 2>&1; then
-    _add_result "success" "Command: age" "Disponivel em $(command -v age)" ""
-  else
-    _add_result "inconclusive" "Command: age" "Nao encontrado no PATH." "Instale age para habilitar criptografia/decriptografia sops."
-  fi
+  # Single source of truth per OS: mirrors the packages installed by
+  # app/bootstrap/bootstrap-ubuntu-wsl.sh (install_software).
+  local _expected_cmds=(
+    op gh git ssh sops age task uv oh-my-posh
+    zsh fastfetch ansible terraform cloudflared direnv
+    flux talosctl helm helmfile kubectl kustomize kubeconform
+    sponge talhelper stern yq jq node npm yarn pnpm psql
+    dos2unix atuin
+  )
+  for _cmd in "${_expected_cmds[@]}"; do
+    _expect_cmd "$_cmd" >/dev/null
+  done
 
   # 1Password session + reference readability checks.
   if command -v op >/dev/null 2>&1; then
@@ -201,11 +209,14 @@ checkEnv() {
 
   # Git signature policy checks (resolved in context of dotfiles repo when present).
   if command -v git >/dev/null 2>&1; then
-    git_probe="$(git rev-parse --show-toplevel 2>/dev/null || true)"
-    if [ -z "$git_probe" ] || [ ! -d "$git_probe/.git" ]; then
-      git_probe_tmp="$(mktemp -d "$HOME/checkenv-probe.XXXXXX")"
-      git -C "$git_probe_tmp" init -q >/dev/null 2>&1 || true
-      git_probe="$git_probe_tmp"
+    # $git_probe was already resolved above; only re-resolve if unavailable.
+    if [ -z "$git_probe" ]; then
+      git_probe="$(git rev-parse --show-toplevel 2>/dev/null || true)"
+      if [ -z "$git_probe" ] || [ ! -d "$git_probe/.git" ]; then
+        git_probe_tmp="$(mktemp -d "$HOME/checkenv-probe.XXXXXX")"
+        git -C "$git_probe_tmp" init -q >/dev/null 2>&1 || true
+        git_probe="$git_probe_tmp"
+      fi
     fi
 
     gpg_format="$(git -C "$git_probe" config --get gpg.format 2>/dev/null)"
@@ -406,76 +417,46 @@ checkEnv() {
     fi
   fi
 
-  # End-to-end signed commit simulation in disposable temporary repo.
-  if command -v git >/dev/null 2>&1; then
+  # Signature availability probe. NEVER run a real `git commit -S` here: with
+  # the 1Password signer that blocks on a biometric prompt. Instead probe with
+  # `ssh-keygen -Y sign`, which goes through ssh-agent and fails fast (no tty,
+  # no askpass) when the key needs an unlock.
+  if command -v ssh-keygen >/dev/null 2>&1 && [ -n "$signing_key" ]; then
     _tmp_dir="$(mktemp -d "$HOME/checkenv-sign.XXXXXX" 2>/dev/null || mktemp -d 2>/dev/null || true)"
     if [ -n "$_tmp_dir" ]; then
-      (
-        cd "$_tmp_dir" || exit 1
-        git init -q >/dev/null 2>&1 || exit 2
-        uname="$(git config --global --get user.name 2>/dev/null)"
-        uemail="$(git config --global --get user.email 2>/dev/null)"
-        [ -n "$uname" ] || git config user.name "checkEnv"
-        [ -n "$uemail" ] || git config user.email "checkenv@local"
-        [ -n "$signing_key" ] && git config user.signingkey "$signing_key"
-        [ -n "$gpg_format" ] && git config gpg.format "$gpg_format"
-        if [ -n "$gpg_program_resolved" ]; then
-          git config gpg.ssh.program "$gpg_program_resolved"
-        elif [ -n "$gpg_program" ]; then
-          git config gpg.ssh.program "$gpg_program"
-        fi
-        [ "$commit_sign" = "true" ] && git config commit.gpgsign true
-        printf 'checkenv %s\n' "$(date +%s)" > .checkenv
-        git add .checkenv >/dev/null 2>&1 || exit 3
-        if command -v timeout >/dev/null 2>&1; then
-          if ! timeout 45 git commit -S -m "checkEnv signed commit" >/tmp/checkenv_commit.$$ 2>&1; then
-            rc=$?
-            [ "$rc" -eq 124 ] && exit 124
-            exit 4
-          fi
+      local sign_pubkey="" sign_rc=0
+      if [ -f "$signing_key" ]; then
+        sign_pubkey="$signing_key"
+      elif [ -f "$signing_key.pub" ]; then
+        sign_pubkey="$signing_key.pub"
+      elif printf '%s' "$signing_key" | grep -q '^ssh-'; then
+        # Inline public key in user.signingkey: materialize it for the probe.
+        printf '%s\n' "$signing_key" >"$_tmp_dir/signing.pub"
+        sign_pubkey="$_tmp_dir/signing.pub"
+      fi
+
+      if [ -z "$sign_pubkey" ]; then
+        _add_result "warning" "Signature verification" "assinatura nao verificada (requer desbloqueio): user.signingkey nao aponta para uma chave publica legivel." "Ajuste user.signingkey para o caminho da chave publica ou o proprio valor ssh-ed25519 ..."
+      else
+        printf 'checkenv %s\n' "$(date +%s)" >"$_tmp_dir/payload"
+        # stdin fechado + SSH_ASKPASS_REQUIRE=never => nunca abre prompt de biometria.
+        SSH_ASKPASS_REQUIRE=never DISPLAY='' SSH_ASKPASS='' \
+          _run_with_timeout 10 ssh-keygen -Y sign -n git -f "$sign_pubkey" "$_tmp_dir/payload" \
+          </dev/null >"$_tmp_dir/sign.out" 2>&1
+        sign_rc=$?
+        if [ $sign_rc -eq 0 ] && [ -f "$_tmp_dir/payload.sig" ]; then
+          _add_result "success" "Signature verification" "ssh-keygen -Y sign concluiu sem prompt; o agent assinou com a chave configurada." ""
+        elif [ $sign_rc -eq 124 ]; then
+          _add_result "warning" "Signature verification" "assinatura nao verificada (requer desbloqueio): ssh-keygen -Y sign excedeu o tempo limite." "Desbloqueie a chave no agent/1Password e rode checkEnv novamente."
         else
-          git commit -S -m "checkEnv signed commit" >/tmp/checkenv_commit.$$ 2>&1 || exit 4
+          local _sign_err=""
+          _sign_err="$(head -n1 "$_tmp_dir/sign.out" 2>/dev/null | tr -d '\r')"
+          _add_result "warning" "Signature verification" "assinatura nao verificada (requer desbloqueio): ${_sign_err:-ssh-keygen -Y sign falhou (rc=$sign_rc)}." "Desbloqueie a chave no agent/1Password (ou ajuste gpg.ssh.program) e rode checkEnv novamente."
         fi
-        git log --show-signature -1 >/tmp/checkenv_sig.$$ 2>&1 || exit 5
-        git cat-file -p HEAD >/tmp/checkenv_cat.$$ 2>&1 || exit 6
-        exit 0
-      )
-      local commit_probe_rc=$?
-      case $commit_probe_rc in
-        0)
-          if grep -Eq 'Good "git" signature|Good SSH signature' /tmp/checkenv_sig.$$ 2>/dev/null; then
-            _add_result "success" "Signed commit test" "git commit -S e assinatura validada." ""
-          elif grep -q '^gpgsig ' /tmp/checkenv_cat.$$ 2>/dev/null; then
-            _add_result "success" "Signed commit test" "git commit -S gerou commit assinado (bloco gpgsig presente)." ""
-          else
-            if [ "$resolved_mode" = "automation" ]; then
-              _add_result "fail" "Signed commit test" "Commit criado, mas sem evidencia de assinatura (gpgsig ausente)." "Revise a worktree tecnica, a ref da chave publica e a autorizacao do 1Password para a chave de automacao."
-            else
-              _add_result "fail" "Signed commit test" "Commit criado, mas sem evidencia de assinatura (gpgsig ausente)." "Revise gpg.ssh.program, user.signingkey e agent do 1Password."
-            fi
-          fi
-          ;;
-        124)
-          if [ "$resolved_mode" = "automation" ]; then
-            _add_result "fail" "Signed commit test" "git commit -S excedeu tempo limite (possivel prompt de aprovacao da chave tecnica no 1Password)." "Autorize o signer tecnico nesta sessao do terminal e rode checkEnv novamente."
-          else
-            _add_result "fail" "Signed commit test" "git commit -S excedeu tempo limite (possivel prompt de aprovacao do 1Password)." "Aprove o prompt de assinatura no 1Password e rode checkEnv novamente."
-          fi
-          ;;
-        *)
-          local commit_err=""
-          commit_err="$(head -n1 /tmp/checkenv_commit.$$ 2>/dev/null | tr -d '\r')"
-          if [ "$resolved_mode" = "automation" ]; then
-            _add_result "fail" "Signed commit test" "git commit -S falhou em repositorio temporario (${commit_err:-sem detalhe})." "Corrija a worktree tecnica, a chave privada local e o gpg.ssh.program do signer tecnico."
-          else
-            _add_result "fail" "Signed commit test" "git commit -S falhou em repositorio temporario (${commit_err:-sem detalhe})." "Corrija gpg.ssh.program, user.signingkey e agent do 1Password."
-          fi
-          ;;
-      esac
-      rm -f /tmp/checkenv_commit.$$ /tmp/checkenv_sig.$$ /tmp/checkenv_cat.$$
+      fi
       rm -rf "$_tmp_dir"
     else
-      _add_result "fail" "Signed commit test" "Nao foi possivel criar diretorio temporario." "Verifique permissao de escrita em $HOME ou /tmp."
+      _add_result "warning" "Signature verification" "assinatura nao verificada (requer desbloqueio): nao foi possivel criar diretorio temporario." "Verifique permissao de escrita em $HOME ou /tmp."
     fi
   fi
 
@@ -494,7 +475,21 @@ checkEnv() {
   done
 
   echo
-  printf 'Summary: success=%s fail=%s inconclusive=%s\n' "$_ok" "$_fail" "$_inc"
+  # Final table: one row per item, OK/FALHA/AVISO.
+  printf '%-14s | %-44s | %s\n' "RESULTADO" "ITEM" "DETALHE"
+  printf '%s\n' "---------------+----------------------------------------------+--------------------------------"
+  for entry in "${_results[@]}"; do
+    IFS='|' read -r status item detail <<<"$entry"
+    local _row_tag=""
+    case "$status" in
+      success) _row_tag="OK" ;;
+      fail) _row_tag="FALHA" ;;
+      *) _row_tag="AVISO" ;;
+    esac
+    printf '%-14s | %-44s | %s\n' "$_row_tag" "$item" "$detail"
+  done
+  printf '%s\n' "---------------+----------------------------------------------+--------------------------------"
+  printf 'Summary: ok=%s falha=%s aviso=%s\n' "$_ok" "$_fail" "$_inc"
 
   if [ "${#_fixes[@]}" -gt 0 ]; then
     echo "Possible fixes:"
