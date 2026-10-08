@@ -15,7 +15,10 @@
 #   identidade do daneel via GIT_CONFIG_COUNT/GIT_CONFIG_KEY_n/VALUE_n, que sao
 #   herdados por qualquer `git` rodado no shell (inclusive `task sync`).
 # - allowed_signers: SSOT no 1Password, materializado pelo bootstrap em
-#   ${XDG_CONFIG_HOME:-~/.config}/git/allowed_signers (humano + daneel).
+#   ${XDG_STATE_HOME:-~/.local/state}/dotfiles/git/allowed_signers (humano +
+#   daneel). Fica FORA de ~/.config/git de proposito: esse diretorio e' o
+#   app/df/git do proprio repo (symlink do bootstrap), entao materializar ali
+#   sujaria a working tree versionada a cada bootstrap.
 ###############################################################################
 
 # Diretorio da identidade de automacao (mesmo layout no WSL e no Windows).
@@ -28,8 +31,9 @@ dotfiles_automation_signing_key() {
 }
 
 # Caminho materializado do allowed_signers (SSOT: ref no 1Password).
+# Diretorio de estado, NUNCA dentro de ~/.config/git (que e' o repo).
 dotfiles_automation_allowed_signers() {
-  printf '%s/git/allowed_signers' "${XDG_CONFIG_HOME:-$HOME/.config}"
+  printf '%s/dotfiles/git/allowed_signers' "${XDG_STATE_HOME:-$HOME/.local/state}"
 }
 
 # Ponto unico de resolucao do modo de assinatura.

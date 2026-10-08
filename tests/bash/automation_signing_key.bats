@@ -16,7 +16,10 @@ setup() {
   export REPO_ROOT="$PWD"
   export HOME="$BATS_TEST_TMPDIR/home"
   export XDG_CONFIG_HOME="$BATS_TEST_TMPDIR/cfg"
-  mkdir -p "$HOME" "$XDG_CONFIG_HOME"
+  # Estado tambem isolado: o allowed_signers saiu de ~/.config/git (que e' o
+  # repo versionado via symlink) para o diretorio de estado.
+  export XDG_STATE_HOME="$BATS_TEST_TMPDIR/state"
+  mkdir -p "$HOME" "$XDG_CONFIG_HOME" "$XDG_STATE_HOME"
 
   # Isola a config global real do dono da maquina.
   export GIT_CONFIG_GLOBAL="$BATS_TEST_TMPDIR/gitconfig"
@@ -25,7 +28,7 @@ setup() {
   export AUTO_DIR="$XDG_CONFIG_HOME/tars/automation"
   export AUTO_KEY="$AUTO_DIR/daneel_ed25519"
   export SA_TOKEN="$AUTO_DIR/op-sa.token"
-  export ALLOWED_SIGNERS="$XDG_CONFIG_HOME/git/allowed_signers"
+  export ALLOWED_SIGNERS="$XDG_STATE_HOME/dotfiles/git/allowed_signers"
 
   export SCRIPT="$REPO_ROOT/app/bootstrap/bootstrap-ubuntu-wsl.sh"
   export FN_SRC="$BATS_TEST_TMPDIR/fns.sh"

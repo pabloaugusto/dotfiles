@@ -284,10 +284,13 @@ Materialização (bootstrap, idempotente):
    usuário), `daneel_ed25519.pub` 644 e `op-sa.token` 600. O valor **nunca**
    passa por stdout nem por variável.
 2. só regrava quando o conteúdo difere (lê para um temporário e compara).
-3. `allowed_signers` (SSOT no 1Password) vai para
-   `~/.config/git/allowed_signers` e o bootstrap grava
-   `gpg.ssh.allowedSignersFile` de forma idempotente. Não existe mais
-   `allowed_signers` gerado localmente.
+3. `allowed_signers` (SSOT no 1Password) vai para o diretório de **estado** —
+   `${XDG_STATE_HOME:-~/.local/state}/dotfiles/git/allowed_signers` no
+   Linux/WSL, `%LOCALAPPDATA%\dotfiles\git\allowed_signers` no Windows — e o
+   bootstrap grava `gpg.ssh.allowedSignersFile` de forma idempotente. Fica
+   **fora do repo** de propósito: `~/.config/git` é o `app/df/git` versionado
+   (symlink do bootstrap), então nada é materializado ali. Não existe mais
+   `allowed_signers` gerado localmente nem versionado.
 4. se o item não existir no 1Password: falha clara com a instrução. O bootstrap
    **não** gera chave sozinho.
 

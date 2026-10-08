@@ -872,7 +872,11 @@ configureGitSigningKey() {
 # `op read --out-file` (o valor NUNCA passa pelo stdout):
 #   - ${XDG_CONFIG_HOME:-~/.config}/tars/automation/daneel_ed25519 (600)
 #   - ${XDG_CONFIG_HOME:-~/.config}/tars/automation/op-sa.token   (600)
-#   - ${XDG_CONFIG_HOME:-~/.config}/git/allowed_signers (SSOT da ref)
+#   - ${XDG_STATE_HOME:-~/.local/state}/dotfiles/git/allowed_signers (SSOT da ref)
+#
+# O allowed_signers fica no diretorio de ESTADO, nunca em ~/.config/git: esse
+# caminho e' o app/df/git do proprio repo (symlink de setProfileSymlinks), entao
+# materializar ali deixaria a working tree versionada suja a cada bootstrap.
 # e publica gpg.ssh.allowedSignersFile no git config global.
 #
 # Idempotente: regrava apenas quando o conteudo difere. NUNCA gera chave sozinho:
@@ -972,7 +976,7 @@ ensureDaneelIdentity() {
 	key_path="$dir/daneel_ed25519"
 	pub_path="${key_path}.pub"
 	op_token_path="$dir/op-sa.token"
-	allowed_signers_path="${XDG_CONFIG_HOME:-$HOME/.config}/git/allowed_signers"
+	allowed_signers_path="${XDG_STATE_HOME:-$HOME/.local/state}/dotfiles/git/allowed_signers"
 
 	signing_key_ref="$(_daneel_config_value "automation.signing_key_ref")"
 	op_token_ref="$(_daneel_config_value "automation.op_token_ref")"
@@ -1013,12 +1017,17 @@ ensureDaneelIdentity() {
 			echo "AVISO: falha ao gravar gpg.ssh.allowedSignersFile no git config global."
 	fi
 
-	# Migracao: nenhum allowed_signers gerado localmente deve sobreviver.
-	local legacy_dir="${XDG_CONFIG_HOME:-$HOME/.config}/dotfiles/signing"
-	if [[ -f "$legacy_dir/allowed_signers" ]] && [[ "$legacy_dir/allowed_signers" != "$allowed_signers_path" ]]; then
-		rm -f "$legacy_dir/allowed_signers"
-		echo "Migracao: removedor o allowed_signers local legado ($legacy_dir/allowed_signers)."
-	fi
+	# Migracao: nenhum allowed_signers gerado localmente deve sobreviver — nem o
+	# legado, nem o que ficava dentro de ~/.config/git (que e' o repo versionado).
+	local legacy_dir legacy_path
+	for legacy_dir in "${XDG_CONFIG_HOME:-$HOME/.config}/dotfiles/signing" \
+		"${XDG_CONFIG_HOME:-$HOME/.config}/git"; do
+		legacy_path="$legacy_dir/allowed_signers"
+		if [[ -f "$legacy_path" ]] && [[ "$legacy_path" != "$allowed_signers_path" ]]; then
+			rm -f "$legacy_path"
+			echo "Migracao: removido o allowed_signers local legado ($legacy_path)."
+		fi
+	done
 
 	[[ $rc -eq 0 ]] || return 1
 	echo "Identidade de automacao (TARS_ACTOR=agent) usa: $key_path"

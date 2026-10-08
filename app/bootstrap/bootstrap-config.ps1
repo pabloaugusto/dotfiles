@@ -876,7 +876,8 @@ function Ensure-DaneelAutomationIdentity {
 	- daneel_ed25519.pub   (publica)
 	- op-sa.token          (service account, ACL so do usuario)
 	allowed_signers (SSOT: automation.allowed_signers_ref) e materializado em
-	%APPDATA%\git\allowed_signers e aplicado em gpg.ssh.allowedSignersFile.
+	%LOCALAPPDATA%\dotfiles\git\allowed_signers (diretorio de estado, FORA do
+	repo) e aplicado em gpg.ssh.allowedSignersFile.
 	Idempotente: so substitui quando o conteudo muda. Nunca gera chave local.
 	#>
 	param (
@@ -910,7 +911,7 @@ function Ensure-DaneelAutomationIdentity {
 	$keyPath = Join-Path $dir 'daneel_ed25519'
 	$pubPath = "$keyPath.pub"
 	$tokenPath = Join-Path $dir 'op-sa.token'
-	$allowedSignersPath = Join-Path $env:APPDATA 'git\allowed_signers'
+	$allowedSignersPath = Join-Path $env:LOCALAPPDATA 'dotfiles\git\allowed_signers'
 	if (!(Test-Path -Path $dir)) {
 		New-Item -Path $dir -ItemType Directory -Force | Out-Null
 	}

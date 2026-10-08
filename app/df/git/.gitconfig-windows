@@ -33,8 +33,9 @@
 [gpg "ssh"]
     # Program from PATH to keep a single cross-platform reference.
     program = op-ssh-sign
-    # Caminho REAL do dotfiles (o verificador não atravessa symlinks).
-    allowedSignersFile = C:/Users/pablo/dotfiles/app/df/git/allowed_signers
+    # allowedSignersFile NAO fica aqui: e' artefato materializado pelo bootstrap
+    # (SSOT: automation.allowed_signers_ref) em %LOCALAPPDATA%\dotfiles\git\allowed_signers,
+    # gravado via `git config --global gpg.ssh.allowedSignersFile` em EnsureDaneelIdentity.
 
 [commit]
     # gpgsign = VALOR ESPECIFICO DO AMBIENTE

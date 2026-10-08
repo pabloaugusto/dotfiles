@@ -1597,9 +1597,12 @@ function Get-AutomationAllowedSignersPath {
 	<#
 	.SYNOPSIS
 	Caminho do allowed_signers materializado (SSOT: automation.allowed_signers_ref).
+	Fica no diretorio de ESTADO (LOCALAPPDATA), fora do repo — o mesmo desenho do
+	bash (XDG_STATE_HOME), que usa ~/.local/state/dotfiles/git. Nunca sob
+	~/.config/git: esse e' o app/df/git do repo via symlink do bootstrap.
 	#>
-	if ([string]::IsNullOrWhiteSpace($env:APPDATA)) { return '' }
-	return (Join-Path $env:APPDATA 'git\allowed_signers')
+	if ([string]::IsNullOrWhiteSpace($env:LOCALAPPDATA)) { return '' }
+	return (Join-Path $env:LOCALAPPDATA 'dotfiles\git\allowed_signers')
 }
 
 function Get-CheckEnvGitProbeContext {

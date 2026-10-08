@@ -55,17 +55,27 @@ Describe 'checkEnv' {
 Describe 'helpers da identidade daneel' {
 	BeforeAll {
 		$script:OriginalAppData = $env:APPDATA
+		$script:OriginalLocalAppData = $env:LOCALAPPDATA
 		$env:APPDATA = Join-Path $TestDrive 'appdata'
+		$env:LOCALAPPDATA = Join-Path $TestDrive 'localappdata'
 	}
 	AfterAll {
 		$env:APPDATA = $script:OriginalAppData
+		$env:LOCALAPPDATA = $script:OriginalLocalAppData
 	}
 
 	It 'resolve os caminhos da identidade unica (sem hostname)' {
 		(Get-AutomationSigningKeyPath) | Should Be (Join-Path $env:APPDATA 'tars\automation\daneel_ed25519')
 		(Get-AutomationSigningPublicKeyPath) | Should Be (Join-Path $env:APPDATA 'tars\automation\daneel_ed25519.pub')
 		(Get-AutomationOpTokenPath) | Should Be (Join-Path $env:APPDATA 'tars\automation\op-sa.token')
-		(Get-AutomationAllowedSignersPath) | Should Be (Join-Path $env:APPDATA 'git\allowed_signers')
+	}
+
+	It 'materializa o allowed_signers no diretorio de estado, fora do repo' {
+		$signers = Get-AutomationAllowedSignersPath
+		$signers | Should Be (Join-Path $env:LOCALAPPDATA 'dotfiles\git\allowed_signers')
+		# Nunca sob um caminho que o bootstrap linka ao app/df/git versionado.
+		$signers | Should Not Match ([regex]::Escape('app\df\git'))
+		$signers | Should Not Be (Join-Path $env:APPDATA 'git\allowed_signers')
 	}
 }
 
