@@ -83,7 +83,18 @@ class ConventionalEmojiTests(unittest.TestCase):
     def test_branch_validation_rejects_uppercase(self) -> None:
         result = MODULE.validate_branch_name("Feat/test-harness")
         self.assertFalse(result.ok)
-        self.assertIn("<type>/<jira-key>-<slug>", result.error)
+        self.assertIn("<type>/<slug>", result.error)
+
+    def test_branch_validation_accepts_main_and_slug_without_issue_key(self) -> None:
+        for branch in ("main", "master", "develop", "chore/sync-configs-windows"):
+            self.assertTrue(MODULE.validate_branch_name(branch).ok, branch)
+
+    def test_inject_is_idempotent(self) -> None:
+        text = "🔧 chore(sync): git updates\n\ncorpo\n\n"
+        self.assertEqual(MODULE.inject_emoji(text), text)
+
+    def test_inject_replaces_wrong_emoji(self) -> None:
+        self.assertEqual(MODULE.inject_emoji("💚 ci(github): roda testes\n"), "👷 ci(github): roda testes\n")
 
     def test_branch_validation_requires_prompt_type_when_prompt_paths_are_present(self) -> None:
         result = MODULE.validate_branch_name(
