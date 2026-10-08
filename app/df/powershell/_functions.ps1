@@ -1555,7 +1555,16 @@ function Invoke-CheckEnvSignedCommitTest {
 	)
 
 	$tempRepo = Join-Path ([System.IO.Path]::GetTempPath()) ("checkenv-" + [guid]::NewGuid().ToString("N"))
-	$null = New-Item -Path $tempRepo -ItemType Directory -Force
+	try {
+		$null = New-Item -Path $tempRepo -ItemType Directory -Force -ErrorAction Stop
+	}
+	catch {
+		return [PSCustomObject]@{
+			Status   = 'fail'
+			Detail   = ("sem diretorio temporario para o probe de assinatura: {0}" -f $_.Exception.Message)
+			Solution = 'Verifique permissao de escrita na pasta temporaria do sistema.'
+		}
+	}
 
 	try {
 		Push-Location $tempRepo
@@ -1586,21 +1595,40 @@ function Invoke-CheckEnvSignedCommitTest {
 		# bloqueia num prompt de biometria. `ssh-keygen -Y sign` exercita o
 		# mesmo agent e falha rapido (sem tty/askpass) quando a chave precisa
 		# de desbloqueio.
-		$publicKeyPath = ''
-		if (-not [string]::IsNullOrWhiteSpace($SigningKey)) {
-			if (Test-Path -Path $SigningKey -PathType Leaf) { $publicKeyPath = $SigningKey }
-			elseif (Test-Path -Path "$SigningKey.pub" -PathType Leaf) { $publicKeyPath = "$SigningKey.pub" }
-			elseif ($SigningKey -match '^ssh-') {
-				$publicKeyPath = Join-Path $tempRepo 'signing.pub'
-				Set-Content -Path $publicKeyPath -Value $SigningKey
+		# Gate (nao rebaixar): so e `warning` quando o agente exige desbloqueio
+		# humano (agente sem chaves listadas / 1Password bloqueado) ou timeout
+		# por prompt de aprovacao -- sempre com "requer desbloqueio" e o comando
+		# para validar. Signer ausente/irresolvivel, chave publica ilegivel, erro
+		# real de assinatura e ausencia de tmpdir sao `fail`.
+		if ([string]::IsNullOrWhiteSpace($SigningKey)) {
+			return [PSCustomObject]@{
+				Status   = 'fail'
+				Detail   = 'signer nao configurado: user.signingkey ausente, assinatura nao verificada.'
+				Solution = 'Defina ''git config --global user.signingkey "ssh-ed25519 ..."'' e rode checkEnv novamente.'
 			}
+		}
+
+		$publicKeyPath = ''
+		if (Test-Path -Path $SigningKey -PathType Leaf) { $publicKeyPath = $SigningKey }
+		elseif (Test-Path -Path "$SigningKey.pub" -PathType Leaf) { $publicKeyPath = "$SigningKey.pub" }
+		elseif ($SigningKey -match '^ssh-') {
+			$publicKeyPath = Join-Path $tempRepo 'signing.pub'
+			Set-Content -Path $publicKeyPath -Value $SigningKey
 		}
 
 		if ([string]::IsNullOrWhiteSpace($publicKeyPath)) {
 			return [PSCustomObject]@{
-				Status   = 'warning'
-				Detail   = 'assinatura nao verificada (requer desbloqueio): user.signingkey nao aponta para uma chave publica legivel.'
+				Status   = 'fail'
+				Detail   = ("chave publica ilegivel: user.signingkey nao aponta para chave publica legivel nem para um valor ssh-ed25519 (valor: {0})." -f $SigningKey)
 				Solution = 'Ajuste user.signingkey para o caminho da chave publica ou o proprio valor ssh-ed25519 ...'
+			}
+		}
+
+		if (-not (Get-Command ssh-keygen -ErrorAction SilentlyContinue)) {
+			return [PSCustomObject]@{
+				Status   = 'fail'
+				Detail   = 'signer irresolvivel: ssh-keygen nao encontrado no PATH, assinatura nao verificada.'
+				Solution = 'Instale OpenSSH (ssh-keygen) e rode checkEnv novamente.'
 			}
 		}
 
@@ -1622,7 +1650,7 @@ function Invoke-CheckEnvSignedCommitTest {
 			Remove-Job -Job $signJob -Force -ErrorAction SilentlyContinue
 			return [PSCustomObject]@{
 				Status   = 'warning'
-				Detail   = 'assinatura nao verificada (requer desbloqueio): ssh-keygen -Y sign excedeu o tempo limite.'
+				Detail   = ("assinatura nao verificada (requer desbloqueio): ssh-keygen -Y sign excedeu o tempo limite. | valide com: ssh-keygen -Y sign -n git -f '{0}' <arquivo>" -f $SigningKey)
 				Solution = 'Desbloqueie a chave no agent/1Password e rode checkEnv novamente.'
 			}
 		}
@@ -1639,15 +1667,27 @@ function Invoke-CheckEnvSignedCommitTest {
 			}
 		}
 
+		$signErr = ($signOutput | Out-String).Trim()
+		if ([string]::IsNullOrWhiteSpace($signErr)) { $signErr = 'ssh-keygen -Y sign falhou.' }
+		$probeCmd = ("ssh-keygen -Y sign -n git -f '{0}' <arquivo>" -f $SigningKey)
+
+		if ($signErr -match 'no private key found for public key|agent refused operation|refused operation|could ?n?o?t? ?(find|open) key in agent|communication with agent failed|agent_contains_key|keys? not found|no keys? (found|available)|sign_and_send_pubkey|permission denied \(publickey\)|needs? (to be )?unlock|is locked|passphrase') {
+			return [PSCustomObject]@{
+				Status   = 'warning'
+				Detail   = ("assinatura nao verificada (requer desbloqueio): {0} | valide com: {1}" -f $signErr, $probeCmd)
+				Solution = if ($GitSigningMode -eq 'automation') {
+					'Desbloqueie a chave tecnica no 1Password e rode checkEnv novamente.'
+				}
+				else {
+					'Desbloqueie a chave no agent do 1Password e rode checkEnv novamente.'
+				}
+			}
+		}
+
 		return [PSCustomObject]@{
-			Status   = 'warning'
-			Detail   = ("assinatura nao verificada (requer desbloqueio): {0}" -f (($signOutput | Out-String).Trim()))
-			Solution = if ($GitSigningMode -eq 'automation') {
-				'Desbloqueie a chave tecnica no 1Password (ou revise gpg.ssh.program) e rode checkEnv novamente.'
-			}
-			else {
-				'Desbloqueie a chave no agent do 1Password e rode checkEnv novamente.'
-			}
+			Status   = 'fail'
+			Detail   = ("erro real de assinatura: {0}" -f $signErr)
+			Solution = 'Corrija gpg.format/gpg.ssh.program/user.signingkey e rode checkEnv novamente.'
 		}
 	}
 	finally {
