@@ -662,8 +662,11 @@ importLocalEnvFromSops() {
 	fi
 	rm -f "$tmp_plain"
 
-	if [[ -z "${GH_TOKEN:-}" && -n "${GITHUB_TOKEN:-}" ]]; then
-		export GH_TOKEN="$GITHUB_TOKEN"
+	# Migracao: residuos de token no arquivo cifrado nao devem virar env (o token
+	# do 1Password e' lido por ref/arquivo; o `gh` usa a sessao do `gh auth`).
+	if [[ -n "${GH_TOKEN:-}" || -n "${GITHUB_TOKEN:-}" ]]; then
+		unset GH_TOKEN GITHUB_TOKEN
+		echo "Migracao: GH_TOKEN/GITHUB_TOKEN ignorados (nunca vem do env local)."
 	fi
 }
 
@@ -704,6 +707,8 @@ EOF
 		[ -L "$_f" ] && continue
 		[ -f "$_f" ] || continue
 		sed -i '/^export OP_SERVICE_ACCOUNT_TOKEN=/d' "$_f"
+		sed -i '/^export OP_CONNECT_HOST=/d' "$_f"
+		sed -i '/^export OP_CONNECT_TOKEN=/d' "$_f"
 		sed -i '/^export GH_TOKEN=/d' "$_f"
 		sed -i '/^export GITHUB_TOKEN=/d' "$_f"
 		sed -i '/^export SOPS_AGE_KEY=/d' "$_f"
@@ -753,16 +758,16 @@ ensureGitHubAuth() {
 		"$gh_bin" config set git_protocol ssh >/dev/null 2>&1 || true
 	}
 
-	local github_token="${GH_TOKEN:-${GITHUB_TOKEN:-}}"
-	if [[ -z "$github_token" ]]; then
-		# Prefer least-privilege project token, then the full-access fallback.
-		for ref in "op://secrets/dotfiles/github/token" "op://secrets/github/api/token"; do
-			github_token="$(op read "$ref" 2>/dev/null || true)"
-			if [[ -n "$github_token" ]]; then
-				break
-			fi
-		done
-	fi
+	# O token do GitHub vive SO no 1Password e nunca e' exportado: `gh` guarda a
+	# sessao propria (gh auth). Aqui o valor so passa por stdin do `gh auth login`.
+	local github_token=""
+	# Prefer least-privilege project token, then the full-access fallback.
+	for ref in "op://secrets/dotfiles/github/token" "op://secrets/github/api/token"; do
+		github_token="$(op read "$ref" 2>/dev/null || true)"
+		if [[ -n "$github_token" ]]; then
+			break
+		fi
+	done
 
 	# Reuse existing authenticated session when available.
 	if "$gh_bin" auth status --hostname github.com >/dev/null 2>&1; then
@@ -771,10 +776,9 @@ ensureGitHubAuth() {
 	fi
 
 	if [[ -z "$github_token" ]]; then
-		echo "Token do GitHub nao encontrado (GITHUB_TOKEN/GH_TOKEN/op://secrets/dotfiles/github/token/op://secrets/github/api/token)."
+		echo "Token do GitHub nao encontrado (op://secrets/dotfiles/github/token; fallback op://secrets/github/api/token)."
 		return 1
 	fi
-	export GH_TOKEN="$github_token"
 
 	if ! printf '%s\n' "$github_token" | "$gh_bin" auth login --hostname github.com --git-protocol ssh --with-token >/dev/null 2>&1; then
 		# In some environments (plugins/wrappers), login may fail even with an active session.
@@ -861,67 +865,155 @@ configureGitSigningKey() {
 }
 
 # --------------------------------------------------------------------
-# Chave de assinatura de automacao (maquina/IA), por maquina.
+# Identidade de automacao UNICA (`daneel`) + allowed_signers.
 #
-# Par ed25519 gerado no 1o uso em ${XDG_CONFIG_HOME:-~/.config}/dotfiles/signing
-# (dir 700, chave privada 600). Idempotente: se a chave existe, nao regera nem
-# sobrescreve. A saida mostra apenas a chave PUBLICA + instrucao de cadastro no
-# GitHub; a chave privada nunca e' impressa.
-# Tambem (re)escreve `allowed_signers` com a publica humana (git.signing_key da
-# config) e a de automacao, para `git verify-commit` local nos dois modos.
-ensureAutomationSigningKey() {
-	local dir key_path pub_path host human_key
-	dir="${XDG_CONFIG_HOME:-$HOME/.config}/dotfiles/signing"
-	key_path="$dir/automation_ed25519"
-	host="$(hostname 2>/dev/null || printf 'unknown')"
-	host="${host%%.*}"
+# SSOT e' o 1Password: a config local guarda apenas REFS (`automation.*` em
+# app/bootstrap/user-config.yaml). Este passo materializa, sempre via
+# `op read --out-file` (o valor NUNCA passa pelo stdout):
+#   - ${XDG_CONFIG_HOME:-~/.config}/tars/automation/daneel_ed25519 (600)
+#   - ${XDG_CONFIG_HOME:-~/.config}/tars/automation/op-sa.token   (600)
+#   - ${XDG_CONFIG_HOME:-~/.config}/git/allowed_signers (SSOT da ref)
+# e publica gpg.ssh.allowedSignersFile no git config global.
+#
+# Idempotente: regrava apenas quando o conteudo difere. NUNCA gera chave sozinho:
+# se o item nao existir no 1Password, falha com instrucao para o dono criar.
+# --------------------------------------------------------------------
+
+# Default refs do robo. Ficam aqui (e nao espalhadas) para o bootstrap funcionar
+# em maquinas cujo user-config.yaml ainda nao tem a secao `automation`.
+daneel_default_signing_key_ref() { printf 'op://secrets/daneel/signing/private_key'; }
+daneel_default_op_token_ref() { printf 'op://secrets/daneel/1password/service-account'; }
+daneel_default_allowed_signers_ref() { printf 'op://secrets/dotfiles/git/allowed_signers'; }
+
+_daneel_config_value() {
+	local cfg="$DOTFILES_REPO_ROOT/app/bootstrap/user-config.yaml"
+	local value=""
+	if [[ -f "$cfg" ]]; then
+		value="$(_yaml_get "$cfg" "$1")"
+	fi
+	printf '%s' "$value"
+}
+
+# Materializa um item do 1Password em arquivo. $1=ref $2=destino $3=rotulo $4=mode
+# Retorna 0 quando o arquivo ja estava atualizado (no-op idempotente).
+_daneel_materialize_ref() {
+	local ref="$1" dest="$2" label="$3" mode="${4:-600}"
+	local dir tmp
+	dir="$(dirname "$dest")"
+
+	if ! command -v op >/dev/null 2>&1; then
+		echo "FALHA: op (1Password CLI) nao encontrado; $label nao materializado." >&2
+		return 1
+	fi
+
+	tmp="$(mktemp)" || {
+		echo "FALHA: sem diretorio temporario para materializar $label." >&2
+		return 1
+	}
+	chmod 600 "$tmp" 2>/dev/null || true
+
+	if ! op read --out-file "$tmp" "$ref" >/dev/null 2>&1; then
+		rm -f "$tmp"
+		echo "FALHA: nao foi possivel ler $ref do 1Password ($label)." >&2
+		echo "Instrucao: crie/atualize o item e o campo em $ref e garanta que a" >&2
+		echo "service account em uso tenha acesso ao vault. O bootstrap nao gera $label." >&2
+		return 1
+	fi
+	if [[ ! -s "$tmp" ]]; then
+		rm -f "$tmp"
+		echo "FALHA: $ref retornou vazio ($label)." >&2
+		return 1
+	fi
+
+	# Idempotencia: so regrava quando o conteudo difere.
+	if [[ -f "$dest" ]] && cmp -s "$tmp" "$dest"; then
+		rm -f "$tmp"
+		chmod "$mode" "$dest" 2>/dev/null || true
+		return 0
+	fi
+
+	mkdir -p "$dir" || {
+		rm -f "$tmp"
+		echo "FALHA: nao foi possivel criar $dir." >&2
+		return 1
+	}
+	chmod 700 "$dir" 2>/dev/null || true
+	mv -f "$tmp" "$dest" || {
+		rm -f "$tmp"
+		echo "FALHA: nao foi possivel gravar $dest." >&2
+		return 1
+	}
+	chmod "$mode" "$dest" 2>/dev/null || true
+	echo "$label atualizado em $dest."
+	return 0
+}
+
+# Chave privada do daneel precisa terminar em newline para o ssh-keygen aceitar.
+_daneel_normalize_key_newline() {
+	local key_path="$1"
+	[[ -s "$key_path" ]] || return 0
+	[[ "$(tail -c1 "$key_path" | od -An -c | tr -d ' ')" = "\n" ]] && return 0
+	printf '\n' >>"$key_path"
+}
+
+ensureDaneelIdentity() {
+	local dir key_path pub_path op_token_path allowed_signers_path
+	local signing_key_ref op_token_ref allowed_signers_ref rc=0
+
+	dir="${XDG_CONFIG_HOME:-$HOME/.config}/tars/automation"
+	key_path="$dir/daneel_ed25519"
+	pub_path="${key_path}.pub"
+	op_token_path="$dir/op-sa.token"
+	allowed_signers_path="${XDG_CONFIG_HOME:-$HOME/.config}/git/allowed_signers"
+
+	signing_key_ref="$(_daneel_config_value "automation.signing_key_ref")"
+	op_token_ref="$(_daneel_config_value "automation.op_token_ref")"
+	allowed_signers_ref="$(_daneel_config_value "automation.allowed_signers_ref")"
+	: "${signing_key_ref:=$(daneel_default_signing_key_ref)}"
+	: "${op_token_ref:=$(daneel_default_op_token_ref)}"
+	: "${allowed_signers_ref:=$(daneel_default_allowed_signers_ref)}"
+
+	# Chave privada + publica derivada dela (nunca geramos par novo).
+	if ! _daneel_materialize_ref "$signing_key_ref" "$key_path" "Chave de assinatura do daneel" 600; then
+		echo "Instrucao: cadastre a chave PUBLICA correspondente no 1Password em" >&2
+		echo "op://secrets/daneel/signing/public_key e no GitHub como Signing key." >&2
+		return 1
+	fi
+	_daneel_normalize_key_newline "$key_path"
 
 	if ! command -v ssh-keygen >/dev/null 2>&1; then
-		echo "AVISO: ssh-keygen nao encontrado; chave de assinatura de automacao nao provisionada."
-		return 0
+		echo "FALHA: ssh-keygen nao encontrado; chave PUBLICA do daneel nao derivada." >&2
+		return 1
+	fi
+	if ! ssh-keygen -y -f "$key_path" >"$pub_path" 2>/dev/null || [[ ! -s "$pub_path" ]]; then
+		rm -f "$pub_path"
+		echo "FALHA: chave privada do daneel invalida em $key_path (nao derivou a publica)." >&2
+		return 1
+	fi
+	chmod 600 "$pub_path" 2>/dev/null || true
+
+	# Token da service account do daneel (para uso headless do op).
+	if ! _daneel_materialize_ref "$op_token_ref" "$op_token_path" "Token da service account do daneel" 600; then
+		rc=1
 	fi
 
-	if [[ -f "$key_path" ]]; then
-		echo "Chave de assinatura de automacao ja existe (idempotente, nao regerada): $key_path"
-	else
-		mkdir -p "$dir" || {
-			echo "AVISO: falha ao criar $dir; chave de assinatura de automacao nao provisionada."
-			return 0
-		}
-		chmod 700 "$dir" 2>/dev/null || true
-		if ! ssh-keygen -t ed25519 -N '' -C "automation-$host" -f "$key_path" -q; then
-			echo "AVISO: falha ao gerar a chave de assinatura de automacao em $key_path."
-			return 0
-		fi
-		echo "Chave de assinatura de automacao gerada para esta maquina."
+	# allowed_signers: SSOT no 1Password, materializado + registrado no git global.
+	if ! _daneel_materialize_ref "$allowed_signers_ref" "$allowed_signers_path" "allowed_signers" 644; then
+		rc=1
+	elif command -v git >/dev/null 2>&1; then
+		git config --global gpg.ssh.allowedSignersFile "$allowed_signers_path" ||
+			echo "AVISO: falha ao gravar gpg.ssh.allowedSignersFile no git config global."
 	fi
 
-	chmod 600 "$key_path" 2>/dev/null || true
-	chmod 600 "${key_path}.pub" 2>/dev/null || true
-	pub_path="${key_path}.pub"
-	[[ -f "$pub_path" ]] || {
-		echo "AVISO: chave publica de automacao ausente em $pub_path."
-		return 0
-	}
-
-	# allowed_signers: publica humana (SSOT: git.signing_key) + automacao.
-	human_key=""
-	if [[ -f "$DOTFILES_REPO_ROOT/app/bootstrap/user-config.yaml" ]]; then
-		human_key="$(_yaml_get "$DOTFILES_REPO_ROOT/app/bootstrap/user-config.yaml" "git.signing_key")"
+	# Migracao: nenhum allowed_signers gerado localmente deve sobreviver.
+	local legacy_dir="${XDG_CONFIG_HOME:-$HOME/.config}/dotfiles/signing"
+	if [[ -f "$legacy_dir/allowed_signers" ]] && [[ "$legacy_dir/allowed_signers" != "$allowed_signers_path" ]]; then
+		rm -f "$legacy_dir/allowed_signers"
+		echo "Migracao: removedor o allowed_signers local legado ($legacy_dir/allowed_signers)."
 	fi
-	{
-		if [[ "$human_key" == ssh-* || "$human_key" == ecdsa-* ]]; then
-			local human_principal
-			human_principal="$(printf '%s' "$human_key" | awk '{print $NF}')"
-			printf '%s %s\n' "$human_principal" "$human_key"
-		fi
-		printf '%s %s\n' "automation-$host" "$(cat "$pub_path")"
-	} >"$dir/allowed_signers"
-	chmod 644 "$dir/allowed_signers" 2>/dev/null || true
 
-	echo "Assinatura de automacao (TARS_ACTOR=agent) usa: $pub_path"
-	echo "Instrucao: cadastre a chave PUBLICA acima no GitHub como Signing key com o titulo 'automation-$host'."
-	echo "Publica: $(cat "$pub_path")"
+	[[ $rc -eq 0 ]] || return 1
+	echo "Identidade de automacao (TARS_ACTOR=agent) usa: $key_path"
 	return 0
 }
 
@@ -1019,7 +1111,7 @@ persistSopsAgeEnv || bootstrap_exit 1
 ensureOpSshSignAlias || bootstrap_exit 1
 ensureGitHubAuth || bootstrap_exit 1
 configureGitSigningKey
-ensureAutomationSigningKey
+ensureDaneelIdentity || bootstrap_exit 1
 
 
 # 6 - unset setup vars
