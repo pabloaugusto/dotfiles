@@ -27,4 +27,47 @@ Describe 'Add-Symlink' {
 		Test-Path -Path $linkDir -PathType Container | Should Be $true
 		(Get-Content -Path (Join-Path $linkDir 'sample.txt') -Raw) | Should Be "ok$([Environment]::NewLine)"
 	}
+
+	It 'preserva pasta real em backup .dotfiles-prelink-* antes de linkar' {
+		$source = Join-Path $TestDrive 'vscode-src'
+		$dest = Join-Path $TestDrive 'CodeUser'
+		New-Item -ItemType Directory -Path $source -Force | Out-Null
+		New-Item -ItemType Directory -Path $dest -Force | Out-Null
+		Set-Content -Path (Join-Path $dest 'settings.json') -Value 'do-usuario'
+
+		Add-Symlink -from $dest -to $source -WarningAction SilentlyContinue
+
+		$backups = @(Get-ChildItem -Path $TestDrive -Directory -Force | Where-Object { $_.Name -like 'CodeUser.dotfiles-prelink-*' })
+		$backups.Count | Should Be 1
+		(Get-Content -Path (Join-Path $backups[0].FullName 'settings.json') -Raw).Trim() | Should Be 'do-usuario'
+		(Get-Item -Path $dest -Force).LinkType | Should Be 'SymbolicLink'
+	}
+
+	It 'e no-op quando o link correto ja existe' {
+		$source = Join-Path $TestDrive 'src-noop'
+		$dest = Join-Path $TestDrive 'dest-noop'
+		New-Item -ItemType Directory -Path $source -Force | Out-Null
+
+		Add-Symlink -from $dest -to $source -WarningAction SilentlyContinue
+		$firstTarget = [string](Get-Item -Path $dest -Force).Target
+		Add-Symlink -from $dest -to $source -WarningAction SilentlyContinue
+
+		(Get-Item -Path $dest -Force).LinkType | Should Be 'SymbolicLink'
+		[string](Get-Item -Path $dest -Force).Target | Should Be $firstTarget
+	}
+
+	It 'remove apenas o link ao re-apontar, preservando o alvo anterior' {
+		$oldSource = Join-Path $TestDrive 'old-src'
+		$newSource = Join-Path $TestDrive 'new-src'
+		$dest = Join-Path $TestDrive 'dest-retarget'
+		New-Item -ItemType Directory -Path $oldSource -Force | Out-Null
+		New-Item -ItemType Directory -Path $newSource -Force | Out-Null
+		Set-Content -Path (Join-Path $oldSource 'keep.txt') -Value 'antigo'
+
+		Add-Symlink -from $dest -to $oldSource -WarningAction SilentlyContinue
+		Add-Symlink -from $dest -to $newSource -WarningAction SilentlyContinue
+
+		Test-Path -Path (Join-Path $oldSource 'keep.txt') | Should Be $true
+		@(Get-ChildItem -Path $TestDrive -Directory -Force | Where-Object { $_.Name -like 'dest-retarget.dotfiles-prelink-*' }).Count | Should Be 0
+	}
 }
