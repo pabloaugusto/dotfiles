@@ -66,7 +66,8 @@ setup() {
   run bash "$REPO_ROOT/app/bootstrap/bootstrap-ubuntu-wsl.sh" relink
   [ "$status" -eq 0 ]
 
-  run bash -c "ls -d \"$HOME\"/*.dotfiles-prelink-* 2>/dev/null | wc -l"
+  # glob precisa incluir dotfiles (backups comecam com '.')
+  run bash -c "find \"$HOME\" -maxdepth 1 -name '.*.dotfiles-prelink-*' | wc -l"
   [ "$output" = "0" ]
 }
 
