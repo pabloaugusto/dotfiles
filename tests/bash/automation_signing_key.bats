@@ -57,7 +57,7 @@ STUB
   export PATH="$BATS_TEST_TMPDIR/bin:$PATH"
 
   # Fixture de um par ed25519 real (chave de teste, nunca a do dono).
-  ssh-keygen -t ed25519 -N '' -C 'daneel@pabloaugusto.com' -f "$BATS_TEST_TMPDIR/daneel_fixture" -q
+  ssh-keygen -t ed25519 -N '' -C 'daneel-bot@pabloaugusto.com' -f "$BATS_TEST_TMPDIR/daneel_fixture" -q
 
   # Em Git Bash (Windows) chmod nao tem efeito (dirs ficam 755); a assercao de
   # modo POSIX so vale onde o SO representa permissao de verdade (WSL/Linux).
@@ -111,7 +111,7 @@ publish_all_refs() {
   op_publish 'op://secrets/daneel-bot/private key?ssh-format=openssh' "$BATS_TEST_TMPDIR/daneel_fixture"
   printf 'sa-token-de-teste\n' >"$BATS_TEST_TMPDIR/token"
   op_publish 'op://secrets/daneel-bot/1password/service-account' "$BATS_TEST_TMPDIR/token"
-  printf 'daneel@pabloaugusto.com %s\n' "$(cat "$BATS_TEST_TMPDIR/daneel_fixture.pub")" >"$BATS_TEST_TMPDIR/as"
+  printf 'daneel-bot@pabloaugusto.com %s\n' "$(cat "$BATS_TEST_TMPDIR/daneel_fixture.pub")" >"$BATS_TEST_TMPDIR/as"
   op_publish 'op://secrets/dotfiles/git/allowed_signers' "$BATS_TEST_TMPDIR/as"
 }
 
@@ -204,7 +204,7 @@ publish_all_refs() {
   [ "$GIT_CONFIG_VALUE_2" = "$ALLOWED_SIGNERS" ]
   [ "$GIT_CONFIG_KEY_3" = "user.name" ]
   [ "$GIT_CONFIG_VALUE_3" = "Daneel" ]
-  [ "$GIT_CONFIG_VALUE_4" = "daneel@pabloaugusto.com" ]
+  [ "$GIT_CONFIG_VALUE_4" = "daneel-bot@pabloaugusto.com" ]
   # Identidade unica: nada de hostname em nome de chave/config.
   [[ "$GIT_CONFIG_VALUE_0" != *"$(hostname)"* ]]
 

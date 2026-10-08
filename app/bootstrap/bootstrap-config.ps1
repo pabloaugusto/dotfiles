@@ -78,7 +78,7 @@ function Get-BootstrapConfigDefaults {
 	$defaults['automation.op_token_ref'] = 'op://secrets/daneel-bot/1password/service-account'
 	$defaults['automation.allowed_signers_ref'] = 'op://secrets/dotfiles/git/allowed_signers'
 	$defaults['automation.git_name'] = 'Daneel'
-	$defaults['automation.git_email'] = 'daneel@pabloaugusto.com'
+	$defaults['automation.git_email'] = 'daneel-bot@pabloaugusto.com'
 	return $defaults
 }
 

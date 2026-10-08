@@ -275,7 +275,7 @@ SSOT única, na seção `automation` de
 | `automation.signing_public_key_ref` | `op://secrets/daneel-bot/public key` |
 | `automation.op_token_ref` | `op://secrets/daneel-bot/1password/service-account` |
 | `automation.allowed_signers_ref` | `op://secrets/dotfiles/git/allowed_signers` |
-| `automation.git_name` / `automation.git_email` | `Daneel` / `daneel@pabloaugusto.com` |
+| `automation.git_name` / `automation.git_email` | `Daneel` / `daneel-bot@pabloaugusto.com` |
 
 Materialização (bootstrap, idempotente):
 

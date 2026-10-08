@@ -103,7 +103,7 @@ Describe 'bootstrap-config path helpers' {
 		$rendered | Should Match ([regex]::Escape('op_token_ref: "op://secrets/daneel-bot/1password/service-account"'))
 		$rendered | Should Match ([regex]::Escape('allowed_signers_ref: "op://secrets/dotfiles/git/allowed_signers"'))
 		$rendered | Should Match 'git_name: "Daneel"'
-		$rendered | Should Match 'git_email: "daneel@pabloaugusto.com"'
+		$rendered | Should Match 'git_email: "daneel-bot@pabloaugusto.com"'
 	}
 
 	It 'nao escreve ref de automacao por maquina no secrets-ref' {

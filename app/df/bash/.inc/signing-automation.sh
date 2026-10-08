@@ -69,7 +69,7 @@ dotfiles_apply_automation_signing_env() {
 
   # Identidade git do robo (SSOT: automation.git_name/git_email na config).
   local git_name="${TARS_AUTOMATION_GIT_NAME:-Daneel}"
-  local git_email="${TARS_AUTOMATION_GIT_EMAIL:-daneel@pabloaugusto.com}"
+  local git_email="${TARS_AUTOMATION_GIT_EMAIL:-daneel-bot@pabloaugusto.com}"
 
   local -a pairs=(
     "user.signingkey=$pub_path"
