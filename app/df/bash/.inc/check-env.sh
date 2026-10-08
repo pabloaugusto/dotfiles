@@ -371,7 +371,7 @@ checkEnv() {
     elif [ -z "$config_signing_key" ]; then
       _add_result "warning" "Git signing key" "git.signing_key vazio na config: sem SSOT para validar user.signingkey." "Preencha 'git.signing_key' em app/bootstrap/user-config.yaml e rode o bootstrap/checkEnv novamente."
     elif [ -z "$signing_key" ]; then
-      _add_result "fail" "Git signing key" "user.signingkey ausente (git.signing_key definido na config)." "Rode o bootstrap (configureGitSigningKey) ou 'git config --global user.signingkey \"<valor de git.signing_key>\"'."
+      _add_result "fail" "Git signing key" "user.signingkey ausente (git.signing_key definido na config)." "Rode o bootstrap (configureGitSigningKey) ou grave user.signingkey em ~/.config/git/.gitconfig.local com o valor de 'git.signing_key'."
     else
       local _cfg_key_norm _skey_norm
       _cfg_key_norm="$(printf '%s' "$config_signing_key" | awk 'NF {print; exit}' | tr -s '[:space:]' ' ' | sed 's/^ //; s/ $//')"
@@ -379,7 +379,7 @@ checkEnv() {
       if [ "$_cfg_key_norm" = "$_skey_norm" ]; then
         _add_result "success" "Git signing key" "user.signingkey confere com git.signing_key da config." ""
       else
-        _add_result "fail" "Git signing key" "user.signingkey difere de git.signing_key da config." "Sincronize com 'git config --global user.signingkey' usando o valor de 'git.signing_key' em app/bootstrap/user-config.yaml."
+        _add_result "fail" "Git signing key" "user.signingkey difere de git.signing_key da config." "Sincronize user.signingkey (em ~/.config/git/.gitconfig.local) com 'git.signing_key' de app/bootstrap/user-config.yaml."
       fi
     fi
 
@@ -561,7 +561,7 @@ checkEnv() {
   # validar. Signer nao configurado/irresolvivel, chave publica ilegivel, erro
   # real de assinatura e ausencia de tmpdir sao `fail`.
   if [ -z "$signing_key" ]; then
-    _add_result "fail" "Signature verification" "signer nao configurado: user.signingkey ausente, assinatura nao verificada." "Defina 'git config --global user.signingkey \"ssh-ed25519 ...\"' e rode checkEnv novamente."
+    _add_result "fail" "Signature verification" "signer nao configurado: user.signingkey ausente, assinatura nao verificada." "Defina user.signingkey (em ~/.config/git/.gitconfig.local) e rode checkEnv novamente."
   elif ! command -v ssh-keygen >/dev/null 2>&1; then
     _add_result "fail" "Signature verification" "signer irresolvivel: ssh-keygen nao encontrado no PATH, assinatura nao verificada." "Instale OpenSSH (ssh-keygen) e rode checkEnv novamente."
   else

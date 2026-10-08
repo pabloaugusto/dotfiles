@@ -839,9 +839,21 @@ EOF
 # Cleanup export vars
 # --------------------------------------------------------------------
 # SSOT da chave PUBLICA de assinatura: user-config.yaml -> git.signing_key.
-# Nunca vem de `op read` (chave publica nao e' segredo). Idempotente: so grava
-# user.signingkey global quando o valor atual difere. Campo vazio = aviso, sem
+# Nunca vem de `op read` (chave publica nao e' segredo).
+#
+# O destino e' `~/.config/git/.gitconfig.local` (incluido por [include] no
+# ~/.gitconfig), NUNCA `git config --global`: no ~/.gitconfig e' symlink para
+# `app/df/git/.gitconfig`, entao escrever ali suja a working tree versionada a
+# cada bootstrap. O `.local` e' justamente o lugar de dado da maquina (e esta
+# no .gitignore).
+#
+# Idempotente: so grava no .local quando o valor EFETIVO (merge de todos os
+# arquivos, inclui os overlays por ambiente) difere. Campo vazio = aviso, sem
 # quebrar o restante do bootstrap.
+gitLocalConfigPath() {
+	printf '%s' "${XDG_CONFIG_HOME:-$HOME/.config}/git/.gitconfig.local"
+}
+
 configureGitSigningKey() {
 	local cfg="$DOTFILES_REPO_ROOT/app/bootstrap/user-config.yaml"
 	local signing_key=""
@@ -851,24 +863,27 @@ configureGitSigningKey() {
 	fi
 
 	if [[ -z "${signing_key//[[:space:]]/}" ]]; then
-		echo "AVISO: git.signing_key vazio em app/bootstrap/user-config.yaml; user.signingkey global preservado. Preencha para assinar commits."
+		echo "AVISO: git.signing_key vazio em app/bootstrap/user-config.yaml; user.signingkey preservado. Preencha para assinar commits."
 		return 0
 	fi
 	if ! command -v git >/dev/null 2>&1; then
-		echo "AVISO: git nao encontrado no PATH; user.signingkey global nao sincronizado."
+		echo "AVISO: git nao encontrado no PATH; user.signingkey nao sincronizado."
 		return 0
 	fi
 
+	local local_cfg=""
+	local_cfg="$(gitLocalConfigPath)"
+
 	local current=""
-	current="$(git config --global --get user.signingkey 2>/dev/null || true)"
+	current="$(git config --get user.signingkey 2>/dev/null || true)"
 	if [[ "$current" == "$signing_key" ]]; then
 		return 0
 	fi
 
-	if git config --global user.signingkey "$signing_key"; then
-		echo "user.signingkey global sincronizado a partir de git.signing_key."
+	if git config --file "$local_cfg" user.signingkey "$signing_key"; then
+		echo "user.signingkey sincronizado a partir de git.signing_key ($local_cfg)."
 	else
-		echo "AVISO: falha ao gravar git config --global user.signingkey."
+		echo "AVISO: falha ao gravar user.signingkey em $local_cfg."
 	fi
 	return 0
 }
@@ -1031,12 +1046,14 @@ ensureDaneelIdentity() {
 		rc=1
 	fi
 
-	# allowed_signers: SSOT no 1Password, materializado + registrado no git global.
+	# allowed_signers: SSOT no 1Password, materializado + registrado no
+	# .gitconfig.local (incluido pelo ~/.gitconfig). Escrever em `--global`
+	# sujaria o app/df/git/.gitconfig versionado.
 	if ! _daneel_materialize_ref "$allowed_signers_ref" "$allowed_signers_path" "allowed_signers" 644; then
 		rc=1
 	elif command -v git >/dev/null 2>&1; then
-		git config --global gpg.ssh.allowedSignersFile "$allowed_signers_path" ||
-			echo "AVISO: falha ao gravar gpg.ssh.allowedSignersFile no git config global."
+		git config --file "$(gitLocalConfigPath)" gpg.ssh.allowedSignersFile "$allowed_signers_path" ||
+			echo "AVISO: falha ao gravar gpg.ssh.allowedSignersFile em $(gitLocalConfigPath)."
 	fi
 
 	# Migracao: nenhum allowed_signers gerado localmente deve sobreviver — nem o

@@ -93,6 +93,7 @@ extract_fn() {
 
 load_daneel_fns() {
   {
+    extract_fn gitLocalConfigPath
     extract_fn daneel_default_signing_key_ref
     extract_fn daneel_default_op_token_ref
     extract_fn daneel_default_allowed_signers_ref
@@ -142,10 +143,11 @@ publish_all_refs() {
   [[ "$output" != *"$priv_head"* ]]
   [ "$(cat "$AUTO_KEY.pub")" = "$(cat "$BATS_TEST_TMPDIR/daneel_fixture.pub")" ]
 
-  # allowed_signers registrado no git global. O Git normaliza o caminho
+  # allowed_signers registrado no .gitconfig.local (valor EFETIVO lido com
+  # merge; `--global --get` nao segue [include]). O Git normaliza o caminho
   # (ex.: /tmp -> C:/... no Git Bash), entao validamos existencia + nome.
   local configured_signer=""
-  configured_signer="$(git config --global --get gpg.ssh.allowedSignersFile)"
+  configured_signer="$(git config --get gpg.ssh.allowedSignersFile)"
   [ -n "$configured_signer" ]
   [ -f "$configured_signer" ]
   case "$configured_signer" in
@@ -154,9 +156,12 @@ publish_all_refs() {
   esac
 
   # B2: fora do repo. ~/.config/git e' o app/df/git versionado (symlink do
-  # bootstrap), entao materializar ali deixaria a working tree suja.
+  # bootstrap), entao materializar ali deixaria a working tree suja. A ref
+  # gravada e' so a PONTE para o arquivo de estado, no .gitconfig.local.
   [ "$ALLOWED_SIGNERS" != "$XDG_CONFIG_HOME/git/allowed_signers" ]
   [ ! -e "$XDG_CONFIG_HOME/git/allowed_signers" ]
+  [ -f "$XDG_CONFIG_HOME/git/.gitconfig.local" ]
+  ! grep -q 'allowed_signers' "$GIT_CONFIG_GLOBAL"
 }
 
 @test "ensureDaneelIdentity e' idempotente (2a execucao nao regrava)" {
