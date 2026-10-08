@@ -971,6 +971,9 @@ _daneel_materialize_ref() {
 		echo "service account em uso tenha acesso ao vault. O bootstrap nao gera $label." >&2
 		return 1
 	fi
+	# Valor gravado a partir do Windows pode vir com CRLF; o OpenSSH do Linux
+	# recusa chave com \r. Normaliza antes de comparar (idempotencia) e gravar.
+	sed -i 's/\r$//' "$tmp"
 	if [[ ! -s "$tmp" ]]; then
 		rm -f "$tmp"
 		echo "FALHA: $ref retornou vazio ($label)." >&2
