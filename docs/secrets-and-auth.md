@@ -271,8 +271,8 @@ SSOT única, na seção `automation` de
 
 | campo | default |
 | --- | --- |
-| `automation.signing_key_ref` | `op://secrets/daneel-bot/private key?ssh-format=openssh` |
-| `automation.signing_public_key_ref` | `op://secrets/daneel-bot/public key` |
+| `automation.signing_key_ref` | `op://secrets/daneel-bot/private_key?ssh-format=openssh` |
+| `automation.signing_public_key_ref` | `op://secrets/daneel-bot/public_key` |
 | `automation.op_token_ref` | `op://secrets/daneel-bot/1password/service-account` |
 | `automation.allowed_signers_ref` | `op://secrets/dotfiles/git/allowed_signers` |
 | `automation.git_name` / `automation.git_email` | `Daneel` / `daneel-bot@pabloaugusto.com` |
