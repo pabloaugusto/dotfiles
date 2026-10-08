@@ -73,9 +73,9 @@ function Get-BootstrapConfigDefaults {
 	# account em TODAS as maquinas. Nao existe chave nem ref por hostname.
 	# A chave privada vive so no 1Password; o bootstrap materializa em
 	# %APPDATA%\tars\automation (daneel_ed25519, .pub, op-sa.token).
-	$defaults['automation.signing_key_ref'] = 'op://secrets/daneel/private key?ssh-format=openssh'
-	$defaults['automation.signing_public_key_ref'] = 'op://secrets/daneel/public key'
-	$defaults['automation.op_token_ref'] = 'op://secrets/daneel/1password/service-account'
+	$defaults['automation.signing_key_ref'] = 'op://secrets/daneel-bot/private key?ssh-format=openssh'
+	$defaults['automation.signing_public_key_ref'] = 'op://secrets/daneel-bot/public key'
+	$defaults['automation.op_token_ref'] = 'op://secrets/daneel-bot/1password/service-account'
 	$defaults['automation.allowed_signers_ref'] = 'op://secrets/dotfiles/git/allowed_signers'
 	$defaults['automation.git_name'] = 'Daneel'
 	$defaults['automation.git_email'] = 'daneel@pabloaugusto.com'
@@ -881,9 +881,9 @@ function Ensure-DaneelAutomationIdentity {
 	#>
 	param (
 		[hashtable]$Config,
-		[string]$DefaultSigningKeyRef = 'op://secrets/daneel/private key?ssh-format=openssh',
-		[string]$DefaultSigningPublicKeyRef = 'op://secrets/daneel/public key',
-		[string]$DefaultOpTokenRef = 'op://secrets/daneel/1password/service-account',
+		[string]$DefaultSigningKeyRef = 'op://secrets/daneel-bot/private key?ssh-format=openssh',
+		[string]$DefaultSigningPublicKeyRef = 'op://secrets/daneel-bot/public key',
+		[string]$DefaultOpTokenRef = 'op://secrets/daneel-bot/1password/service-account',
 		[string]$DefaultAllowedSignersRef = 'op://secrets/dotfiles/git/allowed_signers'
 	)
 
