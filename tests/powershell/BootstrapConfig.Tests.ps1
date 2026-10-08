@@ -125,8 +125,8 @@ Describe 'bootstrap-config path helpers' {
 		$rendered | Should Not Match 'automation_signing_key_ref'
 		# As refs do 1Password podem ter espaco e metacharacteres de regex (ex.:
 		# `?ssh-format=openssh`): o match e' literal, entao escapa o padrao.
-		$rendered | Should Match ([regex]::Escape('signing_key_ref: "op://secrets/daneel-bot/private_key?ssh-format=openssh"'))
-		$rendered | Should Match ([regex]::Escape('signing_public_key_ref: "op://secrets/daneel-bot/public_key"'))
+		$rendered | Should Match ([regex]::Escape('signing_key_ref: "op://secrets/daneel-bot/github/signing-ssh-private-key"'))
+		$rendered | Should Match ([regex]::Escape('signing_public_key_ref: "op://secrets/daneel-bot/github/signing-ssh-public-key"'))
 		$rendered | Should Match ([regex]::Escape('op_token_ref: "op://secrets/daneel-bot/1password/service-account"'))
 		$rendered | Should Match ([regex]::Escape('allowed_signers_ref: "op://secrets/dotfiles/git/allowed_signers"'))
 		$rendered | Should Match 'git_name: "Daneel"'
@@ -203,7 +203,7 @@ Describe 'identidade de automacao daneel' {
 
 		$keyContent = (Get-Content -Raw -Path $keyPath).Trim()
 		# Match literal: a ref tem `?` (quantificador de regex) no query string.
-		$keyContent | Should Match ([regex]::Escape('op://secrets/daneel-bot/private_key?ssh-format=openssh'))
+		$keyContent | Should Match ([regex]::Escape('op://secrets/daneel-bot/github/signing-ssh-private-key'))
 		(Get-Content -Raw -Path $tokenPath).Trim() | Should Match ([regex]::Escape('op://secrets/daneel-bot/1password/service-account'))
 
 		# Idempotencia: materializar de novo nao reescreve (timestamp preservado).

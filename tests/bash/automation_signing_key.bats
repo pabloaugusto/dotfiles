@@ -118,7 +118,7 @@ op_publish() { # $1=ref $2=arquivo-com-o-conteudo
 }
 
 publish_all_refs() {
-  op_publish 'op://secrets/daneel-bot/private_key?ssh-format=openssh' "$BATS_TEST_TMPDIR/daneel_fixture"
+  op_publish 'op://secrets/daneel-bot/github/signing-ssh-private-key' "$BATS_TEST_TMPDIR/daneel_fixture"
   printf 'sa-token-de-teste\n' >"$BATS_TEST_TMPDIR/token"
   op_publish 'op://secrets/daneel-bot/1password/service-account' "$BATS_TEST_TMPDIR/token"
   printf 'daneel-bot@pabloaugusto.com %s\n' "$(cat "$BATS_TEST_TMPDIR/daneel_fixture.pub")" >"$BATS_TEST_TMPDIR/as"
@@ -192,7 +192,7 @@ publish_all_refs() {
   publish_all_refs
   printf '%s' "$(cat "$BATS_TEST_TMPDIR/daneel_fixture")" >"$BATS_TEST_TMPDIR/daneel_fixture.no_nl"
   mv "$BATS_TEST_TMPDIR/daneel_fixture.no_nl" "$BATS_TEST_TMPDIR/daneel_fixture"
-  op_publish 'op://secrets/daneel-bot/private_key?ssh-format=openssh' "$BATS_TEST_TMPDIR/daneel_fixture"
+  op_publish 'op://secrets/daneel-bot/github/signing-ssh-private-key' "$BATS_TEST_TMPDIR/daneel_fixture"
 
   run ensureDaneelIdentity
   [ "$status" -eq 0 ]
@@ -216,7 +216,7 @@ publish_all_refs() {
   run ensureDaneelIdentity
   [ "$status" -ne 0 ]
   [[ "$output" == *"FALHA"* ]]
-  [[ "$output" == *"op://secrets/daneel-bot/private_key?ssh-format=openssh"* ]]
+  [[ "$output" == *"op://secrets/daneel-bot/github/signing-ssh-private-key"* ]]
   # Nunca gera chave sozinho.
   [ ! -f "$AUTO_KEY" ]
 }
