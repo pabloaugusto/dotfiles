@@ -21,9 +21,14 @@ setup() {
   export XDG_STATE_HOME="$BATS_TEST_TMPDIR/state"
   mkdir -p "$HOME" "$XDG_CONFIG_HOME" "$XDG_STATE_HOME"
 
-  # Isola a config global real do dono da maquina.
+  # Isola a config global real do dono da maquina, com a MESMA estrutura da
+  # maquina: o ~/.gitconfig (versionado) inclui o .gitconfig.local, onde vive
+  # o dado local (assinatura/allowed_signers).
   export GIT_CONFIG_GLOBAL="$BATS_TEST_TMPDIR/gitconfig"
-  : >"$GIT_CONFIG_GLOBAL"
+  {
+    printf '[include]\n'
+    printf '    path = %s/git/.gitconfig.local\n' "$XDG_CONFIG_HOME"
+  } >"$GIT_CONFIG_GLOBAL"
 
   export AUTO_DIR="$XDG_CONFIG_HOME/tars/automation"
   export AUTO_KEY="$AUTO_DIR/daneel_ed25519"

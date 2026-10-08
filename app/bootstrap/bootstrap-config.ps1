@@ -787,6 +787,9 @@ function Set-GitGlobalSigningKey {
 	}
 
 	$localConfigPath = Get-GitLocalConfigPath
+	# `git config --file` nao cria diretorio: sem isto o passo falharia numa
+	# maquina onde o ~/.config/git ainda nao existe.
+	New-Item -ItemType Directory -Path (Split-Path -Parent $localConfigPath) -Force | Out-Null
 
 	$current = (& git config --get user.signingkey 2>$null | Out-String).Trim()
 	if ($current -eq $SigningKey.Trim()) {
@@ -952,7 +955,9 @@ function Ensure-DaneelAutomationIdentity {
 	# allowed_signers (SSOT no 1Password) apontado pelo Git, no .gitconfig.local
 	# incluido pelo ~/.gitconfig (`--global` escreveria no arquivo versionado).
 	if ((Test-Path -Path $allowedSignersPath -PathType Leaf) -and (Get-Command git -ErrorAction SilentlyContinue)) {
-		& git config --file (Get-GitLocalConfigPath) gpg.ssh.allowedSignersFile $allowedSignersPath *> $null
+		$gitLocalConfig = Get-GitLocalConfigPath
+		New-Item -ItemType Directory -Path (Split-Path -Parent $gitLocalConfig) -Force | Out-Null
+		& git config --file $gitLocalConfig gpg.ssh.allowedSignersFile $allowedSignersPath *> $null
 	}
 
 	Write-Host "Identidade de automacao (daneel) pronta em: $dir"

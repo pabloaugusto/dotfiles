@@ -873,6 +873,9 @@ configureGitSigningKey() {
 
 	local local_cfg=""
 	local_cfg="$(gitLocalConfigPath)"
+	# `git config --file` nao cria diretorio: sem isto o passo falharia em
+	# silencio numa maquina onde o setProfileSymlinks ainda nao rodou.
+	mkdir -p "$(dirname "$local_cfg")" 2>/dev/null || true
 
 	local current=""
 	current="$(git config --get user.signingkey 2>/dev/null || true)"
@@ -1052,8 +1055,11 @@ ensureDaneelIdentity() {
 	if ! _daneel_materialize_ref "$allowed_signers_ref" "$allowed_signers_path" "allowed_signers" 644; then
 		rc=1
 	elif command -v git >/dev/null 2>&1; then
-		git config --file "$(gitLocalConfigPath)" gpg.ssh.allowedSignersFile "$allowed_signers_path" ||
-			echo "AVISO: falha ao gravar gpg.ssh.allowedSignersFile em $(gitLocalConfigPath)."
+		local local_cfg=""
+		local_cfg="$(gitLocalConfigPath)"
+		mkdir -p "$(dirname "$local_cfg")" 2>/dev/null || true
+		git config --file "$local_cfg" gpg.ssh.allowedSignersFile "$allowed_signers_path" ||
+			echo "AVISO: falha ao gravar gpg.ssh.allowedSignersFile em $local_cfg."
 	fi
 
 	# Migracao: nenhum allowed_signers gerado localmente deve sobreviver — nem o
