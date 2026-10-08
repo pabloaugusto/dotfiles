@@ -81,6 +81,14 @@ checkEnv() {
     fi
   }
 
+  # Distinguishes a signer that only needs a HUMAN UNLOCK (agent without the key
+  # listed / 1Password locked / agent refused the operation) from a REAL signing
+  # error. Only the former may be downgraded to `warning`; everything else is
+  # `fail`. $1 = captured ssh-keygen output.
+  _sign_needs_unlock() {
+    grep -qiE 'no private key found for public key|agent refused operation|refused operation|could not (find|open) key in agent|couldn.t (find|open) key in agent|communication with agent failed|agent_contains_key|keys? not found|no keys? (found|available)|sign_and_send_pubkey|permission denied \(publickey\)|needs? (to be )?unlock|is locked|passphrase' "$1" 2>/dev/null
+  }
+
   echo "checkEnv: validating environment"
 
   # Resolve the repo root BEFORE any check that wants to read repo-relative
@@ -421,9 +429,21 @@ checkEnv() {
   # the 1Password signer that blocks on a biometric prompt. Instead probe with
   # `ssh-keygen -Y sign`, which goes through ssh-agent and fails fast (no tty,
   # no askpass) when the key needs an unlock.
-  if command -v ssh-keygen >/dev/null 2>&1 && [ -n "$signing_key" ]; then
+  #
+  # Gate (nao rebaixar): `warning` SO quando o agente exige desbloqueio humano
+  # (agente sem chaves listadas / 1Password bloqueado) ou timeout por prompt de
+  # aprovacao -- sempre com o detalhe "requer desbloqueio" e o comando para
+  # validar. Signer nao configurado/irresolvivel, chave publica ilegivel, erro
+  # real de assinatura e ausencia de tmpdir sao `fail`.
+  if [ -z "$signing_key" ]; then
+    _add_result "fail" "Signature verification" "signer nao configurado: user.signingkey ausente, assinatura nao verificada." "Defina 'git config --global user.signingkey \"ssh-ed25519 ...\"' e rode checkEnv novamente."
+  elif ! command -v ssh-keygen >/dev/null 2>&1; then
+    _add_result "fail" "Signature verification" "signer irresolvivel: ssh-keygen nao encontrado no PATH, assinatura nao verificada." "Instale OpenSSH (ssh-keygen) e rode checkEnv novamente."
+  else
     _tmp_dir="$(mktemp -d "$HOME/checkenv-sign.XXXXXX" 2>/dev/null || mktemp -d 2>/dev/null || true)"
-    if [ -n "$_tmp_dir" ]; then
+    if [ -z "$_tmp_dir" ]; then
+      _add_result "fail" "Signature verification" "sem diretorio temporario para o probe de assinatura." "Verifique permissao de escrita em $HOME ou /tmp."
+    else
       local sign_pubkey="" sign_rc=0
       if [ -f "$signing_key" ]; then
         sign_pubkey="$signing_key"
@@ -436,8 +456,9 @@ checkEnv() {
       fi
 
       if [ -z "$sign_pubkey" ]; then
-        _add_result "warning" "Signature verification" "assinatura nao verificada (requer desbloqueio): user.signingkey nao aponta para uma chave publica legivel." "Ajuste user.signingkey para o caminho da chave publica ou o proprio valor ssh-ed25519 ..."
+        _add_result "fail" "Signature verification" "chave publica ilegivel: user.signingkey nao aponta para chave publica legivel nem para um valor ssh-ed25519 (valor: $signing_key)." "Ajuste user.signingkey para o caminho da chave publica ou o proprio valor ssh-ed25519 ..."
       else
+        local _probe_cmd="ssh-keygen -Y sign -n git -f '$signing_key' <arquivo>"
         printf 'checkenv %s\n' "$(date +%s)" >"$_tmp_dir/payload"
         # stdin fechado + SSH_ASKPASS_REQUIRE=never => nunca abre prompt de biometria.
         SSH_ASKPASS_REQUIRE=never DISPLAY='' SSH_ASKPASS='' \
@@ -446,17 +467,18 @@ checkEnv() {
         sign_rc=$?
         if [ $sign_rc -eq 0 ] && [ -f "$_tmp_dir/payload.sig" ]; then
           _add_result "success" "Signature verification" "ssh-keygen -Y sign concluiu sem prompt; o agent assinou com a chave configurada." ""
-        elif [ $sign_rc -eq 124 ]; then
-          _add_result "warning" "Signature verification" "assinatura nao verificada (requer desbloqueio): ssh-keygen -Y sign excedeu o tempo limite." "Desbloqueie a chave no agent/1Password e rode checkEnv novamente."
         else
           local _sign_err=""
           _sign_err="$(head -n1 "$_tmp_dir/sign.out" 2>/dev/null | tr -d '\r')"
-          _add_result "warning" "Signature verification" "assinatura nao verificada (requer desbloqueio): ${_sign_err:-ssh-keygen -Y sign falhou (rc=$sign_rc)}." "Desbloqueie a chave no agent/1Password (ou ajuste gpg.ssh.program) e rode checkEnv novamente."
+          _sign_err="${_sign_err:-ssh-keygen -Y sign falhou (rc=$sign_rc)}"
+          if [ $sign_rc -eq 124 ] || _sign_needs_unlock "$_tmp_dir/sign.out"; then
+            _add_result "warning" "Signature verification" "assinatura nao verificada (requer desbloqueio): $_sign_err | valide com: $_probe_cmd" "Desbloqueie a chave no agent/1Password e rode checkEnv novamente."
+          else
+            _add_result "fail" "Signature verification" "erro real de assinatura: $_sign_err" "Corrija gpg.format/gpg.ssh.program/user.signingkey e rode checkEnv novamente."
+          fi
         fi
       fi
       rm -rf "$_tmp_dir"
-    else
-      _add_result "warning" "Signature verification" "assinatura nao verificada (requer desbloqueio): nao foi possivel criar diretorio temporario." "Verifique permissao de escrita em $HOME ou /tmp."
     fi
   fi
 

@@ -121,6 +121,82 @@ STUB
   [[ "$output" == *"Summary: ok="* ]]
 }
 
+# --- Gate do probe de assinatura (nao pode ser rebaixado para warning) --------
+#
+# Regra: `warning` SO quando o agente exige desbloqueio humano (agente sem
+# chaves listadas / 1Password bloqueado) ou timeout por prompt de aprovacao,
+# sempre com "requer desbloqueio" e o comando de validacao. Signer ausente,
+# chave publica ilegivel e erro real de assinatura sao `fail`.
+
+# Stub configuravel: FAIL_MSG / FAIL_RC controlam a resposta de `-Y sign`.
+_stub_ssh_keygen_fail() {
+  export SIGN_FAIL_MSG="$1"
+  export SIGN_FAIL_RC="${2:-255}"
+  cat >"$STUB_BIN/ssh-keygen" <<'STUB'
+#!/usr/bin/env bash
+case " $* " in
+  *" -Y sign "*)
+    printf '%s\n' "$SIGN_FAIL_MSG" >&2
+    exit "$SIGN_FAIL_RC"
+    ;;
+esac
+for arg in "$@"; do last="$arg"; done
+: >"${last}.sig"
+exit 0
+STUB
+  chmod +x "$STUB_BIN/ssh-keygen"
+}
+
+@test "checkEnv marca FALHA quando user.signingkey esta ausente" {
+  cd "$PROBE_REPO"
+  git config user.signingkey ""
+  source "$REPO_ROOT/app/df/bash/.inc/check-env.sh"
+
+  run checkEnv
+  [[ "$output" == *"[FALHA] Signature verification"* ]]
+  [[ "$output" == *"signer nao configurado"* ]]
+  [ "$status" -ne 0 ]
+}
+
+@test "checkEnv marca FALHA quando user.signingkey nao e chave legivel" {
+  cd "$PROBE_REPO"
+  git config user.signingkey "$BATS_TEST_TMPDIR/nao-existe/nem-publica"
+  source "$REPO_ROOT/app/df/bash/.inc/check-env.sh"
+
+  run checkEnv
+  [[ "$output" == *"[FALHA] Signature verification"* ]]
+  [[ "$output" == *"chave publica ilegivel"* ]]
+  [ "$status" -ne 0 ]
+}
+
+@test "checkEnv marca FALHA em erro real de assinatura" {
+  cd "$PROBE_REPO"
+  printf 'ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIfake checkenv@test\n' >"$BATS_TEST_TMPDIR/fake.pub"
+  git config user.signingkey "$BATS_TEST_TMPDIR/fake.pub"
+  _stub_ssh_keygen_fail "unknown key type" 255
+  source "$REPO_ROOT/app/df/bash/.inc/check-env.sh"
+
+  run checkEnv
+  [[ "$output" == *"[FALHA] Signature verification"* ]]
+  [[ "$output" == *"erro real de assinatura"* ]]
+  [[ "$output" != *"[AVISO] Signature verification"* ]]
+  [ "$status" -ne 0 ]
+}
+
+@test "checkEnv marca AVISO com 'requer desbloqueio' quando o agente exige unlock" {
+  cd "$PROBE_REPO"
+  printf 'ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIfake checkenv@test\n' >"$BATS_TEST_TMPDIR/fake.pub"
+  git config user.signingkey "$BATS_TEST_TMPDIR/fake.pub"
+  _stub_ssh_keygen_fail 'No private key found for public key "fake.pub"' 255
+  source "$REPO_ROOT/app/df/bash/.inc/check-env.sh"
+
+  run checkEnv
+  [[ "$output" == *"[AVISO] Signature verification"* ]]
+  [[ "$output" == *"requer desbloqueio"* ]]
+  [[ "$output" == *"valide com: ssh-keygen -Y sign"* ]]
+  [[ "$output" != *"[FALHA] Signature verification"* ]]
+}
+
 @test "checkEnv nao dispara git commit -S (sem prompt de biometria)" {
   cd "$PROBE_REPO"
   # git que falha o teste se receber `commit -S`.
