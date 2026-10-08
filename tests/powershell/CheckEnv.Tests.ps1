@@ -52,6 +52,48 @@ Describe 'checkEnv' {
 	}
 }
 
+Describe 'helpers da identidade daneel' {
+	BeforeAll {
+		$script:OriginalAppData = $env:APPDATA
+		$env:APPDATA = Join-Path $TestDrive 'appdata'
+	}
+	AfterAll {
+		$env:APPDATA = $script:OriginalAppData
+	}
+
+	It 'resolve os caminhos da identidade unica (sem hostname)' {
+		(Get-AutomationSigningKeyPath) | Should Be (Join-Path $env:APPDATA 'tars\automation\daneel_ed25519')
+		(Get-AutomationSigningPublicKeyPath) | Should Be (Join-Path $env:APPDATA 'tars\automation\daneel_ed25519.pub')
+		(Get-AutomationOpTokenPath) | Should Be (Join-Path $env:APPDATA 'tars\automation\op-sa.token')
+		(Get-AutomationAllowedSignersPath) | Should Be (Join-Path $env:APPDATA 'git\allowed_signers')
+	}
+}
+
+Describe 'Get-ForbiddenEnvLeaks' {
+	It 'reporta NOMES dos segredos presentes no processo, nunca valores' {
+		$marker = 'segredo-nao-deve-vazar-123'
+		$original = $env:GH_TOKEN
+		$env:GH_TOKEN = $marker
+		try {
+			$leaks = @(Get-ForbiddenEnvLeaks)
+			($leaks -contains 'GH_TOKEN') | Should Be $true
+			($leaks -join ',') | Should Not Match $marker
+		}
+		finally {
+			if ($null -eq $original) { Remove-Item Env:GH_TOKEN -ErrorAction SilentlyContinue }
+			else { $env:GH_TOKEN = $original }
+		}
+	}
+
+	It 'cobre os segredos proibidos exigidos (nomes)' {
+		$source = Get-Content -Raw (Join-Path $repoRoot 'app\df\powershell\_functions.ps1')
+		foreach ($name in 'OP_SERVICE_ACCOUNT_TOKEN', 'OP_CONNECT_HOST', 'OP_CONNECT_TOKEN', 'GH_TOKEN', 'GITHUB_TOKEN', 'SOPS_AGE_KEY') {
+			$source | Should Match ([regex]::Escape("'$name'"))
+		}
+		$source | Should Match 'Segredos no ambiente'
+	}
+}
+
 Describe 'Invoke-CheckEnvSignedCommitTest' {
 	# Gate: `warning` SO quando o agente exige desbloqueio humano (agente sem
 	# chaves listadas / 1Password bloqueado) ou timeout por prompt de aprovacao,

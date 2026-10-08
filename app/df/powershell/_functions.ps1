@@ -1502,16 +1502,34 @@ function Ensure-GitHubCliAuthFrom1Password {
 
 
 ######################################################################################
-# Internal helpers: git signing mode / SSH public key normalization for checkEnv
+# Internal helpers: git signing mode / config SSOT for checkEnv
 ######################################################################################
-function Normalize-SshPublicKeyValue {
-	[CmdletBinding()]
-	param ([string]$Value)
+function Get-ForbiddenEnvLeaks {
+	<#
+	.SYNOPSIS
+	Retorna os NOMES dos segredos proibidos presentes no ambiente do PROCESSO.
 
-	if ([string]::IsNullOrWhiteSpace($Value)) { return '' }
-	$firstLine = (($Value -split "\r?\n") | Where-Object { -not [string]::IsNullOrWhiteSpace($_) } | Select-Object -First 1)
-	if ([string]::IsNullOrWhiteSpace($firstLine)) { return '' }
-	return (($firstLine -replace '\s+', ' ').Trim())
+	.DESCRIPTION
+	A automacao le arquivos com ACL (op-sa.token, daneel_ed25519) em vez de
+	variaveis de ambiente. Nunca retorna/expõe valores: apenas nomes.
+	#>
+	[CmdletBinding()]
+	param ([string[]]$Names)
+
+	if (-not $PSBoundParameters.ContainsKey('Names') -or $null -eq $Names -or $Names.Count -eq 0) {
+		$Names = @(
+			'OP_SERVICE_ACCOUNT_TOKEN', 'OP_CONNECT_HOST', 'OP_CONNECT_TOKEN',
+			'GH_TOKEN', 'GITHUB_TOKEN', 'SOPS_AGE_KEY'
+		)
+	}
+
+	$found = New-Object System.Collections.Generic.List[string]
+	foreach ($name in $Names) {
+		if (-not [string]::IsNullOrWhiteSpace([Environment]::GetEnvironmentVariable($name, 'Process'))) {
+			$found.Add($name)
+		}
+	}
+	return $found.ToArray()
 }
 
 function Get-BootstrapConfigSigningKey {
@@ -1544,15 +1562,44 @@ function Get-BootstrapConfigSigningKey {
 function Get-AutomationSigningKeyPath {
 	<#
 	.SYNOPSIS
-	Caminho do par ed25519 de assinatura de automacao desta maquina.
+	Caminho da chave PRIVADA da identidade unica de automacao `daneel`.
 
 	.DESCRIPTION
-	Gerado pelo bootstrap (Ensure-AutomationSigningKey) em
-	%APPDATA%\dotfiles\signing\automation_ed25519. Retorna '' quando o
+	Materializada pelo bootstrap (Ensure-DaneelAutomationIdentity) a partir do
+	1Password em %APPDATA%\tars\automation\daneel_ed25519 (ACL so do usuario).
+	Mesma identidade em TODAS as maquinas (sem hostname). Retorna '' quando o
 	%APPDATA% nao esta definido.
 	#>
 	if ([string]::IsNullOrWhiteSpace($env:APPDATA)) { return '' }
-	return (Join-Path $env:APPDATA 'dotfiles\signing\automation_ed25519')
+	return (Join-Path $env:APPDATA 'tars\automation\daneel_ed25519')
+}
+
+function Get-AutomationSigningPublicKeyPath {
+	<#
+	.SYNOPSIS
+	Caminho da chave PUBLICA da identidade de automacao `daneel` (nao e' segredo).
+	#>
+	$keyPath = Get-AutomationSigningKeyPath
+	if ([string]::IsNullOrWhiteSpace($keyPath)) { return '' }
+	return "$keyPath.pub"
+}
+
+function Get-AutomationOpTokenPath {
+	<#
+	.SYNOPSIS
+	Caminho do token da service account usada pela automacao (arquivo com ACL).
+	#>
+	if ([string]::IsNullOrWhiteSpace($env:APPDATA)) { return '' }
+	return (Join-Path $env:APPDATA 'tars\automation\op-sa.token')
+}
+
+function Get-AutomationAllowedSignersPath {
+	<#
+	.SYNOPSIS
+	Caminho do allowed_signers materializado (SSOT: automation.allowed_signers_ref).
+	#>
+	if ([string]::IsNullOrWhiteSpace($env:APPDATA)) { return '' }
+	return (Join-Path $env:APPDATA 'git\allowed_signers')
 }
 
 function Get-CheckEnvGitProbeContext {
@@ -1576,8 +1623,6 @@ function Get-CheckEnvGitProbeContext {
 	}
 
 	$worktreeMode = (& git -C $repoPath config --worktree --get dotfiles.signing.mode 2>$null | Out-String).Trim()
-	$automationKeyRef = (& git -C $repoPath config --worktree --get dotfiles.signing.automationPublicKeyRef 2>$null | Out-String).Trim()
-	$automationPrivateKeyPath = (& git -C $repoPath config --worktree --get dotfiles.signing.automationPrivateKeyPath 2>$null | Out-String).Trim()
 	$resolvedMode = $GitSigningMode
 	if ($resolvedMode -eq 'auto') {
 		# Ponto unico de resolucao: TARS_ACTOR=agent > worktree > human.
@@ -1590,17 +1635,18 @@ function Get-CheckEnvGitProbeContext {
 	}
 
 	return [PSCustomObject]@{
-		RepoPath          = $repoPath
-		TempRepoPath      = $tempRepo
-		ResolvedMode      = $resolvedMode
-		WorktreeMode      = $worktreeMode
-		AutomationKeyPath = Get-AutomationSigningKeyPath
-		AutomationKeyRef  = $automationKeyRef
-		AutomationPrivateKeyPath = $automationPrivateKeyPath
-		GpgFormat         = (& git -C $repoPath config --includes --get gpg.format 2>$null | Out-String).Trim()
-		GpgProgram        = (& git -C $repoPath config --includes --get gpg.ssh.program 2>$null | Out-String).Trim()
-		SigningKey        = (& git -C $repoPath config --includes --get user.signingkey 2>$null | Out-String).Trim()
-		CommitSignDefault = (& git -C $repoPath config --includes --get commit.gpgsign 2>$null | Out-String).Trim()
+		RepoPath                 = $repoPath
+		TempRepoPath             = $tempRepo
+		ResolvedMode             = $resolvedMode
+		WorktreeMode             = $worktreeMode
+		AutomationKeyPath        = Get-AutomationSigningKeyPath
+		AutomationPublicKeyPath  = Get-AutomationSigningPublicKeyPath
+		AutomationOpTokenPath    = Get-AutomationOpTokenPath
+		GpgFormat                = (& git -C $repoPath config --includes --get gpg.format 2>$null | Out-String).Trim()
+		GpgProgram               = (& git -C $repoPath config --includes --get gpg.ssh.program 2>$null | Out-String).Trim()
+		SigningKey               = (& git -C $repoPath config --includes --get user.signingkey 2>$null | Out-String).Trim()
+		CommitSignDefault        = (& git -C $repoPath config --includes --get commit.gpgsign 2>$null | Out-String).Trim()
+		AllowedSignersFile       = (& git -C $repoPath config --includes --get gpg.ssh.allowedSignersFile 2>$null | Out-String).Trim()
 	}
 }
 
@@ -1805,6 +1851,17 @@ function checkEnv {
 
 	Write-Host "checkEnv: validating environment"
 
+	# 0) Vazamento de segredos no ambiente do processo. A automacao usa arquivos
+	# com ACL (op-sa.token, daneel_ed25519 via op read --out-file) e NUNCA
+	# variaveis de ambiente.
+	$leakedEnvNames = @(Get-ForbiddenEnvLeaks)
+	if ($leakedEnvNames.Count -eq 0) {
+		Add-CheckResult -Item 'Segredos no ambiente' -Status 'success' -Detail 'Nenhum segredo proibido no ambiente do processo.' -Solution ''
+	}
+	else {
+		Add-CheckResult -Item 'Segredos no ambiente' -Status 'fail' -Detail ("Segredos no ambiente do processo (somente nomes): {0}." -f ($leakedEnvNames -join ', ')) -Solution 'Remova estas variaveis do ambiente/HKCU; a automacao le arquivos com ACL (op-sa.token, daneel_ed25519) em vez de env.'
+	}
+
 	# 1) Expected binaries: single source of truth for Windows. Os nomes abaixo
 	# saem das entradas de CLI de app/bootstrap/software-list.ps1 (op = 1Password
 	# CLI, task = go-task, oh-my-posh, glab = GitLab cli, python = python 3.12,
@@ -1982,18 +2039,20 @@ function checkEnv {
 		$gpgProgram = $gitProbe.GpgProgram
 		$signingKey = $gitProbe.SigningKey
 		$commitSign = $gitProbe.CommitSignDefault
-		$automationKeyRef = $gitProbe.AutomationKeyRef
-		$automationPrivateKeyPath = $gitProbe.AutomationPrivateKeyPath
 		$resolvedGitSigningMode = $gitProbe.ResolvedMode
 		$gitSshCommand = (& git -C $gitProbe.RepoPath config --get core.sshCommand 2>$null | Out-String).Trim()
 
 		Add-CheckResult -Item 'Git signing mode' -Status 'success' -Detail ("mode={0}." -f $resolvedGitSigningMode) -Solution ''
 
-		# Modo automation: par ed25519 por maquina (sem 1Password). Exige arquivo
-		# presente, ACL restrita ao usuario e assinatura de um blob de teste.
-		$automationSigningProbe = $null
+		# Modo automation: identidade UNICA `daneel`, materializada do 1Password
+		# pelo bootstrap. Exige chave privada presente com ACL restrita, token da
+		# service account presente/nao-vazio com ACL, e assinatura de um blob.
+		$automationPublicKeyActive = $false
 		if ($resolvedGitSigningMode -eq 'automation') {
 			$automationKeyPath = $gitProbe.AutomationKeyPath
+			$automationPublicKeyPath = $gitProbe.AutomationPublicKeyPath
+			$automationTokenPath = $gitProbe.AutomationOpTokenPath
+
 			if (-not [string]::IsNullOrWhiteSpace($automationKeyPath) -and (Test-Path -Path $automationKeyPath -PathType Leaf)) {
 				# ACL: a chave nao pode estar acessivel a outros usuarios.
 				$acl = Get-Acl -Path $automationKeyPath
@@ -2002,23 +2061,40 @@ function checkEnv {
 						$_.IdentityReference -notmatch 'SYSTEM|Administrators|Administradores'
 					})
 				if ($foreign.Count -eq 0) {
-					Add-CheckResult -Item 'Automation signing key file' -Status 'success' -Detail 'chave de automacao presente e com ACL restrita ao usuario.' -Solution ''
+					Add-CheckResult -Item 'Automation signing key file' -Status 'success' -Detail 'chave privada do daneel presente e com ACL restrita ao usuario.' -Solution ''
 				}
 				else {
-					Add-CheckResult -Item 'Automation signing key file' -Status 'fail' -Detail 'chave de automacao acessivel a outros usuarios.' -Solution "Rode: icacls `"$automationKeyPath`" /inheritance:r /grant:r `"`$env:USERNAME:(R,W)`""
+					Add-CheckResult -Item 'Automation signing key file' -Status 'fail' -Detail 'chave privada do daneel acessivel a outros usuarios.' -Solution "Rode: icacls `"$automationKeyPath`" /inheritance:r /grant:r `"`$env:USERNAME:(R,W)`""
 				}
 			}
 			else {
-				Add-CheckResult -Item 'Automation signing key file' -Status 'fail' -Detail 'chave de automacao ausente para esta maquina.' -Solution 'Rode o bootstrap (Ensure-AutomationSigningKey) para gerar o par por maquina.'
+				Add-CheckResult -Item 'Automation signing key file' -Status 'fail' -Detail 'chave privada do daneel ausente (nao materializada).' -Solution 'Rode o bootstrap (Ensure-DaneelAutomationIdentity) para materializar de automation.signing_key_ref no 1Password.'
 			}
 
-			$automationPublicKeyPath = "$automationKeyPath.pub"
+			if (-not [string]::IsNullOrWhiteSpace($automationTokenPath) -and (Test-Path -Path $automationTokenPath -PathType Leaf) -and (Get-Item -Path $automationTokenPath).Length -gt 0) {
+				$tokenAcl = Get-Acl -Path $automationTokenPath
+				$tokenForeign = @($tokenAcl.Access | Where-Object {
+						$_.IdentityReference -notmatch [regex]::Escape($env:USERNAME) -and
+						$_.IdentityReference -notmatch 'SYSTEM|Administrators|Administradores'
+					})
+				if ($tokenForeign.Count -eq 0) {
+					Add-CheckResult -Item 'Automation service account token' -Status 'success' -Detail 'op-sa.token presente, nao-vazio e com ACL restrita ao usuario.' -Solution ''
+				}
+				else {
+					Add-CheckResult -Item 'Automation service account token' -Status 'fail' -Detail 'op-sa.token acessivel a outros usuarios.' -Solution "Rode: icacls `"$automationTokenPath`" /inheritance:r /grant:r `"`$env:USERNAME:(R,W)`""
+				}
+			}
+			else {
+				Add-CheckResult -Item 'Automation service account token' -Status 'fail' -Detail 'op-sa.token ausente ou vazio.' -Solution 'Rode o bootstrap (Ensure-DaneelAutomationIdentity) para materializar de automation.op_token_ref no 1Password.'
+			}
+
 			if ((Test-Path -Path $automationPublicKeyPath -PathType Leaf) -and (Test-CommandExists ssh-keygen)) {
 				$automationSigningProbe = Invoke-CheckEnvSignedCommitTest -SigningKey $automationPublicKeyPath -GpgFormat 'ssh' -GpgProgram 'ssh-keygen' -CommitSign 'true' -GitSigningMode 'automation'
 				Add-CheckResult -Item 'Automation signing probe' -Status $automationSigningProbe.Status -Detail $automationSigningProbe.Detail -Solution $automationSigningProbe.Solution
 				# Mantem coerentes os checks genericos abaixo (signer/assinatura).
 				$signingKey = $automationPublicKeyPath
 				$gpgProgram = 'ssh-keygen'
+				$automationPublicKeyActive = $true
 			}
 		}
 
@@ -2036,27 +2112,13 @@ function checkEnv {
 			Add-CheckResult -Item 'Git commit signing default' -Status 'fail' -Detail "commit.gpgsign='$commitSign'." -Solution 'Run git config --global commit.gpgsign true.'
 		}
 
-		$hasAutomationPrivateKey = (
-			$resolvedGitSigningMode -eq 'automation' -and
-			-not [string]::IsNullOrWhiteSpace($automationPrivateKeyPath) -and
-			(Test-Path -Path $automationPrivateKeyPath -PathType Leaf) -and
-			$signingKey -eq $automationPrivateKeyPath
-		)
-
-		# Modo automation dirigido por TARS_ACTOR=agent: a chave efetiva e' a
-		# publica por maquina, nao a humana da config. Sem isto o check de SSOT
-		# abaixo compararia chaves diferentes e falharia indevidamente.
-		if ($resolvedGitSigningMode -eq 'automation' -and -not [string]::IsNullOrWhiteSpace($gitProbe.AutomationKeyPath) -and $signingKey -eq "$($gitProbe.AutomationKeyPath).pub") {
-			$hasAutomationPrivateKey = $true
-			$automationPrivateKeyPath = $gitProbe.AutomationKeyPath
-		}
-
 		# SSOT da chave PUBLICA de assinatura: git.signing_key em user-config.yaml.
-		# Nunca via `op read` (chave publica nao e' segredo).
-		$configSigningKey = Get-BootstrapConfigSigningKey -RepoPath $repoPath
+		# Nunca via `op read` (chave publica nao e' segredo). Em modo automation a
+		# chave efetiva e' a PUBLICA do daneel (nao a humana da config).
+		$configSigningKey = Get-BootstrapConfigSigningKey -RepoPath $gitProbe.RepoPath
 
-		if ($hasAutomationPrivateKey) {
-			Add-CheckResult -Item 'Git signing key' -Status 'success' -Detail "user.signingkey aponta para a chave tecnica local: $automationPrivateKeyPath." -Solution ''
+		if ($automationPublicKeyActive) {
+			Add-CheckResult -Item 'Git signing key' -Status 'success' -Detail "user.signingkey usa a chave PUBLICA do daneel: $signingKey." -Solution ''
 		}
 		elseif ([string]::IsNullOrWhiteSpace($configSigningKey)) {
 			Add-CheckResult -Item 'Git signing key' -Status 'warning' -Detail 'git.signing_key vazio na config: sem SSOT para validar user.signingkey.' -Solution "Preencha 'git.signing_key' em app/bootstrap/user-config.yaml e rode o bootstrap/checkEnv novamente."
@@ -2071,38 +2133,13 @@ function checkEnv {
 			Add-CheckResult -Item 'Git signing key' -Status 'fail' -Detail 'user.signingkey difere de git.signing_key da config.' -Solution "Sincronize com 'git config --global user.signingkey' usando o valor de 'git.signing_key' em app/bootstrap/user-config.yaml."
 		}
 
-		if ($resolvedGitSigningMode -eq 'automation') {
-			$localAutomationPublicKey = ''
-			if ($hasAutomationPrivateKey) {
-				$localAutomationPublicKeyPath = "$automationPrivateKeyPath.pub"
-				if (Test-Path -Path $localAutomationPublicKeyPath -PathType Leaf) {
-					$localAutomationPublicKey = Normalize-SshPublicKeyValue ((Get-Content -Path $localAutomationPublicKeyPath -Raw -ErrorAction SilentlyContinue) ?? '')
-				}
-			}
-
-			if ([string]::IsNullOrWhiteSpace($automationKeyRef)) {
-				if (-not [string]::IsNullOrWhiteSpace($localAutomationPublicKey)) {
-					Add-CheckResult -Item 'Automation signing key ref' -Status 'success' -Detail 'A worktree esta usando o par de chaves tecnico local; a ref publica e opcional neste modo.' -Solution ''
-				}
-				else {
-					Add-CheckResult -Item 'Automation signing key ref' -Status 'fail' -Detail 'Nem dotfiles.signing.automationPublicKeyRef nem a chave publica local da worktree foram encontrados.' -Solution 'Rode task git:signing:mode:automation apos provisionar o par tecnico local ou configurar a ref publica.'
-				}
-			}
-			elseif (-not (Test-CommandExists op)) {
-				Add-CheckResult -Item 'Automation signing key ref' -Status 'fail' -Detail "Cannot resolve $automationKeyRef because op is unavailable." -Solution 'Install/authenticate 1Password CLI before using automation signing mode.'
-			}
-			else {
-				$resolvedAutomationKey = Normalize-SshPublicKeyValue ((& op read $automationKeyRef 2>$null | Out-String).Trim())
-				if ([string]::IsNullOrWhiteSpace($resolvedAutomationKey)) {
-					Add-CheckResult -Item 'Automation signing key ref' -Status 'fail' -Detail "$automationKeyRef could not be resolved to an SSH public key." -Solution 'Fix the 1Password ref or rotate the automation signer item.'
-				}
-				elseif ((Normalize-SshPublicKeyValue $signingKey) -eq $resolvedAutomationKey -or $localAutomationPublicKey -eq $resolvedAutomationKey) {
-					Add-CheckResult -Item 'Automation signing key ref' -Status 'success' -Detail "$automationKeyRef matches the current worktree signing key." -Solution ''
-				}
-				else {
-					Add-CheckResult -Item 'Automation signing key ref' -Status 'fail' -Detail "$automationKeyRef does not match user.signingkey in the current worktree." -Solution 'Rerun task git:signing:mode:automation to resync the worktree signer.'
-				}
-			}
+		# allowed_signers: SSOT no 1Password, materializado pelo bootstrap.
+		$allowedSignersFile = $gitProbe.AllowedSignersFile
+		if (-not [string]::IsNullOrWhiteSpace($allowedSignersFile) -and (Test-Path -Path $allowedSignersFile -PathType Leaf)) {
+			Add-CheckResult -Item 'Git allowed signers file' -Status 'success' -Detail "gpg.ssh.allowedSignersFile existe: $allowedSignersFile." -Solution ''
+		}
+		else {
+			Add-CheckResult -Item 'Git allowed signers file' -Status 'fail' -Detail ("gpg.ssh.allowedSignersFile ausente ou inexistente: '{0}'." -f $allowedSignersFile) -Solution 'Rode o bootstrap (materializa automation.allowed_signers_ref) ou aponte gpg.ssh.allowedSignersFile para um allowed_signers existente.'
 		}
 
 		$resolvedProgramPath = ''

@@ -6,8 +6,8 @@
 # - Can run guided setup in terminal.
 # - Syncs derived files used by existing bootstrap flow:
 #   - app/df/secrets/secrets-ref.yaml
-#   - app/bootstrap/secrets/.env.local.tpl
 #   - app/df/git/.gitconfig.local
+#   - %APPDATA%\tars\automation (identidade `daneel` materializada do 1Password)
 #######################################################################################
 
 function Get-BootstrapConfigDefaults {
@@ -21,7 +21,6 @@ function Get-BootstrapConfigDefaults {
 	# Default VAZIO de proposito: a chave PUBLICA de assinatura nao e' segredo,
 	# mas tambem nao deve vir chumbada no repo. O dono preenche no wizard/arquivo.
 	$defaults['git.signing_key'] = ''
-	$defaults['git.automation_signing_key_ref'] = ''
 
 	$defaults['paths.windows.onedrive_enabled'] = 'true'
 	$defaults['paths.windows.onedrive_root'] = ''
@@ -69,6 +68,17 @@ function Get-BootstrapConfigDefaults {
 	$defaults['secrets.github_project_pat_ref'] = 'op://secrets/dotfiles/github/token'
 	$defaults['secrets.github_full_access_ref'] = 'op://secrets/github/api/token'
 	$defaults['secrets.age_key_ref'] = 'op://secrets/dotfiles/age/age.key'
+
+	# Identidade UNICA de automacao (`daneel`): mesma chave e mesma service
+	# account em TODAS as maquinas. Nao existe chave nem ref por hostname.
+	# A chave privada vive so no 1Password; o bootstrap materializa em
+	# %APPDATA%\tars\automation (daneel_ed25519, .pub, op-sa.token).
+	$defaults['automation.signing_key_ref'] = 'op://secrets/daneel/signing/private_key'
+	$defaults['automation.signing_public_key_ref'] = 'op://secrets/daneel/signing/public_key'
+	$defaults['automation.op_token_ref'] = 'op://secrets/daneel/1password/service-account'
+	$defaults['automation.allowed_signers_ref'] = 'op://secrets/dotfiles/git/allowed_signers'
+	$defaults['automation.git_name'] = 'Daneel'
+	$defaults['automation.git_email'] = 'daneel@pabloaugusto.com'
 	return $defaults
 }
 
@@ -515,7 +525,6 @@ function Write-BootstrapConfigYaml {
 		'@@GIT_EMAIL@@' = Escape-YamlDoubleQuotedValue $Config['git.email']
 		'@@GIT_USERNAME@@' = Escape-YamlDoubleQuotedValue $Config['git.username']
 		'@@GIT_SIGNING_KEY@@' = Escape-YamlDoubleQuotedValue $Config['git.signing_key']
-		'@@GIT_AUTOMATION_SIGNING_KEY_REF@@' = Escape-YamlDoubleQuotedValue $Config['git.automation_signing_key_ref']
 		'@@WINDOWS_ONEDRIVE_ENABLED@@' = ConvertTo-BoolString -Value $Config['paths.windows.onedrive_enabled'] -Default 'true'
 		'@@WINDOWS_ONEDRIVE_ROOT@@' = Escape-YamlDoubleQuotedValue $Config['paths.windows.onedrive_root']
 		'@@WINDOWS_ONEDRIVE_AUTO_MIGRATE@@' = ConvertTo-BoolString -Value $Config['paths.windows.onedrive_auto_migrate'] -Default 'true'
@@ -570,6 +579,12 @@ function Write-BootstrapConfigYaml {
 		'@@SECRETS_GITHUB_PROJECT_PAT_REF@@' = Escape-YamlDoubleQuotedValue $Config['secrets.github_project_pat_ref']
 		'@@SECRETS_GITHUB_FULL_ACCESS_REF@@' = Escape-YamlDoubleQuotedValue $Config['secrets.github_full_access_ref']
 		'@@SECRETS_AGE_KEY_REF@@' = Escape-YamlDoubleQuotedValue $Config['secrets.age_key_ref']
+		'@@AUTOMATION_SIGNING_KEY_REF@@' = Escape-YamlDoubleQuotedValue $Config['automation.signing_key_ref']
+		'@@AUTOMATION_SIGNING_PUBLIC_KEY_REF@@' = Escape-YamlDoubleQuotedValue $Config['automation.signing_public_key_ref']
+		'@@AUTOMATION_OP_TOKEN_REF@@' = Escape-YamlDoubleQuotedValue $Config['automation.op_token_ref']
+		'@@AUTOMATION_ALLOWED_SIGNERS_REF@@' = Escape-YamlDoubleQuotedValue $Config['automation.allowed_signers_ref']
+		'@@AUTOMATION_GIT_NAME@@' = Escape-YamlDoubleQuotedValue $Config['automation.git_name']
+		'@@AUTOMATION_GIT_EMAIL@@' = Escape-YamlDoubleQuotedValue $Config['automation.git_email']
 	}
 
 	foreach ($key in $replacements.Keys) {
@@ -594,7 +609,13 @@ function Test-BootstrapConfigFilled {
 		'secrets.onepassword_service_account_ref',
 		'secrets.github_project_pat_ref',
 		'secrets.github_full_access_ref',
-		'secrets.age_key_ref'
+		'secrets.age_key_ref',
+		'automation.signing_key_ref',
+		'automation.signing_public_key_ref',
+		'automation.op_token_ref',
+		'automation.allowed_signers_ref',
+		'automation.git_name',
+		'automation.git_email'
 	)
 
 	foreach ($k in $requiredKeys) {
@@ -666,7 +687,7 @@ function Invoke-BootstrapConfigWizard {
 	$Config['git.email'] = Read-ConfigPrompt -Label 'Git email (ideal: verificado no GitHub). EX: pablo@pabloaugusto.com' -CurrentValue $Config['git.email']
 	$Config['git.username'] = Read-ConfigPrompt -Label 'Git username (login GitHub). EX: pabloaugusto' -CurrentValue $Config['git.username']
 	$Config['git.signing_key'] = Read-ConfigPrompt -Label 'Chave publica SSH para assinatura. EX: ssh-ed25519 AAA... user@host' -CurrentValue $Config['git.signing_key']
-	$Config['git.automation_signing_key_ref'] = Read-ConfigPrompt -Label 'Ref 1Password da chave PUBLICA SSH do signer tecnico de automacao (op://.../public key). Deixe vazio se ainda nao usar.' -CurrentValue $Config['git.automation_signing_key_ref'] -AllowEmpty
+	Write-Host 'Identidade de automacao (daneel) usa defaults unicos por maquina; refs ficam na secao automation do YAML.'
 
 	$Config['paths.windows.onedrive_enabled'] = Read-BooleanPrompt -Label 'Windows: exigir/usar OneDrive no bootstrap?' -CurrentValue $Config['paths.windows.onedrive_enabled']
 	$Config['paths.windows.onedrive_root'] = Read-ConfigPrompt -Label 'Windows OneDrive root canônica (prefira ABS, ex: D:\\onedrive; vazio=detectar/perguntar)' -CurrentValue $Config['paths.windows.onedrive_root'] -AllowEmpty
@@ -757,63 +778,163 @@ function Set-GitGlobalSigningKey {
 	return $true
 }
 
-function Ensure-AutomationSigningKey {
+function Test-AutomationFileContentEqual {
 	<#
 	.SYNOPSIS
-	Gera (uma unica vez) o par ed25519 de assinatura de automacao desta maquina.
+	Compara o conteudo de dois arquivos por hash (SHA256). Nunca imprime conteudo.
+	#>
+	param (
+		[string]$LeftPath,
+		[string]$RightPath
+	)
+
+	if (-not (Test-Path -Path $LeftPath -PathType Leaf) -or -not (Test-Path -Path $RightPath -PathType Leaf)) {
+		return $false
+	}
+	try {
+		$leftHash = (Get-FileHash -LiteralPath $LeftPath -Algorithm SHA256).Hash
+		$rightHash = (Get-FileHash -LiteralPath $RightPath -Algorithm SHA256).Hash
+	}
+	catch {
+		return $false
+	}
+	return ($leftHash -eq $rightHash)
+}
+
+function Set-AutomationFileFromOnePassword {
+	<#
+	.SYNOPSIS
+	Materializa um arquivo local a partir de uma ref do 1Password.
 
 	.DESCRIPTION
-	Mesmo desenho do lado Bash: par POR MAQUINA em
-	%APPDATA%\dotfiles\signing\automation_ed25519 (ACL so do usuario), idempotente
-	(existe -> nao regera). Imprime apenas a chave PUBLICA + a instrucao de
-	cadastro no GitHub como Signing key com o titulo `automation-<hostname>`.
-	Tambem (re)escreve `allowed_signers` com a publica humana (git.signing_key)
-	e a de automacao. A chave privada nunca e' impressa.
+	Usa SEMPRE `op read --out-file` (nunca stdout, nunca variavel). Le para um
+	arquivo temporario, compara com o destino e so substitui quando diferente
+	(idempotente). Se a ref nao existir/estiver ilegivel no 1Password, FALHA com
+	instrucao clara para o dono criar o item -- o bootstrap nunca gera chave.
 	#>
-	param ([string]$HumanPublicKey = '')
+	param (
+		[Parameter(Mandatory)] [string]$OpRef,
+		[Parameter(Mandatory)] [string]$Destination,
+		[switch]$RestrictAcl
+	)
 
-	if (-not (Get-Command ssh-keygen -ErrorAction SilentlyContinue)) {
-		Write-Warning 'ssh-keygen nao encontrado: chave de assinatura de automacao nao provisionada.'
-		return
+	if ([string]::IsNullOrWhiteSpace($OpRef)) {
+		throw "Ref do 1Password vazia: impossivel materializar '$Destination'."
+	}
+	if (-not (Get-Command op -ErrorAction SilentlyContinue)) {
+		throw "op CLI nao encontrado no PATH: impossivel materializar '$Destination' a partir de $OpRef."
 	}
 
-	$dir = Join-Path $env:APPDATA 'dotfiles\signing'
-	$keyPath = Join-Path $dir 'automation_ed25519'
-	$pubPath = "$keyPath.pub"
-	$hostName = if ([string]::IsNullOrWhiteSpace($env:COMPUTERNAME)) { 'unknown' } else { $env:COMPUTERNAME }
-
-	if (Test-Path $keyPath) {
-		Write-Host "Chave de assinatura de automacao ja existe (idempotente, nao regerada): $keyPath"
-	}
-	else {
-		New-Item -ItemType Directory -Path $dir -Force | Out-Null
-		& ssh-keygen -t ed25519 -N '' -C "automation-$hostName" -f $keyPath -q 2>$null
-		if ($LASTEXITCODE -ne 0 -or -not (Test-Path $keyPath)) {
-			Write-Warning "Falha ao gerar a chave de assinatura de automacao em $keyPath."
-			return
+	# Nome de arquivo temporario INEXISTENTE (op read --out-file cria o arquivo).
+	$tmpPath = Join-Path ([System.IO.Path]::GetTempPath()) ("daneel-" + [guid]::NewGuid().ToString('N') + ".tmp")
+	try {
+		& op read --out-file $tmpPath $OpRef *> $null
+		if ($LASTEXITCODE -ne 0 -or -not (Test-Path -Path $tmpPath -PathType Leaf)) {
+			$failMessage = "Item do 1Password ausente ou ilegivel: $OpRef. " +
+			'O dono precisa criar o item (daneel) e liberar acesso a service account; ' +
+			'o bootstrap NUNCA gera chave localmente. Comando que falhou: op read --out-file <tmp> <ref>.'
+			throw $failMessage
 		}
-		# ACL: remove heranca e da acesso apenas ao usuario atual (equivalente ao 600).
-		& icacls $keyPath /inheritance:r /grant:r "$($env:USERNAME):(R,W)" 2>$null | Out-Null
-		Write-Host 'Chave de assinatura de automacao gerada para esta maquina.'
+
+		$contentChanged = $true
+		if (Test-Path -Path $Destination -PathType Leaf) {
+			$contentChanged = -not (Test-AutomationFileContentEqual -LeftPath $tmpPath -RightPath $Destination)
+		}
+
+		if ($contentChanged) {
+			$destDir = Split-Path -Path $Destination -Parent
+			if ($destDir -and !(Test-Path -Path $destDir)) {
+				New-Item -Path $destDir -ItemType Directory -Force | Out-Null
+			}
+			Move-Item -LiteralPath $tmpPath -Destination $Destination -Force
+		}
+
+		if ($RestrictAcl) {
+			# ACL: remove heranca e concede acesso apenas ao usuario atual (~600).
+			$null = & icacls $Destination /inheritance:r /grant:r "$($env:USERNAME):(R,W)" *> $null
+		}
+
+		return $contentChanged
+	}
+	finally {
+		if (Test-Path -Path $tmpPath -PathType Leaf) {
+			Remove-Item -Path $tmpPath -Force -ErrorAction SilentlyContinue
+		}
+	}
+}
+
+function Ensure-DaneelAutomationIdentity {
+	<#
+	.SYNOPSIS
+	Materializa a identidade UNICA de automacao `daneel` a partir do 1Password.
+
+	.DESCRIPTION
+	Uma unica identidade para TODAS as maquinas (sem hostname nas chaves). A
+	chave privada e o token da service account vivem so no 1Password; o bootstrap
+	materializa em %APPDATA%\tars\automation:
+	- daneel_ed25519       (privada, ACL so do usuario)
+	- daneel_ed25519.pub   (publica)
+	- op-sa.token          (service account, ACL so do usuario)
+	allowed_signers (SSOT: automation.allowed_signers_ref) e materializado em
+	%APPDATA%\git\allowed_signers e aplicado em gpg.ssh.allowedSignersFile.
+	Idempotente: so substitui quando o conteudo muda. Nunca gera chave local.
+	#>
+	param (
+		[hashtable]$Config,
+		[string]$DefaultSigningKeyRef = 'op://secrets/daneel/signing/private_key',
+		[string]$DefaultSigningPublicKeyRef = 'op://secrets/daneel/signing/public_key',
+		[string]$DefaultOpTokenRef = 'op://secrets/daneel/1password/service-account',
+		[string]$DefaultAllowedSignersRef = 'op://secrets/dotfiles/git/allowed_signers'
+	)
+
+	if ([string]::IsNullOrWhiteSpace($env:APPDATA)) {
+		Write-Warning 'APPDATA ausente: identidade de automacao nao materializada.'
+		return $false
+	}
+	if (-not (Get-Command op -ErrorAction SilentlyContinue)) {
+		Write-Warning 'op CLI nao encontrado: identidade de automacao nao materializada. Instale/autentique o 1Password CLI e rode o bootstrap novamente.'
+		return $false
 	}
 
-	if (-not (Test-Path $pubPath)) {
-		Write-Warning "Chave publica de automacao ausente em $pubPath."
-		return
+	$resolveRef = {
+		param ([string]$Key, [string]$Fallback)
+		if ($null -ne $Config -and $Config.Contains($Key) -and -not [string]::IsNullOrWhiteSpace([string]$Config[$Key])) {
+			return [string]$Config[$Key]
+		}
+		return $Fallback
 	}
 
-	$allowedSigners = @()
-	if (-not [string]::IsNullOrWhiteSpace($HumanPublicKey) -and $HumanPublicKey -match '^(ssh-|ecdsa-)') {
-		$humanPrincipal = ($HumanPublicKey.Trim() -split '\s+')[-1]
-		$allowedSigners += ("{0} {1}" -f $humanPrincipal, $HumanPublicKey.Trim())
+	# Caminho canonico da identidade. Ver Get-AutomationSigningKeyPath em
+	# app/df/powershell/_functions.ps1 (mesmo layout).
+	$dir = Join-Path $env:APPDATA 'tars\automation'
+	$keyPath = Join-Path $dir 'daneel_ed25519'
+	$pubPath = "$keyPath.pub"
+	$tokenPath = Join-Path $dir 'op-sa.token'
+	$allowedSignersPath = Join-Path $env:APPDATA 'git\allowed_signers'
+	if (!(Test-Path -Path $dir)) {
+		New-Item -Path $dir -ItemType Directory -Force | Out-Null
 	}
-	$allowedSigners += ("automation-{0} {1}" -f $hostName, (Get-Content -Raw -Path $pubPath).Trim())
-	Set-Content -Path (Join-Path $dir 'allowed_signers') -Value $allowedSigners
 
-	$publicKey = (Get-Content -Raw -Path $pubPath).Trim()
-	Write-Host "Assinatura de automacao (TARS_ACTOR=agent) usa: $pubPath"
-	Write-Host "Instrucao: cadastre a chave PUBLICA abaixo no GitHub como Signing key com o titulo 'automation-$hostName'."
-	Write-Host "Publica: $publicKey"
+	$signingKeyRef = & $resolveRef 'automation.signing_key_ref' $DefaultSigningKeyRef
+	$publicKeyRef = & $resolveRef 'automation.signing_public_key_ref' $DefaultSigningPublicKeyRef
+	$tokenRef = & $resolveRef 'automation.op_token_ref' $DefaultOpTokenRef
+	$allowedSignersRef = & $resolveRef 'automation.allowed_signers_ref' $DefaultAllowedSignersRef
+
+	$keyChanged = Set-AutomationFileFromOnePassword -OpRef $signingKeyRef -Destination $keyPath -RestrictAcl
+	$null = Set-AutomationFileFromOnePassword -OpRef $publicKeyRef -Destination $pubPath
+	$null = Set-AutomationFileFromOnePassword -OpRef $tokenRef -Destination $tokenPath -RestrictAcl
+	$null = Set-AutomationFileFromOnePassword -OpRef $allowedSignersRef -Destination $allowedSignersPath
+
+	# allowed_signers (SSOT no 1Password) apontado pelo Git.
+	if ((Test-Path -Path $allowedSignersPath -PathType Leaf) -and (Get-Command git -ErrorAction SilentlyContinue)) {
+		& git config --global gpg.ssh.allowedSignersFile $allowedSignersPath *> $null
+	}
+
+	Write-Host "Identidade de automacao (daneel) pronta em: $dir"
+	if ($keyChanged) {
+		Write-Host "Chave privada materializada a partir de $signingKeyRef."
+	}
+	return $true
 }
 
 function Sync-BootstrapDerivedFiles {
@@ -823,7 +944,6 @@ function Sync-BootstrapDerivedFiles {
 	)
 
 	$secretsRefPath = Join-Path $DotFilesDirectory 'app\df\secrets\secrets-ref.yaml'
-	$envTplPath = Join-Path $DotFilesDirectory 'app\bootstrap\secrets\.env.local.tpl'
 	$gitLocalPath = Join-Path $DotFilesDirectory 'app\df\git\.gitconfig.local'
 
 	$secretsRef = @(
@@ -837,24 +957,10 @@ function Sync-BootstrapDerivedFiles {
 		'age:'
 		("  key: ""{0}""" -f $Config['secrets.age_key_ref'])
 	)
-	if (-not [string]::IsNullOrWhiteSpace([string]$Config['git.automation_signing_key_ref'])) {
-		$secretsRef += @(
-			'git-signing:'
-			("  automation-public-key: ""{0}""" -f $Config['git.automation_signing_key_ref'])
-		)
-	}
 	Set-Content -Path $secretsRefPath -Value $secretsRef
 
-	$envTpl = @(
-		'# Runtime secrets template resolved by 1Password (`op inject`).'
-		'# Bootstrap persists this material encrypted at ~/.env.local.sops.'
-		'# Generated from app/bootstrap/user-config.yaml'
-		("export OP_SERVICE_ACCOUNT_TOKEN=""{{{{{0}}}}}""" -f $Config['secrets.onepassword_service_account_ref'])
-		("export GH_TOKEN=""{{{{{0}}}}}""" -f $Config['secrets.github_project_pat_ref'])
-		("export GITHUB_TOKEN=""{{{{{0}}}}}""" -f $Config['secrets.github_project_pat_ref'])
-		("export SOPS_AGE_KEY_REF=""{{{{{0}}}}}""" -f $Config['secrets.age_key_ref'])
-	)
-	Set-Content -Path $envTplPath -Value $envTpl
+	# app/bootstrap/secrets/.env.local.tpl NAO e' gerado aqui: e' arquivo do repo
+	# (sem tokens; a automacao usa a identidade `daneel` via op read --out-file).
 
 	$gitLocal = @(
 		'# -----------------------------------------------------------------------------'
@@ -867,8 +973,8 @@ function Sync-BootstrapDerivedFiles {
 		'# - Nao coloque tokens, senhas ou chaves privadas aqui.'
 		'# - "signingkey" abaixo e uma chave PUBLICA SSH (nao segredo).'
 		'# - A chave privada continua protegida no 1Password SSH Agent.'
-		'# - O signer tecnico de automacao e aplicado por worktree via tasks/CLI,'
-		'#   usando uma segunda chave PUBLICA resolvida do 1Password quando configurada.'
+		'# - A automacao (TARS_ACTOR=agent) usa a identidade unica `daneel`,'
+		'#   materializada do 1Password em %APPDATA%\tars\automation.'
 		'# -----------------------------------------------------------------------------'
 		''
 		'[user]'
@@ -895,8 +1001,8 @@ function Sync-BootstrapDerivedFiles {
 
 	Set-GitGlobalSigningKey -SigningKey $signingKeyValue
 
-	# Chave de assinatura de automacao (maquina/IA): gerada no 1o uso, idempotente.
-	Ensure-AutomationSigningKey -HumanPublicKey $signingKeyValue
+	# Identidade unica de automacao (`daneel`): materializada do 1Password, idempotente.
+	Ensure-DaneelAutomationIdentity -Config $Config
 
 	# Export for current bootstrap process (consumed by windows/wsl bootstrap scripts).
 	# -------- Windows OneDrive envs --------
