@@ -911,17 +911,13 @@ function Test-OneDriveLayoutHealth {
 	}
 
 #################################################################################
-# verify: really want run bootstrap?
+# info: this run replaces home files (no interactive confirmation)
 #################################################################################
+	# Launching the bootstrap is itself the confirmation, so the run proceeds
+	# automatically. This is only an informational notice.
 	if (-not ($RefreshDotfiles -or $RelinkOnly)) {
 		Write-Warning "This script will override some of your home files"
-		Write-Warning "If you are okay with that complete the sentence below..."
-
-		$Answer = Read-Host -Prompt "MARCO"
-		if ($Answer -ne "POLO") {
-			Write-Host "At least you have chicken 🐔"
-			return
-		}
+		Write-Host "Proceeding automatically: no interactive confirmation is required."
 	}
 	else {
 		Write-Output "Non-full mode: skipping interactive confirmation."

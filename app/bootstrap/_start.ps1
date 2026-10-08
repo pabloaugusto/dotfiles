@@ -25,7 +25,7 @@ if ($Refresh -and $Relink) {
 	throw "Use either -Refresh or -Relink, not both."
 }
 
-Set-ExecutionPolicy -ExecutionPolicy Bypass -Force #-Scope CurrentUser #  Set-ExecutionPolicy -ExecutionPolicy RemoteSigned
+Set-ExecutionPolicy -ExecutionPolicy Bypass -Force -Scope Process # bootstrap-windows.ps1 sets CurrentUser
 Set-PSRepository -Name PSGallery -InstallationPolicy Trusted
 
 #######################################################################################
@@ -227,7 +227,7 @@ function Invoke-WindowsBootstrapFull {
 
 	. "${DotFilesDirectory}\app\bootstrap\bootstrap-windows.ps1"
 
-	Set-ComputerName('RYZEN')			#from _functions.ps1
+	Set-ComputerName					#from _functions.ps1 (name from $Env:DOTFILES_COMPUTER_NAME)
 	Set-MyPrefsWinRegionalization 		#from _functions.ps1
 	Set-MyPrefsWinExplorer				#from _functions.ps1
 	# Set-MyPrefsWinFileAssociations	#from _functions.ps1
