@@ -100,7 +100,7 @@ op_publish() { # $1=ref $2=arquivo-com-o-conteudo
 }
 
 publish_all_refs() {
-  op_publish 'op://secrets/daneel/signing/private_key' "$BATS_TEST_TMPDIR/daneel_fixture"
+  op_publish 'op://secrets/daneel/private key?ssh-format=openssh' "$BATS_TEST_TMPDIR/daneel_fixture"
   printf 'sa-token-de-teste\n' >"$BATS_TEST_TMPDIR/token"
   op_publish 'op://secrets/daneel/1password/service-account' "$BATS_TEST_TMPDIR/token"
   printf 'daneel@pabloaugusto.com %s\n' "$(cat "$BATS_TEST_TMPDIR/daneel_fixture.pub")" >"$BATS_TEST_TMPDIR/as"
@@ -164,7 +164,7 @@ publish_all_refs() {
   run ensureDaneelIdentity
   [ "$status" -ne 0 ]
   [[ "$output" == *"FALHA"* ]]
-  [[ "$output" == *"op://secrets/daneel/signing/private_key"* ]]
+  [[ "$output" == *"op://secrets/daneel/private key?ssh-format=openssh"* ]]
   # Nunca gera chave sozinho.
   [ ! -f "$AUTO_KEY" ]
 }

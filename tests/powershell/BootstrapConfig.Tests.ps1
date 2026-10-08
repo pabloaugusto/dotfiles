@@ -96,8 +96,8 @@ Describe 'bootstrap-config path helpers' {
 
 		$rendered | Should Not Match '@@'
 		$rendered | Should Not Match 'automation_signing_key_ref'
-		$rendered | Should Match 'signing_key_ref: "op://secrets/daneel/signing/private_key"'
-		$rendered | Should Match 'signing_public_key_ref: "op://secrets/daneel/signing/public_key"'
+		$rendered | Should Match 'signing_key_ref: "op://secrets/daneel/private key?ssh-format=openssh"'
+		$rendered | Should Match 'signing_public_key_ref: "op://secrets/daneel/public key"'
 		$rendered | Should Match 'op_token_ref: "op://secrets/daneel/1password/service-account"'
 		$rendered | Should Match 'allowed_signers_ref: "op://secrets/dotfiles/git/allowed_signers"'
 		$rendered | Should Match 'git_name: "Daneel"'
@@ -166,7 +166,7 @@ Describe 'identidade de automacao daneel' {
 		Test-Path -Path $tokenPath -PathType Leaf | Should Be $true
 
 		$keyContent = (Get-Content -Raw -Path $keyPath).Trim()
-		$keyContent | Should Match 'op://secrets/daneel/signing/private_key'
+		$keyContent | Should Match 'op://secrets/daneel/private key?ssh-format=openssh'
 		(Get-Content -Raw -Path $tokenPath).Trim() | Should Match 'op://secrets/daneel/1password/service-account'
 
 		# Idempotencia: materializar de novo nao reescreve (timestamp preservado).

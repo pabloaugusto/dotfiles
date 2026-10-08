@@ -882,7 +882,7 @@ configureGitSigningKey() {
 # Default refs do robo. Ficam aqui (e nao espalhadas) para o bootstrap funcionar
 # em maquinas cujo user-config.yaml ainda nao tem a secao `automation`.
 daneel_default_signing_key_ref() {
-	printf 'op://secrets/daneel/signing/private_key'
+	printf 'op://secrets/daneel/private key?ssh-format=openssh'
 }
 
 daneel_default_op_token_ref() {
@@ -984,7 +984,7 @@ ensureDaneelIdentity() {
 	# Chave privada + publica derivada dela (nunca geramos par novo).
 	if ! _daneel_materialize_ref "$signing_key_ref" "$key_path" "Chave de assinatura do daneel" 600; then
 		echo "Instrucao: cadastre a chave PUBLICA correspondente no 1Password em" >&2
-		echo "op://secrets/daneel/signing/public_key e no GitHub como Signing key." >&2
+		echo "op://secrets/daneel/public key e no GitHub como Signing key." >&2
 		return 1
 	fi
 	_daneel_normalize_key_newline "$key_path"
