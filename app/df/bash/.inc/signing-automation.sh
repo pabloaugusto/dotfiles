@@ -3,25 +3,33 @@
 ###############################################################################
 # app/df/bash/.inc/signing-automation.sh
 #
-# Chave de assinatura de automacao por maquina (TARS_ACTOR=agent).
+# Identidade de automacao UNICA: `daneel` (uma chave para TODAS as maquinas).
 #
 # Desenho (SSOT):
 # - Humano: user.signingkey global = git.signing_key da config, via 1Password.
-# - Maquina/IA: par ed25519 POR MAQUINA, `automation-<hostname>`, gerado pelo
-#   bootstrap no 1o uso em ${XDG_CONFIG_HOME:-~/.config}/dotfiles/signing/.
-#   Idempotente: existe -> nao regera. Nunca imprime chave privada.
+# - Robo (`daneel`): par ed25519 unico, privada so no 1Password; o bootstrap
+#   materializa em ${XDG_CONFIG_HOME:-~/.config}/tars/automation/daneel_ed25519
+#   (dir 700, arquivo 600) com `op read --out-file`. Nao existe mais chave por
+#   hostname nem geracao local: sem o item no 1Password o bootstrap falha claro.
 # - Selecao pelo ator, sem tocar no global: com TARS_ACTOR=agent o Git usa a
-#   chave de automacao via GIT_CONFIG_COUNT/GIT_CONFIG_KEY_n/VALUE_n, que sao
+#   identidade do daneel via GIT_CONFIG_COUNT/GIT_CONFIG_KEY_n/VALUE_n, que sao
 #   herdados por qualquer `git` rodado no shell (inclusive `task sync`).
+# - allowed_signers: SSOT no 1Password, materializado pelo bootstrap em
+#   ${XDG_CONFIG_HOME:-~/.config}/git/allowed_signers (humano + daneel).
 ###############################################################################
 
-# Diretorio da chave de automacao (mesmo layout no WSL e no Windows).
-dotfiles_automation_signing_dir() {
-  printf '%s/dotfiles/signing' "${XDG_CONFIG_HOME:-$HOME/.config}"
+# Diretorio da identidade de automacao (mesmo layout no WSL e no Windows).
+dotfiles_automation_dir() {
+  printf '%s/tars/automation' "${XDG_CONFIG_HOME:-$HOME/.config}"
 }
 
 dotfiles_automation_signing_key() {
-  printf '%s/automation_ed25519' "$(dotfiles_automation_signing_dir)"
+  printf '%s/daneel_ed25519' "$(dotfiles_automation_dir)"
+}
+
+# Caminho materializado do allowed_signers (SSOT: ref no 1Password).
+dotfiles_automation_allowed_signers() {
+  printf '%s/git/allowed_signers' "${XDG_CONFIG_HOME:-$HOME/.config}"
 }
 
 # Ponto unico de resolucao do modo de assinatura.
@@ -46,9 +54,9 @@ dotfiles_resolve_signing_mode() {
   fi
 }
 
-# Exporta o override de config que faz o Git assinar com a chave de automacao,
-# sem 1Password. Silencioso e no-op quando o modo nao e' automation ou quando a
-# chave ainda nao existe.
+# Exporta o override de config que faz o Git usar a identidade `daneel` (chave +
+# nome/email) sem 1Password. Silencioso e no-op quando o modo nao e' automation ou
+# quando a chave ainda nao foi materializada pelo bootstrap.
 dotfiles_apply_automation_signing_env() {
   [ "$(dotfiles_resolve_signing_mode "${1:-.}")" = "automation" ] || return 0
 
@@ -57,10 +65,26 @@ dotfiles_apply_automation_signing_env() {
   pub_path="${key_path}.pub"
   [ -f "$pub_path" ] || return 0
 
-  allowed_signers="$(dotfiles_automation_signing_dir)/allowed_signers"
+  allowed_signers="$(dotfiles_automation_allowed_signers)"
 
-  export GIT_CONFIG_COUNT=3
-  export GIT_CONFIG_KEY_0="user.signingkey" GIT_CONFIG_VALUE_0="$pub_path"
-  export GIT_CONFIG_KEY_1="gpg.ssh.program" GIT_CONFIG_VALUE_1="ssh-keygen"
-  export GIT_CONFIG_KEY_2="gpg.ssh.allowedSignersFile" GIT_CONFIG_VALUE_2="$allowed_signers"
+  # Identidade git do robo (SSOT: automation.git_name/git_email na config).
+  local git_name="${TARS_AUTOMATION_GIT_NAME:-Daneel}"
+  local git_email="${TARS_AUTOMATION_GIT_EMAIL:-daneel@pabloaugusto.com}"
+
+  local -a pairs=(
+    "user.signingkey=$pub_path"
+    "gpg.ssh.program=ssh-keygen"
+    "gpg.ssh.allowedSignersFile=$allowed_signers"
+    "user.name=$git_name"
+    "user.email=$git_email"
+    "commit.gpgsign=true"
+  )
+
+  local i=0 pair
+  export GIT_CONFIG_COUNT="${#pairs[@]}"
+  for pair in "${pairs[@]}"; do
+    export "GIT_CONFIG_KEY_$i=${pair%%=*}"
+    export "GIT_CONFIG_VALUE_$i=${pair#*=}"
+    i=$((i + 1))
+  done
 }

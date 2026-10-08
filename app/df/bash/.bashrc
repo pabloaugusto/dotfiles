@@ -142,7 +142,7 @@ export   MYDOCS="$HOME/onedrive/documents"
 export ONEDRIVE="$HOME/onedrive"
 
 # include local env vars from encrypted file when available (preferred)
-if [ "${DOTFILES_RUNTIME_ENV_LOADED:-0}" != "1" ] || [ -z "${OP_SERVICE_ACCOUNT_TOKEN:-}" ]; then
+if [ "${DOTFILES_RUNTIME_ENV_LOADED:-0}" != "1" ]; then
 	DOTFILES_RUNTIME_ENV_FILE="${DOTFILES_RUNTIME_ENV_FILE:-$HOME/.config/dotfiles/runtime.env}"
 	[ -f "$DOTFILES_RUNTIME_ENV_FILE" ] && source "$DOTFILES_RUNTIME_ENV_FILE"
 
@@ -161,10 +161,11 @@ if [ "${DOTFILES_RUNTIME_ENV_LOADED:-0}" != "1" ] || [ -z "${OP_SERVICE_ACCOUNT_
 		source ~/.env.local
 	fi
 fi
-[ -z "${GH_TOKEN:-}" ] && [ -n "${GITHUB_TOKEN:-}" ] && export GH_TOKEN="$GITHUB_TOKEN"
-[ -n "${OP_SERVICE_ACCOUNT_TOKEN:-}" ] && export OP_SERVICE_ACCOUNT_TOKEN="$(printf '%s' "$OP_SERVICE_ACCOUNT_TOKEN" | tr -d '\r')"
-[ -n "${GH_TOKEN:-}" ] && export GH_TOKEN="$(printf '%s' "$GH_TOKEN" | tr -d '\r')"
-[ -n "${GITHUB_TOKEN:-}" ] && export GITHUB_TOKEN="$(printf '%s' "$GITHUB_TOKEN" | tr -d '\r')"
+# O shell NAO exporta segredo nenhum: nem token de service account do 1Password,
+# nem GH_TOKEN/GITHUB_TOKEN/SOPS_AGE_KEY. `gh` usa a sessao propria do `gh auth`
+# e o 1Password e' acessado por arquivo (op read --out-file) ou por ref.
+# Migracao: remove residuos de tokens que versoes anteriores exportavam aqui.
+unset OP_SERVICE_ACCOUNT_TOKEN OP_CONNECT_HOST OP_CONNECT_TOKEN GH_TOKEN GITHUB_TOKEN 2>/dev/null || true
 # Migracao: a chave age nao deve viver no ambiente (apenas SOPS_AGE_KEY_FILE).
 [ -n "${SOPS_AGE_KEY:-}" ] && unset SOPS_AGE_KEY
 [ -n "${SOPS_AGE_KEY_FILE:-}" ] && export SOPS_AGE_KEY_FILE="$(printf '%s' "$SOPS_AGE_KEY_FILE" | tr -d '\r')"
