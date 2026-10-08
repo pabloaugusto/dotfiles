@@ -860,6 +860,71 @@ configureGitSigningKey() {
 	return 0
 }
 
+# --------------------------------------------------------------------
+# Chave de assinatura de automacao (maquina/IA), por maquina.
+#
+# Par ed25519 gerado no 1o uso em ${XDG_CONFIG_HOME:-~/.config}/dotfiles/signing
+# (dir 700, chave privada 600). Idempotente: se a chave existe, nao regera nem
+# sobrescreve. A saida mostra apenas a chave PUBLICA + instrucao de cadastro no
+# GitHub; a chave privada nunca e' impressa.
+# Tambem (re)escreve `allowed_signers` com a publica humana (git.signing_key da
+# config) e a de automacao, para `git verify-commit` local nos dois modos.
+ensureAutomationSigningKey() {
+	local dir key_path pub_path host human_key
+	dir="${XDG_CONFIG_HOME:-$HOME/.config}/dotfiles/signing"
+	key_path="$dir/automation_ed25519"
+	host="$(hostname 2>/dev/null || printf 'unknown')"
+	host="${host%%.*}"
+
+	if ! command -v ssh-keygen >/dev/null 2>&1; then
+		echo "AVISO: ssh-keygen nao encontrado; chave de assinatura de automacao nao provisionada."
+		return 0
+	fi
+
+	if [[ -f "$key_path" ]]; then
+		echo "Chave de assinatura de automacao ja existe (idempotente, nao regerada): $key_path"
+	else
+		mkdir -p "$dir" || {
+			echo "AVISO: falha ao criar $dir; chave de assinatura de automacao nao provisionada."
+			return 0
+		}
+		chmod 700 "$dir" 2>/dev/null || true
+		if ! ssh-keygen -t ed25519 -N '' -C "automation-$host" -f "$key_path" -q; then
+			echo "AVISO: falha ao gerar a chave de assinatura de automacao em $key_path."
+			return 0
+		fi
+		echo "Chave de assinatura de automacao gerada para esta maquina."
+	fi
+
+	chmod 600 "$key_path" 2>/dev/null || true
+	chmod 600 "${key_path}.pub" 2>/dev/null || true
+	pub_path="${key_path}.pub"
+	[[ -f "$pub_path" ]] || {
+		echo "AVISO: chave publica de automacao ausente em $pub_path."
+		return 0
+	}
+
+	# allowed_signers: publica humana (SSOT: git.signing_key) + automacao.
+	human_key=""
+	if [[ -f "$DOTFILES_REPO_ROOT/app/bootstrap/user-config.yaml" ]]; then
+		human_key="$(_yaml_get "$DOTFILES_REPO_ROOT/app/bootstrap/user-config.yaml" "git.signing_key")"
+	fi
+	{
+		if [[ "$human_key" == ssh-* || "$human_key" == ecdsa-* ]]; then
+			local human_principal
+			human_principal="$(printf '%s' "$human_key" | awk '{print $NF}')"
+			printf '%s %s\n' "$human_principal" "$human_key"
+		fi
+		printf '%s %s\n' "automation-$host" "$(cat "$pub_path")"
+	} >"$dir/allowed_signers"
+	chmod 644 "$dir/allowed_signers" 2>/dev/null || true
+
+	echo "Assinatura de automacao (TARS_ACTOR=agent) usa: $pub_path"
+	echo "Instrucao: cadastre a chave PUBLICA acima no GitHub como Signing key com o titulo 'automation-$host'."
+	echo "Publica: $(cat "$pub_path")"
+	return 0
+}
+
 function clean_setup_vars {
 
 	unset TEMP_USER
@@ -954,6 +1019,7 @@ persistSopsAgeEnv || bootstrap_exit 1
 ensureOpSshSignAlias || bootstrap_exit 1
 ensureGitHubAuth || bootstrap_exit 1
 configureGitSigningKey
+ensureAutomationSigningKey
 
 
 # 6 - unset setup vars
