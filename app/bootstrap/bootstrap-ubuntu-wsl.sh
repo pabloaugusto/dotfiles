@@ -563,6 +563,13 @@ function setLocalEnvFile {
 	local tmp_age
 	local age_recipient
 
+	# Sem refs no template nao ha o que injetar: o shell nao exporta segredo
+	# (os segredos vem do `tars secrets exec`). Pula sem chamar o op.
+	if ! grep -v '^[[:space:]]*#' "$template" | grep -q 'op://'; then
+		echo "Template de env sem refs do 1Password; ~/.env.local.sops nao gerado."
+		return 0
+	fi
+
 	tmp_plain="$(mktemp)" || return 1
 	tmp_age="$(mktemp)" || {
 		rm -f "$tmp_plain"
