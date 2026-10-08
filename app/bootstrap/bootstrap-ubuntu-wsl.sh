@@ -229,7 +229,7 @@ function install_software {
 	install_counted brew zsh
 	install_counted brew fastfetch
 	install_counted brew ansible
-	install_counted brew terraform
+	install_counted brew hashicorp/tap/terraform terraform
 	install_counted brew cloudflared
 	install_counted brew uv
 	install_counted brew go-task/tap/go-task task
