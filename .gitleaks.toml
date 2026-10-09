@@ -1,9 +1,18 @@
 title = "dotfiles-test-harness"
 
+# Sem isto o config custom fica SEM regras e o scan nunca acha nada.
+[extend]
+useDefault = true
+
 [allowlist]
 description = "Arquivos publicos, templates ou referencias tecnicas que nao devem bloquear o scan."
 paths = [
   '''app/df/ssh/authorized_keys''',
   '''app/bootstrap/secrets/.*\.tpl$''',
   '''docs/reference/.*''',
+]
+# Atalhos de teclado do Windows Terminal ("keys": "ctrl+shift+down") nao sao segredo.
+regexTarget = "line"
+regexes = [
+  '''"keys":\s*"(ctrl|alt|shift|win)(\+[a-z0-9]+)+"''',
 ]

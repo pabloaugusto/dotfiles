@@ -1,18 +1,10 @@
-#!/usr/bin/env bash
-set -euo pipefail
-
-MSG_FILE="${1:?commit message file is required}"
-ROOT_DIR="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
-CURRENT_BRANCH="$(git rev-parse --abbrev-ref HEAD 2>/dev/null || true)"
-STAGED_PATHS_JSON="$(
-  git diff --cached --name-only --diff-filter=ACMR \
-    | bash "${ROOT_DIR}/scripts/run-python.sh" -c \
-      "import json,sys; print(json.dumps([line.strip() for line in sys.stdin if line.strip()]))"
-)"
-bash "${ROOT_DIR}/scripts/run-python.sh" "${ROOT_DIR}/.githooks/conventional_emoji.py" \
-  --validate \
-  --require-emoji \
-  --require-issue-key \
-  --branch "${CURRENT_BRANCH}" \
-  --paths-json "${STAGED_PATHS_JSON}" \
-  "${MSG_FILE}"
+#!/usr/bin/env sh
+# Gerado por `tars sync` (commit-msg) — nao edite a mao: o proximo sync sobrescreve.
+# Os gates vem de `[gates]` do .ai/tars.toml (catalogo em .ai/base/gates/, locais do projeto).
+set -e
+root="$(git rev-parse --show-toplevel)"
+if [ -x "$root/dist/tars" ]; then exec "$root/dist/tars" hooks commit-msg "$@"; fi
+if command -v tars >/dev/null 2>&1; then exec tars hooks commit-msg "$@"; fi
+if [ -f "$root/tools/framework/tars.mjs" ]; then exec node "$root/tools/framework/tars.mjs" hooks commit-msg "$@"; fi
+echo "hook commit-msg: nao achei o motor do Tars (dist/tars, tars ou tools/framework/tars.mjs) — rode `tars sync`" >&2
+exit 1

@@ -181,3 +181,5 @@
 # Assinatura/identidade reais vivem em ~/.config/git/.gitconfig.local e nos
 # overlays por ambiente (.gitconfig-windows / -linux / -wsl-windowsfs).
 # O bloco "forçado manual" de 12/06/2026 (chave RSA antiga) foi migrado pra lá.
+[user]
+	signingkey = ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHXSYIIzUF2Tu173LQ554nnCBHINM9aw8+3p7oSUDiGu pablo-dotfiles

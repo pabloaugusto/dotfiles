@@ -71,3 +71,33 @@ fi
 
 print_info "Validando subjects dos commits exclusivos ainda nao presentes em ${REMOTE}..."
 bash "${ROOT_DIR}/scripts/run-python.sh" "${ROOT_DIR}/.githooks/conventional_emoji.py" --validate-many-json "${COMMIT_PAYLOAD_JSON}" --require-emoji --require-issue-key --branch "${CURRENT_BRANCH}"
+
+# Segunda barreira (padrao thood): gitleaks pinado nos commits que vao subir.
+UPSTREAM_REF="refs/remotes/${REMOTE}/${CURRENT_BRANCH}"
+if git rev-parse --verify --quiet "${UPSTREAM_REF}" >/dev/null; then
+  LOG_OPTS="${UPSTREAM_REF}..HEAD"
+else
+  LOG_OPTS="HEAD"
+fi
+print_info "gitleaks (secret scan, commits a publicar: ${LOG_OPTS})..."
+# --exit-code 3 separa "achou segredo" (3) de "ferramenta falhou" (qualquer outro).
+gl_status=0
+bash "${ROOT_DIR}/scripts/run-python.sh" "${ROOT_DIR}/scripts/run_gitleaks.py" \
+  git --no-banner --redact -v --exit-code 3 --config "${ROOT_DIR}/.gitleaks.toml" --log-opts="${LOG_OPTS}" || gl_status=$?
+if (( gl_status != 0 && gl_status != 3 )); then
+  print_error "gitleaks nao rodou (exit ${gl_status}): scan de segredos NAO executado. Veja o erro acima e rode: task env:check"
+  exit 1
+fi
+if (( gl_status == 3 )); then
+  print_error "gitleaks achou possivel segredo nos commits a publicar (detalhes acima: Commit/File/Line/RuleID)."
+  cat >&2 <<STEPS
+
+Como resolver (o segredo ja esta em commit local, ainda NAO publicado):
+  1. Desfaca os commits mantendo as alteracoes: git reset --soft ${LOG_OPTS%%..*}
+  2. Tire o arquivo do indice:                  git rm --cached <arquivo>
+  3. Ignore-o (.gitignore ou .git/info/exclude) e ROTACIONE o segredo (1Password).
+  4. Falso-positivo: allowlist pontual no .gitleaks.toml.
+  5. Rode de novo: df sync
+STEPS
+  exit 1
+fi
