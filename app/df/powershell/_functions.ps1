@@ -1381,12 +1381,41 @@ function Import-DotEnvFromSops {
 	try {
 		& sops -d --output $tmpPlain $EncryptedPath *> $null
 		if ($LASTEXITCODE -ne 0) {
-			# Arquivo legado (cifrado para um recipient age que nao temos mais):
-			# nunca removemos o arquivo do dono, so explicamos por que o aviso
-			# nao e' acionavel. O template atual so tem comentarios, entao nao
-			# existe ref do 1Password capaz de regerar o arquivo.
-			Write-Warning ("Failed to decrypt $EncryptedPath (arquivo legado: o template " +
-				"atual .env.local.tpl nao tem refs do 1Password, entao nada o regenera).")
+			# Falha tem causa certa: o recipient do arquivo diverge da chave
+			# atual (arquivo legado) ou falta chave. Diagnostica pelo recipient
+			# PUBLICO — do metadado do .sops e da chave atual. Nunca imprime
+			# segredo: ambos os valores sao chaves publicas (age1...).
+			$fileRecipient = ''
+			if ((Test-CommandExists sops)) {
+				$fileRaw = & sops -d --extract '["sops"]["age"]' $EncryptedPath 2>$null
+				if ($fileRaw) {
+					$fileRecipient = ($fileRaw | Select-String -Pattern 'age1[0-9a-z]+' |
+						ForEach-Object { $_.Matches[0].Value } | Select-Object -First 1)
+				}
+				if ([string]::IsNullOrWhiteSpace($fileRecipient)) {
+					# Metadado varia por versao do sops: a chave publica tambem
+					# aparece no cabecalho cifrado do proprio arquivo.
+					$fileRecipient = (Select-String -Path $EncryptedPath -Pattern 'age1[0-9a-z]+' |
+						ForEach-Object { $_.Matches[0].Value } | Select-Object -First 1)
+				}
+			}
+			$currentRecipient = ''
+			if (-not [string]::IsNullOrWhiteSpace($Env:SOPS_AGE_KEY_FILE) -and
+				(Test-Path -Path $Env:SOPS_AGE_KEY_FILE -PathType Leaf) -and (Test-CommandExists age-keygen)) {
+				$currentRecipient = (& age-keygen -y $Env:SOPS_AGE_KEY_FILE 2>$null | Out-String).Trim()
+			}
+
+			if ($fileRecipient -and $currentRecipient -and ($fileRecipient -ne $currentRecipient)) {
+				Write-Warning ("Recipient do arquivo ($fileRecipient) difere da chave atual " +
+					"($currentRecipient): $EncryptedPath e' legado. Regere pelo 1Password e " +
+					"recifre (Set-LocalEnvFromSops); nunca copie a chave a mao.")
+			}
+			else {
+				# Sem diagnostico conclusivo: o template atual so tem comentarios,
+				# entao nao existe ref do 1Password capaz de regerar o arquivo.
+				Write-Warning ("Failed to decrypt $EncryptedPath (arquivo legado ou chave " +
+					"age ausente; o template atual .env.local.tpl nao tem refs do 1Password).")
+			}
 			return @{}
 		}
 		return Import-DotEnvFile -Path $tmpPlain
@@ -1506,12 +1535,37 @@ function Import-TerminalIconsModule {
 }
 
 ######################################################################################
+# Caminho canonico da chave age (fonte unica, paridade com o WSL)
+######################################################################################
+function Get-SopsAgeKeyCanonicalPath {
+	[CmdletBinding()]
+	param ()
+	# Windows: %USERPROFILE%\.config\sops\age\pablo-sops-age.key — mesmo caminho
+	# relativo do WSL (~/.config/sops/age/pablo-sops-age.key). Uma fonte so (R3).
+	return (Join-Path $Env:USERPROFILE '.config\sops\age\pablo-sops-age.key')
+}
+
+function Get-SopsAgeKeyLegacyPaths {
+	[CmdletBinding()]
+	param ()
+	# Caminhos legados: apenas fallback de leitura, com aviso de migracao.
+	$legacy = @()
+	if (-not [string]::IsNullOrWhiteSpace($Env:USERPROFILE)) {
+		$legacy += (Join-Path $Env:USERPROFILE '.config\sops\age\keys.txt')
+	}
+	if (-not [string]::IsNullOrWhiteSpace($Env:APPDATA)) {
+		$legacy += (Join-Path $Env:APPDATA 'sops\age\keys.txt')
+	}
+	return $legacy
+}
+
+######################################################################################
 # Materialize SOPS age key file from env when key content is available
 ######################################################################################
 function Ensure-SopsAgeKeyFile {
 	[CmdletBinding()]
 	param (
-		[string]$DefaultPath = (Join-Path $Env:APPDATA 'sops\age\keys.txt'),
+		[string]$DefaultPath = (Get-SopsAgeKeyCanonicalPath),
 		[string]$KeyRef = $Env:SOPS_AGE_KEY_REF,
 		[switch]$ForceMaterialize
 	)
@@ -1557,6 +1611,18 @@ function Ensure-SopsAgeKeyFile {
 		return $true
 	}
 	else {
+		# Fallback: so o arquivo legado existe. Usa sem copiar (a chave nunca e'
+		# duplicada) e avisa UMA vez com o comando de migracao.
+		$legacy = @(Get-SopsAgeKeyLegacyPaths) |
+			Where-Object { Test-Path -Path $_ -PathType Leaf } |
+			Select-Object -First 1
+		if ($legacy) {
+			Write-Warning ("Chave age no caminho legado $legacy; migre para o canonico: " +
+				"Move-Item `"$legacy`" `"$targetPath`"")
+			$Env:SOPS_AGE_KEY_FILE = $legacy
+			$Env:SOPS_AGE_KEY = $null
+			return $true
+		}
 		Write-Warning "No age key material available to materialize at $targetPath."
 		return $false
 	}

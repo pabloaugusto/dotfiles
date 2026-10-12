@@ -440,12 +440,20 @@ function add_user {
 # Fonte do recipient publico esperado (arquivo de config do sops, nao segredo).
 AGE_KEY_RECIPIENT_SOURCE="${DOTFILES_REPO_ROOT}/app/df/secrets/dotfiles.sops.yaml"
 
-# Caminho do arquivo da chave age (padrao do sops, sobrescrivivel por config).
+# Nome canonico da chave age (fonte unica entre WSL e Windows, R3).
+DOTFILES_AGE_KEY_BASENAME='pablo-sops-age.key'
+
+# Caminho canonico da chave age (sobrescrivivel por DOTFILES_AGE_KEY_FILE).
 ageKeyFilePath() {
 	if [[ -n "${DOTFILES_AGE_KEY_FILE:-}" ]]; then
 		printf '%s' "$DOTFILES_AGE_KEY_FILE"
 		return 0
 	fi
+	printf '%s/sops/age/%s' "${XDG_CONFIG_HOME:-$HOME/.config}" "$DOTFILES_AGE_KEY_BASENAME"
+}
+
+# Caminho legado (~/.config, nome antigo), so no fallback de migracao.
+ageKeyFileLegacyPath() {
 	printf '%s/sops/age/keys.txt' "${XDG_CONFIG_HOME:-$HOME/.config}"
 }
 
@@ -488,6 +496,16 @@ materializeAgeKeyFile() {
 			return 1
 		}
 	elif [[ ! -f "$target" ]]; then
+		# Fallback: so o arquivo legado existe. Usa sem copiar (a chave nunca e'
+		# duplicada por nos) e avisa UMA vez com o comando de migracao.
+		local legacy
+		legacy="$(ageKeyFileLegacyPath)"
+		if [[ -f "$legacy" ]]; then
+			echo "aviso: chave age no caminho legado $legacy; migre para o canonico: mv \"$legacy\" \"$target\""
+			target="$legacy"
+			export SOPS_AGE_KEY_FILE="$target"
+			return 0
+		fi
 		echo "Chave age indisponivel: nem SOPS_AGE_KEY, nem SOPS_AGE_KEY_REF, nem $target."
 		return 1
 	fi

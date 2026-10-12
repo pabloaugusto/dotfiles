@@ -448,7 +448,7 @@ checkEnv() {
   if [ -n "${SOPS_AGE_KEY_FILE:-}" ] && [ -f "${SOPS_AGE_KEY_FILE}" ]; then
     _add_result "success" "SOPS age key file" "SOPS_AGE_KEY_FILE definido e arquivo existe." ""
   else
-    _add_result "fail" "SOPS age key file" "Nenhum arquivo de chave age valido (SOPS_AGE_KEY_FILE)." "Configure SOPS_AGE_KEY_FILE apontando para o arquivo 600 da chave (ex.: ~/.config/sops/age/keys.txt)."
+    _add_result "fail" "SOPS age key file" "Nenhum arquivo de chave age valido (SOPS_AGE_KEY_FILE)." "Configure SOPS_AGE_KEY_FILE apontando para o arquivo 600 da chave (ex.: ~/.config/sops/age/pablo-sops-age.key)."
   fi
 
   # Encerra a sessao emprestada do token do daneel antes de medir vazamento.

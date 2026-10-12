@@ -63,8 +63,10 @@ use_op_fail() {
 # Extrai apenas as funcoes de chave age do bootstrap, sem executar o script.
 load_age_functions() {
 	eval "$(sed -n \
+		-e '/^DOTFILES_AGE_KEY_BASENAME=/p' \
 		-e '/^chmodSupportsPosix()/,/^}/p' \
 		-e '/^ageKeyFilePath()/,/^}/p' \
+		-e '/^ageKeyFileLegacyPath()/,/^}/p' \
 		-e '/^ageKeyFileExpectedRecipient()/,/^}/p' \
 		-e '/^materializeAgeKeyFile()/,/^}/p' \
 		-e '/^validateAgeKeyFile()/,/^}/p' \
@@ -88,7 +90,7 @@ load_age_functions() {
 	materializeAgeKeyFile || rc=$?
 	[ "$rc" -eq 0 ]
 
-	key_file="$XDG_CONFIG_HOME/sops/age/keys.txt"
+	key_file="$XDG_CONFIG_HOME/sops/age/pablo-sops-age.key"
 	[ -f "$key_file" ]
 	[ "$SOPS_AGE_KEY_FILE" = "$key_file" ]
 	[ -z "${SOPS_AGE_KEY:-}" ]
@@ -111,7 +113,7 @@ load_age_functions() {
 	run materializeAgeKeyFile
 	[ "$status" -eq 0 ]
 
-	key_file="$XDG_CONFIG_HOME/sops/age/keys.txt"
+	key_file="$XDG_CONFIG_HOME/sops/age/pablo-sops-age.key"
 	[ "$(tr -d '\r' < "$key_file")" = "$TEST_KEY" ]
 	[[ "$output" != *"$DECOY_KEY"* ]]
 	# Nenhuma linha do arquivo carrega a chave do env (compara so' a linha
@@ -127,7 +129,7 @@ load_age_functions() {
 	run materializeAgeKeyFile
 	[ "$status" -ne 0 ]
 	[[ "$output" != *"AGE-SECRET-KEY-1NAOEOUMAREF"* ]]
-	[ ! -f "$XDG_CONFIG_HOME/sops/age/keys.txt" ]
+	[ ! -f "$XDG_CONFIG_HOME/sops/age/pablo-sops-age.key" ]
 }
 
 @test "op read falhando nao ecoa o stderr do op nem a chave" {
@@ -139,7 +141,7 @@ load_age_functions() {
 	[[ "$output" != *"$TEST_KEY"* ]]
 	[[ "$output" != *"AGE-SECRET-KEY-1"* ]]
 	# Nenhum arquivo parcial e' deixado para tras.
-	[ ! -f "$XDG_CONFIG_HOME/sops/age/keys.txt" ]
+	[ ! -f "$XDG_CONFIG_HOME/sops/age/pablo-sops-age.key" ]
 }
 
 @test "validateAgeKeyFile aceita o arquivo cuja chave casa com o recipient de referencia" {
@@ -188,4 +190,48 @@ load_age_functions() {
 	persistSopsAgeEnv
 	! grep -q '^export SOPS_AGE_KEY=' "$HOME/.bashrc"
 	! grep -q '^export SOPS_AGE_KEY=' "$HOME/.profile"
+}
+
+@test "ageKeyFilePath aponta para o nome canonico pablo-sops-age.key" {
+	expected="$XDG_CONFIG_HOME/sops/age/pablo-sops-age.key"
+	[ "$(ageKeyFilePath)" = "$expected" ]
+}
+
+@test "somente o arquivo legado: usa sem copiar e avisa com o comando de migracao" {
+	legacy="$(ageKeyFileLegacyPath)"
+	mkdir -p "$(dirname "$legacy")"
+	cp "$TMP_HOME/k" "$legacy"
+
+	# Sem ref e sem op: cai no ramo do fallback legado.
+	unset DOTFILES_AGE_KEY_REF
+	unset -f op 2>/dev/null || true
+	rc=0
+	materializeAgeKeyFile || rc=$?
+	[ "$rc" -eq 0 ]
+	# Nao duplica: o canonico nao nasce; le-se o legado.
+	[ ! -f "$(ageKeyFilePath)" ]
+	[ -f "$legacy" ]
+	[ "$SOPS_AGE_KEY_FILE" = "$legacy" ]
+}
+
+@test "recipient do arquivo divergente da chave atual e' detectado sem tocar a privada" {
+	key_file="$(ageKeyFilePath)"
+	mkdir -p "$(dirname "$key_file")"
+	cp "$TMP_HOME/k" "$key_file"
+	export SOPS_AGE_KEY_FILE="$key_file"
+
+	# .sops de referencia cifrado para OUTRO recipient (chave publica distinta).
+	age-keygen -o "$TMP_HOME/outro" >/dev/null 2>&1
+	outro_pub="$(age-keygen -y "$TMP_HOME/outro" 2>/dev/null | tr -d '\r\n')"
+	printf 'VALOR=ok\n' > "$TMP_HOME/plain"
+	sops --encrypt --age "$outro_pub" "$TMP_HOME/plain" > "$TMP_HOME/legado.sops" 2>/dev/null \
+		|| skip "sops indisponivel"
+
+	# A publica do arquivo != publica da chave atual: e' o que o perfil reporta.
+	# Le-se do metadado cifrado (a publica aparece no cabecalho, nao e' segredo).
+	file_pub="$(grep -o 'age1[0-9a-z]*' "$TMP_HOME/legado.sops" | head -1)"
+	cur_pub="$(age-keygen -y "$key_file" 2>/dev/null | tr -d '\r\n')"
+	[ "$cur_pub" = "$TEST_RECIPIENT" ]
+	[ "$file_pub" = "$outro_pub" ]
+	[ "$file_pub" != "$cur_pub" ]
 }
