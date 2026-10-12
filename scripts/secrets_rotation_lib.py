@@ -136,7 +136,8 @@ def local_age_secret_key(repo_root: Path) -> str:
 
     candidate_paths = [
         repo_root / "app" / "df" / "secrets" / "dotfiles.age.local.key",
-        Path.home() / ".config" / "sops" / "age" / "keys.txt",
+        Path.home() / ".config" / "sops" / "age" / "pablo-sops-age.key",
+        Path.home() / ".config" / "sops" / "age" / "keys.txt",  # legado
     ]
     for candidate in candidate_paths:
         if not candidate.exists():

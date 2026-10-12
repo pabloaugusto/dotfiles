@@ -23,12 +23,30 @@ if ($IsWindows) { Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass }
 
 
 ######################################################################################
-# Remove a Item (file or folder) if exists (forced, recursive, without confirm)
+# Remove a Item (file or folder) if exists.
+#
+# Nunca apaga recursivamente um alvo cego. Mesmo contrato do Add-Symlink:
+# - link (symlink/junction/hardlink) -> remove SOMENTE o link, preservando o alvo;
+# - conteudo real     -> renomeia para <path>.dotfiles-prelink-<yyyyMMddHHmmss> + warning.
+# Nenhum chamador no repositorio depende de apagar conteudo real de proposito.
 ######################################################################################
 function Remove-ItemIfExists {
 	param ( [Parameter(Mandatory)] [string]$Path )
 
-	if ((Test-Path -Path $Path)) { Remove-Item $Path -Recurse -Force -Confirm:$false }
+	if (-not (Test-Path -LiteralPath $Path)) { return }
+
+	$item = Get-Item -LiteralPath $Path -Force -ErrorAction SilentlyContinue
+	$isLink = $null -ne $item -and ($item.LinkType -eq 'SymbolicLink' -or $item.LinkType -eq 'Junction' -or $item.LinkType -eq 'HardLink')
+	if ($isLink) {
+		# Remove apenas o link; o conteudo apontado nunca e tocado.
+		Remove-LinkOnly -Path $Path
+		return
+	}
+
+	# Conteudo real: preserva via backup antes de qualquer remocao destrutiva.
+	$backupPath = "{0}.dotfiles-prelink-{1}" -f $Path, (Get-Date -Format 'yyyyMMddHHmmss')
+	Rename-Item -LiteralPath $Path -NewName (Split-Path -Path $backupPath -Leaf) -Force -ErrorAction Stop
+	Write-Warning "Remove-ItemIfExists: '$Path' existia com conteúdo real; movido para '$backupPath' em vez de apagar."
 }
 
 ######################################################################################
@@ -51,6 +69,23 @@ function updateAll {
 }
 
 ######################################################################################
+# Remove SOMENTE um link (symlink/junction/hardlink), preservando o alvo.
+# Nunca use Remove-Item -Recurse em um link: em algumas versoes do PowerShell ele
+# segue o link e apaga o conteudo real (ex.: ~/.ssh, VS Code User).
+######################################################################################
+function Remove-LinkOnly {
+	param ( [Parameter(Mandatory)] [string]$Path )
+
+	$item = Get-Item -LiteralPath $Path -Force -ErrorAction SilentlyContinue
+	if ($null -eq $item) { return }
+
+	switch ([string]$item.LinkType) {
+		'Junction' { [System.IO.Directory]::Delete($Path, $false) }
+		default    { Remove-Item -LiteralPath $Path -Force -Confirm:$false -ErrorAction SilentlyContinue }
+	}
+}
+
+######################################################################################
 # Create a symbolic link
 ######################################################################################
 function Add-Symlink {
@@ -65,18 +100,18 @@ function Add-Symlink {
 
 	$fromPath = $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($from)
 	$toPath = $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($to)
-	$targetExists = Test-Path -Path $toPath
-	$targetItem = if ($targetExists) { Get-Item -Path $toPath -Force -ErrorAction SilentlyContinue } else { $null }
+	$targetExists = Test-Path -LiteralPath $toPath
+	$targetItem = if ($targetExists) { Get-Item -LiteralPath $toPath -Force -ErrorAction SilentlyContinue } else { $null }
 	$targetIsDirectory = ($null -ne $targetItem -and $targetItem.PSIsContainer)
 
 	# Ensure parent folder exists before creating the link.
 	$parentPath = Split-Path -Path $fromPath -Parent
-	if ($parentPath -and !(Test-Path -Path $parentPath)) {
+	if ($parentPath -and !(Test-Path -LiteralPath $parentPath)) {
 		New-Item -ItemType Directory -Path $parentPath -Force | Out-Null
 	}
 
-	if (Test-Path -Path $fromPath) {
-		$currentItem = Get-Item -Path $fromPath -Force -ErrorAction SilentlyContinue
+	if (Test-Path -LiteralPath $fromPath) {
+		$currentItem = Get-Item -LiteralPath $fromPath -Force -ErrorAction SilentlyContinue
 		$isLink = $null -ne $currentItem -and ($currentItem.LinkType -eq 'SymbolicLink' -or $currentItem.LinkType -eq 'Junction')
 		$currentTarget = if ($isLink -and $null -ne $currentItem.Target) { [string]($currentItem.Target | Select-Object -First 1) } else { '' }
 		$resolvedCurrentTarget = if ($currentTarget) { $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($currentTarget) } else { '' }
@@ -86,18 +121,28 @@ function Add-Symlink {
 			return
 		}
 
-		Remove-Item -Path $fromPath -Recurse -Force -Confirm:$false -ErrorAction SilentlyContinue
+		if ($isLink) {
+			# Link apontando para outro alvo: remove APENAS o link, nunca o conteúdo apontado.
+			Remove-LinkOnly -Path $fromPath
+		}
+		else {
+			# Conteúdo real (ex.: ~/.ssh, VS Code User): preserva via backup antes de linkar.
+			$backupPath = "{0}.dotfiles-prelink-{1}" -f $fromPath, (Get-Date -Format 'yyyyMMddHHmmss')
+			Rename-Item -LiteralPath $fromPath -NewName (Split-Path -Path $backupPath -Leaf) -Force -ErrorAction Stop
+			Write-Warning "Add-Symlink: '$fromPath' já existia com conteúdo real; movido para '$backupPath' antes de criar o link."
+		}
 	}
 
 	New-Item -ItemType SymbolicLink -Path $fromPath -Target $toPath -Force -WarningAction SilentlyContinue -InformationAction Ignore -ErrorAction SilentlyContinue | Out-Null
-	$createdItem = Get-Item -Path $fromPath -Force -ErrorAction SilentlyContinue
+	$createdItem = Get-Item -LiteralPath $fromPath -Force -ErrorAction SilentlyContinue
 	$createdLinkType = if ($null -ne $createdItem) { [string]$createdItem.LinkType } else { '' }
 	if ($createdLinkType -eq 'SymbolicLink') {
 		return
 	}
 
-	if (Test-Path -Path $fromPath) {
-		Remove-Item -Path $fromPath -Recurse -Force -Confirm:$false -ErrorAction SilentlyContinue
+	if ($null -ne $createdItem -and ($createdItem.LinkType -eq 'SymbolicLink' -or $createdItem.LinkType -eq 'Junction' -or $createdItem.LinkType -eq 'HardLink')) {
+		# Somente um link parcial: pode ser removido sem risco para conteúdo real.
+		Remove-LinkOnly -Path $fromPath
 	}
 
 	if ($targetIsDirectory) {
@@ -669,10 +714,18 @@ function RenameAllFoldersLowercase {
 # Set ou change computer Name (hostname)
 ######################################################################################
 function Set-ComputerName {
-	param ( [Parameter(Mandatory)] [string]$ComputerName )
+	param ( [string]$ComputerName = $Env:DOTFILES_COMPUTER_NAME )
+
+	# Empty/unset means "keep the current name": renaming is opt-in via env var.
+	if ([string]::IsNullOrWhiteSpace($ComputerName)) {
+		Write-Host "DOTFILES_COMPUTER_NAME not set: computer rename skipped (pulado)."
+		return
+	}
 
 	if ($ComputerName -ne (&Hostname)) {
-		Rename-computer -NewName $ComputerName -Restart -Force
+		# Deliberately without the restart flag: the user reboots when convenient.
+		Rename-computer -NewName $ComputerName -Force
+		Write-Host "Computer renamed to '$ComputerName'. Restart Windows to apply the new name." -ForegroundColor Yellow
 	}
 }
 
@@ -1227,18 +1280,20 @@ function Set-LocalEnvFrom1Password {
 			return $false
 		}
 
+		# O token do GitHub fica so no hashtable $loaded (o `gh` alimentado por
+		# stdin em Ensure-GitHubCliAuthFrom1Password); nunca no ambiente.
 		$loaded = Import-DotEnvFile -Path $tmpPlain
-		if ($loaded.ContainsKey('GITHUB_TOKEN') -and [string]::IsNullOrWhiteSpace($Env:GH_TOKEN)) {
-			$Env:GH_TOKEN = $loaded['GITHUB_TOKEN']
-		}
 
-		$ageKey = $Env:SOPS_AGE_KEY
-		$canEncrypt = $ageKey -and (Test-CommandExists sops) -and (Test-CommandExists age-keygen)
+		# A chave vive em arquivo com ACL restrita; o conteudo nunca fica no ambiente.
+		$keyFileReady = Ensure-SopsAgeKeyFile
+		$ageKeyFile = $Env:SOPS_AGE_KEY_FILE
+		$canEncrypt = $keyFileReady -and (-not [string]::IsNullOrWhiteSpace($ageKeyFile)) -and
+			(Test-Path -Path $ageKeyFile -PathType Leaf) -and
+			(Test-CommandExists sops) -and (Test-CommandExists age-keygen)
 		if ($canEncrypt) {
-			# Derive public recipient from private age key using a temp identity file.
-			$tmpKey = [System.IO.Path]::GetTempFileName()
-			Set-Content -Path $tmpKey -Value $ageKey -NoNewline
-			$recipient = (& age-keygen -y $tmpKey 2>$null | Out-String).Trim()
+			# Derive public recipient from the age key file (nunca apagado aqui:
+			# $tmpKey continua nulo para o finally nao remover o arquivo real).
+			$recipient = (& age-keygen -y $ageKeyFile 2>$null | Out-String).Trim()
 			if ([string]::IsNullOrWhiteSpace($recipient)) {
 				$canEncrypt = $false
 			}
@@ -1253,7 +1308,7 @@ function Set-LocalEnvFrom1Password {
 				Copy-Item -Path $tmpPlain -Destination $OutputPath -Force
 			}
 			else {
-				Write-Warning "SOPS_AGE_KEY/sops/age-keygen ausentes; criptografia .sops indisponível e fallback plaintext não permitido."
+				Write-Warning "Arquivo de chave age/sops/age-keygen ausentes; criptografia .sops indisponível e fallback plaintext não permitido."
 				return $false
 			}
 		}
@@ -1266,6 +1321,29 @@ function Set-LocalEnvFrom1Password {
 	return $true
 }
 
+######################################################################################
+# Detecta refs do 1Password (op://) uteis no template de env local
+######################################################################################
+function Test-EnvTemplateHasOpRefs {
+	[CmdletBinding()]
+	param (
+		[string]$TemplatePath = (Join-Path $Env:USERPROFILE 'dotfiles\app\bootstrap\secrets\.env.local.tpl')
+	)
+
+	if ([string]::IsNullOrWhiteSpace($TemplatePath) -or !(Test-Path -Path $TemplatePath -PathType Leaf)) {
+		return $false
+	}
+
+	# Linhas comentadas nao contam: o template atual documenta em comentario a
+	# ausencia de refs e nao deve disparar `op inject` (SSOT com o WSL).
+	foreach ($line in @(Get-Content -Path $TemplatePath -ErrorAction SilentlyContinue)) {
+		if ($line -match '^\s*#') { continue }
+		if ($line -match 'op://') { return $true }
+	}
+
+	return $false
+}
+
 function Import-DotEnvFromSops {
 	[CmdletBinding()]
 	param (
@@ -1273,7 +1351,8 @@ function Import-DotEnvFromSops {
 	)
 
 	if (!(Test-Path -Path $EncryptedPath -PathType Leaf)) {
-		Write-Warning "Encrypted env file not found: $EncryptedPath"
+		# Ausencia e' o estado normal quando o template nao tem refs do
+		# 1Password: o perfil nao deve avisar nada nesse caso.
 		return @{}
 	}
 
@@ -1282,24 +1361,61 @@ function Import-DotEnvFromSops {
 		return @{}
 	}
 
-	if ([string]::IsNullOrWhiteSpace($Env:SOPS_AGE_KEY)) {
-		$userAgeKey = [Environment]::GetEnvironmentVariable('SOPS_AGE_KEY', 'User')
-		if (-not [string]::IsNullOrWhiteSpace($userAgeKey)) {
-			$Env:SOPS_AGE_KEY = $userAgeKey
-		}
+	# Migracao: SOPS_AGE_KEY residual no HKCU e removido; so o caminho e usado.
+	if (-not [string]::IsNullOrWhiteSpace([Environment]::GetEnvironmentVariable('SOPS_AGE_KEY', 'User'))) {
+		[Environment]::SetEnvironmentVariable('SOPS_AGE_KEY', $null, 'User')
 	}
+	$Env:SOPS_AGE_KEY = $null
+
 	if ([string]::IsNullOrWhiteSpace($Env:SOPS_AGE_KEY_FILE)) {
 		$userAgeKeyFile = [Environment]::GetEnvironmentVariable('SOPS_AGE_KEY_FILE', 'User')
 		if (-not [string]::IsNullOrWhiteSpace($userAgeKeyFile)) {
 			$Env:SOPS_AGE_KEY_FILE = $userAgeKeyFile
 		}
 	}
+	if ([string]::IsNullOrWhiteSpace($Env:SOPS_AGE_KEY_FILE)) {
+		$null = Ensure-SopsAgeKeyFile
+	}
 
 	$tmpPlain = [System.IO.Path]::GetTempFileName()
 	try {
 		& sops -d --output $tmpPlain $EncryptedPath *> $null
 		if ($LASTEXITCODE -ne 0) {
-			Write-Warning "Failed to decrypt $EncryptedPath"
+			# Falha tem causa certa: o recipient do arquivo diverge da chave
+			# atual (arquivo legado) ou falta chave. Diagnostica pelo recipient
+			# PUBLICO — do metadado do .sops e da chave atual. Nunca imprime
+			# segredo: ambos os valores sao chaves publicas (age1...).
+			$fileRecipient = ''
+			if ((Test-CommandExists sops)) {
+				$fileRaw = & sops -d --extract '["sops"]["age"]' $EncryptedPath 2>$null
+				if ($fileRaw) {
+					$fileRecipient = ($fileRaw | Select-String -Pattern 'age1[0-9a-z]+' |
+						ForEach-Object { $_.Matches[0].Value } | Select-Object -First 1)
+				}
+				if ([string]::IsNullOrWhiteSpace($fileRecipient)) {
+					# Metadado varia por versao do sops: a chave publica tambem
+					# aparece no cabecalho cifrado do proprio arquivo.
+					$fileRecipient = (Select-String -Path $EncryptedPath -Pattern 'age1[0-9a-z]+' |
+						ForEach-Object { $_.Matches[0].Value } | Select-Object -First 1)
+				}
+			}
+			$currentRecipient = ''
+			if (-not [string]::IsNullOrWhiteSpace($Env:SOPS_AGE_KEY_FILE) -and
+				(Test-Path -Path $Env:SOPS_AGE_KEY_FILE -PathType Leaf) -and (Test-CommandExists age-keygen)) {
+				$currentRecipient = (& age-keygen -y $Env:SOPS_AGE_KEY_FILE 2>$null | Out-String).Trim()
+			}
+
+			if ($fileRecipient -and $currentRecipient -and ($fileRecipient -ne $currentRecipient)) {
+				Write-Warning ("Recipient do arquivo ($fileRecipient) difere da chave atual " +
+					"($currentRecipient): $EncryptedPath e' legado. Regere pelo 1Password e " +
+					"recifre (Set-LocalEnvFromSops); nunca copie a chave a mao.")
+			}
+			else {
+				# Sem diagnostico conclusivo: o template atual so tem comentarios,
+				# entao nao existe ref do 1Password capaz de regerar o arquivo.
+				Write-Warning ("Failed to decrypt $EncryptedPath (arquivo legado ou chave " +
+					"age ausente; o template atual .env.local.tpl nao tem refs do 1Password).")
+			}
 			return @{}
 		}
 		return Import-DotEnvFile -Path $tmpPlain
@@ -1311,38 +1427,213 @@ function Import-DotEnvFromSops {
 
 
 ######################################################################################
+# Isola (move, nunca apaga) a pasta de cache XML de um modulo que a corrompeu
+######################################################################################
+function Move-ModuleCacheAside {
+	[CmdletBinding()]
+	param (
+		[string]$CacheRoot,
+		[string]$Suffix = 'corrompido'
+	)
+
+	if ([string]::IsNullOrWhiteSpace($CacheRoot) -or !(Test-Path -Path $CacheRoot -PathType Container)) {
+		return $null
+	}
+
+	$stamp = (Get-Date).ToString('yyyyMMdd-HHmmss')
+	$target = Join-Path (Split-Path -Path $CacheRoot -Parent) (
+		'{0}.{1}-{2}' -f (Split-Path -Path $CacheRoot -Leaf), $Suffix, $stamp)
+
+	try {
+		Move-Item -LiteralPath $CacheRoot -Destination $target -Force -ErrorAction Stop
+	}
+	catch {
+		# Pasta travada por outra janela: seguimos sem isolar (o chamador ainda
+		# tenta o reimport). Nunca propagamos o erro para o console do dono.
+		return $null
+	}
+
+	return $target
+}
+
+######################################################################################
+# Importa Terminal-Icons tolerando o cache XML corrompido por imports concorrentes
+######################################################################################
+function Import-TerminalIconsModule {
+	[CmdletBinding()]
+	param (
+		[string]$ModuleName = 'Terminal-Icons',
+		[string]$CacheRoot = (Join-Path $Env:APPDATA 'powershell\Community\Terminal-Icons'),
+		[int]$MaxAttempts = 2
+	)
+
+	if (Get-Module -Name $ModuleName) {
+		return $true
+	}
+	if (!(Get-Module -ListAvailable -Name $ModuleName)) {
+		return $false
+	}
+
+	# O modulo regrava o XML de cache a cada import; varias janelas do pwsh
+	# abrindo juntas corrompem os arquivos. O mutex serializa o import.
+	$mutex = $null
+	$ownsMutex = $false
+	try {
+		$mutex = New-Object System.Threading.Mutex($false, 'Local\DotfilesTerminalIconsImport')
+		$ownsMutex = $mutex.WaitOne([TimeSpan]::FromSeconds(20))
+	}
+	catch [System.Threading.AbandonedMutexException] {
+		# Dono anterior morreu: o mutex e' nosso agora.
+		$ownsMutex = $true
+	}
+	catch {
+		# Sem mutex seguimos mesmo assim: pior caso e' a corrida original.
+		$mutex = $null
+		$ownsMutex = $false
+	}
+
+	try {
+		for ($attempt = 1; $attempt -le [Math]::Max(1, $MaxAttempts); $attempt++) {
+			$errorsBefore = $global:Error.Count
+			$previousPreference = $global:ErrorActionPreference
+			$threw = $false
+			try {
+				# A preferencia precisa ser GLOBAL: o script module importado
+				# resolve $ErrorActionPreference no escopo global, entao um valor
+				# local nao silenciaria os erros dele.
+				$global:ErrorActionPreference = 'SilentlyContinue'
+				Import-Module $ModuleName *> $null
+			}
+			catch {
+				$threw = $true
+			}
+			finally {
+				$global:ErrorActionPreference = $previousPreference
+			}
+
+			# Import-Module nao reporta os erros do corpo do modulo nem por
+			# -ErrorVariable nem por redirecionamento: a unica pista e' o $Error.
+			$imported = !$threw -and $global:Error.Count -eq $errorsBefore -and (Get-Module -Name $ModuleName)
+			if ($imported) { return $true }
+
+			if ($attempt -ge $MaxAttempts) { break }
+
+			# Cache corrompido: isola a pasta e reimporta uma unica vez.
+			$null = Move-ModuleCacheAside -CacheRoot $CacheRoot -Suffix 'corrompido'
+			Remove-Module -Name $ModuleName -Force -ErrorAction SilentlyContinue
+		}
+
+		# Erros do modulo nunca vazam para o console: o perfil segue sem ele.
+		return $false
+	}
+	finally {
+		if ($mutex) {
+			if ($ownsMutex) { try { $null = $mutex.ReleaseMutex() } catch { } }
+			$mutex.Dispose()
+		}
+	}
+}
+
+######################################################################################
+# Caminho canonico da chave age (fonte unica, paridade com o WSL)
+######################################################################################
+function Get-SopsAgeKeyCanonicalPath {
+	[CmdletBinding()]
+	param ()
+	# Windows: %USERPROFILE%\.config\sops\age\pablo-sops-age.key — mesmo caminho
+	# relativo do WSL (~/.config/sops/age/pablo-sops-age.key). Uma fonte so (R3).
+	return (Join-Path $Env:USERPROFILE '.config\sops\age\pablo-sops-age.key')
+}
+
+function Get-SopsAgeKeyLegacyPaths {
+	[CmdletBinding()]
+	param ()
+	# Caminhos legados: apenas fallback de leitura, com aviso de migracao.
+	$legacy = @()
+	if (-not [string]::IsNullOrWhiteSpace($Env:USERPROFILE)) {
+		$legacy += (Join-Path $Env:USERPROFILE '.config\sops\age\keys.txt')
+	}
+	if (-not [string]::IsNullOrWhiteSpace($Env:APPDATA)) {
+		$legacy += (Join-Path $Env:APPDATA 'sops\age\keys.txt')
+	}
+	return $legacy
+}
+
+######################################################################################
 # Materialize SOPS age key file from env when key content is available
 ######################################################################################
 function Ensure-SopsAgeKeyFile {
 	[CmdletBinding()]
 	param (
-		[string]$DefaultPath = (Join-Path $Env:USERPROFILE '.config\sops\age\keys.txt'),
+		[string]$DefaultPath = (Get-SopsAgeKeyCanonicalPath),
+		[string]$KeyRef = $Env:SOPS_AGE_KEY_REF,
 		[switch]$ForceMaterialize
 	)
 
-	# If a key file is already present, we are done.
-	if (-not [string]::IsNullOrWhiteSpace($Env:SOPS_AGE_KEY_FILE) -and (Test-Path -Path $Env:SOPS_AGE_KEY_FILE -PathType Leaf)) {
+	# Caminho ja resolvido e valido: nada a materializar, mas garante que o
+	# conteudo da chave nao ficou para tras no ambiente/HKCU.
+	if ([string]::IsNullOrWhiteSpace($Env:DOTFILES_AGE_KEY_FILE) -and
+		-not [string]::IsNullOrWhiteSpace($Env:SOPS_AGE_KEY_FILE) -and
+		(Test-Path -Path $Env:SOPS_AGE_KEY_FILE -PathType Leaf)) {
+		$Env:SOPS_AGE_KEY = $null
+		[Environment]::SetEnvironmentVariable('SOPS_AGE_KEY', $null, 'User')
 		return $true
 	}
 
-	# If no key material is present, nothing to do.
-	if ([string]::IsNullOrWhiteSpace($Env:SOPS_AGE_KEY)) {
-		return $true
+	$targetPath = if (-not [string]::IsNullOrWhiteSpace($Env:DOTFILES_AGE_KEY_FILE)) {
+		$Env:DOTFILES_AGE_KEY_FILE
 	}
-
-	# Default behavior now is non-materializing (keep only in env).
-	if (-not $ForceMaterialize -and [string]::IsNullOrWhiteSpace($Env:SOPS_AGE_KEY_FILE)) {
-		return $true
+	elseif (-not [string]::IsNullOrWhiteSpace($Env:SOPS_AGE_KEY_FILE)) {
+		$Env:SOPS_AGE_KEY_FILE
 	}
-
-	$targetPath = if (-not [string]::IsNullOrWhiteSpace($Env:SOPS_AGE_KEY_FILE)) { $Env:SOPS_AGE_KEY_FILE } else { $DefaultPath }
+	else {
+		$DefaultPath
+	}
 	$targetDir = Split-Path -Path $targetPath -Parent
 	if ($targetDir -and !(Test-Path -Path $targetDir)) {
 		New-Item -Path $targetDir -ItemType Directory -Force | Out-Null
 	}
 
-	Set-Content -Path $targetPath -Value $Env:SOPS_AGE_KEY -NoNewline
+	if (-not [string]::IsNullOrWhiteSpace($Env:SOPS_AGE_KEY)) {
+		Set-Content -Path $targetPath -Value $Env:SOPS_AGE_KEY.Trim() -NoNewline -Encoding ascii
+	}
+	elseif (-not [string]::IsNullOrWhiteSpace($KeyRef) -and (Test-CommandExists op)) {
+		$keyContent = (& op read $KeyRef 2>$null | Out-String).Trim()
+		if ([string]::IsNullOrWhiteSpace($keyContent)) {
+			Write-Warning 'Unable to read the age key from the 1Password reference.'
+			return $false
+		}
+		Set-Content -Path $targetPath -Value $keyContent -NoNewline -Encoding ascii
+	}
+	elseif ((Test-Path -Path $targetPath -PathType Leaf) -and -not $ForceMaterialize) {
+		$Env:SOPS_AGE_KEY_FILE = $targetPath
+		$Env:SOPS_AGE_KEY = $null
+		return $true
+	}
+	else {
+		# Fallback: so o arquivo legado existe. Usa sem copiar (a chave nunca e'
+		# duplicada) e avisa UMA vez com o comando de migracao.
+		$legacy = @(Get-SopsAgeKeyLegacyPaths) |
+			Where-Object { Test-Path -Path $_ -PathType Leaf } |
+			Select-Object -First 1
+		if ($legacy) {
+			Write-Warning ("Chave age no caminho legado $legacy; migre para o canonico: " +
+				"Move-Item `"$legacy`" `"$targetPath`"")
+			$Env:SOPS_AGE_KEY_FILE = $legacy
+			$Env:SOPS_AGE_KEY = $null
+			return $true
+		}
+		Write-Warning "No age key material available to materialize at $targetPath."
+		return $false
+	}
+
+	# ACL restrita ao usuario atual (equivalente ao 600 no Linux).
+	$null = & icacls $targetPath /inheritance:r /grant:r "$($Env:USERNAME):F" *> $null
+
 	$Env:SOPS_AGE_KEY_FILE = $targetPath
+	# A chave nunca deve viver no ambiente nem no HKCU: apenas o arquivo 600/ACL.
+	$Env:SOPS_AGE_KEY = $null
+	[Environment]::SetEnvironmentVariable('SOPS_AGE_KEY', $null, 'User')
 	return (Test-Path -Path $targetPath -PathType Leaf)
 }
 
@@ -1376,11 +1667,10 @@ function Ensure-GitHubCliAuthFrom1Password {
 	}
 
 	if ([string]::IsNullOrWhiteSpace($token) -and (Test-CommandExists op)) {
-		# Prefer least-privilege project token, then escalate through the full-access fallbacks.
+		# Prefer least-privilege project token, then the full-access fallback.
 		$tokenRefs = @(
 			'op://secrets/dotfiles/github/token',
-			'op://secrets/github/api/token',
-			'op://Personal/github/token-full-access'
+			'op://secrets/github/api/token'
 		)
 		foreach ($ref in $tokenRefs) {
 			$candidate = (& op read $ref 2>$null | Out-String).Trim()
@@ -1392,11 +1682,12 @@ function Ensure-GitHubCliAuthFrom1Password {
 	}
 
 	if ([string]::IsNullOrWhiteSpace($token)) {
-		Write-Warning "GitHub token not found in GH_TOKEN/GITHUB_TOKEN/op://secrets/dotfiles/github/token/op://secrets/github/api/token/op://Personal/github/token-full-access."
+		Write-Warning "GitHub token not found in GH_TOKEN/GITHUB_TOKEN/op://secrets/dotfiles/github/token/op://secrets/github/api/token."
 		return $false
 	}
-	$Env:GH_TOKEN = $token
-
+	# O token vai por STDIN para o `gh auth login`; nunca vira variavel de
+	# ambiente do processo (o shell nao exporta segredo e o gate de vazamento do
+	# checkEnv tem que continuar passando na 2a execucao).
 	$token | & gh auth login --hostname github.com --git-protocol ssh --with-token *> $null
 	if ($LASTEXITCODE -ne 0) {
 		$authStatusOutput = & gh auth status --hostname github.com 2>&1
@@ -1414,16 +1705,123 @@ function Ensure-GitHubCliAuthFrom1Password {
 
 
 ######################################################################################
-# Internal helpers: git signing mode / SSH public key normalization for checkEnv
+# Internal helpers: git signing mode / config SSOT for checkEnv
 ######################################################################################
-function Normalize-SshPublicKeyValue {
-	[CmdletBinding()]
-	param ([string]$Value)
+function Get-DotfilesForbiddenEnvNames {
+	<#
+	.SYNOPSIS
+	SSOT da lista de segredos que NUNCA podem viver no ambiente do processo.
 
-	if ([string]::IsNullOrWhiteSpace($Value)) { return '' }
-	$firstLine = (($Value -split "\r?\n") | Where-Object { -not [string]::IsNullOrWhiteSpace($_) } | Select-Object -First 1)
-	if ([string]::IsNullOrWhiteSpace($firstLine)) { return '' }
-	return (($firstLine -replace '\s+', ' ').Trim())
+	.DESCRIPTION
+	A automacao le arquivos com ACL (op-sa.token, daneel_ed25519) e o 1Password
+	em vez de variaveis de ambiente. Usada tanto pelo gate de vazamento quanto
+	pelo snapshot/restore de emprestimos temporarios (checkEnv).
+	#>
+	[CmdletBinding()]
+	param ()
+
+	return @(
+		'OP_SERVICE_ACCOUNT_TOKEN', 'OP_CONNECT_HOST', 'OP_CONNECT_TOKEN',
+		'GH_TOKEN', 'GITHUB_TOKEN', 'SOPS_AGE_KEY'
+	)
+}
+
+function Get-ForbiddenEnvLeaks {
+	<#
+	.SYNOPSIS
+	Retorna os NOMES dos segredos proibidos presentes no ambiente do PROCESSO.
+
+	.DESCRIPTION
+	A automacao le arquivos com ACL (op-sa.token, daneel_ed25519) em vez de
+	variaveis de ambiente. Nunca retorna/expõe valores: apenas nomes.
+	#>
+	[CmdletBinding()]
+	param ([string[]]$Names)
+
+	if (-not $PSBoundParameters.ContainsKey('Names') -or $null -eq $Names -or $Names.Count -eq 0) {
+		$Names = Get-DotfilesForbiddenEnvNames
+	}
+
+	$found = New-Object System.Collections.Generic.List[string]
+	foreach ($name in $Names) {
+		if (-not [string]::IsNullOrWhiteSpace([Environment]::GetEnvironmentVariable($name, 'Process'))) {
+			$found.Add($name)
+		}
+	}
+	return $found.ToArray()
+}
+
+function Get-BootstrapConfigSigningKey {
+	<#
+	.SYNOPSIS
+	Le git.signing_key de app/bootstrap/user-config.yaml (SSOT da chave PUBLICA
+	de assinatura). Nunca usa `op read`: chave publica nao e' segredo.
+	#>
+	[CmdletBinding()]
+	param ([string]$RepoPath)
+
+	if ([string]::IsNullOrWhiteSpace($RepoPath)) { return '' }
+	$configPath = Join-Path $RepoPath 'app/bootstrap/user-config.yaml'
+	if (-not (Test-Path -Path $configPath -PathType Leaf)) { return '' }
+
+	$inGitBlock = $false
+	foreach ($line in Get-Content -Path $configPath) {
+		if ($inGitBlock -and $line -match '^\S') { break }
+		if ($line -match '^git:\s*(#.*)?$') { $inGitBlock = $true; continue }
+		if ($inGitBlock -and $line -match '^\s+signing_key:\s*(.*)$') {
+			$value = $Matches[1].Trim()
+			$value = $value -replace '^"(.*)"$', '$1'
+			$value = $value -replace "^'(.*)'$", '$1'
+			return $value.Trim()
+		}
+	}
+	return ''
+}
+
+function Get-AutomationSigningKeyPath {
+	<#
+	.SYNOPSIS
+	Caminho da chave PRIVADA da identidade unica de automacao `daneel`.
+
+	.DESCRIPTION
+	Materializada pelo bootstrap (Ensure-DaneelAutomationIdentity) a partir do
+	1Password em %APPDATA%\tars\automation\daneel_ed25519 (ACL so do usuario).
+	Mesma identidade em TODAS as maquinas (sem hostname). Retorna '' quando o
+	%APPDATA% nao esta definido.
+	#>
+	if ([string]::IsNullOrWhiteSpace($env:APPDATA)) { return '' }
+	return (Join-Path $env:APPDATA 'tars\automation\daneel_ed25519')
+}
+
+function Get-AutomationSigningPublicKeyPath {
+	<#
+	.SYNOPSIS
+	Caminho da chave PUBLICA da identidade de automacao `daneel` (nao e' segredo).
+	#>
+	$keyPath = Get-AutomationSigningKeyPath
+	if ([string]::IsNullOrWhiteSpace($keyPath)) { return '' }
+	return "$keyPath.pub"
+}
+
+function Get-AutomationOpTokenPath {
+	<#
+	.SYNOPSIS
+	Caminho do token da service account usada pela automacao (arquivo com ACL).
+	#>
+	if ([string]::IsNullOrWhiteSpace($env:APPDATA)) { return '' }
+	return (Join-Path $env:APPDATA 'tars\automation\op-sa.token')
+}
+
+function Get-AutomationAllowedSignersPath {
+	<#
+	.SYNOPSIS
+	Caminho do allowed_signers materializado (SSOT: automation.allowed_signers_ref).
+	Fica no diretorio de ESTADO (LOCALAPPDATA), fora do repo — o mesmo desenho do
+	bash (XDG_STATE_HOME), que usa ~/.local/state/dotfiles/git. Nunca sob
+	~/.config/git: esse e' o app/df/git do repo via symlink do bootstrap.
+	#>
+	if ([string]::IsNullOrWhiteSpace($env:LOCALAPPDATA)) { return '' }
+	return (Join-Path $env:LOCALAPPDATA 'dotfiles\git\allowed_signers')
 }
 
 function Get-CheckEnvGitProbeContext {
@@ -1447,24 +1845,36 @@ function Get-CheckEnvGitProbeContext {
 	}
 
 	$worktreeMode = (& git -C $repoPath config --worktree --get dotfiles.signing.mode 2>$null | Out-String).Trim()
-	$automationKeyRef = (& git -C $repoPath config --worktree --get dotfiles.signing.automationPublicKeyRef 2>$null | Out-String).Trim()
-	$automationPrivateKeyPath = (& git -C $repoPath config --worktree --get dotfiles.signing.automationPrivateKeyPath 2>$null | Out-String).Trim()
 	$resolvedMode = $GitSigningMode
 	if ($resolvedMode -eq 'auto') {
-		$resolvedMode = if ($worktreeMode -eq 'automation') { 'automation' } else { 'human' }
+		# Ponto unico de resolucao, MESMA ordem do bash (dotfiles_resolve_signing_mode):
+		# TARS_ACTOR=agent > DOTFILES_GIT_SIGN_MODE > worktree > human. Sem o
+		# DOTFILES_GIT_SIGN_MODE o hook poria o trailer de automacao e o checkEnv
+		# reportaria mode=human (divergencia bash x PowerShell).
+		if ($env:TARS_ACTOR -eq 'agent') {
+			$resolvedMode = 'automation'
+		}
+		elseif ($env:DOTFILES_GIT_SIGN_MODE -eq 'human' -or $env:DOTFILES_GIT_SIGN_MODE -eq 'automation') {
+			$resolvedMode = $env:DOTFILES_GIT_SIGN_MODE
+		}
+		else {
+			$resolvedMode = if ($worktreeMode -eq 'automation') { 'automation' } else { 'human' }
+		}
 	}
 
 	return [PSCustomObject]@{
-		RepoPath          = $repoPath
-		TempRepoPath      = $tempRepo
-		ResolvedMode      = $resolvedMode
-		WorktreeMode      = $worktreeMode
-		AutomationKeyRef  = $automationKeyRef
-		AutomationPrivateKeyPath = $automationPrivateKeyPath
-		GpgFormat         = (& git -C $repoPath config --includes --get gpg.format 2>$null | Out-String).Trim()
-		GpgProgram        = (& git -C $repoPath config --includes --get gpg.ssh.program 2>$null | Out-String).Trim()
-		SigningKey        = (& git -C $repoPath config --includes --get user.signingkey 2>$null | Out-String).Trim()
-		CommitSignDefault = (& git -C $repoPath config --includes --get commit.gpgsign 2>$null | Out-String).Trim()
+		RepoPath                 = $repoPath
+		TempRepoPath             = $tempRepo
+		ResolvedMode             = $resolvedMode
+		WorktreeMode             = $worktreeMode
+		AutomationKeyPath        = Get-AutomationSigningKeyPath
+		AutomationPublicKeyPath  = Get-AutomationSigningPublicKeyPath
+		AutomationOpTokenPath    = Get-AutomationOpTokenPath
+		GpgFormat                = (& git -C $repoPath config --includes --get gpg.format 2>$null | Out-String).Trim()
+		GpgProgram               = (& git -C $repoPath config --includes --get gpg.ssh.program 2>$null | Out-String).Trim()
+		SigningKey               = (& git -C $repoPath config --includes --get user.signingkey 2>$null | Out-String).Trim()
+		CommitSignDefault        = (& git -C $repoPath config --includes --get commit.gpgsign 2>$null | Out-String).Trim()
+		AllowedSignersFile       = (& git -C $repoPath config --includes --get gpg.ssh.allowedSignersFile 2>$null | Out-String).Trim()
 	}
 }
 
@@ -1484,7 +1894,16 @@ function Invoke-CheckEnvSignedCommitTest {
 	)
 
 	$tempRepo = Join-Path ([System.IO.Path]::GetTempPath()) ("checkenv-" + [guid]::NewGuid().ToString("N"))
-	$null = New-Item -Path $tempRepo -ItemType Directory -Force
+	try {
+		$null = New-Item -Path $tempRepo -ItemType Directory -Force -ErrorAction Stop
+	}
+	catch {
+		return [PSCustomObject]@{
+			Status   = 'fail'
+			Detail   = ("sem diretorio temporario para o probe de assinatura: {0}" -f $_.Exception.Message)
+			Solution = 'Verifique permissao de escrita na pasta temporaria do sistema.'
+		}
+	}
 
 	try {
 		Push-Location $tempRepo
@@ -1511,48 +1930,103 @@ function Invoke-CheckEnvSignedCommitTest {
 		Set-Content -Path '.checkenv' -Value ("checkenv {0}" -f (Get-Date -Format o)) -NoNewline
 		& git add .checkenv *> $null
 
-		$commitOutput = & git commit -S -m "checkEnv signed commit" 2>&1
-		if ($LASTEXITCODE -ne 0) {
-			$hint = if ($GitSigningMode -eq 'automation') {
-				'Corrija o gpg.ssh.program, a chave tecnica local da worktree e a configuracao do signer de automacao.'
-			}
-			else {
-				'Corrija gpg.ssh.program, user.signingkey e a disponibilidade do agent SSH do 1Password.'
-			}
+		# NUNCA rodar `git commit -S` aqui: com o signer do 1Password isso
+		# bloqueia num prompt de biometria. `ssh-keygen -Y sign` exercita o
+		# mesmo agent e falha rapido (sem tty/askpass) quando a chave precisa
+		# de desbloqueio.
+		# Gate (nao rebaixar): so e `warning` quando o agente exige desbloqueio
+		# humano (agente sem chaves listadas / 1Password bloqueado) ou timeout
+		# por prompt de aprovacao -- sempre com "requer desbloqueio" e o comando
+		# para validar. Signer ausente/irresolvivel, chave publica ilegivel, erro
+		# real de assinatura e ausencia de tmpdir sao `fail`.
+		if ([string]::IsNullOrWhiteSpace($SigningKey)) {
 			return [PSCustomObject]@{
 				Status   = 'fail'
-				Detail   = ("git commit -S failed: {0}" -f (($commitOutput | Out-String).Trim()))
-				Solution = $hint
+				Detail   = 'signer nao configurado: user.signingkey ausente, assinatura nao verificada.'
+				Solution = 'Defina user.signingkey no .gitconfig.local incluido pelo ~/.gitconfig e rode checkEnv novamente.'
 			}
 		}
 
-		$sigOutput = (& git log --show-signature -1 2>&1 | Out-String).Trim()
-		if ($sigOutput -match 'Good "git" signature' -or $sigOutput -match 'Good SSH signature') {
+		$publicKeyPath = ''
+		if (Test-Path -Path $SigningKey -PathType Leaf) { $publicKeyPath = $SigningKey }
+		elseif (Test-Path -Path "$SigningKey.pub" -PathType Leaf) { $publicKeyPath = "$SigningKey.pub" }
+		elseif ($SigningKey -match '^ssh-') {
+			$publicKeyPath = Join-Path $tempRepo 'signing.pub'
+			Set-Content -Path $publicKeyPath -Value $SigningKey
+		}
+
+		if ([string]::IsNullOrWhiteSpace($publicKeyPath)) {
+			return [PSCustomObject]@{
+				Status   = 'fail'
+				Detail   = ("chave publica ilegivel: user.signingkey nao aponta para chave publica legivel nem para um valor ssh-ed25519 (valor: {0})." -f $SigningKey)
+				Solution = 'Ajuste user.signingkey para o caminho da chave publica ou o proprio valor ssh-ed25519 ...'
+			}
+		}
+
+		if (-not (Get-Command ssh-keygen -ErrorAction SilentlyContinue)) {
+			return [PSCustomObject]@{
+				Status   = 'fail'
+				Detail   = 'signer irresolvivel: ssh-keygen nao encontrado no PATH, assinatura nao verificada.'
+				Solution = 'Instale OpenSSH (ssh-keygen) e rode checkEnv novamente.'
+			}
+		}
+
+		$payload = Join-Path $tempRepo 'payload'
+		Set-Content -Path $payload -Value ("checkenv {0}" -f (Get-Date -Format o)) -NoNewline
+
+		$signJob = Start-Job -ScriptBlock {
+			param ($KeyPath, $PayloadPath)
+			$env:SSH_ASKPASS_REQUIRE = 'never'
+			$env:DISPLAY = ''
+			$env:SSH_ASKPASS = ''
+			& ssh-keygen -Y sign -n git -f $KeyPath $PayloadPath 2>&1
+			exit $LASTEXITCODE
+		} -ArgumentList $publicKeyPath, $payload
+
+		$signDone = Wait-Job -Job $signJob -Timeout 10
+		if ($null -eq $signDone) {
+			Stop-Job -Job $signJob -ErrorAction SilentlyContinue
+			Remove-Job -Job $signJob -Force -ErrorAction SilentlyContinue
+			return [PSCustomObject]@{
+				Status   = 'warning'
+				Detail   = ("assinatura nao verificada (requer desbloqueio): ssh-keygen -Y sign excedeu o tempo limite. | valide com: ssh-keygen -Y sign -n git -f '{0}' <arquivo>" -f $SigningKey)
+				Solution = 'Desbloqueie a chave no agent/1Password e rode checkEnv novamente.'
+			}
+		}
+
+		$signOutput = Receive-Job -Job $signJob
+		$signOk = $signJob.State -eq 'Completed' -and (Test-Path -Path "$payload.sig" -PathType Leaf)
+		Remove-Job -Job $signJob -Force -ErrorAction SilentlyContinue
+
+		if ($signOk) {
 			return [PSCustomObject]@{
 				Status   = 'success'
-				Detail   = 'git commit -S succeeded and signature validation output is good.'
+				Detail   = 'ssh-keygen -Y sign concluiu sem prompt; o agent assinou com a chave configurada.'
 				Solution = ''
 			}
 		}
 
-		$catOutput = (& git cat-file -p HEAD 2>&1 | Out-String)
-		if ($catOutput -match '(?m)^gpgsig ') {
+		$signErr = ($signOutput | Out-String).Trim()
+		if ([string]::IsNullOrWhiteSpace($signErr)) { $signErr = 'ssh-keygen -Y sign falhou.' }
+		$probeCmd = ("ssh-keygen -Y sign -n git -f '{0}' <arquivo>" -f $SigningKey)
+
+		if ($signErr -match 'no private key found for public key|agent refused operation|refused operation|could ?n?o?t? ?(find|open) key in agent|communication with agent failed|agent_contains_key|keys? not found|no keys? (found|available)|sign_and_send_pubkey|permission denied \(publickey\)|needs? (to be )?unlock|is locked|passphrase') {
 			return [PSCustomObject]@{
-				Status   = 'success'
-				Detail   = 'git commit -S created a signed commit (gpgsig block present).'
-				Solution = ''
+				Status   = 'warning'
+				Detail   = ("assinatura nao verificada (requer desbloqueio): {0} | valide com: {1}" -f $signErr, $probeCmd)
+				Solution = if ($GitSigningMode -eq 'automation') {
+					'Desbloqueie a chave tecnica no 1Password e rode checkEnv novamente.'
+				}
+				else {
+					'Desbloqueie a chave no agent do 1Password e rode checkEnv novamente.'
+				}
 			}
 		}
 
 		return [PSCustomObject]@{
 			Status   = 'fail'
-			Detail   = 'Commit created but signature block (gpgsig) was not found.'
-			Solution = if ($GitSigningMode -eq 'automation') {
-				'Corrija a chave tecnica local, o gpg.ssh.program e a configuracao do signer de automacao da worktree.'
-			}
-			else {
-				'Corrija gpg.ssh.program, user.signingkey e a disponibilidade do agent SSH do 1Password.'
-			}
+			Detail   = ("erro real de assinatura: {0}" -f $signErr)
+			Solution = 'Corrija gpg.format/gpg.ssh.program/user.signingkey e rode checkEnv novamente.'
 		}
 	}
 	finally {
@@ -1578,7 +2052,7 @@ function checkEnv {
 	function Add-CheckResult {
 		param (
 			[string]$Item,
-			[ValidateSet('success', 'fail', 'inconclusive')]
+			[ValidateSet('success', 'fail', 'warning', 'inconclusive')]
 			[string]$Status,
 			[string]$Detail,
 			[string]$Solution
@@ -1599,45 +2073,55 @@ function checkEnv {
 			Add-CheckResult -Item "Command: $Name" -Status 'success' -Detail "Available at $($cmd.Source)." -Solution ''
 		}
 		else {
-			Add-CheckResult -Item "Command: $Name" -Status 'fail' -Detail "Command not found in PATH." -Solution "Install '$Name' in bootstrap and reload the shell."
+			Add-CheckResult -Item "Command: $Name" -Status 'fail' -Detail "Command not found in PATH." -Solution "Rode o bootstrap (app/bootstrap/bootstrap-windows.ps1) ou instale '$Name' via winget/choco e recarregue o shell."
 		}
 	}
 
 	Write-Host "checkEnv: validating environment"
 
-	# 1) Baseline command availability
-	'op', 'gh', 'git', 'ssh' | ForEach-Object { Add-CommandCheck $_ }
-
-	# 2) Optional sops/age readiness checks (non-blocking for SSH auth flow)
-	if (Test-CommandExists sops) {
-		Add-CheckResult -Item 'Command: sops' -Status 'success' -Detail "Available at $((Get-Command sops).Source)." -Solution ''
+	# 0) Vazamento de segredos no ambiente do processo. A automacao usa arquivos
+	# com ACL (op-sa.token, daneel_ed25519 via op read --out-file) e NUNCA
+	# variaveis de ambiente.
+	$leakedEnvNames = @(Get-ForbiddenEnvLeaks)
+	if ($leakedEnvNames.Count -eq 0) {
+		Add-CheckResult -Item 'Segredos no ambiente' -Status 'success' -Detail 'Nenhum segredo proibido no ambiente do processo.' -Solution ''
 	}
 	else {
-		Add-CheckResult -Item 'Command: sops' -Status 'inconclusive' -Detail 'sops not found in PATH.' -Solution 'Install sops if you want encrypted local secret files with age.'
+		Add-CheckResult -Item 'Segredos no ambiente' -Status 'fail' -Detail ("Segredos no ambiente do processo (somente nomes): {0}." -f ($leakedEnvNames -join ', ')) -Solution 'Remova estas variaveis do ambiente/HKCU; a automacao le arquivos com ACL (op-sa.token, daneel_ed25519) em vez de env.'
 	}
 
-	if (Test-CommandExists age) {
-		Add-CheckResult -Item 'Command: age' -Status 'success' -Detail "Available at $((Get-Command age).Source)." -Solution ''
-	}
-	else {
-		Add-CheckResult -Item 'Command: age' -Status 'inconclusive' -Detail 'age not found in PATH.' -Solution 'Install age to support sops encryption/decryption flow.'
-	}
+	# 1) Expected binaries: single source of truth for Windows. Os nomes abaixo
+	# saem das entradas de CLI de app/bootstrap/software-list.ps1 (op = 1Password
+	# CLI, task = go-task, oh-my-posh, glab = GitLab cli, python = python 3.12,
+	# ssh = OpenSSH) + os do fluxo de auth/segredos.
+	# Sem node: o dotfiles nao usa Node e o bootstrap nao o instala.
+	# Ids winget de GUI (1Password, VsCode, Windows Terminal, Postman...) ficam
+	# de fora de proposito: nao sao binarios de PATH.
+	$expectedCommands = @(
+		'op', 'gh', 'glab', 'git', 'ssh', 'sops', 'age', 'task', 'uv', 'oh-my-posh',
+		'jq', 'yq', 'kubectl', 'kustomize', 'kubeconform', 'terraform', 'helm',
+		'flux', 'cloudflared', 'direnv', 'python'
+	)
+	$expectedCommands | ForEach-Object { Add-CommandCheck $_ }
 
-	if ([string]::IsNullOrWhiteSpace($Env:SOPS_AGE_KEY)) {
-		$userAgeKey = [Environment]::GetEnvironmentVariable('SOPS_AGE_KEY', 'User')
-		if (-not [string]::IsNullOrWhiteSpace($userAgeKey)) {
-			$Env:SOPS_AGE_KEY = $userAgeKey
+	if ([string]::IsNullOrWhiteSpace($Env:SOPS_AGE_KEY_FILE)) {
+		$userAgeKeyFile = [Environment]::GetEnvironmentVariable('SOPS_AGE_KEY_FILE', 'User')
+		if (-not [string]::IsNullOrWhiteSpace($userAgeKeyFile)) {
+			$Env:SOPS_AGE_KEY_FILE = $userAgeKeyFile
 		}
 	}
 
 	if (-not [string]::IsNullOrWhiteSpace($Env:SOPS_AGE_KEY_FILE) -and (Test-Path -Path $Env:SOPS_AGE_KEY_FILE -PathType Leaf)) {
 		Add-CheckResult -Item 'SOPS age key file' -Status 'success' -Detail "SOPS_AGE_KEY_FILE points to an existing file: $Env:SOPS_AGE_KEY_FILE." -Solution ''
 	}
-	elseif (-not [string]::IsNullOrWhiteSpace($Env:SOPS_AGE_KEY)) {
-		Add-CheckResult -Item 'SOPS age key file' -Status 'success' -Detail 'SOPS_AGE_KEY is loaded in environment (env-only mode).' -Solution ''
-	}
 	else {
-		Add-CheckResult -Item 'SOPS age key file' -Status 'fail' -Detail 'No SOPS age key detected in environment.' -Solution 'Set SOPS_AGE_KEY (recommended) or configure SOPS_AGE_KEY_FILE.'
+		Add-CheckResult -Item 'SOPS age key file' -Status 'fail' -Detail 'No valid age key file detected (SOPS_AGE_KEY_FILE).' -Solution 'Set SOPS_AGE_KEY_FILE to the 600/ACL-restricted age key file (ex.: %APPDATA%\sops\age\keys.txt).'
+	}
+
+	# Leak signal: o conteudo da chave nunca deve estar no ambiente/HKCU.
+	if (-not [string]::IsNullOrWhiteSpace($Env:SOPS_AGE_KEY) -or
+		-not [string]::IsNullOrWhiteSpace([Environment]::GetEnvironmentVariable('SOPS_AGE_KEY', 'User'))) {
+		Add-CheckResult -Item 'SOPS age key leaked in env' -Status 'inconclusive' -Detail 'SOPS_AGE_KEY is present in the environment or HKCU (key content leak).' -Solution 'Remove SOPS_AGE_KEY from the environment/HKCU and use SOPS_AGE_KEY_FILE only.'
 	}
 
 	# 2.1) Windows OneDrive/profile path compliance (when enabled in bootstrap config)
@@ -1700,11 +2184,25 @@ function checkEnv {
 		else {
 			$envSopsPath = Join-Path $Env:USERPROFILE '.env.local.sops'
 			if (Test-Path -Path $envSopsPath -PathType Leaf) {
-				$loadedEnv = Import-DotEnvFromSops -EncryptedPath $envSopsPath
-				if ($loadedEnv.ContainsKey('OP_SERVICE_ACCOUNT_TOKEN')) {
-					& op whoami *> $null
-					if ($LASTEXITCODE -eq 0) {
-						$opHealthy = $true
+				# Emprestimo temporario do .env.sops: o import escreve no Env do
+				# processo, entao o estado anterior e' restaurado no finally. Sem
+				# isso a 2a chamada de checkEnv acusaria vazamento (nao-idempotente).
+				$envBeforeBorrow = @{}
+				foreach ($borrowedName in @(Get-DotfilesForbiddenEnvNames)) {
+					$envBeforeBorrow[$borrowedName] = [Environment]::GetEnvironmentVariable($borrowedName, 'Process')
+				}
+				try {
+					$loadedEnv = Import-DotEnvFromSops -EncryptedPath $envSopsPath
+					if ($loadedEnv.ContainsKey('OP_SERVICE_ACCOUNT_TOKEN')) {
+						& op whoami *> $null
+						if ($LASTEXITCODE -eq 0) {
+							$opHealthy = $true
+						}
+					}
+				}
+				finally {
+					foreach ($borrowedName in $envBeforeBorrow.Keys) {
+						[Environment]::SetEnvironmentVariable($borrowedName, $envBeforeBorrow[$borrowedName], 'Process')
 					}
 				}
 			}
@@ -1757,7 +2255,7 @@ function checkEnv {
 			Add-CheckResult -Item 'GitHub CLI auth' -Status 'success' -Detail 'gh authenticated for github.com.' -Solution ''
 		}
 		else {
-			Add-CheckResult -Item 'GitHub CLI auth' -Status 'fail' -Detail (($statusOutput | Out-String).Trim()) -Solution 'Authenticate with gh using a token from 1Password (prefer op://secrets/dotfiles/github/token; contingencia final: op://Personal/github/token-full-access).'
+			Add-CheckResult -Item 'GitHub CLI auth' -Status 'fail' -Detail (($statusOutput | Out-String).Trim()) -Solution 'Authenticate with gh using a token from 1Password (prefer op://secrets/dotfiles/github/token; fallback: op://secrets/github/api/token).'
 		}
 
 		& gh config set git_protocol ssh --host github.com *> $null
@@ -1783,12 +2281,64 @@ function checkEnv {
 		$gpgProgram = $gitProbe.GpgProgram
 		$signingKey = $gitProbe.SigningKey
 		$commitSign = $gitProbe.CommitSignDefault
-		$automationKeyRef = $gitProbe.AutomationKeyRef
-		$automationPrivateKeyPath = $gitProbe.AutomationPrivateKeyPath
 		$resolvedGitSigningMode = $gitProbe.ResolvedMode
 		$gitSshCommand = (& git -C $gitProbe.RepoPath config --get core.sshCommand 2>$null | Out-String).Trim()
 
 		Add-CheckResult -Item 'Git signing mode' -Status 'success' -Detail ("mode={0}." -f $resolvedGitSigningMode) -Solution ''
+
+		# Modo automation: identidade UNICA `daneel`, materializada do 1Password
+		# pelo bootstrap. Exige chave privada presente com ACL restrita, token da
+		# service account presente/nao-vazio com ACL, e assinatura de um blob.
+		$automationPublicKeyActive = $false
+		if ($resolvedGitSigningMode -eq 'automation') {
+			$automationKeyPath = $gitProbe.AutomationKeyPath
+			$automationPublicKeyPath = $gitProbe.AutomationPublicKeyPath
+			$automationTokenPath = $gitProbe.AutomationOpTokenPath
+
+			if (-not [string]::IsNullOrWhiteSpace($automationKeyPath) -and (Test-Path -Path $automationKeyPath -PathType Leaf)) {
+				# ACL: a chave nao pode estar acessivel a outros usuarios.
+				$acl = Get-Acl -Path $automationKeyPath
+				$foreign = @($acl.Access | Where-Object {
+						$_.IdentityReference -notmatch [regex]::Escape($env:USERNAME) -and
+						$_.IdentityReference -notmatch 'SYSTEM|Administrators|Administradores'
+					})
+				if ($foreign.Count -eq 0) {
+					Add-CheckResult -Item 'Automation signing key file' -Status 'success' -Detail 'chave privada do daneel presente e com ACL restrita ao usuario.' -Solution ''
+				}
+				else {
+					Add-CheckResult -Item 'Automation signing key file' -Status 'fail' -Detail 'chave privada do daneel acessivel a outros usuarios.' -Solution "Rode: icacls `"$automationKeyPath`" /inheritance:r /grant:r `"`$env:USERNAME:(R,W)`""
+				}
+			}
+			else {
+				Add-CheckResult -Item 'Automation signing key file' -Status 'fail' -Detail 'chave privada do daneel ausente (nao materializada).' -Solution 'Rode o bootstrap (Ensure-DaneelAutomationIdentity) para materializar de automation.signing_key_ref no 1Password.'
+			}
+
+			if (-not [string]::IsNullOrWhiteSpace($automationTokenPath) -and (Test-Path -Path $automationTokenPath -PathType Leaf) -and (Get-Item -Path $automationTokenPath).Length -gt 0) {
+				$tokenAcl = Get-Acl -Path $automationTokenPath
+				$tokenForeign = @($tokenAcl.Access | Where-Object {
+						$_.IdentityReference -notmatch [regex]::Escape($env:USERNAME) -and
+						$_.IdentityReference -notmatch 'SYSTEM|Administrators|Administradores'
+					})
+				if ($tokenForeign.Count -eq 0) {
+					Add-CheckResult -Item 'Automation service account token' -Status 'success' -Detail 'op-sa.token presente, nao-vazio e com ACL restrita ao usuario.' -Solution ''
+				}
+				else {
+					Add-CheckResult -Item 'Automation service account token' -Status 'fail' -Detail 'op-sa.token acessivel a outros usuarios.' -Solution "Rode: icacls `"$automationTokenPath`" /inheritance:r /grant:r `"`$env:USERNAME:(R,W)`""
+				}
+			}
+			else {
+				Add-CheckResult -Item 'Automation service account token' -Status 'fail' -Detail 'op-sa.token ausente ou vazio.' -Solution 'Rode o bootstrap (Ensure-DaneelAutomationIdentity) para materializar de automation.op_token_ref no 1Password.'
+			}
+
+			if ((Test-Path -Path $automationPublicKeyPath -PathType Leaf) -and (Test-CommandExists ssh-keygen)) {
+				$automationSigningProbe = Invoke-CheckEnvSignedCommitTest -SigningKey $automationPublicKeyPath -GpgFormat 'ssh' -GpgProgram 'ssh-keygen' -CommitSign 'true' -GitSigningMode 'automation'
+				Add-CheckResult -Item 'Automation signing probe' -Status $automationSigningProbe.Status -Detail $automationSigningProbe.Detail -Solution $automationSigningProbe.Solution
+				# Mantem coerentes os checks genericos abaixo (signer/assinatura).
+				$signingKey = $automationPublicKeyPath
+				$gpgProgram = 'ssh-keygen'
+				$automationPublicKeyActive = $true
+			}
+		}
 
 		if ($gpgFormat -eq 'ssh') {
 			Add-CheckResult -Item 'Git signing format' -Status 'success' -Detail 'gpg.format=ssh.' -Solution ''
@@ -1804,61 +2354,34 @@ function checkEnv {
 			Add-CheckResult -Item 'Git commit signing default' -Status 'fail' -Detail "commit.gpgsign='$commitSign'." -Solution 'Run git config --global commit.gpgsign true.'
 		}
 
-		$hasAutomationPrivateKey = (
-			$resolvedGitSigningMode -eq 'automation' -and
-			-not [string]::IsNullOrWhiteSpace($automationPrivateKeyPath) -and
-			(Test-Path -Path $automationPrivateKeyPath -PathType Leaf) -and
-			$signingKey -eq $automationPrivateKeyPath
-		)
+		# SSOT da chave PUBLICA de assinatura: git.signing_key em user-config.yaml.
+		# Nunca via `op read` (chave publica nao e' segredo). Em modo automation a
+		# chave efetiva e' a PUBLICA do daneel (nao a humana da config).
+		$configSigningKey = Get-BootstrapConfigSigningKey -RepoPath $gitProbe.RepoPath
 
-		if ($signingKey -match '^ssh-') {
-			Add-CheckResult -Item 'Git signing key' -Status 'success' -Detail 'user.signingkey uses SSH key format.' -Solution ''
+		if ($automationPublicKeyActive) {
+			Add-CheckResult -Item 'Git signing key' -Status 'success' -Detail "user.signingkey usa a chave PUBLICA do daneel: $signingKey." -Solution ''
 		}
-		elseif ($hasAutomationPrivateKey) {
-			Add-CheckResult -Item 'Git signing key' -Status 'success' -Detail "user.signingkey aponta para a chave tecnica local: $automationPrivateKeyPath." -Solution ''
+		elseif ([string]::IsNullOrWhiteSpace($configSigningKey)) {
+			Add-CheckResult -Item 'Git signing key' -Status 'warning' -Detail 'git.signing_key vazio na config: sem SSOT para validar user.signingkey.' -Solution "Preencha 'git.signing_key' em app/bootstrap/user-config.yaml e rode o bootstrap/checkEnv novamente."
+		}
+		elseif ([string]::IsNullOrWhiteSpace($signingKey)) {
+			Add-CheckResult -Item 'Git signing key' -Status 'fail' -Detail 'user.signingkey ausente (git.signing_key definido na config).' -Solution 'Rode o bootstrap (Set-GitGlobalSigningKey) ou grave user.signingkey no .gitconfig.local incluido pelo ~/.gitconfig.'
+		}
+		elseif ($signingKey.Trim() -eq $configSigningKey.Trim()) {
+			Add-CheckResult -Item 'Git signing key' -Status 'success' -Detail 'user.signingkey confere com git.signing_key da config.' -Solution ''
 		}
 		else {
-			$signingKeySolution = if ($resolvedGitSigningMode -eq 'automation') {
-				'Rode task git:signing:mode:automation para sincronizar a chave tecnica local e o signer da worktree atual.'
-			}
-			else {
-				'Set user.signingkey to the SSH public key managed by 1Password.'
-			}
-			Add-CheckResult -Item 'Git signing key' -Status 'fail' -Detail 'user.signingkey is missing or invalid.' -Solution $signingKeySolution
+			Add-CheckResult -Item 'Git signing key' -Status 'fail' -Detail 'user.signingkey difere de git.signing_key da config.' -Solution "Sincronize user.signingkey (no .gitconfig.local incluido pelo ~/.gitconfig) com 'git.signing_key' de app/bootstrap/user-config.yaml."
 		}
 
-		if ($resolvedGitSigningMode -eq 'automation') {
-			$localAutomationPublicKey = ''
-			if ($hasAutomationPrivateKey) {
-				$localAutomationPublicKeyPath = "$automationPrivateKeyPath.pub"
-				if (Test-Path -Path $localAutomationPublicKeyPath -PathType Leaf) {
-					$localAutomationPublicKey = Normalize-SshPublicKeyValue ((Get-Content -Path $localAutomationPublicKeyPath -Raw -ErrorAction SilentlyContinue) ?? '')
-				}
-			}
-
-			if ([string]::IsNullOrWhiteSpace($automationKeyRef)) {
-				if (-not [string]::IsNullOrWhiteSpace($localAutomationPublicKey)) {
-					Add-CheckResult -Item 'Automation signing key ref' -Status 'success' -Detail 'A worktree esta usando o par de chaves tecnico local; a ref publica e opcional neste modo.' -Solution ''
-				}
-				else {
-					Add-CheckResult -Item 'Automation signing key ref' -Status 'fail' -Detail 'Nem dotfiles.signing.automationPublicKeyRef nem a chave publica local da worktree foram encontrados.' -Solution 'Rode task git:signing:mode:automation apos provisionar o par tecnico local ou configurar a ref publica.'
-				}
-			}
-			elseif (-not (Test-CommandExists op)) {
-				Add-CheckResult -Item 'Automation signing key ref' -Status 'fail' -Detail "Cannot resolve $automationKeyRef because op is unavailable." -Solution 'Install/authenticate 1Password CLI before using automation signing mode.'
-			}
-			else {
-				$resolvedAutomationKey = Normalize-SshPublicKeyValue ((& op read $automationKeyRef 2>$null | Out-String).Trim())
-				if ([string]::IsNullOrWhiteSpace($resolvedAutomationKey)) {
-					Add-CheckResult -Item 'Automation signing key ref' -Status 'fail' -Detail "$automationKeyRef could not be resolved to an SSH public key." -Solution 'Fix the 1Password ref or rotate the automation signer item.'
-				}
-				elseif ((Normalize-SshPublicKeyValue $signingKey) -eq $resolvedAutomationKey -or $localAutomationPublicKey -eq $resolvedAutomationKey) {
-					Add-CheckResult -Item 'Automation signing key ref' -Status 'success' -Detail "$automationKeyRef matches the current worktree signing key." -Solution ''
-				}
-				else {
-					Add-CheckResult -Item 'Automation signing key ref' -Status 'fail' -Detail "$automationKeyRef does not match user.signingkey in the current worktree." -Solution 'Rerun task git:signing:mode:automation to resync the worktree signer.'
-				}
-			}
+		# allowed_signers: SSOT no 1Password, materializado pelo bootstrap.
+		$allowedSignersFile = $gitProbe.AllowedSignersFile
+		if (-not [string]::IsNullOrWhiteSpace($allowedSignersFile) -and (Test-Path -Path $allowedSignersFile -PathType Leaf)) {
+			Add-CheckResult -Item 'Git allowed signers file' -Status 'success' -Detail "gpg.ssh.allowedSignersFile existe: $allowedSignersFile." -Solution ''
+		}
+		else {
+			Add-CheckResult -Item 'Git allowed signers file' -Status 'fail' -Detail ("gpg.ssh.allowedSignersFile ausente ou inexistente: '{0}'." -f $allowedSignersFile) -Solution 'Rode o bootstrap (materializa automation.allowed_signers_ref) ou aponte gpg.ssh.allowedSignersFile para um allowed_signers existente.'
 		}
 
 		$resolvedProgramPath = ''
@@ -2002,9 +2525,10 @@ function checkEnv {
 	# 9) Render report + actionable remediation hints
 	foreach ($entry in $results) {
 		$label = switch ($entry.Status) {
-			'success' { '[SUCCESS]' }
-			'fail' { '[FAIL]' }
-			default { '[INCONCLUSIVE]' }
+			'success' { '[OK]' }
+			'fail' { '[FALHA]' }
+			'warning' { '[AVISO]' }
+			default { '[INCONCLUSIVO]' }
 		}
 		$color = switch ($entry.Status) {
 			'success' { 'Green' }
@@ -2016,9 +2540,25 @@ function checkEnv {
 
 	$successCount = ($results | Where-Object { $_.Status -eq 'success' }).Count
 	$failCount = ($results | Where-Object { $_.Status -eq 'fail' }).Count
+	$warningCount = ($results | Where-Object { $_.Status -eq 'warning' }).Count
 	$inconclusiveCount = ($results | Where-Object { $_.Status -eq 'inconclusive' }).Count
+
+	# Tabela final: uma linha por item, OK/FALHA/AVISO.
 	Write-Host ""
-	Write-Host ("Summary: success={0} fail={1} inconclusive={2}" -f $successCount, $failCount, $inconclusiveCount)
+	Write-Host ("{0,-14} | {1,-44} | {2}" -f 'RESULTADO', 'ITEM', 'DETALHE')
+	Write-Host ('---------------+----------------------------------------------+--------------------------------')
+	foreach ($entry in $results) {
+		$rowTag = switch ($entry.Status) {
+			'success' { 'OK' }
+			'fail' { 'FALHA' }
+			default { 'AVISO' }
+		}
+		Write-Host ("{0,-14} | {1,-44} | {2}" -f $rowTag, $entry.Item, $entry.Detail)
+	}
+	Write-Host ('---------------+----------------------------------------------+--------------------------------')
+
+	Write-Host ""
+	Write-Host ("Summary: ok={0} falha={1} aviso={2} inconclusivo={3}" -f $successCount, $failCount, $warningCount, $inconclusiveCount)
 
 	$fixes = $results | Where-Object { -not [string]::IsNullOrWhiteSpace($_.Solution) } | Select-Object -Unique Item, Solution
 	if ($fixes.Count -gt 0) {
@@ -2269,6 +2809,66 @@ function Push-DotfilesCurrentBranch {
 }
 
 ######################################################################################
+# Resolve the ABSOLUTE path of the 1Password op-ssh-sign.exe on Windows.
+#
+# Na primeira execucao o PATH do processo nao contem o diretorio do 1Password
+# recem-instalado, entao `Get-Command op-ssh-sign` falha. Procuramos nos locais
+# reais de instalacao (Store/WindowsApps, %LOCALAPPDATA%\1Password\app\*,
+# Program Files) e so depois caímos para o PATH.
+# Retorna '' quando nao encontra nada (o chamador trata como falha alta).
+######################################################################################
+function Find-OpSshSignWindows {
+	[CmdletBinding()]
+	param (
+		[string[]]$SearchRoots
+	)
+
+	if (-not $PSBoundParameters.ContainsKey('SearchRoots')) {
+		$roots = New-Object System.Collections.Generic.List[string]
+		if (-not [string]::IsNullOrWhiteSpace($Env:LOCALAPPDATA)) {
+			$roots.Add((Join-Path $Env:LOCALAPPDATA 'Microsoft\WindowsApps'))
+			$roots.Add((Join-Path $Env:LOCALAPPDATA '1Password\app'))
+			$roots.Add((Join-Path $Env:LOCALAPPDATA 'Programs\1Password\app'))
+		}
+		$programFiles = [Environment]::GetEnvironmentVariable('ProgramFiles')
+		if (-not [string]::IsNullOrWhiteSpace($programFiles)) {
+			$roots.Add((Join-Path $programFiles '1Password\app'))
+			$roots.Add((Join-Path $programFiles '1Password'))
+		}
+		$SearchRoots = $roots.ToArray()
+	}
+
+	$found = New-Object System.Collections.Generic.List[string]
+	foreach ($root in @($SearchRoots | Where-Object { -not [string]::IsNullOrWhiteSpace($_) } | Select-Object -Unique)) {
+		if (-not (Test-Path -LiteralPath $root -PathType Container)) { continue }
+
+		$direct = Join-Path $root 'op-ssh-sign.exe'
+		if (Test-Path -LiteralPath $direct -PathType Leaf) { $found.Add($direct); continue }
+
+		# Instalacoes versionadas (ex.: 1Password\app\8.10.0\op-ssh-sign.exe): mais recente primeiro.
+		$versionDirs = @(Get-ChildItem -LiteralPath $root -Directory -Force -ErrorAction SilentlyContinue |
+			Sort-Object -Property LastWriteTime -Descending)
+		foreach ($dir in $versionDirs) {
+			$exe = Join-Path $dir.FullName 'op-ssh-sign.exe'
+			if (Test-Path -LiteralPath $exe -PathType Leaf) { $found.Add($exe) }
+		}
+	}
+
+	foreach ($candidate in $found) {
+		$resolved = Resolve-Path -LiteralPath $candidate -ErrorAction SilentlyContinue | Select-Object -First 1 -ExpandProperty Path
+		if (-not [string]::IsNullOrWhiteSpace($resolved)) { return $resolved }
+	}
+
+	# Ultimo recurso: binario real no PATH (nunca alias/function).
+	foreach ($name in @('op-ssh-sign.exe', 'op-ssh-sign-wsl.exe')) {
+		$cmd = Get-Command -Name $name -CommandType Application -ErrorAction SilentlyContinue | Select-Object -First 1
+		if ($null -ne $cmd -and -not [string]::IsNullOrWhiteSpace($cmd.Source)) { return $cmd.Source }
+	}
+
+	return ''
+}
+
+######################################################################################
 # Ensure gpg.ssh.program is valid for the current runtime (Windows/Unix).
 # Auto-heals stale local overrides that point to the other platform signer.
 ######################################################################################
@@ -2282,6 +2882,19 @@ function Ensure-DotfilesGitSignerProgram {
 	$effectiveProgram = (& git -C $RepoPath config --get gpg.ssh.program 2>$null | Out-String).Trim()
 	$localProgram = (& git -C $RepoPath config --local --get gpg.ssh.program 2>$null | Out-String).Trim()
 	$isWindowsRuntime = ($Env:OS -eq 'Windows_NT')
+
+	# Destino dos ajustes: o `.gitconfig.local` incluido pelo ~/.gitconfig (dado
+	# da maquina). NUNCA `--global`: no Windows o ~/.gitconfig e' symlink para
+	# app/df/git/.gitconfig (versionado), entao escrever ali deixaria a working
+	# tree suja. Twin de Get-GitLocalConfigPath em app/bootstrap/bootstrap-config.ps1.
+	$gitLocalConfigPath = [Environment]::GetEnvironmentVariable('HOME')
+	if ([string]::IsNullOrWhiteSpace($gitLocalConfigPath)) {
+		$gitLocalConfigPath = [Environment]::GetEnvironmentVariable('USERPROFILE')
+	}
+	if ([string]::IsNullOrWhiteSpace($gitLocalConfigPath)) {
+		$gitLocalConfigPath = [Environment]::GetFolderPath('UserProfile')
+	}
+	$gitLocalConfigPath = Join-Path (Join-Path $gitLocalConfigPath '.config') 'git\.gitconfig.local'
 
 	# Resolve helper for a program token/path
 	$resolveProgramPath = {
@@ -2318,21 +2931,18 @@ function Ensure-DotfilesGitSignerProgram {
 		}
 
 		if ($isWindowsRuntime) {
-			$preferredWindowsProgram = ''
-			if (Test-CommandExists op-ssh-sign) {
-				$preferredWindowsProgram = 'op-ssh-sign'
-			}
-			elseif (Test-CommandExists op-ssh-sign.exe) {
-				$preferredWindowsProgram = 'op-ssh-sign.exe'
-			}
-			elseif (Test-CommandExists op-ssh-sign-wsl.exe) {
-				$preferredWindowsProgram = 'op-ssh-sign-wsl.exe'
-			}
+			# Caminho ABSOLUTO: o PATH da 1a execucao nao tem o app do 1Password.
+			$preferredWindowsProgram = Find-OpSshSignWindows
 
 			$effectiveProgramAfterLocalFix = (& git -C $RepoPath config --get gpg.ssh.program 2>$null | Out-String).Trim()
 			$resolvedAfterLocalFix = & $resolveProgramPath $effectiveProgramAfterLocalFix
 			if ([string]::IsNullOrWhiteSpace($resolvedAfterLocalFix) -and -not [string]::IsNullOrWhiteSpace($preferredWindowsProgram)) {
-				& git -C $RepoPath config --global gpg.ssh.program $preferredWindowsProgram *> $null
+				& git -C $RepoPath config --file $gitLocalConfigPath gpg.ssh.program $preferredWindowsProgram *> $null
+			}
+			elseif ([string]::IsNullOrWhiteSpace($resolvedAfterLocalFix) -and [string]::IsNullOrWhiteSpace($preferredWindowsProgram)) {
+				throw ("1Password signer not resolvable on Windows: op-ssh-sign.exe nao encontrado em " +
+					"WindowsApps, %LOCALAPPDATA%\1Password\app\*, Program Files ou PATH. " +
+					"Instale o 1Password (app desktop ou CLI) e rode o bootstrap novamente.")
 			}
 		}
 		else {
@@ -2347,7 +2957,7 @@ function Ensure-DotfilesGitSignerProgram {
 			$effectiveProgramAfterLocalFix = (& git -C $RepoPath config --get gpg.ssh.program 2>$null | Out-String).Trim()
 			$resolvedAfterLocalFix = & $resolveProgramPath $effectiveProgramAfterLocalFix
 			if ([string]::IsNullOrWhiteSpace($resolvedAfterLocalFix) -and -not [string]::IsNullOrWhiteSpace($preferredUnixProgram)) {
-				& git -C $RepoPath config --global gpg.ssh.program $preferredUnixProgram *> $null
+				& git -C $RepoPath config --file $gitLocalConfigPath gpg.ssh.program $preferredUnixProgram *> $null
 			}
 		}
 
@@ -2663,7 +3273,7 @@ function Sync-DotfilesWindowsToWsl {
 
 			$pushRecovered = $false
 			if (-not [string]::IsNullOrWhiteSpace($repoPath) -and (Test-CommandExists op)) {
-				foreach ($ref in @('op://secrets/dotfiles/github/token', 'op://secrets/github/api/token', 'op://Personal/github/token-full-access')) {
+				foreach ($ref in @('op://secrets/dotfiles/github/token', 'op://secrets/github/api/token')) {
 					$token = (& op read $ref 2>$null | Out-String).Trim()
 					if ([string]::IsNullOrWhiteSpace($token)) { continue }
 

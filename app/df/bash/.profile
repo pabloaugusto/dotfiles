@@ -6,11 +6,7 @@ DOTFILES_RUNTIME_ENV_FILE="${DOTFILES_RUNTIME_ENV_FILE:-$HOME/.config/dotfiles/r
 [ -f "$DOTFILES_RUNTIME_ENV_FILE" ] && . "$DOTFILES_RUNTIME_ENV_FILE"
 
 _dotfiles_load_runtime_env() {
-  # Fallback for legacy setups that persisted SOPS key in ~/.profile.
-  if [ -z "${SOPS_AGE_KEY:-}" ] && [ -f "$HOME/.profile" ]; then
-    _dotfiles_sops_key="$(awk -F'\"' '/^export SOPS_AGE_KEY=/{print $2}' "$HOME/.profile" | tail -n1 | tr -d '\r')"
-    [ -n "$_dotfiles_sops_key" ] && export SOPS_AGE_KEY="$_dotfiles_sops_key"
-  fi
+  # Fallback for legacy setups that persisted SOPS key file path in ~/.profile.
   if [ -z "${SOPS_AGE_KEY_FILE:-}" ] && [ -f "$HOME/.profile" ]; then
     _dotfiles_sops_key_file="$(awk -F'\"' '/^export SOPS_AGE_KEY_FILE=/{print $2}' "$HOME/.profile" | tail -n1 | tr -d '\r')"
     [ -n "$_dotfiles_sops_key_file" ] && export SOPS_AGE_KEY_FILE="$_dotfiles_sops_key_file"
@@ -36,8 +32,14 @@ _dotfiles_load_runtime_env() {
   [ -n "${OP_SERVICE_ACCOUNT_TOKEN:-}" ] && export OP_SERVICE_ACCOUNT_TOKEN="$(printf '%s' "$OP_SERVICE_ACCOUNT_TOKEN" | tr -d '\r')"
   [ -n "${GH_TOKEN:-}" ] && export GH_TOKEN="$(printf '%s' "$GH_TOKEN" | tr -d '\r')"
   [ -n "${GITHUB_TOKEN:-}" ] && export GITHUB_TOKEN="$(printf '%s' "$GITHUB_TOKEN" | tr -d '\r')"
-  [ -n "${SOPS_AGE_KEY:-}" ] && export SOPS_AGE_KEY="$(printf '%s' "$SOPS_AGE_KEY" | tr -d '\r')"
   [ -n "${SOPS_AGE_KEY_FILE:-}" ] && export SOPS_AGE_KEY_FILE="$(printf '%s' "$SOPS_AGE_KEY_FILE" | tr -d '\r')"
+
+  # Migracao: a chave age nunca deve viver no ambiente; apenas o caminho do
+  # arquivo 600 (SOPS_AGE_KEY_FILE). Remove residuo de setups antigos.
+  if [ -n "${SOPS_AGE_KEY:-}" ]; then
+    echo "aviso: SOPS_AGE_KEY presente no ambiente (vazamento); use SOPS_AGE_KEY_FILE." >&2
+    unset SOPS_AGE_KEY
+  fi
 }
 
 _dotfiles_load_runtime_env

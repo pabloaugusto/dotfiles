@@ -18,8 +18,7 @@ Refs principais:
 
 - `op://secrets/dotfiles/1password/service-account`
 - `op://secrets/dotfiles/github/token` (preferencial)
-- `op://secrets/github/api/token` (primeiro fallback)
-- `op://Personal/github/token-full-access` (contingencia final)
+- `op://secrets/github/api/token` (fallback)
 - `op://secrets/dotfiles/age/age.key`
 - `git-signing.automation-public-key` em [`app/df/secrets/secrets-ref.yaml`](../app/df/secrets/secrets-ref.yaml) quando o signer tecnico estiver configurado
 
@@ -254,45 +253,73 @@ Políticas:
 - `commit.gpgsign=true`
 - `gpg.ssh.program=op-ssh-sign`
 
-## Modo humano vs automação
+## Modo humano vs automação: a identidade `daneel`
 
-O repo passa a operar com dois perfis de assinatura:
+O repo opera com dois perfis de assinatura, selecionados **pelo ator** — nunca
+por hostname:
 
-- Humano: chave pública padrão em `~/.config/git/.gitconfig.local`.
-- Automação: chave pública técnica aplicada só na worktree atual via
-  `config.worktree`, sem exportar chave privada.
+- Humano: `user.signingkey` global = `git.signing_key` da config, resolvido via
+  1Password (`op-ssh-sign`), como antes.
+- Automação: identidade única `daneel`, a **mesma para todas as máquinas**.
+  `TARS_ACTOR=agent` faz o Git usar a chave e a identidade da `daneel` via
+  `GIT_CONFIG_COUNT`/`GIT_CONFIG_KEY_n`/`GIT_CONFIG_VALUE_n`, que são herdados
+  por qualquer `git` do shell (inclusive `task sync`). O global continua
+  intocado — sem `TARS_ACTOR`, nada muda para o humano.
 
-Fluxo recomendado para automação local:
+SSOT única, na seção `automation` de
+[`app/bootstrap/user-config.yaml`](../app/bootstrap/user-config.yaml):
 
-1. guardar a chave privada técnica no 1Password SSH Agent
-2. registrar a ref da chave pública em `git.automation_signing_key_ref` no
-   bootstrap local
-3. sincronizar os derivados do bootstrap
-4. aplicar `task git:signing:mode:automation`
-5. validar com `task env:check SIGN_MODE=automation`
+| campo | default |
+| --- | --- |
+| `automation.signing_key_ref` | `op://secrets/daneel-bot/github/signing-ssh-private-key` |
+| `automation.signing_public_key_ref` | `op://secrets/daneel-bot/github/signing-ssh-public-key` |
+| `automation.op_token_ref` | `op://secrets/daneel-bot/1password/service-account` |
+| `automation.allowed_signers_ref` | `op://secrets/dotfiles/git/allowed_signers` |
+| `automation.git_name` / `automation.git_email` | `Daneel` / `daneel-bot@pabloaugusto.com` |
 
-No modo de automação, a worktree também pode materializar um `core.sshCommand`
-scoped para o próprio checkout, apontando para a chave técnica local derivada
-no diretório Git comum da worktree. Nesse mesmo modo, `user.signingkey` passa
-a referenciar a chave privada técnica local e `gpg.ssh.program` e sobrescrito
-para `ssh-keygen`, permitindo assinatura Git sem depender do prompt biométrico
-do 1Password fora do fluxo humano padrão. A resolução desses caminhos fica
-centralizada em [`scripts/git_signing_lib.py`](../scripts/git_signing_lib.py),
-evitando drift entre o contrato documental e a implementação real.
+Materialização (bootstrap, idempotente):
+
+1. `op read --out-file` para `${XDG_CONFIG_HOME:-~/.config}/tars/automation/`
+   (Windows: `%APPDATA%\tars\automation\`), com `daneel_ed25519` 600 (ACL só do
+   usuário), `daneel_ed25519.pub` 644 e `op-sa.token` 600. O valor **nunca**
+   passa por stdout nem por variável.
+2. só regrava quando o conteúdo difere (lê para um temporário e compara).
+3. `allowed_signers` (SSOT no 1Password) vai para o diretório de **estado** —
+   `${XDG_STATE_HOME:-~/.local/state}/dotfiles/git/allowed_signers` no
+   Linux/WSL, `%LOCALAPPDATA%\dotfiles\git\allowed_signers` no Windows — e o
+   bootstrap grava `gpg.ssh.allowedSignersFile` de forma idempotente. Fica
+   **fora do repo** de propósito: `~/.config/git` é o `app/df/git` versionado
+   (symlink do bootstrap), então nada é materializado ali. Não existe mais
+   `allowed_signers` gerado localmente nem versionado.
+4. se o item não existir no 1Password: falha clara com a instrução. O bootstrap
+   **não** gera chave sozinho.
+
+Trailer: commits do agente ganham `Machine: <hostname>` via
+[`.githooks/prepare-commit-msg`](../.githooks/prepare-commit-msg), apenas
+quando `TARS_ACTOR=agent` e de forma idempotente.
 
 Observações:
 
-- a chave pública técnica não é segredo; a rotação continua simples porque a
-  ref no 1Password é a fonte de verdade
-- o GitHub é sincronizado via `gh`, sem manter material em plaintext no repo
-- o `op` só resolve a chave pública e os tokens; a chave privada continua no
-  1Password SSH Agent
+- a chave pública não é segredo; a rotação continua simples porque a ref no
+  1Password é a fonte de verdade
+- o GitHub é sincronizado via `gh` (auth próprio), sem material em plaintext
+- o `op` da automação usa a service account cujo token vive só em
+  `~/.config/tars/automation/op-sa.token` (600); o shell não exporta token
 
 ## `user.signingkey` é segredo?
 
 Em modo humano, não. É material público (chave pública SSH).
 
-- Pode ficar em `~/.config/git/.gitconfig.local`
+- SSOT: campo `git.signing_key` em
+  [`app/bootstrap/user-config.yaml`](../app/bootstrap/user-config.yaml). O default no
+  repositório é vazio de propósito; o dono preenche no wizard do bootstrap.
+- O bootstrap (`configureGitSigningKey` no Bash, `Set-GitGlobalSigningKey` no
+  PowerShell) grava `git config --global user.signingkey` a partir desse campo,
+  de forma idempotente. Não usa `op read` — a chave pública não é segredo e a
+  service account do bootstrap não enxerga o cofre `Personal`.
+- Com o campo vazio, o bootstrap apenas avisa e preserva o
+  `user.signingkey` global existente; o restante do bootstrap não quebra.
+- Ainda pode ficar em `~/.config/git/.gitconfig.local`
 - A worktree de automação pode sobrescrevê-lo localmente com o caminho da
   chave privada técnica, sem tocar no perfil humano
 - Não precisa de `sops+age`
@@ -302,10 +329,9 @@ Em modo humano, não. É material público (chave pública SSH).
 ## Operação recomendada
 
 1. usar token dedicado do projeto como padrão
-2. usar `op://secrets/github/api/token` como primeiro fallback
-3. usar `op://Personal/github/token-full-access` como contingencia final
-4. rodar `checkEnv` após mudanças em auth/SSH/Git
-5. rotacionar imediatamente qualquer credencial exposta
+2. usar `op://secrets/github/api/token` como fallback
+3. rodar `checkEnv` após mudanças em auth/SSH/Git
+4. rotacionar imediatamente qualquer credencial exposta
 
 ## Rotacao canonica
 

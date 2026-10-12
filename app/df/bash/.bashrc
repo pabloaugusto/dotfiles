@@ -111,6 +111,10 @@ fi
 [ -f ~/.aliases ] && source ~/.aliases
 [ -f "$HOME/dotfiles/app/df/bash/.inc/secrets-manager.sh" ] && source "$HOME/dotfiles/app/df/bash/.inc/secrets-manager.sh"
 [ -f "$HOME/dotfiles/app/df/bash/.inc/check-env.sh" ] && source "$HOME/dotfiles/app/df/bash/.inc/check-env.sh"
+# Chave de assinatura de automacao: com TARS_ACTOR=agent o Git passa a assinar
+# com a chave por maquina via GIT_CONFIG_*, sem tocar no user.signingkey global.
+[ -f "$HOME/dotfiles/app/df/bash/.inc/signing-automation.sh" ] && source "$HOME/dotfiles/app/df/bash/.inc/signing-automation.sh"
+declare -f dotfiles_apply_automation_signing_env >/dev/null 2>&1 && dotfiles_apply_automation_signing_env
 
 # set PATH so it includes brew bin if exists
 [ -f "/home/linuxbrew/.linuxbrew/bin/brew" ] && eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
@@ -138,7 +142,7 @@ export   MYDOCS="$HOME/onedrive/documents"
 export ONEDRIVE="$HOME/onedrive"
 
 # include local env vars from encrypted file when available (preferred)
-if [ "${DOTFILES_RUNTIME_ENV_LOADED:-0}" != "1" ] || [ -z "${OP_SERVICE_ACCOUNT_TOKEN:-}" ]; then
+if [ "${DOTFILES_RUNTIME_ENV_LOADED:-0}" != "1" ]; then
 	DOTFILES_RUNTIME_ENV_FILE="${DOTFILES_RUNTIME_ENV_FILE:-$HOME/.config/dotfiles/runtime.env}"
 	[ -f "$DOTFILES_RUNTIME_ENV_FILE" ] && source "$DOTFILES_RUNTIME_ENV_FILE"
 
@@ -157,11 +161,13 @@ if [ "${DOTFILES_RUNTIME_ENV_LOADED:-0}" != "1" ] || [ -z "${OP_SERVICE_ACCOUNT_
 		source ~/.env.local
 	fi
 fi
-[ -z "${GH_TOKEN:-}" ] && [ -n "${GITHUB_TOKEN:-}" ] && export GH_TOKEN="$GITHUB_TOKEN"
-[ -n "${OP_SERVICE_ACCOUNT_TOKEN:-}" ] && export OP_SERVICE_ACCOUNT_TOKEN="$(printf '%s' "$OP_SERVICE_ACCOUNT_TOKEN" | tr -d '\r')"
-[ -n "${GH_TOKEN:-}" ] && export GH_TOKEN="$(printf '%s' "$GH_TOKEN" | tr -d '\r')"
-[ -n "${GITHUB_TOKEN:-}" ] && export GITHUB_TOKEN="$(printf '%s' "$GITHUB_TOKEN" | tr -d '\r')"
-[ -n "${SOPS_AGE_KEY:-}" ] && export SOPS_AGE_KEY="$(printf '%s' "$SOPS_AGE_KEY" | tr -d '\r')"
+# O shell NAO exporta segredo nenhum: nem token de service account do 1Password,
+# nem GH_TOKEN/GITHUB_TOKEN/SOPS_AGE_KEY. `gh` usa a sessao propria do `gh auth`
+# e o 1Password e' acessado por arquivo (op read --out-file) ou por ref.
+# Migracao: remove residuos de tokens que versoes anteriores exportavam aqui.
+unset OP_SERVICE_ACCOUNT_TOKEN OP_CONNECT_HOST OP_CONNECT_TOKEN GH_TOKEN GITHUB_TOKEN 2>/dev/null || true
+# Migracao: a chave age nao deve viver no ambiente (apenas SOPS_AGE_KEY_FILE).
+[ -n "${SOPS_AGE_KEY:-}" ] && unset SOPS_AGE_KEY
 [ -n "${SOPS_AGE_KEY_FILE:-}" ] && export SOPS_AGE_KEY_FILE="$(printf '%s' "$SOPS_AGE_KEY_FILE" | tr -d '\r')"
 
 # Prefer 1Password SSH agent socket when available in WSL/Linux.

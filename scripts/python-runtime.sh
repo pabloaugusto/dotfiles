@@ -48,26 +48,35 @@ resolve_python_cmd() {
     return 1
   }
 
+  # Python do Windows so serve ao bash do Windows (Git Bash/MSYS). No WSL o
+  # .exe tambem e executavel via interop, mas recebe caminho /mnt/... e falha.
+  local windows_host=0
+  case "$(uname -s)" in MINGW*|MSYS*|CYGWIN*) windows_host=1 ;; esac
+
   local -a local_candidates=(
     "${project_root}/.venv/linux/bin/python"
     "${project_root}/.venv/linux/bin/python3"
-    "${project_root}/.venv/windows/Scripts/python"
-    "${project_root}/.venv/windows/Scripts/python.exe"
     "${project_root}/.venv/bin/python"
     "${project_root}/.venv/bin/python3"
-    "${project_root}/.venv/Scripts/python"
-    "${project_root}/.venv/Scripts/python.exe"
     "${VIRTUAL_ENV:-}/bin/python"
     "${VIRTUAL_ENV:-}/bin/python3"
-    "${VIRTUAL_ENV:-}/Scripts/python"
-    "${VIRTUAL_ENV:-}/Scripts/python.exe"
-    "${PYTHON_BIN:-}"
   )
+  if [[ "${windows_host}" == "1" ]]; then
+    local_candidates+=(
+      "${project_root}/.venv/windows/Scripts/python"
+      "${project_root}/.venv/windows/Scripts/python.exe"
+      "${project_root}/.venv/Scripts/python"
+      "${project_root}/.venv/Scripts/python.exe"
+      "${VIRTUAL_ENV:-}/Scripts/python"
+      "${VIRTUAL_ENV:-}/Scripts/python.exe"
+    )
+  fi
+  local_candidates+=("${PYTHON_BIN:-}")
   if try_candidates "${local_candidates[@]}"; then
     return 0
   fi
 
-  if command -v py >/dev/null 2>&1 && py -3 -c 'import sys' >/dev/null 2>&1; then
+  if [[ "${windows_host}" == "1" ]] && command -v py >/dev/null 2>&1 && py -3 -c 'import sys' >/dev/null 2>&1; then
     PYTHON_CMD=(py -3)
     return 0
   fi
@@ -82,7 +91,7 @@ resolve_python_cmd() {
     return 0
   fi
 
-  if command -v python.exe >/dev/null 2>&1 && python.exe -c 'import sys' >/dev/null 2>&1; then
+  if [[ "${windows_host}" == "1" ]] && command -v python.exe >/dev/null 2>&1 && python.exe -c 'import sys' >/dev/null 2>&1; then
     PYTHON_CMD=(python.exe)
     return 0
   fi

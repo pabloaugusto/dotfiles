@@ -10,3 +10,24 @@ esac
 
 ROOT_DIR="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
 bash "${ROOT_DIR}/scripts/run-python.sh" "${ROOT_DIR}/.githooks/conventional_emoji.py" --inject "${MSG_FILE}" || true
+
+# ---------------------------------------------------------------------------
+# Trailer de identidade do robo `daneel`: commits da automacao (TARS_ACTOR=agent
+# ou worktree em modo automation) levam `Machine: <hostname>` para auditar de
+# qual maquina a assinatura saiu. Identidade de assinatura e' unica (daneel);
+# o host vai apenas no trailer. Idempotente: nunca duplica. Commits humanos
+# (default) nao sao tocados.
+# ---------------------------------------------------------------------------
+SIGNING_MODE="${DOTFILES_GIT_SIGN_MODE:-}"
+if [ -z "${SIGNING_MODE}" ] || [ "${SIGNING_MODE}" = "auto" ]; then
+  SIGNING_MODE="$(git config --worktree --get dotfiles.signing.mode 2>/dev/null || true)"
+fi
+
+if [ "${TARS_ACTOR:-}" = "agent" ] || [ "${SIGNING_MODE}" = "automation" ]; then
+  MACHINE="$(hostname 2>/dev/null || printf 'unknown')"
+  MACHINE="${MACHINE%%.*}"
+  if [ -n "${MSG_FILE}" ] && [ -f "${MSG_FILE}" ] && ! grep -qE '^Machine:[[:space:]]' "${MSG_FILE}"; then
+    # Garante a linha em branco exigida antes de um trailer.
+    printf '\nMachine: %s\n' "${MACHINE}" >>"${MSG_FILE}"
+  fi
+fi

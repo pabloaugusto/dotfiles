@@ -446,7 +446,6 @@ class AiSessionStartupTests(unittest.TestCase):
                 "GITHUB_TOKEN",
                 "op://secrets/dotfiles/github/token",
                 "op://secrets/github/api/token",
-                "op://Personal/github/token-full-access",
             ],
             "active_sources_current_shell": ["GH_TOKEN"],
             "active_sources_without_env_tokens": ["keyring"],
@@ -1402,7 +1401,7 @@ class AiSessionStartupTests(unittest.TestCase):
         self.assertIn("## startup_governor_status", markdown)
         self.assertIn("startup-ready.json", markdown)
         self.assertIn("fingerprint-123", markdown)
-        self.assertIn("op://Personal/github/token-full-access", markdown)
+        self.assertIn("op://secrets/github/api/token", markdown)
 
     def test_startup_session_payload_counts_pending_contracts(self) -> None:
         with tempfile.TemporaryDirectory() as tmp_dir:

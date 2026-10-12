@@ -911,17 +911,13 @@ function Test-OneDriveLayoutHealth {
 	}
 
 #################################################################################
-# verify: really want run bootstrap?
+# info: this run replaces home files (no interactive confirmation)
 #################################################################################
+	# Launching the bootstrap is itself the confirmation, so the run proceeds
+	# automatically. This is only an informational notice.
 	if (-not ($RefreshDotfiles -or $RelinkOnly)) {
 		Write-Warning "This script will override some of your home files"
-		Write-Warning "If you are okay with that complete the sentence below..."
-
-		$Answer = Read-Host -Prompt "MARCO"
-		if ($Answer -ne "POLO") {
-			Write-Host "At least you have chicken 🐔"
-			return
-		}
+		Write-Host "Proceeding automatically: no interactive confirmation is required."
 	}
 	else {
 		Write-Output "Non-full mode: skipping interactive confirmation."
@@ -1049,15 +1045,9 @@ catch {
 # bootstrap: symlink VsCode settings
 #################################################################################
 
-	# ---------------------------------------------------------------
-	# remove previous root dotfile dirs symlinks
-	# make this check/delete a functionality into add-symlink function
-	# ---------------------------------------------------------------
+	# Add-Symlink remove apenas links antigos; conteudo real (settings/snippets do
+	# usuario) e preservado em backup <pasta>.dotfiles-prelink-YYYYMMDDHHMMSS.
 	$codeUserPath = Resolve-WindowsCodeUserPath
-	if (Test-Path -Path $codeUserPath) {
-		Remove-Item -r $codeUserPath
-	}
-
 	Add-Symlink $codeUserPath "$DotFilesDirectory\app\df\vscode" > $null
 	#Add-Symlink "$Env:APPDATA\Code\User\settings.json" "$DotFilesDirectory\app\df\vscode\settings.json" > $null
 	#Add-Symlink "$Env:APPDATA\Code\User\keybindings.json" "$DotFilesDirectory\app\df\vscode\keybindings.json" > $null
@@ -1139,13 +1129,20 @@ catch {
 	if (-not $RelinkOnly) {
 		$templatePath = Join-Path $DotFilesDirectory 'app\bootstrap\secrets\.env.local.tpl'
 		$envLocalPath = Join-Path $Env:USERPROFILE '.env.local.sops'
-		if (!(Set-LocalEnvFrom1Password -TemplatePath $templatePath -OutputPath $envLocalPath)) {
-			throw "Failed to initialize encrypted env (.env.local.sops) from 1Password."
-		}
+		# SSOT com o bootstrap do WSL: template sem refs `op://` nao gera nem exige
+		# o arquivo. Um ~/.env.local.sops legado do dono NAO e' removido aqui.
+		if (Test-EnvTemplateHasOpRefs -TemplatePath $templatePath) {
+			if (!(Set-LocalEnvFrom1Password -TemplatePath $templatePath -OutputPath $envLocalPath)) {
+				throw "Failed to initialize encrypted env (.env.local.sops) from 1Password."
+			}
 
-		$loadedEnv = Import-DotEnvFromSops -EncryptedPath $envLocalPath
-		if ($loadedEnv.Count -eq 0) {
-			throw "Failed to decrypt/import runtime env from .env.local.sops."
+			$loadedEnv = Import-DotEnvFromSops -EncryptedPath $envLocalPath
+			if ($loadedEnv.Count -eq 0) {
+				throw "Failed to decrypt/import runtime env from .env.local.sops."
+			}
+		}
+		else {
+			Write-Output "Template de env sem refs do 1Password; ~/.env.local.sops nao gerado."
 		}
 
 		# Legacy plaintext env file is removed when present.
@@ -1154,11 +1151,15 @@ catch {
 			Remove-Item -Path $legacyPlainEnvPath -Force -ErrorAction SilentlyContinue
 		}
 
-		# Persist only age material for next terminals.
-		if (-not [string]::IsNullOrWhiteSpace($Env:SOPS_AGE_KEY)) {
-			[Environment]::SetEnvironmentVariable('SOPS_AGE_KEY', $Env:SOPS_AGE_KEY, 'User')
+		# Materializa a chave age em arquivo com ACL restrita ao usuario atual e
+		# persiste APENAS o caminho (SOPS_AGE_KEY_FILE) para os proximos terminais.
+		if (!(Ensure-SopsAgeKeyFile)) {
+			throw "Failed to materialize the SOPS age key file."
 		}
-		[Environment]::SetEnvironmentVariable('SOPS_AGE_KEY_FILE', '', 'User')
+		[Environment]::SetEnvironmentVariable('SOPS_AGE_KEY_FILE', $Env:SOPS_AGE_KEY_FILE, 'User')
+		# Migracao: remove conteudo da chave persistido por versoes anteriores.
+		$Env:SOPS_AGE_KEY = $null
+		[Environment]::SetEnvironmentVariable('SOPS_AGE_KEY', $null, 'User')
 		# Clear plaintext token persistence from previous bootstrap versions.
 		[Environment]::SetEnvironmentVariable('OP_SERVICE_ACCOUNT_TOKEN', '', 'User')
 		[Environment]::SetEnvironmentVariable('GITHUB_TOKEN', '', 'User')
