@@ -21,7 +21,7 @@ jobs:
         uses: astral-sh/setup-uv@v7
 
       - name: Set up Task
-        uses: go-task/setup-task@v1
+        uses: go-task/setup-task@v2
 
       - name: Run canonical Linux quality gate
         run: task ci:quality:linux
@@ -42,7 +42,7 @@ jobs:
         uses: astral-sh/setup-uv@v7
 
       - name: Set up Task
-        uses: go-task/setup-task@v1
+        uses: go-task/setup-task@v2
 
       - name: Ensure Pester
         shell: pwsh
